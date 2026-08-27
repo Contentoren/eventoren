@@ -1,0 +1,37 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+out
+/build/
+
+# Bun package manager
+bun.lock
+bun.lockb
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+
+# Logs and local files
+*.log
+.DS_Store
+
+# Generated TanStack Router tree
+src/routeTree.gen.ts
+
+# Baseline local assets are committed so the initial build has its own icons and OG image.
+!images/
+!images/1200x630_webp/
+!images/1200x630_webp/eventoren-og.png
+!public/*.png
+!public/images/
+!public/images/*.webp
+
+# Vite generated config files
+vite.config.d.ts
+vite.config.js

@@ -1,0 +1,16 @@
+[Unit]
+Description=eventoren dev/preview server
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/leo/projects/eventoren
+Environment=PATH=%h/.local/bin:%h/.bun/bin:/usr/local/bin:/usr/bin:/bin
+Nice=10
+ExecStart=/usr/bin/env bun run dev
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=development
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,43 @@
+{
+  "name": "eventoren",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run vite:dev",
+    "vite:dev": "vite --host",
+    "build": "vite build",
+    "deploy": "bun run build && bun run upload",
+    "upload": "bunx wrangler pages deploy dist/client --project-name eventoren --branch main --commit-dirty=true",
+    "typecheck": "tsc --noEmit",
+    "format": "biome format --write src",
+    "assets:optimize": "bun run ./src/app/assets/assetsOptimize.ts",
+    "assets:process": "bun run ./src/app/assets/assetsProcess.ts",
+    "assets:process:init": "bun run ./src/app/assets/assetsProcess.ts -- --resync",
+    "preview": "vite preview --host --port 3040"
+  },
+  "dependencies": {
+    "@tanstack/solid-router": "^1.170.30",
+    "@tanstack/solid-start": "^1.168.47",
+    "gray-matter": "^4.0.3",
+    "marked": "^18.0.11",
+    "solid-js": "^1.9.15"
+  },
+  "devDependencies": {
+    "@adaptive-ds/assets-optimizer": "^0.20.0",
+    "@biomejs/biome": "^2.5.10",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/bun": "^1.4.0",
+    "@types/node": "^26.4.0",
+    "ai-src": "^0.1.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vite-plugin-solid": "^2.11.14"
+  },
+  "prettier": {
+    "semi": false,
+    "printWidth": 120,
+    "trailingComma": "all"
+  }
+}
