@@ -7,10 +7,5 @@ export const Route = createFileRoute("/")({
 })
 
 function HomePage() {
-  return (
-    <main class="min-h-screen p-8">
-      <h1 class="text-3xl font-bold">Eventoren</h1>
-      <p class="mt-4 max-w-2xl text-lg text-slate-600">Veranstaltungen, Termine und Erlebnisse an einem Ort.</p>
-    </main>
-  )
+  return <main class="flex min-h-screen items-center justify-center">Hallo - Eventoren</main>
 }
