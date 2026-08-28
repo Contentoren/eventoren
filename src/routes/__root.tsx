@@ -5,10 +5,28 @@ import { HydrationScript } from "solid-js/web"
 import { NotFoundPage } from "../components/NotFoundPage"
 import { seoHeadCreate } from "../seo/seoHeadCreate"
 import appCss from "../tailwind.css?url"
+import { ThemeProvider } from "../theme/ThemeProvider.tsx"
+import { themeModeStorageKey } from "../theme/themeModeStorageKey.ts"
 
 const speculationRules = JSON.stringify({
   prerender: [{ where: { href_matches: "/*" }, eagerness: "moderate" }],
 })
+
+const themeInitScript = `(() => {
+  const root = document.documentElement
+  let mode = "dark"
+
+  try {
+    const storedMode = window.localStorage.getItem(${JSON.stringify(themeModeStorageKey)})
+    if (storedMode === "light" || storedMode === "dark") mode = storedMode
+  } catch {}
+
+  root.classList.remove("light", "dark")
+  root.classList.add(mode)
+  root.dataset.theme = mode
+  root.style.colorScheme = mode
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", mode === "dark" ? "#020617" : "#f8fafc")
+})()`
 
 export const Route = createRootRoute({
   head: () => {
@@ -17,7 +35,8 @@ export const Route = createRootRoute({
       ...head,
       links: [
         ...head.links,
-        { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+        { rel: "icon", type: "image/png", href: "/favicon-32x32.png", sizes: "32x32" },
+        { rel: "icon", type: "image/png", href: "/favicon-192x192.png", sizes: "192x192" },
         { rel: "icon", type: "image/x-icon", href: "/favicon.ico", sizes: "32x32" },
         { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
         { rel: "manifest", href: "/site.webmanifest" },
@@ -31,7 +50,11 @@ export const Route = createRootRoute({
 })
 
 function RootOutlet() {
-  return <Outlet />
+  return (
+    <ThemeProvider>
+      <Outlet />
+    </ThemeProvider>
+  )
 }
 
 function RootDocument(props: { children: JSX.Element }) {
@@ -39,6 +62,7 @@ function RootDocument(props: { children: JSX.Element }) {
     <html lang="de">
       <head>
         <HydrationScript />
+        <script innerHTML={themeInitScript} />
         <HeadContent />
         <script type="speculationrules" innerHTML={speculationRules} />
       </head>

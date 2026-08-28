@@ -1,1 +1,231 @@
 @import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Semantic design tokens.
+
+   The default values form a calm, high-contrast light theme. The dark theme
+   overrides the same generated Tailwind variables below, so every semantic
+   utility (`bg-surface`, `text-content`, `border-border-subtle`, …) follows
+   the selected appearance without duplicating component styles.
+ --------------------------------------------------------------------------- */
+@theme {
+  /* Light theme: the page backdrop sits below white cards as a raised plane. */
+  --color-surface-base: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-surface-inverted: #0f172a;
+  --color-border-subtle: #cbd5e1;
+  --color-border-strong: #64748b;
+
+  --color-content: #172033;
+  --color-content-muted: #475569;
+  --color-content-inverted: #ffffff;
+
+  --color-brand: #4f46e5;
+  --color-brand-strong: #4338ca;
+  --color-brand-soft: #e0e7ff;
+  --color-brand-accent: #3730a3;
+  --color-brand-content: #ffffff;
+
+  --color-success: #166534;
+  --color-success-soft: #dcfce7;
+  --color-warning: #92400e;
+  --color-warning-soft: #fef3c7;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fee2e2;
+
+  /* 4 / 6 / 8 / 12 / 16 / 24 / 32px spacing scale */
+  --spacing-space-1: 4px;
+  --spacing-space-2: 6px;
+  --spacing-space-3: 8px;
+  --spacing-space-4: 12px;
+  --spacing-space-5: 16px;
+  --spacing-space-6: 24px;
+  --spacing-space-7: 32px;
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+}
+
+/* Dark theme values retain the original deep-stage palette. */
+:root.dark {
+  --color-surface-base: #020617;
+  --color-surface: #0f172a;
+  --color-surface-muted: #1e293b;
+  --color-surface-inverted: #020617;
+  --color-border-subtle: #475569;
+  --color-border-strong: #64748b;
+
+  --color-content: #f8fafc;
+  --color-content-muted: #cbd5e1;
+
+  --color-brand-soft: #312e81;
+  --color-brand-accent: #a5b4fc;
+
+  --color-success: #4ade80;
+  --color-success-soft: #14532d;
+  --color-warning: #fbbf24;
+  --color-warning-soft: #78350f;
+  --color-danger: #f87171;
+  --color-danger-soft: #7f1d1d;
+}
+
+/* Keep a no-JavaScript/system fallback aligned with the OS preference. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not(.dark) {
+    color-scheme: dark;
+    --color-surface-base: #020617;
+    --color-surface: #0f172a;
+    --color-surface-muted: #1e293b;
+    --color-surface-inverted: #020617;
+    --color-border-subtle: #475569;
+    --color-border-strong: #64748b;
+    --color-content: #f8fafc;
+    --color-content-muted: #cbd5e1;
+    --color-brand-soft: #312e81;
+    --color-brand-accent: #a5b4fc;
+    --color-success: #4ade80;
+    --color-success-soft: #14532d;
+    --color-warning: #fbbf24;
+    --color-warning-soft: #78350f;
+    --color-danger: #f87171;
+    --color-danger-soft: #7f1d1d;
+  }
+}
+
+/* Native widgets (scrollbars, date pickers, dropdowns, autofill) follow the
+   active theme instead of flashing a browser-default surface. */
+@layer base {
+  :root {
+    color-scheme: light;
+    accent-color: var(--color-brand);
+  }
+
+  :root.light {
+    color-scheme: light;
+  }
+
+  :root.dark {
+    color-scheme: dark;
+  }
+
+  html {
+    background-color: var(--color-surface-base);
+  }
+
+  body {
+    background-color: var(--color-surface-base);
+    color: var(--color-content);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: var(--color-brand-content);
+  }
+
+  :root.dark {
+    /* Chrome renders search/date affordances near-black on dark inputs. */
+    ::-webkit-search-cancel-button,
+    ::-webkit-calendar-picker-indicator {
+      filter: invert(1) opacity(0.7);
+    }
+  }
+}
+
+/* The image logo uses white lettering, so its compact dark lockup remains
+   legible in both appearances. */
+.eventoren-logo-shell {
+  background-color: var(--color-surface-inverted);
+}
+
+/* Indigo-300 reads far better than indigo-600 as a ring on deep surfaces. */
+@utility focus-ring {
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hero text knockout: images play *through* the letterforms.
+   Each layer paints one image, clipped to the glyphs, and cross-fades while
+   slowly panning/zooming (Ken Burns) so the headline reads as a video loop.
+--------------------------------------------------------------------------- */
+
+.eventoren-knockout-layer {
+  background-repeat: no-repeat;
+  background-position: 50% 50%;
+  background-size: 120% 120%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  opacity: 0;
+  will-change: opacity, background-position, background-size;
+  animation: eventoren-knockout-cycle var(--eventoren-knockout-duration, 24s) linear infinite;
+  animation-delay: var(--eventoren-knockout-delay, 0s);
+}
+
+/* Always-on base fill so the glyphs stay legible between cross-fades.
+   Brightened (indigo-400 → violet-400 → pink-400) and raised to 0.8 so the
+   wordmark keeps a strong edge against the near-black stage. */
+.eventoren-knockout-base {
+  background-image: linear-gradient(115deg, #818cf8 0%, #a78bfa 45%, #f472b6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  opacity: 0.8;
+}
+
+@keyframes eventoren-knockout-cycle {
+  0% {
+    opacity: 0;
+    background-size: 120% 120%;
+    background-position: 42% 45%;
+  }
+  3% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 1;
+  }
+  28% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    background-size: 142% 142%;
+    background-position: 58% 55%;
+  }
+}
+
+/* No background-clip: text support -> render a solid, readable headline. */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .eventoren-knockout-layer {
+    display: none;
+  }
+
+  .eventoren-knockout-base {
+    background-image: none;
+    color: var(--color-content-inverted);
+    -webkit-text-fill-color: var(--color-content-inverted);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eventoren-knockout-layer {
+    animation: none;
+    background-size: 128% 128%;
+    opacity: 0;
+  }
+
+  /* Freeze on a single still frame instead of looping. */
+  .eventoren-knockout-layer:first-of-type {
+    opacity: 1;
+  }
+}

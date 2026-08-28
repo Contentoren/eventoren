@@ -10,9 +10,11 @@ export const Route = createFileRoute("/kontakt")({
 function ContactPage() {
   return (
     <SiteFrame>
-      <main class="mx-auto max-w-6xl px-6 py-20 md:py-28">
+      <main id="content" tabindex="-1" class="mx-auto max-w-6xl px-6 py-20 md:py-28">
         <h1 class="text-4xl font-bold tracking-tight">Kontakt</h1>
-        <p class="mt-5 max-w-2xl text-lg text-slate-600">Informationen und Kontaktmöglichkeiten werden hier ergänzt.</p>
+        <p class="mt-5 max-w-2xl text-lg text-content-muted">
+          Informationen und Kontaktmöglichkeiten werden hier ergänzt.
+        </p>
       </main>
     </SiteFrame>
   )

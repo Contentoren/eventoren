@@ -4,7 +4,7 @@ import { SiteHeader } from "./SiteHeader"
 
 export function SiteFrame(props: { children: JSX.Element }) {
   return (
-    <div class="min-h-screen bg-white text-slate-950">
+    <div class="min-h-screen bg-surface-base text-content">
       <SiteHeader />
       {props.children}
       <SiteFooter />
