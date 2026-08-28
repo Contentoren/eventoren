@@ -5,6 +5,7 @@ type SeoPage = {
   changefreq: "weekly" | "monthly" | "yearly"
   priority: number
   jsonLdType: "WebPage" | "ContactPage"
+  noindex?: boolean
 }
 
 export const seoPages = [
@@ -14,6 +15,23 @@ export const seoPages = [
     description: "Eventoren präsentiert Veranstaltungen, Termine und Erlebnisse an einem Ort.",
     changefreq: "weekly",
     priority: 1,
+    jsonLdType: "WebPage",
+  },
+  {
+    path: "/checkout",
+    title: "Kasse | Eventoren",
+    description: "Tickets sicher als Gast buchen – transparente Gebühren und sofortiges digitales Ticket.",
+    changefreq: "monthly",
+    priority: 0.3,
+    jsonLdType: "WebPage",
+    noindex: true,
+  },
+  {
+    path: "/meine-tickets",
+    title: "Meine Tickets | Eventoren",
+    description: "Alle gekauften Tickets als Wallet-Pass mit QR-Code – jederzeit abrufbar, auch offline.",
+    changefreq: "monthly",
+    priority: 0.5,
     jsonLdType: "WebPage",
   },
   {

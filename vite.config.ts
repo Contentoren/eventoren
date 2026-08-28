@@ -41,10 +41,13 @@ export default defineConfig({
       },
       pages: seoPages.map((page) => ({
         path: page.path,
-        sitemap: {
-          priority: page.priority,
-          changefreq: page.changefreq,
-        },
+        sitemap:
+          "noindex" in page && page.noindex === true
+            ? { exclude: true }
+            : {
+                priority: page.priority,
+                changefreq: page.changefreq,
+              },
       })),
     }),
     solidAiSrcPlugin(),
