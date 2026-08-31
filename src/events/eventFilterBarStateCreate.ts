@@ -11,7 +11,7 @@ export function eventFilterBarStateCreate(inputs: {
   resultCount: () => number
 }) {
   const categoryOptions = createMemo(() => [
-    { value: "alle" as const, label: "Alle Kategorien" },
+    { value: "alle" as const, label: "Alle Genres" },
     ...(Object.keys(eventCategoryLabels) as EventCategory[]).map((value) => ({
       value,
       label: eventCategoryLabels[value],
@@ -32,6 +32,18 @@ export function eventFilterBarStateCreate(inputs: {
   const selectQuery = (query: string) => inputs.onFilterChange({ ...inputs.filter(), query })
   const selectCategory = (category: EventFilter["category"]) => inputs.onFilterChange({ ...inputs.filter(), category })
   const selectTimeWindow = (timeWindow: EventTimeWindow) => inputs.onFilterChange({ ...inputs.filter(), timeWindow })
+  const submitSearch = (event?: SubmitEvent) => {
+    event?.preventDefault()
+    inputs.onFilterChange(inputs.filter())
+  }
 
-  return { categoryOptions, timeWindowOptions, resultLabel, selectQuery, selectCategory, selectTimeWindow }
+  return {
+    categoryOptions,
+    timeWindowOptions,
+    resultLabel,
+    selectQuery,
+    selectCategory,
+    selectTimeWindow,
+    submitSearch,
+  }
 }

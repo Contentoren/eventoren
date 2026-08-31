@@ -8,16 +8,6 @@ export function EventDetailHeader(props: { event: EventItem }) {
 
   return (
     <header class="flex flex-col gap-space-6">
-      <div class="overflow-hidden rounded-card bg-surface-muted">
-        <img
-          src={props.event.imageUrl}
-          alt={props.event.imageAlt}
-          width="1200"
-          height="630"
-          class="aspect-[16/9] w-full object-cover"
-        />
-      </div>
-
       <div class="flex flex-wrap items-center gap-space-2">
         <UiBadge tone="brand">{state.categoryLabel()}</UiBadge>
         <Show when={props.event.soldOut} fallback={<UiBadge tone="success">Tickets verfügbar</UiBadge>}>

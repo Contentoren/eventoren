@@ -1,1 +1,1 @@
-export const eventImagePlaceholder = "/images/eventoren-og_9669cb2c.webp"
+export const eventImagePlaceholder = "/images/festival-lights_3f89b9a5.webp"

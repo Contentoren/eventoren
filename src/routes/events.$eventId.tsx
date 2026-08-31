@@ -1,5 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/solid-router"
 import { SiteFrame } from "../components/SiteFrame"
+import { EventDetailBanner } from "../events/EventDetailBanner.tsx"
 import { EventDetailHeader } from "../events/EventDetailHeader.tsx"
 import { EventDetailInfo } from "../events/EventDetailInfo.tsx"
 import { eventDetailPageStateCreate } from "../events/eventDetailPageStateCreate.ts"
@@ -28,6 +29,8 @@ function EventDetailPage() {
   return (
     <SiteFrame>
       <main id="content" tabindex="-1">
+        <EventDetailBanner imageUrl={state.event().imageUrl} imageAlt={state.event().imageAlt} />
+
         <UiContainer class="flex flex-col gap-space-7 py-space-7">
           <EventDetailHeader event={state.event()} />
 

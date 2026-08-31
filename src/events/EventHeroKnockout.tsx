@@ -18,31 +18,31 @@ export function EventHeroKnockout(props: {
   })
 
   return (
-    <section class="relative isolate overflow-hidden bg-surface-inverted" aria-label="Tickets und Erlebnisse finden">
+    <section
+      class="relative isolate overflow-hidden bg-surface-base transition-colors duration-300"
+      aria-label="Tickets und Erlebnisse finden"
+    >
       {/* Warm up the loop images before the first cross-fade. */}
       <div class="hidden">
         <For each={state.preloadUrls()}>{(url) => <img src={url} alt="" aria-hidden="true" decoding="async" />}</For>
       </div>
 
-      {/* Dark stage backdrop: radial brand glow + fine grid. */}
+      {/* Bright ambient backdrop: soft colorful brand glows + light grid. */}
       <div
         aria-hidden="true"
-        class="pointer-events-none absolute inset-0 bg-[radial-gradient(75%_60%_at_50%_0%,rgba(139,92,246,0.55),transparent_70%),radial-gradient(50%_50%_at_85%_100%,rgba(236,72,153,0.35),transparent_70%),radial-gradient(45%_45%_at_12%_85%,rgba(56,189,248,0.22),transparent_70%)]"
+        class="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_65%_at_50%_0%,rgba(139,92,246,0.22),transparent_75%),radial-gradient(60%_60%_at_85%_90%,rgba(236,72,153,0.14),transparent_70%),radial-gradient(55%_55%_at_15%_80%,rgba(56,189,248,0.15),transparent_70%)]"
       />
       <div
         aria-hidden="true"
-        class="pointer-events-none absolute inset-0 opacity-[0.12] [background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(70%_60%_at_50%_30%,#000,transparent)]"
-      />
-      {/* Vignette: darkens the outer edges so white type never sits on a hot glow. */}
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_40%,transparent_35%,rgba(2,6,23,0.85)_100%)]"
+        class="pointer-events-none absolute inset-0 opacity-[0.06] [background-image:linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] dark:opacity-[0.08] dark:[background-image:linear-gradient(to_right,#fff_1px,transparent_1px),linear-gradient(to_bottom,#fff_1px,transparent_1px)] [background-size:64px_64px] [mask-image:radial-gradient(70%_60%_at_50%_40%,#000,transparent)]"
       />
 
       <UiContainer width="wide" class="relative py-16 sm:py-20">
-        <p class="text-center text-xs font-semibold uppercase tracking-[0.35em] text-brand-accent drop-shadow-[0_1px_8px_rgba(2,6,23,0.9)]">
-          {state.eventCountLabel()}
-        </p>
+        <div class="flex justify-center">
+          <p class="inline-flex items-center rounded-full border border-brand-accent/30 bg-surface/90 px-4 py-1.5 text-center text-sm font-semibold uppercase tracking-[0.25em] text-brand-accent shadow-md backdrop-blur-md">
+            {state.eventCountLabel()}
+          </p>
+        </div>
 
         {/*
           Text knockout: one accessible <h1> carries the real text, while the
@@ -72,13 +72,13 @@ export function EventHeroKnockout(props: {
           </span>
         </h1>
 
-        <p class="mx-auto mt-space-6 max-w-2xl text-center text-base font-medium leading-relaxed text-white drop-shadow-[0_1px_10px_rgba(2,6,23,0.95)]">
+        <p class="mx-auto mt-space-6 max-w-2xl text-center text-base font-semibold leading-relaxed text-content-muted">
           {props.description}
         </p>
 
         {/* Floating single-line quick filter bar. */}
         <form
-          class="mx-auto mt-space-7 max-w-4xl rounded-full border border-border-strong bg-surface/90 p-space-2 shadow-2xl shadow-black/60 ring-1 ring-inset ring-white/5 backdrop-blur-xl focus-within:border-brand-accent"
+          class="mx-auto mt-space-7 max-w-4xl rounded-card border border-border-strong/60 bg-surface/95 p-space-2 shadow-xl shadow-black/5 ring-1 ring-inset ring-black/5 backdrop-blur-xl focus-within:border-brand-accent"
           aria-label="Schnellsuche"
           onSubmit={(event) => {
             event.preventDefault()
@@ -87,10 +87,7 @@ export function EventHeroKnockout(props: {
         >
           <div class="flex flex-col gap-space-2 md:flex-row md:items-center">
             <div class="flex-1 px-space-4 py-space-2">
-              <label
-                for="hero-knockout-term"
-                class="block text-[10px] font-semibold uppercase tracking-widest text-content-muted"
-              >
+              <label for="hero-knockout-term" class="block text-sm font-bold uppercase tracking-wider text-content">
                 Event / Künstler
               </label>
               <input
@@ -99,17 +96,14 @@ export function EventHeroKnockout(props: {
                 value={state.term()}
                 placeholder="z. B. Wacken Open Air"
                 onInput={(event) => state.changeTerm(event.currentTarget.value)}
-                class="focus-ring w-full bg-transparent text-sm font-medium text-content placeholder:text-content-muted/80"
+                class="focus-ring w-full bg-transparent text-sm font-medium text-content placeholder:text-content-muted"
               />
             </div>
 
             <div aria-hidden="true" class="hidden h-9 w-px bg-border-strong md:block" />
 
             <div class="flex-1 px-space-4 py-space-2">
-              <label
-                for="hero-knockout-city"
-                class="block text-[10px] font-semibold uppercase tracking-widest text-content-muted"
-              >
+              <label for="hero-knockout-city" class="block text-sm font-bold uppercase tracking-wider text-content">
                 Ort
               </label>
               <input
@@ -118,17 +112,14 @@ export function EventHeroKnockout(props: {
                 value={state.city()}
                 placeholder="z. B. Berlin"
                 onInput={(event) => state.changeCity(event.currentTarget.value)}
-                class="focus-ring w-full bg-transparent text-sm font-medium text-content placeholder:text-content-muted/80"
+                class="focus-ring w-full bg-transparent text-sm font-medium text-content placeholder:text-content-muted"
               />
             </div>
 
             <div aria-hidden="true" class="hidden h-9 w-px bg-border-strong md:block" />
 
             <div class="flex-1 px-space-4 py-space-2">
-              <label
-                for="hero-knockout-when"
-                class="block text-[10px] font-semibold uppercase tracking-widest text-content-muted"
-              >
+              <label for="hero-knockout-when" class="block text-sm font-bold uppercase tracking-wider text-content">
                 Wann
               </label>
               <select
@@ -142,7 +133,7 @@ export function EventHeroKnockout(props: {
                     <option
                       value={option.value}
                       selected={state.activeTimeWindow() === option.value}
-                      class="bg-surface text-content"
+                      class="bg-surface text-content text-sm font-medium"
                     >
                       {option.label}
                     </option>
@@ -153,7 +144,7 @@ export function EventHeroKnockout(props: {
 
             <button
               type="submit"
-              class="focus-ring h-12 shrink-0 rounded-full bg-brand px-space-7 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong"
+              class="focus-ring h-12 shrink-0 rounded-control bg-brand px-space-7 text-base font-bold text-brand-content shadow-md transition-colors hover:bg-brand-strong"
             >
               Tickets finden
             </button>
@@ -169,10 +160,10 @@ export function EventHeroKnockout(props: {
                 type="button"
                 aria-pressed={state.chipActiveId() === chip.id}
                 onClick={() => state.selectChip(chip.id)}
-                class={`focus-ring rounded-full px-space-5 py-space-2 text-sm font-semibold transition-colors ${
+                class={`focus-ring rounded-control px-space-5 py-space-2 text-sm font-semibold transition-colors ${
                   state.chipActiveId() === chip.id
-                    ? "border border-transparent bg-content-inverted text-surface-inverted shadow-lg shadow-black/40"
-                    : "border border-border-strong bg-surface/80 text-content-muted backdrop-blur hover:border-brand-accent hover:bg-surface hover:text-content"
+                    ? "border border-transparent bg-brand text-brand-content shadow-lg shadow-black/40"
+                    : "border border-border-strong bg-surface/90 text-content backdrop-blur hover:border-brand-accent hover:bg-surface hover:text-brand-accent"
                 }`}
               >
                 {chip.label}
