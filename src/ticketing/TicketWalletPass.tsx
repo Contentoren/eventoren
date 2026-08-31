@@ -10,7 +10,7 @@ export function TicketWalletPass(props: { order: TicketOrder }) {
 
   return (
     <article
-      class="overflow-hidden rounded-card border border-border-strong bg-surface text-content shadow-lg shadow-black/30"
+      class="overflow-hidden rounded-card border border-border-strong bg-surface text-content"
       aria-labelledby={`wallet-pass-${props.order.id}`}
     >
       <header class="flex flex-col gap-space-2 bg-linear-to-br from-brand-strong to-brand px-space-6 py-space-6 text-brand-content">

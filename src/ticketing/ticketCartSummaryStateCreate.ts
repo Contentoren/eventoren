@@ -7,10 +7,26 @@ import type { TicketCart } from "./TicketCart.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 
-const trustBadges = [
-  "Sofortiger digitaler Wallet-Pass",
-  "100% Einlass-Garantie",
-  "Sichere Zahlung – keine versteckten Kosten",
+export type TicketCartTrustBadgeId = "verified" | "wallet" | "protection"
+
+export interface TicketCartTrustBadge {
+  id: TicketCartTrustBadgeId
+  label: string
+}
+
+const trustBadges: readonly TicketCartTrustBadge[] = [
+  {
+    id: "verified",
+    label: "100 % verifizierte Original-Tickets",
+  },
+  {
+    id: "wallet",
+    label: "Direktes Mobile-Wallet-Ticket (Apple & Google Wallet)",
+  },
+  {
+    id: "protection",
+    label: "Käuferschutz & Erstattung bei Eventabsage",
+  },
 ] as const
 
 export function ticketCartSummaryStateCreate(inputs: { event: () => EventItem; cart: () => TicketCart }) {
