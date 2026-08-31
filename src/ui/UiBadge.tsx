@@ -14,7 +14,7 @@ const toneClass = {
 export function UiBadge(props: { children: JSX.Element; tone?: keyof typeof toneClass; class?: string }) {
   return (
     <span
-      class={`inline-flex items-center gap-space-1 rounded-full px-space-4 py-space-1 text-xs font-medium ring-1 ring-inset ${
+      class={`inline-flex items-center gap-space-1 rounded-full px-3.5 py-1 text-sm font-semibold ring-1 ring-inset ${
         toneClass[props.tone ?? "neutral"]
       } ${props.class ?? ""}`}
     >

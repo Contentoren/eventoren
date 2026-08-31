@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/solid-router"
 import { For } from "solid-js"
+import type { SiteLocale } from "../locale/SiteLocale.ts"
 import { ThemeToggle } from "../theme/ThemeToggle.tsx"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiDialog } from "../ui/UiDialog.tsx"
-import type { SiteLocale } from "../locale/SiteLocale.ts"
 import { SiteHeaderLocalePicker } from "./SiteHeaderLocalePicker.tsx"
 import type { SiteHeaderNavLink } from "./SiteHeaderNavLink.ts"
 

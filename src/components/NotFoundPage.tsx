@@ -14,13 +14,13 @@ export function NotFoundPage() {
           <div class="mt-8 flex flex-wrap gap-4">
             <Link
               to="/"
-              class="focus-ring rounded-full bg-brand px-5 py-3 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong"
+              class="focus-ring rounded-control bg-brand px-5 py-3 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong"
             >
               Zur Startseite
             </Link>
             <Link
               to="/kontakt"
-              class="focus-ring rounded-full border border-border-strong px-5 py-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted"
+              class="focus-ring rounded-control border border-border-strong px-5 py-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted"
             >
               Kontakt aufnehmen
             </Link>
