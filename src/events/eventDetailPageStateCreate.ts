@@ -1,5 +1,5 @@
 import { getRouteApi } from "@tanstack/solid-router"
-import { createMemo } from "solid-js"
+import { createEffect, createMemo } from "solid-js"
 import type { TicketCart } from "../ticketing/TicketCart.ts"
 import { ticketCartDraftSave } from "../ticketing/ticketCartDraftSave.ts"
 import { ticketCartSearchFormat } from "../ticketing/ticketCartSearchFormat.ts"
@@ -17,6 +17,8 @@ export function eventDetailPageStateCreate() {
   const event = createMemo<EventItem>(() => loaderData())
   const cart = createMemo(() => ticketCartSearchParse(params().eventId, search().tickets ?? ""))
 
+  let initializedEventId = ""
+
   const applyCart = (next: TicketCart) => {
     ticketCartDraftSave(next)
     navigate({
@@ -28,12 +30,35 @@ export function eventDetailPageStateCreate() {
     })
   }
 
+  createEffect(() => {
+    const currentEvent = event()
+    const eventId = params().eventId
+    if (initializedEventId === eventId) return
+    initializedEventId = eventId
+
+    const hasValidSelection = cart().lines.some((line) => currentEvent.tiers.some((tier) => tier.id === line.tierId))
+    if (hasValidSelection) return
+
+    const firstAvailableTier = currentEvent.tiers.find((tier) => tier.available > 0)
+    if (!firstAvailableTier) return
+
+    applyCart({ eventId, lines: [{ tierId: firstAvailableTier.id, quantity: 1 }] })
+  })
+
+  const goToCart = () => {
+    ticketCartDraftSave(cart())
+    navigate({
+      to: "/warenkorb",
+    })
+  }
+
   const goToCheckout = () => {
+    ticketCartDraftSave(cart())
     navigate({
       to: "/checkout",
       search: { event: params().eventId, tickets: ticketCartSearchFormat(cart()) || undefined },
     })
   }
 
-  return { event, cart, applyCart, goToCheckout }
+  return { event, cart, applyCart, goToCart, goToCheckout }
 }

@@ -1,9 +1,10 @@
 import { createMemo, createSignal, onMount } from "solid-js"
 import type { TicketOrder } from "./TicketOrder.ts"
+import { ticketOrderMockList } from "./ticketOrderMockList.ts"
 import { ticketStorageLoad } from "./ticketStorageLoad.ts"
 
 export function ticketOrderListStateCreate() {
-  const [orders, setOrders] = createSignal<readonly TicketOrder[]>([])
+  const [orders, setOrders] = createSignal<readonly TicketOrder[]>(ticketOrderMockList)
   const [errorMessage, setErrorMessage] = createSignal("")
   const [isLoaded, setIsLoaded] = createSignal(false)
 

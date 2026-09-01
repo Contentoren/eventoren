@@ -27,6 +27,15 @@ export const seoPages = [
     noindex: true,
   },
   {
+    path: "/warenkorb",
+    title: "Warenkorb | Eventoren",
+    description: "Überprüfe deine ausgewählten Event-Tickets im Warenkorb und gehe direkt zur sicheren Kasse.",
+    changefreq: "monthly",
+    priority: 0.4,
+    jsonLdType: "WebPage",
+    noindex: true,
+  },
+  {
     path: "/meine-tickets",
     title: "Meine Tickets | Eventoren",
     description: "Alle gekauften Tickets als Wallet-Pass mit QR-Code – jederzeit abrufbar, auch offline.",
