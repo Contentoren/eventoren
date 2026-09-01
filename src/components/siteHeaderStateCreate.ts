@@ -5,8 +5,10 @@ import { siteLocaleLoad } from "../locale/siteLocaleLoad.ts"
 import { siteLocaleOptions } from "../locale/siteLocaleOptions.ts"
 import { siteLocaleSave } from "../locale/siteLocaleSave.ts"
 import { siteLocaleShortLabel } from "../locale/siteLocaleShortLabel.ts"
+import type { TicketCart } from "../ticketing/TicketCart.ts"
 import { ticketCartDraftEventName } from "../ticketing/ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "../ticketing/ticketCartDraftLoad.ts"
+import { ticketCartEmpty } from "../ticketing/ticketCartEmpty.ts"
 import { ticketCartQuantityTotal } from "../ticketing/ticketCartQuantityTotal.ts"
 import type { SiteHeaderOverlay } from "./SiteHeaderOverlay.ts"
 import { siteHeaderNavLinks } from "./siteHeaderNavLinks.ts"
@@ -16,13 +18,10 @@ export function siteHeaderStateCreate() {
   const [menuOpen, setMenuOpen] = createSignal(false)
   const [mobileLocaleOpen, setMobileLocaleOpen] = createSignal(false)
   const [locale, setLocale] = createSignal<SiteLocale>(siteLocaleDefault)
-  const [cartQuantity, setCartQuantity] = createSignal(0)
-  const [cartEventId, setCartEventId] = createSignal("")
+  const [cart, setCart] = createSignal<TicketCart>(ticketCartEmpty(""))
 
   const syncCart = () => {
-    const cart = ticketCartDraftLoad()
-    setCartEventId(cart.eventId)
-    setCartQuantity(ticketCartQuantityTotal(cart))
+    setCart(ticketCartDraftLoad())
   }
 
   onMount(() => {
@@ -39,6 +38,8 @@ export function siteHeaderStateCreate() {
       window.removeEventListener("storage", syncCart)
     })
   })
+
+  const cartQuantity = createMemo(() => ticketCartQuantityTotal(cart()))
 
   const localeLabel = createMemo(() => siteLocaleShortLabel(locale()))
 
@@ -61,7 +62,6 @@ export function siteHeaderStateCreate() {
   const toggleOverlay = (next: SiteHeaderOverlay) => setOverlay((current) => (current === next ? "none" : next))
 
   const openLocalePicker = () => toggleOverlay("locale")
-  const openCart = () => toggleOverlay("cart")
   const openAuth = () => setOverlay("auth")
   const openMenu = () => {
     setOverlay("none")
@@ -84,17 +84,14 @@ export function siteHeaderStateCreate() {
     locale,
     localeLabel,
     cartQuantity,
-    cartEventId,
     cartLabel,
     cartHasItems,
     isLocaleOpen: () => overlay() === "locale",
-    isCartOpen: () => overlay() === "cart",
     isAuthOpen: () => overlay() === "auth",
     isMenuOpen: menuOpen,
     isMobileLocaleOpen: mobileLocaleOpen,
     closeOverlay,
     openLocalePicker,
-    openCart,
     openAuth,
     openMenu,
     closeMobileLocalePicker,

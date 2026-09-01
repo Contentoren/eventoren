@@ -37,17 +37,13 @@ export function SiteHeader() {
               to="/kontakt"
               class="focus-ring hidden h-10 items-center rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted lg:inline-flex"
             >
-              Für Veranstalter
+              Kontakt
             </Link>
 
             <SiteHeaderCartButton
-              open={state.isCartOpen()}
               quantity={state.cartQuantity()}
               label={state.cartLabel()}
               hasItems={state.cartHasItems()}
-              eventId={state.cartEventId()}
-              onToggle={() => state.openCart()}
-              onClose={() => state.closeOverlay()}
               class="max-md:px-space-2"
             />
 
