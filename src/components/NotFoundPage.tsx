@@ -1,11 +1,9 @@
 import { Link } from "@tanstack/solid-router"
-import { SiteFooter } from "./SiteFooter"
-import { SiteHeader } from "./SiteHeader"
+import { SiteFrame } from "./SiteFrame"
 
 export function NotFoundPage() {
   return (
-    <div class="min-h-screen bg-surface-base text-content">
-      <SiteHeader />
+    <SiteFrame>
       <main id="content" tabindex="-1" class="mx-auto flex min-h-[60vh] max-w-6xl items-center px-6 py-20">
         <div>
           <p class="text-sm font-semibold uppercase tracking-[0.25em] text-brand-accent">404</p>
@@ -27,7 +25,6 @@ export function NotFoundPage() {
           </div>
         </div>
       </main>
-      <SiteFooter />
-    </div>
+    </SiteFrame>
   )
 }

@@ -4,9 +4,9 @@ import { SiteHeader } from "./SiteHeader"
 
 export function SiteFrame(props: { children: JSX.Element }) {
   return (
-    <div class="min-h-screen bg-surface-base text-content">
+    <div class="flex min-h-dvh flex-col bg-surface-base text-content">
       <SiteHeader />
-      {props.children}
+      <div class="flex flex-1 flex-col">{props.children}</div>
       <SiteFooter />
     </div>
   )
