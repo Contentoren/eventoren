@@ -16,6 +16,13 @@ export const imageList = {
     alt: "DJ am Pult auf einer Festivalbühne mit blauen Lichtstrahlen",
     mimeType: "image/webp",
   },
+  event_production: {
+    path: "event-production_193062e0.webp",
+    width: 1920,
+    height: 1080,
+    alt: "Bühnenlichter, Scheinwerfer und Konzerthalle im atmosphärischen Nebel",
+    mimeType: "image/webp",
+  },
   eventoren_og: {
     path: "eventoren-og_9669cb2c.webp",
     width: 1200,

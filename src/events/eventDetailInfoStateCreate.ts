@@ -1,31 +1,85 @@
-import { createMemo } from "solid-js"
+import { createMemo, createSignal } from "solid-js"
+import type { EventCollageImage } from "./EventCollageImage.ts"
+import type { EventFaqItem } from "./EventFaqItem.ts"
+import type { EventHighlightDetail } from "./EventHighlightDetail.ts"
 import type { EventItem } from "./EventItem.ts"
-import { eventDateFormat } from "./eventDateFormat.ts"
-import { eventPriceFormat } from "./eventPriceFormat.ts"
-import { eventTicketTierPriceTotal } from "./eventTicketTierPriceTotal.ts"
-import { eventTimeFormat } from "./eventTimeFormat.ts"
+import type { EventScheduleItem } from "./EventScheduleItem.ts"
+import { eventCollageImagesGet } from "./eventCollageImagesGet.ts"
+import { eventExclusionsGet } from "./eventExclusionsGet.ts"
+import { eventFaqsGet } from "./eventFaqsGet.ts"
+import { eventHighlightDetailByTag } from "./eventHighlightDetailByTag.ts"
+import { eventInclusionsGet } from "./eventInclusionsGet.ts"
+import { eventScheduleGet } from "./eventScheduleGet.ts"
 
 export function eventDetailInfoStateCreate(inputs: { event: () => EventItem }) {
-  const facts = createMemo(() => [
-    { label: "Veranstaltungsort", value: inputs.event().venue },
-    { label: "Adresse", value: inputs.event().address },
-    { label: "Einlass", value: eventTimeFormat(inputs.event().doorsAt) },
-    { label: "Ende", value: `${eventDateFormat(inputs.event().endsAt)}, ${eventTimeFormat(inputs.event().endsAt)}` },
-    { label: "Veranstalter", value: inputs.event().organizer },
-  ])
+  const [expandedTags, setExpandedTags] = createSignal<readonly string[]>([])
+  const [expandedFaqIds, setExpandedFaqIds] = createSignal<readonly string[]>([])
+  const [isInclusionsExpanded, setIsInclusionsExpanded] = createSignal(true)
+  const [isExclusionsExpanded, setIsExclusionsExpanded] = createSignal(true)
+  const [isScheduleExpanded, setIsScheduleExpanded] = createSignal(true)
 
-  const tierRows = createMemo(() =>
-    inputs.event().tiers.map((tier) => ({
-      id: tier.id,
-      name: tier.name,
-      description: tier.description,
-      priceLabel: eventPriceFormat(tier.priceCents),
-      feeLabel: `zzgl. ${eventPriceFormat(tier.feeCents)} Gebühren`,
-      totalLabel: `${eventPriceFormat(eventTicketTierPriceTotal(tier))} gesamt`,
-      availabilityLabel: tier.available === 0 ? "Ausverkauft" : `${tier.available} verfügbar`,
-      soldOut: tier.available === 0,
-    })),
+  const description = createMemo(() => inputs.event().description)
+  const hasHighlights = createMemo(() => inputs.event().tags.length > 0)
+  const highlights = createMemo<readonly EventHighlightDetail[]>(() =>
+    inputs.event().tags.map((tag) => eventHighlightDetailByTag(tag)),
   )
+  const collageImages = createMemo<readonly [EventCollageImage, EventCollageImage, EventCollageImage]>(() =>
+    eventCollageImagesGet(inputs.event()),
+  )
+  const inclusions = createMemo<readonly string[]>(() => eventInclusionsGet(inputs.event()))
+  const hasInclusions = createMemo(() => inclusions().length > 0)
+  const exclusions = createMemo<readonly string[]>(() => eventExclusionsGet(inputs.event()))
+  const hasExclusions = createMemo(() => exclusions().length > 0)
+  const schedule = createMemo<readonly EventScheduleItem[]>(() => eventScheduleGet(inputs.event()))
+  const hasSchedule = createMemo(() => schedule().length > 0)
+  const faqs = createMemo<readonly EventFaqItem[]>(() => eventFaqsGet(inputs.event()))
+  const hasFaqs = createMemo(() => faqs().length > 0)
 
-  return { facts, tierRows }
+  const isHighlightExpanded = (tag: string) => expandedTags().includes(tag)
+  const isFaqExpanded = (id: string) => expandedFaqIds().includes(id)
+
+  const toggleHighlight = (tag: string) => {
+    setExpandedTags((prev) => (prev.includes(tag) ? prev.filter((item) => item !== tag) : [...prev, tag]))
+  }
+
+  const toggleFaq = (id: string) => {
+    setExpandedFaqIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]))
+  }
+
+  const toggleInclusions = () => {
+    setIsInclusionsExpanded((prev) => !prev)
+  }
+
+  const toggleExclusions = () => {
+    setIsExclusionsExpanded((prev) => !prev)
+  }
+
+  const toggleSchedule = () => {
+    setIsScheduleExpanded((prev) => !prev)
+  }
+
+  return {
+    collageImages,
+    description,
+    exclusions,
+    faqs,
+    hasExclusions,
+    hasFaqs,
+    hasHighlights,
+    hasInclusions,
+    hasSchedule,
+    highlights,
+    inclusions,
+    isExclusionsExpanded,
+    isFaqExpanded,
+    isHighlightExpanded,
+    isInclusionsExpanded,
+    isScheduleExpanded,
+    schedule,
+    toggleExclusions,
+    toggleFaq,
+    toggleHighlight,
+    toggleInclusions,
+    toggleSchedule,
+  }
 }

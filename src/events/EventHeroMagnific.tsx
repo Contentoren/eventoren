@@ -36,18 +36,6 @@ export function EventHeroMagnific(props: { eventCount?: number }) {
       <div class="relative mx-auto flex max-w-screen-2xl flex-col justify-between gap-12 lg:flex-row lg:items-center">
         {/* Left column */}
         <div class="flex max-w-2xl flex-col items-start gap-6">
-          {/* Pill Badge */}
-          <a
-            href={`#${eventHeroResultsAnchorId}`}
-            class="focus-ring inline-flex items-center gap-3 rounded-control border border-brand-accent/30 bg-white/10 px-4 py-2 text-sm font-medium text-white backdrop-blur-md transition-colors hover:bg-white/20"
-          >
-            <span>Ranked #1 Live-Entertainment Plattform</span>
-            <span class="hidden text-white/50 sm:inline">Eventoren Bericht</span>
-            <svg class="size-4 fill-current text-brand-accent" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M13.17 12l-4.58-4.59L10 6l6 6-6 6-1.41-1.41z" />
-            </svg>
-          </a>
-
           {/* Headline */}
           <h2 class="text-4xl font-black leading-[1.15] tracking-tight text-white sm:text-5xl lg:text-[54px]">
             Die führende Plattform für deine besten Live-Momente
