@@ -13,9 +13,6 @@ export function EventDetailHeader(props: { event: EventItem }) {
         <Show when={state.isSoldOut()}>
           <UiBadge tone="danger">Ausverkauft</UiBadge>
         </Show>
-        <Show when={state.isScarce()}>
-          <UiBadge tone="warning">{state.scarcityLabel()}</UiBadge>
-        </Show>
       </div>
 
       <div class="flex flex-col gap-space-2">

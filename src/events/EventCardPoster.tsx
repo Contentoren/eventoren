@@ -38,9 +38,6 @@ export function EventCardPoster(props: { event: EventItem }) {
               <Show when={props.event.soldOut}>
                 <UiBadge tone="danger">Ausverkauft</UiBadge>
               </Show>
-              <Show when={state.isScarce()}>
-                <UiBadge tone="warning">Nur noch {state.availableCount()} Tickets</UiBadge>
-              </Show>
             </div>
           </div>
 

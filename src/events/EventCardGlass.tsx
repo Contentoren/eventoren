@@ -34,9 +34,6 @@ export function EventCardGlass(props: { event: EventItem }) {
           <Show when={props.event.soldOut}>
             <UiBadge tone="danger">Ausverkauft</UiBadge>
           </Show>
-          <Show when={state.isScarce()}>
-            <UiBadge tone="warning">Nur noch {state.availableCount()} Tickets</UiBadge>
-          </Show>
         </div>
 
         <div class="relative mt-auto p-space-4 pt-0">
