@@ -117,7 +117,7 @@ export function TicketCartSummary(props: {
           </Show>
         </div>
 
-        <div class="flex flex-col gap-space-2.5">
+        <div class="flex flex-col gap-space-3">
           <Show when={props.onCheckout}>
             {(onCheckout) => (
               <UiButton size="lg" block disabled={state.isCheckoutDisabled()} onClick={() => onCheckout()()}>
