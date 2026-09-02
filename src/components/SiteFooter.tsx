@@ -12,6 +12,9 @@ export function SiteFooter() {
           <Link to="/agb" class="focus-ring rounded-control transition-colors hover:text-content">
             AGB
           </Link>
+          <Link to="/kontakt" class="transition-colors hover:text-content">
+            Kontakt
+          </Link>
         </nav>
       </div>
     </footer>

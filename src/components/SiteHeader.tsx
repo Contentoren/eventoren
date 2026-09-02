@@ -32,13 +32,6 @@ export function SiteHeader() {
               class="max-md:px-space-2"
             />
 
-            <Link
-              to="/kontakt"
-              class="focus-ring hidden h-10 items-center rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted lg:inline-flex"
-            >
-              Kontakt
-            </Link>
-
             <SiteHeaderCartButton
               quantity={state.cartQuantity()}
               label={state.cartLabel()}
