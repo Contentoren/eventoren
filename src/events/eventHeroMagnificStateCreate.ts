@@ -49,6 +49,7 @@ export function eventHeroMagnificStateCreate(inputs: { eventCount: () => number 
     if (typeof window === "undefined") return
 
     let resetTimer: number | undefined
+    let reenableTransitionFrame: number | undefined
 
     const timer = window.setInterval(() => {
       const nextIndex = virtualIndex.get() + 1
@@ -62,13 +63,20 @@ export function eventHeroMagnificStateCreate(inputs: { eventCount: () => number 
           isTransitioning.set(false)
           virtualIndex.set(nextIndex - tickerItems.length)
         })
+        reenableTransitionFrame = window.requestAnimationFrame(() => {
+          reenableTransitionFrame = window.requestAnimationFrame(() => {
+            isTransitioning.set(true)
+            reenableTransitionFrame = undefined
+          })
+        })
         resetTimer = undefined
-      }, tickerTransitionDurationMs)
+      }, tickerTransitionDurationMs + 400)
     }, tickerIntervalMs)
 
     onCleanup(() => {
       window.clearInterval(timer)
       if (resetTimer !== undefined) window.clearTimeout(resetTimer)
+      if (reenableTransitionFrame !== undefined) window.cancelAnimationFrame(reenableTransitionFrame)
     })
   })
 

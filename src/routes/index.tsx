@@ -4,7 +4,6 @@ import { EventFilterBar } from "../events/EventFilterBar.tsx"
 import { EventGrid } from "../events/EventGrid.tsx"
 import { EventHeroKnockout } from "../events/EventHeroKnockout.tsx"
 import { EventHeroMagnific } from "../events/EventHeroMagnific.tsx"
-import { EventHeroShowcase } from "../events/EventHeroShowcase.tsx"
 import { eventDiscoverySearchParse } from "../events/eventDiscoverySearchParse.ts"
 import { eventHeroResultsAnchorId } from "../events/eventHeroResultsAnchorId.ts"
 import { indexPageStateCreate } from "../events/indexPageStateCreate.ts"
@@ -33,7 +32,6 @@ function DiscoveryPage() {
           onFilterChange={(filter) => state.applyFilter(filter)}
         />
 
-        <EventHeroShowcase filter={state.filter()} onFilterChange={(filter) => state.applyFilter(filter)} />
         <EventHeroMagnific eventCount={state.totalCount()} />
 
         <UiContainer class="flex flex-col gap-space-7 py-space-7" id={eventHeroResultsAnchorId}>
