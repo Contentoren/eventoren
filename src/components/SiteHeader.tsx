@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/solid-router"
-import { ThemeToggle } from "../theme/ThemeToggle.tsx"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { SiteHeaderAuthDialog } from "./SiteHeaderAuthDialog.tsx"
@@ -61,8 +60,6 @@ export function SiteHeader() {
               </svg>
               Meine Tickets
             </Link>
-
-            <ThemeToggle class="max-md:px-space-2" />
 
             <UiButton size="sm" class="ml-space-2 max-sm:hidden sm:inline-flex" onClick={() => state.openAuth()}>
               Anmelden

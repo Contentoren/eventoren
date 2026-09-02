@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/solid-router"
 import { For } from "solid-js"
 import type { SiteLocale } from "../locale/SiteLocale.ts"
-import { ThemeToggle } from "../theme/ThemeToggle.tsx"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiDialog } from "../ui/UiDialog.tsx"
 import { SiteHeaderLocalePicker } from "./SiteHeaderLocalePicker.tsx"
@@ -55,7 +54,7 @@ export function SiteHeaderMobileMenu(props: {
           Anmelden / Registrieren
         </UiButton>
 
-        <div class="grid grid-cols-2 gap-space-2 border-t border-border-subtle pt-space-5">
+        <div class="border-t border-border-subtle pt-space-5">
           <SiteHeaderLocalePicker
             open={props.localeOpen}
             label={props.localeLabel}
@@ -66,7 +65,6 @@ export function SiteHeaderMobileMenu(props: {
             onSelect={(locale) => props.onSelectLocale(locale)}
             class="w-full justify-center"
           />
-          <ThemeToggle class="w-full justify-center" />
         </div>
       </div>
     </UiDialog>

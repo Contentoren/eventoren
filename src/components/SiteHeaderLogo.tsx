@@ -4,11 +4,11 @@ export function SiteHeaderLogo(props: { class?: string } = {}) {
   return (
     <Link
       to="/"
-      class={`eventoren-logo-shell focus-ring flex shrink-0 items-center rounded-control px-space-2 py-space-1 ${props.class ?? ""}`}
+      class={`focus-ring flex shrink-0 items-center rounded-control transition-opacity hover:opacity-90 ${props.class ?? ""}`}
       aria-label="Eventoren – zur Startseite"
     >
       <img
-        src="/eventoren-logo.png"
+        src="/eventoren-logo-light.png"
         alt="Eventoren"
         width="1024"
         height="206"

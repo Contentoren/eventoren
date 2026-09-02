@@ -14,18 +14,14 @@ const speculationRules = JSON.stringify({
 
 const themeInitScript = `(() => {
   const root = document.documentElement
-  let mode = "dark"
-
+  root.classList.remove("dark")
+  root.classList.add("light")
+  root.dataset.theme = "light"
+  root.style.colorScheme = "light"
   try {
-    const storedMode = window.localStorage.getItem(${JSON.stringify(themeModeStorageKey)})
-    if (storedMode === "light" || storedMode === "dark") mode = storedMode
+    window.localStorage.removeItem(${JSON.stringify(themeModeStorageKey)})
   } catch {}
-
-  root.classList.remove("light", "dark")
-  root.classList.add(mode)
-  root.dataset.theme = mode
-  root.style.colorScheme = mode
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", mode === "dark" ? "#020617" : "#f8fafc")
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#f8fafc")
 })()`
 
 export const Route = createRootRoute({

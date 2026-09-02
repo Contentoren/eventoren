@@ -3,13 +3,9 @@
 /* ---------------------------------------------------------------------------
    Semantic design tokens.
 
-   The default values form a calm, high-contrast light theme. The dark theme
-   overrides the same generated Tailwind variables below, so every semantic
-   utility (`bg-surface`, `text-content`, `border-border-subtle`, …) follows
-   the selected appearance without duplicating component styles.
- --------------------------------------------------------------------------- */
+   The default values form a calm, high-contrast light theme.
+  --------------------------------------------------------------------------- */
 @theme {
-  /* Light theme: the page backdrop sits below white cards as a raised plane. */
   --color-surface-base: #f8fafc;
   --color-surface: #ffffff;
   --color-surface-muted: #f1f5f9;
@@ -17,14 +13,17 @@
   --color-border-subtle: #cbd5e1;
   --color-border-strong: #64748b;
 
-  --color-content: #172033;
+  --color-content: #0f172a;
   --color-content-muted: #475569;
   --color-content-inverted: #ffffff;
 
-  --color-brand: #4f46e5;
-  --color-brand-strong: #4338ca;
-  --color-brand-soft: #e0e7ff;
-  --color-brand-accent: #3730a3;
+  --color-brand: #14b8a6;
+  --color-brand-strong: #0d9488;
+  --color-brand-soft: #ccfbf1;
+  --color-brand-accent: #115e59;
+  --color-accent: #f59e0b;
+  --color-accent-strong: #d97706;
+  --color-accent-soft: #fef3c7;
   --color-brand-content: #ffffff;
 
   --color-success: #166534;
@@ -47,66 +46,10 @@
   --radius-control: 12px;
 }
 
-/* Dark theme values retain the original deep-stage palette. */
-:root.dark {
-  --color-surface-base: #020617;
-  --color-surface: #0f172a;
-  --color-surface-muted: #1e293b;
-  --color-surface-inverted: #020617;
-  --color-border-subtle: #475569;
-  --color-border-strong: #64748b;
-
-  --color-content: #f8fafc;
-  --color-content-muted: #cbd5e1;
-
-  --color-brand-soft: #312e81;
-  --color-brand-accent: #a5b4fc;
-
-  --color-success: #4ade80;
-  --color-success-soft: #14532d;
-  --color-warning: #fbbf24;
-  --color-warning-soft: #78350f;
-  --color-danger: #f87171;
-  --color-danger-soft: #7f1d1d;
-}
-
-/* Keep a no-JavaScript/system fallback aligned with the OS preference. */
-@media (prefers-color-scheme: dark) {
-  :root:not(.light):not(.dark) {
-    color-scheme: dark;
-    --color-surface-base: #020617;
-    --color-surface: #0f172a;
-    --color-surface-muted: #1e293b;
-    --color-surface-inverted: #020617;
-    --color-border-subtle: #475569;
-    --color-border-strong: #64748b;
-    --color-content: #f8fafc;
-    --color-content-muted: #cbd5e1;
-    --color-brand-soft: #312e81;
-    --color-brand-accent: #a5b4fc;
-    --color-success: #4ade80;
-    --color-success-soft: #14532d;
-    --color-warning: #fbbf24;
-    --color-warning-soft: #78350f;
-    --color-danger: #f87171;
-    --color-danger-soft: #7f1d1d;
-  }
-}
-
-/* Native widgets (scrollbars, date pickers, dropdowns, autofill) follow the
-   active theme instead of flashing a browser-default surface. */
 @layer base {
   :root {
     color-scheme: light;
     accent-color: var(--color-brand);
-  }
-
-  :root.light {
-    color-scheme: light;
-  }
-
-  :root.dark {
-    color-scheme: dark;
   }
 
   html {
@@ -123,20 +66,6 @@
     background-color: var(--color-brand);
     color: var(--color-brand-content);
   }
-
-  :root.dark {
-    /* Chrome renders search/date affordances near-black on dark inputs. */
-    ::-webkit-search-cancel-button,
-    ::-webkit-calendar-picker-indicator {
-      filter: invert(1) opacity(0.7);
-    }
-  }
-}
-
-/* The image logo uses white lettering, so its compact dark lockup remains
-   legible in both appearances. */
-.eventoren-logo-shell {
-  background-color: var(--color-surface-inverted);
 }
 
 /* Indigo-300 reads far better than indigo-600 as a ring on deep surfaces. */

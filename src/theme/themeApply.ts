@@ -1,12 +1,11 @@
-export function themeApply(mode: "light" | "dark") {
+export function themeApply(_mode?: "light" | "dark") {
   if (typeof document === "undefined") return
 
   const root = document.documentElement
-  root.classList.remove("light", "dark")
-  root.classList.add(mode)
-  root.dataset.theme = mode
-  root.style.colorScheme = mode
+  root.classList.remove("dark")
+  root.classList.add("light")
+  root.dataset.theme = "light"
+  root.style.colorScheme = "light"
 
-  const themeColor = mode === "dark" ? "#020617" : "#f8fafc"
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", themeColor)
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#f8fafc")
 }
