@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/solid-router"
 import { Show } from "solid-js"
+import { classMerge } from "../ui/classMerge.ts"
 
 export function SiteHeaderCartButton(props: { quantity: number; label: string; hasItems: boolean; class?: string }) {
   return (
@@ -7,7 +8,10 @@ export function SiteHeaderCartButton(props: { quantity: number; label: string; h
       to="/warenkorb"
       aria-label={props.label}
       activeProps={{ class: "bg-surface-muted", "aria-current": "page" }}
-      class={`focus-ring relative inline-flex h-10 items-center gap-space-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted max-md:px-space-2 ${props.class ?? ""}`}
+      class={classMerge(
+        "focus-ring relative inline-flex h-10 items-center gap-space-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted max-md:px-space-2",
+        props.class,
+      )}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true" class="size-5" fill="none" stroke="currentColor">
         <path

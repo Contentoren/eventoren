@@ -1,4 +1,5 @@
 import type { JSX } from "solid-js"
+import { classMerge } from "./classMerge.ts"
 
 const variantClass = {
   primary: "bg-brand text-brand-content hover:bg-brand-strong",
@@ -28,9 +29,13 @@ export function UiButton(
       type={props.type ?? "button"}
       /* Disabled state is opacity-70, not -50: on a near-black backdrop a
          faded fill loses far more perceived contrast than it does on white. */
-      class={`focus-ring inline-flex items-center justify-center rounded-control font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-70 ${
-        variantClass[props.variant ?? "primary"]
-      } ${sizeClass[props.size ?? "md"]} ${props.block ? "w-full" : ""} ${props.class ?? ""}`}
+      class={classMerge(
+        "focus-ring inline-flex items-center justify-center rounded-control font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-70",
+        variantClass[props.variant ?? "primary"],
+        sizeClass[props.size ?? "md"],
+        props.block && "w-full",
+        props.class,
+      )}
     >
       {props.children}
     </button>

@@ -1,5 +1,6 @@
 import { For } from "solid-js"
 import type { SiteLocale } from "../locale/SiteLocale.ts"
+import { classMerge } from "../ui/classMerge.ts"
 import { UiPopover } from "../ui/UiPopover.tsx"
 
 export function SiteHeaderLocalePicker(props: {
@@ -25,7 +26,10 @@ export function SiteHeaderLocalePicker(props: {
           aria-expanded={props.open}
           aria-controls={api.panelId}
           aria-label={`Land, Sprache und Währung: ${props.locale.countryLabel}, ${props.locale.languageLabel}, ${props.locale.currencyLabel}`}
-          class={`focus-ring inline-flex h-10 items-center gap-space-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted ${props.class ?? ""}`}
+          class={classMerge(
+            "focus-ring inline-flex h-10 items-center gap-space-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted",
+            props.class,
+          )}
         >
           <span aria-hidden="true" class="text-base leading-none">
             {props.locale.flag}
@@ -53,11 +57,12 @@ export function SiteHeaderLocalePicker(props: {
                 type="button"
                 onClick={() => props.onSelect(option)}
                 aria-current={option.id === props.locale.id ? "true" : undefined}
-                class={`focus-ring flex w-full items-center gap-space-3 rounded-control px-space-3 py-space-2 text-left text-sm transition-colors ${
+                class={classMerge(
+                  "focus-ring flex w-full items-center gap-space-3 rounded-control px-space-3 py-space-2 text-left text-sm transition-colors",
                   option.id === props.locale.id
                     ? "bg-brand-soft font-semibold text-brand-accent"
-                    : "text-content hover:bg-surface-muted"
-                }`}
+                    : "text-content hover:bg-surface-muted",
+                )}
               >
                 <span aria-hidden="true" class="text-base leading-none">
                   {option.flag}

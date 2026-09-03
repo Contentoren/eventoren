@@ -1,4 +1,5 @@
 import type { JSX } from "solid-js"
+import { classMerge } from "./classMerge.ts"
 
 /* Deep tinted chip + its own bright ink, so badges glow against dark cards
    while every pair clears WCAG AA (most clear AAA). Rings are lifted to /50
@@ -14,9 +15,11 @@ const toneClass = {
 export function UiBadge(props: { children: JSX.Element; tone?: keyof typeof toneClass; class?: string }) {
   return (
     <span
-      class={`inline-flex items-center gap-space-1 rounded-full px-3.5 py-1 text-sm font-semibold ring-1 ring-inset ${
-        toneClass[props.tone ?? "neutral"]
-      } ${props.class ?? ""}`}
+      class={classMerge(
+        "inline-flex items-center gap-space-1 rounded-full px-3.5 py-1 text-sm font-semibold ring-1 ring-inset",
+        toneClass[props.tone ?? "neutral"],
+        props.class,
+      )}
     >
       {props.children}
     </span>

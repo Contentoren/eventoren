@@ -1,4 +1,5 @@
 import { Show } from "solid-js"
+import { classMerge } from "../ui/classMerge.ts"
 import type { ThemeMode } from "./ThemeMode.ts"
 import { themeToggleStateCreate } from "./themeToggleStateCreate.ts"
 
@@ -33,7 +34,10 @@ export function ThemeToggle(props: { class?: string } = {}) {
       onClick={() => state.toggle()}
       aria-label={state.toggleLabel()}
       title={state.toggleLabel()}
-      class={`focus-ring inline-flex h-10 items-center gap-space-2 rounded-control px-space-3 text-content transition-colors hover:bg-surface-muted ${props.class ?? ""}`}
+      class={classMerge(
+        "focus-ring inline-flex h-10 items-center gap-space-2 rounded-control px-space-3 text-content transition-colors hover:bg-surface-muted",
+        props.class,
+      )}
     >
       <ThemeModeIcon mode={state.mode} />
       <span class="sr-only">{state.toggleLabel()}</span>

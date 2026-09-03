@@ -1,10 +1,14 @@
 import { Link } from "@tanstack/solid-router"
+import { classMerge } from "../ui/classMerge.ts"
 
 export function SiteHeaderLogo(props: { class?: string } = {}) {
   return (
     <Link
       to="/"
-      class={`focus-ring flex shrink-0 items-center rounded-control transition-opacity hover:opacity-90 ${props.class ?? ""}`}
+      class={classMerge(
+        "focus-ring flex shrink-0 items-center rounded-control transition-opacity hover:opacity-90",
+        props.class,
+      )}
       aria-label="Eventoren – zur Startseite"
     >
       <img
