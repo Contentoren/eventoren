@@ -1,10 +1,8 @@
 import { createFileRoute } from "@tanstack/solid-router"
 import { SiteFrame } from "../components/SiteFrame"
-import { ContactBenefitsList } from "../contact/ContactBenefitsList.tsx"
 import { ContactDirectInfo } from "../contact/ContactDirectInfo.tsx"
 import { ContactFaqList } from "../contact/ContactFaqList.tsx"
 import { ContactHeader } from "../contact/ContactHeader.tsx"
-import { ContactHeroBanner } from "../contact/ContactHeroBanner.tsx"
 import { ContactOrganizerForm } from "../contact/ContactOrganizerForm.tsx"
 import { contactPageStateCreate } from "../contact/contactPageStateCreate.ts"
 import { seoHeadCreate } from "../seo/seoHeadCreate"
@@ -21,8 +19,6 @@ function ContactPage() {
   return (
     <SiteFrame>
       <main id="content" tabindex="-1">
-        <ContactHeroBanner />
-
         <UiContainer width="wide" class="flex flex-col gap-space-7 py-space-7">
           <ContactHeader />
 
@@ -48,8 +44,6 @@ function ContactPage() {
                 onSubmit={(e) => state.submitForm(e)}
                 onReset={() => state.resetForm()}
               />
-
-              <ContactBenefitsList />
 
               <ContactFaqList expandedFaqId={state.expandedFaqId} onToggleFaq={(id) => state.toggleFaq(id)} />
             </div>

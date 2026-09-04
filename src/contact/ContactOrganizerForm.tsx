@@ -61,19 +61,6 @@ export function ContactOrganizerForm(props: {
           >
             Besucher-Support
           </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={props.inquiryType() === "presse"}
-            onClick={() => props.setInquiryType("presse")}
-            class={`flex-1 rounded-lg py-2 text-center text-xs font-semibold transition-all sm:text-sm ${
-              props.inquiryType() === "presse"
-                ? "bg-surface text-content shadow-xs"
-                : "text-content-muted hover:text-content"
-            }`}
-          >
-            Partnerschaften & Presse
-          </button>
         </div>
 
         <Show when={props.isSubmitted()}>

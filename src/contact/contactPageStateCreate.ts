@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js"
 
-export type ContactInquiryType = "veranstalter" | "support" | "presse"
+export type ContactInquiryType = "veranstalter" | "support"
 
 export function contactPageStateCreate() {
   const [inquiryType, setInquiryType] = createSignal<ContactInquiryType>("veranstalter")
