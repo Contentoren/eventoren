@@ -6,6 +6,7 @@ import { eventTimeWindowLabels } from "./eventTimeWindowLabels.ts"
 
 export function eventDiscoverySearchParse(input: Record<string, unknown>): EventDiscoverySearch {
   const rawQuery = input.q
+  const rawLocation = input.ort ?? input.location
   const rawCategory = input.kategorie
   const rawTimeWindow = input.zeitraum
 
@@ -15,6 +16,7 @@ export function eventDiscoverySearchParse(input: Record<string, unknown>): Event
 
   return {
     q: typeof rawQuery === "string" && rawQuery.length > 0 ? rawQuery : undefined,
+    ort: typeof rawLocation === "string" && rawLocation.length > 0 ? rawLocation : undefined,
     kategorie: isCategory ? (rawCategory as EventCategory) : undefined,
     zeitraum: isTimeWindow ? (rawTimeWindow as EventTimeWindow) : undefined,
   }

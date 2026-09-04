@@ -76,8 +76,8 @@ export function EventFilterBar(props: {
               type="search"
               aria-label="Ort wählen"
               placeholder="Alle Städte oder Künstler"
-              value={props.filter.query}
-              onInput={(event) => state.selectQuery(event.currentTarget.value)}
+              value={props.filter.location}
+              onInput={(event) => state.selectLocation(event.currentTarget.value)}
               class="h-full w-full bg-transparent text-sm font-medium text-content placeholder:text-content-muted/80 focus:outline-none"
             />
           </div>

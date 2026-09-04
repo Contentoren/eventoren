@@ -1,10 +1,9 @@
-import { createMemo, createSignal } from "solid-js"
+import { createEffect, createMemo, createSignal } from "solid-js"
 import { urlImage } from "../app/assets/urlImage.ts"
 import type { EventFilter } from "./EventFilter.ts"
 import type { EventTimeWindow } from "./EventTimeWindow.ts"
 import { eventHeroKnockoutFrames } from "./eventHeroKnockoutFrames.ts"
 import { eventHeroKnockoutTimingCreate } from "./eventHeroKnockoutTimingCreate.ts"
-import { eventHeroQueryCompose } from "./eventHeroQueryCompose.ts"
 import { eventHeroQuickChips } from "./eventHeroQuickChips.ts"
 import { eventHeroResultsAnchorId } from "./eventHeroResultsAnchorId.ts"
 import { eventHeroTimeWindowOptions } from "./eventHeroTimeWindowOptions.ts"
@@ -15,7 +14,15 @@ export function eventHeroKnockoutStateCreate(inputs: {
   onFilterChange: (filter: EventFilter) => void
 }) {
   const [term, setTerm] = createSignal(inputs.filter().query)
-  const [city, setCity] = createSignal("")
+  const [city, setCity] = createSignal(inputs.filter().location)
+
+  createEffect(() => {
+    setTerm(inputs.filter().query)
+  })
+
+  createEffect(() => {
+    setCity(inputs.filter().location)
+  })
 
   const timing = eventHeroKnockoutTimingCreate(eventHeroKnockoutFrames.length)
 
@@ -77,7 +84,8 @@ export function eventHeroKnockoutStateCreate(inputs: {
   const submitSearch = () => {
     inputs.onFilterChange({
       ...inputs.filter(),
-      query: eventHeroQueryCompose({ term: term(), city: city() }),
+      query: term().trim(),
+      location: city().trim(),
     })
     scrollToResults()
   }

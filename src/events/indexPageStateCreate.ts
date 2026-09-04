@@ -14,6 +14,7 @@ export function indexPageStateCreate() {
 
   const filter = createMemo<EventFilter>(() => ({
     query: search().q ?? "",
+    location: search().ort ?? "",
     category: search().kategorie ?? "alle",
     timeWindow: search().zeitraum ?? "alle",
   }))
@@ -25,6 +26,7 @@ export function indexPageStateCreate() {
       to: "/",
       search: {
         q: next.query.length > 0 ? next.query : undefined,
+        ort: next.location.length > 0 ? next.location : undefined,
         kategorie: next.category === "alle" ? undefined : next.category,
         zeitraum: next.timeWindow === "alle" ? undefined : next.timeWindow,
       },

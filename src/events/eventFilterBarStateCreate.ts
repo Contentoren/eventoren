@@ -30,6 +30,7 @@ export function eventFilterBarStateCreate(inputs: {
   )
 
   const selectQuery = (query: string) => inputs.onFilterChange({ ...inputs.filter(), query })
+  const selectLocation = (location: string) => inputs.onFilterChange({ ...inputs.filter(), location })
   const selectCategory = (category: EventFilter["category"]) => inputs.onFilterChange({ ...inputs.filter(), category })
   const selectTimeWindow = (timeWindow: EventTimeWindow) => inputs.onFilterChange({ ...inputs.filter(), timeWindow })
   const submitSearch = (event?: SubmitEvent) => {
@@ -42,6 +43,7 @@ export function eventFilterBarStateCreate(inputs: {
     timeWindowOptions,
     resultLabel,
     selectQuery,
+    selectLocation,
     selectCategory,
     selectTimeWindow,
     submitSearch,
