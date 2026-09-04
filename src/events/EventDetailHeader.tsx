@@ -7,7 +7,7 @@ export function EventDetailHeader(props: { event: EventItem }) {
   const state = eventDetailHeaderStateCreate({ event: () => props.event })
 
   return (
-    <header class="flex flex-col gap-space-4">
+    <header class="flex flex-col gap-space-3 sm:gap-space-4">
       <div class="flex flex-wrap items-center gap-space-2">
         <UiBadge tone="brand">{state.categoryLabel()}</UiBadge>
         <Show when={state.isSoldOut()}>
@@ -16,13 +16,13 @@ export function EventDetailHeader(props: { event: EventItem }) {
       </div>
 
       <div class="flex flex-col gap-space-2">
-        <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">{props.event.title}</h1>
+        <h1 class="text-2xl sm:text-4xl font-semibold tracking-tight text-content">{props.event.title}</h1>
         <Show when={props.event.subtitle}>
-          <p class="text-base text-content-muted">{props.event.subtitle}</p>
+          <p class="text-sm sm:text-base text-content-muted">{props.event.subtitle}</p>
         </Show>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 my-4 py-4 border-y border-border-subtle">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 sm:gap-y-4 my-2 py-2 sm:my-4 sm:py-4 border-y border-border-subtle">
         <div class="flex items-center gap-3">
           <div
             class="size-9 shrink-0 flex items-center justify-center rounded-md border border-border-subtle bg-surface-muted/60 text-brand-accent shadow-xs"

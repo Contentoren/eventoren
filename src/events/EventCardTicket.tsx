@@ -42,10 +42,10 @@ export function EventCardTicket(props: { event: EventItem }) {
           </div>
 
           <div class="flex min-w-0 flex-1 flex-col gap-space-1.5">
-            <h3 class="line-clamp-2 text-base font-bold leading-snug tracking-tight text-content transition-colors group-hover:text-brand-accent sm:text-lg">
+            <h3 class="line-clamp-2 text-lg font-bold leading-snug tracking-tight text-content transition-colors group-hover:text-brand-accent sm:text-lg">
               {props.event.title}
             </h3>
-            <p class="text-xs text-content-muted sm:text-sm">
+            <p class="text-sm text-content-muted sm:text-sm">
               {state.timeLabel()} · {state.locationLabel()}
             </p>
           </div>

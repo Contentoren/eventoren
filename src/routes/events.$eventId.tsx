@@ -30,7 +30,7 @@ function EventDetailPage() {
       <main id="content" tabindex="-1">
         <EventDetailBanner imageUrl={state.event().imageUrl} imageAlt={state.event().imageAlt} />
 
-        <UiContainer class="flex flex-col gap-space-7 py-space-7">
+        <UiContainer class="flex flex-col gap-space-7 pt-space-3 pb-28 sm:py-space-7 lg:pb-space-7">
           <EventDetailHeader event={state.event()} />
 
           <div class="grid gap-space-7 lg:grid-cols-[minmax(0,1fr)_20rem]">
