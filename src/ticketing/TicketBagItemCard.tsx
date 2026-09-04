@@ -42,7 +42,7 @@ export function TicketBagItemCard(props: {
             <Link
               to="/events/$eventId"
               params={{ eventId: props.event.id }}
-              class="focus-ring text-base font-semibold tracking-tight text-content hover:text-brand-accent hover:underline sm:text-lg"
+              class="focus-ring text-lg font-semibold tracking-tight text-content hover:text-brand-accent hover:underline sm:text-lg"
             >
               {props.event.title}
             </Link>
