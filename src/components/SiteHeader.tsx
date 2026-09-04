@@ -3,7 +3,6 @@ import { UiButton } from "../ui/UiButton.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { SiteHeaderAuthDialog } from "./SiteHeaderAuthDialog.tsx"
 import { SiteHeaderCartButton } from "./SiteHeaderCartButton.tsx"
-import { SiteHeaderLocalePicker } from "./SiteHeaderLocalePicker.tsx"
 import { SiteHeaderLogo } from "./SiteHeaderLogo.tsx"
 import { SiteHeaderMobileMenu } from "./SiteHeaderMobileMenu.tsx"
 import { SiteHeaderSkipLink } from "./SiteHeaderSkipLink.tsx"
@@ -21,17 +20,6 @@ export function SiteHeader() {
           <SiteHeaderLogo class="max-md:px-space-1" />
 
           <div class="flex items-center gap-space-1 max-md:gap-0">
-            <SiteHeaderLocalePicker
-              open={state.isLocaleOpen()}
-              label={state.localeLabel()}
-              locale={state.locale()}
-              options={state.localeOptions()}
-              onToggle={() => state.openLocalePicker()}
-              onClose={() => state.closeOverlay()}
-              onSelect={(locale) => state.selectLocale(locale)}
-              class="max-md:px-space-2"
-            />
-
             <SiteHeaderCartButton
               quantity={state.cartQuantity()}
               label={state.cartLabel()}
@@ -79,13 +67,6 @@ export function SiteHeader() {
       <SiteHeaderMobileMenu
         open={state.isMenuOpen()}
         links={state.navLinks()}
-        localeOpen={state.isMobileLocaleOpen()}
-        locale={state.locale()}
-        localeLabel={state.localeLabel()}
-        localeOptions={state.localeOptions()}
-        onToggleLocale={() => state.toggleMobileLocalePicker()}
-        onCloseLocale={() => state.closeMobileLocalePicker()}
-        onSelectLocale={(locale) => state.selectLocale(locale)}
         onClose={() => state.closeOverlay()}
         onOpenAuth={() => state.openAuth()}
       />
