@@ -19,14 +19,14 @@ export function eventDetailPageStateCreate() {
 
   let initializedEventId = ""
 
-  const applyCart = (next: TicketCart) => {
+  const applyCart = (next: TicketCart, resetScroll = false) => {
     ticketCartDraftSave(next)
     navigate({
       to: "/events/$eventId",
       params: { eventId: params().eventId },
       search: { tickets: ticketCartSearchFormat(next) || undefined },
       replace: true,
-      resetScroll: false,
+      resetScroll,
     })
   }
 
@@ -42,7 +42,7 @@ export function eventDetailPageStateCreate() {
     const firstAvailableTier = currentEvent.tiers.find((tier) => tier.available > 0)
     if (!firstAvailableTier) return
 
-    applyCart({ eventId, lines: [{ tierId: firstAvailableTier.id, quantity: 1 }] })
+    applyCart({ eventId, lines: [{ tierId: firstAvailableTier.id, quantity: 1 }] }, true)
   })
 
   const goToCart = () => {
