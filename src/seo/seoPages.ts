@@ -61,8 +61,8 @@ export const seoPages = [
   },
   {
     path: "/agb",
-    title: "Allgemeine Geschäftsbedingungen | Eventoren",
-    description: "Allgemeine Geschäftsbedingungen von Eventoren.",
+    title: "[Platzhalter] Allgemeine Geschäftsbedingungen (AGB) | Eventoren",
+    description: "Allgemeine Geschäftsbedingungen (Platzhalter-Entwurf) von Eventoren.",
     changefreq: "yearly",
     priority: 0.2,
     jsonLdType: "WebPage",
