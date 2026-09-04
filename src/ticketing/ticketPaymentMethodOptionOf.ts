@@ -7,8 +7,6 @@ const fallback: TicketPaymentMethodOption = {
   name: "Rechnung / SEPA-Lastschrift",
   description: "Rechnung per E-Mail oder Einzug von deinem Konto.",
   hint: "Zahlbar innerhalb von 14 Tagen nach Erhalt.",
-  badge: "Ohne Karte",
-  badgeTone: "neutral",
 }
 
 export function ticketPaymentMethodOptionOf(method: TicketPaymentMethod): TicketPaymentMethodOption {

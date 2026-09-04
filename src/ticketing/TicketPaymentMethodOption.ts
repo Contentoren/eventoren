@@ -5,6 +5,4 @@ export type TicketPaymentMethodOption = {
   name: string
   description: string
   hint: string
-  badge: string
-  badgeTone: "neutral" | "brand" | "success" | "warning"
 }
