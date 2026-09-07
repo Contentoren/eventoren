@@ -22,10 +22,10 @@ export function EventFilterBar(props: {
           class="grid grid-cols-1 gap-space-2 rounded-card border border-border-strong/40 bg-surface p-space-2 shadow-lg sm:grid-cols-2 lg:grid-cols-[1fr_1.2fr_1fr_auto] lg:items-center"
           onSubmit={state.submitSearch}
         >
-          {/* Genre selection */}
+          {/* Category selection */}
           <div class="relative flex h-13 items-center rounded-control border border-border-subtle bg-surface-muted px-space-4 transition-colors hover:border-border-strong focus-within:border-brand-accent focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand-accent/20">
-            <label for="event-filter-genre" class="sr-only">
-              Genre
+            <label for="event-filter-category" class="sr-only">
+              Kategorie
             </label>
             <span class="mr-space-3 shrink-0 text-content-muted" aria-hidden="true">
               <svg class="size-5 fill-current" viewBox="0 0 24 24" aria-hidden="true">
@@ -33,8 +33,8 @@ export function EventFilterBar(props: {
               </svg>
             </span>
             <select
-              id="event-filter-genre"
-              aria-label="Genre"
+              id="event-filter-category"
+              aria-label="Kategorie"
               value={props.filter.category}
               onChange={(event) => state.selectCategory(event.currentTarget.value as EventCategory | "alle")}
               class="h-full w-full cursor-pointer appearance-none bg-transparent pr-space-6 text-sm font-medium text-content focus:outline-none"

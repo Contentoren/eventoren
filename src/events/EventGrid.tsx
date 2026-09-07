@@ -1,7 +1,6 @@
 import { For, Show } from "solid-js"
 import { EventCard } from "./EventCard.tsx"
 import type { EventItem } from "./EventItem.ts"
-import { eventCardVariationByIndex } from "./eventCardVariationByIndex.ts"
 
 export function EventGrid(props: { events: readonly EventItem[]; emptyMessage?: string }) {
   return (
@@ -18,9 +17,9 @@ export function EventGrid(props: { events: readonly EventItem[]; emptyMessage?: 
         aria-label="Eventliste"
       >
         <For each={props.events}>
-          {(event, index) => (
+          {(event) => (
             <li class="h-full">
-              <EventCard event={event} variation={eventCardVariationByIndex(index())} />
+              <EventCard event={event} />
             </li>
           )}
         </For>

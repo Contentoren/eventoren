@@ -61,9 +61,13 @@ export function EventCardTicket(props: { event: EventItem }) {
           <p class="text-base font-bold text-content">{state.priceLabel()}</p>
           <span
             data-testid="module-content-list-item-cta"
-            class="inline-flex h-10 items-center justify-center rounded-control bg-brand px-4 text-sm font-bold text-brand-content shadow-sm transition-colors group-hover:bg-brand-strong"
+            class={`inline-flex h-10 items-center justify-center rounded-control px-4 text-sm font-bold shadow-sm transition-colors ${
+              props.event.soldOut
+                ? "border border-border-strong bg-surface-muted text-content-muted"
+                : "bg-brand text-brand-content group-hover:bg-brand-strong"
+            }`}
           >
-            Tickets kaufen
+            {props.event.soldOut ? "Ausverkauft" : "Tickets kaufen"}
           </span>
         </div>
       </Link>
