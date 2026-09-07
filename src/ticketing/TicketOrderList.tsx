@@ -6,15 +6,10 @@ export function TicketOrderList(props: { emptyMessage?: string }) {
   const state = ticketOrderListStateCreate()
 
   return (
-    <section class="flex flex-col gap-space-6" aria-labelledby="ticket-order-list">
-      <div class="flex items-baseline justify-between gap-space-4">
-        <h2 id="ticket-order-list" class="text-xl font-semibold text-content">
-          Meine Tickets
-        </h2>
-        <p class="text-sm text-content-muted" aria-live="polite">
-          {state.countLabel()}
-        </p>
-      </div>
+    <section class="flex flex-col gap-space-6" aria-label="Ticket-Bestellungen">
+      <p class="text-sm text-content-muted" aria-live="polite">
+        {state.countLabel()}
+      </p>
 
       <Show when={state.errorMessage()}>
         <p

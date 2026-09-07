@@ -31,7 +31,7 @@ function BagPage() {
           >
             <div class="flex flex-col gap-space-3 border-b border-border-subtle pb-space-6 dark:border-border-strong/30">
               <h1 class="text-3xl font-bold tracking-tight text-content sm:text-4xl lg:text-5xl">
-                Dein Warenkorb beträgt {state.totals().totalLabel}.
+                Dein Warenkorb – Gesamtsumme: {state.totals().totalLabel}
               </h1>
               <p class="text-sm text-content-muted sm:text-base">
                 Kostenlose digitale Bereitstellung und sofortiger Download in Apple & Google Wallet.

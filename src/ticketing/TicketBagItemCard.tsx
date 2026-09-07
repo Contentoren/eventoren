@@ -85,7 +85,7 @@ export function TicketBagItemCard(props: {
                   clip-rule="evenodd"
                 />
               </svg>
-              <span>Sofortige digitale Bereitstellung & Apple / Google Wallet Pass</span>
+              <span>Sofortige digitale Bereitstellung & Apple- & Google-Wallet-Pass</span>
             </div>
           </div>
 

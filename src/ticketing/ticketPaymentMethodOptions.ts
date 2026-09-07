@@ -11,7 +11,7 @@ export const ticketPaymentMethodOptions: readonly TicketPaymentMethodOption[] = 
     id: "card",
     name: "Kreditkarte",
     description: "Visa, Mastercard und American Express.",
-    hint: "3-D Secure Freigabe über deine Bank.",
+    hint: "3-D-Secure-Freigabe über deine Bank.",
   },
   {
     id: "paypal",

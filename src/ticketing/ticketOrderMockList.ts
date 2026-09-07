@@ -6,7 +6,7 @@ export const ticketOrderMockList: readonly TicketOrder[] = [
     code: "EVT-FUS-2026-8841",
     createdAt: "2026-05-02T14:30:00+02:00",
     eventId: "fusion-festival",
-    eventTitle: "Fusion Festival — Ferienkommunismus",
+    eventTitle: "Fusion Festival – Ferienkommunismus",
     eventStartsAt: "2026-06-24T14:00:00+02:00",
     eventDoorsAt: "2026-06-24T10:00:00+02:00",
     venue: "Flugplatz Lärz",

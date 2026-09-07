@@ -8,7 +8,7 @@ export function TicketBagSummary(props: {
   onCheckout: () => void
 }) {
   return (
-    <aside aria-label="Warenkorb Zusammenfassung" class="flex flex-col gap-space-5">
+    <aside aria-label="Warenkorb-Zusammenfassung" class="flex flex-col gap-space-5">
       <div class="rounded-2xl border border-border-subtle bg-surface p-space-6 shadow-xs dark:border-border-strong/30">
         <h2 class="text-xl font-semibold tracking-tight text-content">Zusammenfassung</h2>
 
@@ -63,7 +63,7 @@ export function TicketBagSummary(props: {
                 <path d="m9 12 2 2 4-4" />
               </svg>
             </span>
-            <span>100% Original-Tickets direkt vom Veranstalter</span>
+            <span>100 % Original-Tickets direkt vom Veranstalter</span>
           </li>
 
           <li class="flex items-center gap-space-3">
@@ -89,7 +89,7 @@ export function TicketBagSummary(props: {
                 <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
               </svg>
             </span>
-            <span>Sofortige Zusendung & Apple / Google Wallet Export</span>
+            <span>Sofortige Zusendung & Apple- & Google-Wallet-Export</span>
           </li>
         </ul>
       </div>

@@ -43,13 +43,6 @@ function CheckoutPage() {
           >
             {(event) => <TicketCheckoutForm event={event()} cart={state.cart()} />}
           </Show>
-
-          <Link
-            to="/meine-tickets"
-            class="focus-ring rounded-control text-sm font-semibold text-brand-accent underline underline-offset-4 hover:text-content"
-          >
-            Meine Tickets ansehen
-          </Link>
         </UiContainer>
       </main>
     </SiteFrame>

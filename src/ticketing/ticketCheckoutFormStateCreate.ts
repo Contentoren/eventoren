@@ -5,6 +5,8 @@ import type { TicketCheckoutStep } from "./TicketCheckoutStep.ts"
 import type { TicketContact } from "./TicketContact.ts"
 import type { TicketOrder } from "./TicketOrder.ts"
 import type { TicketPaymentMethod } from "./TicketPaymentMethod.ts"
+import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
+import { ticketCartEmpty } from "./ticketCartEmpty.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
 import { ticketCheckoutStepLabels } from "./ticketCheckoutStepLabels.ts"
 import { ticketCheckoutStepOrder } from "./ticketCheckoutStepOrder.ts"
@@ -124,6 +126,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
       return
     }
 
+    ticketCartDraftSave(ticketCartEmpty(""))
     ticketContactDraftSave(null)
     ticketPaymentMethodDraftSave(null)
     setOrder(created.data)

@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/solid-router"
 import { Show } from "solid-js"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiButton } from "../ui/UiButton.tsx"
@@ -147,7 +148,7 @@ export function TicketCheckoutForm(props: {
                   <dd class="text-sm font-medium text-content">{state.selectedPaymentMethodOption().name}</dd>
                 </div>
                 <div class="flex items-baseline justify-between gap-space-4">
-                  <dt class="text-sm text-content-muted">Empfänger</dt>
+                  <dt class="text-sm text-content-muted">Ticketinhaber:in</dt>
                   <dd class="text-sm font-medium text-content">
                     {state.contact().firstName} {state.contact().lastName}
                   </dd>
@@ -184,6 +185,14 @@ export function TicketCheckoutForm(props: {
                 <p class="text-sm text-content-muted" aria-live="polite">
                   Deine Tickets sind sofort verfügbar. Du findest sie jederzeit unter „Meine Tickets“ – auch offline.
                 </p>
+                <div class="pt-space-2">
+                  <Link
+                    to="/meine-tickets"
+                    class="focus-ring inline-flex h-10 items-center justify-center rounded-control bg-brand px-space-5 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong"
+                  >
+                    Meine Tickets ansehen
+                  </Link>
+                </div>
               </section>
             </UiCard>
 
