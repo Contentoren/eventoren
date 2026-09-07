@@ -8,6 +8,7 @@ import { eventFindById } from "../events/eventFindById.ts"
 import { eventDetailHeadCreate } from "../seo/eventDetailHeadCreate.ts"
 import { TicketCartSummary } from "../ticketing/TicketCartSummary.tsx"
 import { TicketStickyCta } from "../ticketing/TicketStickyCta.tsx"
+import { TicketTierSelector } from "../ticketing/TicketTierSelector.tsx"
 import { ticketSelectionSearchParse } from "../ticketing/ticketSelectionSearchParse.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 
@@ -35,6 +36,11 @@ function EventDetailPage() {
 
           <div class="grid gap-space-7 lg:grid-cols-[minmax(0,1fr)_20rem]">
             <div class="flex flex-col gap-space-7">
+              <TicketTierSelector
+                event={state.event()}
+                cart={state.cart()}
+                onCartChange={(cart) => state.applyCart(cart)}
+              />
               <EventDetailInfo event={state.event()} />
             </div>
 
@@ -42,7 +48,6 @@ function EventDetailPage() {
               <TicketCartSummary
                 event={state.event()}
                 cart={state.cart()}
-                minimumQuantity={1}
                 checkoutLabel="In den Warenkorb"
                 onCartChange={(cart) => state.applyCart(cart)}
                 onCheckout={() => state.goToCart()}

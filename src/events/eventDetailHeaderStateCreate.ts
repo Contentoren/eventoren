@@ -15,9 +15,13 @@ export function eventDetailHeaderStateCreate(inputs: { event: () => EventItem })
   const scarcityLabel = createMemo(() => `Nur noch ${totalAvailable()} Tickets`)
 
   const dateFormatted = createMemo(() => eventDateFormatLong(inputs.event().startsAt))
-  const timeFormatted = createMemo(
-    () => `Beginn ${eventTimeFormat(inputs.event().startsAt)} · Einlass ${eventTimeFormat(inputs.event().doorsAt)}`,
-  )
+  const timeFormatted = createMemo(() => {
+    const event = inputs.event()
+    if (event.doorsAt) {
+      return `Einlass ${eventTimeFormat(event.doorsAt)} · Beginn ${eventTimeFormat(event.startsAt)}`
+    }
+    return `Beginn ${eventTimeFormat(event.startsAt)}`
+  })
   const locationFormatted = createMemo(() => `${inputs.event().venue}, ${inputs.event().city}`)
   const priceLabel = createMemo(() => `ab ${eventPriceFormat(eventPriceFrom(inputs.event()))}`)
   const ticketAvailabilityFormatted = createMemo(() => {
