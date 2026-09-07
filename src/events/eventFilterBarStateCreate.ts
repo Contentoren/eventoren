@@ -11,7 +11,7 @@ export function eventFilterBarStateCreate(inputs: {
   resultCount: () => number
 }) {
   const categoryOptions = createMemo(() => [
-    { value: "alle" as const, label: "Alle Genres" },
+    { value: "alle" as const, label: "Alle Kategorien" },
     ...(Object.keys(eventCategoryLabels) as EventCategory[]).map((value) => ({
       value,
       label: eventCategoryLabels[value],
