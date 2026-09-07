@@ -13,7 +13,7 @@ export function siteHeaderAuthDialogStateCreate() {
 
   const description = createMemo(() =>
     isRegister()
-      ? "Erstelle dein Eventoren-Konto und sammle Punkte auf jede Buchung."
+      ? "Erstelle dein Eventoren-Konto und sammle Punkte bei jeder Buchung."
       : "Melde dich an, um Buchungen, Wallet-Pässe und Rabatte zu verwalten.",
   )
 

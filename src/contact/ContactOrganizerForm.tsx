@@ -165,8 +165,8 @@ export function ContactOrganizerForm(props: {
                 class="focus-ring h-11 w-full rounded-control border border-border-strong bg-surface-muted px-space-4 text-sm font-medium text-content"
               >
                 <option value="Bis 250 Tickets">Bis 250 Tickets</option>
-                <option value="250 - 1.000 Tickets">250 - 1.000 Tickets</option>
-                <option value="1.000 - 5.000 Tickets">1.000 - 5.000 Tickets</option>
+                <option value="250–1.000 Tickets">250–1.000 Tickets</option>
+                <option value="1.000–5.000 Tickets">1.000–5.000 Tickets</option>
                 <option value="5.000+ Tickets (Großveranstaltung)">5.000+ Tickets (Großveranstaltung)</option>
               </select>
             </div>

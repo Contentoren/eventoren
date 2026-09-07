@@ -157,7 +157,7 @@ const mockScheduleById: Record<string, readonly EventScheduleItem[]> = {
     {
       marker: "14:45 Uhr",
       title: "Aufwärmphase & Vorprogramm",
-      detail: "Spielerbeider Teams auf dem Rasen, Mannschaftsaufstellungen und Vereinshymnen.",
+      detail: "Spieler beider Teams auf dem Rasen, Mannschaftsaufstellungen und Vereinshymnen.",
     },
     {
       marker: "15:30 Uhr",

@@ -2,13 +2,13 @@ import { type Accessor, batch, createEffect, createMemo, createSignal, onCleanup
 
 const tickerItems = [
   "Konzerte & Tourneen",
-  "Open-Air Festivals",
+  "Open-Air-Festivals",
   "Kultur & Theater",
   "Stadion- & Sportevents",
   "VIP & Backstage Access",
-  "Mobile Wallet Tickets",
+  "Mobile Wallet-Tickets",
   "Exklusive Presales",
-  "Aftershow Partys",
+  "Aftershow-Partys",
 ] as const
 
 const tickerSetCount = 5

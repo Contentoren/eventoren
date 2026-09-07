@@ -25,7 +25,7 @@ export function ContactFaqList(props: { expandedFaqId: () => string | null; onTo
       id: "faq-4",
       question: "Wo finden Besucher ihre gekauften Tickets?",
       answer:
-        "Gekaufte Tickets werden direkt per E-Mail versendet und sind dauerhaft auf unserer Unterseite Meine Tickets sowie als Apple & Google Wallet Pass offline auf dem Smartphone verfügbar.",
+        "Gekaufte Tickets werden direkt per E-Mail versendet und sind dauerhaft auf unserer Unterseite „Meine Tickets“ sowie als Apple- und Google-Wallet-Pass offline auf dem Smartphone verfügbar.",
     },
     {
       id: "faq-5",

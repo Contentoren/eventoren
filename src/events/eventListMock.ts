@@ -32,7 +32,7 @@ export const eventListMock: readonly EventItem[] = [
   },
   {
     id: "fusion-festival",
-    title: "Fusion Festival — Ferienkommunismus",
+    title: "Fusion Festival – Ferienkommunismus",
     subtitle: "Vier Tage Musik, Theater und Performance am Flugplatz Lärz",
     description:
       "Elektronische Musik, Zirkus und Theater auf dem ehemaligen Militärflugplatz. Tickets werden im Losverfahren vergeben, Restkontingente kommen tagesaktuell in den Verkauf.",
