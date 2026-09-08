@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js"
+import { classArr } from "../ui/classArr.ts"
 import type { TicketPaymentMethod } from "./TicketPaymentMethod.ts"
 import { TicketPaymentMethodIcon } from "./TicketPaymentMethodIcon.tsx"
 import type { TicketPaymentMethodOption } from "./TicketPaymentMethodOption.ts"
@@ -20,11 +21,12 @@ export function TicketPaymentMethodSelector(props: {
             return (
               <label
                 for={`payment-method-${option.id}`}
-                class={`group relative flex cursor-pointer items-start gap-space-3.5 rounded-2xl border p-space-4 transition-all duration-200 ease-out focus-within:focus-ring ${
+                class={classArr(
+                  "group relative flex cursor-pointer items-start gap-space-3.5 rounded-2xl border p-space-4 transition-all duration-200 ease-out focus-within:focus-ring",
                   isSelected()
                     ? "border-brand-accent bg-surface shadow-xs ring-2 ring-brand-accent/25 dark:bg-surface-muted/60"
-                    : "border-border-subtle/90 bg-surface hover:border-border-strong/70 hover:bg-surface-muted/40 dark:border-border-strong/30 dark:bg-surface-muted/20 dark:hover:bg-surface-muted/50"
-                }`}
+                    : "border-border-subtle/90 bg-surface hover:border-border-strong/70 hover:bg-surface-muted/40 dark:border-border-strong/30 dark:bg-surface-muted/20 dark:hover:bg-surface-muted/50",
+                )}
               >
                 <input
                   id={`payment-method-${option.id}`}
@@ -39,11 +41,12 @@ export function TicketPaymentMethodSelector(props: {
                 {/* Apple-style Custom Radio Indicator */}
                 <span
                   aria-hidden="true"
-                  class={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all duration-200 ${
+                  class={classArr(
+                    "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border transition-all duration-200",
                     isSelected()
                       ? "border-brand-accent bg-brand-accent text-brand-content shadow-xs"
-                      : "border-border-strong/50 bg-surface group-hover:border-border-strong"
-                  }`}
+                      : "border-border-strong/50 bg-surface group-hover:border-border-strong",
+                  )}
                 >
                   <Show when={isSelected()}>
                     <span class="h-2 w-2 rounded-full bg-white" />

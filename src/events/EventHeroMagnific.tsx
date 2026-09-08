@@ -1,4 +1,5 @@
 import { For } from "solid-js"
+import { classArr } from "../ui/classArr.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { eventHeroMagnificStateCreate } from "./eventHeroMagnificStateCreate.ts"
 import { eventHeroResultsAnchorId } from "./eventHeroResultsAnchorId.ts"
@@ -94,9 +95,10 @@ export function EventHeroMagnific(props: { eventCount?: number }) {
 
                         return (
                           <div
-                            class={`flex h-[60px] shrink-0 items-center text-3xl tracking-tight ${
-                              isActive() ? "font-bold text-white" : "font-normal text-white"
-                            }`}
+                            class={classArr(
+                              "flex h-[60px] shrink-0 items-center text-3xl tracking-tight",
+                              isActive() ? "font-bold text-white" : "font-normal text-white",
+                            )}
                             style={{
                               opacity: state.tickerItemOpacity(index()),
                               transition: state.isTransitionEnabled() ? "opacity 700ms ease-in-out" : "none",

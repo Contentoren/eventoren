@@ -5,6 +5,7 @@ import { seoHeadCreate } from "../seo/seoHeadCreate"
 import { myTicketsPageStateCreate } from "../ticketing/myTicketsPageStateCreate.ts"
 import { TicketOrderList } from "../ticketing/TicketOrderList.tsx"
 import { ticketWalletViewSearchParse } from "../ticketing/ticketWalletViewSearchParse.ts"
+import { classArr } from "../ui/classArr.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 
 export const Route = createFileRoute("/meine-tickets")({
@@ -33,11 +34,12 @@ function MyTicketsPage() {
                   type="button"
                   aria-pressed={state.view() === option.value}
                   onClick={() => state.selectView(option.value)}
-                  class={`focus-ring rounded-control px-space-4 py-space-2 text-sm font-medium transition-colors ${
+                  class={classArr(
+                    "focus-ring rounded-control px-space-4 py-space-2 text-sm font-medium transition-colors",
                     state.view() === option.value
                       ? "bg-brand text-brand-content"
-                      : "bg-surface-muted text-content-muted ring-1 ring-inset ring-border-strong hover:text-content hover:ring-brand-accent"
-                  }`}
+                      : "bg-surface-muted text-content-muted ring-1 ring-inset ring-border-strong hover:text-content hover:ring-brand-accent",
+                  )}
                 >
                   {option.label}
                 </button>

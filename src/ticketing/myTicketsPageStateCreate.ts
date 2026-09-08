@@ -1,5 +1,6 @@
 import { getRouteApi } from "@tanstack/solid-router"
 import { createMemo } from "solid-js"
+import { classArr } from "../ui/classArr.ts"
 import type { TicketWalletView } from "./TicketWalletView.ts"
 import { ticketWalletViewLabels } from "./ticketWalletViewLabels.ts"
 
@@ -19,9 +20,10 @@ export function myTicketsPageStateCreate() {
   )
 
   const listClass = createMemo(() =>
-    view() === "drucken"
-      ? "rounded-card border border-border-strong bg-surface p-space-6 text-content [&_*]:break-inside-avoid"
-      : "",
+    classArr(
+      view() === "drucken" &&
+        "rounded-card border border-border-strong bg-surface p-space-6 text-content [&_*]:break-inside-avoid",
+    ),
   )
 
   const hintLabel = createMemo(() =>

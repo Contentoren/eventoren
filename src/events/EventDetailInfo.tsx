@@ -1,4 +1,5 @@
 import { For, type JSX, Show } from "solid-js"
+import { classArr } from "../ui/classArr.ts"
 import type { EventItem } from "./EventItem.ts"
 import { eventDetailInfoStateCreate } from "./eventDetailInfoStateCreate.ts"
 
@@ -43,7 +44,10 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                           aria-hidden="true"
                         >
                           <svg
-                            class={`size-4 stroke-[2] transition-transform duration-200 ${state.isHighlightExpanded(item.tag) ? "rotate-180" : ""}`}
+                            class={classArr(
+                              "size-4 stroke-[2] transition-transform duration-200",
+                              state.isHighlightExpanded(item.tag) && "rotate-180",
+                            )}
                             viewBox="0 0 16 16"
                             fill="none"
                             stroke="currentColor"
@@ -123,7 +127,10 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                 aria-hidden="true"
               >
                 <svg
-                  class={`size-4 stroke-[2] transition-transform duration-200 ${state.isInclusionsExpanded() ? "rotate-180" : ""}`}
+                  class={classArr(
+                    "size-4 stroke-[2] transition-transform duration-200",
+                    state.isInclusionsExpanded() && "rotate-180",
+                  )}
                   viewBox="0 0 16 16"
                   fill="none"
                   stroke="currentColor"
@@ -189,7 +196,10 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                 aria-hidden="true"
               >
                 <svg
-                  class={`size-4 stroke-[2] transition-transform duration-200 ${state.isExclusionsExpanded() ? "rotate-180" : ""}`}
+                  class={classArr(
+                    "size-4 stroke-[2] transition-transform duration-200",
+                    state.isExclusionsExpanded() && "rotate-180",
+                  )}
                   viewBox="0 0 16 16"
                   fill="none"
                   stroke="currentColor"
@@ -255,7 +265,10 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                 aria-hidden="true"
               >
                 <svg
-                  class={`size-4 stroke-[2] transition-transform duration-200 ${state.isScheduleExpanded() ? "rotate-180" : ""}`}
+                  class={classArr(
+                    "size-4 stroke-[2] transition-transform duration-200",
+                    state.isScheduleExpanded() && "rotate-180",
+                  )}
                   viewBox="0 0 16 16"
                   fill="none"
                   stroke="currentColor"
@@ -329,7 +342,10 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                           aria-hidden="true"
                         >
                           <svg
-                            class={`size-4 stroke-[2] transition-transform duration-200 ${state.isFaqExpanded(faq.id) ? "rotate-180" : ""}`}
+                            class={classArr(
+                              "size-4 stroke-[2] transition-transform duration-200",
+                              state.isFaqExpanded(faq.id) && "rotate-180",
+                            )}
                             viewBox="0 0 16 16"
                             fill="none"
                             stroke="currentColor"

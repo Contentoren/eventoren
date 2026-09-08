@@ -1,4 +1,5 @@
 import { For } from "solid-js"
+import { classArr } from "../ui/classArr.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import type { EventFilter } from "./EventFilter.ts"
 import { eventHeroKnockoutStateCreate } from "./eventHeroKnockoutStateCreate.ts"
@@ -160,11 +161,12 @@ export function EventHeroKnockout(props: {
                 type="button"
                 aria-pressed={state.chipActiveId() === chip.id}
                 onClick={() => state.selectChip(chip.id)}
-                class={`focus-ring rounded-control px-space-5 py-space-2 text-sm font-semibold transition-colors ${
+                class={classArr(
+                  "focus-ring rounded-control px-space-5 py-space-2 text-sm font-semibold transition-colors",
                   state.chipActiveId() === chip.id
                     ? "border border-transparent bg-brand text-brand-content shadow-lg shadow-black/40"
-                    : "border border-border-strong bg-surface/90 text-content backdrop-blur hover:border-brand-accent hover:bg-surface hover:text-brand-accent"
-                }`}
+                    : "border border-border-strong bg-surface/90 text-content backdrop-blur hover:border-brand-accent hover:bg-surface hover:text-brand-accent",
+                )}
               >
                 {chip.label}
               </button>

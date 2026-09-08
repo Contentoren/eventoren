@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/solid-router"
 import { Show } from "solid-js"
+import { classArr } from "../ui/classArr.ts"
 import { UiBadge } from "../ui/UiBadge.tsx"
 import type { EventItem } from "./EventItem.ts"
 import { eventCardStateCreate } from "./eventCardStateCreate.ts"
@@ -61,11 +62,12 @@ export function EventCardTicket(props: { event: EventItem }) {
           <p class="text-base font-bold text-content">{state.priceLabel()}</p>
           <span
             data-testid="module-content-list-item-cta"
-            class={`inline-flex h-10 items-center justify-center rounded-control px-4 text-sm font-bold shadow-sm transition-colors ${
+            class={classArr(
+              "inline-flex h-10 items-center justify-center rounded-control px-4 text-sm font-bold shadow-sm transition-colors",
               props.event.soldOut
                 ? "border border-border-strong bg-surface-muted text-content-muted"
-                : "bg-brand text-brand-content group-hover:bg-brand-strong"
-            }`}
+                : "bg-brand text-brand-content group-hover:bg-brand-strong",
+            )}
           >
             {props.event.soldOut ? "Ausverkauft" : "Tickets kaufen"}
           </span>

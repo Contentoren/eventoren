@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
+import { classArr } from "../ui/classArr.ts"
 
 export function ContactFaqList(props: { expandedFaqId: () => string | null; onToggleFaq: (id: string) => void }) {
   const faqs = [
@@ -63,7 +64,10 @@ export function ContactFaqList(props: { expandedFaqId: () => string | null; onTo
                     aria-hidden="true"
                   >
                     <svg
-                      class={`size-4 stroke-[2] transition-transform duration-200 ${isExpanded() ? "rotate-180" : ""}`}
+                      class={classArr(
+                        "size-4 stroke-[2] transition-transform duration-200",
+                        isExpanded() && "rotate-180",
+                      )}
                       viewBox="0 0 16 16"
                       fill="none"
                       stroke="currentColor"

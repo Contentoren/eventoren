@@ -1,4 +1,5 @@
 import { Show } from "solid-js"
+import { classArr } from "../ui/classArr.ts"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
 import type { ContactInquiryType } from "./contactPageStateCreate.ts"
@@ -40,11 +41,12 @@ export function ContactOrganizerForm(props: {
             role="tab"
             aria-selected={props.inquiryType() === "veranstalter"}
             onClick={() => props.setInquiryType("veranstalter")}
-            class={`flex-1 rounded-lg py-2 text-center text-xs font-semibold transition-all sm:text-sm ${
+            class={classArr(
+              "flex-1 rounded-lg py-2 text-center text-xs font-semibold transition-all sm:text-sm",
               props.inquiryType() === "veranstalter"
                 ? "bg-surface text-content shadow-xs"
-                : "text-content-muted hover:text-content"
-            }`}
+                : "text-content-muted hover:text-content",
+            )}
           >
             Für Veranstalter
           </button>
@@ -53,11 +55,12 @@ export function ContactOrganizerForm(props: {
             role="tab"
             aria-selected={props.inquiryType() === "support"}
             onClick={() => props.setInquiryType("support")}
-            class={`flex-1 rounded-lg py-2 text-center text-xs font-semibold transition-all sm:text-sm ${
+            class={classArr(
+              "flex-1 rounded-lg py-2 text-center text-xs font-semibold transition-all sm:text-sm",
               props.inquiryType() === "support"
                 ? "bg-surface text-content shadow-xs"
-                : "text-content-muted hover:text-content"
-            }`}
+                : "text-content-muted hover:text-content",
+            )}
           >
             Besucher-Support
           </button>
@@ -120,7 +123,9 @@ export function ContactOrganizerForm(props: {
               </div>
             </div>
 
-            <div class={`grid gap-space-4 sm:grid-cols-2 ${props.inquiryType() === "veranstalter" ? "" : "hidden"}`}>
+            <div
+              class={classArr("grid gap-space-4 sm:grid-cols-2", props.inquiryType() !== "veranstalter" && "hidden")}
+            >
               <div>
                 <label for="contact-org" class="mb-space-1.5 block text-sm font-medium text-content">
                   Veranstalter / Unternehmen
@@ -154,7 +159,7 @@ export function ContactOrganizerForm(props: {
               </div>
             </div>
 
-            <div class={props.inquiryType() === "veranstalter" ? "" : "hidden"}>
+            <div class={classArr(props.inquiryType() !== "veranstalter" && "hidden")}>
               <label for="contact-capacity" class="mb-space-1.5 block text-sm font-medium text-content">
                 Erwartete Ticketanzahl pro Event
               </label>
