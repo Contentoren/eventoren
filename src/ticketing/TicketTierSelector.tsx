@@ -1,4 +1,4 @@
-import { For } from "solid-js"
+import { For, Show } from "solid-js"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiBadge } from "../ui/UiBadge.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
@@ -31,13 +31,14 @@ export function TicketTierSelector(props: {
                   <div class="flex flex-col gap-space-2">
                     <p class="text-base font-semibold text-content">{row.name}</p>
                     <p class="text-sm text-content-muted">{row.description}</p>
-                    <UiBadge tone={row.soldOut ? "danger" : "success"}>{row.availabilityLabel}</UiBadge>
+                    <Show when={row.soldOut}>
+                      <UiBadge tone="danger">Ausverkauft</UiBadge>
+                    </Show>
                   </div>
 
                   <div class="flex flex-col items-start gap-space-3 sm:items-end">
                     <div class="sm:text-right">
                       <p class="text-lg font-semibold text-content">{row.priceLabel}</p>
-                      <p class="text-sm text-content-muted">{row.feeLabel}</p>
                       <p class="text-sm text-content-muted">{row.totalLabel}</p>
                     </div>
 
@@ -63,7 +64,7 @@ export function TicketTierSelector(props: {
                         onClick={() => state.increaseTier(row.id)}
                         disabled={!row.canIncrease}
                         aria-label={`Ein Ticket mehr für ${row.name}`}
-                        class="focus-ring flex size-10 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-strong transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
+                        class="focus-ring flex size-10 items-center justify-center rounded-control bg-brand text-lg font-semibold text-brand-content transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         +
                       </button>
