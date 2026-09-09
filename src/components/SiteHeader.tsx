@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/solid-router"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { SiteHeaderAuthDialog } from "./SiteHeaderAuthDialog.tsx"
@@ -26,21 +25,6 @@ export function SiteHeader() {
               hasItems={state.cartHasItems()}
               class="max-md:px-space-2"
             />
-
-            <Link
-              to="/meine-tickets"
-              activeProps={{ class: "bg-surface-muted", "aria-current": "page" }}
-              class="focus-ring hidden h-10 items-center gap-space-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted md:inline-flex"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true" class="size-5" fill="none" stroke="currentColor">
-                <path
-                  d="M4 9V7a1 1 0 011-1h14a1 1 0 011 1v2a2.5 2.5 0 000 5v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-3a2.5 2.5 0 000-5z"
-                  stroke-width="1.6"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              Meine Tickets
-            </Link>
 
             <UiButton size="sm" class="ml-space-2 max-sm:hidden sm:inline-flex" onClick={() => state.openAuth()}>
               Anmelden

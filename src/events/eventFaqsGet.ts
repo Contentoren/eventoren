@@ -610,7 +610,7 @@ function eventFaqsFallback(event: EventItem): readonly EventFaqItem[] {
       id: "ticket-retrieval",
       question: "Wie erhalte ich mein Ticket nach dem Kauf?",
       answer:
-        "Nach erfolgreicher Buchung steht dein Ticket unmittelbar digital in deinem Eventoren-Konto unter 'Meine Tickets' bereit. Am Einlass genügt das Vorzeigen des QR-Codes auf deinem Smartphone.",
+        "Nach erfolgreicher Buchung steht dein Ticket unmittelbar digital bereit. Am Einlass genügt das Vorzeigen des QR-Codes auf deinem Smartphone.",
     },
     {
       id: "ticket-tiers",

@@ -36,14 +36,6 @@ export const seoPages = [
     noindex: true,
   },
   {
-    path: "/meine-tickets",
-    title: "Meine Tickets | Eventoren",
-    description: "Alle gekauften Tickets als Wallet-Pass mit QR-Code – jederzeit abrufbar, auch offline.",
-    changefreq: "monthly",
-    priority: 0.5,
-    jsonLdType: "WebPage",
-  },
-  {
     path: "/kontakt",
     title: "Kontakt | Eventoren",
     description: "Kontakt und Informationen zu Eventoren.",

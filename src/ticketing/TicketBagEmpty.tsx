@@ -32,12 +32,6 @@ export function TicketBagEmpty() {
         >
           Events entdecken
         </Link>
-        <Link
-          to="/meine-tickets"
-          class="focus-ring inline-flex h-12 items-center justify-center rounded-xl border border-border-strong bg-surface px-space-6 text-sm font-semibold text-content transition-colors hover:bg-surface-muted"
-        >
-          Meine Tickets ansehen
-        </Link>
       </div>
     </div>
   )

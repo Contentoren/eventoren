@@ -27,7 +27,7 @@ title: "[Platzhalter] Allgemeine Geschäftsbedingungen (AGB)"
 
 ## 4. Bereitstellung, Einlasskontrolle und Weitergabe
 
-1. Tickets werden nach erfolgreicher Bezahlung primär digital (z. B. als QR-Code, Wallet-Pass oder PDF-Download) im Bereich „Meine Tickets“ sowie per E-Mail bereitgestellt. Ein postalischer Versand findet standardmäßig nicht statt.
+1. Tickets werden nach erfolgreicher Bezahlung primär digital (z. B. als QR-Code, Wallet-Pass oder PDF-Download) sowie per E-Mail bereitgestellt. Ein postalischer Versand findet standardmäßig nicht statt.
 2. Jedes digitale Ticket ist mit einem eindeutigen Code / QR-Code versehen. Am Einlass der jeweiligen Veranstaltung berechtigt nur die erstmalige Vorlage des unbeschädigten und lesbaren QR-Codes zum Zutritt.
 3. Der Weiterverkauf von Tickets zu gewerblichen Zwecken oder zu überhöhten Preisen auf dem Zweitmarkt ist untersagt.
 4. Bei personalisierten Tickets ist am Einlass auf Verlangen ein amtlicher Lichtbildausweis vorzulegen, der mit dem Namen auf dem Ticket übereinstimmt.

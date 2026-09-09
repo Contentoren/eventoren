@@ -1,5 +1,5 @@
 export type SiteHeaderNavLink = {
-  to: "/" | "/meine-tickets" | "/kontakt"
+  to: "/" | "/kontakt"
   label: string
   exact: boolean
 }

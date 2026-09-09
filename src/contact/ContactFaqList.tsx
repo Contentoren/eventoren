@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
 import { classArr } from "../ui/classArr.ts"
 
@@ -26,7 +25,7 @@ export function ContactFaqList(props: { expandedFaqId: () => string | null; onTo
       id: "faq-4",
       question: "Wo finden Besucher ihre gekauften Tickets?",
       answer:
-        "Gekaufte Tickets werden direkt per E-Mail versendet und sind dauerhaft auf unserer Unterseite „Meine Tickets“ sowie als Apple- und Google-Wallet-Pass offline auf dem Smartphone verfügbar.",
+        "Gekaufte Tickets werden direkt per E-Mail versendet und sind als Apple- und Google-Wallet-Pass offline auf dem Smartphone verfügbar.",
     },
     {
       id: "faq-5",
@@ -82,13 +81,6 @@ export function ContactFaqList(props: { expandedFaqId: () => string | null; onTo
                 <Show when={isExpanded()}>
                   <div class="border-t border-border-subtle/50 px-space-4 py-space-4 text-sm leading-relaxed text-content-muted sm:px-space-5 dark:border-border-strong/20">
                     <p>{faq.answer}</p>
-                    <Show when={faq.id === "faq-4"}>
-                      <p class="mt-2">
-                        <Link to="/meine-tickets" class="font-semibold text-brand-accent underline underline-offset-2">
-                          Direkt zu Meine Tickets →
-                        </Link>
-                      </p>
-                    </Show>
                   </div>
                 </Show>
               </li>
