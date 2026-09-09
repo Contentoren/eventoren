@@ -22,6 +22,17 @@ export default defineConfig({
     allowedHosts,
   },
   plugins: [
+    {
+      name: "abiball-preview-rewrite",
+      configureServer(server) {
+        server.middlewares.use((req, _res, next) => {
+          if (req.url === "/abiball-2027" || req.url === "/abiball-2027/") {
+            req.url = "/abiball-2027.html"
+          }
+          next()
+        })
+      },
+    },
     tailwindcss(),
     tanstackStart({
       srcDirectory: "src",
