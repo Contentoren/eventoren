@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/solid-router"
 import { createMemo, createSignal, onMount } from "solid-js"
 import type { EventItem } from "../events/EventItem.ts"
 import type { TicketCart } from "./TicketCart.ts"
@@ -29,6 +30,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
   cart: () => TicketCart
   onOrderComplete?: (order: TicketOrder) => void
 }) {
+  const navigate = useNavigate()
   const [contact, setContact] = createSignal<TicketContact>(ticketContactEmpty())
   const [step, setStep] = createSignal<TicketCheckoutStep>("kontakt")
   const [errorMessage, setErrorMessage] = createSignal("")
@@ -134,6 +136,10 @@ export function ticketCheckoutFormStateCreate(inputs: {
     setStep("bestaetigung")
     setIsSubmitting(false)
     inputs.onOrderComplete?.(created.data)
+    navigate({
+      to: "/",
+      search: { buchung: "erfolgreich" },
+    })
   }
 
   return {

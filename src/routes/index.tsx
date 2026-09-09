@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/solid-router"
+import { Show } from "solid-js"
 import { SiteFrame } from "../components/SiteFrame"
+import { EventBookingThankYouBanner } from "../events/EventBookingThankYouBanner.tsx"
 import { EventFilterBar } from "../events/EventFilterBar.tsx"
 import { EventGrid } from "../events/EventGrid.tsx"
 import { EventHeroKnockout } from "../events/EventHeroKnockout.tsx"
@@ -25,6 +27,10 @@ function DiscoveryPage() {
   return (
     <SiteFrame>
       <main id="content" tabindex="-1">
+        <Show when={state.isBookingSuccess()}>
+          <EventBookingThankYouBanner onDismiss={() => state.dismissBookingSuccess()} />
+        </Show>
+
         <EventHeroKnockout
           description={heroDescription}
           eventCount={state.totalCount()}

@@ -183,14 +183,14 @@ export function TicketCheckoutForm(props: {
                   Buchung bestätigt
                 </h2>
                 <p class="text-sm text-content-muted" aria-live="polite">
-                  Deine Tickets sind sofort verfügbar. Du findest sie jederzeit unter „Meine Tickets“ – auch offline.
+                  Deine Tickets sind sofort verfügbar. Du findest deinen digitalen Pass direkt hier im Anschluss.
                 </p>
                 <div class="pt-space-2">
                   <Link
-                    to="/meine-tickets"
+                    to="/"
                     class="focus-ring inline-flex h-10 items-center justify-center rounded-control bg-brand px-space-5 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong"
                   >
-                    Meine Tickets ansehen
+                    Weitere Events entdecken
                   </Link>
                 </div>
               </section>

@@ -5,4 +5,5 @@ export type EventDiscoverySearch = {
   ort?: string
   kategorie?: EventFilter["category"]
   zeitraum?: EventFilter["timeWindow"]
+  buchung?: "erfolgreich"
 }

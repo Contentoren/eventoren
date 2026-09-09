@@ -20,6 +20,7 @@ export function indexPageStateCreate() {
   }))
 
   const visibleEvents = createMemo(() => eventFilterApply(allEvents(), filter()))
+  const isBookingSuccess = createMemo(() => search().buchung === "erfolgreich")
 
   const applyFilter = (next: EventFilter) => {
     navigate({
@@ -29,6 +30,22 @@ export function indexPageStateCreate() {
         ort: next.location.length > 0 ? next.location : undefined,
         kategorie: next.category === "alle" ? undefined : next.category,
         zeitraum: next.timeWindow === "alle" ? undefined : next.timeWindow,
+        buchung: search().buchung,
+      },
+      replace: true,
+      resetScroll: false,
+    })
+  }
+
+  const dismissBookingSuccess = () => {
+    navigate({
+      to: "/",
+      search: {
+        q: search().q,
+        ort: search().ort,
+        kategorie: search().kategorie,
+        zeitraum: search().zeitraum,
+        buchung: undefined,
       },
       replace: true,
       resetScroll: false,
@@ -40,6 +57,8 @@ export function indexPageStateCreate() {
     visibleEvents,
     totalCount: () => allEvents().length,
     resultCount: () => visibleEvents().length,
+    isBookingSuccess,
+    dismissBookingSuccess,
     applyFilter,
   }
 }
