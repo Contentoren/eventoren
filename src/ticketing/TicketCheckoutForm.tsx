@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/solid-router"
-import { Show } from "solid-js"
+import { For, Show } from "solid-js"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
@@ -12,14 +12,12 @@ import { TicketWalletPass } from "./TicketWalletPass.tsx"
 import { ticketCheckoutFormStateCreate } from "./ticketCheckoutFormStateCreate.ts"
 
 export function TicketCheckoutForm(props: {
-  event: EventItem
-  cart: TicketCart
-  onOrderComplete?: (order: TicketOrder) => void
+  items: readonly { readonly event: EventItem; readonly cart: TicketCart }[]
+  onOrderComplete?: (orders: readonly TicketOrder[]) => void
 }) {
   const state = ticketCheckoutFormStateCreate({
-    event: () => props.event,
-    cart: () => props.cart,
-    onOrderComplete: (order) => props.onOrderComplete?.(order),
+    items: () => props.items,
+    onOrderComplete: (orders) => props.onOrderComplete?.(orders),
   })
 
   return (
@@ -121,7 +119,9 @@ export function TicketCheckoutForm(props: {
             </form>
           </UiCard>
 
-          <TicketCartSummary event={props.event} cart={props.cart} />
+          <div class="flex flex-col gap-space-4">
+            <For each={props.items}>{(item) => <TicketCartSummary event={item.event} cart={item.cart} />}</For>
+          </div>
         </div>
       </Show>
 
@@ -170,12 +170,14 @@ export function TicketCheckoutForm(props: {
             </section>
           </UiCard>
 
-          <TicketCartSummary event={props.event} cart={props.cart} />
+          <div class="flex flex-col gap-space-4">
+            <For each={props.items}>{(item) => <TicketCartSummary event={item.event} cart={item.cart} />}</For>
+          </div>
         </div>
       </Show>
 
-      <Show when={state.order()}>
-        {(order) => (
+      <Show when={state.step() === "bestaetigung" && state.orders().length > 0}>
+        <>
           <div class="flex flex-col gap-space-6">
             <UiCard>
               <section aria-labelledby="checkout-done" class="flex flex-col gap-space-3">
@@ -196,9 +198,9 @@ export function TicketCheckoutForm(props: {
               </section>
             </UiCard>
 
-            <TicketWalletPass order={order()} />
+            <For each={state.orders()}>{(order) => <TicketWalletPass order={order} />}</For>
           </div>
-        )}
+        </>
       </Show>
     </div>
   )

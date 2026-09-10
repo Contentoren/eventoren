@@ -23,7 +23,7 @@ function CheckoutPage() {
           <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">Kasse</h1>
 
           <Show
-            when={state.event()}
+            when={state.hasItems()}
             fallback={
               <div class="flex flex-col items-start gap-space-4">
                 <p
@@ -33,15 +33,15 @@ function CheckoutPage() {
                   {state.errorMessage()}
                 </p>
                 <Link
-                  to="/"
+                  to={state.fallbackPath()}
                   class="focus-ring rounded-control text-sm font-semibold text-brand-accent underline underline-offset-4 hover:text-content"
                 >
-                  Zurück zur Event-Übersicht
+                  {state.fallbackPath() === "/warenkorb" ? "Zum Warenkorb" : "Zurück zur Event-Übersicht"}
                 </Link>
               </div>
             }
           >
-            {(event) => <TicketCheckoutForm event={event()} cart={state.cart()} />}
+            <TicketCheckoutForm items={state.items()} />
           </Show>
         </UiContainer>
       </main>

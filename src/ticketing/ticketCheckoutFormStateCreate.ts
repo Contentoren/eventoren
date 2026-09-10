@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/solid-router"
-import { createMemo, createSignal, onMount } from "solid-js"
+import { type Accessor, createMemo, createSignal, onMount, type Setter } from "solid-js"
 import type { EventItem } from "../events/EventItem.ts"
 import type { TicketCart } from "./TicketCart.ts"
 import type { TicketCheckoutStep } from "./TicketCheckoutStep.ts"
@@ -7,7 +7,6 @@ import type { TicketContact } from "./TicketContact.ts"
 import type { TicketOrder } from "./TicketOrder.ts"
 import type { TicketPaymentMethod } from "./TicketPaymentMethod.ts"
 import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
-import { ticketCartEmpty } from "./ticketCartEmpty.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
 import { ticketCheckoutStepLabels } from "./ticketCheckoutStepLabels.ts"
 import { ticketCheckoutStepOrder } from "./ticketCheckoutStepOrder.ts"
@@ -25,117 +24,156 @@ import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 import { ticketStorageAppend } from "./ticketStorageAppend.ts"
 import { ticketStorageIdleWrite } from "./ticketStorageIdleWrite.ts"
 
+type SignalObject<T> = {
+  get: Accessor<T>
+  set: Setter<T>
+}
+
+const createSignalObject = <T>(initialValue: T): SignalObject<T> => {
+  const [get, set] = createSignal(initialValue)
+  return { get, set }
+}
+
 export function ticketCheckoutFormStateCreate(inputs: {
-  event: () => EventItem
-  cart: () => TicketCart
-  onOrderComplete?: (order: TicketOrder) => void
+  items: () => readonly { readonly event: EventItem; readonly cart: TicketCart }[]
+  onOrderComplete?: (orders: readonly TicketOrder[]) => void
 }) {
   const navigate = useNavigate()
-  const [contact, setContact] = createSignal<TicketContact>(ticketContactEmpty())
-  const [step, setStep] = createSignal<TicketCheckoutStep>("kontakt")
-  const [errorMessage, setErrorMessage] = createSignal("")
-  const [order, setOrder] = createSignal<TicketOrder | null>(null)
-  const [isSubmitting, setIsSubmitting] = createSignal(false)
-  const [paymentMethod, setPaymentMethod] = createSignal<TicketPaymentMethod>(ticketPaymentMethodDefault)
+  const contact = createSignalObject<TicketContact>(ticketContactEmpty())
+  const step = createSignalObject<TicketCheckoutStep>("kontakt")
+  const errorMessage = createSignalObject("")
+  const orders = createSignalObject<readonly TicketOrder[]>([])
+  const isSubmitting = createSignalObject(false)
+  const paymentMethod = createSignalObject<TicketPaymentMethod>(ticketPaymentMethodDefault)
 
   const persistDraft = ticketStorageIdleWrite(() => {
-    if (order() !== null) return
-    ticketContactDraftSave(contact())
+    if (orders.get().length > 0) return
+    ticketContactDraftSave(contact.get())
   })
 
   const persistPaymentMethod = ticketStorageIdleWrite(() => {
-    if (order() !== null) return
-    ticketPaymentMethodDraftSave(paymentMethod())
+    if (orders.get().length > 0) return
+    ticketPaymentMethodDraftSave(paymentMethod.get())
   })
 
   onMount(() => {
     const draft = ticketContactDraftLoad()
-    if (draft.success) setContact(draft.data)
+    if (draft.success) contact.set(draft.data)
 
     const method = ticketPaymentMethodDraftLoad()
-    if (method.success) setPaymentMethod(method.data)
+    if (method.success) paymentMethod.set(method.data)
   })
 
   const stepLabels = createMemo(() => ticketCheckoutStepOrder.map((entry) => ticketCheckoutStepLabels[entry]))
-  const stepIndex = createMemo(() => ticketCheckoutStepOrder.indexOf(step()))
-  const total = createMemo(() => ticketCartTotalCalculate(inputs.cart(), inputs.event()))
+  const stepIndex = createMemo(() => ticketCheckoutStepOrder.indexOf(step.get()))
+  const total = createMemo(() => {
+    let quantity = 0
+    let subtotalCents = 0
+    let feeCents = 0
+
+    for (const item of inputs.items()) {
+      const itemTotal = ticketCartTotalCalculate(item.cart, item.event)
+      quantity += itemTotal.quantity
+      subtotalCents += itemTotal.subtotalCents
+      feeCents += itemTotal.feeCents
+    }
+
+    return { quantity, subtotalCents, feeCents, totalCents: subtotalCents + feeCents }
+  })
   const totalLabel = createMemo(() => ticketPriceFormat(total().totalCents))
-  const isCartEmpty = createMemo(() => total().quantity === 0)
+  const isCartEmpty = createMemo(() => total().quantity === 0 || inputs.items().length === 0)
 
   const paymentMethodOptions = createMemo(() => ticketPaymentMethodOptions)
 
-  const selectedPaymentMethodOption = createMemo(() => ticketPaymentMethodOptionOf(paymentMethod()))
+  const selectedPaymentMethodOption = createMemo(() => ticketPaymentMethodOptionOf(paymentMethod.get()))
 
   const confirmLabel = createMemo(() => {
-    if (paymentMethod() === "wallet") return "Mit Apple Pay / Google Pay zahlen"
-    if (paymentMethod() === "paypal") return "Mit PayPal bezahlen"
-    if (paymentMethod() === "klarna") return "Mit Klarna kostenpflichtig buchen"
+    if (paymentMethod.get() === "wallet") return "Mit Apple Pay / Google Pay zahlen"
+    if (paymentMethod.get() === "paypal") return "Mit PayPal bezahlen"
+    if (paymentMethod.get() === "klarna") return "Mit Klarna kostenpflichtig buchen"
     return "Jetzt kostenpflichtig buchen"
   })
 
   const paymentMethodSelect = (method: TicketPaymentMethod) => {
-    setPaymentMethod(method)
-    setErrorMessage("")
+    paymentMethod.set(method)
+    errorMessage.set("")
     persistPaymentMethod()
   }
 
   const contactFieldChange = (field: keyof TicketContact, value: string) => {
-    setContact({ ...contact(), [field]: value })
-    setErrorMessage("")
+    contact.set({ ...contact.get(), [field]: value })
+    errorMessage.set("")
     persistDraft()
   }
 
   const goToPayment = () => {
     if (isCartEmpty()) {
-      setErrorMessage("Bitte wähle zuerst mindestens ein Ticket aus.")
+      errorMessage.set("Bitte wähle zuerst mindestens ein Ticket aus.")
       return
     }
-    const validated = ticketContactValidate(contact())
+    const validated = ticketContactValidate(contact.get())
     if (!validated.success) {
-      setErrorMessage(validated.errorMessage)
+      errorMessage.set(validated.errorMessage)
       return
     }
-    setContact(validated.data)
-    setErrorMessage("")
-    setStep("zahlung")
+    contact.set(validated.data)
+    errorMessage.set("")
+    step.set("zahlung")
   }
 
   const goToContact = () => {
-    setErrorMessage("")
-    setStep("kontakt")
+    errorMessage.set("")
+    step.set("kontakt")
   }
 
   const confirmPayment = () => {
-    if (isSubmitting()) return
-    setIsSubmitting(true)
-
-    const created = ticketOrderCreate({
-      event: inputs.event(),
-      cart: inputs.cart(),
-      contact: contact(),
-      paymentMethod: paymentMethod(),
-    })
-    if (!created.success) {
-      setErrorMessage(created.errorMessage)
-      setIsSubmitting(false)
+    if (isSubmitting.get()) return
+    if (isCartEmpty()) {
+      errorMessage.set("Bitte wähle zuerst mindestens ein Ticket aus.")
       return
     }
 
-    const stored = ticketStorageAppend(created.data)
-    if (!stored.success) {
-      setErrorMessage(stored.errorMessage)
-      setIsSubmitting(false)
+    const validated = ticketContactValidate(contact.get())
+    if (!validated.success) {
+      errorMessage.set(validated.errorMessage)
       return
     }
 
-    ticketCartDraftSave(ticketCartEmpty(""))
+    contact.set(validated.data)
+    isSubmitting.set(true)
+    const createdOrders: TicketOrder[] = []
+    for (const item of inputs.items()) {
+      const created = ticketOrderCreate({
+        event: item.event,
+        cart: item.cart,
+        contact: contact.get(),
+        paymentMethod: paymentMethod.get(),
+      })
+      if (!created.success) {
+        errorMessage.set(created.errorMessage)
+        isSubmitting.set(false)
+        return
+      }
+      createdOrders.push(created.data)
+    }
+
+    for (const order of createdOrders) {
+      const stored = ticketStorageAppend(order)
+      if (!stored.success) {
+        errorMessage.set(stored.errorMessage)
+        isSubmitting.set(false)
+        return
+      }
+    }
+
+    ticketCartDraftSave([])
     ticketContactDraftSave(null)
     ticketPaymentMethodDraftSave(null)
-    setOrder(created.data)
-    setErrorMessage("")
-    setStep("bestaetigung")
-    setIsSubmitting(false)
-    inputs.onOrderComplete?.(created.data)
+    orders.set(createdOrders)
+    errorMessage.set("")
+    step.set("bestaetigung")
+    isSubmitting.set(false)
+    inputs.onOrderComplete?.(createdOrders)
     navigate({
       to: "/",
       search: { buchung: "erfolgreich" },
@@ -143,16 +181,16 @@ export function ticketCheckoutFormStateCreate(inputs: {
   }
 
   return {
-    contact,
-    step,
+    contact: contact.get,
+    step: step.get,
     stepIndex,
     stepLabels,
-    errorMessage,
-    order,
-    isSubmitting,
+    errorMessage: errorMessage.get,
+    orders: orders.get,
+    isSubmitting: isSubmitting.get,
     isCartEmpty,
     totalLabel,
-    paymentMethod,
+    paymentMethod: paymentMethod.get,
     paymentMethodOptions,
     selectedPaymentMethodOption,
     paymentMethodSelect,
