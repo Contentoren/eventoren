@@ -1,16 +1,15 @@
 import { createMemo, createSignal, onCleanup, onMount } from "solid-js"
-import type { TicketCart } from "../ticketing/TicketCart.ts"
+import type { TicketCartDraft } from "../ticketing/TicketCartDraft.ts"
 import { ticketCartDraftEventName } from "../ticketing/ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "../ticketing/ticketCartDraftLoad.ts"
-import { ticketCartEmpty } from "../ticketing/ticketCartEmpty.ts"
-import { ticketCartQuantityTotal } from "../ticketing/ticketCartQuantityTotal.ts"
+import { ticketCartDraftTotalQuantity } from "../ticketing/ticketCartDraftTotalQuantity.ts"
 import type { SiteHeaderOverlay } from "./SiteHeaderOverlay.ts"
 import { siteHeaderNavLinks } from "./siteHeaderNavLinks.ts"
 
 export function siteHeaderStateCreate() {
   const [overlay, setOverlay] = createSignal<SiteHeaderOverlay>("none")
   const [menuOpen, setMenuOpen] = createSignal(false)
-  const [cart, setCart] = createSignal<TicketCart>(ticketCartEmpty(""))
+  const [cart, setCart] = createSignal<TicketCartDraft>([])
 
   const syncCart = () => {
     setCart(ticketCartDraftLoad())
@@ -30,7 +29,7 @@ export function siteHeaderStateCreate() {
     })
   })
 
-  const cartQuantity = createMemo(() => ticketCartQuantityTotal(cart()))
+  const cartQuantity = createMemo(() => ticketCartDraftTotalQuantity(cart()))
 
   const cartLabel = createMemo(() => {
     const quantity = cartQuantity()
@@ -47,9 +46,6 @@ export function siteHeaderStateCreate() {
     setMenuOpen(false)
   }
 
-  const toggleOverlay = (next: SiteHeaderOverlay) => setOverlay((current) => (current === next ? "none" : next))
-
-  const openAuth = () => setOverlay("auth")
   const openMenu = () => {
     setOverlay("none")
     setMenuOpen(true)
@@ -60,10 +56,8 @@ export function siteHeaderStateCreate() {
     cartQuantity,
     cartLabel,
     cartHasItems,
-    isAuthOpen: () => overlay() === "auth",
     isMenuOpen: menuOpen,
     closeOverlay,
-    openAuth,
     openMenu,
   }
 }

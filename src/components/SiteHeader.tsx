@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/solid-router"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { SiteHeaderAuthDialog } from "./SiteHeaderAuthDialog.tsx"
@@ -8,6 +9,7 @@ import { SiteHeaderSkipLink } from "./SiteHeaderSkipLink.tsx"
 import { siteHeaderStateCreate } from "./siteHeaderStateCreate.ts"
 
 export function SiteHeader() {
+  const navigate = useNavigate()
   const state = siteHeaderStateCreate()
 
   return (
@@ -26,8 +28,13 @@ export function SiteHeader() {
               class="max-md:px-space-2"
             />
 
-            <UiButton size="sm" class="ml-space-2 max-sm:hidden sm:inline-flex" onClick={() => state.openAuth()}>
-              Anmelden
+            <UiButton
+              size="sm"
+              class="ml-space-2 max-sm:hidden sm:inline-flex"
+              disabled={!state.cartHasItems()}
+              onClick={() => navigate({ to: "/checkout" })}
+            >
+              Zur Kasse
             </UiButton>
 
             <button
