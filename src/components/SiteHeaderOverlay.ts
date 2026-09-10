@@ -1,1 +1,1 @@
-export type SiteHeaderOverlay = "none" | "cart" | "auth" | "menu"
+export type SiteHeaderOverlay = "none" | "cart" | "menu"

@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/solid-router"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
-import { SiteHeaderAuthDialog } from "./SiteHeaderAuthDialog.tsx"
 import { SiteHeaderCartButton } from "./SiteHeaderCartButton.tsx"
 import { SiteHeaderLogo } from "./SiteHeaderLogo.tsx"
 import { SiteHeaderMobileMenu } from "./SiteHeaderMobileMenu.tsx"
@@ -53,14 +52,7 @@ export function SiteHeader() {
         </div>
       </UiContainer>
 
-      <SiteHeaderAuthDialog open={state.isAuthOpen()} onClose={() => state.closeOverlay()} />
-
-      <SiteHeaderMobileMenu
-        open={state.isMenuOpen()}
-        links={state.navLinks()}
-        onClose={() => state.closeOverlay()}
-        onOpenAuth={() => state.openAuth()}
-      />
+      <SiteHeaderMobileMenu open={state.isMenuOpen()} links={state.navLinks()} onClose={() => state.closeOverlay()} />
     </header>
   )
 }
