@@ -2,24 +2,21 @@ import { useNavigate } from "@tanstack/solid-router"
 import { createMemo, createSignal, onCleanup, onMount } from "solid-js"
 import { eventDateFormat } from "../events/eventDateFormat.ts"
 import { eventFindById } from "../events/eventFindById.ts"
-import type { EventItem } from "../events/EventItem.ts"
 import { eventTimeFormat } from "../events/eventTimeFormat.ts"
+import type { TicketBagGroup } from "./TicketBagGroup.ts"
 import type { TicketBagItem } from "./TicketBagItem.ts"
-import type { TicketCart } from "./TicketCart.ts"
+import type { TicketCartDraft } from "./TicketCartDraft.ts"
 import { ticketCartDraftEventName } from "./ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "./ticketCartDraftLoad.ts"
+import { ticketCartDraftQuantitySet } from "./ticketCartDraftQuantitySet.ts"
 import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
-import { ticketCartEmpty } from "./ticketCartEmpty.ts"
-import { ticketCartQuantitySet } from "./ticketCartQuantitySet.ts"
-import { ticketCartQuantityTotal } from "./ticketCartQuantityTotal.ts"
-import { ticketCartSearchFormat } from "./ticketCartSearchFormat.ts"
-import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
+import { ticketCartDraftTotalQuantity } from "./ticketCartDraftTotalQuantity.ts"
 import { ticketMaxPerOrder } from "./ticketMaxPerOrder.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 
 export function ticketBagPageStateCreate() {
   const navigate = useNavigate()
-  const [cart, setCart] = createSignal<TicketCart>(ticketCartEmpty(""))
+  const [cart, setCart] = createSignal<TicketCartDraft>(ticketCartDraftLoad())
 
   const syncCart = () => {
     setCart(ticketCartDraftLoad())
@@ -39,42 +36,43 @@ export function ticketBagPageStateCreate() {
     })
   })
 
-  const eventResult = createMemo(() => {
-    const current = cart()
-    if (!current.eventId) return null
-    return eventFindById(current.eventId)
-  })
+  const groups = createMemo<readonly TicketBagGroup[]>(() => {
+    const result: TicketBagGroup[] = []
 
-  const event = createMemo<EventItem | null>(() => {
-    const result = eventResult()
-    if (!result || !result.success) return null
-    return result.data
-  })
+    for (const currentCart of cart()) {
+      const eventResult = eventFindById(currentCart.eventId)
+      if (!eventResult.success) continue
 
-  const totalQuantity = createMemo(() => ticketCartQuantityTotal(cart()))
+      const currentEvent = eventResult.data
+      const items: TicketBagItem[] = []
 
-  const items = createMemo<TicketBagItem[]>(() => {
-    const currentEvent = event()
-    if (!currentEvent) return []
+      for (const tier of currentEvent.tiers) {
+        const line = currentCart.lines.find((candidate) => candidate.tierId === tier.id)
+        if (!line || line.quantity <= 0) continue
 
-    const result: TicketBagItem[] = []
-    for (const line of cart().lines) {
-      const tier = currentEvent.tiers.find((t) => t.id === line.tierId)
-      if (!tier || line.quantity <= 0) continue
+        const unitPriceCents = tier.priceCents + tier.feeCents
+        const totalPriceCents = unitPriceCents * line.quantity
 
-      const unitPriceCents = tier.priceCents + tier.feeCents
-      const totalPriceCents = unitPriceCents * line.quantity
+        items.push({
+          tierId: tier.id,
+          tierName: tier.name,
+          tierDescription: tier.description,
+          quantity: line.quantity,
+          unitPriceCents,
+          unitPriceLabel: ticketPriceFormat(unitPriceCents),
+          totalPriceCents,
+          totalPriceLabel: ticketPriceFormat(totalPriceCents),
+          maxQuantity: Math.min(tier.available, ticketMaxPerOrder),
+        })
+      }
+
+      if (items.length === 0) continue
 
       result.push({
-        tierId: tier.id,
-        tierName: tier.name,
-        tierDescription: tier.description,
-        quantity: line.quantity,
-        unitPriceCents,
-        unitPriceLabel: ticketPriceFormat(unitPriceCents),
-        totalPriceCents,
-        totalPriceLabel: ticketPriceFormat(totalPriceCents),
-        maxQuantity: Math.min(tier.available, ticketMaxPerOrder),
+        event: currentEvent,
+        eventDateLabel: `${eventDateFormat(currentEvent.startsAt)} · ${eventTimeFormat(currentEvent.startsAt)}`,
+        eventLocationLabel: `${currentEvent.venue}, ${currentEvent.city}`,
+        items,
       })
     }
 
@@ -82,77 +80,59 @@ export function ticketBagPageStateCreate() {
   })
 
   const totals = createMemo(() => {
-    const currentEvent = event()
-    if (!currentEvent) {
-      return {
-        quantity: 0,
-        subtotalCents: 0,
-        feeCents: 0,
-        totalCents: 0,
-        subtotalLabel: ticketPriceFormat(0),
-        feeLabel: ticketPriceFormat(0),
-        totalLabel: ticketPriceFormat(0),
+    let quantity = 0
+    let subtotalCents = 0
+    let feeCents = 0
+
+    for (const group of groups()) {
+      for (const item of group.items) {
+        const tier = group.event.tiers.find((candidate) => candidate.id === item.tierId)
+        if (!tier) continue
+
+        quantity += item.quantity
+        subtotalCents += tier.priceCents * item.quantity
+        feeCents += tier.feeCents * item.quantity
       }
     }
 
-    const calculated = ticketCartTotalCalculate(cart(), currentEvent)
+    const totalCents = subtotalCents + feeCents
     return {
-      ...calculated,
-      subtotalLabel: ticketPriceFormat(calculated.subtotalCents),
-      feeLabel: ticketPriceFormat(calculated.feeCents),
-      totalLabel: ticketPriceFormat(calculated.totalCents),
+      quantity,
+      subtotalCents,
+      feeCents,
+      totalCents,
+      subtotalLabel: ticketPriceFormat(subtotalCents),
+      feeLabel: ticketPriceFormat(feeCents),
+      totalLabel: ticketPriceFormat(totalCents),
     }
   })
 
-  const isEmpty = createMemo(() => items().length === 0 || totalQuantity() === 0)
+  const totalQuantity = createMemo(() => ticketCartDraftTotalQuantity(cart()))
 
-  const eventDateLabel = createMemo(() => {
-    const currentEvent = event()
-    if (!currentEvent) return ""
-    return `${eventDateFormat(currentEvent.startsAt)} · ${eventTimeFormat(currentEvent.startsAt)}`
-  })
+  const isEmpty = createMemo(() => groups().length === 0 || totalQuantity() === 0)
 
-  const eventLocationLabel = createMemo(() => {
-    const currentEvent = event()
-    if (!currentEvent) return ""
-    return `${currentEvent.venue}, ${currentEvent.city}`
-  })
-
-  const updateQuantity = (tierId: string, quantity: number) => {
-    const updated = ticketCartQuantitySet(cart(), tierId, quantity)
+  const updateQuantity = (eventId: string, tierId: string, quantity: number) => {
+    const updated = ticketCartDraftQuantitySet(cart(), eventId, tierId, quantity)
     setCart(updated)
     ticketCartDraftSave(updated)
   }
 
-  const removeItem = (tierId: string) => {
-    updateQuantity(tierId, 0)
+  const removeItem = (eventId: string, tierId: string) => {
+    updateQuantity(eventId, tierId, 0)
   }
 
   const clearBag = () => {
-    const empty = ticketCartEmpty("")
-    setCart(empty)
-    ticketCartDraftSave(empty)
+    setCart([])
+    ticketCartDraftSave([])
   }
 
   const checkout = () => {
-    const currentEvent = event()
-    if (!currentEvent || isEmpty()) return
-
-    navigate({
-      to: "/checkout",
-      search: {
-        event: currentEvent.id,
-        tickets: ticketCartSearchFormat(cart()),
-      },
-    })
+    if (isEmpty()) return
+    navigate({ to: "/checkout" })
   }
 
   return {
-    cart,
-    event,
-    eventDateLabel,
-    eventLocationLabel,
-    items,
+    groups,
     totals,
     totalQuantity,
     isEmpty,
