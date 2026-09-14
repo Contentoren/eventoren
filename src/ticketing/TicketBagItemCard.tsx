@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import type { EventItem } from "../events/EventItem.ts"
+import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import type { TicketBagItem } from "./TicketBagItem.ts"
 
 export function TicketBagItemCard(props: {
@@ -29,7 +31,7 @@ export function TicketBagItemCard(props: {
           class="focus-ring relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl border border-border-subtle/60 sm:aspect-square sm:w-28 md:w-32"
         >
           <img
-            src={props.event.imageUrl}
+            src={eventImageUrlGet(props.event.imageUrl)}
             alt={props.event.imageAlt}
             loading="lazy"
             class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -111,13 +113,15 @@ export function TicketBagItemCard(props: {
               </select>
             </div>
 
-            <button
+            <Button
+              variant="none"
+              size="none"
               type="button"
               onClick={() => props.onRemove()}
               class="focus-ring rounded text-sm font-medium text-brand-accent transition-colors hover:underline hover:text-content"
             >
               Entfernen
-            </button>
+            </Button>
           </div>
         </div>
 

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/solid-router"
-import { LegalMarkdownPage } from "../components/LegalMarkdownPage"
-import { legalDocumentLoad } from "../legal/actions/legalDocumentLoad"
+import { LegalMarkdownPage } from "../components/LegalMarkdownPage.tsx"
+import { legalDocumentLoad } from "../legal/actions/legalDocumentLoad.ts"
 import markdownCss from "../markdown.css?url"
-import { seoHeadCreate } from "../seo/seoHeadCreate"
+import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 
 export const Route = createFileRoute("/agb")({
   head: () => {

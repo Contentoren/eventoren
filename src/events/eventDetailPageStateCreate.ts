@@ -10,13 +10,12 @@ import type { EventItem } from "./EventItem.ts"
 
 const routeApi = getRouteApi("/events/$eventId")
 
-export function eventDetailPageStateCreate() {
+export function eventDetailPageStateCreate(inputs: { event: () => EventItem }) {
   const search = routeApi.useSearch()
   const params = routeApi.useParams()
-  const loaderData = routeApi.useLoaderData()
   const navigate = routeApi.useNavigate()
 
-  const event = createMemo<EventItem>(() => loaderData())
+  const event = createMemo(() => inputs.event())
   const cart = createMemo(() => ticketCartSearchParse(params().eventId, search().tickets ?? ""))
 
   let initializedEventId = ""

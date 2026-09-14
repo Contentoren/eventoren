@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiButton } from "../ui/UiButton.tsx"
@@ -6,18 +5,13 @@ import { UiCard } from "../ui/UiCard.tsx"
 import { UiStepper } from "../ui/UiStepper.tsx"
 import type { TicketCart } from "./TicketCart.ts"
 import { TicketCartSummary } from "./TicketCartSummary.tsx"
-import type { TicketOrder } from "./TicketOrder.ts"
-import { TicketPaymentMethodSelector } from "./TicketPaymentMethodSelector.tsx"
-import { TicketWalletPass } from "./TicketWalletPass.tsx"
 import { ticketCheckoutFormStateCreate } from "./ticketCheckoutFormStateCreate.ts"
 
 export function TicketCheckoutForm(props: {
   items: readonly { readonly event: EventItem; readonly cart: TicketCart }[]
-  onOrderComplete?: (orders: readonly TicketOrder[]) => void
 }) {
   const state = ticketCheckoutFormStateCreate({
     items: () => props.items,
-    onOrderComplete: (orders) => props.onOrderComplete?.(orders),
   })
 
   return (
@@ -133,20 +127,11 @@ export function TicketCheckoutForm(props: {
                 Zahlung
               </h2>
               <p class="text-sm text-content-muted">
-                Demo-Zahlung: Es werden keine echten Zahlungsdaten erhoben oder abgebucht.
+                Du wirst für die sichere Zahlung zum Zahlungsanbieter weitergeleitet. Der verbindliche Zahlungsstatus
+                kommt anschließend vom Server zurück.
               </p>
 
-              <TicketPaymentMethodSelector
-                options={state.paymentMethodOptions()}
-                selected={state.paymentMethod()}
-                onSelect={(method) => state.paymentMethodSelect(method)}
-              />
-
               <dl class="flex flex-col gap-space-3 border-t border-border-subtle pt-space-4">
-                <div class="flex items-baseline justify-between gap-space-4">
-                  <dt class="text-sm text-content-muted">Zahlungsart</dt>
-                  <dd class="text-sm font-medium text-content">{state.selectedPaymentMethodOption().name}</dd>
-                </div>
                 <div class="flex items-baseline justify-between gap-space-4">
                   <dt class="text-sm text-content-muted">Ticketinhaber:in</dt>
                   <dd class="text-sm font-medium text-content">
@@ -159,12 +144,37 @@ export function TicketCheckoutForm(props: {
                 </div>
               </dl>
 
+              <label class="flex items-start gap-space-3 text-sm text-content-muted">
+                <input
+                  type="checkbox"
+                  checked={state.legalAccepted()}
+                  onChange={(event) => state.legalAcceptanceChange(event.currentTarget.checked)}
+                  class="mt-1 size-4 accent-brand"
+                />
+                <span>
+                  Ich akzeptiere die{" "}
+                  <a href="/agb" class="underline underline-offset-4">
+                    AGB
+                  </a>{" "}
+                  und habe die
+                  <a href="/datenschutz" class="ml-1 underline underline-offset-4">
+                    Datenschutzhinweise
+                  </a>{" "}
+                  gelesen.
+                </span>
+              </label>
+
               <div class="flex flex-col gap-space-3 sm:flex-row">
                 <UiButton variant="secondary" size="lg" onClick={() => state.goToContact()}>
                   Zurück
                 </UiButton>
-                <UiButton size="lg" block disabled={state.isSubmitting()} onClick={() => state.confirmPayment()}>
-                  {state.confirmLabel()}
+                <UiButton
+                  size="lg"
+                  block
+                  disabled={state.isSubmitting() || !state.legalAccepted()}
+                  onClick={() => state.confirmPayment()}
+                >
+                  {state.isSubmitting() ? "Checkout wird erstellt …" : "Weiter zur sicheren Zahlung"}
                 </UiButton>
               </div>
             </section>
@@ -174,33 +184,6 @@ export function TicketCheckoutForm(props: {
             <For each={props.items}>{(item) => <TicketCartSummary event={item.event} cart={item.cart} />}</For>
           </div>
         </div>
-      </Show>
-
-      <Show when={state.step() === "bestaetigung" && state.orders().length > 0}>
-        <>
-          <div class="flex flex-col gap-space-6">
-            <UiCard>
-              <section aria-labelledby="checkout-done" class="flex flex-col gap-space-3">
-                <h2 id="checkout-done" class="text-lg font-semibold text-content">
-                  Buchung bestätigt
-                </h2>
-                <p class="text-sm text-content-muted" aria-live="polite">
-                  Deine Tickets sind sofort verfügbar. Du findest deinen digitalen Pass direkt hier im Anschluss.
-                </p>
-                <div class="pt-space-2">
-                  <Link
-                    to="/"
-                    class="focus-ring inline-flex h-10 items-center justify-center rounded-control bg-brand px-space-5 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong"
-                  >
-                    Weitere Events entdecken
-                  </Link>
-                </div>
-              </section>
-            </UiCard>
-
-            <For each={state.orders()}>{(order) => <TicketWalletPass order={order} />}</For>
-          </div>
-        </>
       </Show>
     </div>
   )

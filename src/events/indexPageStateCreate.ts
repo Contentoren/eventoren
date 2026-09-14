@@ -2,15 +2,17 @@ import { getRouteApi } from "@tanstack/solid-router"
 import { createMemo } from "solid-js"
 import type { EventFilter } from "./EventFilter.ts"
 import { eventFilterApply } from "./eventFilterApply.ts"
-import { eventListAll } from "./eventListAll.ts"
+import type { EventItem } from "./EventItem.ts"
 
 const routeApi = getRouteApi("/")
 
-export function indexPageStateCreate() {
+export function indexPageStateCreate(inputs: { events: () => readonly EventItem[] }) {
   const search = routeApi.useSearch()
   const navigate = routeApi.useNavigate()
 
-  const allEvents = createMemo(() => eventListAll())
+  const allEvents = createMemo(() =>
+    [...inputs.events()].sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt)),
+  )
 
   const filter = createMemo<EventFilter>(() => ({
     query: search().q ?? "",

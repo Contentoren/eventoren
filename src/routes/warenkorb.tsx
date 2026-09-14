@@ -1,16 +1,21 @@
 import { createFileRoute } from "@tanstack/solid-router"
+import { createServerFn } from "@tanstack/solid-start"
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
-import { SiteFrame } from "../components/SiteFrame"
-import { seoHeadCreate } from "../seo/seoHeadCreate"
+import { SiteFrame } from "../components/SiteFrame.tsx"
+import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 import { TicketBagEmpty } from "../ticketing/TicketBagEmpty.tsx"
 import { TicketBagItemCard } from "../ticketing/TicketBagItemCard.tsx"
 import { ticketBagPageStateCreate } from "../ticketing/ticketBagPageStateCreate.ts"
 import { TicketBagSummary } from "../ticketing/TicketBagSummary.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
+import { catalogEventsPublicGet } from "../server/catalogEventsPublicGet.js"
+
+const getCatalogEvents = createServerFn({ method: "GET" }).handler(catalogEventsPublicGet)
 
 export const Route = createFileRoute("/warenkorb")({
   head: () => seoHeadCreate("/warenkorb"),
+  loader: () => getCatalogEvents(),
   component: BagPage,
 })
 
@@ -21,6 +26,14 @@ function BagPage() {
     <SiteFrame>
       <main id="content" tabindex="-1">
         <UiContainer width="wide" class="flex flex-col gap-space-7 py-space-7 sm:py-12">
+          <Show when={state.catalogError()}>
+            <p
+              role="alert"
+              class="rounded-control border border-danger/50 bg-danger-soft px-space-4 py-space-3 text-sm text-danger"
+            >
+              {state.catalogError()}
+            </p>
+          </Show>
           {/* Apple-style Headline Banner */}
           <Show
             when={!state.isEmpty()}

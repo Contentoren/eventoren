@@ -1,4 +1,5 @@
 import { For, Match, Show, Switch } from "solid-js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
@@ -53,7 +54,9 @@ export function TicketCartSummary(props: {
                       <span>{row.priceLabel}</span>
                       <Show when={state.canChangeCart()}>
                         <div class="flex items-center gap-space-2">
-                          <button
+                          <Button
+                            variant="none"
+                            size="none"
                             type="button"
                             onClick={() => state.decreaseTier(row.id)}
                             disabled={!row.canDecrease}
@@ -61,7 +64,7 @@ export function TicketCartSummary(props: {
                             class="focus-ring flex size-9 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-strong transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             −
-                          </button>
+                          </Button>
                           <output
                             aria-live="polite"
                             aria-label={`${row.quantity} Tickets für ${row.name}`}
@@ -69,7 +72,9 @@ export function TicketCartSummary(props: {
                           >
                             {row.quantity}
                           </output>
-                          <button
+                          <Button
+                            variant="none"
+                            size="none"
                             type="button"
                             onClick={() => state.increaseTier(row.id)}
                             disabled={!row.canIncrease}
@@ -77,7 +82,7 @@ export function TicketCartSummary(props: {
                             class="focus-ring flex size-9 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-strong transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             +
-                          </button>
+                          </Button>
                         </div>
                       </Show>
                     </dd>

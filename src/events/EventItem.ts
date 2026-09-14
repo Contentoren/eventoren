@@ -3,6 +3,7 @@ import type { EventTicketTier } from "./EventTicketTier.ts"
 
 export type EventItem = {
   id: string
+  catalogVersion: number
   title: string
   subtitle: string
   description: string

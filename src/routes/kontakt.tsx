@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/solid-router"
-import { SiteFrame } from "../components/SiteFrame"
+import { SiteFrame } from "../components/SiteFrame.tsx"
 import { ContactDirectInfo } from "../contact/ContactDirectInfo.tsx"
 import { ContactFaqList } from "../contact/ContactFaqList.tsx"
 import { ContactHeader } from "../contact/ContactHeader.tsx"
 import { ContactOrganizerForm } from "../contact/ContactOrganizerForm.tsx"
 import { contactPageStateCreate } from "../contact/contactPageStateCreate.ts"
-import { seoHeadCreate } from "../seo/seoHeadCreate"
+import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 
 export const Route = createFileRoute("/kontakt")({

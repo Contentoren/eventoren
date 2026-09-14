@@ -1,20 +1,34 @@
 import { createFileRoute, Link } from "@tanstack/solid-router"
+import { createServerFn } from "@tanstack/solid-start"
 import { Show } from "solid-js"
-import { SiteFrame } from "../components/SiteFrame"
-import { seoHeadCreate } from "../seo/seoHeadCreate"
+import { SiteFrame } from "../components/SiteFrame.tsx"
+import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 import { checkoutPageStateCreate } from "../ticketing/checkoutPageStateCreate.ts"
 import { TicketCheckoutForm } from "../ticketing/TicketCheckoutForm.tsx"
 import { ticketCheckoutSearchParse } from "../ticketing/ticketCheckoutSearchParse.ts"
+import { ticketCheckoutSearchOrderIdsParse } from "../ticketing/ticketCheckoutSearchOrderIdsParse.ts"
+import { TicketOrderStatusPage } from "../ticketing/TicketOrderStatusPage.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
+import { catalogEventsPublicGet } from "../server/catalogEventsPublicGet.js"
+
+const getCatalogEvents = createServerFn({ method: "GET" }).handler(catalogEventsPublicGet)
 
 export const Route = createFileRoute("/checkout")({
   head: () => seoHeadCreate("/checkout"),
   validateSearch: ticketCheckoutSearchParse,
+  loader: () => getCatalogEvents(),
   component: CheckoutPage,
 })
 
 function CheckoutPage() {
   const state = checkoutPageStateCreate()
+  const search = Route.useSearch()
+  const orderIds = () => ticketCheckoutSearchOrderIdsParse(search().orders)
+  const isStatusPage = () => orderIds().length > 0 || Boolean(search().checkout)
+
+  if (isStatusPage()) {
+    return <TicketOrderStatusPage orderIds={orderIds()} checkoutKey={search().checkout} />
+  }
 
   return (
     <SiteFrame>

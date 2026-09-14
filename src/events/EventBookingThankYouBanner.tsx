@@ -1,3 +1,4 @@
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { eventBookingThankYouBannerStateCreate } from "./eventBookingThankYouBannerStateCreate.ts"
 
@@ -26,7 +27,9 @@ export function EventBookingThankYouBanner(props: { onDismiss: () => void }) {
           </span>
           <p class="text-sm font-medium text-content sm:text-base">{state.message()}</p>
         </div>
-        <button
+        <Button
+          variant="none"
+          size="none"
           type="button"
           onClick={state.dismiss}
           aria-label="Buchungsbestätigung schließen"
@@ -35,7 +38,7 @@ export function EventBookingThankYouBanner(props: { onDismiss: () => void }) {
           <svg viewBox="0 0 20 20" aria-hidden="true" class="size-5" fill="none" stroke="currentColor">
             <path d="M5 5l10 10M15 5L5 15" stroke-width="1.8" stroke-linecap="round" />
           </svg>
-        </button>
+        </Button>
       </UiContainer>
     </aside>
   )

@@ -2,54 +2,45 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/solid-r
 import type { JSX } from "solid-js"
 import { Suspense } from "solid-js"
 import { HydrationScript } from "solid-js/web"
-import { NotFoundPage } from "../components/NotFoundPage"
-import { seoHeadCreate } from "../seo/seoHeadCreate"
+import { seo } from "../lib/seo.js"
 import appCss from "../tailwind.css?url"
-import { ThemeProvider } from "../theme/ThemeProvider.tsx"
-import { themeModeStorageKey } from "../theme/themeModeStorageKey.ts"
-
+import { NotFoundPage } from "../marketing/NotFoundPage.js"
+import { Footer } from "../marketing/Footer.js"
+import { Header } from "../marketing/Header.js"
+const siteName = "eventoren"
 const speculationRules = JSON.stringify({
   prerender: [{ where: { href_matches: "/*" }, eagerness: "moderate" }],
 })
 
-const themeInitScript = `(() => {
-  const root = document.documentElement
-  root.classList.remove("dark")
-  root.classList.add("light")
-  root.dataset.theme = "light"
-  root.style.colorScheme = "light"
-  try {
-    window.localStorage.removeItem(${JSON.stringify(themeModeStorageKey)})
-  } catch {}
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", "#f8fafc")
-})()`
-
 export const Route = createRootRoute({
-  head: () => {
-    const head = seoHeadCreate("/")
-    return {
-      ...head,
-      links: [
-        ...head.links,
-        { rel: "icon", type: "image/png", href: "/favicon-32x32.png", sizes: "32x32" },
-        { rel: "icon", type: "image/png", href: "/favicon-192x192.png", sizes: "192x192" },
-        { rel: "icon", type: "image/x-icon", href: "/favicon.ico", sizes: "32x32" },
-        { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
-        { rel: "manifest", href: "/site.webmanifest" },
-        { rel: "stylesheet", href: appCss },
-      ],
-    }
-  },
-  component: RootOutlet,
-  shellComponent: RootDocument,
+  head: () => ({
+    meta: [
+      { charset: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#ffffff" },
+      ...seo.pageMeta({ title: siteName, path: "/" }),
+    ],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", type: "image/x-icon", href: "/favicon.ico", sizes: "any" },
+      { rel: "manifest", href: "/site.webmanifest" },
+    ],
+    scripts: [
+      { type: "application/ld+json", children: JSON.stringify(seo.websiteJsonLd()) },
+      { type: "application/ld+json", children: JSON.stringify(seo.softwareSourceCodeJsonLd()) },
+    ],
+  }),
+  component: PublicRootContent,
   notFoundComponent: NotFoundPage,
+  shellComponent: RootDocument,
 })
 
-function RootOutlet() {
+function PublicRootContent() {
   return (
-    <ThemeProvider>
+    <>
       <Outlet />
-    </ThemeProvider>
+    </>
   )
 }
 
@@ -58,12 +49,15 @@ function RootDocument(props: { children: JSX.Element }) {
     <html lang="de">
       <head>
         <HydrationScript />
-        <script innerHTML={themeInitScript} />
-        <HeadContent />
         <script type="speculationrules" innerHTML={speculationRules} />
+        <HeadContent />
       </head>
-      <body>
-        <Suspense>{props.children}</Suspense>
+      <body class="min-h-dvh">
+        <Header />
+        <main>
+          <Suspense>{props.children}</Suspense>
+        </main>
+        <Footer />
         <Scripts />
       </body>
     </html>

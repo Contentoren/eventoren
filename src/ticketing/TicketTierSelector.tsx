@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiBadge } from "../ui/UiBadge.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
@@ -43,7 +44,9 @@ export function TicketTierSelector(props: {
                     </div>
 
                     <div class="flex items-center gap-space-3">
-                      <button
+                      <Button
+                        variant="none"
+                        size="none"
                         type="button"
                         onClick={() => state.decreaseTier(row.id)}
                         disabled={!row.canDecrease}
@@ -51,7 +54,7 @@ export function TicketTierSelector(props: {
                         class="focus-ring flex size-10 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-strong transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         −
-                      </button>
+                      </Button>
                       <output
                         aria-live="polite"
                         aria-label={`${row.quantity} Tickets für ${row.name}`}
@@ -59,7 +62,9 @@ export function TicketTierSelector(props: {
                       >
                         {row.quantity}
                       </output>
-                      <button
+                      <Button
+                        variant="none"
+                        size="none"
                         type="button"
                         onClick={() => state.increaseTier(row.id)}
                         disabled={!row.canIncrease}
@@ -67,7 +72,7 @@ export function TicketTierSelector(props: {
                         class="focus-ring flex size-10 items-center justify-center rounded-control bg-brand text-lg font-semibold text-brand-content transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         +
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>

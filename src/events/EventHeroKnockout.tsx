@@ -1,4 +1,5 @@
 import { For } from "solid-js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { classArr } from "../ui/classArr.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import type { EventFilter } from "./EventFilter.ts"
@@ -143,12 +144,14 @@ export function EventHeroKnockout(props: {
               </select>
             </div>
 
-            <button
+            <Button
+              variant="none"
+              size="none"
               type="submit"
               class="focus-ring h-12 shrink-0 rounded-control bg-brand px-space-7 text-base font-bold text-brand-content shadow-md transition-colors hover:bg-brand-strong"
             >
               Tickets finden
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -157,7 +160,9 @@ export function EventHeroKnockout(props: {
           <legend class="sr-only">Direktfilter</legend>
           <For each={state.quickChips()}>
             {(chip) => (
-              <button
+              <Button
+                variant="none"
+                size="none"
                 type="button"
                 aria-pressed={state.chipActiveId() === chip.id}
                 onClick={() => state.selectChip(chip.id)}
@@ -169,7 +174,7 @@ export function EventHeroKnockout(props: {
                 )}
               >
                 {chip.label}
-              </button>
+              </Button>
             )}
           </For>
         </fieldset>

@@ -4,5 +4,6 @@ export type EventTicketTier = {
   description: string
   priceCents: number
   feeCents: number
+  capacity: number
   available: number
 }

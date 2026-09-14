@@ -1,67 +1,42 @@
 import { useNavigate } from "@tanstack/solid-router"
-import { type Accessor, createMemo, createSignal, onMount, type Setter } from "solid-js"
+import { createMemo, onMount } from "solid-js"
+import { userTokenGet } from "../auth/ui/signals/userSessionSignal.ts"
 import type { EventItem } from "../events/EventItem.ts"
+import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { TicketCart } from "./TicketCart.ts"
 import type { TicketCheckoutStep } from "./TicketCheckoutStep.ts"
 import type { TicketContact } from "./TicketContact.ts"
-import type { TicketOrder } from "./TicketOrder.ts"
-import type { TicketPaymentMethod } from "./TicketPaymentMethod.ts"
 import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
+import { ticketCheckoutCreate } from "./ticketCheckoutCreate.ts"
+import { ticketCheckoutKeyCreate } from "./ticketCheckoutKeyCreate.ts"
+import { ticketCheckoutLegalDocumentRevision } from "./ticketCheckoutLegalDocumentRevision.ts"
 import { ticketCheckoutStepLabels } from "./ticketCheckoutStepLabels.ts"
 import { ticketCheckoutStepOrder } from "./ticketCheckoutStepOrder.ts"
 import { ticketContactDraftLoad } from "./ticketContactDraftLoad.ts"
 import { ticketContactDraftSave } from "./ticketContactDraftSave.ts"
 import { ticketContactEmpty } from "./ticketContactEmpty.ts"
 import { ticketContactValidate } from "./ticketContactValidate.ts"
-import { ticketOrderCreate } from "./ticketOrderCreate.ts"
-import { ticketPaymentMethodDefault } from "./ticketPaymentMethodDefault.ts"
-import { ticketPaymentMethodDraftLoad } from "./ticketPaymentMethodDraftLoad.ts"
-import { ticketPaymentMethodDraftSave } from "./ticketPaymentMethodDraftSave.ts"
-import { ticketPaymentMethodOptionOf } from "./ticketPaymentMethodOptionOf.ts"
-import { ticketPaymentMethodOptions } from "./ticketPaymentMethodOptions.ts"
+import { ticketGuestAccessTokenCreate } from "./ticketGuestAccessTokenCreate.ts"
+import { ticketOrderAccessStorageUpsert } from "./ticketOrderAccessStorageUpsert.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
-import { ticketStorageAppend } from "./ticketStorageAppend.ts"
-import { ticketStorageIdleWrite } from "./ticketStorageIdleWrite.ts"
+import { ticketCheckoutSearchOrderIds } from "./ticketCheckoutSearchOrderIds.ts"
 
-type SignalObject<T> = {
-  get: Accessor<T>
-  set: Setter<T>
-}
+type CheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
-const createSignalObject = <T>(initialValue: T): SignalObject<T> => {
-  const [get, set] = createSignal(initialValue)
-  return { get, set }
-}
-
-export function ticketCheckoutFormStateCreate(inputs: {
-  items: () => readonly { readonly event: EventItem; readonly cart: TicketCart }[]
-  onOrderComplete?: (orders: readonly TicketOrder[]) => void
-}) {
+export function ticketCheckoutFormStateCreate(inputs: { items: () => readonly CheckoutItem[] }) {
   const navigate = useNavigate()
   const contact = createSignalObject<TicketContact>(ticketContactEmpty())
   const step = createSignalObject<TicketCheckoutStep>("kontakt")
   const errorMessage = createSignalObject("")
-  const orders = createSignalObject<readonly TicketOrder[]>([])
   const isSubmitting = createSignalObject(false)
-  const paymentMethod = createSignalObject<TicketPaymentMethod>(ticketPaymentMethodDefault)
+  const legalAccepted = createSignalObject(false)
 
-  const persistDraft = ticketStorageIdleWrite(() => {
-    if (orders.get().length > 0) return
-    ticketContactDraftSave(contact.get())
-  })
-
-  const persistPaymentMethod = ticketStorageIdleWrite(() => {
-    if (orders.get().length > 0) return
-    ticketPaymentMethodDraftSave(paymentMethod.get())
-  })
+  const persistDraft = () => ticketContactDraftSave(contact.get())
 
   onMount(() => {
     const draft = ticketContactDraftLoad()
     if (draft.success) contact.set(draft.data)
-
-    const method = ticketPaymentMethodDraftLoad()
-    if (method.success) paymentMethod.set(method.data)
   })
 
   const stepLabels = createMemo(() => ticketCheckoutStepOrder.map((entry) => ticketCheckoutStepLabels[entry]))
@@ -83,27 +58,15 @@ export function ticketCheckoutFormStateCreate(inputs: {
   const totalLabel = createMemo(() => ticketPriceFormat(total().totalCents))
   const isCartEmpty = createMemo(() => total().quantity === 0 || inputs.items().length === 0)
 
-  const paymentMethodOptions = createMemo(() => ticketPaymentMethodOptions)
-
-  const selectedPaymentMethodOption = createMemo(() => ticketPaymentMethodOptionOf(paymentMethod.get()))
-
-  const confirmLabel = createMemo(() => {
-    if (paymentMethod.get() === "wallet") return "Mit Apple Pay / Google Pay zahlen"
-    if (paymentMethod.get() === "paypal") return "Mit PayPal bezahlen"
-    if (paymentMethod.get() === "klarna") return "Mit Klarna kostenpflichtig buchen"
-    return "Jetzt kostenpflichtig buchen"
-  })
-
-  const paymentMethodSelect = (method: TicketPaymentMethod) => {
-    paymentMethod.set(method)
-    errorMessage.set("")
-    persistPaymentMethod()
-  }
-
   const contactFieldChange = (field: keyof TicketContact, value: string) => {
     contact.set({ ...contact.get(), [field]: value })
     errorMessage.set("")
     persistDraft()
+  }
+
+  const legalAcceptanceChange = (accepted: boolean) => {
+    legalAccepted.set(accepted)
+    errorMessage.set("")
   }
 
   const goToPayment = () => {
@@ -126,10 +89,14 @@ export function ticketCheckoutFormStateCreate(inputs: {
     step.set("kontakt")
   }
 
-  const confirmPayment = () => {
+  const confirmPayment = async () => {
     if (isSubmitting.get()) return
     if (isCartEmpty()) {
       errorMessage.set("Bitte wähle zuerst mindestens ein Ticket aus.")
+      return
+    }
+    if (!legalAccepted.get()) {
+      errorMessage.set("Bitte bestätige AGB und Datenschutzhinweise.")
       return
     }
 
@@ -139,44 +106,79 @@ export function ticketCheckoutFormStateCreate(inputs: {
       return
     }
 
-    contact.set(validated.data)
+    const token = userTokenGet()
+    const guestAccessToken = token ? undefined : ticketGuestAccessTokenCreate()
+    const createdOrderIds: string[] = []
+    let redirectUrl: string | undefined
     isSubmitting.set(true)
-    const createdOrders: TicketOrder[] = []
-    for (const item of inputs.items()) {
-      const created = ticketOrderCreate({
-        event: item.event,
-        cart: item.cart,
-        contact: contact.get(),
-        paymentMethod: paymentMethod.get(),
-      })
-      if (!created.success) {
-        errorMessage.set(created.errorMessage)
-        isSubmitting.set(false)
-        return
-      }
-      createdOrders.push(created.data)
-    }
+    errorMessage.set("")
 
-    for (const order of createdOrders) {
-      const stored = ticketStorageAppend(order)
-      if (!stored.success) {
-        errorMessage.set(stored.errorMessage)
-        isSubmitting.set(false)
-        return
+    try {
+      for (const item of inputs.items()) {
+        const checkoutKey = ticketCheckoutKeyCreate()
+        const returnUrl = new URL("/checkout", window.location.origin)
+        returnUrl.searchParams.set("checkout", checkoutKey)
+        const created = await ticketCheckoutCreate({
+          token: token || undefined,
+          guestAccessToken,
+          checkoutKey,
+          eventKey: item.event.id,
+          catalogVersion: item.event.catalogVersion,
+          tickets: item.cart.lines
+            .filter((line) => line.quantity > 0)
+            .map((line) => ({ tierKey: line.tierId, quantity: line.quantity })),
+          successUrl: returnUrl.toString(),
+          cancelUrl: returnUrl.toString(),
+          locale: "de",
+          customer: {
+            email: validated.data.email,
+            givenName: validated.data.firstName,
+            familyName: validated.data.lastName,
+            phone: validated.data.phone,
+          },
+          legalContext: {
+            cta: "Jetzt kostenpflichtig buchen",
+            termsAccepted: true,
+            privacyAcknowledged: true,
+            documentSetRevision: ticketCheckoutLegalDocumentRevision,
+          },
+        })
+        if (!created.success) {
+          errorMessage.set(created.errorMessage)
+          isSubmitting.set(false)
+          return
+        }
+
+        const stored = ticketOrderAccessStorageUpsert({
+          orderId: created.data.orderId,
+          checkoutKey,
+          guestAccessToken,
+        })
+        if (!stored.success) {
+          errorMessage.set(stored.errorMessage)
+          isSubmitting.set(false)
+          return
+        }
+
+        createdOrderIds.push(created.data.orderId)
+        if (created.data.url && redirectUrl === undefined) redirectUrl = created.data.url
       }
+    } catch (error) {
+      errorMessage.set(error instanceof Error ? error.message : "Checkout konnte nicht erstellt werden.")
+      isSubmitting.set(false)
+      return
     }
 
     ticketCartDraftSave([])
     ticketContactDraftSave(null)
-    ticketPaymentMethodDraftSave(null)
-    orders.set(createdOrders)
-    errorMessage.set("")
-    step.set("bestaetigung")
     isSubmitting.set(false)
-    inputs.onOrderComplete?.(createdOrders)
+    if (redirectUrl) {
+      window.location.assign(redirectUrl)
+      return
+    }
     navigate({
-      to: "/",
-      search: { buchung: "erfolgreich" },
+      to: "/checkout",
+      search: { orders: ticketCheckoutSearchOrderIds(createdOrderIds) },
     })
   }
 
@@ -186,15 +188,11 @@ export function ticketCheckoutFormStateCreate(inputs: {
     stepIndex,
     stepLabels,
     errorMessage: errorMessage.get,
-    orders: orders.get,
     isSubmitting: isSubmitting.get,
     isCartEmpty,
     totalLabel,
-    paymentMethod: paymentMethod.get,
-    paymentMethodOptions,
-    selectedPaymentMethodOption,
-    paymentMethodSelect,
-    confirmLabel,
+    legalAccepted: legalAccepted.get,
+    legalAcceptanceChange,
     contactFieldChange,
     goToPayment,
     goToContact,

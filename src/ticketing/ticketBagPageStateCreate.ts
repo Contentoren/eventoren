@@ -1,8 +1,8 @@
-import { useNavigate } from "@tanstack/solid-router"
+import { getRouteApi, useNavigate } from "@tanstack/solid-router"
 import { createMemo, createSignal, onCleanup, onMount } from "solid-js"
 import { eventDateFormat } from "../events/eventDateFormat.ts"
-import { eventFindById } from "../events/eventFindById.ts"
 import { eventTimeFormat } from "../events/eventTimeFormat.ts"
+import type { EventItem } from "../events/EventItem.ts"
 import type { TicketBagGroup } from "./TicketBagGroup.ts"
 import type { TicketBagItem } from "./TicketBagItem.ts"
 import type { TicketCartDraft } from "./TicketCartDraft.ts"
@@ -16,6 +16,8 @@ import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 
 export function ticketBagPageStateCreate() {
   const navigate = useNavigate()
+  const routeApi = getRouteApi("/warenkorb")
+  const catalog = routeApi.useLoaderData()
   const [cart, setCart] = createSignal<TicketCartDraft>(ticketCartDraftLoad())
 
   const syncCart = () => {
@@ -38,12 +40,15 @@ export function ticketBagPageStateCreate() {
 
   const groups = createMemo<readonly TicketBagGroup[]>(() => {
     const result: TicketBagGroup[] = []
+    const catalogResult = catalog()
+
+    if (!catalogResult.success) return result
 
     for (const currentCart of cart()) {
-      const eventResult = eventFindById(currentCart.eventId)
-      if (!eventResult.success) continue
-
-      const currentEvent = eventResult.data
+      const currentEvent = (catalogResult.data as readonly EventItem[]).find(
+        (event: EventItem) => event.id === currentCart.eventId,
+      )
+      if (!currentEvent) continue
       const items: TicketBagItem[] = []
 
       for (const tier of currentEvent.tiers) {
@@ -110,6 +115,7 @@ export function ticketBagPageStateCreate() {
   const totalQuantity = createMemo(() => ticketCartDraftTotalQuantity(cart()))
 
   const isEmpty = createMemo(() => groups().length === 0 || totalQuantity() === 0)
+  const catalogError = createMemo(() => (catalog().success ? "" : "Der Eventkatalog ist gerade nicht verfügbar."))
 
   const updateQuantity = (eventId: string, tierId: string, quantity: number) => {
     const updated = ticketCartDraftQuantitySet(cart(), eventId, tierId, quantity)
@@ -136,6 +142,7 @@ export function ticketBagPageStateCreate() {
     totals,
     totalQuantity,
     isEmpty,
+    catalogError,
     updateQuantity,
     removeItem,
     clearBag,

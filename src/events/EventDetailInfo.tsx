@@ -1,4 +1,5 @@
 import { For, type JSX, Show } from "solid-js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { classArr } from "../ui/classArr.ts"
 import type { EventItem } from "./EventItem.ts"
 import { eventDetailInfoStateCreate } from "./eventDetailInfoStateCreate.ts"
@@ -25,7 +26,9 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
 
                   return (
                     <li>
-                      <button
+                      <Button
+                        variant="none"
+                        size="none"
                         id={buttonId}
                         type="button"
                         class="group flex w-full items-center justify-between gap-space-4 py-space-4 text-left transition-colors focus-visible:focus-ring"
@@ -57,7 +60,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                             <path d="M3.5 6l4.5 4.5 4.5-4.5" />
                           </svg>
                         </div>
-                      </button>
+                      </Button>
 
                       <Show when={state.isHighlightExpanded(item.tag)}>
                         <div
@@ -111,7 +114,9 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
 
         <Show when={state.hasInclusions()}>
           <div class="flex flex-col border-t border-border-subtle/40 pt-space-4">
-            <button
+            <Button
+              variant="none"
+              size="none"
               id="event-inclusions-button"
               type="button"
               class="group flex w-full items-center justify-between gap-space-4 py-space-2 text-left transition-colors focus-visible:focus-ring"
@@ -140,7 +145,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                   <path d="M3.5 6l4.5 4.5 4.5-4.5" />
                 </svg>
               </div>
-            </button>
+            </Button>
 
             <Show when={state.isInclusionsExpanded()}>
               <div
@@ -180,7 +185,9 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
 
         <Show when={state.hasExclusions()}>
           <div class="flex flex-col border-t border-border-subtle/40 pt-space-4">
-            <button
+            <Button
+              variant="none"
+              size="none"
               id="event-exclusions-button"
               type="button"
               class="group flex w-full items-center justify-between gap-space-4 py-space-2 text-left transition-colors focus-visible:focus-ring"
@@ -209,7 +216,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                   <path d="M3.5 6l4.5 4.5 4.5-4.5" />
                 </svg>
               </div>
-            </button>
+            </Button>
 
             <Show when={state.isExclusionsExpanded()}>
               <div
@@ -249,7 +256,9 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
 
         <Show when={state.hasSchedule()}>
           <div class="flex flex-col border-t border-border-subtle/40 pt-space-4">
-            <button
+            <Button
+              variant="none"
+              size="none"
               id="event-schedule-button"
               type="button"
               class="group flex w-full items-center justify-between gap-space-4 py-space-2 text-left transition-colors focus-visible:focus-ring"
@@ -278,7 +287,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                   <path d="M3.5 6l4.5 4.5 4.5-4.5" />
                 </svg>
               </div>
-            </button>
+            </Button>
 
             <Show when={state.isScheduleExpanded()}>
               <div
@@ -326,7 +335,9 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
 
                   return (
                     <li class="overflow-hidden rounded-control border border-border-subtle bg-surface transition-colors">
-                      <button
+                      <Button
+                        variant="none"
+                        size="none"
                         id={buttonId}
                         type="button"
                         class="focus-ring group flex w-full items-center justify-between gap-space-4 p-space-5 text-left transition-colors hover:bg-surface-muted/50 sm:p-space-6"
@@ -355,7 +366,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                             <path d="M3.5 6l4.5 4.5 4.5-4.5" />
                           </svg>
                         </div>
-                      </button>
+                      </Button>
 
                       <Show when={state.isFaqExpanded(faq.id)}>
                         <div

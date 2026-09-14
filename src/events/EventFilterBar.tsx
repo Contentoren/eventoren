@@ -1,4 +1,5 @@
 import { For } from "solid-js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import type { EventCategory } from "./EventCategory.ts"
 import type { EventFilter } from "./EventFilter.ts"
 import type { EventTimeWindow } from "./EventTimeWindow.ts"
@@ -122,12 +123,14 @@ export function EventFilterBar(props: {
           </div>
 
           {/* Submit action */}
-          <button
+          <Button
+            variant="none"
+            size="none"
             type="submit"
             class="focus-ring flex h-13 items-center justify-center rounded-control bg-brand px-space-6 text-sm font-bold text-brand-content shadow-md transition-all hover:bg-brand-strong active:scale-[0.99] whitespace-nowrap"
           >
             Events suchen
-          </button>
+          </Button>
         </form>
       </search>
 

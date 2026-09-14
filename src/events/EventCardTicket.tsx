@@ -3,6 +3,7 @@ import { Show } from "solid-js"
 import { classArr } from "../ui/classArr.ts"
 import { UiBadge } from "../ui/UiBadge.tsx"
 import type { EventItem } from "./EventItem.ts"
+import { eventImageUrlGet } from "./eventImageUrlGet.ts"
 import { eventCardStateCreate } from "./eventCardStateCreate.ts"
 
 /** Variation B: ticket stub with date block, perforation line and solid primary CTA. */
@@ -15,7 +16,7 @@ export function EventCardTicket(props: { event: EventItem }) {
         {/* Taller vertical image aspect ratio */}
         <div class="relative aspect-[4/3] overflow-hidden bg-surface-muted">
           <img
-            src={props.event.imageUrl}
+            src={eventImageUrlGet(props.event.imageUrl)}
             alt={props.event.imageAlt}
             loading="lazy"
             width="1200"
