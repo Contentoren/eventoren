@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/solid-router"
-import { Button } from "#ui/interactive/button/Button.jsx"
+import { Show } from "solid-js"
 import { eventorenAuthControlStateCreate } from "#src/auth/ui/eventorenAuthControlStateCreate.ts"
+import { Button } from "#ui/interactive/button/Button.jsx"
 
 const siteName = "eventoren"
 
@@ -14,17 +15,23 @@ export function Header() {
           {siteName}
         </Link>
         <div class="flex items-center gap-3">
-          <Link to="/sign-in" class="text-sm font-semibold text-brand-accent hover:underline">
-            Anmelden
-          </Link>
           <Link to="/admin" class="text-sm font-semibold text-brand-accent hover:underline">
             Verwaltung
           </Link>
-          <form method="post" action="/logout" onSubmit={state.logout}>
-            <Button variant="ghost" size="sm" type="submit">
-              Abmelden
-            </Button>
-          </form>
+          <Show
+            when={state.isAuthenticated()}
+            fallback={
+              <Link to="/sign-in" class="text-sm font-semibold text-brand-accent hover:underline">
+                Anmelden
+              </Link>
+            }
+          >
+            <form method="post" action="/logout" onSubmit={state.logout}>
+              <Button variant="ghost" size="sm" type="submit">
+                Abmelden
+              </Button>
+            </form>
+          </Show>
         </div>
       </div>
     </header>
