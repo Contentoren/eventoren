@@ -1,0 +1,6 @@
+{
+  "units": ["eventoren-convex-backend.service"],
+  "health_port": "convex",
+  "health_path": "/version",
+  "install": ["bash ops/prod/install.bash"]
+}

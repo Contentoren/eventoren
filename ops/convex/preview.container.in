@@ -1,0 +1,32 @@
+# Rendered by ops/convex/preview-install.bash. Do not use the AllGroups container or volume.
+[Unit]
+Description=eventoren isolated preview Convex backend
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+ContainerName=eventoren-convex-preview
+Image=ghcr.io/get-convex/convex-backend:latest
+AutoUpdate=registry
+# Billing preview is a host systemd service bound to 127.0.0.1:3146. Keep the
+# rootless network and map only pasta's host-gateway address to host loopback;
+# this avoids the public Caddy hairpin without exposing Billing on a host port.
+Network=pasta:--map-host-loopback=169.254.1.2
+PublishPort=127.0.0.1:@CONVEX_PORT@:3210
+PublishPort=127.0.0.1:@API_PORT@:3211
+Volume=eventoren-convex-preview-data.volume:/convex/data
+EnvironmentFile=@ENV_FILE@
+Environment=DOCUMENT_RETENTION_DELAY=172800
+Environment=RUST_LOG=info
+Notify=healthy
+HealthCmd=curl -f http://localhost:3210/version
+HealthInterval=5s
+HealthStartPeriod=10s
+
+[Service]
+Restart=always
+RestartSec=2
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target

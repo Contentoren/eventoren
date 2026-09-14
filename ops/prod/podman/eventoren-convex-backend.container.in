@@ -1,0 +1,28 @@
+# Rendered by ops/prod/install.bash from prodctl's allocated loopback ports.
+[Unit]
+Description=eventoren production Convex backend
+After=network-online.target
+Wants=network-online.target
+
+[Container]
+ContainerName=eventoren-convex-backend
+Image=ghcr.io/get-convex/convex-backend:latest
+AutoUpdate=registry
+PublishPort=127.0.0.1:@CONVEX_PORT@:3210
+PublishPort=127.0.0.1:@API_PORT@:3211
+Volume=eventoren-convex-data.volume:/convex/data
+EnvironmentFile=%h/.config/eventoren/convex-backend.env
+Environment=DOCUMENT_RETENTION_DELAY=172800
+Environment=RUST_LOG=info
+Notify=healthy
+HealthCmd=curl -f http://localhost:3210/version
+HealthInterval=5s
+HealthStartPeriod=10s
+
+[Service]
+Restart=always
+RestartSec=2
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target

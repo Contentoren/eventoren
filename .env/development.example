@@ -1,0 +1,13 @@
+# Copy this file to .env/development and fill in local or deployment values.
+PUBLIC_ENV_MODE=development
+
+# BEGIN project-creator assets-service settings
+# Assets-service settings for this project. Fill non-secret values locally or in deployment configuration.
+ASSETS_API_URL=https://assets-service.contentoren.de
+ASSETS_PROJECT=eventoren
+ASSETS_ENVIRONMENT=development
+
+# Credential reference only: provide ASSETS_TOKEN through the environment or a secret manager.
+# The credential value is intentionally not generated here.
+# Organization reference: ASSETS_ORGANIZATION
+# END project-creator assets-service settings

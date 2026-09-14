@@ -1,0 +1,29 @@
+[Unit]
+Description=eventoren vite development server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/eventoren
+Environment=PATH=%h/.local/bin:%h/.bun/bin:/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=-%h/eventoren/.env.development
+EnvironmentFile=-%h/.config/eventoren/preview-web.env
+Environment=PUBLIC_ENV_MODE=development
+Environment=PUBLIC_BASE_URL_SITE=https://eventoren.leonardomora.de
+Environment=PUBLIC_BASE_URL_APP=https://eventoren.leonardomora.de
+Environment=PUBLIC_BASE_URL_CONVEX=https://eventoren-convex.leonardomora.de
+Environment=PUBLIC_BASE_URL_API=https://eventoren-api.leonardomora.de
+Environment=VITE_CONVEX_URL=https://eventoren-convex.leonardomora.de
+Environment=VITE_CONVEX_SITE_URL=https://eventoren-api.leonardomora.de
+Environment=CONVEX_SITE_URL=https://eventoren-api.leonardomora.de
+Environment=CONVEX_SELF_HOSTED_URL=https://eventoren-convex.leonardomora.de
+Environment=NODE_ENV=development
+ExecStart=%h/.bun/bin/bun run dev -- --host 127.0.0.1 --port ${PREVIEW_WEB_PORT}
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
