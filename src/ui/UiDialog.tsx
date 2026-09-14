@@ -1,4 +1,5 @@
 import { type JSX, Show } from "solid-js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { classMerge } from "./classMerge.ts"
 import { uiDialogStateCreate } from "./uiDialogStateCreate.ts"
 
@@ -47,7 +48,9 @@ export function UiDialog(props: {
             </Show>
           </div>
 
-          <button
+          <Button
+            variant="none"
+            size="none"
             type="button"
             onClick={() => state.requestClose()}
             aria-label="Dialog schließen"
@@ -56,7 +59,7 @@ export function UiDialog(props: {
             <svg viewBox="0 0 20 20" aria-hidden="true" class="size-5" fill="none" stroke="currentColor">
               <path d="M5 5l10 10M15 5L5 15" stroke-width="1.6" stroke-linecap="round" />
             </svg>
-          </button>
+          </Button>
         </div>
 
         {props.children}

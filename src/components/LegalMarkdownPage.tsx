@@ -1,4 +1,4 @@
-import { SiteFrame } from "./SiteFrame"
+import { SiteFrame } from "./SiteFrame.tsx"
 
 export function LegalMarkdownPage(props: { html: string; title: string }) {
   return (

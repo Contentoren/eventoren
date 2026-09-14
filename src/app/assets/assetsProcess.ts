@@ -1,5 +1,5 @@
 import { processAssets } from "@adaptive-ds/assets-optimizer"
-import { packageName } from "./package"
+import { packageName } from "./package.js"
 
 await processAssets({
   logLevel: 3,

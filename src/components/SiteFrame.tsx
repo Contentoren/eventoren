@@ -1,6 +1,6 @@
 import type { JSX } from "solid-js"
-import { SiteFooter } from "./SiteFooter"
-import { SiteHeader } from "./SiteHeader"
+import { SiteFooter } from "./SiteFooter.tsx"
+import { SiteHeader } from "./SiteHeader.tsx"
 
 export function SiteFrame(props: { children: JSX.Element }) {
   return (

@@ -1,4 +1,5 @@
 import { Show } from "solid-js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { classArr } from "../ui/classArr.ts"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
@@ -36,7 +37,9 @@ export function ContactOrganizerForm(props: {
 
         {/* Inquiry Type Tabs */}
         <div class="flex rounded-control border border-border-subtle bg-surface-muted/60 p-1" role="tablist">
-          <button
+          <Button
+            variant="none"
+            size="none"
             type="button"
             role="tab"
             aria-selected={props.inquiryType() === "veranstalter"}
@@ -49,8 +52,10 @@ export function ContactOrganizerForm(props: {
             )}
           >
             Für Veranstalter
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="none"
+            size="none"
             type="button"
             role="tab"
             aria-selected={props.inquiryType() === "support"}
@@ -63,7 +68,7 @@ export function ContactOrganizerForm(props: {
             )}
           >
             Besucher-Support
-          </button>
+          </Button>
         </div>
 
         <Show when={props.isSubmitted()}>

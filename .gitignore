@@ -35,3 +35,48 @@ src/routeTree.gen.ts
 # Vite generated config files
 vite.config.d.ts
 vite.config.js
+node_modules/
+dist/
+out/
+build/
+coverage/
+.cache/
+.wrangler/
+/data/
+!.env.development.example
+!.env.production.example
+convex/_generated
+ops/convex/preview.env
+ops/convex/*.container
+ops/convex/*.volume
+.project-creator/
+# Bun package manager cache
+# Output
+*.tgz
+# Code coverage
+*.lcov
+# Logs
+logs/
+# Finder (macOS) folder config
+# Caches
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.code-workspace
+!eventoren.code-workspace
+# Package manager debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+package-lock.json
+pnpm-lock.yaml
+# Dotenv and local secret files
+.env/*
+!.env/
+!.env/development.example
+!.env/production.example
+.integration-secrets/
+# npm publishing
+.npmrc

@@ -1,5 +1,5 @@
 import type { VideoType } from "@adaptive-ds/assets-optimizer"
-import { packageName } from "./package"
+import { packageName } from "./package.js"
 
 export function urlVideo(video: VideoType): string {
   if (video.path.startsWith("https://")) return video.path

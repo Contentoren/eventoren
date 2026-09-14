@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { classArr } from "../ui/classArr.ts"
 
 export function ContactFaqList(props: { expandedFaqId: () => string | null; onToggleFaq: (id: string) => void }) {
@@ -51,7 +52,9 @@ export function ContactFaqList(props: { expandedFaqId: () => string | null; onTo
 
             return (
               <li class="overflow-hidden rounded-xl border border-border-subtle bg-surface transition-colors dark:border-border-strong/30">
-                <button
+                <Button
+                  variant="none"
+                  size="none"
                   type="button"
                   class="focus-ring flex w-full items-center justify-between gap-space-4 p-space-4 text-left font-medium text-content transition-colors hover:bg-surface-muted/50 sm:p-space-5"
                   aria-expanded={isExpanded()}
@@ -76,7 +79,7 @@ export function ContactFaqList(props: { expandedFaqId: () => string | null; onTo
                       <path d="M3.5 6l4.5 4.5 4.5-4.5" />
                     </svg>
                   </div>
-                </button>
+                </Button>
 
                 <Show when={isExpanded()}>
                   <div class="border-t border-border-subtle/50 px-space-4 py-space-4 text-sm leading-relaxed text-content-muted sm:px-space-5 dark:border-border-strong/20">

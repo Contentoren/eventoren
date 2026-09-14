@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/solid-router"
-import { UiButton } from "../ui/UiButton.tsx"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { SiteHeaderCartButton } from "./SiteHeaderCartButton.tsx"
 import { SiteHeaderLogo } from "./SiteHeaderLogo.tsx"
@@ -19,7 +19,7 @@ export function SiteHeader() {
         <div class="flex h-16 items-center justify-between gap-space-5 max-md:gap-space-2">
           <SiteHeaderLogo class="max-md:px-space-1" />
 
-          <div class="flex items-center gap-space-1 max-md:gap-0">
+          <div class="flex items-center gap-2 max-md:gap-0">
             <SiteHeaderCartButton
               quantity={state.cartQuantity()}
               label={state.cartLabel()}
@@ -27,16 +27,19 @@ export function SiteHeader() {
               class="max-md:px-space-2"
             />
 
-            <UiButton
+            <Button
               size="sm"
-              class="ml-space-2 max-sm:hidden sm:inline-flex"
+              variant="none"
+              class="bg-brand text-brand-content hover:bg-brand-strong max-sm:hidden sm:inline-flex"
               disabled={!state.cartHasItems()}
               onClick={() => navigate({ to: "/checkout" })}
             >
               Zur Kasse
-            </UiButton>
+            </Button>
 
-            <button
+            <Button
+              variant="ghost"
+              size="none"
               type="button"
               onClick={() => state.openMenu()}
               aria-haspopup="dialog"
@@ -47,7 +50,7 @@ export function SiteHeader() {
               <svg viewBox="0 0 24 24" aria-hidden="true" class="size-6" fill="none" stroke="currentColor">
                 <path d="M4 7h16M4 12h16M4 17h16" stroke-width="1.6" stroke-linecap="round" />
               </svg>
-            </button>
+            </Button>
           </div>
         </div>
       </UiContainer>

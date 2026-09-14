@@ -1,7 +1,7 @@
-import { imageList } from "../app/assets/imageList"
-import { urlImage } from "../app/assets/urlImage"
-import { seoPages } from "./seoPages"
-import { seoSiteUrl } from "./seoSiteUrl"
+import { imageList } from "../app/assets/imageList.js"
+import { urlImage } from "../app/assets/urlImage.js"
+import { seoPages } from "./seoPages.js"
+import { seoSiteUrl } from "./seoSiteUrl.js"
 
 function absoluteUrl(path: string) {
   return path === "/" ? seoSiteUrl : `${seoSiteUrl}${path}`

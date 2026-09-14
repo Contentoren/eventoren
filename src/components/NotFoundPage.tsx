@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/solid-router"
-import { SiteFrame } from "./SiteFrame"
+import { SiteFrame } from "./SiteFrame.tsx"
 
 export function NotFoundPage() {
   return (

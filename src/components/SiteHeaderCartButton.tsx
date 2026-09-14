@@ -9,7 +9,7 @@ export function SiteHeaderCartButton(props: { quantity: number; label: string; h
       aria-label={props.label}
       activeProps={{ class: "bg-surface-muted", "aria-current": "page" }}
       class={classMerge(
-        "focus-ring relative inline-flex h-10 items-center gap-space-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted max-md:px-space-2",
+        "focus-ring relative inline-flex h-10 items-center gap-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted max-md:px-space-2",
         props.class,
       )}
     >

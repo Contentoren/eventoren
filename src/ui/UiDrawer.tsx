@@ -1,5 +1,6 @@
 import { type JSX, Show } from "solid-js"
 import { Portal } from "solid-js/web"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { classMerge } from "./classMerge.ts"
 import { uiDrawerStateCreate } from "./uiDrawerStateCreate.ts"
 
@@ -62,7 +63,9 @@ export function UiDrawer(props: {
                 </Show>
               </div>
 
-              <button
+              <Button
+                variant="none"
+                size="none"
                 ref={state.attachCloseButtonRef}
                 type="button"
                 onClick={() => state.requestClose()}
@@ -72,7 +75,7 @@ export function UiDrawer(props: {
                 <svg viewBox="0 0 24 24" aria-hidden="true" class="size-6" fill="none" stroke="currentColor">
                   <path d="M6 6l12 12M18 6L6 18" stroke-width="1.8" stroke-linecap="round" />
                 </svg>
-              </button>
+              </Button>
             </div>
 
             <div class="flex flex-1 flex-col overflow-y-auto p-space-5">{props.children}</div>
