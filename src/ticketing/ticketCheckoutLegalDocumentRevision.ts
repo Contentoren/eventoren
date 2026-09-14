@@ -1,0 +1,2 @@
+export const ticketCheckoutLegalDocumentRevision =
+  "sha256:709971d4d30a3974a39a1696a6f3d01f5fcfc001d8dc13dfe7ff2116e2b4e573"

@@ -1,0 +1,166 @@
+import { action } from "#convex/_generated/server.js"
+import { v } from "convex/values"
+import { internal } from "#convex/_generated/api.js"
+import { createResult, createResultError, type PromiseResult, type Result } from "#result"
+import { billingEventorenClient } from "./billingEventorenClient.js"
+import { ticketOrderAccessResolve } from "./ticketOrderAccessResolve.js"
+
+const checkoutKeyValidator = v.string()
+const ticketSelectionValidator = v.object({ tierKey: v.string(), quantity: v.number() })
+
+export const ticketCheckoutCreateAction = action({
+  args: {
+    token: v.optional(v.string()),
+    guestAccessToken: v.optional(v.string()),
+    checkoutKey: checkoutKeyValidator,
+    eventKey: v.string(),
+    catalogVersion: v.number(),
+    tickets: v.array(ticketSelectionValidator),
+    successUrl: v.string(),
+    cancelUrl: v.string(),
+    locale: v.optional(v.union(v.literal("de"), v.literal("en"))),
+    customer: v.object({
+      email: v.string(),
+      givenName: v.string(),
+      familyName: v.string(),
+      phone: v.string(),
+    }),
+    legalContext: v.object({
+      cta: v.string(),
+      termsAccepted: v.literal(true),
+      privacyAcknowledged: v.literal(true),
+      documentSetRevision: v.string(),
+    }),
+  },
+  handler: async (
+    ctx,
+    args,
+  ): PromiseResult<{
+    orderId: string
+    paymentReference: string
+    orderReference?: string
+    stripeMode: "live" | "test"
+    status: "checkout_created" | "paid"
+    paymentStatus: "pending" | "paid"
+    url?: string
+    replayed: boolean
+  }> => {
+    const op = "ticketCheckoutCreateAction"
+    if (!/^[A-Za-z0-9]{32,96}$/u.test(args.checkoutKey)) return createResultError(op, "Checkout key is invalid")
+    if (args.guestAccessToken !== undefined && !/^[A-Za-z0-9_-]{32,256}$/u.test(args.guestAccessToken))
+      return createResultError(op, "Guest access token is invalid")
+    if (!/^sha256:[a-f0-9]{64}$/u.test(args.legalContext.documentSetRevision))
+      return createResultError(op, "Legal document revision is invalid")
+    const accessResult = await ticketOrderAccessResolve(args)
+    if (!accessResult.success) return accessResult
+    const config = billingEventorenClient.configRead()
+    if (!config.success) return config
+    const locale = args.locale ?? "de"
+    const urlResult = checkoutUrlsValidate(config.data.publicBaseUrl, args.successUrl, args.cancelUrl)
+    if (!urlResult.success) return urlResult
+    const email = args.customer.email.trim().toLowerCase()
+    const givenName = args.customer.givenName.trim()
+    const familyName = args.customer.familyName.trim()
+    if (!email || !givenName || !familyName) return createResultError(op, "Customer contact is incomplete")
+    if (!/^\S+@\S+\.\S+$/u.test(email)) return createResultError(op, "Customer email is invalid")
+
+    const paymentReference = `payment_${args.checkoutKey}`
+    const prepared = await ctx.runMutation(internal.ticketing.ticketCheckoutPrepareMutation, {
+      checkoutKey: args.checkoutKey,
+      ownerUserId: accessResult.data.userId,
+      guestAccessDigest: accessResult.data.guestAccessDigest,
+      customerEmail: email,
+      customerGivenName: givenName,
+      customerFamilyName: familyName,
+      customerPhone: args.customer.phone.trim(),
+      eventKey: args.eventKey,
+      catalogVersion: args.catalogVersion,
+      tickets: args.tickets,
+      stripeMode: config.data.stripeMode,
+      successUrl: args.successUrl,
+      cancelUrl: args.cancelUrl,
+      locale,
+      legalContext: args.legalContext,
+      paymentReference,
+    })
+    if (!prepared.success) return prepared
+    if (prepared.data.status === "paid")
+      return createResult({
+        orderId: prepared.data.orderId,
+        paymentReference: prepared.data.paymentReference,
+        stripeMode: prepared.data.stripeMode,
+        status: "paid" as const,
+        paymentStatus: "paid" as const,
+        replayed: true,
+      })
+    if (prepared.data.status === "checkout_created" && prepared.data.checkoutUrl && prepared.data.billingOrderReference)
+      return createResult({
+        orderId: prepared.data.orderId,
+        paymentReference: prepared.data.paymentReference,
+        orderReference: prepared.data.billingOrderReference,
+        stripeMode: prepared.data.stripeMode,
+        status: "checkout_created" as const,
+        paymentStatus: "pending" as const,
+        url: prepared.data.checkoutUrl,
+        replayed: true,
+      })
+
+    const claimed = await ctx.runMutation(internal.ticketing.ticketCheckoutClaimBillingMutation, {
+      orderId: prepared.data.orderId,
+      paymentReference,
+    })
+    if (!claimed.success) return claimed
+
+    const billingResult = await billingEventorenClient.ticketCheckoutCreate(config.data, {
+      organizationId: config.data.organizationId,
+      paymentReference,
+      eventKey: args.eventKey,
+      catalogVersion: args.catalogVersion,
+      tickets: args.tickets,
+      stripeMode: config.data.stripeMode,
+      successUrl: args.successUrl,
+      cancelUrl: args.cancelUrl,
+      locale,
+      customer: { email },
+      legalContext: args.legalContext,
+    })
+    if (!billingResult.success) return billingResult
+    if (
+      billingResult.data.paymentReference !== paymentReference ||
+      billingResult.data.stripeMode !== config.data.stripeMode
+    )
+      return createResultError(op, "Billing returned mismatched checkout correlation")
+
+    const marked = await ctx.runMutation(internal.ticketing.ticketCheckoutMarkCreatedMutation, {
+      orderId: prepared.data.orderId,
+      paymentReference,
+      billingOrderReference: billingResult.data.orderReference,
+      checkoutUrl: billingResult.data.url,
+    })
+    if (!marked.success) return marked
+    return createResult({
+      orderId: marked.data.orderId,
+      paymentReference: marked.data.paymentReference,
+      orderReference: marked.data.billingOrderReference,
+      stripeMode: billingResult.data.stripeMode,
+      status: "checkout_created" as const,
+      paymentStatus: "pending" as const,
+      url: marked.data.checkoutUrl,
+      replayed: prepared.data.replayed || marked.data.replayed,
+    })
+  },
+})
+
+function checkoutUrlsValidate(publicBaseUrl: string, successUrl: string, cancelUrl: string): Result<void> {
+  const op = "ticketCheckoutUrlsValidate"
+  try {
+    const expectedOrigin = new URL(publicBaseUrl).origin
+    const success = new URL(successUrl)
+    const cancel = new URL(cancelUrl)
+    if (success.origin !== expectedOrigin || cancel.origin !== expectedOrigin)
+      return createResultError(op, "Checkout return URLs must use the configured Eventoren origin")
+    return createResult(undefined)
+  } catch (error) {
+    return createResultError(op, "Checkout return URLs are invalid", String(error))
+  }
+}

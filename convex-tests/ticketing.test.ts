@@ -1,0 +1,471 @@
+/// <reference types="vite/client" />
+
+import { convexTest } from "convex-test"
+import { afterEach, expect, test, vi } from "vitest"
+import { api, internal } from "../convex/_generated/api.js"
+import schema from "../convex/schema.js"
+import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+
+const modules = import.meta.glob("../convex/**/*.ts")
+const authSecret = "ticketing-convex-test-secret"
+process.env.AUTH_SECRET = authSecret
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.useRealTimers()
+})
+
+async function createUser(t: ReturnType<typeof convexTest>, role: "admin" | "user" = "user") {
+  const now = new Date().toISOString()
+  return await t.run(async (ctx) =>
+    ctx.db.insert("users", {
+      name: role,
+      role,
+      createdAt: now,
+      updatedAt: now,
+    }),
+  )
+}
+
+async function tokenFor(userId: string) {
+  return await createToken(userId, authSecret)
+}
+
+function billingMock(
+  payment: "pending" | "paid" | "failed" = "pending",
+  expirationPayment: "pending" | "paid" | "failed" | "expired" = "expired",
+) {
+  let checkoutCalls = 0
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input)
+    let paymentReference = "payment_checkoutkey123456789012345678901234"
+    if (typeof init?.body === "string") {
+      try {
+        const body = JSON.parse(init.body) as { paymentReference?: unknown }
+        if (typeof body.paymentReference === "string") paymentReference = body.paymentReference
+      } catch {
+        // The test mock only needs the payment reference when the request body is valid JSON.
+      }
+    }
+    if (url.includes("/expire")) {
+      const pathParts = url.split("/")
+      const referencePart = pathParts.at(-2)
+      if (referencePart) paymentReference = decodeURIComponent(referencePart)
+    }
+    if (url.endsWith("/catalog"))
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: { catalogVersion: 3, catalogDigest: "a".repeat(64), eventCount: 1, replayed: false },
+        }),
+        { status: 200 },
+      )
+    if (url.endsWith("/ticket-checkout")) {
+      checkoutCalls += 1
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            paymentReference,
+            orderReference: "order_billing1",
+            stripeMode: "test",
+            status: "checkout_created",
+            url: "https://checkout.stripe.test/session",
+          },
+        }),
+        { status: 201 },
+      )
+    }
+    if (url.includes("/expire"))
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            paymentReference,
+            orderReference: "order_billing1",
+            stripeMode: "test",
+            status:
+              expirationPayment === "expired"
+                ? "expired"
+                : expirationPayment === "failed"
+                  ? "failed"
+                  : "checkout_created",
+            payment: expirationPayment,
+            expiresAt: null,
+          },
+        }),
+        { status: 200 },
+      )
+    if (url.includes("/status"))
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            paymentReference: "payment_checkoutkey123456789012345678901234",
+            orderReference: "order_billing1",
+            stripeMode: "test",
+            status: payment === "failed" ? "failed" : payment === "pending" ? "checkout_created" : "checkout_created",
+            payment,
+            expiresAt: null,
+          },
+        }),
+        { status: 200 },
+      )
+    return new Response(null, { status: 404 })
+  })
+  vi.stubGlobal("fetch", fetchMock)
+  return { fetchMock, checkoutCallsGet: () => checkoutCalls }
+}
+
+async function seedCatalog(t: ReturnType<typeof convexTest>, token: string) {
+  const event = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    eventKey: "ticket-event",
+    title: "Ticket event",
+    subtitle: "Subtitle",
+    description: "Description",
+    category: "konzerte",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    venue: "Hall",
+    city: "Berlin",
+    address: "Street 1",
+    organizer: "Eventoren",
+    imageUrl: "https://eventoren.test/image.jpg",
+    imageAlt: "Stage",
+    tags: [],
+    token,
+  })
+  expect(event.success).toBe(true)
+  await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    eventKey: "ticket-event",
+    tierKey: "standard",
+    name: "Standard",
+    description: "Ticket",
+    priceCents: 2_500,
+    feeCents: 300,
+    capacity: 2,
+    token,
+  })
+  const published = await t.mutation(api.catalog.catalogEventPublishMutation, {
+    eventKey: "ticket-event",
+    token,
+  })
+  expect(published.success).toBe(true)
+  if (!published.success) throw new Error("catalog seed failed")
+  return published.data.catalogVersion
+}
+
+function checkoutArgs(token: string, catalogVersion: number, checkoutKey: string) {
+  return {
+    token,
+    checkoutKey,
+    eventKey: "ticket-event",
+    catalogVersion,
+    tickets: [{ tierKey: "standard", quantity: 1 }],
+    successUrl: "https://eventoren.test/checkout/success",
+    cancelUrl: "https://eventoren.test/checkout/cancel",
+    locale: "de" as const,
+    customer: { email: "buyer@example.com", givenName: "Ada", familyName: "Lovelace", phone: "" },
+    legalContext: {
+      cta: "Kostenpflichtig buchen",
+      termsAccepted: true as const,
+      privacyAcknowledged: true as const,
+      documentSetRevision: `sha256:${"a".repeat(64)}`,
+    },
+  }
+}
+
+function environmentSet() {
+  process.env.EVENTOREN_BILLING_BASE_URL = "https://billing.test"
+  process.env.EVENTOREN_BILLING_ORGANIZATION_ID = "eventoren-test"
+  process.env.EVENTOREN_BILLING_API_CREDENTIAL = "bapi_test"
+  process.env.EVENTOREN_BILLING_STRIPE_MODE = "test"
+  process.env.EVENTOREN_PUBLIC_BASE_URL = "https://eventoren.test"
+}
+
+test("reserves atomically and replays the same checkout without a second Billing session", async () => {
+  environmentSet()
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+
+  const first = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  const replay = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  const competing = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...args,
+    checkoutKey: "checkoutkey223456789012345678901234",
+    tickets: [{ tierKey: "standard", quantity: 2 }],
+  })
+
+  expect(first.success).toBe(true)
+  expect(replay).toMatchObject({ success: true, data: { replayed: true, status: "checkout_created" } })
+  expect(competing.success).toBe(false)
+  expect(billing.checkoutCallsGet()).toBe(1)
+  const inventory = await t.run(async (ctx) => {
+    const tier = await ctx.db.query("catalogTicketTiers").collect()
+    const orders = await ctx.db.query("ticketOrders").collect()
+    const reservations = await ctx.db.query("ticketReservations").collect()
+    return { tier, orders, reservations }
+  })
+  expect(inventory.tier[0]?.reserved).toBe(1)
+  expect(inventory.orders).toHaveLength(1)
+  expect(inventory.reservations).toHaveLength(1)
+  expect(billing.fetchMock).toHaveBeenCalled()
+})
+
+test("does not release a still-payable pending session, then issues exactly once after Billing paid", async () => {
+  environmentSet()
+  const billing = billingMock("pending")
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+  const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(checkout.success).toBe(true)
+  if (!checkout.success) return
+
+  const pending = await t.action(api.ticketing.ticketPaymentReconcileAction, {
+    orderId: checkout.data.orderId as never,
+    token: args.token,
+  })
+  expect(pending).toMatchObject({ success: true, data: { paymentStatus: "pending" } })
+  const pendingInventory = await t.run(async (ctx) => ctx.db.query("catalogTicketTiers").collect())
+  expect(pendingInventory[0]?.reserved).toBe(1)
+
+  vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+    const url = String(input)
+    if (url.includes("/status"))
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            paymentReference: "payment_checkoutkey123456789012345678901234",
+            orderReference: "order_billing1",
+            stripeMode: "test",
+            status: "failed",
+            payment: "paid",
+            expiresAt: null,
+          },
+        }),
+        { status: 200 },
+      )
+    return billing.fetchMock(input)
+  })
+  const paid = await t.action(api.ticketing.ticketPaymentReconcileAction, {
+    orderId: checkout.data.orderId as never,
+    token: args.token,
+  })
+  const replayedPaid = await t.action(api.ticketing.ticketPaymentReconcileAction, {
+    orderId: checkout.data.orderId as never,
+    token: args.token,
+  })
+  expect(paid).toMatchObject({ success: true, data: { status: "paid", ticketCount: 1 } })
+  expect(replayedPaid).toMatchObject({ success: true, data: { status: "paid", ticketCount: 1 } })
+  const finalInventory = await t.run(async (ctx) => {
+    const tier = await ctx.db.query("catalogTicketTiers").collect()
+    const tickets = await ctx.db.query("ticketIssued").collect()
+    return { tier, tickets }
+  })
+  expect(finalInventory.tier[0]).toMatchObject({ reserved: 0, sold: 1 })
+  expect(finalInventory.tickets).toHaveLength(1)
+})
+
+test("rejects a payment correlation mismatch without changing inventory", async () => {
+  environmentSet()
+  billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const checkout = await t.action(
+    api.ticketing.ticketCheckoutCreateAction,
+    checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234"),
+  )
+  expect(checkout.success).toBe(true)
+  if (!checkout.success) return
+  const wrong = await t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+    orderId: checkout.data.orderId as never,
+    paymentReference: "payment_other",
+    billingOrderReference: "order_billing1",
+    stripeMode: "test",
+    payment: "paid",
+  })
+  expect(wrong.success).toBe(false)
+  const inventory = await t.run(async (ctx) => ctx.db.query("catalogTicketTiers").collect())
+  expect(inventory[0]).toMatchObject({ reserved: 1, sold: 0 })
+})
+
+test("releases inventory only after Billing reports failed and keeps guest access capability private", async () => {
+  environmentSet()
+  billingMock("failed")
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const guestAccessToken = "guest_access_token_123456789012345678"
+  const args = {
+    ...checkoutArgs("", catalogVersion, "checkoutkey123456789012345678901234"),
+    token: undefined,
+    guestAccessToken,
+  }
+  const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(checkout.success).toBe(true)
+  if (!checkout.success) return
+  const guestOrder = await t.query(api.ticketing.ticketOrderGetQuery, {
+    orderId: checkout.data.orderId as never,
+    guestAccessToken,
+  })
+  expect(guestOrder).toMatchObject({ success: true, data: { status: "checkout_created" } })
+  const failed = await t.action(api.ticketing.ticketPaymentReconcileAction, {
+    orderId: checkout.data.orderId as never,
+    guestAccessToken,
+  })
+  expect(failed).toMatchObject({ success: true, data: { status: "failed", paymentStatus: "failed" } })
+  const inventory = await t.run(async (ctx) => {
+    const tier = await ctx.db.query("catalogTicketTiers").collect()
+    const reservations = await ctx.db.query("ticketReservations").collect()
+    return { tier, reservations }
+  })
+  expect(inventory.tier[0]).toMatchObject({ reserved: 0, sold: 0 })
+  expect(inventory.reservations[0]?.status).toBe("released")
+})
+
+test("scheduled expiry calls authenticated Billing expiration, releases once, and is idempotent", async () => {
+  vi.useFakeTimers()
+  environmentSet()
+  const billing = billingMock("pending", "expired")
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+  const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(checkout.success).toBe(true)
+  if (!checkout.success) return
+
+  await t.finishAllScheduledFunctions(vi.runAllTimers)
+  const replay = await t.action(internal.ticketing.ticketReservationExpireAction, {
+    orderId: checkout.data.orderId as never,
+  })
+  expect(replay).toMatchObject({ success: true, data: { action: "complete" } })
+  const expirationCalls = billing.fetchMock.mock.calls.filter(([input]) => String(input).includes("/expire"))
+  expect(expirationCalls).toHaveLength(1)
+  expect(expirationCalls[0]?.[1]).toMatchObject({
+    method: "POST",
+    headers: { Authorization: "Bearer bapi_test" },
+  })
+
+  const state = await t.run(async (ctx) => {
+    const order = await ctx.db.get(checkout.data.orderId as never)
+    const tier = await ctx.db.query("catalogTicketTiers").collect()
+    const reservations = await ctx.db.query("ticketReservations").collect()
+    const tickets = await ctx.db.query("ticketIssued").collect()
+    return { order, tier, reservations, tickets }
+  })
+  expect(state.order).toMatchObject({ status: "expired", paymentStatus: "expired" })
+  expect(state.tier[0]).toMatchObject({ reserved: 0, sold: 0 })
+  expect(state.reservations[0]?.status).toBe("released")
+  expect(state.tickets).toHaveLength(0)
+})
+
+test("pending and provider errors retain inventory and schedule expiry retries", async () => {
+  environmentSet()
+  const billing = billingMock("pending", "pending")
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+  const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(checkout.success).toBe(true)
+  if (!checkout.success) return
+
+  const pending = await t.action(internal.ticketing.ticketReservationExpireAction, {
+    orderId: checkout.data.orderId as never,
+  })
+  expect(pending).toMatchObject({ success: true, data: { action: "deferred" } })
+
+  const providerErrorFetch = vi.fn(async (input: RequestInfo | URL) => {
+    if (String(input).includes("/expire")) return new Response(JSON.stringify({ success: false }), { status: 502 })
+    return billing.fetchMock(input)
+  })
+  vi.stubGlobal("fetch", providerErrorFetch)
+  const providerError = await t.action(internal.ticketing.ticketReservationExpireAction, {
+    orderId: checkout.data.orderId as never,
+  })
+  expect(providerError).toMatchObject({ success: false })
+  const state = await t.run(async (ctx) => {
+    const order = await ctx.db.get(checkout.data.orderId as never)
+    const tier = await ctx.db.query("catalogTicketTiers").collect()
+    return { order, tier }
+  })
+  expect(state.order).toMatchObject({ status: "checkout_created", paymentStatus: "pending" })
+  expect(state.tier[0]).toMatchObject({ reserved: 1, sold: 0 })
+  expect(providerErrorFetch).toHaveBeenCalledWith(expect.stringContaining("/expire"), expect.anything())
+})
+
+test("paid expiration result issues once and late paid truth after release cannot oversell", async () => {
+  environmentSet()
+  billingMock("pending", "paid")
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+  const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(checkout.success).toBe(true)
+  if (!checkout.success) return
+
+  const paid = await t.action(internal.ticketing.ticketReservationExpireAction, {
+    orderId: checkout.data.orderId as never,
+  })
+  expect(paid).toMatchObject({ success: true, data: { status: "paid", ticketCount: 1 } })
+
+  const secondBilling = billingMock("pending", "expired")
+  vi.stubGlobal("fetch", secondBilling.fetchMock)
+  const secondCheckout = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...args,
+    checkoutKey: "checkoutkey223456789012345678901234",
+  })
+  expect(secondCheckout.success).toBe(true)
+  if (!secondCheckout.success) return
+  const expired = await t.action(internal.ticketing.ticketReservationExpireAction, {
+    orderId: secondCheckout.data.orderId as never,
+  })
+  expect(expired).toMatchObject({ success: true, data: { expired: true, released: true } })
+  const replacement = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...args,
+    checkoutKey: "checkoutkey323456789012345678901234",
+  })
+  expect(replacement.success).toBe(true)
+  if (!replacement.success) return
+  const latePaid = await t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+    orderId: secondCheckout.data.orderId as never,
+    paymentReference: "payment_checkoutkey223456789012345678901234",
+    billingOrderReference: "order_billing1",
+    stripeMode: "test",
+    payment: "paid",
+  })
+  expect(latePaid).toMatchObject({ success: true, data: { status: "paid_inventory_conflict", ticketCount: 0 } })
+
+  const state = await t.run(async (ctx) => {
+    const tier = await ctx.db.query("catalogTicketTiers").collect()
+    const tickets = await ctx.db.query("ticketIssued").collect()
+    const orders = await ctx.db.query("ticketOrders").collect()
+    return { tier, tickets, orders }
+  })
+  expect(state.tier[0]).toMatchObject({ reserved: 1, sold: 1 })
+  expect(state.tickets).toHaveLength(1)
+  expect(state.orders.find((order) => order._id === secondCheckout.data.orderId)).toMatchObject({
+    status: "paid_inventory_conflict",
+    paymentStatus: "paid",
+  })
+  expect(state.orders.find((order) => order._id === replacement.data.orderId)).toMatchObject({
+    status: "checkout_created",
+    paymentStatus: "pending",
+  })
+})
