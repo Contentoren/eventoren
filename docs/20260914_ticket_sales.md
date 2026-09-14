@@ -17,4 +17,4 @@ Build the authoritative Convex catalog first, add a Billing catalog contract usi
 3. Completed: catalog push, reservations, checkout, reconciliation, issuance, and authenticated Billing session expiration with safe abandoned-reservation release.
 4. Completed: connect homepage/event pages to Convex with 60-second SSR caching; implement admin management and persistent checkout/tickets UI. Backend interfaces are documented in docs/ticket_checkout_backend.md.
 5. Completed: verify and fix backend deployment/configuration and end-to-end browser purchase/admin flows.
-6. In progress: delegate commits skill to Luna, then deploy and verify deployed services.
+6. In progress: finalize production build/auth follow-up commits using Luna commits skill, redeploy the clean revision, and verify deployed services. Production auth, admin access, catalog synchronization, and live merchant configuration are configured; production catalog remains unpublished.
