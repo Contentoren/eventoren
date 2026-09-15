@@ -4,6 +4,7 @@ import * as a from "valibot"
 export type Language = keyof typeof language
 
 export const language = {
+  de: "de",
   en: "en",
   ru: "ru",
   tj: "tj",
@@ -17,7 +18,12 @@ export function isEn(l: Language): boolean {
 
 export const languageSchema = a.enum(language)
 
-export const languageValidator = v.union(v.literal(language.en), v.literal(language.ru), v.literal(language.tj))
+export const languageValidator = v.union(
+  v.literal(language.de),
+  v.literal(language.en),
+  v.literal(language.ru),
+  v.literal(language.tj),
+)
 
 export function languageParseString<T>(s: string, fallback: T): Language | T {
   const parsed = a.safeParse(languageSchema, s)
@@ -40,6 +46,7 @@ export const languageOrNoneSchema = a.enum(languageOrNone)
 
 export const languageOrNoneValidator = v.union(
   v.literal(languageOrNone.none),
+  v.literal(language.de),
   v.literal(language.en),
   v.literal(language.ru),
   v.literal(language.tj),
