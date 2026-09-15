@@ -17,6 +17,17 @@ export type ApiClientPublicProjectInfo = {
   readonly serverTimestamp: number
 }
 
+function apiClientErrorMessageGet(error: unknown): string {
+  if (error instanceof Error) return error.message
+  if (typeof error === "string") return error
+  if (error !== null && typeof error === "object") {
+    const message = "message" in error ? error.message : undefined
+    if (typeof message === "string") return message
+    return JSON.stringify(error) ?? "Unknown API error"
+  }
+  return String(error)
+}
+
 export function apiClientCreate(url = convexUrlGet()): ConvexHttpClient {
   return new ConvexHttpClient(url)
 }
@@ -30,7 +41,7 @@ export async function apiClientPublicProjectInfoGet(
   } catch (error) {
     return {
       success: false,
-      error: { status: 503, message: error instanceof Error ? error.message : String(error) },
+      error: { status: 503, message: apiClientErrorMessageGet(error) },
     }
   }
 }
@@ -44,7 +55,7 @@ export async function apiClientCatalogEventListPublishedGet(
   } catch (error) {
     return {
       success: false,
-      error: { status: 503, message: error instanceof Error ? error.message : String(error) },
+      error: { status: 503, message: apiClientErrorMessageGet(error) },
     }
   }
 }
@@ -59,7 +70,7 @@ export async function apiClientCatalogEventGetPublished(
   } catch (error) {
     return {
       success: false,
-      error: { status: 503, message: error instanceof Error ? error.message : String(error) },
+      error: { status: 503, message: apiClientErrorMessageGet(error) },
     }
   }
 }
