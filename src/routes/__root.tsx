@@ -5,8 +5,8 @@ import { HydrationScript } from "solid-js/web"
 import { seo } from "../lib/seo.js"
 import appCss from "../tailwind.css?url"
 import { NotFoundPage } from "../marketing/NotFoundPage.js"
-import { Footer } from "../marketing/Footer.js"
 import { Header } from "../marketing/Header.js"
+import { RootFooter } from "../marketing/RootFooter.js"
 const siteName = "eventoren"
 const speculationRules = JSON.stringify({
   prerender: [{ where: { href_matches: "/*" }, eagerness: "moderate" }],
@@ -54,10 +54,10 @@ function RootDocument(props: { children: JSX.Element }) {
       </head>
       <body class="min-h-dvh">
         <Header />
-        <main>
+        <div>
           <Suspense>{props.children}</Suspense>
-        </main>
-        <Footer />
+        </div>
+        <RootFooter />
         <Scripts />
       </body>
     </html>
