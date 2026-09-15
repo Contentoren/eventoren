@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/solid-router"
 
-export function LegalPage(props: { readonly html: () => string }) {
+export function LegalPage(props: { readonly html: () => string; readonly homeHref?: string }) {
   return (
     <main class="min-h-screen bg-gray-50 px-4 py-12 text-gray-900 sm:px-6 sm:py-14 lg:px-8 lg:py-20">
       <div class="mx-auto max-w-5xl">
         <Link
-          to="/"
+          to={props.homeHref ?? "/"}
           class="mb-8 inline-flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-gray-900 sm:mb-10"
         >
           ← Back to homepage
