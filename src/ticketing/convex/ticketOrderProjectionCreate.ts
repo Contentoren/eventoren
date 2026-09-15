@@ -69,6 +69,7 @@ export async function ticketOrderProjectionCreate(ctx: QueryCtx, orderId: Id<"ti
       tierName: ticket.tierName,
       priceCents: ticket.priceCents,
       feeCents: ticket.feeCents,
+      participantName: ticket.participantName,
       issuedAt: ticket.issuedAt,
     })),
   }

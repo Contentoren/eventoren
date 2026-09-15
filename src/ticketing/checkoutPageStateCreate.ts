@@ -4,6 +4,7 @@ import type { EventItem } from "../events/EventItem.ts"
 import type { TicketCart } from "./TicketCart.ts"
 import { ticketCartDraftLoad } from "./ticketCartDraftLoad.ts"
 import { ticketCartSearchParse } from "./ticketCartSearchParse.ts"
+import { ticketCheckoutText } from "./ticketCheckoutText.ts"
 
 const routeApi = getRouteApi("/checkout")
 
@@ -41,16 +42,17 @@ export function checkoutPageStateCreate() {
   const groups = createMemo(() => items())
   const hasItems = createMemo(() => items().length > 0)
   const errorMessage = createMemo(() => {
+    const text = ticketCheckoutText()
     const catalogResult = catalog()
     const eventId = search().event?.trim() ?? ""
     if (eventId.length > 0) {
       if (catalogResult.success && catalogResult.data.some((event: EventItem) => event.id === eventId)) return ""
-      if (!catalogResult.success) return "Der Eventkatalog ist gerade nicht verfügbar. Bitte versuche es später erneut."
-      return "Für diese Bestellung wurde kein Event gefunden. Bitte wähle ein Event neu aus."
+      if (!catalogResult.success) return text.catalogUnavailable
+      return text.eventNotFound
     }
-    if (!catalogResult.success) return "Der Eventkatalog ist gerade nicht verfügbar. Bitte versuche es später erneut."
+    if (!catalogResult.success) return text.catalogUnavailable
     if (hasItems()) return ""
-    return "Dein Warenkorb enthält keine gültigen Tickets. Bitte wähle ein Event neu aus."
+    return text.noValidTickets
   })
   const fallbackPath = createMemo<"/" | "/warenkorb">(() => (search().event?.trim() ? "/" : "/warenkorb"))
 

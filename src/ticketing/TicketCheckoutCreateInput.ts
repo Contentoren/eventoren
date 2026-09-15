@@ -4,7 +4,11 @@ export type TicketCheckoutCreateInput = {
   readonly checkoutKey: string
   readonly eventKey: string
   readonly catalogVersion: number
-  readonly tickets: { readonly tierKey: string; readonly quantity: number }[]
+  readonly tickets: {
+    readonly tierKey: string
+    readonly quantity: number
+    readonly participantNames: string[]
+  }[]
   readonly successUrl: string
   readonly cancelUrl: string
   readonly locale: "de" | "en"

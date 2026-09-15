@@ -78,6 +78,7 @@ export const ticketTables = {
     tierName: v.string(),
     tierDescription: v.string(),
     quantity: v.number(),
+    participantNamesJson: v.optional(v.string()),
     priceCents: v.number(),
     feeCents: v.number(),
     createdAt: v.string(),
@@ -87,6 +88,7 @@ export const ticketTables = {
     orderId: v.id("ticketOrders"),
     tierId: v.id("catalogTicketTiers"),
     quantity: v.number(),
+    participantNamesJson: v.optional(v.string()),
     status: ticketReservationStatusValidator,
     expiresAt: v.number(),
     createdAt: v.string(),
@@ -133,8 +135,32 @@ export const ticketTables = {
     tierName: v.string(),
     priceCents: v.number(),
     feeCents: v.number(),
+    participantName: v.optional(v.string()),
+    cancelled: v.optional(v.boolean()),
+    checkedInAt: v.optional(v.string()),
+    checkedInBy: v.optional(vIdUser),
+    checkedInByName: v.optional(v.string()),
     issuedAt: v.string(),
   })
     .index("orderIdAndSequence", ["orderId", "sequence"])
+    .index("code", ["code"])
+    .index("eventKey", ["eventKey"])
     .index("ownerUserId", ["ownerUserId"]),
+
+  ticketCheckInHistory: defineTable({
+    ticketId: v.id("ticketIssued"),
+    orderId: v.id("ticketOrders"),
+    eventKey: v.string(),
+    ticketNumber: v.string(),
+    action: v.union(v.literal("check_in"), v.literal("reset")),
+    occurredAt: v.string(),
+    checkInAt: v.string(),
+    operatorId: vIdUser,
+    operatorName: v.string(),
+    participantName: v.string(),
+    buyerName: v.string(),
+    buyerEmail: v.string(),
+  })
+    .index("ticketIdAndOccurredAt", ["ticketId", "occurredAt"])
+    .index("eventKeyAndOccurredAt", ["eventKey", "occurredAt"]),
 } as const

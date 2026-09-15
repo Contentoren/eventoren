@@ -6,7 +6,11 @@ import { billingEventorenClient } from "./billingEventorenClient.js"
 import { ticketOrderAccessResolve } from "./ticketOrderAccessResolve.js"
 
 const checkoutKeyValidator = v.string()
-const ticketSelectionValidator = v.object({ tierKey: v.string(), quantity: v.number() })
+const ticketSelectionValidator = v.object({
+  tierKey: v.string(),
+  quantity: v.number(),
+  participantNames: v.optional(v.array(v.string())),
+})
 
 export const ticketCheckoutCreateAction = action({
   args: {
@@ -64,6 +68,18 @@ export const ticketCheckoutCreateAction = action({
     if (!email || !givenName || !familyName) return createResultError(op, "Customer contact is incomplete")
     if (!/^\S+@\S+\.\S+$/u.test(email)) return createResultError(op, "Customer email is invalid")
 
+    const tickets = args.tickets.map((ticket) => ({
+      tierKey: ticket.tierKey,
+      quantity: ticket.quantity,
+      ...(ticket.participantNames !== undefined
+        ? { participantNames: ticket.participantNames.map((name) => name.trim()) }
+        : {}),
+    }))
+    if (tickets.some((ticket) => ticket.participantNames === undefined))
+      return createResultError(op, "Each ticket requires exactly one participant name")
+    if (tickets.some((ticket) => ticket.participantNames?.some((name) => name.length === 0)))
+      return createResultError(op, "Participant names are incomplete")
+
     const paymentReference = `payment_${args.checkoutKey}`
     const prepared = await ctx.runMutation(internal.ticketing.ticketCheckoutPrepareMutation, {
       checkoutKey: args.checkoutKey,
@@ -75,7 +91,7 @@ export const ticketCheckoutCreateAction = action({
       customerPhone: args.customer.phone.trim(),
       eventKey: args.eventKey,
       catalogVersion: args.catalogVersion,
-      tickets: args.tickets,
+      tickets,
       stripeMode: config.data.stripeMode,
       successUrl: args.successUrl,
       cancelUrl: args.cancelUrl,
@@ -116,7 +132,7 @@ export const ticketCheckoutCreateAction = action({
       paymentReference,
       eventKey: args.eventKey,
       catalogVersion: args.catalogVersion,
-      tickets: args.tickets,
+      tickets: tickets.map(({ tierKey, quantity }) => ({ tierKey, quantity })),
       stripeMode: config.data.stripeMode,
       successUrl: args.successUrl,
       cancelUrl: args.cancelUrl,

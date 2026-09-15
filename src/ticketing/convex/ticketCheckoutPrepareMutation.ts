@@ -6,7 +6,11 @@ import { createResult, createResultError, type PromiseResult } from "#result"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 import { ticketCheckoutContextCanonicalize } from "./ticketCheckoutContextCanonicalize.js"
 
-const ticketSelectionValidator = v.object({ tierKey: v.string(), quantity: v.number() })
+const ticketSelectionValidator = v.object({
+  tierKey: v.string(),
+  quantity: v.number(),
+  participantNames: v.optional(v.array(v.string())),
+})
 
 export const ticketCheckoutPrepareMutation = internalMutation({
   args: {
@@ -114,6 +118,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       tierName: string
       tierDescription: string
       quantity: number
+      participantNames?: readonly string[]
       priceCents: number
       feeCents: number
     }> = []
@@ -124,6 +129,10 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       seenTierKeys.add(selection.tierKey)
       if (!Number.isInteger(selection.quantity) || selection.quantity < 1 || selection.quantity > 1_000)
         return createResultError(op, "Ticket quantity is invalid")
+      if (selection.participantNames === undefined || selection.participantNames.length !== selection.quantity)
+        return createResultError(op, "Each ticket requires exactly one participant name")
+      if (selection.participantNames.some((name) => name.trim().length === 0))
+        return createResultError(op, "Participant names are incomplete")
       const tier = await ctx.db
         .query("catalogTicketTiers")
         .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", selection.tierKey))
@@ -139,13 +148,15 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         tierName: tier.name,
         tierDescription: tier.description,
         quantity: selection.quantity,
+        ...(selection.participantNames !== undefined
+          ? { participantNames: selection.participantNames.map((name) => name.trim()) }
+          : {}),
         priceCents: tier.priceCents,
         feeCents: tier.feeCents,
       })
     }
     if (lineInputs.length === 0) return createResultError(op, "At least one ticket is required")
     if (subtotalCents + feeCents < 1) return createResultError(op, "The selected tickets are not payable")
-
     const now = new Date().toISOString()
     const expiresAt = Date.now() + 15 * 60 * 1000
     const orderId = await ctx.db.insert("ticketOrders", {
@@ -198,6 +209,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         tierName: line.tierName,
         tierDescription: line.tierDescription,
         quantity: line.quantity,
+        ...(line.participantNames !== undefined ? { participantNamesJson: JSON.stringify(line.participantNames) } : {}),
         priceCents: line.priceCents,
         feeCents: line.feeCents,
         createdAt: now,
@@ -211,6 +223,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         orderId,
         tierId: line.tierId,
         quantity: line.quantity,
+        ...(line.participantNames !== undefined ? { participantNamesJson: JSON.stringify(line.participantNames) } : {}),
         status: "active",
         expiresAt,
         createdAt: now,

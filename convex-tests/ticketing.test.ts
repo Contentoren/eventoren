@@ -157,13 +157,20 @@ async function seedCatalog(t: ReturnType<typeof convexTest>, token: string) {
   return published.data.catalogVersion
 }
 
-function checkoutArgs(token: string, catalogVersion: number, checkoutKey: string) {
+function checkoutArgs(
+  token: string,
+  catalogVersion: number,
+  checkoutKey: string,
+  options: {
+    tickets?: { tierKey: string; quantity: number; participantNames?: string[] }[]
+  } = {},
+) {
   return {
     token,
     checkoutKey,
     eventKey: "ticket-event",
     catalogVersion,
-    tickets: [{ tierKey: "standard", quantity: 1 }],
+    tickets: options.tickets ?? [{ tierKey: "standard", quantity: 1, participantNames: ["Ada Lovelace"] }],
     successUrl: "https://eventoren.test/checkout/success",
     cancelUrl: "https://eventoren.test/checkout/cancel",
     locale: "de" as const,
@@ -279,7 +286,7 @@ test("reserves atomically and replays the same checkout without a second Billing
   const competing = await t.action(api.ticketing.ticketCheckoutCreateAction, {
     ...args,
     checkoutKey: "checkoutkey223456789012345678901234",
-    tickets: [{ tierKey: "standard", quantity: 2 }],
+    tickets: [{ tierKey: "standard", quantity: 2, participantNames: ["Ada Lovelace", "Grace Hopper"] }],
   })
 
   expect(first.success).toBe(true)
@@ -296,6 +303,24 @@ test("reserves atomically and replays the same checkout without a second Billing
   expect(inventory.orders).toHaveLength(1)
   expect(inventory.reservations).toHaveLength(1)
   expect(billing.fetchMock).toHaveBeenCalled()
+})
+
+test("requires participant names for every newly checked-out ticket", async () => {
+  environmentSet()
+  billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey523456789012345678901234"),
+    tickets: [{ tierKey: "standard", quantity: 1 }],
+  })
+
+  expect(result).toMatchObject({ success: false, errorMessage: "Each ticket requires exactly one participant name" })
+  const orders = await t.run(async (ctx) => ctx.db.query("ticketOrders").collect())
+  expect(orders).toHaveLength(0)
 })
 
 test("does not release a still-payable pending session, then issues exactly once after Billing paid", async () => {
@@ -354,6 +379,103 @@ test("does not release a still-payable pending session, then issues exactly once
   })
   expect(finalInventory.tier[0]).toMatchObject({ reserved: 0, sold: 1 })
   expect(finalInventory.tickets).toHaveLength(1)
+})
+
+test("keeps participant names associated with quantities and lines through reservation, issuance, wallet data, and paid retries", async () => {
+  environmentSet()
+  billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const adminToken = await tokenFor(adminId)
+  const catalogVersion = await seedCatalog(t, adminToken)
+  const addedTier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    eventKey: "ticket-event",
+    tierKey: "vip",
+    name: "VIP",
+    description: "VIP ticket",
+    priceCents: 4_000,
+    feeCents: 500,
+    capacity: 2,
+    token: adminToken,
+  })
+  expect(addedTier.success).toBe(true)
+  if (!addedTier.success) return
+
+  const checkoutKey = "checkoutkey423456789012345678901234"
+  const args = checkoutArgs(await tokenFor(userId), addedTier.data.catalogVersion, checkoutKey, {
+    tickets: [
+      { tierKey: "standard", quantity: 2, participantNames: ["Ada", "Grace"] },
+      { tierKey: "vip", quantity: 1, participantNames: ["Lin"] },
+    ],
+  })
+  const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(checkout).toMatchObject({ success: true, data: { status: "checkout_created" } })
+  if (!checkout.success) return
+
+  const changedReplay = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...args,
+    tickets: [
+      { tierKey: "standard", quantity: 2, participantNames: ["Ada", "Changed"] },
+      { tierKey: "vip", quantity: 1, participantNames: ["Lin"] },
+    ],
+  })
+  expect(changedReplay.success).toBe(false)
+
+  const reserved = await t.run(async (ctx) => {
+    const lines = await ctx.db.query("ticketOrderLines").collect()
+    const reservations = await ctx.db.query("ticketReservations").collect()
+    const order = await ctx.db.get(checkout.data.orderId as never)
+    return { lines, reservations, order }
+  })
+  expect(reserved.lines.map((line) => line.participantNamesJson)).toEqual([
+    JSON.stringify(["Ada", "Grace"]),
+    JSON.stringify(["Lin"]),
+  ])
+  expect(reserved.reservations.map((reservation) => reservation.participantNamesJson)).toEqual([
+    JSON.stringify(["Ada", "Grace"]),
+    JSON.stringify(["Lin"]),
+  ])
+  expect(reserved.order).toMatchObject({ customerGivenName: "Ada", customerFamilyName: "Lovelace" })
+
+  const paid = await t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+    orderId: checkout.data.orderId as never,
+    paymentReference: `payment_${checkoutKey}`,
+    billingOrderReference: "order_billing1",
+    stripeMode: "test",
+    payment: "paid",
+  })
+  const paidRetry = await t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+    orderId: checkout.data.orderId as never,
+    paymentReference: `payment_${checkoutKey}`,
+    billingOrderReference: "order_billing1",
+    stripeMode: "test",
+    payment: "paid",
+  })
+  expect(paid).toMatchObject({ success: true, data: { status: "paid", ticketCount: 3 } })
+  expect(paidRetry).toMatchObject({ success: true, data: { status: "paid", ticketCount: 3 } })
+
+  const tickets = await t.run(async (ctx) =>
+    (await ctx.db.query("ticketIssued").collect()).sort((left, right) => left.sequence - right.sequence),
+  )
+  expect(tickets).toHaveLength(3)
+  expect(tickets.map((ticket) => [ticket.tierKey, ticket.participantName])).toEqual([
+    ["standard", "Ada"],
+    ["standard", "Grace"],
+    ["vip", "Lin"],
+  ])
+
+  const wallet = await t.query(api.ticketing.ticketOrderGetQuery, {
+    orderId: checkout.data.orderId as never,
+    token: args.token,
+  })
+  expect(wallet).toMatchObject({
+    success: true,
+    data: {
+      contact: { givenName: "Ada", familyName: "Lovelace" },
+      tickets: [{ participantName: "Ada" }, { participantName: "Grace" }, { participantName: "Lin" }],
+    },
+  })
 })
 
 test("rejects a payment correlation mismatch without changing inventory", async () => {

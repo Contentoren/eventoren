@@ -1,1 +1,1 @@
-export type TicketCheckoutStep = "kontakt" | "zahlung" | "bestaetigung"
+export type TicketCheckoutStep = "kontakt" | "bestaetigung"

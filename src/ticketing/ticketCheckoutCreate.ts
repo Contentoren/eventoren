@@ -14,7 +14,13 @@ export async function ticketCheckoutCreate(
   client: ConvexHttpClient = apiClientCreate(),
 ): Promise<Result<TicketCheckoutCreateResponse>> {
   try {
-    const response = await client.action(api.ticketing.ticketCheckoutCreateAction, input)
+    const response = await client.action(api.ticketing.ticketCheckoutCreateAction, {
+      ...input,
+      tickets: input.tickets.map((ticket) => ({
+        ...ticket,
+        ...(ticket.participantNames === undefined ? {} : { participantNames: [...ticket.participantNames] }),
+      })),
+    })
     if (!response.success) return createResultError(op, response.errorMessage, response)
     return createResult(response.data)
   } catch (error) {

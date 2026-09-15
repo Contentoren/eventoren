@@ -62,6 +62,7 @@ export type TicketOrderProjection = {
     readonly tierName: string
     readonly priceCents: number
     readonly feeCents: number
+    readonly participantName?: string
     readonly issuedAt: string
   }[]
 }

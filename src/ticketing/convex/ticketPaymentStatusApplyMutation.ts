@@ -181,6 +181,9 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       .collect()
     if (activeReservations.length !== lines.length)
       return createResultError(op, "Paid inventory reservation is incomplete")
+    const participantNamesByTier = new Map(
+      activeReservations.map((reservation) => [reservation.tierId, reservation.participantNamesJson]),
+    )
 
     for (const reservation of activeReservations) {
       const tier = await ctx.db.get(reservation.tierId)
@@ -200,14 +203,18 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       .collect()
     sequence = existingTickets.length
     for (const line of lines.sort((left, right) => left.tierKey.localeCompare(right.tierKey))) {
+      const participantNames =
+        participantNamesRead(line.participantNamesJson) ?? participantNamesRead(participantNamesByTier.get(line.tierId))
       for (let index = 0; index < line.quantity; index += 1) {
         sequence += 1
+        const codeResult = await ticketIssuedCodeCreate(ctx)
+        if (!codeResult.success) return codeResult
         await ctx.db.insert("ticketIssued", {
           orderId: order._id,
           sequence,
           ownerUserId: order.ownerUserId,
           guestAccessDigest: order.guestAccessDigest,
-          code: `TKT-${crypto.randomUUID().replaceAll("-", "").slice(0, 20).toUpperCase()}`,
+          code: codeResult.data,
           eventKey: order.eventKey,
           eventTitle: order.eventTitle,
           eventStartsAt: order.eventStartsAt,
@@ -219,6 +226,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
           tierName: line.tierName,
           priceCents: line.priceCents,
           feeCents: line.feeCents,
+          ...(participantNames?.[index] !== undefined ? { participantName: participantNames[index] } : {}),
           issuedAt: now,
         })
       }
@@ -242,10 +250,35 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
   },
 })
 
+async function ticketIssuedCodeCreate(ctx: MutationCtx): PromiseResult<string> {
+  const op = "ticketIssuedCodeCreate"
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const code = `TKT-${crypto.randomUUID().replaceAll("-", "").slice(0, 20).toUpperCase()}`
+    const existing = await ctx.db
+      .query("ticketIssued")
+      .withIndex("code", (q) => q.eq("code", code))
+      .first()
+    if (!existing) return createResult(code)
+  }
+  return createResultError(op, "Could not generate a unique ticket code")
+}
+
 async function ticketCountGet(ctx: MutationCtx, orderId: Id<"ticketOrders">) {
   return await ctx.db
     .query("ticketIssued")
     .withIndex("orderIdAndSequence", (q) => q.eq("orderId", orderId))
     .collect()
     .then((tickets) => tickets.length)
+}
+
+function participantNamesRead(value: string | undefined): readonly string[] | undefined {
+  if (value === undefined) return undefined
+  try {
+    const parsed: unknown = JSON.parse(value)
+    if (!Array.isArray(parsed) || parsed.some((name) => typeof name !== "string" || name.trim().length === 0))
+      return undefined
+    return parsed
+  } catch {
+    return undefined
+  }
 }
