@@ -5,7 +5,6 @@ import { HydrationScript } from "solid-js/web"
 import { seo } from "../lib/seo.js"
 import appCss from "../tailwind.css?url"
 import { NotFoundPage } from "../marketing/NotFoundPage.js"
-import { Header } from "../marketing/Header.js"
 import { RootFooter } from "../marketing/RootFooter.js"
 const siteName = "eventoren"
 const speculationRules = JSON.stringify({
@@ -53,7 +52,6 @@ function RootDocument(props: { children: JSX.Element }) {
         <HeadContent />
       </head>
       <body class="min-h-dvh">
-        <Header />
         <div>
           <Suspense>{props.children}</Suspense>
         </div>
