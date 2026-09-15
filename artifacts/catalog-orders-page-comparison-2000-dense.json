@@ -5,12 +5,7 @@
   "runtime": {
     "backend": "local convex-test/mock",
     "convexTestVersion": "0.0.56",
-    "processMemoryIncludes": [
-      "Vitest runner",
-      "convex-test mock storage",
-      "JavaScript heap",
-      "GC variability"
-    ],
+    "processMemoryIncludes": ["Vitest runner", "convex-test mock storage", "JavaScript heap", "GC variability"],
     "hostedFunctionMemoryCaptured": false,
     "readMetrics": {
       "supported": false,
@@ -89,9 +84,7 @@
               "mean": 1705784,
               "max": 1705784
             },
-            "observedRecordCounts": [
-              2000
-            ],
+            "observedRecordCounts": [2000],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:34:39.350Z",
@@ -125,9 +118,7 @@
               "mean": 42883,
               "max": 42883
             },
-            "observedRecordCounts": [
-              50
-            ],
+            "observedRecordCounts": [50],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:35:02.313Z",
@@ -161,9 +152,7 @@
               "mean": 423,
               "max": 423
             },
-            "observedRecordCounts": [
-              0
-            ],
+            "observedRecordCounts": [0],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:35:02.953Z",
@@ -197,9 +186,7 @@
               "mean": 1924945,
               "max": 1924945
             },
-            "observedRecordCounts": [
-              2000
-            ],
+            "observedRecordCounts": [2000],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:35:25.178Z",
@@ -233,9 +220,7 @@
               "mean": 2949082,
               "max": 2949082
             },
-            "observedRecordCounts": [
-              2000
-            ],
+            "observedRecordCounts": [2000],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:36:16.778Z",
@@ -269,9 +254,7 @@
               "mean": 35867,
               "max": 35867
             },
-            "observedRecordCounts": [
-              50
-            ],
+            "observedRecordCounts": [50],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:36:47.369Z",

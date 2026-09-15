@@ -5,12 +5,7 @@
   "runtime": {
     "backend": "local convex-test/mock",
     "convexTestVersion": "0.0.56",
-    "processMemoryIncludes": [
-      "Vitest runner",
-      "convex-test mock storage",
-      "JavaScript heap",
-      "GC variability"
-    ],
+    "processMemoryIncludes": ["Vitest runner", "convex-test mock storage", "JavaScript heap", "GC variability"],
     "hostedFunctionMemoryCaptured": false,
     "readMetrics": {
       "supported": false,
@@ -89,9 +84,7 @@
               "mean": 849,
               "max": 849
             },
-            "observedRecordCounts": [
-              1
-            ],
+            "observedRecordCounts": [1],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:34:17.207Z",
@@ -125,9 +118,7 @@
               "mean": 1245,
               "max": 1245
             },
-            "observedRecordCounts": [
-              1
-            ],
+            "observedRecordCounts": [1],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:34:17.266Z",
@@ -161,9 +152,7 @@
               "mean": 1109,
               "max": 1109
             },
-            "observedRecordCounts": [
-              1
-            ],
+            "observedRecordCounts": [1],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:34:17.314Z",
@@ -197,9 +186,7 @@
               "mean": 1916949,
               "max": 1916949
             },
-            "observedRecordCounts": [
-              2000
-            ],
+            "observedRecordCounts": [2000],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:34:39.953Z",
@@ -233,9 +220,7 @@
               "mean": 1558,
               "max": 1558
             },
-            "observedRecordCounts": [
-              1
-            ],
+            "observedRecordCounts": [1],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:35:01.554Z",
@@ -269,9 +254,7 @@
               "mean": 810,
               "max": 810
             },
-            "observedRecordCounts": [
-              1
-            ],
+            "observedRecordCounts": [1],
             "errors": [],
             "workloadProcessBaseline": {
               "sampledAt": "2026-09-15T08:35:01.590Z",
