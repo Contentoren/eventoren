@@ -230,7 +230,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                     {(exclusion) => (
                       <li class="flex items-start gap-space-3 text-sm leading-relaxed text-content-muted sm:text-base">
                         <span
-                          class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-danger/30 bg-danger-soft text-danger"
+                          class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-border-subtle/60 bg-surface-muted/40 text-content-muted"
                           aria-hidden="true"
                         >
                           <svg

@@ -10,14 +10,6 @@ export function EventDetailBanner(props: { imageUrl: string; imageAlt: string })
         height="820"
         class="size-full object-cover"
       />
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-black/50 to-transparent"
-      />
-      <div
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-linear-to-t from-surface-base via-surface-base/40 to-transparent"
-      />
     </div>
   )
 }
