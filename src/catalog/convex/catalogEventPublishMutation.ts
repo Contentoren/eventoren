@@ -26,12 +26,11 @@ async function catalogEventPublishAuthorizedFn(
   if (event.status === "published")
     return createResult({ eventKey: event.eventKey, catalogVersion: event.catalogVersion })
 
-  const tierCount = await ctx.db
+  const tier = await ctx.db
     .query("catalogTicketTiers")
     .withIndex("eventId", (q) => q.eq("eventId", event._id))
-    .collect()
-    .then((tiers) => tiers.length)
-  if (tierCount === 0) return createResultError(op, "Published events need a ticket tier")
+    .first()
+  if (!tier) return createResultError(op, "Published events need a ticket tier")
 
   const now = new Date().toISOString()
   const versionResult = await catalogSyncAdvanceFn(ctx, args.userId, now)

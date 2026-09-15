@@ -1,4 +1,5 @@
 export { catalogEventGetPublishedQuery } from "#src/catalog/convex/catalogEventGetPublishedQuery.ts"
+export { catalogEventListPublishedPageQuery } from "#src/catalog/convex/catalogEventListPublishedPageQuery.ts"
 export { catalogEventListPublishedQuery } from "#src/catalog/convex/catalogEventListPublishedQuery.ts"
 export { catalogEventPublishMutation } from "#src/catalog/convex/catalogEventPublishMutation.ts"
 export { catalogEventUpsertMutation } from "#src/catalog/convex/catalogEventUpsertMutation.ts"

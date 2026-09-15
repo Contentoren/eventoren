@@ -8,11 +8,13 @@ import { eventFilterBarStateCreate } from "./eventFilterBarStateCreate.ts"
 export function EventFilterBar(props: {
   filter: EventFilter
   resultCount: number
+  isDone: boolean
   onFilterChange: (filter: EventFilter) => void
 }) {
   const state = eventFilterBarStateCreate({
     filter: () => props.filter,
     resultCount: () => props.resultCount,
+    isDone: () => props.isDone,
     onFilterChange: (filter) => props.onFilterChange(filter),
   })
 

@@ -53,14 +53,13 @@ async function catalogEventUpsertAuthorizedFn(
   const status = args.status ?? existing?.status ?? "draft"
 
   if (status === "published") {
-    const tierCount = existing
+    const tier = existing
       ? await ctx.db
           .query("catalogTicketTiers")
           .withIndex("eventId", (q) => q.eq("eventId", existing._id))
-          .collect()
-          .then((tiers) => tiers.length)
-      : 0
-    if (tierCount === 0) return createResultError("catalogEventUpsertMutation", "Published events need a ticket tier")
+          .first()
+      : null
+    if (!tier) return createResultError("catalogEventUpsertMutation", "Published events need a ticket tier")
   }
 
   const now = new Date().toISOString()

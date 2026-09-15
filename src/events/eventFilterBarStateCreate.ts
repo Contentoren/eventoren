@@ -9,6 +9,7 @@ export function eventFilterBarStateCreate(inputs: {
   filter: () => EventFilter
   onFilterChange: (filter: EventFilter) => void
   resultCount: () => number
+  isDone: () => boolean
 }) {
   const categoryOptions = createMemo(() => [
     { value: "alle" as const, label: "Alle Kategorien" },
@@ -25,9 +26,11 @@ export function eventFilterBarStateCreate(inputs: {
     })),
   )
 
-  const resultLabel = createMemo(() =>
-    inputs.resultCount() === 1 ? "1 Event gefunden" : `${inputs.resultCount()} Events gefunden`,
-  )
+  const resultLabel = createMemo(() => {
+    if (!inputs.isDone())
+      return inputs.resultCount() === 1 ? "1 Event geladen" : `${inputs.resultCount()} Events geladen`
+    return inputs.resultCount() === 1 ? "1 Event gefunden" : `${inputs.resultCount()} Events gefunden`
+  })
 
   const selectQuery = (query: string) => inputs.onFilterChange({ ...inputs.filter(), query })
   const selectLocation = (location: string) => inputs.onFilterChange({ ...inputs.filter(), location })
