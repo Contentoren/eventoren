@@ -7,6 +7,7 @@ const ruTranslations = {}
 const tjTranslations = {}
 
 const translations: Record<string, Record<string, string>> = {
+  de: {},
   ru: ruTranslations,
   tj: tjTranslations,
 }

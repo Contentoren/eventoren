@@ -6,6 +6,10 @@ export function languageFromBrowser(): Language | undefined {
   const browserLanguages = navigator.languages || [navigator.language]
   if (!browserLanguages || browserLanguages.length <= 0) return undefined
   for (const lang of browserLanguages) {
+    const isDe = lang.startsWith("de")
+    if (isDe) {
+      return language.de
+    }
     const isEn = lang.startsWith("en")
     if (isEn) {
       return language.en

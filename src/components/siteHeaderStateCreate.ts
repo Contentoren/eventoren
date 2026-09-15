@@ -1,4 +1,8 @@
-import { createMemo, createSignal, onCleanup, onMount } from "solid-js"
+import { createMemo, onCleanup, onMount } from "solid-js"
+import { createSignalObject } from "#ui/utils/createSignalObject.ts"
+import { languageSignal } from "../app/i18n/languageSignal.ts"
+import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
+import { userSessionSignal } from "../auth/ui/signals/userSessionSignal.ts"
 import type { TicketCartDraft } from "../ticketing/TicketCartDraft.ts"
 import { ticketCartDraftEventName } from "../ticketing/ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "../ticketing/ticketCartDraftLoad.ts"
@@ -7,15 +11,18 @@ import type { SiteHeaderOverlay } from "./SiteHeaderOverlay.ts"
 import { siteHeaderNavLinks } from "./siteHeaderNavLinks.ts"
 
 export function siteHeaderStateCreate() {
-  const [overlay, setOverlay] = createSignal<SiteHeaderOverlay>("none")
-  const [menuOpen, setMenuOpen] = createSignal(false)
-  const [cart, setCart] = createSignal<TicketCartDraft>([])
+  const overlay = createSignalObject<SiteHeaderOverlay>("none")
+  const menuOpen = createSignalObject(false)
+  const cart = createSignalObject<TicketCartDraft>([])
+  const sessionHydrated = createSignalObject(false)
 
   const syncCart = () => {
-    setCart(ticketCartDraftLoad())
+    cart.set(ticketCartDraftLoad())
   }
 
   onMount(() => {
+    userSessionBrowserRestore()
+    sessionHydrated.set(true)
     syncCart()
 
     if (typeof window === "undefined") return
@@ -29,7 +36,7 @@ export function siteHeaderStateCreate() {
     })
   })
 
-  const cartQuantity = createMemo(() => ticketCartDraftTotalQuantity(cart()))
+  const cartQuantity = createMemo(() => ticketCartDraftTotalQuantity(cart.get()))
 
   const cartLabel = createMemo(() => {
     const quantity = cartQuantity()
@@ -42,21 +49,23 @@ export function siteHeaderStateCreate() {
   const cartHasItems = createMemo(() => cartQuantity() > 0)
 
   const closeOverlay = () => {
-    setOverlay("none")
-    setMenuOpen(false)
+    overlay.set("none")
+    menuOpen.set(false)
   }
 
   const openMenu = () => {
-    setOverlay("none")
-    setMenuOpen(true)
+    overlay.set("none")
+    menuOpen.set(true)
   }
 
   return {
-    navLinks: () => siteHeaderNavLinks,
+    navLinks: createMemo(() =>
+      siteHeaderNavLinks(languageSignal.get(), userSessionSignal.get()?.profile.role, sessionHydrated.get()),
+    ),
     cartQuantity,
     cartLabel,
     cartHasItems,
-    isMenuOpen: menuOpen,
+    isMenuOpen: menuOpen.get,
     closeOverlay,
     openMenu,
   }

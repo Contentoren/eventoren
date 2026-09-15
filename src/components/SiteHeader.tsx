@@ -1,5 +1,7 @@
-import { useNavigate } from "@tanstack/solid-router"
+import { Link, useNavigate } from "@tanstack/solid-router"
+import { For } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import { LanguageSelector } from "../app/i18n/LanguageSelector.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { SiteHeaderCartButton } from "./SiteHeaderCartButton.tsx"
 import { SiteHeaderLogo } from "./SiteHeaderLogo.tsx"
@@ -19,7 +21,28 @@ export function SiteHeader() {
         <div class="flex h-16 items-center justify-between gap-space-5 max-md:gap-space-2">
           <SiteHeaderLogo class="max-md:px-space-1" />
 
+          <nav aria-label="Main navigation" class="max-md:hidden">
+            <ul class="flex items-center gap-space-1">
+              <For each={state.navLinks()}>
+                {(link) => (
+                  <li>
+                    <Link
+                      to={link.to}
+                      activeOptions={{ exact: link.exact }}
+                      activeProps={{ class: "bg-brand-soft text-brand-accent", "aria-current": "page" }}
+                      inactiveProps={{ class: "text-content-muted hover:bg-surface-muted hover:text-content" }}
+                      class="focus-ring rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                )}
+              </For>
+            </ul>
+          </nav>
+
           <div class="flex items-center gap-2 max-md:gap-0">
+            <LanguageSelector />
             <SiteHeaderCartButton
               quantity={state.cartQuantity()}
               label={state.cartLabel()}

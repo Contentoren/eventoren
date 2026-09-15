@@ -4,6 +4,8 @@ import { ttc } from "./ttc.js"
 
 export function languageGetText(l: string) {
   switch (l as Language) {
+    case language.de:
+      return "Deutsch"
     case language.en:
       return "English"
     case language.ru:

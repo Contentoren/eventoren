@@ -9,21 +9,7 @@ const languageLocalStorageKey = "language"
 export const languageSignal: SignalObject<Language> = createLanguageSignal()
 
 function createLanguageSignal(): SignalObject<Language> {
-  let hasLoaded = false
-  const signal = createSignalObject<Language>(languageFromBrowser() ?? languageDefault)
-
-  // Override get to from localStorage if not already loaded
-  const signalGet = signal.get
-  signal.get = () => {
-    if (!hasLoaded) {
-      const result = languageLoadFromLocalStorage()
-      if (result.success) {
-        signal.set(result.data)
-      }
-      hasLoaded = true
-    }
-    return signalGet()
-  }
+  const signal = createSignalObject<Language>(languageDefault)
 
   // Override the set method to also save to localStorage
   const signalSet = signal.set
@@ -38,7 +24,7 @@ function createLanguageSignal(): SignalObject<Language> {
 
 export function languageLoadFromLocalStorage() {
   const op = "languageLoadFromLocalStorage"
-  if (!localStorage) return createResultError(op, "localStorage not defined")
+  if (typeof localStorage === "undefined") return createResultError(op, "localStorage not defined")
   const read = localStorage.getItem(languageLocalStorageKey)
   if (!read) return createResultError(op, "no language saved in localStorage")
   const parsing = a.safeParse(languageSchema, read)
@@ -49,7 +35,7 @@ export function languageLoadFromLocalStorage() {
 }
 
 export function languageSaveToLocalStorage(language: Language) {
-  if (!localStorage) return
+  if (typeof localStorage === "undefined") return
   localStorage.setItem(languageLocalStorageKey, language)
 }
 
@@ -66,6 +52,13 @@ export function languageSignalRegisterHandler(signal = languageSignal) {
   }
   onMount(() => {
     if (typeof window == "undefined") return
+    const stored = languageLoadFromLocalStorage()
+    const browserLanguage = languageFromBrowser()
+    if (stored.success) {
+      signal.set(stored.data)
+    } else if (browserLanguage !== undefined) {
+      signal.set(browserLanguage)
+    }
     window.addEventListener("storage", handleStorageEvent)
   })
   onCleanup(() => {
