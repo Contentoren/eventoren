@@ -3,6 +3,45 @@
 @source "./**/*.{ts,tsx}";
 @source "../ui/**/*.{ts,tsx}";
 @theme {
+  --color-surface-base: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f5f9;
+  --color-surface-inverted: #0f172a;
+  --color-border-subtle: #cbd5e1;
+  --color-border-strong: #64748b;
+
+  --color-content: #0f172a;
+  --color-content-muted: #475569;
+  --color-content-inverted: #ffffff;
+
+  --color-brand: #0f766e;
+  --color-brand-strong: #115e59;
+  --color-brand-soft: #ccfbf1;
+  --color-brand-accent: #134e4a;
+  --color-accent: #f59e0b;
+  --color-accent-strong: #d97706;
+  --color-accent-soft: #fef3c7;
+  --color-brand-content: #ffffff;
+
+  --color-success: #166534;
+  --color-success-soft: #dcfce7;
+  --color-warning: #92400e;
+  --color-warning-soft: #fef3c7;
+  --color-danger: #b91c1c;
+  --color-danger-soft: #fee2e2;
+
+  /* 4 / 6 / 8 / 12 / 16 / 24 / 32px spacing scale */
+  --spacing-space-1: 4px;
+  --spacing-space-2: 6px;
+  --spacing-space-3: 8px;
+  --spacing-space-4: 12px;
+  --spacing-space-5: 16px;
+  --spacing-space-6: 24px;
+  --spacing-space-7: 32px;
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.2 0 0);
   --color-muted: oklch(0.96 0 0);
@@ -10,12 +49,71 @@
 }
 
 @layer base {
+  :root {
+    color-scheme: light;
+    accent-color: var(--color-brand);
+  }
+
   html {
+    background-color: var(--color-surface-base);
     scrollbar-gutter: stable;
   }
 
   body {
-    background: var(--color-background);
-    color: var(--color-foreground);
+    background-color: var(--color-surface-base);
+    color: var(--color-content);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: var(--color-brand-content);
+  }
+}
+
+/* Indigo-300 reads far better than indigo-600 as a ring on deep surfaces. */
+@utility focus-ring {
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-accent);
+    outline-offset: 2px;
+  }
+}
+
+/* The image layers use native utilities; only their shared animation needs CSS. */
+@keyframes eventoren-knockout-cycle {
+  0% {
+    opacity: 0;
+    background-size: 120% 120%;
+    background-position: 42% 45%;
+  }
+  3% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 1;
+  }
+  28% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+    background-size: 142% 142%;
+    background-position: 58% 55%;
+  }
+}
+
+/* No background-clip: text support -> render a solid, readable headline. */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  [data-eventoren-knockout-layer] {
+    display: none;
+  }
+
+  [data-eventoren-knockout-base] {
+    background-image: none;
+    color: var(--color-content-inverted);
+    -webkit-text-fill-color: var(--color-content-inverted);
+    opacity: 1;
   }
 }
