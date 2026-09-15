@@ -67,7 +67,8 @@ export const ticketTables = {
   })
     .index("checkoutKey", ["checkoutKey"])
     .index("paymentReference", ["paymentReference"])
-    .index("ownerUserId", ["ownerUserId"]),
+    .index("ownerUserId", ["ownerUserId"])
+    .index("ownerUserIdAndCreatedAt", ["ownerUserId", "createdAt"]),
 
   ticketOrderLines: defineTable({
     orderId: v.id("ticketOrders"),

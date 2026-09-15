@@ -3,6 +3,7 @@ export { ticketCheckoutCreateAction } from "#src/ticketing/convex/ticketCheckout
 export { ticketCheckoutMarkCreatedMutation } from "#src/ticketing/convex/ticketCheckoutMarkCreatedMutation.ts"
 export { ticketCheckoutPrepareMutation } from "#src/ticketing/convex/ticketCheckoutPrepareMutation.ts"
 export { ticketOrderGetQuery } from "#src/ticketing/convex/ticketOrderGetQuery.ts"
+export { ticketOrderListMinePaginatedQuery } from "#src/ticketing/convex/ticketOrderListMinePaginatedQuery.ts"
 export { ticketOrderListMineQuery } from "#src/ticketing/convex/ticketOrderListMineQuery.ts"
 export { ticketOrderPaymentContextQuery } from "#src/ticketing/convex/ticketOrderPaymentContextQuery.ts"
 export { ticketPaymentReconcileAction } from "#src/ticketing/convex/ticketPaymentReconcileAction.ts"

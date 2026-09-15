@@ -3,6 +3,7 @@
 import { convexTest } from "convex-test"
 import { afterEach, expect, test, vi } from "vitest"
 import { api, internal } from "../convex/_generated/api.js"
+import type { Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
 import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
 
@@ -176,6 +177,86 @@ function checkoutArgs(token: string, catalogVersion: number, checkoutKey: string
   }
 }
 
+async function insertOrderHistoryOrder(
+  t: ReturnType<typeof convexTest>,
+  ownerUserId: Id<"users">,
+  index: number,
+  createdAt: string,
+  detailTierId?: Id<"catalogTicketTiers">,
+  withDetails = false,
+) {
+  return await t.run(async (ctx) => {
+    const orderId = await ctx.db.insert("ticketOrders", {
+      checkoutKey: `history-checkout-${index}`,
+      ownerUserId,
+      customerEmail: `history-${index}@example.com`,
+      customerGivenName: "History",
+      customerFamilyName: `Order ${index}`,
+      customerPhone: "+491234567890",
+      contactSnapshotJson: JSON.stringify({ email: `history-${index}@example.com` }),
+      eventKey: `history-event-${index}`,
+      eventTitle: `History event ${index}`,
+      eventSubtitle: "Order history test event",
+      eventDescription: "This description belongs to the detail endpoint.",
+      eventStartsAt: "2026-11-01T18:00:00.000Z",
+      eventEndsAt: "2026-11-01T22:00:00.000Z",
+      eventDoorsAt: "2026-11-01T17:00:00.000Z",
+      venue: "History Hall",
+      city: "Berlin",
+      address: "History Street 1",
+      organizer: "Eventoren",
+      imageUrl: "https://eventoren.test/history.jpg",
+      imageAlt: "History event",
+      catalogVersion: 1,
+      subtotalCents: 2_500,
+      feeCents: 300,
+      totalCents: 2_800,
+      checkoutContextJson: JSON.stringify({ source: "test" }),
+      paymentReference: `history-payment-${index}`,
+      stripeMode: "test",
+      status: "paid",
+      paymentStatus: "paid",
+      reservationExpiresAt: Date.now() + 60_000,
+      createdAt,
+      updatedAt: createdAt,
+      paidAt: createdAt,
+    })
+    if (withDetails) {
+      await ctx.db.insert("ticketOrderLines", {
+        orderId,
+        tierId: detailTierId as Id<"catalogTicketTiers">,
+        eventKey: `history-event-${index}`,
+        tierKey: "standard",
+        tierName: "Standard",
+        tierDescription: "Standard ticket",
+        quantity: 1,
+        priceCents: 2_500,
+        feeCents: 300,
+        createdAt,
+      })
+      await ctx.db.insert("ticketIssued", {
+        orderId,
+        sequence: 1,
+        ownerUserId,
+        code: `HISTORY-TICKET-${index}`,
+        eventKey: `history-event-${index}`,
+        eventTitle: `History event ${index}`,
+        eventStartsAt: "2026-11-01T18:00:00.000Z",
+        eventDoorsAt: "2026-11-01T17:00:00.000Z",
+        venue: "History Hall",
+        city: "Berlin",
+        address: "History Street 1",
+        tierKey: "standard",
+        tierName: "Standard",
+        priceCents: 2_500,
+        feeCents: 300,
+        issuedAt: createdAt,
+      })
+    }
+    return orderId
+  })
+}
+
 function environmentSet() {
   process.env.EVENTOREN_BILLING_BASE_URL = "https://billing.test"
   process.env.EVENTOREN_BILLING_ORGANIZATION_ID = "eventoren-test"
@@ -332,6 +413,81 @@ test("releases inventory only after Billing reports failed and keeps guest acces
   })
   expect(inventory.tier[0]).toMatchObject({ reserved: 0, sold: 0 })
   expect(inventory.reservations[0]?.status).toBe("released")
+})
+
+test("paginates current-user order summaries by indexed creation order without leaking other users or details", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const otherUserId = await createUser(t)
+  const token = await tokenFor(userId)
+  const otherToken = await tokenFor(otherUserId)
+  await seedCatalog(t, await tokenFor(adminId))
+  const detailTierId = await t.run(async (ctx) => {
+    const tier = await ctx.db.query("catalogTicketTiers").first()
+    if (!tier) throw new Error("test catalog tier is missing")
+    return tier._id
+  })
+  const createdAt = [
+    "2026-11-03T00:00:00.000Z",
+    "2026-11-03T00:00:00.000Z",
+    "2026-11-02T00:00:00.000Z",
+    "2026-11-02T00:00:00.000Z",
+    "2026-11-01T00:00:00.000Z",
+  ]
+  const orderIds = []
+  for (const [index, timestamp] of createdAt.entries())
+    orderIds.push(await insertOrderHistoryOrder(t, userId, index, timestamp, detailTierId, index === 0))
+  const otherOrderId = await insertOrderHistoryOrder(t, otherUserId, 99, "2026-11-04T00:00:00.000Z", undefined)
+
+  const pages = []
+  let cursor: string | null = null
+  while (true) {
+    const response = await t.query(api.ticketing.ticketOrderListMinePaginatedQuery, {
+      token,
+      paginationOpts: { numItems: 2, cursor },
+    })
+    expect(response.success).toBe(true)
+    if (!response.success) return
+    pages.push(...response.data.page)
+    if (response.data.isDone) break
+    cursor = response.data.continueCursor
+  }
+
+  expect(pages).toHaveLength(orderIds.length)
+  expect(new Set(pages.map((order) => order.id)).size).toBe(orderIds.length)
+  expect(pages.map((order) => order.id)).toEqual(expect.arrayContaining(orderIds))
+  expect(pages.some((order) => order.id === otherOrderId)).toBe(false)
+  expect(pages.every((order) => !("lines" in order) && !("tickets" in order))).toBe(true)
+  expect(
+    pages.every((order, index) => {
+      const previous = pages[index - 1]
+      return index === 0 || (previous !== undefined && previous.createdAt >= order.createdAt)
+    }),
+  ).toBe(true)
+
+  const otherResponse = await t.query(api.ticketing.ticketOrderListMinePaginatedQuery, {
+    token: otherToken,
+    paginationOpts: { numItems: 10, cursor: null },
+  })
+  expect(otherResponse).toMatchObject({ success: true, data: { page: [{ id: otherOrderId }] } })
+
+  const unauthorizedResponse = await t.query(api.ticketing.ticketOrderListMinePaginatedQuery, {
+    token: "not-a-valid-user-token",
+    paginationOpts: { numItems: 2, cursor: null },
+  })
+  expect(unauthorizedResponse.success).toBe(false)
+
+  const detailOrderId = orderIds[0]
+  if (!detailOrderId) throw new Error("test order is missing")
+  const detail = await t.query(api.ticketing.ticketOrderGetQuery, { orderId: detailOrderId, token })
+  expect(detail).toMatchObject({
+    success: true,
+    data: { lines: [{ tierKey: "standard" }], tickets: [{ sequence: 1 }] },
+  })
+  if (!detail.success) return
+  expect(detail.data.contact).toMatchObject({ givenName: "History", familyName: "Order 0" })
+  expect(detail.data.tickets[0]?.participantName).toBeUndefined()
 })
 
 test("scheduled expiry calls authenticated Billing expiration, releases once, and is idempotent", async () => {
