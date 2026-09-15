@@ -1,7 +1,8 @@
 import type { MutationCtx } from "#convex/_generated/server.js"
-import { catalogSyncScheduleFn } from "./catalogSyncScheduleFn.js"
 import { createResult, type PromiseResult } from "#result"
 import type { IdUser } from "#src/auth/convex/IdUser.ts"
+import { catalogSyncScheduleFn } from "./catalogSyncScheduleFn.js"
+import { catalogSyncSnapshotPayloadBytesCalculate } from "./catalogSyncSnapshotPayloadBytesCalculate.js"
 
 export async function catalogSyncAdvanceFn(ctx: MutationCtx, userId: IdUser, now: string): PromiseResult<number> {
   const syncState = await ctx.db
@@ -9,6 +10,16 @@ export async function catalogSyncAdvanceFn(ctx: MutationCtx, userId: IdUser, now
     .withIndex("key", (q) => q.eq("key", "catalog"))
     .unique()
   const version = (syncState?.version ?? 0) + 1
+  const snapshot = {
+    version,
+    status: "building" as const,
+    eventCursor: undefined,
+    nextChunkIndex: 0,
+    eventCount: 0,
+    chunkCount: 0,
+    payloadBytes: catalogSyncSnapshotPayloadBytesCalculate(version, 0, 0),
+    updatedAt: now,
+  }
 
   if (!syncState) {
     await ctx.db.insert("catalogSyncStates", {
@@ -20,6 +31,7 @@ export async function catalogSyncAdvanceFn(ctx: MutationCtx, userId: IdUser, now
       lastChangedByUserId: userId,
       updatedAt: now,
     })
+    await ctx.db.insert("catalogSyncSnapshots", snapshot)
     await catalogSyncScheduleFn(ctx, version)
     return createResult(version)
   }
@@ -33,6 +45,7 @@ export async function catalogSyncAdvanceFn(ctx: MutationCtx, userId: IdUser, now
     lastChangedByUserId: userId,
     updatedAt: now,
   })
+  await ctx.db.insert("catalogSyncSnapshots", snapshot)
   await catalogSyncScheduleFn(ctx, version)
   return createResult(version)
 }

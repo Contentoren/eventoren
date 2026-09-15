@@ -65,4 +65,22 @@ export const catalogTables = {
     lastChangedByUserId: vIdUser,
     updatedAt: v.string(),
   }).index("key", ["key"]),
+
+  catalogSyncSnapshots: defineTable({
+    version: v.number(),
+    status: v.union(v.literal("building"), v.literal("ready")),
+    eventCursor: v.optional(v.string()),
+    nextChunkIndex: v.number(),
+    eventCount: v.number(),
+    chunkCount: v.number(),
+    payloadBytes: v.number(),
+    updatedAt: v.string(),
+  }).index("version", ["version"]),
+
+  catalogSyncSnapshotChunks: defineTable({
+    version: v.number(),
+    chunkIndex: v.number(),
+    eventKey: v.string(),
+    payloadJson: v.string(),
+  }).index("versionAndChunkIndex", ["version", "chunkIndex"]),
 } as const

@@ -1,11 +1,12 @@
-import { internalMutation } from "#convex/_generated/server.js"
 import { v } from "convex/values"
 import { internal } from "#convex/_generated/api.js"
+import { internalMutation } from "#convex/_generated/server.js"
 
 export const catalogSyncMarkFailedMutation = internalMutation({
   args: {
     attemptedVersion: v.number(),
     errorMessage: v.string(),
+    retryable: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const state = await ctx.db
@@ -13,10 +14,11 @@ export const catalogSyncMarkFailedMutation = internalMutation({
       .withIndex("key", (q) => q.eq("key", "catalog"))
       .unique()
     if (!state) return { scheduled: false, currentVersion: 0 }
-    if (state.version > args.attemptedVersion) {
-      await ctx.scheduler.runAfter(0, internal.catalog.catalogSyncPushAction, {
-        requestedVersion: state.version,
-      })
+    if (state.version !== args.attemptedVersion) {
+      if (state.version > args.attemptedVersion)
+        await ctx.scheduler.runAfter(0, internal.catalog.catalogSyncPushAction, {
+          requestedVersion: state.version,
+        })
       return { scheduled: false, currentVersion: state.version }
     }
 
@@ -29,9 +31,12 @@ export const catalogSyncMarkFailedMutation = internalMutation({
       lastError: args.errorMessage.slice(0, 500),
       updatedAt: new Date().toISOString(),
     })
-    await ctx.scheduler.runAfter(retryDelayMs, internal.catalog.catalogSyncPushAction, {
-      requestedVersion: args.attemptedVersion,
-    })
-    return { scheduled: true, currentVersion: state.version }
+    if (args.retryable !== false) {
+      await ctx.scheduler.runAfter(retryDelayMs, internal.catalog.catalogSyncPushAction, {
+        requestedVersion: args.attemptedVersion,
+      })
+      return { scheduled: true, currentVersion: state.version }
+    }
+    return { scheduled: false, currentVersion: state.version }
   },
 })

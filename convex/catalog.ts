@@ -9,3 +9,4 @@ export { catalogSyncMarkSyncedMutation } from "#src/catalog/convex/catalogSyncMa
 export { catalogSyncPushAction } from "#src/catalog/convex/catalogSyncPushAction.ts"
 export { catalogSyncRescheduleMutation } from "#src/catalog/convex/catalogSyncRescheduleMutation.ts"
 export { catalogSyncSnapshotQuery } from "#src/catalog/convex/catalogSyncSnapshotQuery.ts"
+export { catalogSyncSnapshotBuildMutation } from "#src/catalog/convex/catalogSyncSnapshotBuildMutation.ts"

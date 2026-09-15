@@ -1,61 +1,90 @@
-import { internalQuery } from "#convex/_generated/server.js"
 import { v } from "convex/values"
+import { internalQuery } from "#convex/_generated/server.js"
+import { catalogSyncLimits } from "./catalogSyncLimits.js"
+
+const snapshotCursorVersion = 1
+
+type SnapshotCursor = {
+  version: number
+  catalogVersion: number
+  sourceCursor: string
+}
 
 export const catalogSyncSnapshotQuery = internalQuery({
-  args: { requestedVersion: v.number() },
-  handler: async (ctx, args) => {
-    const state = await ctx.db
-      .query("catalogSyncStates")
-      .withIndex("key", (q) => q.eq("key", "catalog"))
+  args: {
+    requestedVersion: v.number(),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (
+    ctx,
+    args,
+  ): Promise<{
+    requestedVersion: number
+    catalogVersion: number
+    eventCount: number
+    payloadBytes: number
+    events: readonly Record<string, unknown>[]
+    isDone: boolean
+    continueCursor: string
+  } | null> => {
+    const snapshot = await ctx.db
+      .query("catalogSyncSnapshots")
+      .withIndex("version", (q) => q.eq("version", args.requestedVersion))
       .unique()
-    if (!state) return null
+    if (snapshot?.status !== "ready") return null
 
-    const events = await ctx.db.query("catalogEvents").collect()
-    const normalizedEvents = []
-    for (const event of events.sort((left, right) => left.eventKey.localeCompare(right.eventKey))) {
-      const tiers = await ctx.db
-        .query("catalogTicketTiers")
-        .withIndex("eventId", (q) => q.eq("eventId", event._id))
-        .collect()
-      normalizedEvents.push({
-        eventKey: event.eventKey,
-        title: event.title,
-        subtitle: event.subtitle,
-        description: event.description,
-        category: event.category,
-        startsAt: event.startsAt,
-        endsAt: event.endsAt,
-        doorsAt: event.doorsAt,
-        venue: event.venue,
-        city: event.city,
-        address: event.address,
-        organizer: event.organizer,
-        imageUrl: event.imageUrl,
-        imageAlt: event.imageAlt,
-        tags: event.tags,
-        status: event.status,
-        catalogVersion: state.version,
-        tiers: tiers
-          .sort((left, right) => left.tierKey.localeCompare(right.tierKey))
-          .map((tier) => ({
-            tierKey: tier.tierKey,
-            name: tier.name,
-            description: tier.description,
-            priceCents: tier.priceCents,
-            feeCents: tier.feeCents,
-            capacity: tier.capacity,
-            reserved: tier.reserved,
-            sold: tier.sold,
-            sortOrder: tier.sortOrder,
-            catalogVersion: state.version,
-          })),
+    const sourceCursor = snapshotCursorRead(args.cursor, snapshot.version)
+    if (args.cursor !== undefined && sourceCursor === null) return null
+
+    const page = await ctx.db
+      .query("catalogSyncSnapshotChunks")
+      .withIndex("versionAndChunkIndex", (q) => q.eq("version", args.requestedVersion))
+      .order("asc")
+      .paginate({
+        cursor: sourceCursor,
+        numItems: catalogSyncLimits.snapshotQueryPageSize,
+        maximumRowsRead: catalogSyncLimits.snapshotQueryPageSize,
+        maximumBytesRead: 4 * 1024 * 1024,
       })
+    const events: Record<string, unknown>[] = []
+    for (const chunk of page.page) {
+      try {
+        const payload = JSON.parse(chunk.payloadJson)
+        if (typeof payload !== "object" || payload === null || Array.isArray(payload)) return null
+        events.push(payload as Record<string, unknown>)
+      } catch {
+        return null
+      }
     }
 
     return {
       requestedVersion: args.requestedVersion,
-      catalogVersion: state.version,
-      events: normalizedEvents,
+      catalogVersion: snapshot.version,
+      eventCount: snapshot.eventCount,
+      payloadBytes: snapshot.payloadBytes,
+      events,
+      isDone: page.isDone,
+      continueCursor: JSON.stringify({
+        version: snapshotCursorVersion,
+        catalogVersion: snapshot.version,
+        sourceCursor: page.continueCursor,
+      } satisfies SnapshotCursor),
     }
   },
 })
+
+function snapshotCursorRead(cursor: string | undefined, catalogVersion: number): string | null {
+  if (cursor === undefined) return null
+  try {
+    const parsed = JSON.parse(cursor) as Partial<SnapshotCursor>
+    if (
+      parsed.version !== snapshotCursorVersion ||
+      parsed.catalogVersion !== catalogVersion ||
+      typeof parsed.sourceCursor !== "string"
+    )
+      return null
+    return parsed.sourceCursor
+  } catch {
+    return null
+  }
+}
