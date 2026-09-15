@@ -54,12 +54,18 @@ export function EventHeroKnockout(props: {
           <span class="sr-only">Eventoren – Tickets für Konzerte, Festivals und Live-Events</span>
 
           <span aria-hidden="true" class="relative block text-[clamp(3rem,15.5vw,13rem)] [font-stretch:condensed]">
-            <span class="eventoren-knockout-base block">{wordmark}</span>
+            <span
+              data-eventoren-knockout-base
+              class="block bg-[linear-gradient(115deg,#818cf8_0%,#a78bfa_45%,#f472b6_100%)] bg-clip-text text-transparent opacity-[0.8] [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]"
+            >
+              {wordmark}
+            </span>
 
             <For each={state.layers()}>
               {(layer) => (
                 <span
-                  class="eventoren-knockout-layer absolute inset-0 block"
+                  data-eventoren-knockout-layer
+                  class="absolute inset-0 block bg-clip-text bg-no-repeat text-transparent opacity-0 motion-reduce:animate-none motion-reduce:opacity-0 motion-reduce:[background-size:128%_128%] [animation-delay:var(--eventoren-knockout-delay,0s)] [background-position:50%_50%] [background-size:120%_120%] [will-change:opacity,background-position,background-size] [-webkit-background-clip:text] [-webkit-text-fill-color:transparent] animate-[eventoren-knockout-cycle_var(--eventoren-knockout-duration,24s)_linear_infinite]"
                   style={{
                     "background-image": `url(${layer.imageUrl})`,
                     "background-position": layer.origin,
