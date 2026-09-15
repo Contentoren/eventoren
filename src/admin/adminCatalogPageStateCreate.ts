@@ -5,39 +5,12 @@ import { userSessionBrowserRestore } from "#src/auth/ui/signals/userSessionBrows
 import { catalogEventPublish } from "../catalog/client/catalogEventPublish.ts"
 import { catalogEventUpsert } from "../catalog/client/catalogEventUpsert.ts"
 import { catalogTicketTierUpsert } from "../catalog/client/catalogTicketTierUpsert.ts"
-import type { EventCategory } from "../events/EventCategory.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import type { EventTicketTier } from "../events/EventTicketTier.ts"
+import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
+import type { AdminEventDraft } from "./AdminEventDraft.ts"
+import type { AdminTierDraft } from "./AdminTierDraft.ts"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
-
-type AdminEventDraft = {
-  eventKey: string
-  title: string
-  subtitle: string
-  description: string
-  category: EventCategory
-  startsAt: string
-  endsAt: string
-  doorsAt: string
-  venue: string
-  city: string
-  address: string
-  organizer: string
-  imageUrl: string
-  imageAlt: string
-  tags: string
-  status: "draft" | "published" | "archived"
-}
-
-type AdminTierDraft = {
-  tierKey: string
-  name: string
-  description: string
-  priceCents: string
-  feeCents: string
-  capacity: string
-  sortOrder: string
-}
 
 const emptyEventDraft = (): AdminEventDraft => ({
   eventKey: "",
@@ -71,7 +44,7 @@ const emptyTierDraft = (): AdminTierDraft => ({
 export function adminCatalogPageStateCreate(inputs: {
   events: () => readonly EventItem[]
   isServerAuthorized: () => boolean
-}) {
+}): AdminCatalogPageState {
   const events = createSignalObject<readonly EventItem[]>(inputs.events())
   const selectedEventKey = createSignalObject("")
   const eventDraft = createSignalObject<AdminEventDraft>(emptyEventDraft())

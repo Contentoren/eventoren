@@ -1,5 +1,6 @@
 import { type Infer, v } from "convex/values"
 import { loginProviderValidator } from "#src/auth/model_field/loginMethodValidator.ts"
+import { zitadelRoleValidator } from "#src/auth/model_field/zitadelRoleValidator.ts"
 
 export type CommonAuthProvider = Infer<typeof commonAuthProviderValidator>
 
@@ -12,8 +13,9 @@ export const commonAuthProviderValidator = v.object({
   familyName: v.string(),
   image: v.string(),
   username: v.string(),
+  zitadelRoles: v.optional(v.array(zitadelRoleValidator)),
   // email
-  email: v.string(),
+  email: v.optional(v.string()),
 })
 
 export function getUserNameFromCommonAuthProvider(

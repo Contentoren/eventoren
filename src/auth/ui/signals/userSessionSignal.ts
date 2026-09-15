@@ -1,7 +1,7 @@
 import * as a from "valibot"
 import { createResult, createResultError, type Result } from "#result"
 import { type UserSession, userSessionSchema } from "#src/auth/model/UserSession.ts"
-import { userRole } from "#src/auth/model_field/userRole.ts"
+import { userRoleIsCustomer } from "#src/auth/model_field/userRole.ts"
 import { userSessionsSignal } from "#src/auth/ui/signals/userSessionsSignal.ts"
 import { createSignalObject, type SetterSimplified, type SignalObject } from "#ui/utils/createSignalObject.ts"
 
@@ -55,7 +55,7 @@ function shouldAutologin(sessions: UserSession[]): UserSession | null {
   // const isSingle = sessions.length === 1
   const single = sessions[0]
   if (!single) return null
-  const hasUserRole = single.profile.role == userRole.user
+  const hasUserRole = userRoleIsCustomer(single.profile.role)
   if (!hasUserRole) return null
   return single
 }

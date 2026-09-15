@@ -1,7 +1,8 @@
 import { api } from "#convex/_generated/api.js"
 import { ConvexHttpClient } from "convex/browser"
-import { eventorenSessionCookie } from "./eventorenSessionCookie.ts"
 import { convexUrlGet } from "#src/server/convexUrlGet.ts"
+import { eventorenSessionCookie } from "./eventorenSessionCookie.ts"
+import { eventorenZitadelProviderCreate } from "./eventorenZitadelProviderCreate.ts"
 
 const defaultIssuer = "https://auth.contentoren.de"
 const resourceOwnerScope = "urn:zitadel:iam:user:resourceowner"
@@ -52,27 +53,27 @@ export const eventorenZitadel = {
     const state = url.searchParams.get("state") ?? ""
     const code = url.searchParams.get("code") ?? ""
     if (url.searchParams.get("error") || !login || !code || login.state !== state) {
-      return new Response("Die Eventoren-Anmeldung konnte nicht verifiziert werden.", { status: 400 })
+      return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 400)
     }
 
     const tokenResponse = await tokenExchange(config, code, login.verifier)
     if (!tokenResponse)
-      return new Response("Die Eventoren-Anmeldung konnte nicht abgeschlossen werden.", { status: 502 })
+      return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht abgeschlossen werden.", 502)
 
     const userInfo = await userInfoRead(config.issuer, tokenResponse)
     if (!userInfo)
-      return new Response("Die Eventoren-Benutzerinformationen konnten nicht geladen werden.", { status: 502 })
+      return loginErrorResponse(request, "Die Eventoren-Benutzerinformationen konnten nicht geladen werden.", 502)
 
-    const provider = userInfoToProvider(userInfo)
+    const provider = eventorenZitadelProviderCreate(userInfo)
     const client = new ConvexHttpClient(convexUrlGet())
     let sessionResult
     try {
       sessionResult = await client.action(api.auth.authSignInUsingZitadelAction, provider)
     } catch {
-      return new Response("Die Eventoren-Sitzung konnte nicht erstellt werden.", { status: 502 })
+      return loginErrorResponse(request, "Die Eventoren-Sitzung konnte nicht erstellt werden.", 502)
     }
     if (!sessionResult.success)
-      return new Response("Die Eventoren-Sitzung konnte nicht erstellt werden.", { status: 403 })
+      return loginErrorResponse(request, "Die Eventoren-Sitzung konnte nicht erstellt werden.", 403)
 
     const redirectUrl = new URL("/sign-in", config.appOrigin)
     redirectUrl.searchParams.set("returnTo", login.returnTo)
@@ -87,10 +88,18 @@ export const eventorenZitadel = {
   },
 } as const
 
+function loginErrorResponse(request: Request, message: string, status: number): Response {
+  return new Response(message, {
+    status,
+    headers: { "set-cookie": eventorenSessionCookie.loginClear(requestIsSecure(request)) },
+  })
+}
+
 function configuration(request: Request): ZitadelConfiguration | undefined {
   const clientId = process.env.ZITADEL_CLIENT_ID?.trim()
   const clientSecret = process.env.ZITADEL_CLIENT_SECRET?.trim()
-  if (!clientId || !clientSecret) return undefined
+  const authSecret = process.env.AUTH_SECRET?.trim()
+  if (!clientId || !clientSecret || !authSecret || authSecret.startsWith("replace-with-")) return undefined
 
   const appOrigin = (process.env.PUBLIC_BASE_URL_APP?.trim() || new URL(request.url).origin).replace(/\/$/u, "")
   const issuer = (process.env.ZITADEL_ISSUER?.trim() || defaultIssuer).replace(/\/$/u, "")
@@ -141,28 +150,6 @@ async function userInfoRead(issuer: string, accessToken: string): Promise<UserIn
   } catch {
     return undefined
   }
-}
-
-function userInfoToProvider(userInfo: UserInfo) {
-  const name = claimString(userInfo, "name")
-  const givenName = claimString(userInfo, "given_name") || name
-  const familyName = claimString(userInfo, "family_name")
-  const username =
-    claimString(userInfo, "preferred_username") || claimString(userInfo, "nickname") || (userInfo.sub as string)
-  return {
-    provider: "zitadel" as const,
-    providerId: userInfo.sub as string,
-    givenName,
-    familyName,
-    image: claimString(userInfo, "picture"),
-    username,
-    email: claimString(userInfo, "email"),
-  }
-}
-
-function claimString(userInfo: UserInfo, key: string): string {
-  const value = userInfo[key]
-  return typeof value === "string" ? value.trim() : ""
 }
 
 function returnToRead(value: string | null, appOrigin: string): string {

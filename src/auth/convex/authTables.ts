@@ -3,7 +3,9 @@ import { v } from "convex/values"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 import { loginMethodValidator } from "#src/auth/model_field/loginMethodValidator.ts"
 import { otpPurposeValidator } from "#src/auth/model_field/otpPurpose.ts"
+import { userRoleSourceValidator } from "#src/auth/model_field/userRoleSourceValidator.ts"
 import { userRoleValidator } from "#src/auth/model_field/userRoleValidator.ts"
+import { zitadelRoleValidator } from "#src/auth/model_field/zitadelRoleValidator.ts"
 import { fieldsConvexCreatedAtUpdatedAt } from "#src/utils/data/fieldsConvexCreatedAtUpdatedAt.ts"
 import { fieldsConvexCreatedAtUpdatedAtDeletedAt } from "#src/utils/data/fieldsConvexCreatedAtUpdatedAtDeletedAt.ts"
 
@@ -18,11 +20,17 @@ export const authTables = {
     emailVerifiedAt: v.optional(v.string()),
     hashedPassword: v.optional(v.string()),
     role: userRoleValidator,
+    roleSource: v.optional(userRoleSourceValidator),
+    zitadelUserId: v.optional(v.string()),
+    zitadelRoles: v.optional(v.array(zitadelRoleValidator)),
+    zitadelRolesSynchronizedAt: v.optional(v.string()),
+    organizerInvitedAt: v.optional(v.string()),
     ...fieldsConvexCreatedAtUpdatedAtDeletedAt,
   })
     //
     .index("email", ["email"])
-    .index("username", ["username"]),
+    .index("username", ["username"])
+    .index("zitadelUserId", ["zitadelUserId"]),
 
   authAccounts: defineTable({
     userId: vIdUser,

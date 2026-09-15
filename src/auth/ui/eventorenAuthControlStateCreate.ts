@@ -1,5 +1,6 @@
 import { onMount } from "solid-js"
 import { userSessionSignal } from "#src/auth/ui/signals/userSessionSignal.ts"
+import { userSessionsClear } from "#src/auth/ui/signals/userSessionsClear.ts"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 
 export function eventorenAuthControlStateCreate() {
@@ -11,9 +12,15 @@ export function eventorenAuthControlStateCreate() {
 
   const logout = async (event: SubmitEvent) => {
     event.preventDefault()
-    userSessionSignal.set(null)
+    const token = userSessionSignal.get()?.token
+    userSessionsClear()
     try {
-      await fetch("/logout", { method: "POST", credentials: "same-origin" })
+      await fetch("/logout", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ token }),
+      })
     } finally {
       window.location.assign("/")
     }

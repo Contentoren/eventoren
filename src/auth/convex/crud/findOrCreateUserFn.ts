@@ -3,6 +3,7 @@ import { createResult, createResultError, type PromiseResult } from "#result"
 import { createUserFromAuthProviderFn } from "#src/auth/convex/crud/createUserFromAuthProviderMutation.ts"
 import { findUserByEmailFn } from "#src/auth/convex/crud/findUserByEmailQuery.ts"
 import { linkAuthToExistingUserFn } from "#src/auth/convex/crud/linkAuthToExistingUserFn.ts"
+import { synchronizeUserZitadelRolesFn } from "#src/auth/convex/crud/synchronizeUserZitadelRolesFn.ts"
 import type { DocAuthAccount } from "#src/auth/convex/IdUser.ts"
 import { docUserToUserProfile } from "#src/auth/convex/user/docUserToUserProfile.ts"
 import { createUserSessionTimes, type UserSession } from "#src/auth/model/UserSession.ts"
@@ -28,8 +29,13 @@ export async function findOrCreateUserFn(
     const user = await ctx.db.get("users", existingAuthAccount.userId)
     if (!user) return createResultError(op, "User not found by userId", existingAuthAccount.userId)
     if (user.deletedAt) return createResultError(op, "User account has been deleted")
-    const { orgHandle, orgRole } = await orgMemberGetHandleAndRoleFn(ctx, user._id)
-    const userProfile = docUserToUserProfile(user, orgHandle, orgRole)
+    const synchronized =
+      authData.provider === "zitadel"
+        ? await synchronizeUserZitadelRolesFn(ctx, user._id, authData.providerId, authData.zitadelRoles)
+        : createResult(user)
+    if (!synchronized.success) return createResultError(op, synchronized.errorMessage)
+    const { orgHandle, orgRole } = await orgMemberGetHandleAndRoleFn(ctx, synchronized.data._id)
+    const userProfile = docUserToUserProfile(synchronized.data, orgHandle, orgRole)
     return createResult({
       profile: userProfile,
       hasPw: !!user.hashedPassword,
@@ -44,8 +50,13 @@ export async function findOrCreateUserFn(
     if (existingUser) {
       if (existingUser.deletedAt) return createResultError(op, "User account has been deleted")
       await linkAuthToExistingUserFn(ctx, existingUser._id, authData.provider, authData.providerId)
-      const { orgHandle, orgRole } = await orgMemberGetHandleAndRoleFn(ctx, existingUser._id)
-      const userProfile = docUserToUserProfile(existingUser, orgHandle, orgRole)
+      const synchronized =
+        authData.provider === "zitadel"
+          ? await synchronizeUserZitadelRolesFn(ctx, existingUser._id, authData.providerId, authData.zitadelRoles)
+          : createResult(existingUser)
+      if (!synchronized.success) return createResultError(op, synchronized.errorMessage)
+      const { orgHandle, orgRole } = await orgMemberGetHandleAndRoleFn(ctx, synchronized.data._id)
+      const userProfile = docUserToUserProfile(synchronized.data, orgHandle, orgRole)
       return createResult({
         profile: userProfile,
         hasPw: !!existingUser.hashedPassword,
@@ -58,7 +69,7 @@ export async function findOrCreateUserFn(
   // No existing user found - create new one
   const createdResult = await createUserFromAuthProviderFn(ctx, authData)
   if (!createdResult.success) {
-    return createResultError(op, "Failed to create user: " + createdResult.errorMessage)
+    return createResultError(op, `Failed to create user: ${createdResult.errorMessage}`)
   }
   const userSession: SignInUsingSocialAuthResultInternal = {
     profile: createdResult.data,

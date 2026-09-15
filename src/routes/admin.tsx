@@ -1,6 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
 import { AdminCatalogPage } from "../admin/AdminCatalogPage.tsx"
+import { adminCatalogPageStateCreate } from "../admin/adminCatalogPageStateCreate.ts"
+import { adminMemberManagementStateCreate } from "../admin/adminMemberManagementStateCreate.ts"
 import { eventorenAdminAccessRead } from "#src/auth/server/eventorenAdminAccessRead.ts"
 import { catalogEventsPublicGet } from "../server/catalogEventsPublicGet.js"
 import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
@@ -26,11 +28,14 @@ export const Route = createFileRoute("/admin")({
   },
   component: () => {
     const loaderData = Route.useLoaderData()
-    return (
-      <AdminCatalogPage
-        eventsResult={() => loaderData().eventsResult}
-        isServerAuthorized={() => loaderData().isServerAuthorized}
-      />
-    )
+    const state = adminCatalogPageStateCreate({
+      events: () => {
+        const result = loaderData().eventsResult
+        return result.success ? result.data : []
+      },
+      isServerAuthorized: () => loaderData().isServerAuthorized,
+    })
+    const memberState = adminMemberManagementStateCreate()
+    return <AdminCatalogPage state={state} memberState={memberState} />
   },
 })

@@ -2,10 +2,13 @@ import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/solid-r
 import type { JSX } from "solid-js"
 import { Suspense } from "solid-js"
 import { HydrationScript } from "solid-js/web"
+import { rootDocumentStateCreate } from "../app/i18n/rootDocumentStateCreate.ts"
+import { logoutMarkerConsumeStateCreate } from "#src/auth/ui/logoutMarkerConsumeStateCreate.ts"
 import { seo } from "../lib/seo.js"
-import appCss from "../tailwind.css?url"
 import { NotFoundPage } from "../marketing/NotFoundPage.js"
 import { RootFooter } from "../marketing/RootFooter.js"
+import appCss from "../tailwind.css?url"
+
 const siteName = "eventoren"
 const speculationRules = JSON.stringify({
   prerender: [{ where: { href_matches: "/*" }, eagerness: "moderate" }],
@@ -22,7 +25,6 @@ export const Route = createRootRoute({
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
-      { rel: "icon", type: "image/x-icon", href: "/favicon.ico", sizes: "any" },
       { rel: "manifest", href: "/site.webmanifest" },
     ],
     scripts: [
@@ -36,6 +38,8 @@ export const Route = createRootRoute({
 })
 
 function PublicRootContent() {
+  logoutMarkerConsumeStateCreate()
+
   return (
     <>
       <Outlet />
@@ -44,8 +48,10 @@ function PublicRootContent() {
 }
 
 function RootDocument(props: { children: JSX.Element }) {
+  const state = rootDocumentStateCreate()
+
   return (
-    <html lang="de">
+    <html lang={state.language()}>
       <head>
         <HydrationScript />
         <script type="speculationrules" innerHTML={speculationRules} />
