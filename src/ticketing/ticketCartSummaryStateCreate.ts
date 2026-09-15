@@ -5,28 +5,7 @@ import type { TicketCart } from "./TicketCart.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
 import { ticketTierSelectorStateCreate } from "./ticketTierSelectorStateCreate.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
-
-export type TicketCartTrustBadgeId = "secure_payment" | "instant_delivery" | "original_tickets"
-
-export interface TicketCartTrustBadge {
-  id: TicketCartTrustBadgeId
-  label: string
-}
-
-const trustBadges: readonly TicketCartTrustBadge[] = [
-  {
-    id: "secure_payment",
-    label: "Sichere Bezahlung mit SSL-Verschlüsselung",
-  },
-  {
-    id: "instant_delivery",
-    label: "Direkter Ticketversand per E-Mail",
-  },
-  {
-    id: "original_tickets",
-    label: "100 % verifizierte Original-Tickets",
-  },
-] as const
+import { ticketCheckoutText } from "./ticketCheckoutText.ts"
 
 export function ticketCartSummaryStateCreate(inputs: {
   event: () => EventItem
@@ -55,7 +34,7 @@ export function ticketCartSummaryStateCreate(inputs: {
           name: tier.name,
           quantity: line.quantity,
           label: `${line.quantity} × ${tier.name}`,
-          unitPriceLabel: `${ticketPriceFormat(tier.priceCents)} pro Ticket`,
+          unitPriceLabel: `${ticketPriceFormat(tier.priceCents)} ${ticketCheckoutText().perTicket}`,
           priceLabel: ticketPriceFormat(tier.priceCents * line.quantity),
           canDecrease: selectorRow.canDecrease && line.quantity > minimumQuantity(),
           canIncrease: selectorRow.canIncrease,
@@ -68,10 +47,14 @@ export function ticketCartSummaryStateCreate(inputs: {
   const subtotalLabel = createMemo(() => ticketPriceFormat(total().subtotalCents))
   const feeLabel = createMemo(() => ticketPriceFormat(total().feeCents))
   const totalLabel = createMemo(() => ticketPriceFormat(total().totalCents))
-  const fromPriceLabel = createMemo(() => `ab ${ticketPriceFormat(eventPriceFrom(inputs.event()))}`)
+  const fromPriceLabel = createMemo(
+    () => `${ticketCheckoutText().fromPrice} ${ticketPriceFormat(eventPriceFrom(inputs.event()))}`,
+  )
 
   const quantityLabel = createMemo(() =>
-    isEmpty() ? "0 Tickets gewählt" : `${total().quantity} ${total().quantity === 1 ? "Ticket" : "Tickets"}`,
+    isEmpty()
+      ? `0 ${ticketCheckoutText().ticketsSelected}`
+      : `${total().quantity} ${total().quantity === 1 ? "Ticket" : ticketCheckoutText().tickets}`,
   )
 
   const isCheckoutDisabled = createMemo(() => isEmpty() || inputs.event().soldOut)
@@ -96,7 +79,6 @@ export function ticketCartSummaryStateCreate(inputs: {
     canChangeCart,
     increaseTier,
     decreaseTier,
-    trustBadges: () => trustBadges,
     total,
   }
 }

@@ -1,10 +1,11 @@
-import { For, Match, Show, Switch } from "solid-js"
+import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
 import type { TicketCart } from "./TicketCart.ts"
 import { ticketCartSummaryStateCreate } from "./ticketCartSummaryStateCreate.ts"
+import { ticketCheckoutText } from "./ticketCheckoutText.ts"
 
 export function TicketCartSummary(props: {
   event: EventItem
@@ -21,13 +22,14 @@ export function TicketCartSummary(props: {
     minimumQuantity: () => props.minimumQuantity,
     onCartChange: props.onCartChange,
   })
+  const text = ticketCheckoutText
 
   return (
     <UiCard>
       <section class="flex flex-col gap-space-5" aria-labelledby="ticket-cart-summary">
         <div class="flex items-center justify-between gap-space-2 border-b border-border-subtle pb-space-3">
           <h2 id="ticket-cart-summary" class="text-base font-semibold text-content">
-            Bestellübersicht
+            {text().orderSummary}
           </h2>
           <span class="text-xs font-medium text-content-muted">{state.quantityLabel()}</span>
         </div>
@@ -37,8 +39,10 @@ export function TicketCartSummary(props: {
             when={!state.isEmpty()}
             fallback={
               <div class="flex flex-col gap-space-2 rounded-control bg-surface-muted p-space-4 text-center">
-                <p class="text-sm font-medium text-content">Noch keine Tickets gewählt</p>
-                <p class="text-xs text-content-muted">Wähle deine gewünschten Tickets aus ({state.fromPriceLabel()})</p>
+                <p class="text-sm font-medium text-content">{text().noTicketsSelected}</p>
+                <p class="text-xs text-content-muted">
+                  {text().chooseTickets} ({state.fromPriceLabel()})
+                </p>
               </div>
             }
           >
@@ -60,14 +64,14 @@ export function TicketCartSummary(props: {
                             type="button"
                             onClick={() => state.decreaseTier(row.id)}
                             disabled={!row.canDecrease}
-                            aria-label={`Ein Ticket weniger für ${row.name}`}
+                            aria-label={`${text().decreaseTicket} ${row.name}`}
                             class="focus-ring flex size-9 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-strong transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             −
                           </Button>
                           <output
                             aria-live="polite"
-                            aria-label={`${row.quantity} Tickets für ${row.name}`}
+                            aria-label={`${row.quantity} ${text().tickets} für ${row.name}`}
                             class="w-7 text-center text-base font-semibold text-content"
                           >
                             {row.quantity}
@@ -78,7 +82,7 @@ export function TicketCartSummary(props: {
                             type="button"
                             onClick={() => state.increaseTier(row.id)}
                             disabled={!row.canIncrease}
-                            aria-label={`Ein Ticket mehr für ${row.name}`}
+                            aria-label={`${text().increaseTicket} ${row.name}`}
                             class="focus-ring flex size-9 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-strong transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             +
@@ -91,15 +95,15 @@ export function TicketCartSummary(props: {
               </For>
 
               <div class="flex items-baseline justify-between gap-space-4 border-t border-border-subtle pt-space-3">
-                <dt class="text-sm text-content-muted">Zwischensumme</dt>
+                <dt class="text-sm text-content-muted">{text().subtotal}</dt>
                 <dd class="text-sm font-medium text-content">{state.subtotalLabel()}</dd>
               </div>
               <div class="flex items-baseline justify-between gap-space-4">
-                <dt class="text-sm text-content-muted">Service- & Vorverkaufsgebühren</dt>
+                <dt class="text-sm text-content-muted">{text().fees}</dt>
                 <dd class="text-sm font-medium text-content">{state.feeLabel()}</dd>
               </div>
               <div class="flex items-baseline justify-between gap-space-4 border-t border-border-subtle pt-space-3">
-                <dt class="text-base font-semibold text-content">Gesamtsumme (inkl. MwSt.)</dt>
+                <dt class="text-base font-semibold text-content">{text().total}</dt>
                 <dd class="text-base font-bold text-content">{state.totalLabel()}</dd>
               </div>
             </dl>
@@ -117,7 +121,7 @@ export function TicketCartSummary(props: {
                   clip-rule="evenodd"
                 />
               </svg>
-              <span>Garantierter Endpreis inklusive aller Gebühren</span>
+              <span>{text().feesIncluded}</span>
             </div>
           </Show>
         </div>
@@ -126,7 +130,7 @@ export function TicketCartSummary(props: {
           <Show when={props.onCheckout}>
             {(onCheckout) => (
               <UiButton size="lg" block disabled={state.isCheckoutDisabled()} onClick={() => onCheckout()()}>
-                {props.checkoutLabel ?? "In den Warenkorb"}
+                {props.checkoutLabel ?? text().addToCart}
               </UiButton>
             )}
           </Show>
@@ -140,70 +144,33 @@ export function TicketCartSummary(props: {
                 disabled={state.isCheckoutDisabled()}
                 onClick={() => onDirectCheckout()()}
               >
-                Direkt zur Kasse
+                {text().directCheckout}
               </UiButton>
             )}
           </Show>
         </div>
 
-        <div class="rounded-control border border-border-subtle bg-surface-muted/50 p-space-4">
-          <ul class="flex flex-col gap-space-3" aria-label="Sicherheits- und Servicegarantien">
-            <For each={state.trustBadges()}>
-              {(badge) => (
-                <li class="flex items-center gap-space-4 text-xs font-medium text-content">
-                  <span
-                    aria-hidden="true"
-                    class="flex size-7 shrink-0 items-center justify-center rounded-full border border-brand-accent/20 bg-brand-soft text-brand-accent shadow-xs"
-                  >
-                    <Switch>
-                      <Match when={badge.id === "secure_payment"}>
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="size-3.5"
-                        >
-                          <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                        </svg>
-                      </Match>
-                      <Match when={badge.id === "instant_delivery"}>
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="size-3.5"
-                        >
-                          <rect width="20" height="16" x="2" y="4" rx="2" />
-                          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                        </svg>
-                      </Match>
-                      <Match when={badge.id === "original_tickets"}>
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                          class="size-3.5"
-                        >
-                          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                          <path d="m9 12 2 2 4-4" />
-                        </svg>
-                      </Match>
-                    </Switch>
-                  </span>
-                  <span class="leading-snug">{badge.label}</span>
-                </li>
-              )}
-            </For>
+        <div class="flex flex-col gap-space-3 rounded-control border border-border-subtle bg-surface-muted/50 p-space-4">
+          <p class="text-xs font-medium text-content">{text().paymentMethods}</p>
+          <ul class="flex flex-wrap items-center gap-space-3" aria-label={text().supportedPaymentMethods}>
+            <li>
+              <img src="/payment-visa.svg" alt="Visa" class="h-10 w-auto" />
+            </li>
+            <li>
+              <img src="/payment-mastercard.svg" alt="Mastercard" class="h-10 w-auto" />
+            </li>
+            <li>
+              <img src="/payment-american-express.svg" alt="American Express" class="h-10 w-auto" />
+            </li>
+            <li>
+              <img src="/payment-discover.svg" alt="Discover" class="h-10 w-auto" />
+            </li>
+            <li>
+              <img src="/payment-paypal.svg" alt="PayPal" class="h-10 w-auto" />
+            </li>
+            <li>
+              <img src="/payment-klarna.svg" alt="Klarna" class="h-10 w-auto" />
+            </li>
           </ul>
         </div>
       </section>
