@@ -2,7 +2,7 @@ import { createSignal } from "solid-js"
 
 export type ContactInquiryType = "veranstalter" | "support"
 
-export function contactPageStateCreate() {
+export function contactPageStateCreate(inputs: { readonly initialSubmitted?: boolean } = {}) {
   const [inquiryType, setInquiryType] = createSignal<ContactInquiryType>("veranstalter")
   const [name, setName] = createSignal("")
   const [email, setEmail] = createSignal("")
@@ -11,7 +11,7 @@ export function contactPageStateCreate() {
   const [expectedTickets, setExpectedTickets] = createSignal("100 - 500")
   const [message, setMessage] = createSignal("")
   const [isSubmitting, setIsSubmitting] = createSignal(false)
-  const [isSubmitted, setIsSubmitted] = createSignal(false)
+  const [isSubmitted, setIsSubmitted] = createSignal(inputs.initialSubmitted ?? false)
   const [expandedFaqId, setExpandedFaqId] = createSignal<string | null>("faq-1")
 
   const submitForm = (e: SubmitEvent) => {

@@ -2,7 +2,11 @@ import { For, Show } from "solid-js"
 import { EventCard } from "./EventCard.tsx"
 import type { EventItem } from "./EventItem.ts"
 
-export function EventGrid(props: { events: readonly EventItem[]; emptyMessage?: string }) {
+export function EventGrid(props: {
+  events: readonly EventItem[]
+  emptyMessage?: string
+  eventHref?: (event: EventItem) => string
+}) {
   return (
     <Show
       when={props.events.length > 0}
@@ -19,7 +23,7 @@ export function EventGrid(props: { events: readonly EventItem[]; emptyMessage?: 
         <For each={props.events}>
           {(event) => (
             <li class="h-full">
-              <EventCard event={event} />
+              <EventCard event={event} href={props.eventHref?.(event)} />
             </li>
           )}
         </For>

@@ -1,18 +1,18 @@
 import { Link } from "@tanstack/solid-router"
-import { Show } from "solid-js"
+import { type JSX, Show } from "solid-js"
 import { classArr } from "../ui/classArr.ts"
 import { UiBadge } from "../ui/UiBadge.tsx"
 import type { EventItem } from "./EventItem.ts"
-import { eventImageUrlGet } from "./eventImageUrlGet.ts"
 import { eventCardStateCreate } from "./eventCardStateCreate.ts"
+import { eventImageUrlGet } from "./eventImageUrlGet.ts"
 
 /** Variation B: ticket stub with date block, perforation line and solid primary CTA. */
-export function EventCardTicket(props: { event: EventItem }) {
+export function EventCardTicket(props: { event: EventItem; href?: string }) {
   const state = eventCardStateCreate({ event: () => props.event })
 
   return (
     <article class="group relative h-full overflow-hidden rounded-card border-2 border-border-strong bg-surface shadow-sm transition-all duration-200 hover:border-brand hover:shadow-md">
-      <Link to="/events/$eventId" params={{ eventId: props.event.id }} class="focus-ring flex h-full flex-col">
+      <EventCardLink event={props.event} href={props.href}>
         {/* Taller vertical image aspect ratio */}
         <div class="relative aspect-[4/3] overflow-hidden bg-surface-muted">
           <img
@@ -73,7 +73,23 @@ export function EventCardTicket(props: { event: EventItem }) {
             {props.event.soldOut ? "Ausverkauft" : "Tickets kaufen"}
           </span>
         </div>
-      </Link>
+      </EventCardLink>
     </article>
+  )
+}
+
+function EventCardLink(props: { event: EventItem; href?: string; children: JSX.Element }) {
+  if (props.href) {
+    return (
+      <a href={props.href} class="focus-ring flex h-full flex-col">
+        {props.children}
+      </a>
+    )
+  }
+
+  return (
+    <Link to="/events/$eventId" params={{ eventId: props.event.id }} class="focus-ring flex h-full flex-col">
+      {props.children}
+    </Link>
   )
 }

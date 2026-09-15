@@ -10,6 +10,7 @@ export function TicketBagItemCard(props: {
   item: TicketBagItem
   eventDateLabel: string
   eventLocationLabel: string
+  eventHref?: string
   onQuantityChange: (quantity: number) => void
   onRemove: () => void
 }) {
@@ -25,29 +26,52 @@ export function TicketBagItemCard(props: {
     >
       <div class="flex flex-col gap-space-5 sm:flex-row sm:items-start sm:gap-space-6">
         {/* Event Thumbnail */}
-        <Link
-          to="/events/$eventId"
-          params={{ eventId: props.event.id }}
-          class="focus-ring relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl border border-border-subtle/60 sm:aspect-square sm:w-28 md:w-32"
-        >
-          <img
-            src={eventImageUrlGet(props.event.imageUrl)}
-            alt={props.event.imageAlt}
-            loading="lazy"
-            class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        </Link>
+        {props.eventHref ? (
+          <a
+            href={props.eventHref}
+            class="focus-ring relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl border border-border-subtle/60 sm:aspect-square sm:w-28 md:w-32"
+          >
+            <img
+              src={eventImageUrlGet(props.event.imageUrl)}
+              alt={props.event.imageAlt}
+              loading="lazy"
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </a>
+        ) : (
+          <Link
+            to="/events/$eventId"
+            params={{ eventId: props.event.id }}
+            class="focus-ring relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl border border-border-subtle/60 sm:aspect-square sm:w-28 md:w-32"
+          >
+            <img
+              src={eventImageUrlGet(props.event.imageUrl)}
+              alt={props.event.imageAlt}
+              loading="lazy"
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </Link>
+        )}
 
         {/* Item Info */}
         <div class="flex min-w-0 flex-1 flex-col gap-space-3.5">
           <div class="flex flex-col gap-space-1">
-            <Link
-              to="/events/$eventId"
-              params={{ eventId: props.event.id }}
-              class="focus-ring text-lg font-semibold tracking-tight text-content hover:text-brand-accent hover:underline sm:text-lg"
-            >
-              {props.event.title}
-            </Link>
+            {props.eventHref ? (
+              <a
+                href={props.eventHref}
+                class="focus-ring text-lg font-semibold tracking-tight text-content hover:text-brand-accent hover:underline sm:text-lg"
+              >
+                {props.event.title}
+              </a>
+            ) : (
+              <Link
+                to="/events/$eventId"
+                params={{ eventId: props.event.id }}
+                class="focus-ring text-lg font-semibold tracking-tight text-content hover:text-brand-accent hover:underline sm:text-lg"
+              >
+                {props.event.title}
+              </Link>
+            )}
 
             <div class="flex flex-wrap items-center gap-space-2 text-sm font-medium text-content">
               <span class="font-semibold">{props.item.tierName}</span>

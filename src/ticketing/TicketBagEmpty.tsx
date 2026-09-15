@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/solid-router"
 
-export function TicketBagEmpty() {
+export function TicketBagEmpty(props: { eventsHref?: string } = {}) {
   return (
     <div class="flex flex-col items-center justify-center rounded-3xl border border-border-subtle/80 bg-surface px-space-6 py-12 text-center shadow-xs sm:px-space-7 sm:py-16 dark:border-border-strong/20">
       <div
@@ -26,12 +26,21 @@ export function TicketBagEmpty() {
       </p>
 
       <div class="mt-space-7 flex flex-wrap items-center justify-center gap-space-4">
-        <Link
-          to="/"
-          class="focus-ring inline-flex h-12 items-center justify-center rounded-xl bg-brand px-space-7 text-sm font-semibold text-brand-content shadow-xs transition-colors hover:bg-brand-strong"
-        >
-          Events entdecken
-        </Link>
+        {props.eventsHref ? (
+          <a
+            href={props.eventsHref}
+            class="focus-ring inline-flex h-12 items-center justify-center rounded-xl bg-brand px-space-7 text-sm font-semibold text-brand-content shadow-xs transition-colors hover:bg-brand-strong"
+          >
+            Events entdecken
+          </a>
+        ) : (
+          <Link
+            to="/"
+            class="focus-ring inline-flex h-12 items-center justify-center rounded-xl bg-brand px-space-7 text-sm font-semibold text-brand-content shadow-xs transition-colors hover:bg-brand-strong"
+          >
+            Events entdecken
+          </Link>
+        )}
       </div>
     </div>
   )

@@ -1,40 +1,42 @@
-import { type Accessor, For, Show } from "solid-js"
-import { Button } from "#ui/interactive/button/Button.jsx"
+import { For, Show } from "solid-js"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
 import { Textarea } from "#ui/input/textarea/Textarea.jsx"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
-import type { ApiClientResult } from "../client/apiClient.js"
 import type { EventCategory } from "../events/EventCategory.ts"
-import type { EventItem } from "../events/EventItem.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
-import { adminCatalogPageStateCreate } from "./adminCatalogPageStateCreate.ts"
+import { LanguageSelector } from "../app/i18n/LanguageSelector.tsx"
+import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
+import { AdminMemberManagement } from "./AdminMemberManagement.tsx"
+import type { AdminMemberManagementState } from "./AdminMemberManagementState.ts"
 
 export function AdminCatalogPage(props: {
-  eventsResult: Accessor<ApiClientResult<readonly EventItem[]>>
-  isServerAuthorized: Accessor<boolean>
+  state: AdminCatalogPageState
+  memberState?: AdminMemberManagementState
+  description?: string
 }) {
-  const events = () => {
-    const result = props.eventsResult()
-    return result.success ? result.data : []
-  }
-  const state = adminCatalogPageStateCreate({
-    events,
-    isServerAuthorized: props.isServerAuthorized,
-  })
+  const state = props.state
 
   return (
     <main id="content" tabindex="-1">
       <UiContainer width="wide" class="flex flex-col gap-8 py-10">
         <header class="flex flex-col gap-3">
-          <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Administration</p>
+          <div class="flex items-center justify-between gap-4">
+            <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Administration</p>
+            <Show when={props.memberState}>
+              <LanguageSelector />
+            </Show>
+          </div>
           <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">Events & Ticketprodukte</h1>
           <p class="max-w-3xl text-sm leading-relaxed text-content-muted">
-            Änderungen werden über die autorisierten Convex-Mutationen gespeichert. Verkaufspreise und Bestand werden
-            niemals aus Browserdaten übernommen.
+            {props.description ??
+              "Änderungen werden über die autorisierten Convex-Mutationen gespeichert. Verkaufspreise und Bestand werden niemals aus Browserdaten übernommen."}
           </p>
         </header>
+
+        <Show when={props.memberState}>{(memberState) => <AdminMemberManagement state={memberState()} />}</Show>
 
         <Show
           when={state.isAuthorized()}
@@ -266,20 +268,22 @@ export function AdminCatalogPage(props: {
                     </span>
                   </div>
                   <Show when={state.selectedEvent()?.tiers.length}>
-                    <div class="flex flex-wrap gap-2" role="list" aria-label="Vorhandene Ticketprodukte">
+                    <ul class="flex flex-wrap gap-2" aria-label="Vorhandene Ticketprodukte">
                       <For each={state.selectedEvent()?.tiers ?? []}>
                         {(tier) => (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            class="rounded-full px-3 py-1 text-xs text-content-muted hover:bg-surface-muted"
-                            onClick={() => state.selectTier(tier)}
-                          >
-                            {tier.name} · {tier.available} verfügbar
-                          </Button>
+                          <li>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              class="rounded-full px-3 py-1 text-xs text-content-muted hover:bg-surface-muted"
+                              onClick={() => state.selectTier(tier)}
+                            >
+                              {tier.name} · {tier.available} verfügbar
+                            </Button>
+                          </li>
                         )}
                       </For>
-                    </div>
+                    </ul>
                   </Show>
                   <p class="text-xs text-content-muted">
                     Bei bestehenden Produkten bitte die gesamte Kapazität eingeben; reservierte und verkaufte Mengen

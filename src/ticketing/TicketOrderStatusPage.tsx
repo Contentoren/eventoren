@@ -3,14 +3,22 @@ import { For, Show } from "solid-js"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
+import type { TicketOrderStatusPageState } from "./TicketOrderStatusPageState.ts"
 import { TicketOrderWalletPass } from "./TicketOrderWalletPass.tsx"
 import { ticketOrderStatusPageStateCreate } from "./ticketOrderStatusPageStateCreate.ts"
 
-export function TicketOrderStatusPage(props: { orderIds: readonly string[]; checkoutKey?: string }) {
-  const state = ticketOrderStatusPageStateCreate({
-    orderIds: () => props.orderIds,
-    checkoutKey: () => props.checkoutKey,
-  })
+export function TicketOrderStatusPage(props: {
+  orderIds: readonly string[]
+  checkoutKey?: string
+  state?: TicketOrderStatusPageState
+  cartHref?: string
+}) {
+  const state =
+    props.state ??
+    ticketOrderStatusPageStateCreate({
+      orderIds: () => props.orderIds,
+      checkoutKey: () => props.checkoutKey,
+    })
 
   return (
     <main id="content" tabindex="-1">
@@ -54,12 +62,21 @@ export function TicketOrderStatusPage(props: { orderIds: readonly string[]; chec
             Status aktualisieren
           </UiButton>
           <UiButton onClick={state.goToEvents}>Weitere Events entdecken</UiButton>
-          <Link
-            to="/warenkorb"
-            class="focus-ring inline-flex h-11 items-center rounded-control px-space-5 text-sm font-semibold text-content-muted underline underline-offset-4"
-          >
-            Zum Warenkorb
-          </Link>
+          {props.cartHref ? (
+            <a
+              href={props.cartHref}
+              class="focus-ring inline-flex h-11 items-center rounded-control px-space-5 text-sm font-semibold text-content-muted underline underline-offset-4"
+            >
+              Zum Warenkorb
+            </a>
+          ) : (
+            <Link
+              to="/warenkorb"
+              class="focus-ring inline-flex h-11 items-center rounded-control px-space-5 text-sm font-semibold text-content-muted underline underline-offset-4"
+            >
+              Zum Warenkorb
+            </Link>
+          )}
         </div>
       </UiContainer>
     </main>
