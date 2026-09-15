@@ -1,0 +1,180 @@
+{
+  "benchmark": "eventoren-catalog-orders-baseline",
+  "startedAt": "2026-09-15T06:38:17.062Z",
+  "completedAt": "2026-09-15T06:45:37.579Z",
+  "runtime": {
+    "backend": "local convex-test/mock",
+    "convexTestVersion": "0.0.56",
+    "processMemoryIncludes": ["Vitest runner", "convex-test mock storage", "JavaScript heap", "GC variability"],
+    "hostedFunctionMemoryCaptured": false,
+    "readMetrics": {
+      "supported": false,
+      "reason": "convex-test exposes transaction limits but no per-query read-row or read-byte usage API"
+    },
+    "process": {
+      "bun": null,
+      "node": "v26.8.2",
+      "platform": "linux",
+      "release": "6.12.96+deb13-amd64",
+      "arch": "x64",
+      "hostname": "leo-server",
+      "logicalCpuCount": 24,
+      "totalSystemMemoryBytes": 126618472448
+    },
+    "execution": {
+      "command": "bun run benchmark:catalog-orders",
+      "selectedScenarios": "2000-dense",
+      "outputPath": "artifacts/catalog-orders-baseline-2000-dense.json",
+      "repeatCountSource": "default",
+      "isolatedProcessGuidance": "Run one BENCHMARK_SCENARIOS value per command so each artifact has a fresh process and isolated mock store."
+    },
+    "memorySampling": {
+      "intervalMs": 1,
+      "peakType": "sampled process peak; absolute and baseline delta",
+      "notFunctionMemory": true
+    }
+  },
+  "workload": {
+    "repeatCount": 5,
+    "fixtureSetupExcludedFromLatency": true,
+    "fixtureSetupBatchSize": 25,
+    "warmupExcludedFromLatency": true,
+    "scenarios": [
+      {
+        "name": "2000-dense",
+        "recordCount": 2000,
+        "publishedCount": 2000,
+        "targetOrderCount": 2000,
+        "seedTransactionCount": 162,
+        "fixtureSetupDurationMs": 1238.354363,
+        "fixtureProcessBaseline": {
+          "sampledAt": "2026-09-15T06:38:17.068Z",
+          "rssBytes": 94691328,
+          "heapUsedBytes": 22375152
+        },
+        "fixtureProcessAfterSetup": {
+          "sampledAt": "2026-09-15T06:38:18.306Z",
+          "rssBytes": 133619712,
+          "heapUsedBytes": 40886320
+        },
+        "fixtureSetupProcessPeak": {
+          "sampledAt": "2026-09-15T06:38:18.306Z",
+          "rssBytes": 133619712,
+          "heapUsedBytes": 40884616
+        },
+        "processPeakDuringFixtureAndWorkloads": {
+          "sampledAt": "2026-09-15T06:45:06.248Z",
+          "rssBytes": 261984256,
+          "heapUsedBytes": 127516440
+        },
+        "measurements": [
+          {
+            "endpoint": "catalogEventListPublishedQuery",
+            "expectedRecordsPerRun": 2000,
+            "repeatCount": 5,
+            "warmupDurationMs": 22445.367327,
+            "latencyMs": {
+              "min": 21353.752911999996,
+              "median": 21651.462531999998,
+              "p95": 22598.624396,
+              "max": 22598.624396
+            },
+            "returnedPayloadBytes": {
+              "min": 1705784,
+              "mean": 1705784,
+              "max": 1705784
+            },
+            "observedRecordCounts": [2000, 2000, 2000, 2000, 2000],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T06:38:40.758Z",
+              "rssBytes": 187097088,
+              "heapUsedBytes": 58006912
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T06:40:29.752Z",
+              "rssBytes": 222269440,
+              "heapUsedBytes": 90846984
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 35172352,
+              "heapUsedBytes": 32840072
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "catalogSyncSnapshotQuery",
+            "expectedRecordsPerRun": 2000,
+            "repeatCount": 5,
+            "warmupDurationMs": 20914.783944000024,
+            "latencyMs": {
+              "min": 21136.17823399999,
+              "median": 21583.214034000004,
+              "p95": 22069.09249099999,
+              "max": 22069.09249099999
+            },
+            "returnedPayloadBytes": {
+              "min": 1924945,
+              "mean": 1924945,
+              "max": 1924945
+            },
+            "observedRecordCounts": [2000, 2000, 2000, 2000, 2000],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T06:40:50.668Z",
+              "rssBytes": 216317952,
+              "heapUsedBytes": 71328504
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T06:42:38.807Z",
+              "rssBytes": 243089408,
+              "heapUsedBytes": 110792544
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 26771456,
+              "heapUsedBytes": 39464040
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "ticketOrderListMineQuery",
+            "expectedRecordsPerRun": 2000,
+            "repeatCount": 5,
+            "warmupDurationMs": 29657.11246600002,
+            "latencyMs": {
+              "min": 28417.062879000034,
+              "median": 29949.829392999993,
+              "p95": 31310.289931000036,
+              "max": 31310.289931000036
+            },
+            "returnedPayloadBytes": {
+              "min": 2949082,
+              "mean": 2949082,
+              "max": 2949082
+            },
+            "observedRecordCounts": [2000, 2000, 2000, 2000, 2000],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T06:43:08.465Z",
+              "rssBytes": 198107136,
+              "heapUsedBytes": 60894000
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T06:45:06.248Z",
+              "rssBytes": 261984256,
+              "heapUsedBytes": 127516440
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 63877120,
+              "heapUsedBytes": 66622440
+            },
+            "gcAvailable": false
+          }
+        ],
+        "invalidation": {
+          "verified": false
+        }
+      }
+    ]
+  }
+}

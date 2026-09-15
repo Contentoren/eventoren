@@ -1,0 +1,299 @@
+{
+  "benchmark": "eventoren-catalog-orders-baseline",
+  "startedAt": "2026-09-15T08:34:15.570Z",
+  "completedAt": "2026-09-15T08:36:47.388Z",
+  "runtime": {
+    "backend": "local convex-test/mock",
+    "convexTestVersion": "0.0.56",
+    "processMemoryIncludes": [
+      "Vitest runner",
+      "convex-test mock storage",
+      "JavaScript heap",
+      "GC variability"
+    ],
+    "hostedFunctionMemoryCaptured": false,
+    "readMetrics": {
+      "supported": false,
+      "reason": "convex-test exposes transaction limits but no per-query read-row or read-byte usage API"
+    },
+    "process": {
+      "bun": null,
+      "node": "v26.8.2",
+      "platform": "linux",
+      "release": "6.12.96+deb13-amd64",
+      "arch": "x64",
+      "hostname": "leo-server",
+      "logicalCpuCount": 24,
+      "totalSystemMemoryBytes": 126618472448
+    },
+    "execution": {
+      "command": "bun run benchmark:catalog-orders",
+      "selectedScenarios": "2000-dense",
+      "outputPath": "artifacts/catalog-orders-page-comparison-2000-dense.json",
+      "repeatCountSource": "BENCHMARK_REPEAT_COUNT",
+      "isolatedProcessGuidance": "Run one BENCHMARK_SCENARIOS value per command so each artifact has a fresh process and isolated mock store."
+    },
+    "memorySampling": {
+      "intervalMs": 1,
+      "peakType": "sampled process peak; absolute and baseline delta",
+      "notFunctionMemory": true
+    }
+  },
+  "workload": {
+    "repeatCount": 1,
+    "fixtureSetupExcludedFromLatency": true,
+    "fixtureSetupBatchSize": 25,
+    "warmupExcludedFromLatency": true,
+    "scenarios": [
+      {
+        "name": "2000-dense",
+        "recordCount": 2000,
+        "publishedCount": 2000,
+        "targetOrderCount": 2000,
+        "seedTransactionCount": 162,
+        "fixtureSetupDurationMs": 1168.7848479999998,
+        "fixtureProcessBaseline": {
+          "sampledAt": "2026-09-15T08:34:15.578Z",
+          "rssBytes": 95567872,
+          "heapUsedBytes": 22477960
+        },
+        "fixtureProcessAfterSetup": {
+          "sampledAt": "2026-09-15T08:34:16.747Z",
+          "rssBytes": 134889472,
+          "heapUsedBytes": 40779232
+        },
+        "fixtureSetupProcessPeak": {
+          "sampledAt": "2026-09-15T08:34:16.746Z",
+          "rssBytes": 134889472,
+          "heapUsedBytes": 40777528
+        },
+        "processPeakDuringFixtureAndWorkloads": {
+          "sampledAt": "2026-09-15T08:35:46.625Z",
+          "rssBytes": 227729408,
+          "heapUsedBytes": 114252640
+        },
+        "measurements": [
+          {
+            "endpoint": "catalogEventListPublishedQuery",
+            "expectedRecordsPerRun": 2000,
+            "repeatCount": 1,
+            "warmupDurationMs": 22595.214456,
+            "latencyMs": {
+              "min": 22384.435841,
+              "median": 22384.435841,
+              "p95": 22384.435841,
+              "max": 22384.435841
+            },
+            "returnedPayloadBytes": {
+              "min": 1705784,
+              "mean": 1705784,
+              "max": 1705784
+            },
+            "observedRecordCounts": [
+              2000
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:34:39.350Z",
+              "rssBytes": 186597376,
+              "heapUsedBytes": 59264496
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:35:01.741Z",
+              "rssBytes": 204685312,
+              "heapUsedBytes": 89695920
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 18087936,
+              "heapUsedBytes": 30431424
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "catalogEventListPublishedPageQuery",
+            "expectedRecordsPerRun": 50,
+            "repeatCount": 1,
+            "warmupDurationMs": 569.9607670000041,
+            "latencyMs": {
+              "min": 623.6218230000013,
+              "median": 623.6218230000013,
+              "p95": 623.6218230000013,
+              "max": 623.6218230000013
+            },
+            "returnedPayloadBytes": {
+              "min": 42883,
+              "mean": 42883,
+              "max": 42883
+            },
+            "observedRecordCounts": [
+              50
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:35:02.313Z",
+              "rssBytes": 208027648,
+              "heapUsedBytes": 75131056
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:35:02.937Z",
+              "rssBytes": 208027648,
+              "heapUsedBytes": 90761912
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 0,
+              "heapUsedBytes": 15630856
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "catalogEventListPublishedPageQuery:sparseFilter",
+            "expectedRecordsPerRun": 0,
+            "repeatCount": 1,
+            "warmupDurationMs": 14.994792999998026,
+            "latencyMs": {
+              "min": 15.500866000002134,
+              "median": 15.500866000002134,
+              "p95": 15.500866000002134,
+              "max": 15.500866000002134
+            },
+            "returnedPayloadBytes": {
+              "min": 423,
+              "mean": 423,
+              "max": 423
+            },
+            "observedRecordCounts": [
+              0
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:35:02.953Z",
+              "rssBytes": 206495744,
+              "heapUsedBytes": 97447456
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:35:02.953Z",
+              "rssBytes": 206495744,
+              "heapUsedBytes": 97448328
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 0,
+              "heapUsedBytes": 872
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "catalogSyncSnapshotQuery",
+            "expectedRecordsPerRun": 2000,
+            "repeatCount": 1,
+            "warmupDurationMs": 22209.175175000004,
+            "latencyMs": {
+              "min": 21438.282825999995,
+              "median": 21438.282825999995,
+              "p95": 21438.282825999995,
+              "max": 21438.282825999995
+            },
+            "returnedPayloadBytes": {
+              "min": 1924945,
+              "mean": 1924945,
+              "max": 1924945
+            },
+            "observedRecordCounts": [
+              2000
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:35:25.178Z",
+              "rssBytes": 216522752,
+              "heapUsedBytes": 80564736
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:35:46.625Z",
+              "rssBytes": 227729408,
+              "heapUsedBytes": 114252640
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 11206656,
+              "heapUsedBytes": 33687904
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "ticketOrderListMineQuery",
+            "expectedRecordsPerRun": 2000,
+            "repeatCount": 1,
+            "warmupDurationMs": 30152.849717999998,
+            "latencyMs": {
+              "min": 30516.90641099999,
+              "median": 30516.90641099999,
+              "p95": 30516.90641099999,
+              "max": 30516.90641099999
+            },
+            "returnedPayloadBytes": {
+              "min": 2949082,
+              "mean": 2949082,
+              "max": 2949082
+            },
+            "observedRecordCounts": [
+              2000
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:36:16.778Z",
+              "rssBytes": 210821120,
+              "heapUsedBytes": 59362648
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:36:47.343Z",
+              "rssBytes": 210821120,
+              "heapUsedBytes": 80570928
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 0,
+              "heapUsedBytes": 21208280
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "ticketOrderListMinePaginatedQuery",
+            "expectedRecordsPerRun": 50,
+            "repeatCount": 1,
+            "warmupDurationMs": 25.4855239999888,
+            "latencyMs": {
+              "min": 16.87065500000608,
+              "median": 16.87065500000608,
+              "p95": 16.87065500000608,
+              "max": 16.87065500000608
+            },
+            "returnedPayloadBytes": {
+              "min": 35867,
+              "mean": 35867,
+              "max": 35867
+            },
+            "observedRecordCounts": [
+              50
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:36:47.369Z",
+              "rssBytes": 199360512,
+              "heapUsedBytes": 60663464
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:36:47.387Z",
+              "rssBytes": 199360512,
+              "heapUsedBytes": 68865384
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 0,
+              "heapUsedBytes": 8201920
+            },
+            "gcAvailable": false
+          }
+        ],
+        "invalidation": {
+          "verified": false
+        }
+      }
+    ]
+  }
+}

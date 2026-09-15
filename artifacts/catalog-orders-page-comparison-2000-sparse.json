@@ -1,0 +1,309 @@
+{
+  "benchmark": "eventoren-catalog-orders-baseline",
+  "startedAt": "2026-09-15T08:34:15.645Z",
+  "completedAt": "2026-09-15T08:35:22.555Z",
+  "runtime": {
+    "backend": "local convex-test/mock",
+    "convexTestVersion": "0.0.56",
+    "processMemoryIncludes": [
+      "Vitest runner",
+      "convex-test mock storage",
+      "JavaScript heap",
+      "GC variability"
+    ],
+    "hostedFunctionMemoryCaptured": false,
+    "readMetrics": {
+      "supported": false,
+      "reason": "convex-test exposes transaction limits but no per-query read-row or read-byte usage API"
+    },
+    "process": {
+      "bun": null,
+      "node": "v26.8.2",
+      "platform": "linux",
+      "release": "6.12.96+deb13-amd64",
+      "arch": "x64",
+      "hostname": "leo-server",
+      "logicalCpuCount": 24,
+      "totalSystemMemoryBytes": 126618472448
+    },
+    "execution": {
+      "command": "bun run benchmark:catalog-orders",
+      "selectedScenarios": "2000-sparse",
+      "outputPath": "artifacts/catalog-orders-page-comparison-2000-sparse.json",
+      "repeatCountSource": "BENCHMARK_REPEAT_COUNT",
+      "isolatedProcessGuidance": "Run one BENCHMARK_SCENARIOS value per command so each artifact has a fresh process and isolated mock store."
+    },
+    "memorySampling": {
+      "intervalMs": 1,
+      "peakType": "sampled process peak; absolute and baseline delta",
+      "notFunctionMemory": true
+    }
+  },
+  "workload": {
+    "repeatCount": 1,
+    "fixtureSetupExcludedFromLatency": true,
+    "fixtureSetupBatchSize": 25,
+    "warmupExcludedFromLatency": true,
+    "scenarios": [
+      {
+        "name": "2000-sparse",
+        "recordCount": 2000,
+        "publishedCount": 1,
+        "targetOrderCount": 1,
+        "seedTransactionCount": 162,
+        "fixtureSetupDurationMs": 1170.775427,
+        "fixtureProcessBaseline": {
+          "sampledAt": "2026-09-15T08:34:15.650Z",
+          "rssBytes": 95637504,
+          "heapUsedBytes": 18529728
+        },
+        "fixtureProcessAfterSetup": {
+          "sampledAt": "2026-09-15T08:34:16.821Z",
+          "rssBytes": 133779456,
+          "heapUsedBytes": 37393912
+        },
+        "fixtureSetupProcessPeak": {
+          "sampledAt": "2026-09-15T08:34:16.820Z",
+          "rssBytes": 133779456,
+          "heapUsedBytes": 37392208
+        },
+        "processPeakDuringFixtureAndWorkloads": {
+          "sampledAt": "2026-09-15T08:35:01.240Z",
+          "rssBytes": 191778816,
+          "heapUsedBytes": 75888312
+        },
+        "measurements": [
+          {
+            "endpoint": "catalogEventListPublishedQuery",
+            "expectedRecordsPerRun": 1,
+            "repeatCount": 1,
+            "warmupDurationMs": 378.6112860000003,
+            "latencyMs": {
+              "min": 28.57817699999987,
+              "median": 28.57817699999987,
+              "p95": 28.57817699999987,
+              "max": 28.57817699999987
+            },
+            "returnedPayloadBytes": {
+              "min": 849,
+              "mean": 849,
+              "max": 849
+            },
+            "observedRecordCounts": [
+              1
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:34:17.207Z",
+              "rssBytes": 134959104,
+              "heapUsedBytes": 37053664
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:34:17.236Z",
+              "rssBytes": 135745536,
+              "heapUsedBytes": 37054184
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 786432,
+              "heapUsedBytes": 520
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "catalogEventListPublishedPageQuery",
+            "expectedRecordsPerRun": 1,
+            "repeatCount": 1,
+            "warmupDurationMs": 27.350325999999768,
+            "latencyMs": {
+              "min": 21.030295999999908,
+              "median": 21.030295999999908,
+              "p95": 21.030295999999908,
+              "max": 21.030295999999908
+            },
+            "returnedPayloadBytes": {
+              "min": 1245,
+              "mean": 1245,
+              "max": 1245
+            },
+            "observedRecordCounts": [
+              1
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:34:17.266Z",
+              "rssBytes": 135745536,
+              "heapUsedBytes": 45218104
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:34:17.267Z",
+              "rssBytes": 135745536,
+              "heapUsedBytes": 45218624
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 0,
+              "heapUsedBytes": 520
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "catalogEventListPublishedPageQuery:sparseFilter",
+            "expectedRecordsPerRun": 1,
+            "repeatCount": 1,
+            "warmupDurationMs": 25.369337000000087,
+            "latencyMs": {
+              "min": 24.626749000000018,
+              "median": 24.626749000000018,
+              "p95": 24.626749000000018,
+              "max": 24.626749000000018
+            },
+            "returnedPayloadBytes": {
+              "min": 1109,
+              "mean": 1109,
+              "max": 1109
+            },
+            "observedRecordCounts": [
+              1
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:34:17.314Z",
+              "rssBytes": 135745536,
+              "heapUsedBytes": 32937832
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:34:17.339Z",
+              "rssBytes": 135745536,
+              "heapUsedBytes": 43122888
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 0,
+              "heapUsedBytes": 10185056
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "catalogSyncSnapshotQuery",
+            "expectedRecordsPerRun": 2000,
+            "repeatCount": 1,
+            "warmupDurationMs": 22613.39646,
+            "latencyMs": {
+              "min": 21280.066806999996,
+              "median": 21280.066806999996,
+              "p95": 21280.066806999996,
+              "max": 21280.066806999996
+            },
+            "returnedPayloadBytes": {
+              "min": 1916949,
+              "mean": 1916949,
+              "max": 1916949
+            },
+            "observedRecordCounts": [
+              2000
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:34:39.953Z",
+              "rssBytes": 180768768,
+              "heapUsedBytes": 43067496
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:35:01.240Z",
+              "rssBytes": 191778816,
+              "heapUsedBytes": 75888312
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 11010048,
+              "heapUsedBytes": 32820816
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "ticketOrderListMineQuery",
+            "expectedRecordsPerRun": 1,
+            "repeatCount": 1,
+            "warmupDurationMs": 313.2724129999988,
+            "latencyMs": {
+              "min": 23.882676000001084,
+              "median": 23.882676000001084,
+              "p95": 23.882676000001084,
+              "max": 23.882676000001084
+            },
+            "returnedPayloadBytes": {
+              "min": 1558,
+              "mean": 1558,
+              "max": 1558
+            },
+            "observedRecordCounts": [
+              1
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:35:01.554Z",
+              "rssBytes": 189460480,
+              "heapUsedBytes": 45395224
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:35:01.578Z",
+              "rssBytes": 189460480,
+              "heapUsedBytes": 59103344
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 0,
+              "heapUsedBytes": 13708120
+            },
+            "gcAvailable": false
+          },
+          {
+            "endpoint": "ticketOrderListMinePaginatedQuery",
+            "expectedRecordsPerRun": 1,
+            "repeatCount": 1,
+            "warmupDurationMs": 11.449689000000944,
+            "latencyMs": {
+              "min": 9.092650999999023,
+              "median": 9.092650999999023,
+              "p95": 9.092650999999023,
+              "max": 9.092650999999023
+            },
+            "returnedPayloadBytes": {
+              "min": 810,
+              "mean": 810,
+              "max": 810
+            },
+            "observedRecordCounts": [
+              1
+            ],
+            "errors": [],
+            "workloadProcessBaseline": {
+              "sampledAt": "2026-09-15T08:35:01.590Z",
+              "rssBytes": 189460480,
+              "heapUsedBytes": 35078856
+            },
+            "workloadProcessPeak": {
+              "sampledAt": "2026-09-15T08:35:01.600Z",
+              "rssBytes": 189460480,
+              "heapUsedBytes": 39546688
+            },
+            "workloadProcessPeakDelta": {
+              "rssBytes": 0,
+              "heapUsedBytes": 4467832
+            },
+            "gcAvailable": false
+          }
+        ],
+        "invalidation": {
+          "verified": true,
+          "details": {
+            "catalogListBefore": 1,
+            "catalogListAfter": 2,
+            "snapshotTitle": "Invalidated benchmark event",
+            "orderTitle": "Invalidated benchmark order",
+            "snapshotRequestedVersion": 1234,
+            "catalogOrderVerified": true,
+            "orderHistoryOrderVerified": true,
+            "duplicateRecordsFound": false
+          }
+        }
+      }
+    ]
+  }
+}

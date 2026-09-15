@@ -17,6 +17,7 @@
     "preview": "vite preview",
     "test": "bun test --path-ignore-patterns=convex-tests/** --max-concurrency=1 --pass-with-no-tests",
     "test:convex": "bun run convex codegen --system-udfs --typecheck disable && bunx vitest run --config vitest.convex.config.ts",
+    "benchmark:catalog-orders": "bunx vitest run --config vitest.benchmark.config.ts --reporter verbose",
     "convex:codegen": "bun --env-file=.env.development run convex codegen",
     "codegen": "bun run convex:codegen",
     "cc": "bun run convex:codegen",
