@@ -2,6 +2,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <title>Abiball 2027 – Ticketshop | Abikur</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -89,6 +90,7 @@ input,select{font:inherit;color:inherit}
 }
 .nav-link:hover{color:var(--color-content);background:var(--color-surface-muted)}
 .header-right{display:flex;align-items:center;gap:14px}
+.header-right[hidden]{display:none}
 .demobar-group{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--color-content-muted);font-weight:500}
 .phasepick{display:flex;background:var(--color-surface-muted);border-radius:999px;padding:3px;gap:2px}
 .phasepick button{background:none;border:0;color:var(--color-content-muted);padding:5px 14px;border-radius:999px;font-size:13px;font-weight:500;transition:color .12s}
@@ -313,7 +315,7 @@ h2.sec{font-size:22px;margin:30px 0 14px}
         <a href="/" class="nav-link">Events entdecken</a>
       </nav>
     </div>
-    <div class="header-right">
+    <div class="header-right" id="header-right" hidden>
       <div class="demobar-group">
         <span>Ticketphase</span>
         <div class="phasepick">
@@ -335,8 +337,8 @@ h2.sec{font-size:22px;margin:30px 0 14px}
       <h1>Abiball 2027</h1>
       <p>Der Ticketverkauf ist nur für den Abiturjahrgang. Gib das Passwort ein, das ihr von der Abiballkomitee-Leitung bekommen habt.</p>
       <label class="field">
-        <span>Passwort <em style="font-style:normal;color:var(--ink-soft)">(optional)</em></span>
-        <input type="password" id="pw" autocomplete="off" placeholder="Passwort eingeben (optional)">
+        <span>Passwort</span>
+        <input type="password" id="pw" autocomplete="off" placeholder="Passwort eingeben" required>
       </label>
       <p class="err" id="pwerr"></p>
       <button class="btn" id="pwgo" style="margin-top:6px">Zum Ticketshop</button>
@@ -490,7 +492,7 @@ h2.sec{font-size:22px;margin:30px 0 14px}
    Konfiguration – hier stellst du echte Werte ein
    ========================================================= */
 const CONFIG = {
-  passwort: "IKGTAbiTree27",
+  passwort: "IKGTabi2027TREE",
   schule: "Immanuel-Kant-Gymnasium",
   preise: { ball: 10600, lehrer: 10600, after: 2500 },   // in Cent
   bestand: { ball: 132, after: 96, lehrer: 24 },
@@ -531,6 +533,12 @@ S = frisch();
 const $ = id => document.getElementById(id);
 function pruefePasswort(){
   $("pwerr").textContent = "";
+  if ($("pw").value !== CONFIG.passwort) {
+    $("pwerr").textContent = "Das Passwort ist nicht korrekt.";
+    $("pw").focus();
+    return;
+  }
+  $("header-right").hidden = false;
   zeige("s-role");
 }
 $("pwgo").addEventListener("click", pruefePasswort);
@@ -567,6 +575,7 @@ function setzePhase(p){
 $("reset").addEventListener("click", () => {
   const p = S.phase; S = frisch(); S.phase = p;
   $("pw").value = ""; $("pwerr").textContent = "";
+  $("header-right").hidden = true;
   document.querySelectorAll(".bill").forEach(i => { if(i.tagName==="INPUT") i.value=""; });
   $("b-tel").value=""; $("agb").checked=false;
   zeige("s-gate");
