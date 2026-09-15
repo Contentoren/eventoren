@@ -64,8 +64,8 @@
     "assets:doctor": "ASSETS_ENV_FILE=\"${ASSETS_CLI_ENV_FILE:-$HOME/.config/project-creator/assets/eventoren/assets-cli.env}\" bun run assets doctor --environment production --json",
     "ssr:check": "bun run src/ssrOutputCheck.ts",
     "ssr:worker": "bun run scripts/buildSsrWorker.ts",
-    "frontend:build:development": "bun --env-file=.env/development run build",
-    "frontend:build:production": "env -u PUBLIC_BASE_URL_SITE -u PUBLIC_BASE_URL_APP -u PUBLIC_BASE_URL_API -u PUBLIC_BASE_URL_CONVEX -u VITE_CONVEX_URL -u VITE_CONVEX_SITE_URL -u CONVEX_SITE_URL bun --env-file=.env/production run build",
+    "frontend:build:development": "env -u PUBLIC_BASE_URL_SITE -u PUBLIC_BASE_URL_APP -u PUBLIC_BASE_URL_API -u PUBLIC_BASE_URL_CONVEX -u VITE_CONVEX_URL -u VITE_CONVEX_SITE_URL -u CONVEX_SITE_URL -u CONVEX_URL -u CONVEX_SELF_HOSTED_URL bun --env-file=.env.development run build",
+    "frontend:build:production": "env -u PUBLIC_BASE_URL_SITE -u PUBLIC_BASE_URL_APP -u PUBLIC_BASE_URL_API -u PUBLIC_BASE_URL_CONVEX -u VITE_CONVEX_URL -u VITE_CONVEX_SITE_URL -u CONVEX_SITE_URL -u CONVEX_URL -u CONVEX_SELF_HOSTED_URL bun --env-file=.env.production run build",
     "frontend:build": "bun run frontend:build:production",
     "frontend:upload:preview": "bunx wrangler pages deploy ./dist/client --project-name=eventoren --branch preview --commit-dirty=true",
     "frontend:upload:production": "bunx wrangler pages deploy ./dist/client --project-name=eventoren --branch main --commit-dirty=true",
@@ -99,7 +99,9 @@
     "@corvu/dialog": "^0.2.4",
     "@corvu/popover": "^0.2.0",
     "@solid-primitives/keyed": "^1.5.3",
-    "@solid-primitives/scheduled": "^1.5.3"
+    "@solid-primitives/scheduled": "^1.5.3",
+    "@zxing/browser": "^0.1.5",
+    "@zxing/library": "^0.21.0"
   },
   "devDependencies": {
     "@adaptive-ds/assets-optimizer": "^0.20.0",
