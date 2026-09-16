@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import type { EventorenCatalogUpsertRequest } from "billing/contracts/eventorenCatalogUpsertRequestSchema"
 import { internal } from "#convex/_generated/api.js"
 import { internalAction } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
@@ -99,8 +100,8 @@ export const catalogSyncPushAction = internalAction({
     const billingPayload = {
       organizationId: config.data.organizationId,
       catalogVersion: args.requestedVersion,
-      events,
-    }
+      events: events as EventorenCatalogUpsertRequest["events"],
+    } satisfies EventorenCatalogUpsertRequest
     const serializedBillingPayload = JSON.stringify(billingPayload)
     const serializedBillingPayloadBytes = new TextEncoder().encode(serializedBillingPayload).byteLength
     if (serializedBillingPayloadBytes > catalogSyncLimits.billingPayloadMaxBytes)

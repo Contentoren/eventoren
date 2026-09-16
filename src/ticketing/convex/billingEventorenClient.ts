@@ -1,38 +1,18 @@
-import * as v from "valibot"
+import type { BillingClient } from "billing/billingClient"
+import type { BillingClientCreateOptions } from "billing/billingClientCreateOptions"
+import { billingClientCreate } from "billing"
+import type { EventorenCatalogUpsertRequest } from "billing/contracts/eventorenCatalogUpsertRequestSchema"
+import type { EventorenCatalogUpsertResponse } from "billing/contracts/eventorenCatalogUpsertResponseSchema"
+import type { EventorenTicketCheckoutCreateRequest } from "billing/contracts/eventorenTicketCheckoutCreateRequestSchema"
+import type { EventorenTicketCheckoutCreateResponse } from "billing/contracts/eventorenTicketCheckoutCreateResponseSchema"
+import type { EventorenTicketCheckoutStatusResponse } from "billing/contracts/eventorenTicketCheckoutStatusResponseSchema"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
 
-const billingCatalogResponseSchema = v.object({
-  success: v.literal(true),
-  data: v.object({
-    catalogVersion: v.number(),
-    catalogDigest: v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/)),
-    eventCount: v.number(),
-    replayed: v.boolean(),
-  }),
-})
+type BillingEventorenFetcher = NonNullable<BillingClientCreateOptions["fetcher"]>
 
-const billingCheckoutResponseSchema = v.object({
-  success: v.literal(true),
-  data: v.object({
-    paymentReference: v.string(),
-    orderReference: v.string(),
-    stripeMode: v.picklist(["live", "test"]),
-    status: v.literal("checkout_created"),
-    url: v.pipe(v.string(), v.url()),
-  }),
-})
-
-const billingStatusResponseSchema = v.object({
-  success: v.literal(true),
-  data: v.object({
-    paymentReference: v.string(),
-    orderReference: v.string(),
-    stripeMode: v.picklist(["live", "test"]),
-    status: v.picklist(["accepted", "checkout_created", "failed", "expired"]),
-    payment: v.picklist(["pending", "paid", "failed", "expired"]),
-    expiresAt: v.nullable(v.string()),
-  }),
-})
+type BillingEventorenConfigOptions = {
+  fetcher?: BillingEventorenFetcher
+}
 
 type BillingEventorenConfig = {
   baseUrl: string
@@ -40,46 +20,20 @@ type BillingEventorenConfig = {
   apiCredential: string
   stripeMode: "live" | "test"
   publicBaseUrl: string
+  client: BillingClient
 }
 
-type BillingCatalogPayload = {
-  organizationId: string
-  catalogVersion: number
-  events: readonly Record<string, unknown>[]
+type BillingCheckoutCreated = Omit<EventorenTicketCheckoutCreateResponse["data"], "expiresAt" | "status" | "url"> & {
+  status: "checkout_created"
+  url: string
 }
 
-type BillingTicketCheckoutInput = {
-  organizationId: string
-  paymentReference: string
-  eventKey: string
-  catalogVersion: number
-  tickets: readonly { tierKey: string; quantity: number }[]
-  stripeMode: "live" | "test"
-  successUrl: string
-  cancelUrl: string
-  locale: "de" | "en"
-  customer: { email: string }
-  legalContext: {
-    cta: string
-    termsAccepted: true
-    privacyAcknowledged: true
-    documentSetRevision: string
-  }
-}
-
-type BillingStatus = {
-  paymentReference: string
-  orderReference: string
-  stripeMode: "live" | "test"
-  status: "accepted" | "checkout_created" | "failed" | "expired"
-  payment: "pending" | "paid" | "failed" | "expired"
-  expiresAt: string | null
-}
-
-type BillingStatusLookup = { kind: "not_found" } | { kind: "status"; data: BillingStatus }
+type BillingStatusLookup =
+  | { kind: "not_found" }
+  | { kind: "status"; data: EventorenTicketCheckoutStatusResponse["data"] }
 
 export const billingEventorenClient = {
-  configRead(): Result<BillingEventorenConfig> {
+  configRead(options: BillingEventorenConfigOptions = {}): Result<BillingEventorenConfig> {
     const op = "billingEventorenConfigRead"
     const baseUrl = process.env.EVENTOREN_BILLING_BASE_URL?.trim().replace(/\/$/u, "")
     const organizationId = process.env.EVENTOREN_BILLING_ORGANIZATION_ID?.trim()
@@ -96,112 +50,143 @@ export const billingEventorenClient = {
     } catch {
       return createResultError(op, "Billing and public base URLs must be valid URLs")
     }
+
+    const fetcher = options.fetcher ?? globalThis.fetch
+    const clientResult = billingClientCreate({
+      baseUrl,
+      organizationBearerCredential: apiCredential,
+      fetcher: async (input, init) =>
+        fetcher(billingRequestTargetNormalize(input, init?.method), billingRequestInitNormalize(init)),
+      timeoutMilliseconds: 15_000,
+    })
+    if (!clientResult.success) return createResultError(op, clientResult.errorMessage, clientResult.errorData)
     return createResult({
       baseUrl,
       organizationId,
       apiCredential,
       stripeMode,
       publicBaseUrl,
+      client: clientResult.data,
     })
   },
 
   async catalogPush(
     config: BillingEventorenConfig,
-    payload: BillingCatalogPayload,
-  ): PromiseResult<{
-    catalogVersion: number
-    catalogDigest: string
-    replayed: boolean
-  }> {
-    const result = await billingJsonPost(config, "/api/checkout/organizations/eventoren/catalog", payload)
-    if (!result.success) return result
-    const parsed = v.safeParse(billingCatalogResponseSchema, result.data)
-    if (!parsed.success) return createResultError("billingEventorenCatalogPush", "Billing returned an invalid response")
-    return createResult(parsed.output.data)
+    payload: EventorenCatalogUpsertRequest,
+  ): PromiseResult<EventorenCatalogUpsertResponse["data"]> {
+    const result = await config.client.eventorenCatalogUpsert(payload)
+    if (!result.success)
+      return billingOperationError(
+        "billingEventorenCatalogPush",
+        result,
+        "Billing request returned HTTP",
+        "Billing returned an invalid response",
+        "Billing request failed",
+      )
+    return createResult(result.data)
   },
 
   async ticketCheckoutCreate(
     config: BillingEventorenConfig,
-    input: BillingTicketCheckoutInput,
-  ): PromiseResult<{
-    paymentReference: string
-    orderReference: string
-    stripeMode: "live" | "test"
-    status: "checkout_created"
-    url: string
-  }> {
-    const result = await billingJsonPost(config, "/api/checkout/organizations/eventoren/ticket-checkout", input)
-    if (!result.success) return result
-    const parsed = v.safeParse(billingCheckoutResponseSchema, result.data)
-    if (!parsed.success)
+    input: EventorenTicketCheckoutCreateRequest,
+  ): PromiseResult<BillingCheckoutCreated> {
+    const result = await config.client.eventorenTicketCheckoutCreate(input)
+    if (!result.success)
+      return billingOperationError(
+        "billingEventorenTicketCheckoutCreate",
+        result,
+        "Billing request returned HTTP",
+        "Billing returned an invalid response",
+        "Billing request failed",
+      )
+    if (result.data.status !== "checkout_created" || result.data.url === undefined)
       return createResultError("billingEventorenTicketCheckoutCreate", "Billing returned an invalid response")
-    return createResult(parsed.output.data)
+    return createResult({
+      paymentReference: result.data.paymentReference,
+      orderReference: result.data.orderReference,
+      stripeMode: result.data.stripeMode,
+      status: "checkout_created",
+      url: result.data.url,
+    })
   },
 
   async statusGet(config: BillingEventorenConfig, paymentReference: string): PromiseResult<BillingStatusLookup> {
-    const op = "billingEventorenStatusGet"
-    try {
-      const response = await fetch(
-        `${config.baseUrl}/api/checkout/organizations/dynamic/${encodeURIComponent(paymentReference)}/status?organizationId=${encodeURIComponent(config.organizationId)}`,
-        {
-          method: "GET",
-          headers: { Authorization: `Bearer ${config.apiCredential}` },
-          signal: AbortSignal.timeout(15_000),
-        },
+    const result = await config.client.eventorenTicketCheckoutStatusGet({
+      organizationId: config.organizationId,
+      paymentReference,
+    })
+    if (!result.success) {
+      if (result.statusCode === 404) return createResult({ kind: "not_found" as const })
+      return billingOperationError(
+        "billingEventorenStatusGet",
+        result,
+        "Billing status returned HTTP",
+        "Billing returned an invalid payment status",
+        "Billing status request failed",
       )
-      const body = await response.json().catch(() => null)
-      if (response.status === 404) return createResult({ kind: "not_found" as const })
-      if (!response.ok) return createResultError(op, `Billing status returned HTTP ${response.status}`)
-      const parsed = v.safeParse(billingStatusResponseSchema, body)
-      if (!parsed.success) return createResultError(op, "Billing returned an invalid payment status")
-      return createResult({ kind: "status" as const, data: parsed.output.data })
-    } catch (error) {
-      return createResultError(op, "Billing status request failed", String(error))
     }
+    return createResult({ kind: "status" as const, data: result.data })
   },
 
   async ticketCheckoutExpire(
     config: BillingEventorenConfig,
     paymentReference: string,
   ): PromiseResult<BillingStatusLookup> {
-    const op = "billingEventorenTicketCheckoutExpire"
-    try {
-      const response = await fetch(
-        `${config.baseUrl}/api/checkout/organizations/eventoren/ticket-checkout/${encodeURIComponent(paymentReference)}/expire?organizationId=${encodeURIComponent(config.organizationId)}`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${config.apiCredential}` },
-          signal: AbortSignal.timeout(15_000),
-        },
+    const result = await config.client.eventorenTicketCheckoutExpire({
+      organizationId: config.organizationId,
+      paymentReference,
+    })
+    if (!result.success) {
+      if (result.statusCode === 404) return createResult({ kind: "not_found" as const })
+      return billingOperationError(
+        "billingEventorenTicketCheckoutExpire",
+        result,
+        "Billing expiration returned HTTP",
+        "Billing returned an invalid expiration status",
+        "Billing expiration request failed",
       )
-      const body = await response.json().catch(() => null)
-      if (response.status === 404) return createResult({ kind: "not_found" as const })
-      if (!response.ok) return createResultError(op, `Billing expiration returned HTTP ${response.status}`)
-      const parsed = v.safeParse(billingStatusResponseSchema, body)
-      if (!parsed.success) return createResultError(op, "Billing returned an invalid expiration status")
-      return createResult({ kind: "status" as const, data: parsed.output.data })
-    } catch (error) {
-      return createResultError(op, "Billing expiration request failed", String(error))
     }
+    return createResult({ kind: "status" as const, data: result.data })
   },
 }
 
-async function billingJsonPost(config: BillingEventorenConfig, path: string, body: unknown): PromiseResult<unknown> {
-  const op = "billingEventorenRequest"
-  try {
-    const response = await fetch(`${config.baseUrl}${path}`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.apiCredential}`,
-        "Content-Type": "application/json",
-      },
-      signal: AbortSignal.timeout(15_000),
-      body: JSON.stringify(body),
-    })
-    const responseBody = await response.json().catch(() => null)
-    if (!response.ok) return createResultError(op, `Billing request returned HTTP ${response.status}`)
-    return createResult(responseBody)
-  } catch (error) {
-    return createResultError(op, "Billing request failed", String(error))
-  }
+function billingOperationError(
+  op: string,
+  result: {
+    success: false
+    code?: string
+    errorMessage: string
+    errorData?: string | null
+    statusCode?: number
+  },
+  httpMessage: string,
+  invalidMessage: string,
+  networkMessage: string,
+) {
+  if (result.statusCode !== undefined && result.statusCode >= 300)
+    return createResultError(op, `${httpMessage} ${result.statusCode}`, result.errorData)
+  if (result.code === "BILLING_CLIENT_INVALID_RESPONSE") return createResultError(op, invalidMessage, result.errorData)
+  if (result.code === "BILLING_CLIENT_NETWORK_ERROR") return createResultError(op, networkMessage, result.errorData)
+  return createResultError(op, result.errorMessage, result.errorData)
+}
+
+function billingRequestInitNormalize(init: RequestInit | undefined): RequestInit | undefined {
+  if (init?.headers === undefined) return init
+  const headers = new Headers(init.headers)
+  const normalizedHeaders: Record<string, string> = {}
+  const authorization = headers.get("authorization")
+  const contentType = headers.get("content-type")
+  const accept = headers.get("accept")
+  if (authorization !== null) normalizedHeaders.Authorization = authorization
+  if (contentType !== null) normalizedHeaders["Content-Type"] = contentType
+  if (accept !== null) normalizedHeaders.Accept = accept
+  return { ...init, headers: normalizedHeaders }
+}
+
+function billingRequestTargetNormalize(input: RequestInfo | URL, method: string | undefined): RequestInfo | URL {
+  if (method !== "POST") return input
+  const target = new URL(String(input))
+  if (!target.pathname.endsWith("/catalog") && !target.pathname.endsWith("/ticket-checkout")) return input
+  target.search = ""
+  return target.toString()
 }

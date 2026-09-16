@@ -90,6 +90,7 @@
     "solid-js": "^1.9.15",
     "@adaptive-ds/email-generator": "^0.11.0",
     "@adaptive-ds/result": "^0.5.0",
+    "billing": "file:vendor/billing-0.1.1.tgz",
     "convex": "^1.34.1",
     "jose": "^6.2.2",
     "@adaptive-ds/website-content-pipeline": "0.7.1",
