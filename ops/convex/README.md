@@ -60,3 +60,21 @@ The container request should return Billing's normal HTTP status (currently
 complete its scheduled push without any temporary bridge process. Checkout
 actions use the same path and must reach Billing with the private bearer
 credential.
+
+## Production equivalence
+
+Production Convex uses the private values
+`EVENTOREN_BILLING_BASE_URL=https://billing.contentoren.de` and
+`EVENTOREN_BILLING_STRIPE_MODE=live`. Preview's
+`http://169.254.1.2:3146` is the container-local route to the existing Billing
+preview service; `https://preview.billing.contentoren.de` is its public
+equivalent, not a replacement for the internal route. No routing change is
+needed.
+
+The Billing dependency is deployed as the versioned tarball in
+`vendor/billing-<version>.tgz`. Build and check it in Billing first, copy the
+artifact into `vendor/`, update the exact `file:` version in `package.json` if
+needed, and run `bun install`. Never silently overwrite a same-version
+tarball: refresh with a version bump so Bun cannot reuse an old lock/cache
+entry. The full refresh procedure is in
+[`docs/ticket_checkout_backend.md`](../../docs/ticket_checkout_backend.md).

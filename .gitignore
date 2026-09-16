@@ -53,6 +53,8 @@ ops/convex/*.volume
 # Bun package manager cache
 # Output
 *.tgz
+!vendor/
+!vendor/*.tgz
 # Code coverage
 *.lcov
 # Logs
