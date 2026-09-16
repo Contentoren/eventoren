@@ -108,49 +108,51 @@ const variantClasses = {
   //
   filledYellow: classArr(
     "text-white", // text
-    "bg-yellow-500 dark:bg-yellow-800 ", // bg
-    "hover:bg-yellow-700 dark:hover:bg-yellow-600", // bg hover
-    "focus:ring-yellow-400 dark:focus:ring-yellow-400", // focus
+    "bg-yellow-700 dark:bg-yellow-800", // bg
+    "hover:bg-yellow-800 dark:hover:bg-yellow-700", // bg hover
+    "focus:ring-yellow-700 dark:focus:ring-yellow-700", // focus
   ),
   filledAmber: classArr(
     "text-white", // text
-    "bg-amber-500 dark:bg-amber-800 ", // bg
-    "hover:bg-amber-700 dark:hover:bg-amber-600", // bg hover
-    "focus:ring-amber-400 dark:focus:ring-amber-400", // focus
+    "bg-amber-700 dark:bg-amber-800", // bg
+    "hover:bg-amber-800 dark:hover:bg-amber-700", // bg hover
+    "focus:ring-amber-700 dark:focus:ring-amber-700", // focus
   ),
   filledOrange: classArr(
     "text-white", // text
-    "bg-orange-500 dark:bg-orange-800 ", // bg
-    "hover:bg-orange-700 dark:hover:bg-orange-600", // bg hover
-    "focus:ring-orange-400 dark:focus:ring-orange-400", // focus
+    "bg-orange-700 dark:bg-orange-800", // bg
+    "hover:bg-orange-800 dark:hover:bg-orange-700", // bg hover
+    "focus:ring-orange-700 dark:focus:ring-orange-700", // focus
   ),
   filledRed: classArr(
     "text-white", // text
-    "bg-red-500 dark:bg-red-700", // bg
-    "hover:bg-red-600 dark:hover:bg-red-600", // bg hover
-    "focus:ring-red-400 dark:focus:ring-red-400", // focus
+    "bg-red-600 dark:bg-red-700", // bg
+    "hover:bg-red-700 dark:hover:bg-red-800", // bg hover
+    "focus:ring-red-700 dark:focus:ring-red-700", // focus
   ),
   filledGreen: classArr(
     "text-white", // text
-    "bg-green-500 hover:bg-green-700 dark:hover:bg-green-700", // bg
-    "focus:ring-green-400 dark:focus:ring-green-400", // focus
+    "bg-green-700 dark:bg-green-800", // bg
+    "hover:bg-green-800 dark:hover:bg-green-700", // bg hover
+    "focus:ring-green-700 dark:focus:ring-green-700", // focus
   ),
   filledSky: classArr(
     "text-white", // text
-    "bg-sky-500 hover:bg-sky-700 dark:hover:bg-sky-700", // bg
-    "focus:ring-sky-400 dark:focus:ring-sky-400", // focus
+    "bg-sky-700 dark:bg-sky-800", // bg
+    "hover:bg-sky-800 dark:hover:bg-sky-700", // bg hover
+    "focus:ring-sky-700 dark:focus:ring-sky-700", // focus
   ),
   filledIndigo: classArr(
     "text-white", // text
-    "bg-indigo-500 dark:bg-indigo-800 ", // bg
-    "hover:bg-indigo-700 dark:hover:bg-indigo-600", // bg hover
-    "focus:ring-indigo-400 dark:focus:ring-indigo-400", // focus
+    "bg-indigo-700 dark:bg-indigo-800", // bg
+    "hover:bg-indigo-800 dark:hover:bg-indigo-700", // bg hover
+    "focus:ring-indigo-700 dark:focus:ring-indigo-700", // focus
   ),
   filledBlue: classArr(
     "text-white", // text
-    "bg-blue-500 dark:bg-blue-800 ", // bg
-    "hover:bg-blue-700 dark:hover:bg-blue-600", // bg hover
-    "focus:ring-blue-400 dark:focus:ring-blue-400", // focus
+    "bg-blue-700 dark:bg-blue-800", // bg
+    "hover:bg-blue-800 dark:hover:bg-blue-700", // bg hover
+    "focus:ring-blue-700 dark:focus:ring-blue-700", // focus
   ),
   //
   // filled gradient colors
@@ -158,76 +160,76 @@ const variantClasses = {
   //
   filledGreenGradient: classArr(
     "text-white", // text
-    "bg-gradient-to-r from-green-500 to-emerald-600", // gradient bg
-    "hover:from-green-600 hover:to-emerald-700", // bg hover
+    "bg-gradient-to-r from-green-700 to-emerald-700", // gradient bg
+    "hover:from-green-800 hover:to-emerald-800", // bg hover
     "shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all", // shadow
-    "focus:ring-emerald-400 dark:focus:ring-emerald-400", // focus
+    "focus:ring-emerald-700 dark:focus:ring-emerald-700", // focus
   ),
   filledYellowGradient: classArr(
     "text-white", // text
-    "bg-gradient-to-r from-yellow-400 to-yellow-700", // gradient bg (pure yellow)
-    "hover:from-yellow-500 hover:to-yellow-800", // bg hover
+    "bg-gradient-to-r from-yellow-700 to-yellow-800", // gradient bg (pure yellow)
+    "hover:from-yellow-800 hover:to-yellow-900", // bg hover
     "shadow-lg shadow-yellow-500/25 hover:shadow-yellow-500/40 transition-all", // shadow
-    "focus:ring-yellow-400 dark:focus:ring-yellow-400", // focus
+    "focus:ring-yellow-700 dark:focus:ring-yellow-700", // focus
   ),
   filledAmberGradient: classArr(
     "text-white", // text
-    "bg-gradient-to-r from-amber-400 to-amber-700", // gradient bg (pure amber)
-    "hover:from-amber-500 hover:to-amber-800", // bg hover
+    "bg-gradient-to-r from-amber-700 to-amber-800", // gradient bg (pure amber)
+    "hover:from-amber-800 hover:to-amber-900", // bg hover
     "shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all", // shadow
-    "focus:ring-amber-400 dark:focus:ring-amber-400", // focus
+    "focus:ring-amber-700 dark:focus:ring-amber-700", // focus
   ),
   filledOrangeGradient: classArr(
     "text-white", // text
-    "bg-gradient-to-r from-orange-400 to-orange-700", // gradient bg (pure orange)
-    "hover:from-orange-500 hover:to-orange-800", // bg hover
+    "bg-gradient-to-r from-orange-700 to-orange-800", // gradient bg (pure orange)
+    "hover:from-orange-800 hover:to-orange-900", // bg hover
     "shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all", // shadow
-    "focus:ring-orange-400 dark:focus:ring-orange-400", // focus
+    "focus:ring-orange-700 dark:focus:ring-orange-700", // focus
   ),
   filledRedGradient: classArr(
     "text-white", // text
-    "bg-gradient-to-r from-red-400 to-red-700", // gradient bg (pure red)
-    "hover:from-red-500 hover:to-red-800", // bg hover
+    "bg-gradient-to-r from-red-700 to-red-800", // gradient bg (pure red)
+    "hover:from-red-800 hover:to-red-900", // bg hover
     "shadow-lg shadow-red-500/25 hover:shadow-red-500/40 transition-all", // shadow
-    "focus:ring-red-400 dark:focus:ring-red-400", // focus
+    "focus:ring-red-700 dark:focus:ring-red-700", // focus
   ),
   filledSkyGradient: classArr(
     "text-white", // text
-    "bg-gradient-to-r from-sky-400 to-sky-700", // gradient bg (pure sky)
-    "hover:from-sky-500 hover:to-sky-800", // bg hover
+    "bg-gradient-to-r from-sky-700 to-sky-800", // gradient bg (pure sky)
+    "hover:from-sky-800 hover:to-sky-900", // bg hover
     "shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 transition-all", // shadow
-    "focus:ring-sky-400 dark:focus:ring-sky-400", // focus
+    "focus:ring-sky-700 dark:focus:ring-sky-700", // focus
   ),
   filledBlueGradient: classArr(
     "text-white", // text
-    "bg-gradient-to-r from-blue-400 to-blue-700", // gradient bg (pure blue)
-    "hover:from-blue-500 hover:to-blue-800", // bg hover
+    "bg-gradient-to-r from-blue-700 to-blue-800", // gradient bg (pure blue)
+    "hover:from-blue-800 hover:to-blue-900", // bg hover
     "shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all", // shadow
-    "focus:ring-blue-400 dark:focus:ring-blue-400", // focus
+    "focus:ring-blue-700 dark:focus:ring-blue-700", // focus
   ),
   filledBlueGreenGradient: classArr(
     "text-white", // text
-    "bg-gradient-to-r from-blue-600 to-emerald-500", // gradient bg
-    "hover:from-blue-700 hover:to-emerald-600", // bg hover
+    "bg-gradient-to-r from-blue-700 to-emerald-700", // gradient bg
+    "hover:from-blue-800 hover:to-emerald-800", // bg hover
     "shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all", // shadow
-    "focus:ring-blue-400 dark:focus:ring-blue-400", // focus
+    "focus:ring-blue-700 dark:focus:ring-blue-700", // focus
   ),
   filledIndigoGradient: classArr(
     "text-white", // text
-    "bg-gradient-to-r from-indigo-400 to-indigo-700", // gradient bg (pure indigo)
-    "hover:from-indigo-500 hover:to-indigo-800", // bg hover
+    "bg-gradient-to-r from-indigo-700 to-indigo-800", // gradient bg (pure indigo)
+    "hover:from-indigo-800 hover:to-indigo-900", // bg hover
     "shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all", // shadow
-    "focus:ring-indigo-400 dark:focus:ring-indigo-400", // focus
+    "focus:ring-indigo-700 dark:focus:ring-indigo-700", // focus
   ),
   //
   // outline toast colors
   //
   outlineRed: classArr(
-    "text-red-500 dark:text-red-500", // text
-    "border border-red-200 dark:border-red-700", // border
+    "text-red-700 dark:text-red-400", // text
+    "border border-red-700 dark:border-red-400", // border
     "bg-transparent", // bg
     "hover:bg-red-100 dark:hover:bg-red-950", // bg hover
-    "focus:ring-red-400 dark:focus:ring-red-400", // focus
+    "focus:ring-red-700 dark:focus:ring-red-400", // focus
   ),
 } as const satisfies Record<ButtonVariant, string>
 

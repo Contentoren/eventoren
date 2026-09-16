@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Eventoren is light-only; dark utilities require an explicit theme class, not OS preference. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source "./**/*.{ts,tsx}";
 @source "../ui/**/*.{ts,tsx}";
 @theme {
@@ -9,6 +12,8 @@
   --color-surface-inverted: #0f172a;
   --color-border-subtle: #cbd5e1;
   --color-border-strong: #64748b;
+  --color-input: var(--color-border-subtle);
+  --color-ring: var(--color-brand-accent);
 
   --color-content: #0f172a;
   --color-content-muted: #475569;

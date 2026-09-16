@@ -10,6 +10,6 @@ export const classesInput = classArr(
   "px-3 py-2", // spacing
   "placeholder:text-muted-foreground", // typography
   "file:border-0 file:bg-transparent file:font-medium", // file input styling
-  "focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-2", // focus states
+  "focus-visible:ring-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-2 ring-offset-background", // focus states
   classesDisabledModifier, // disabled
 )
