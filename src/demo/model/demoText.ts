@@ -25,6 +25,10 @@ type DemoTextKey =
   | "navigationTitle"
   | "navigationDescription"
   | "navigationOpen"
+  | "controlsButton"
+  | "controlsTitle"
+  | "controlsClose"
+  | "controlsDirectory"
 
 const texts: Record<DemoTextKey, { de: string; en: string }> = {
   shellTitle: { de: "Eventoren-Demos", en: "Eventoren demos" },
@@ -68,6 +72,10 @@ const texts: Record<DemoTextKey, { de: string; en: string }> = {
     en: "The production mobile navigation drawer with demo-local destinations only.",
   },
   navigationOpen: { de: "Menü öffnen", en: "Open menu" },
+  controlsButton: { de: "Demo", en: "Demo" },
+  controlsTitle: { de: "Demo-Navigation", en: "Demo navigation" },
+  controlsClose: { de: "Schließen", en: "Close" },
+  controlsDirectory: { de: "Zum Demo-Verzeichnis", en: "Demo directory" },
 }
 
 export function demoText(key: DemoTextKey): string {
