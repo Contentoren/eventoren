@@ -4,6 +4,7 @@ import { AdminCatalogPage } from "../admin/AdminCatalogPage.tsx"
 import { adminCatalogPageStateCreate } from "../admin/adminCatalogPageStateCreate.ts"
 import { adminMemberManagementStateCreate } from "../admin/adminMemberManagementStateCreate.ts"
 import { eventorenAdminAccessRead } from "#src/auth/server/eventorenAdminAccessRead.ts"
+import { SiteFrame } from "../components/SiteFrame.tsx"
 import { catalogEventsPublicGet } from "../server/catalogEventsPublicGet.js"
 import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 
@@ -36,6 +37,10 @@ export const Route = createFileRoute("/admin")({
       isServerAuthorized: () => loaderData().isServerAuthorized,
     })
     const memberState = adminMemberManagementStateCreate()
-    return <AdminCatalogPage state={state} memberState={memberState} />
+    return (
+      <SiteFrame>
+        <AdminCatalogPage state={state} memberState={memberState} />
+      </SiteFrame>
+    )
   },
 })

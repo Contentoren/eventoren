@@ -1,8 +1,10 @@
-import { createMemo } from "solid-js"
+import { createMemo, createUniqueId } from "solid-js"
 import { language, languageDefault } from "./language.ts"
 import { languageSignal } from "./languageSignal.ts"
 
 export function languageSelectorStateCreate() {
+  const selectorId = `language-selector-${createUniqueId()}`
+
   const selectedLanguage = createMemo(() => {
     if (typeof window === "undefined") return languageDefault
     return languageSignal.get() === language.de ? language.de : language.en
@@ -18,5 +20,5 @@ export function languageSelectorStateCreate() {
     if (value === language.de || value === language.en) languageSignal.set(value)
   }
 
-  return { language: selectedLanguage, languageChange, text }
+  return { language: selectedLanguage, languageChange, selectorId, text }
 }

@@ -14,7 +14,7 @@ import { siteHeaderStateCreate } from "./siteHeaderStateCreate.ts"
 
 export function SiteHeader(
   props: {
-    readonly session?: { readonly role?: UserRole }
+    readonly session?: { readonly role?: UserRole } | Accessor<{ readonly role?: UserRole } | undefined>
     readonly navLinkHref?: (link: SiteHeaderNavLink) => string
     readonly logoHref?: string
     readonly cartHref?: string
@@ -63,8 +63,8 @@ export function SiteHeader(
                         const href = linkHref()(link)
                         const active = state.navLinkIsActive(link, href)
                         return (
-                          <a
-                            href={href}
+                          <Link
+                            to={href}
                             aria-current={active ? "page" : undefined}
                             class={`focus-ring rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors ${
                               active
@@ -73,7 +73,7 @@ export function SiteHeader(
                             }`}
                           >
                             {link.label}
-                          </a>
+                          </Link>
                         )
                       }}
                     </Show>
@@ -109,14 +109,14 @@ export function SiteHeader(
               }
             >
               {(checkoutHref) => (
-                <a
-                  href={state.cartHasItems() ? checkoutHref() : undefined}
+                <Link
+                  to={checkoutHref()}
                   aria-disabled={!state.cartHasItems()}
                   class="inline-flex h-10 items-center justify-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong max-sm:hidden sm:inline-flex"
                   classList={{ "pointer-events-none opacity-50": !state.cartHasItems() }}
                 >
                   Zur Kasse
-                </a>
+                </Link>
               )}
             </Show>
 

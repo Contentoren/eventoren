@@ -7,7 +7,7 @@ import { SiteHeader } from "./SiteHeader.tsx"
 export function SiteFrame(props: {
   children: JSX.Element
   header?: {
-    readonly session?: { readonly role?: UserRole }
+    readonly session?: { readonly role?: UserRole } | Accessor<{ readonly role?: UserRole } | undefined>
     readonly navLinkHref?: (link: SiteHeaderNavLink) => string
     readonly logoHref?: string
     readonly cartHref?: string

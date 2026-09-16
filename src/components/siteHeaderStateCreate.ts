@@ -16,7 +16,7 @@ import { siteHeaderNavLinks } from "./siteHeaderNavLinks.ts"
 
 export function siteHeaderStateCreate(
   inputs: {
-    readonly session?: { readonly role?: UserRole }
+    readonly session?: { readonly role?: UserRole } | Accessor<{ readonly role?: UserRole } | undefined>
     readonly cartQuantity?: Accessor<number>
     readonly navLinkIsActive?: (link: SiteHeaderNavLink, href: string, pathname: string) => boolean
     readonly cartIsActive?: (href: string, pathname: string) => boolean
@@ -24,6 +24,8 @@ export function siteHeaderStateCreate(
 ) {
   const location = useLocation()
   const hasInjectedSession = inputs.session !== undefined
+  const injectedSessionRole = () =>
+    typeof inputs.session === "function" ? inputs.session()?.role : inputs.session?.role
   const overlay = createSignalObject<SiteHeaderOverlay>("none")
   const menuOpen = createSignalObject(false)
   const cart = createSignalObject<TicketCartDraft>([])
@@ -77,7 +79,7 @@ export function siteHeaderStateCreate(
     navLinks: createMemo(() =>
       siteHeaderNavLinks(
         languageSignal.get(),
-        hasInjectedSession ? inputs.session?.role : userSessionSignal.get()?.profile.role,
+        hasInjectedSession ? injectedSessionRole() : userSessionSignal.get()?.profile.role,
         sessionHydrated.get(),
       ),
     ),

@@ -14,9 +14,9 @@ export function TicketOrderWalletPass(props: { order: TicketOrderProjection }) {
   return (
     <UiCard class="overflow-hidden p-0">
       <header class="flex flex-col gap-space-2 bg-linear-to-br from-brand-strong to-brand px-space-6 py-space-6 text-brand-content">
-        <p class="text-sm font-semibold uppercase tracking-widest text-white/90">{text().walletTicket}</p>
+        <p class="text-sm font-semibold uppercase tracking-widest text-brand-content">{text().walletTicket}</p>
         <h2 class="text-xl font-semibold leading-snug">{order().eventTitle}</h2>
-        <p class="text-sm font-medium text-white/90">
+        <p class="text-sm font-medium text-brand-content">
           {eventDateFormat(order().eventStartsAt)} · {eventTimeFormat(order().eventStartsAt)}
         </p>
       </header>

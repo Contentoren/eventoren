@@ -7,9 +7,9 @@ export function SiteFooter(props: { readonly linkHref?: (href: string) => string
     className = "focus-ring rounded-control transition-colors hover:text-content",
   ) =>
     props.linkHref ? (
-      <a href={props.linkHref(href)} class={className}>
+      <Link to={props.linkHref(href)} class={className}>
         {label}
-      </a>
+      </Link>
     ) : (
       <Link
         to={href as "/impressum" | "/agb" | "/kontakt"}
@@ -21,7 +21,7 @@ export function SiteFooter(props: { readonly linkHref?: (href: string) => string
 
   return (
     <footer class="relative z-10 border-t border-border-subtle bg-surface">
-      <div class="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 text-sm text-content-muted sm:flex-row sm:items-center sm:justify-between">
+      <div class="mx-auto flex max-w-6xl flex-col items-center justify-center gap-3 px-6 py-8 text-center text-sm text-content-muted sm:flex-row">
         <p>© Eventoren</p>
         <nav class="flex gap-4" aria-label="Rechtliche Informationen">
           {link("/impressum", "Impressum")}

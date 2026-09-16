@@ -5,11 +5,11 @@ export function LanguageSelector(props: { readonly class?: string }) {
 
   return (
     <div class={props.class}>
-      <label for="language-selector" class="sr-only">
+      <label for={state.selectorId} class="sr-only">
         {state.text().label}
       </label>
       <select
-        id="language-selector"
+        id={state.selectorId}
         aria-label={state.text().label}
         value={state.language()}
         onChange={(event) => state.languageChange(event.currentTarget.value)}

@@ -40,9 +40,9 @@ export function SiteHeaderCartButton(props: {
   )
 
   return props.href ? (
-    <a href={props.href} aria-label={props.label} aria-current={props.active ? "page" : undefined} class={className}>
+    <Link to={props.href} aria-label={props.label} aria-current={props.active ? "page" : undefined} class={className}>
       {content()}
-    </a>
+    </Link>
   ) : (
     <Link
       to="/warenkorb"

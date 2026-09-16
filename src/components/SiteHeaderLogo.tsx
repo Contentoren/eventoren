@@ -18,9 +18,9 @@ export function SiteHeaderLogo(props: { class?: string; href?: string } = {}) {
   )
 
   return props.href ? (
-    <a href={props.href} class={className} aria-label="Eventoren – zur Startseite">
+    <Link to={props.href} class={className} aria-label="Eventoren – zur Startseite">
       {content()}
-    </a>
+    </Link>
   ) : (
     <Link to="/" class={className} aria-label="Eventoren – zur Startseite">
       {content()}

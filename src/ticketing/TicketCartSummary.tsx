@@ -26,9 +26,9 @@ export function TicketCartSummary(props: {
 
   return (
     <UiCard>
-      <section class="flex flex-col gap-space-5" aria-labelledby="ticket-cart-summary">
+      <section class="flex flex-col gap-space-5" aria-labelledby={state.headingId}>
         <div class="flex items-center justify-between gap-space-2 border-b border-border-subtle pb-space-3">
-          <h2 id="ticket-cart-summary" class="text-base font-semibold text-content">
+          <h2 id={state.headingId} class="text-base font-semibold text-content">
             {text().orderSummary}
           </h2>
           <span class="text-xs font-medium text-content-muted">{state.quantityLabel()}</span>
