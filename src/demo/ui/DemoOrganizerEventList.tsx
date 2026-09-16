@@ -1,7 +1,7 @@
 import { OrganizerEventListPage } from "../../organizer/OrganizerEventListPage.tsx"
 import { demoOrganizerEventListPageStateCreate } from "../state/demoOrganizerEventListPageStateCreate.ts"
 import { DemoOrganizerEventListControls } from "./DemoOrganizerEventListControls.tsx"
-import { DemoOrganizerFrame } from "./DemoOrganizerFrame.tsx"
+import { DemoSiteFrame } from "./DemoSiteFrame.tsx"
 
 export function DemoOrganizerEventList(props: { readonly empty: boolean }) {
   const state = demoOrganizerEventListPageStateCreate(props.empty)
@@ -10,9 +10,9 @@ export function DemoOrganizerEventList(props: { readonly empty: boolean }) {
     <OrganizerEventListPage
       state={state}
       frame={(frameProps) => (
-        <DemoOrganizerFrame currentId={props.empty ? "organizer-empty" : "organizer"}>
+        <DemoSiteFrame currentId={props.empty ? "organizer-empty" : "organizer"} sessionRole="organizer">
           {frameProps.children}
-        </DemoOrganizerFrame>
+        </DemoSiteFrame>
       )}
       eventHref={(eventKey) => `/demo/organizer/event/${eventKey}`}
       demoControls={<DemoOrganizerEventListControls empty={props.empty} />}

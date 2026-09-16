@@ -3,9 +3,9 @@ import type { ParentComponent } from "solid-js"
 import { LegalMarkdownPage } from "../../components/LegalMarkdownPage.tsx"
 import { demoStaticPages } from "../../demo/fixtures/demoStaticPages.ts"
 import { demoRouteHeadCreate } from "../../demo/model/demoRouteHeadCreate.ts"
-import { DemoShell } from "../../demo/ui/DemoShell.tsx"
+import { DemoSiteFrame } from "../../demo/ui/DemoSiteFrame.tsx"
 
-const DemoAgbFrame: ParentComponent = (props) => <DemoShell currentId="agb">{props.children}</DemoShell>
+const DemoAgbFrame: ParentComponent = (props) => <DemoSiteFrame currentId="agb">{props.children}</DemoSiteFrame>
 
 export const Route = createFileRoute("/demo/agb")({
   head: () => demoRouteHeadCreate("AGB demo", "Review the local Eventoren terms fixture.", "/demo/agb"),

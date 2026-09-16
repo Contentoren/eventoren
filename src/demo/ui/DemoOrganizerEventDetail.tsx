@@ -1,7 +1,7 @@
 import { OrganizerEventDetailPage } from "../../organizer/OrganizerEventDetailPage.tsx"
 import { demoOrganizerEventDetailPageStateCreate } from "../state/demoOrganizerEventDetailPageStateCreate.ts"
-import { DemoOrganizerEventFrame } from "./DemoOrganizerEventFrame.tsx"
 import { DemoOrganizerScannerSimulation } from "./DemoOrganizerScannerSimulation.tsx"
+import { DemoSiteFrame } from "./DemoSiteFrame.tsx"
 
 export function DemoOrganizerEventDetail(props: {
   readonly eventKey: () => string
@@ -14,7 +14,11 @@ export function DemoOrganizerEventDetail(props: {
   return (
     <OrganizerEventDetailPage
       state={state}
-      frame={DemoOrganizerEventFrame}
+      frame={(frameProps) => (
+        <DemoSiteFrame currentId="organizer-event" sessionRole="organizer">
+          {frameProps.children}
+        </DemoSiteFrame>
+      )}
       backHref="/demo/organizer"
       scannerSimulation={<DemoOrganizerScannerSimulation state={state} />}
     />

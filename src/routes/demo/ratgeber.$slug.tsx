@@ -2,6 +2,7 @@ import { createFileRoute, notFound } from "@tanstack/solid-router"
 import { ContentArticlePage } from "../../app/content/ContentArticlePage.tsx"
 import { demoStaticPages } from "../../demo/fixtures/demoStaticPages.ts"
 import { demoRouteHeadCreate } from "../../demo/model/demoRouteHeadCreate.ts"
+import { DemoScenarioFrame } from "../../demo/ui/DemoScenarioFrame.tsx"
 
 export const Route = createFileRoute("/demo/ratgeber/$slug")({
   head: ({ params }) =>
@@ -19,6 +20,10 @@ export const Route = createFileRoute("/demo/ratgeber/$slug")({
   },
   component: () => {
     const data = Route.useLoaderData()
-    return <ContentArticlePage entry={data().entry} articleContent={data().articleContent} pathPrefix="/demo" />
+    return (
+      <DemoScenarioFrame currentId="ratgeber-article">
+        <ContentArticlePage entry={data().entry} articleContent={data().articleContent} pathPrefix="/demo" />
+      </DemoScenarioFrame>
+    )
   },
 })

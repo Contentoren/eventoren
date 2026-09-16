@@ -5,14 +5,14 @@ import { UiContainer } from "../../ui/UiContainer.tsx"
 import { demoCatalogEvents } from "../fixtures/demoCatalogEvents.ts"
 import { demoCheckoutFormStateCreate } from "../state/demoCheckoutFormStateCreate.ts"
 import { demoText } from "../model/demoText.ts"
-import { DemoShell } from "./DemoShell.tsx"
+import { DemoSiteFrame } from "./DemoSiteFrame.tsx"
 
 export function DemoCheckout(props: { readonly empty?: boolean; readonly error?: boolean }) {
   const state = demoCheckoutFormStateCreate({ events: demoCatalogEvents, empty: props.empty, error: props.error })
   const currentId = props.empty ? "checkout-empty" : props.error ? "checkout-error" : "checkout"
 
   return (
-    <DemoShell currentId={currentId}>
+    <DemoSiteFrame currentId={currentId} cartQuantity={props.empty ? () => 0 : undefined}>
       <main id="content" tabindex="-1">
         <UiContainer class="flex flex-col gap-space-7 py-space-7">
           <Show
@@ -80,6 +80,6 @@ export function DemoCheckout(props: { readonly empty?: boolean; readonly error?:
           </Show>
         </UiContainer>
       </main>
-    </DemoShell>
+    </DemoSiteFrame>
   )
 }

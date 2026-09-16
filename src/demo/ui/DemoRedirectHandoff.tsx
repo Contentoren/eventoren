@@ -1,8 +1,8 @@
-import { DemoShell } from "./DemoShell.tsx"
+import { DemoScenarioFrame } from "./DemoScenarioFrame.tsx"
 
 export function DemoRedirectHandoff() {
   return (
-    <DemoShell currentId="abiball-redirect">
+    <DemoScenarioFrame currentId="abiball-redirect">
       <section class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
         <p class="text-sm font-semibold uppercase tracking-wide text-indigo-600">Static redirect</p>
         <h1 class="mt-2 text-3xl font-bold tracking-tight">Abiball 2027</h1>
@@ -17,6 +17,6 @@ export function DemoRedirectHandoff() {
           Statische Seite öffnen →
         </a>
       </section>
-    </DemoShell>
+    </DemoScenarioFrame>
   )
 }

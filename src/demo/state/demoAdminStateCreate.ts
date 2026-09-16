@@ -10,5 +10,14 @@ export function demoAdminStateCreate(inputs: {
   const catalog = demoAdminCatalogPageStateCreate({ events: demoCatalogEvents, authorized: inputs.authorized })
   const members = inputs.authorized === false ? undefined : demoAdminMemberManagementStateCreate(inputs.memberScenario)
   if (inputs.newEvent) catalog.startNewEvent()
-  return { catalog, members }
+  const currentId = inputs.newEvent
+    ? "admin-new"
+    : inputs.authorized === false
+      ? "admin-unauthorized"
+      : inputs.memberScenario === "empty"
+        ? "admin-empty"
+        : inputs.memberScenario === "error"
+          ? "admin-error"
+          : "admin"
+  return { catalog, members, currentId }
 }
