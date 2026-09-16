@@ -71,6 +71,7 @@ function billingMock(
             orderReference: "order_billing1",
             stripeMode: "test",
             status: "checkout_created",
+            expiresAt: null,
             url: "https://checkout.stripe.test/session",
           },
         }),

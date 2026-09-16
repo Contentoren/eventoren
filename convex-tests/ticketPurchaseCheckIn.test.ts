@@ -67,6 +67,7 @@ function billingMock() {
             orderReference: "billing-order-integrated",
             stripeMode: "test",
             status: "checkout_created",
+            expiresAt: null,
             url: "https://checkout.stripe.test/integrated",
           },
         }),
