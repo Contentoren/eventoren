@@ -298,10 +298,11 @@ test("checks in atomically, reports the previous operator and exposes current pr
   const list = await t.query(api.organizer.organizerEventTicketListQuery, {
     eventKey: "check-in-event",
     token: firstToken,
+    paginationOpts: { numItems: 50, cursor: null },
   })
   expect(list).toMatchObject({ success: true })
   if (!list.success) return
-  expect(list.data.find((ticket) => ticket.id === ids.paidTicketId)).toMatchObject({
+  expect(list.data.page.find((ticket) => ticket.id === ids.paidTicketId)).toMatchObject({
     checkedIn: true,
     checkIn: { status: "checked-in", operatorName: "Organizer Operator" },
   })

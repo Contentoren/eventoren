@@ -29,6 +29,7 @@ export type OrganizerText = {
   readonly reset: string
   readonly working: string
   readonly loading: string
+  readonly loadMore: string
   readonly loadError: string
   readonly actionSuccess: string
   readonly resetSuccess: string

@@ -155,7 +155,7 @@ export function OrganizerEventDetailPage(props: {
                 />
               </div>
               <Show
-                when={!state.loading()}
+                when={state.tickets().length > 0 || !state.loading()}
                 fallback={
                   <p role="status" class="text-sm text-content-muted">
                     {state.text().loading}
@@ -164,7 +164,11 @@ export function OrganizerEventDetailPage(props: {
               >
                 <Show
                   when={state.tickets().length > 0}
-                  fallback={<p class="text-sm text-content-muted">{state.text().noTickets}</p>}
+                  fallback={
+                    <Show when={state.isDone()}>
+                      <p class="text-sm text-content-muted">{state.text().noTickets}</p>
+                    </Show>
+                  }
                 >
                   <ul class="flex max-h-[36rem] flex-col gap-space-2 overflow-y-auto pr-space-1">
                     <For each={state.tickets()}>
@@ -191,6 +195,13 @@ export function OrganizerEventDetailPage(props: {
                       )}
                     </For>
                   </ul>
+                </Show>
+                <Show when={!state.isDone()}>
+                  <div class="flex justify-center">
+                    <Button variant="outline" disabled={state.loading()} onClick={state.loadMore}>
+                      {state.loading() ? state.text().loading : state.text().loadMore}
+                    </Button>
+                  </div>
                 </Show>
               </Show>
             </CardWrapper>

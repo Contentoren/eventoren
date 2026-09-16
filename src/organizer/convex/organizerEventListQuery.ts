@@ -1,56 +1,92 @@
+import { paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { query } from "#convex/_generated/server.js"
-import { createResult, type PromiseResult } from "#result"
+import { createResult, createResultError, type PromiseResult, type Result } from "#result"
 import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryTokenToUserId.ts"
 import { organizerAuthorizeFn } from "./organizerAuthorizeFn.js"
+import { organizerEventProjectionCreate } from "./organizerEventProjectionCreate.js"
 
-type OrganizerEventItem = {
-  id: string
-  eventKey: string
-  title: string
-  imageUrl: string
-  imageAlt: string
-  startsAt: string
-  endsAt: string
-  doorsAt: string
-  status: "draft" | "published" | "archived"
+type OrganizerEventListCursor = {
+  readonly version: number
+  readonly userId: string
+  readonly sourceCursor: string
 }
 
+const maxPageSize = 50
+const maxPageBytes = 512 * 1024
+const cursorVersion = 1
+
 export const organizerEventListQuery = query({
-  args: { token: v.string() },
-  handler: async (ctx, args): PromiseResult<readonly OrganizerEventItem[]> =>
+  args: { paginationOpts: paginationOptsValidator, token: v.string() },
+  handler: async (
+    ctx,
+    args,
+  ): PromiseResult<{
+    page: readonly ReturnType<typeof organizerEventProjectionCreate>[]
+    isDone: boolean
+    continueCursor: string
+  }> =>
     authQueryTokenToUserId(ctx, args, async (queryCtx, { userId }) => {
+      const op = "organizerEventListQuery"
       const globalAuthorization = await organizerAuthorizeFn(queryCtx, userId)
       if (!globalAuthorization.success) return globalAuthorization
 
-      const events = await queryCtx.db.query("catalogEvents").collect()
-      const visibleEvents: OrganizerEventItem[] = []
-      for (const event of events) {
-        const authorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt)
-        if (!authorization.success) continue
-        visibleEvents.push({
-          id: event._id,
-          eventKey: event.eventKey,
-          title: event.title,
-          imageUrl: event.imageUrl,
-          imageAlt: event.imageAlt,
-          startsAt: event.startsAt,
-          endsAt: event.endsAt,
-          doorsAt: event.doorsAt,
-          status: event.status,
-        })
+      const pageSize = args.paginationOpts.numItems
+      if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > maxPageSize) {
+        return createResultError(op, `numItems must be an integer from 1 to ${maxPageSize}`)
       }
 
-      visibleEvents.sort((left, right) => eventStartsAtCompare(left.startsAt, right.startsAt))
-      return createResult(visibleEvents)
+      const sourceCursorResult = organizerEventListSourceCursorGet(args.paginationOpts.cursor, userId)
+      if (!sourceCursorResult.success) return sourceCursorResult
+
+      const sourcePage = await queryCtx.db.query("catalogEvents").withIndex("startsAt").order("asc").paginate({
+        cursor: sourceCursorResult.data,
+        numItems: pageSize,
+        maximumRowsRead: pageSize,
+        maximumBytesRead: maxPageBytes,
+      })
+      const page: ReturnType<typeof organizerEventProjectionCreate>[] = []
+      for (const event of sourcePage.page) {
+        const authorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt)
+        if (!authorization.success) continue
+        page.push(organizerEventProjectionCreate(event))
+      }
+
+      return createResult({
+        page,
+        isDone: sourcePage.isDone,
+        continueCursor: organizerEventListCursorCreate(sourcePage.continueCursor, userId),
+      })
     }),
 })
 
-function eventStartsAtCompare(left: string, right: string): number {
-  const leftTimestamp = Date.parse(left)
-  const rightTimestamp = Date.parse(right)
-  if (Number.isFinite(leftTimestamp) && Number.isFinite(rightTimestamp)) return leftTimestamp - rightTimestamp
-  if (Number.isFinite(leftTimestamp)) return -1
-  if (Number.isFinite(rightTimestamp)) return 1
-  return left.localeCompare(right)
+function organizerEventListCursorCreate(sourceCursor: string, userId: string): string {
+  return JSON.stringify({ version: cursorVersion, userId, sourceCursor } satisfies OrganizerEventListCursor)
+}
+
+function organizerEventListSourceCursorGet(cursor: string | null, userId: string): Result<string | null> {
+  const op = "organizerEventListSourceCursorGet"
+  if (cursor === null) return createResult(null)
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(cursor)
+  } catch {
+    return createResultError(op, "Invalid organizer event page cursor")
+  }
+
+  if (
+    typeof parsed !== "object" ||
+    parsed === null ||
+    !("version" in parsed) ||
+    parsed.version !== cursorVersion ||
+    !("userId" in parsed) ||
+    parsed.userId !== userId ||
+    !("sourceCursor" in parsed) ||
+    typeof parsed.sourceCursor !== "string"
+  ) {
+    return createResultError(op, "Organizer event page cursor does not match the current organizer")
+  }
+
+  return createResult(parsed.sourceCursor)
 }

@@ -160,23 +160,65 @@ async function seed(t: ReturnType<typeof convexTest>) {
 test("organizer event listing applies the invitation boundary while admins see every date", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const organizer = await t.query(api.organizer.organizerEventListQuery, { token: await tokenFor(ids.organizerId) })
-  const admin = await t.query(api.organizer.organizerEventListQuery, { token: await tokenFor(ids.adminId) })
+  const organizer = await t.query(api.organizer.organizerEventListQuery, {
+    token: await tokenFor(ids.organizerId),
+    paginationOpts: { numItems: 50, cursor: null },
+  })
+  const admin = await t.query(api.organizer.organizerEventListQuery, {
+    token: await tokenFor(ids.adminId),
+    paginationOpts: { numItems: 50, cursor: null },
+  })
 
   expect(organizer).toMatchObject({ success: true })
   expect(admin).toMatchObject({ success: true })
   if (!organizer.success || !admin.success) return
-  expect(organizer.data.map((event) => event.eventKey)).toEqual(["exact-invitation", "after-invitation"])
-  expect(organizer.data[0]).toMatchObject({
+  expect(organizer.data.page.map((event) => event.eventKey)).toEqual(["exact-invitation", "after-invitation"])
+  expect(organizer.data.page[0]).toMatchObject({
     imageUrl: "/images/exact-invitation.webp",
     startsAt: "2026-09-15T12:00:00.000Z",
   })
-  expect(admin.data.map((event) => event.eventKey)).toEqual([
+  expect(admin.data.page.map((event) => event.eventKey)).toEqual([
     "old-event",
     "before-invitation",
     "exact-invitation",
     "after-invitation",
   ])
+})
+
+test("organizer event pages continue past unauthorized source rows and bind cursors", async () => {
+  const t = convexTest(schema, modules)
+  const ids = await seed(t)
+  const organizerToken = await tokenFor(ids.organizerId)
+  const adminToken = await tokenFor(ids.adminId)
+
+  const first = await t.query(api.organizer.organizerEventListQuery, {
+    token: organizerToken,
+    paginationOpts: { numItems: 2, cursor: null },
+  })
+  expect(first).toMatchObject({ success: true, data: { page: [], isDone: false } })
+  if (!first.success) return
+
+  const second = await t.query(api.organizer.organizerEventListQuery, {
+    token: organizerToken,
+    paginationOpts: { numItems: 2, cursor: first.data.continueCursor },
+  })
+  expect(second).toMatchObject({
+    success: true,
+    data: { page: [{ eventKey: "exact-invitation" }, { eventKey: "after-invitation" }], isDone: false },
+  })
+  if (!second.success) return
+
+  const third = await t.query(api.organizer.organizerEventListQuery, {
+    token: organizerToken,
+    paginationOpts: { numItems: 2, cursor: second.data.continueCursor },
+  })
+  expect(third).toMatchObject({ success: true, data: { page: [], isDone: true } })
+
+  const mismatchedCursor = await t.query(api.organizer.organizerEventListQuery, {
+    token: adminToken,
+    paginationOpts: { numItems: 2, cursor: first.data.continueCursor },
+  })
+  expect(mismatchedCursor.success).toBe(false)
 })
 
 test("ticket list and detail search participant and buyer names and preserve legacy/cancelled data", async () => {
@@ -187,16 +229,19 @@ test("ticket list and detail search participant and buyer names and preserve leg
   const all = await t.query(api.organizer.organizerEventTicketListQuery, {
     eventKey: "exact-invitation",
     token,
+    paginationOpts: { numItems: 50, cursor: null },
   })
   const participantSearch = await t.query(api.organizer.organizerEventTicketListQuery, {
     eventKey: "exact-invitation",
     search: "hopper",
     token,
+    paginationOpts: { numItems: 50, cursor: null },
   })
   const buyerSearch = await t.query(api.organizer.organizerEventTicketListQuery, {
     eventKey: "exact-invitation",
     search: "lovelace",
     token,
+    paginationOpts: { numItems: 50, cursor: null },
   })
   const detail = await t.query(api.organizer.organizerEventTicketGetQuery, {
     eventKey: "exact-invitation",
@@ -206,15 +251,17 @@ test("ticket list and detail search participant and buyer names and preserve leg
 
   expect(all).toMatchObject({
     success: true,
-    data: [{ ticketNumber: "TKT-LEGACY" }, { ticketNumber: "TKT-CANCELLED" }],
+    data: { page: [{ ticketNumber: "TKT-LEGACY" }, { ticketNumber: "TKT-CANCELLED" }] },
   })
   expect(participantSearch).toMatchObject({
     success: true,
-    data: [{ participantName: "Grace Hopper", cancelled: true }],
+    data: { page: [{ participantName: "Grace Hopper", cancelled: true }] },
   })
   expect(buyerSearch).toMatchObject({
     success: true,
-    data: [{ participantName: "Ada Lovelace", participantNameSource: "buyer" }, { participantName: "Grace Hopper" }],
+    data: {
+      page: [{ participantName: "Ada Lovelace", participantNameSource: "buyer" }, { participantName: "Grace Hopper" }],
+    },
   })
   expect(detail).toMatchObject({
     success: true,
@@ -229,6 +276,95 @@ test("ticket list and detail search participant and buyer names and preserve leg
   })
 })
 
+test("ticket pages preserve order across sparse matches, deduplicate shared orders, and bind cursors", async () => {
+  const t = convexTest(schema, modules)
+  const ids = await seed(t)
+  const token = await tokenFor(ids.organizerId)
+
+  const first = await t.query(api.organizer.organizerEventTicketListQuery, {
+    eventKey: "exact-invitation",
+    token,
+    paginationOpts: { numItems: 1, cursor: null },
+  })
+  expect(first).toMatchObject({
+    success: true,
+    data: { page: [{ ticketNumber: "TKT-LEGACY" }], isDone: false },
+  })
+  if (!first.success) return
+
+  const second = await t.query(api.organizer.organizerEventTicketListQuery, {
+    eventKey: "exact-invitation",
+    token,
+    paginationOpts: { numItems: 1, cursor: first.data.continueCursor },
+  })
+  expect(second).toMatchObject({
+    success: true,
+    data: { page: [{ ticketNumber: "TKT-CANCELLED" }], isDone: false },
+  })
+  if (!second.success) return
+
+  const third = await t.query(api.organizer.organizerEventTicketListQuery, {
+    eventKey: "exact-invitation",
+    token,
+    paginationOpts: { numItems: 1, cursor: second.data.continueCursor },
+  })
+  expect(third).toMatchObject({ success: true, data: { page: [], isDone: true } })
+
+  const sparseFirst = await t.query(api.organizer.organizerEventTicketListQuery, {
+    eventKey: "exact-invitation",
+    search: "hopper",
+    token,
+    paginationOpts: { numItems: 1, cursor: null },
+  })
+  expect(sparseFirst).toMatchObject({ success: true, data: { page: [], isDone: false } })
+  if (!sparseFirst.success) return
+
+  const sparseSecond = await t.query(api.organizer.organizerEventTicketListQuery, {
+    eventKey: "exact-invitation",
+    search: "hopper",
+    token,
+    paginationOpts: { numItems: 1, cursor: sparseFirst.data.continueCursor },
+  })
+  expect(sparseSecond).toMatchObject({
+    success: true,
+    data: { page: [{ ticketNumber: "TKT-CANCELLED" }], isDone: false },
+  })
+  if (!sparseSecond.success) return
+
+  const sparseThird = await t.query(api.organizer.organizerEventTicketListQuery, {
+    eventKey: "exact-invitation",
+    search: "hopper",
+    token,
+    paginationOpts: { numItems: 1, cursor: sparseSecond.data.continueCursor },
+  })
+  expect(sparseThird).toMatchObject({ success: true, data: { page: [], isDone: true } })
+
+  const sharedOrderPage = await t.query(api.organizer.organizerEventTicketListQuery, {
+    eventKey: "exact-invitation",
+    token,
+    paginationOpts: { numItems: 2, cursor: null },
+  })
+  expect(sharedOrderPage).toMatchObject({
+    success: true,
+    data: { page: [{ buyerName: "Ada Lovelace" }, { buyerName: "Ada Lovelace" }] },
+  })
+
+  const crossEvent = await t.query(api.organizer.organizerEventTicketListQuery, {
+    eventKey: "after-invitation",
+    token,
+    paginationOpts: { numItems: 1, cursor: first.data.continueCursor },
+  })
+  expect(crossEvent).toMatchObject({ success: false })
+
+  const crossSearch = await t.query(api.organizer.organizerEventTicketListQuery, {
+    eventKey: "exact-invitation",
+    search: "lovelace",
+    token,
+    paginationOpts: { numItems: 1, cursor: first.data.continueCursor },
+  })
+  expect(crossSearch).toMatchObject({ success: false })
+})
+
 test("customer direct access and organizer access before the boundary are rejected", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
@@ -238,18 +374,40 @@ test("customer direct access and organizer access before the boundary are reject
   const customer = await t.query(api.organizer.organizerEventTicketListQuery, {
     eventKey: "exact-invitation",
     token: customerToken,
+    paginationOpts: { numItems: 50, cursor: null },
   })
   const before = await t.query(api.organizer.organizerEventTicketListQuery, {
     eventKey: "before-invitation",
     token: organizerToken,
+    paginationOpts: { numItems: 50, cursor: null },
   })
   const mismatchedDetail = await t.query(api.organizer.organizerEventTicketGetQuery, {
     eventKey: "after-invitation",
     ticketId: ids.legacyTicketId,
     token: organizerToken,
   })
+  const organizerDetail = await t.query(api.organizer.organizerEventGetQuery, {
+    eventKey: "exact-invitation",
+    token: organizerToken,
+  })
+  const unauthorizedDetail = await t.query(api.organizer.organizerEventGetQuery, {
+    eventKey: "before-invitation",
+    token: organizerToken,
+  })
+  const customerDetail = await t.query(api.organizer.organizerEventGetQuery, {
+    eventKey: "exact-invitation",
+    token: customerToken,
+  })
+  const adminDetail = await t.query(api.organizer.organizerEventGetQuery, {
+    eventKey: "before-invitation",
+    token: await tokenFor(ids.adminId),
+  })
 
   expect(customer.success).toBe(false)
   expect(before.success).toBe(false)
   expect(mismatchedDetail.success).toBe(false)
+  expect(organizerDetail).toMatchObject({ success: true, data: { eventKey: "exact-invitation" } })
+  expect(unauthorizedDetail.success).toBe(false)
+  expect(customerDetail.success).toBe(false)
+  expect(adminDetail).toMatchObject({ success: true, data: { eventKey: "before-invitation" } })
 })

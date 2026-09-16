@@ -1,4 +1,5 @@
-import { createEffect, createMemo, on, onCleanup, onMount } from "solid-js"
+import { createEffect, on, onCleanup, onMount } from "solid-js"
+import type { PaginationOptions } from "convex/server"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import { languageSignal } from "../app/i18n/languageSignal.ts"
 import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
@@ -14,6 +15,8 @@ import { organizerDuplicateInfoRead } from "./organizerDuplicateInfoRead.ts"
 import { organizerTextGet } from "./organizerTextGet.ts"
 import { organizerTicketScannerStateCreate } from "./organizerTicketScannerStateCreate.ts"
 
+const pageSize = 50
+
 export function organizerEventDetailPageStateCreate(inputs: {
   readonly eventKey: () => string
   readonly initialSearch: () => string
@@ -23,8 +26,10 @@ export function organizerEventDetailPageStateCreate(inputs: {
   readonly token?: () => string
 }): OrganizerEventDetailPageState {
   const dataSource = inputs.dataSource ?? organizerDataSourceLiveCreate()
-  const events = createSignalObject<readonly OrganizerEvent[]>([])
+  const event = createSignalObject<OrganizerEvent | undefined>(undefined)
   const tickets = createSignalObject<readonly OrganizerTicket[]>([])
+  const cursor = createSignalObject<string | null>(null)
+  const isDone = createSignalObject(false)
   const selectedTicket = createSignalObject<OrganizerTicket | undefined>(undefined)
   const selectedTicketId = createSignalObject(inputs.initialTicketId())
   const search = createSignalObject(inputs.initialSearch())
@@ -36,10 +41,10 @@ export function organizerEventDetailPageStateCreate(inputs: {
   const text = () => organizerTextGet(languageSignal.get())
   let searchTimer: ReturnType<typeof setTimeout> | undefined
   let scannerFeedbackClear = () => {}
+  let ticketListRevision = 0
+  let activeEventKey = inputs.eventKey()
 
   const tokenRead = () => inputs.token?.() ?? userTokenGet()
-  const event = createMemo(() => events.get().find((item) => item.eventKey === inputs.eventKey()))
-
   const errorMessage = () => {
     const message = actionError.get()
     if (!message) return ""
@@ -53,33 +58,67 @@ export function organizerEventDetailPageStateCreate(inputs: {
     return message.code === "reset" ? text().resetSuccess : text().actionSuccess
   }
 
-  const ticketLoad = async (searchValue: string) => {
+  const ticketPageLoad = async (pageCursor: string | null, revision: number, searchValue: string) => {
+    if (revision !== ticketListRevision) return
     loading.set(true)
-    try {
-      const result = await dataSource.ticketList(inputs.eventKey(), searchValue, tokenRead())
+    let nextCursor = pageCursor
+    while (true) {
+      const paginationOpts: PaginationOptions = { numItems: pageSize, cursor: nextCursor }
+      const result = await dataSource.ticketList(inputs.eventKey(), searchValue, tokenRead(), paginationOpts)
+      if (revision !== ticketListRevision || searchValue !== search.get()) return
       if (!result.success) {
         actionSuccess.set(null)
         actionError.set({ code: "load" })
+        loading.set(false)
         return
       }
-      tickets.set(result.data)
+
+      const knownTickets = new Map(tickets.get().map((ticket) => [ticket.id, ticket]))
+      for (const ticket of result.data.page) knownTickets.set(ticket.id, ticket)
+      tickets.set([...knownTickets.values()].sort(organizerTicketOrderCompare))
+      cursor.set(result.data.continueCursor)
+      isDone.set(result.data.isDone)
       actionError.set(null)
-      const selected = result.data.find((ticket) => ticket.id === selectedTicketId.get())
+      const selected = tickets.get().find((ticket) => ticket.id === selectedTicketId.get())
       if (selected) selectedTicket.set(selected)
-      if (!selected && selectedTicketId.get()) void ticketDetailLoad(selectedTicketId.get())
+
+      if (result.data.page.length > 0 || result.data.isDone) {
+        if (!selected && selectedTicketId.get()) void ticketDetailLoad(selectedTicketId.get())
+        loading.set(false)
+        return
+      }
+      nextCursor = result.data.continueCursor
+    }
+  }
+
+  const ticketLoad = async (searchValue: string, revision: number) => {
+    if (revision !== ticketListRevision) return
+    try {
+      await ticketPageLoad(null, revision, searchValue)
     } catch {
+      if (revision !== ticketListRevision) return
       actionSuccess.set(null)
       actionError.set({ code: "load" })
-    } finally {
       loading.set(false)
     }
   }
 
+  const ticketListReset = () => {
+    ticketListRevision += 1
+    tickets.set([])
+    cursor.set(null)
+    isDone.set(false)
+    loading.set(true)
+    return ticketListRevision
+  }
+
   const ticketDetailLoad = async (ticketId: string) => {
+    const revision = ticketListRevision
     const known = tickets.get().find((ticket) => ticket.id === ticketId)
     if (known) return selectedTicket.set(known)
     try {
       const result = await dataSource.ticketGet(inputs.eventKey(), ticketId as OrganizerTicket["id"], tokenRead())
+      if (revision !== ticketListRevision || selectedTicketId.get() !== ticketId) return
       if (!result.success) {
         selectedTicket.set(undefined)
         actionSuccess.set(null)
@@ -88,32 +127,47 @@ export function organizerEventDetailPageStateCreate(inputs: {
       }
       selectedTicket.set(result.data)
     } catch {
+      if (revision !== ticketListRevision || selectedTicketId.get() !== ticketId) return
       selectedTicket.set(undefined)
       actionSuccess.set(null)
       actionError.set({ code: "load" })
     }
   }
 
-  const eventListLoad = async () => {
+  const eventLoad = async () => {
+    const eventKey = inputs.eventKey()
     try {
-      const eventResult = await dataSource.eventList(tokenRead())
-      if (eventResult.success) events.set(eventResult.data)
+      const eventResult = await dataSource.eventGet(eventKey, tokenRead())
+      if (inputs.eventKey() !== eventKey) return
+      if (eventResult.success) event.set(eventResult.data)
     } catch {
-      // The ticket list still loads independently when the event list is unavailable.
+      // The ticket list still loads independently when the event detail is unavailable.
     }
   }
 
   onMount(() => {
     if (!inputs.dataSource) userSessionBrowserRestore()
-    void eventListLoad()
-    void ticketLoad(search.get())
+    void eventLoad()
+    void ticketLoad(search.get(), ticketListRevision)
   })
 
   createEffect(
     on(
-      () => [inputs.initialSearch(), inputs.initialTicketId()] as const,
-      ([nextSearch, nextTicketId]) => {
-        if (nextSearch !== search.get()) search.set(nextSearch)
+      () => [inputs.eventKey(), inputs.initialSearch(), inputs.initialTicketId()] as const,
+      ([nextEventKey, nextSearch, nextTicketId]) => {
+        const eventChanged = nextEventKey !== activeEventKey
+        if (eventChanged) {
+          activeEventKey = nextEventKey
+          event.set(undefined)
+          void eventLoad()
+        }
+        if (eventChanged || nextSearch !== search.get()) {
+          search.set(nextSearch)
+          selectedTicketId.set("")
+          selectedTicket.set(undefined)
+          const revision = ticketListReset()
+          void ticketLoad(nextSearch, revision)
+        }
         if (nextTicketId === selectedTicketId.get()) return
         selectedTicketId.set(nextTicketId)
         if (nextTicketId) void ticketDetailLoad(nextTicketId)
@@ -128,6 +182,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
 
   const searchChange = (value: string) => {
     search.set(value)
+    const revision = ticketListReset()
     selectedTicketId.set("")
     selectedTicket.set(undefined)
     actionSuccess.set(null)
@@ -138,7 +193,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     searchTimer = setTimeout(() => {
       const update = () => {
         inputs.searchReplace(value, "")
-        void ticketLoad(value)
+        void ticketLoad(value, revision)
       }
       if (typeof requestIdleCallback === "function") {
         requestIdleCallback(update)
@@ -146,6 +201,17 @@ export function organizerEventDetailPageStateCreate(inputs: {
       }
       update()
     }, 250)
+  }
+
+  const loadMore = () => {
+    if (loading.get() || isDone.get()) return
+    const revision = ticketListRevision
+    void ticketPageLoad(cursor.get(), revision, search.get()).catch(() => {
+      if (revision !== ticketListRevision) return
+      actionSuccess.set(null)
+      actionError.set({ code: "load" })
+      loading.set(false)
+    })
   }
 
   const ticketSelect = (ticket: OrganizerTicket) => {
@@ -172,7 +238,12 @@ export function organizerEventDetailPageStateCreate(inputs: {
     const updated = result.data
     selectedTicketId.set(updated.id)
     selectedTicket.set(updated)
-    tickets.set(tickets.get().map((ticket) => (ticket.id === updated.id ? updated : ticket)))
+    tickets.set(
+      tickets
+        .get()
+        .map((ticket) => (ticket.id === updated.id ? updated : ticket))
+        .sort(organizerTicketOrderCompare),
+    )
     inputs.searchReplace(search.get(), updated.id)
     duplicateInfo.set(null)
     actionError.set(null)
@@ -246,18 +317,20 @@ export function organizerEventDetailPageStateCreate(inputs: {
   scannerFeedbackClear = scanner.scannerFeedbackClear
 
   return {
-    event,
+    event: event.get,
     tickets: tickets.get,
     selectedTicket: selectedTicket.get,
     selectedTicketId: selectedTicketId.get,
     search: search.get,
     text,
     loading: loading.get,
+    isDone: isDone.get,
     actionPending: actionPending.get,
     errorMessage,
     successMessage,
     duplicateInfo: duplicateInfo.get,
     searchChange,
+    loadMore,
     ticketSelect,
     ticketCheckIn,
     ticketReset,
@@ -314,4 +387,8 @@ function errorText(code: DetailActionErrorCode, text: ReturnType<typeof organize
   if (code === "organizer.check-in.wrong-event") return text.wrongEvent
   if (code === "organizer.check-in.unknown-ticket") return text.unknownTicket
   return text.actionFailed
+}
+
+function organizerTicketOrderCompare(left: OrganizerTicket, right: OrganizerTicket): number {
+  return left.sequence - right.sequence || left.ticketNumber.localeCompare(right.ticketNumber)
 }

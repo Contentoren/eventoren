@@ -33,6 +33,7 @@ export const catalogTables = {
     updatedAt: v.string(),
   })
     .index("eventKey", ["eventKey"])
+    .index("startsAt", ["startsAt"])
     .index("statusAndStartsAt", ["status", "startsAt"]),
 
   catalogTicketTiers: defineTable({

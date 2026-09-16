@@ -1,3 +1,4 @@
+export { organizerEventGetQuery } from "#src/organizer/convex/organizerEventGetQuery.ts"
 export { organizerEventListQuery } from "#src/organizer/convex/organizerEventListQuery.ts"
 export { organizerEventTicketGetQuery } from "#src/organizer/convex/organizerEventTicketGetQuery.ts"
 export { organizerEventTicketListQuery } from "#src/organizer/convex/organizerEventTicketListQuery.ts"

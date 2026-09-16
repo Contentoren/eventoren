@@ -145,6 +145,7 @@ export const ticketTables = {
     .index("orderIdAndSequence", ["orderId", "sequence"])
     .index("code", ["code"])
     .index("eventKey", ["eventKey"])
+    .index("eventKeyAndSequenceAndCode", ["eventKey", "sequence", "code"])
     .index("ownerUserId", ["ownerUserId"]),
 
   ticketCheckInHistory: defineTable({
