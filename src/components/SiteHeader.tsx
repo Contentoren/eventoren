@@ -1,17 +1,36 @@
 import { Link, useNavigate } from "@tanstack/solid-router"
-import { For } from "solid-js"
+import type { Accessor } from "solid-js"
+import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import type { UserRole } from "../auth/model_field/userRole.ts"
 import { LanguageSelector } from "../app/i18n/LanguageSelector.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { SiteHeaderCartButton } from "./SiteHeaderCartButton.tsx"
 import { SiteHeaderLogo } from "./SiteHeaderLogo.tsx"
 import { SiteHeaderMobileMenu } from "./SiteHeaderMobileMenu.tsx"
 import { SiteHeaderSkipLink } from "./SiteHeaderSkipLink.tsx"
+import type { SiteHeaderNavLink } from "./SiteHeaderNavLink.ts"
 import { siteHeaderStateCreate } from "./siteHeaderStateCreate.ts"
 
-export function SiteHeader() {
+export function SiteHeader(
+  props: {
+    readonly session?: { readonly role?: UserRole }
+    readonly navLinkHref?: (link: SiteHeaderNavLink) => string
+    readonly logoHref?: string
+    readonly cartHref?: string
+    readonly checkoutHref?: string
+    readonly cartQuantity?: Accessor<number>
+    readonly navLinkIsActive?: (link: SiteHeaderNavLink, href: string, pathname: string) => boolean
+    readonly cartIsActive?: (href: string, pathname: string) => boolean
+  } = {},
+) {
   const navigate = useNavigate()
-  const state = siteHeaderStateCreate()
+  const state = siteHeaderStateCreate({
+    session: props.session,
+    cartQuantity: props.cartQuantity,
+    navLinkIsActive: props.navLinkIsActive,
+    cartIsActive: props.cartIsActive,
+  })
 
   return (
     <header class="sticky top-0 z-30 border-b border-border-subtle bg-surface-base/90 text-content backdrop-blur-xl">
@@ -19,22 +38,45 @@ export function SiteHeader() {
 
       <UiContainer width="wide" class="max-md:px-space-3">
         <div class="flex h-16 items-center justify-between gap-space-5 max-md:gap-space-2">
-          <SiteHeaderLogo class="max-md:px-space-1" />
+          <SiteHeaderLogo class="max-md:px-space-1" href={props.logoHref} />
 
           <nav aria-label="Main navigation" class="max-md:hidden">
             <ul class="flex items-center gap-space-1">
               <For each={state.navLinks()}>
                 {(link) => (
                   <li>
-                    <Link
-                      to={link.to}
-                      activeOptions={{ exact: link.exact }}
-                      activeProps={{ class: "bg-brand-soft text-brand-accent", "aria-current": "page" }}
-                      inactiveProps={{ class: "text-content-muted hover:bg-surface-muted hover:text-content" }}
-                      class="focus-ring rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors"
+                    <Show
+                      when={props.navLinkHref}
+                      fallback={
+                        <Link
+                          to={link.to}
+                          activeOptions={{ exact: link.exact }}
+                          activeProps={{ class: "bg-brand-soft text-brand-accent", "aria-current": "page" }}
+                          inactiveProps={{ class: "text-content-muted hover:bg-surface-muted hover:text-content" }}
+                          class="focus-ring rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors"
+                        >
+                          {link.label}
+                        </Link>
+                      }
                     >
-                      {link.label}
-                    </Link>
+                      {(linkHref) => {
+                        const href = linkHref()(link)
+                        const active = state.navLinkIsActive(link, href)
+                        return (
+                          <a
+                            href={href}
+                            aria-current={active ? "page" : undefined}
+                            class={`focus-ring rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors ${
+                              active
+                                ? "bg-brand-soft text-brand-accent"
+                                : "text-content-muted hover:bg-surface-muted hover:text-content"
+                            }`}
+                          >
+                            {link.label}
+                          </a>
+                        )
+                      }}
+                    </Show>
                   </li>
                 )}
               </For>
@@ -47,18 +89,36 @@ export function SiteHeader() {
               quantity={state.cartQuantity()}
               label={state.cartLabel()}
               hasItems={state.cartHasItems()}
+              href={props.cartHref}
+              active={props.cartHref ? state.pathIsActive(props.cartHref) : undefined}
               class="max-md:px-space-2"
             />
 
-            <Button
-              size="sm"
-              variant="none"
-              class="bg-brand text-brand-content hover:bg-brand-strong max-sm:hidden sm:inline-flex"
-              disabled={!state.cartHasItems()}
-              onClick={() => navigate({ to: "/checkout" })}
+            <Show
+              when={props.checkoutHref}
+              fallback={
+                <Button
+                  size="sm"
+                  variant="none"
+                  class="bg-brand text-brand-content hover:bg-brand-strong max-sm:hidden sm:inline-flex"
+                  disabled={!state.cartHasItems()}
+                  onClick={() => navigate({ to: "/checkout" })}
+                >
+                  Zur Kasse
+                </Button>
+              }
             >
-              Zur Kasse
-            </Button>
+              {(checkoutHref) => (
+                <a
+                  href={state.cartHasItems() ? checkoutHref() : undefined}
+                  aria-disabled={!state.cartHasItems()}
+                  class="inline-flex h-10 items-center justify-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong max-sm:hidden sm:inline-flex"
+                  classList={{ "pointer-events-none opacity-50": !state.cartHasItems() }}
+                >
+                  Zur Kasse
+                </a>
+              )}
+            </Show>
 
             <Button
               variant="ghost"
@@ -78,7 +138,13 @@ export function SiteHeader() {
         </div>
       </UiContainer>
 
-      <SiteHeaderMobileMenu open={state.isMenuOpen()} links={state.navLinks()} onClose={() => state.closeOverlay()} />
+      <SiteHeaderMobileMenu
+        open={state.isMenuOpen()}
+        links={state.navLinks()}
+        onClose={() => state.closeOverlay()}
+        linkHref={props.navLinkHref}
+        isLinkActive={props.navLinkHref ? state.navLinkIsActive : undefined}
+      />
     </header>
   )
 }

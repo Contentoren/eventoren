@@ -2,17 +2,16 @@ import { Link } from "@tanstack/solid-router"
 import { Show } from "solid-js"
 import { classMerge } from "../ui/classMerge.ts"
 
-export function SiteHeaderCartButton(props: { quantity: number; label: string; hasItems: boolean; class?: string }) {
-  return (
-    <Link
-      to="/warenkorb"
-      aria-label={props.label}
-      activeProps={{ class: "bg-surface-muted", "aria-current": "page" }}
-      class={classMerge(
-        "focus-ring relative inline-flex h-10 items-center gap-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted max-md:px-space-2",
-        props.class,
-      )}
-    >
+export function SiteHeaderCartButton(props: {
+  quantity: number
+  label: string
+  hasItems: boolean
+  class?: string
+  href?: string
+  active?: boolean
+}) {
+  const content = () => (
+    <>
       <svg viewBox="0 0 24 24" aria-hidden="true" class="size-5" fill="none" stroke="currentColor">
         <path
           d="M4 5h2l1.6 9.2a2 2 0 0 0 2 1.8h6.9a2 2 0 0 0 2-1.7L20 8H7"
@@ -32,6 +31,26 @@ export function SiteHeaderCartButton(props: { quantity: number; label: string; h
           {props.quantity}
         </span>
       </Show>
+    </>
+  )
+  const className = classMerge(
+    "focus-ring relative inline-flex h-10 items-center gap-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted max-md:px-space-2",
+    props.active && "bg-surface-muted",
+    props.class,
+  )
+
+  return props.href ? (
+    <a href={props.href} aria-label={props.label} aria-current={props.active ? "page" : undefined} class={className}>
+      {content()}
+    </a>
+  ) : (
+    <Link
+      to="/warenkorb"
+      aria-label={props.label}
+      activeProps={{ class: "bg-surface-muted", "aria-current": "page" }}
+      class={className}
+    >
+      {content()}
     </Link>
   )
 }

@@ -7,7 +7,7 @@ export function RootFooter() {
 
   return (
     <Show when={state.shouldRender()}>
-      <Footer />
+      <Footer linkHref={state.linkHref()} />
     </Show>
   )
 }
