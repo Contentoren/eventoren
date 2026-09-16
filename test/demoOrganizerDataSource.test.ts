@@ -10,10 +10,10 @@ describe("organizer demo datasource", () => {
     expect((await populated.eventList("demo")).success).toBe(true)
     expect(await empty.eventList("demo")).toEqual({ success: true, data: [] })
 
-    const result = await populated.ticketList("xyz", "Robin", "demo")
+    const result = await populated.ticketList("xyz", "Robin", "demo", { numItems: 50, cursor: null })
     expect(result.success).toBe(true)
     if (!result.success) return
-    expect(result.data.map((ticket) => ticket.ticketNumber)).toEqual(["EVT-XYZ-0001"])
+    expect(result.data.page.map((ticket) => ticket.ticketNumber)).toEqual(["EVT-XYZ-0001"])
   })
 
   test("supports successful check-in, duplicate details, reset and re-check-in", async () => {

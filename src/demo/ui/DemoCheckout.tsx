@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js"
+import { Link } from "@tanstack/solid-router"
 import { TicketCheckoutForm } from "../../ticketing/TicketCheckoutForm.tsx"
 import { TicketOrderWalletPass } from "../../ticketing/TicketOrderWalletPass.tsx"
 import { UiContainer } from "../../ui/UiContainer.tsx"
@@ -32,18 +33,18 @@ export function DemoCheckout(props: { readonly empty?: boolean; readonly error?:
                 </div>
                 <For each={state.completedOrders()}>{(order) => <TicketOrderWalletPass order={order} />}</For>
                 <div class="flex flex-wrap gap-space-3">
-                  <a
-                    href="/demo/events"
+                  <Link
+                    to="/demo/events"
                     class="focus-ring inline-flex h-11 items-center rounded-control bg-brand px-space-5 text-sm font-semibold text-brand-content"
                   >
                     {demoText("checkoutDiscoverEvents")}
-                  </a>
-                  <a
-                    href="/demo/cart"
+                  </Link>
+                  <Link
+                    to="/demo/cart"
                     class="focus-ring inline-flex h-11 items-center rounded-control px-space-5 text-sm font-semibold text-content underline"
                   >
                     {demoText("checkoutCartLink")}
-                  </a>
+                  </Link>
                 </div>
               </div>
             }
@@ -59,12 +60,12 @@ export function DemoCheckout(props: { readonly empty?: boolean; readonly error?:
                   >
                     {demoText("checkoutEmptyCart")}
                   </p>
-                  <a
-                    href="/demo/cart"
+                  <Link
+                    to="/demo/cart"
                     class="focus-ring rounded-control text-sm font-semibold text-brand-accent underline underline-offset-4"
                   >
                     {demoText("checkoutCartLinkShort")}
-                  </a>
+                  </Link>
                 </div>
               }
             >

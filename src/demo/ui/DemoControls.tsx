@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js"
+import { Link } from "@tanstack/solid-router"
 import { Portal } from "solid-js/web"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { demoScenarioText } from "../model/demoScenarioText.ts"
@@ -6,8 +7,9 @@ import { demoText } from "../model/demoText.ts"
 import { demoScenarios } from "../model/demoScenarios.js"
 import { demoControlsStateCreate } from "../state/demoControlsStateCreate.ts"
 
-export function DemoControls(props: { readonly currentId: string }) {
+export function DemoControls(props: { readonly currentId: string | (() => string) }) {
   const state = demoControlsStateCreate()
+  const currentId = () => (typeof props.currentId === "function" ? props.currentId() : props.currentId)
 
   return (
     <Show when={!state.hidden}>
@@ -47,28 +49,28 @@ export function DemoControls(props: { readonly currentId: string }) {
                 </Button>
               </div>
               <nav class="overflow-y-auto p-space-3" aria-label={demoText("controlsTitle")}>
-                <a
-                  href="/demo"
+                <Link
+                  to="/demo"
                   class="focus-ring mb-space-2 block rounded-control px-space-3 py-space-2 text-sm font-semibold text-brand-accent hover:bg-surface-muted"
-                  aria-current={props.currentId === "directory" ? "page" : undefined}
+                  aria-current={currentId() === "directory" ? "page" : undefined}
                 >
                   {demoText("controlsDirectory")}
-                </a>
+                </Link>
                 <ul class="flex flex-col gap-space-1">
                   <For each={demoScenarios.filter((scenario) => scenario.id !== "directory")}>
                     {(scenario) => (
                       <li>
-                        <a
-                          href={scenario.path}
+                        <Link
+                          to={scenario.path}
                           class="focus-ring block rounded-control px-space-3 py-space-2 text-sm transition-colors hover:bg-surface-muted"
                           classList={{
-                            "bg-brand-soft font-semibold text-brand-accent": scenario.id === props.currentId,
-                            "text-content-muted": scenario.id !== props.currentId,
+                            "bg-brand-soft font-semibold text-brand-accent": scenario.id === currentId(),
+                            "text-content-muted": scenario.id !== currentId(),
                           }}
-                          aria-current={scenario.id === props.currentId ? "page" : undefined}
+                          aria-current={scenario.id === currentId() ? "page" : undefined}
                         >
                           {demoScenarioText(scenario).title}
-                        </a>
+                        </Link>
                       </li>
                     )}
                   </For>

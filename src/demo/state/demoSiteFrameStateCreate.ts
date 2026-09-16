@@ -3,12 +3,15 @@ import type { SiteHeaderNavLink } from "../../components/SiteHeaderNavLink.ts"
 import { ticketCartDraftTotalQuantity } from "../../ticketing/ticketCartDraftTotalQuantity.ts"
 import { demoCartStore } from "./demoCartStore.ts"
 
-export function demoSiteFrameStateCreate(inputs: { sessionRole?: UserRole; cartQuantity?: () => number }) {
+export function demoSiteFrameStateCreate(inputs: {
+  sessionRole?: UserRole | (() => UserRole | undefined)
+  cartQuantity?: () => number
+}) {
   const cartQuantity = inputs.cartQuantity ?? (() => ticketCartDraftTotalQuantity(demoCartStore.draft()))
 
   return {
     header: {
-      session: { role: inputs.sessionRole },
+      session: () => ({ role: typeof inputs.sessionRole === "function" ? inputs.sessionRole() : inputs.sessionRole }),
       navLinkHref: demoSiteNavHref,
       logoHref: "/demo/events",
       cartHref: "/demo/cart",

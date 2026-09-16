@@ -1,6 +1,8 @@
+import type { PaginationOptions } from "convex/server"
 import type { OrganizerDataResult } from "../../organizer/OrganizerDataResult.ts"
 import type { OrganizerDataSource } from "../../organizer/OrganizerDataSource.ts"
 import type { OrganizerTicket } from "../../organizer/OrganizerTicket.ts"
+import type { OrganizerTicketListPage } from "../../organizer/OrganizerTicketListPage.ts"
 import { demoOrganizerEvents } from "./demoOrganizerEvents.ts"
 import { demoOrganizerTickets } from "./demoOrganizerTickets.ts"
 
@@ -61,17 +63,30 @@ export function demoOrganizerDataSourceCreate(inputs?: { readonly emptyEvents?: 
 
   return {
     eventList: async () => ({ success: true, data: inputs?.emptyEvents ? [] : demoOrganizerEvents }),
-    ticketList: async (eventKey, search) => {
+    eventGet: async (eventKey) => {
+      const event = demoOrganizerEvents.find((candidate) => candidate.eventKey === eventKey)
+      return event ? { success: true, data: event } : error("organizer.event.not-found")
+    },
+    ticketList: async (eventKey, search, _token, paginationOpts: PaginationOptions) => {
       const normalizedSearch = search.trim().toLocaleLowerCase()
+      const matchingTickets = tickets.filter(
+        (ticket) =>
+          ticket.eventKey === eventKey &&
+          (!normalizedSearch ||
+            ticket.participantName.toLocaleLowerCase().includes(normalizedSearch) ||
+            ticket.buyerName.toLocaleLowerCase().includes(normalizedSearch)),
+      )
+      const start = paginationCursorRead(paginationOpts.cursor)
+      const page = matchingTickets.slice(start, start + paginationOpts.numItems)
+      const next = start + page.length
+      const data: OrganizerTicketListPage = {
+        page,
+        isDone: next >= matchingTickets.length,
+        continueCursor: String(next),
+      }
       return {
         success: true,
-        data: tickets.filter(
-          (ticket) =>
-            ticket.eventKey === eventKey &&
-            (!normalizedSearch ||
-              ticket.participantName.toLocaleLowerCase().includes(normalizedSearch) ||
-              ticket.buyerName.toLocaleLowerCase().includes(normalizedSearch)),
-        ),
+        data,
       }
     },
     ticketGet: async (eventKey, ticketId) => {
@@ -105,4 +120,10 @@ export function demoOrganizerDataSourceCreate(inputs?: { readonly emptyEvents?: 
       return { success: true, data: updated }
     },
   }
+}
+
+function paginationCursorRead(cursor: string | null): number {
+  if (cursor === null) return 0
+  const value = Number.parseInt(cursor, 10)
+  return Number.isInteger(value) && value >= 0 ? value : 0
 }
