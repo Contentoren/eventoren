@@ -501,8 +501,7 @@ const CONFIG = {
   kurse: ["Q4a – Frau Berger","Q4b – Herr Alvermann","Q4c – Frau Dogan","Q4d – Herr Reinhold","Q4e – Frau Petzold"],
   extras: [
     { id:"cocktail", titel:"Cocktail im Ticket", text:"Ein Cocktail deiner Wahl an der Bar, schon vorab bezahlt.", preis:900, statt:1200, proGast:true },
-    { id:"tisch",    titel:"Tisch in Bühnennähe", text:"Reservierung in den vorderen zwei Reihen, für den ganzen Tisch.", preis:1500, statt:null, proGast:false, max:1 },
-    { id:"foto",     titel:"Fotobox-Abzüge",      text:"Fünf gedruckte Abzüge aus der Fotobox, direkt am Abend.", preis:1200, statt:null, proGast:true }
+    { id:"sektglas", titel:"Personalisiertes Sektglas", text:"Ein personalisiertes Sektglas als Erinnerung an den Abend.", preis:2500, statt:null, proGast:true }
   ]
 };
 
@@ -520,7 +519,7 @@ function frisch(){
     qty: { ball:0, after:0 },
     lehrer:false, lehrerPlus:false,
     gaeste:{}, offen:null,
-    extras:{ cocktail:0, tisch:0, foto:0 },
+    extras:{ cocktail:0, sektglas:0 },
     zahlung:null, agb:false
   };
 }
@@ -566,7 +565,7 @@ $("p2").addEventListener("click", () => setzePhase(2));
 function setzePhase(p){
   S.phase = p; S.step = 0;
   S.qty = {ball:0, after:0}; S.lehrer=false; S.lehrerPlus=false; S.gaeste={}; S.offen=null;
-  S.extras = {cocktail:0,tisch:0,foto:0};
+  S.extras = {cocktail:0,sektglas:0};
   if(!S.rolle || S.rolle === "lehrer") S.rolle = "schueler";
   $("p1").setAttribute("aria-pressed", p===1); $("p2").setAttribute("aria-pressed", p===2);
   zeige("s-shop");
@@ -900,7 +899,7 @@ function renderBar(){
   const t = gesamt(), n = anzAlle();
   $("barTotal").textContent = euro(t);
   $("barLabel").textContent = n === 0 ? "Noch keine Tickets ausgewählt"
-    : `${n} ${n === 1 ? "Ticket" : "Tickets"}${S.extras.cocktail + S.extras.tisch + S.extras.foto > 0 ? " + Extras" : ""}`;
+    : `${n} ${n === 1 ? "Ticket" : "Tickets"}${S.extras.cocktail + S.extras.sektglas > 0 ? " + Extras" : ""}`;
 
 
   const btn = $("next");
