@@ -77,7 +77,9 @@
     "deploy:preview": "bun run frontend:deploy:preview && bun run backend:deploy:development",
     "deploy:production": "bun run backend:provision:production && bun run backend:deploy:production && env -u PUBLIC_BASE_URL_SITE -u PUBLIC_BASE_URL_APP -u PUBLIC_BASE_URL_API -u PUBLIC_BASE_URL_CONVEX -u VITE_CONVEX_URL -u VITE_CONVEX_SITE_URL -u CONVEX_SITE_URL bun --env-file=.env/production run convex:verify && bun run frontend:deploy:production",
     "boundary:check": "bun run src/webappBoundaryCheck.ts",
-    "convex:verify": "bun run convex codegen --system-udfs --typecheck disable && bun run scripts/verifyConvexPublicProjectInfo.ts"
+    "convex:verify": "bun run convex codegen --system-udfs --typecheck disable && bun run scripts/verifyConvexPublicProjectInfo.ts",
+    "convex:logs:development": "bun ./node_modules/convex/bin/main.js logs --env-file .env.development",
+    "convex:logs:production": "bun ./node_modules/convex/bin/main.js logs --env-file .env.production"
   },
   "dependencies": {
     "@tanstack/solid-router": "^1.170.30",
