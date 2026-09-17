@@ -23,5 +23,7 @@ export type TicketCheckoutCreateInput = {
     readonly termsAccepted: true
     readonly privacyAcknowledged: true
     readonly documentSetRevision: string
+    readonly termsMarkdown?: string
+    readonly privacyMarkdown?: string
   }
 }

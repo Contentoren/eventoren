@@ -7,6 +7,7 @@ import { api } from "../convex/_generated/api.js"
 import type { Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
 import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { ticketCheckoutLegalDocumentSnapshot } from "../src/ticketing/ticketCheckoutLegalDocumentSnapshot.ts"
 import { ticketQrMatrixCreate } from "../src/ticketing/ticketQrMatrixCreate.ts"
 import { ticketQrSvgGenerate } from "../src/ticketing/ticketQrSvgGenerate.ts"
 
@@ -163,6 +164,8 @@ function checkoutArgs(token: string, catalogVersion: number) {
       termsAccepted: true as const,
       privacyAcknowledged: true as const,
       documentSetRevision: `sha256:${"a".repeat(64)}`,
+      termsMarkdown: ticketCheckoutLegalDocumentSnapshot.termsMarkdown,
+      privacyMarkdown: ticketCheckoutLegalDocumentSnapshot.privacyMarkdown,
     },
   }
 }

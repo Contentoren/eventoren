@@ -14,6 +14,32 @@ Task 3 exposes these Convex functions for the future checkout UI:
 - `EVENTOREN_BILLING_API_CREDENTIAL`
 - `EVENTOREN_BILLING_STRIPE_MODE` (`test` or `live`)
 - `EVENTOREN_PUBLIC_BASE_URL`
+- `EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST` (optional comma-separated Billing organization IDs; unset or empty is disabled)
+
+`ticketCheckoutCreateAction` returns the additive `fulfillmentEligible` boolean. It is evaluated only when a new
+Eventoren checkout order is inserted from the allowlist above and is persisted on that order. Replays return the
+persisted value, with missing legacy values normalized to `false`; changing the allowlist cannot change a replay. The
+existing checkout request, Billing checkout call, payment provider flow, and ticket issuance are unchanged when the
+allowlist is disabled.
+
+The task-1 fulfillment wire contract is defined in Billing's client package as
+`eventorenTicketFulfillmentPrepareRequestSchema` and `eventorenTicketFulfillmentPrepareResponseSchema`, with the
+authenticated `eventorenTicketFulfillmentPrepare` client method targeting
+`POST /api/checkout/organizations/eventoren/ticket-fulfillment`. The request carries the stable Billing
+`orderReference` and `paymentReference`, Eventoren-issued admission codes and ticket IDs, event/tier labels,
+`startsAt`/`endsAt`/`doorsAt`, venue/city/address, `onlineTicketUrl`, locale, and accepted legal Markdown snapshots.
+Billing treats `onlineTicketUrl` as a customer-facing link and must not fetch it or any other request URL. No Billing
+handler, route worker, invoice, email, PDF, or provider side effect is part of this task.
+
+The legal snapshot revision is deterministic: remove the YAML front matter from `src/legal/agb.md` and
+`src/legal/datenschutz.md`, trim each resulting Markdown body, serialize exactly
+`JSON.stringify({ termsMarkdown, privacyMarkdown })` in that property order, hash its UTF-8 bytes with SHA-256, and
+prefix the lowercase hex digest with `sha256:`. The current source revision is
+`sha256:cde3b9ff38ba7e012154d8b642ff52b98d9d725d99e1a3d5704d52e1566db31f`; run
+`bun run legal:checkout-revision` after either source changes. There is no arbitrary legal URL fetch. Enabled new
+orders reject a legal revision or Markdown body other than the generated current snapshot; the exact accepted revision
+and Markdown bodies are persisted on the order. Legacy replays are not revalidated and accept their legacy checkout
+context shape.
 
 Every event/tier admin mutation schedules a durable catalog push. Sync uses the monotonic catalog version, Billing's idempotent same-version digest contract, and exponential retries. Reservations increment Eventoren's authoritative `reserved` count atomically; payment reconciliation changes `reserved` to `sold` and issues tickets exactly once.
 

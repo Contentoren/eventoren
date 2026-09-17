@@ -4,6 +4,8 @@ import type { Id } from "#convex/_generated/dataModel.js"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
+import { ticketCheckoutLegalDocumentRevision } from "../ticketCheckoutLegalDocumentRevision.js"
+import { ticketCheckoutLegalDocumentSnapshot } from "../ticketCheckoutLegalDocumentSnapshot.js"
 import { ticketCheckoutContextCanonicalize } from "./ticketCheckoutContextCanonicalize.js"
 
 const ticketSelectionValidator = v.object({
@@ -33,8 +35,11 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       termsAccepted: v.literal(true),
       privacyAcknowledged: v.literal(true),
       documentSetRevision: v.string(),
+      termsMarkdown: v.optional(v.string()),
+      privacyMarkdown: v.optional(v.string()),
     }),
     paymentReference: v.string(),
+    fulfillmentEligible: v.boolean(),
   },
   handler: async (
     ctx,
@@ -47,6 +52,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     billingOrderReference?: string
     status: "reserved" | "checkout_created" | "paid" | "failed" | "expired" | "released" | "paid_inventory_conflict"
     paymentStatus: "pending" | "paid" | "failed" | "expired"
+    fulfillmentEligible: boolean
     replayed: boolean
   }> => {
     const op = "ticketCheckoutPrepareMutation"
@@ -71,11 +77,35 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       },
       legalContext: args.legalContext,
     })
+    const legacyContextJson = ticketCheckoutContextCanonicalize({
+      checkoutKey: args.checkoutKey,
+      eventKey: args.eventKey,
+      catalogVersion: args.catalogVersion,
+      tickets: args.tickets,
+      stripeMode: args.stripeMode,
+      successUrl: args.successUrl,
+      cancelUrl: args.cancelUrl,
+      locale: args.locale,
+      customer: {
+        email: args.customerEmail,
+        givenName: args.customerGivenName,
+        familyName: args.customerFamilyName,
+        phone: args.customerPhone,
+      },
+      legalContext: {
+        cta: args.legalContext.cta,
+        termsAccepted: args.legalContext.termsAccepted,
+        privacyAcknowledged: args.legalContext.privacyAcknowledged,
+        documentSetRevision: args.legalContext.documentSetRevision,
+      },
+    })
 
     if (existing) {
       const sameOwner = existing.ownerUserId === args.ownerUserId
       const sameGuest = !args.guestAccessDigest || existing.guestAccessDigest === args.guestAccessDigest
-      if (!sameOwner || !sameGuest || existing.checkoutContextJson !== contextJson)
+      const sameCheckoutEvidence =
+        existing.checkoutContextJson === contextJson || existing.checkoutContextJson === legacyContextJson
+      if (!sameOwner || !sameGuest || !sameCheckoutEvidence)
         return createResultError(op, "The checkout key was reused with different ownership or checkout evidence")
       if (
         existing.status === "failed" ||
@@ -92,9 +122,44 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         billingOrderReference: existing.billingOrderReference,
         status: existing.status,
         paymentStatus: existing.paymentStatus,
+        fulfillmentEligible: existing.fulfillmentEligible ?? false,
         replayed: true,
       })
     }
+
+    if (
+      args.fulfillmentEligible &&
+      (args.legalContext.documentSetRevision !== ticketCheckoutLegalDocumentRevision ||
+        args.legalContext.termsMarkdown !== ticketCheckoutLegalDocumentSnapshot.termsMarkdown ||
+        args.legalContext.privacyMarkdown !== ticketCheckoutLegalDocumentSnapshot.privacyMarkdown)
+    )
+      return createResultError(op, "The accepted legal snapshot is not current")
+
+    const acceptedLegalContext = args.fulfillmentEligible
+      ? {
+          ...args.legalContext,
+          documentSetRevision: ticketCheckoutLegalDocumentRevision,
+          termsMarkdown: ticketCheckoutLegalDocumentSnapshot.termsMarkdown,
+          privacyMarkdown: ticketCheckoutLegalDocumentSnapshot.privacyMarkdown,
+        }
+      : args.legalContext
+    const acceptedContextJson = ticketCheckoutContextCanonicalize({
+      checkoutKey: args.checkoutKey,
+      eventKey: args.eventKey,
+      catalogVersion: args.catalogVersion,
+      tickets: args.tickets,
+      stripeMode: args.stripeMode,
+      successUrl: args.successUrl,
+      cancelUrl: args.cancelUrl,
+      locale: args.locale,
+      customer: {
+        email: args.customerEmail,
+        givenName: args.customerGivenName,
+        familyName: args.customerFamilyName,
+        phone: args.customerPhone,
+      },
+      legalContext: acceptedLegalContext,
+    })
 
     const syncState = await ctx.db
       .query("catalogSyncStates")
@@ -190,9 +255,17 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       subtotalCents,
       feeCents,
       totalCents: subtotalCents + feeCents,
-      checkoutContextJson: contextJson,
+      checkoutContextJson: acceptedContextJson,
       paymentReference: args.paymentReference,
       stripeMode: args.stripeMode,
+      fulfillmentEligible: args.fulfillmentEligible,
+      legalDocumentSetRevision: acceptedLegalContext.documentSetRevision,
+      ...(acceptedLegalContext.termsMarkdown !== undefined
+        ? { legalTermsMarkdown: acceptedLegalContext.termsMarkdown }
+        : {}),
+      ...(acceptedLegalContext.privacyMarkdown !== undefined
+        ? { legalPrivacyMarkdown: acceptedLegalContext.privacyMarkdown }
+        : {}),
       status: "reserved",
       paymentStatus: "pending",
       reservationExpiresAt: expiresAt,
@@ -245,6 +318,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       stripeMode: args.stripeMode,
       status: "reserved" as const,
       paymentStatus: "pending" as const,
+      fulfillmentEligible: args.fulfillmentEligible,
       replayed: false,
     })
   },

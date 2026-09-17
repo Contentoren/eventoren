@@ -6,6 +6,8 @@ import { api, internal } from "../convex/_generated/api.js"
 import type { Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
 import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { ticketCheckoutLegalDocumentRevision } from "../src/ticketing/ticketCheckoutLegalDocumentRevision.ts"
+import { ticketCheckoutLegalDocumentSnapshot } from "../src/ticketing/ticketCheckoutLegalDocumentSnapshot.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const authSecret = "ticketing-convex-test-secret"
@@ -14,6 +16,7 @@ process.env.AUTH_SECRET = authSecret
 afterEach(() => {
   vi.unstubAllGlobals()
   vi.useRealTimers()
+  delete process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST
 })
 
 async function createUser(t: ReturnType<typeof convexTest>, role: "admin" | "user" = "user") {
@@ -163,24 +166,33 @@ function checkoutArgs(
   catalogVersion: number,
   checkoutKey: string,
   options: {
+    eventKey?: string
     tickets?: { tierKey: string; quantity: number; participantNames?: string[] }[]
+    customer?: { email?: string; givenName?: string; familyName?: string; phone?: string }
   } = {},
 ) {
   return {
     token,
     checkoutKey,
-    eventKey: "ticket-event",
+    eventKey: options.eventKey ?? "ticket-event",
     catalogVersion,
     tickets: options.tickets ?? [{ tierKey: "standard", quantity: 1, participantNames: ["Ada Lovelace"] }],
     successUrl: "https://eventoren.test/checkout/success",
     cancelUrl: "https://eventoren.test/checkout/cancel",
     locale: "de" as const,
-    customer: { email: "buyer@example.com", givenName: "Ada", familyName: "Lovelace", phone: "" },
+    customer: {
+      email: options.customer?.email ?? "buyer@example.com",
+      givenName: options.customer?.givenName ?? "Ada",
+      familyName: options.customer?.familyName ?? "Lovelace",
+      phone: options.customer?.phone ?? "",
+    },
     legalContext: {
       cta: "Kostenpflichtig buchen",
       termsAccepted: true as const,
       privacyAcknowledged: true as const,
-      documentSetRevision: `sha256:${"a".repeat(64)}`,
+      documentSetRevision: ticketCheckoutLegalDocumentRevision,
+      termsMarkdown: ticketCheckoutLegalDocumentSnapshot.termsMarkdown,
+      privacyMarkdown: ticketCheckoutLegalDocumentSnapshot.privacyMarkdown,
     },
   }
 }
@@ -291,6 +303,7 @@ test("reserves atomically and replays the same checkout without a second Billing
   })
 
   expect(first.success).toBe(true)
+  expect(first).toMatchObject({ success: true, data: { fulfillmentEligible: false } })
   expect(replay).toMatchObject({ success: true, data: { replayed: true, status: "checkout_created" } })
   expect(competing.success).toBe(false)
   expect(billing.checkoutCallsGet()).toBe(1)
@@ -304,6 +317,118 @@ test("reserves atomically and replays the same checkout without a second Billing
   expect(inventory.orders).toHaveLength(1)
   expect(inventory.reservations).toHaveLength(1)
   expect(billing.fetchMock).toHaveBeenCalled()
+})
+
+test("persists enabled fulfillment eligibility once and replays it after the allowlist changes", async () => {
+  environmentSet()
+  process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST = "eventoren-test"
+  billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey323456789012345678901234")
+
+  const first = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(first).toMatchObject({ success: true, data: { fulfillmentEligible: true, replayed: false } })
+  if (!first.success) return
+  const stored = await t.run(async (ctx) => ctx.db.get(first.data.orderId as Id<"ticketOrders">))
+  expect(stored).toMatchObject({
+    fulfillmentEligible: true,
+    legalDocumentSetRevision: ticketCheckoutLegalDocumentRevision,
+    legalTermsMarkdown: ticketCheckoutLegalDocumentSnapshot.termsMarkdown,
+    legalPrivacyMarkdown: ticketCheckoutLegalDocumentSnapshot.privacyMarkdown,
+  })
+
+  process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST = ""
+  const replay = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(replay).toMatchObject({ success: true, data: { fulfillmentEligible: true, replayed: true } })
+})
+
+test("requires the generated current legal revision only for a newly enabled checkout", async () => {
+  environmentSet()
+  process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST = "eventoren-test"
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey423456789012345678901234"),
+    legalContext: {
+      cta: "Kostenpflichtig buchen",
+      termsAccepted: true,
+      privacyAcknowledged: true,
+      documentSetRevision: `sha256:${"a".repeat(64)}`,
+      termsMarkdown: ticketCheckoutLegalDocumentSnapshot.termsMarkdown,
+      privacyMarkdown: ticketCheckoutLegalDocumentSnapshot.privacyMarkdown,
+    },
+  })
+
+  expect(result).toMatchObject({ success: false, errorMessage: "The accepted legal snapshot is not current" })
+  expect(billing.checkoutCallsGet()).toBe(0)
+  expect(await t.run(async (ctx) => ctx.db.query("ticketOrders").collect())).toHaveLength(0)
+})
+
+test("requires the exact accepted legal Markdown snapshot for a newly enabled checkout", async () => {
+  environmentSet()
+  process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST = "eventoren-test"
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey823456789012345678901234")
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...args,
+    legalContext: {
+      ...args.legalContext,
+      termsMarkdown: "stale legal terms",
+    },
+  })
+
+  expect(result).toMatchObject({ success: false, errorMessage: "The accepted legal snapshot is not current" })
+  expect(billing.checkoutCallsGet()).toBe(0)
+})
+
+test("defaults missing legacy fulfillment eligibility to false without reevaluating the current switch", async () => {
+  environmentSet()
+  delete process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "legacycheckout123456789012345678901234")
+  const first = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(first).toMatchObject({ success: true, data: { fulfillmentEligible: false } })
+  if (!first.success) return
+  await t.run(async (ctx) => {
+    const order = await ctx.db.get(first.data.orderId as Id<"ticketOrders">)
+    const context = JSON.parse(order?.checkoutContextJson ?? "{}") as { legalContext?: Record<string, unknown> }
+    const legalContext = { ...(context.legalContext ?? {}) }
+    delete legalContext.termsMarkdown
+    delete legalContext.privacyMarkdown
+    context.legalContext = legalContext
+    await ctx.db.patch(first.data.orderId as Id<"ticketOrders">, {
+      checkoutContextJson: JSON.stringify(context),
+      fulfillmentEligible: undefined,
+      legalDocumentSetRevision: undefined,
+      legalTermsMarkdown: undefined,
+      legalPrivacyMarkdown: undefined,
+    })
+  })
+
+  process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST = "eventoren-test"
+
+  const replay = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(replay).toMatchObject({
+    success: true,
+    data: { status: "checkout_created", fulfillmentEligible: false, replayed: true },
+  })
+  expect(billing.checkoutCallsGet()).toBe(1)
 })
 
 test("requires participant names for every newly checked-out ticket", async () => {
@@ -322,6 +447,51 @@ test("requires participant names for every newly checked-out ticket", async () =
   expect(result).toMatchObject({ success: false, errorMessage: "Each ticket requires exactly one participant name" })
   const orders = await t.run(async (ctx) => ctx.db.query("ticketOrders").collect())
   expect(orders).toHaveLength(0)
+})
+
+test("rejects checkout return URLs outside the configured Eventoren origin", async () => {
+  environmentSet()
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey623456789012345678901234"),
+    successUrl: "https://alternate.example.test/checkout/success",
+  })
+
+  expect(result).toMatchObject({
+    success: false,
+    errorMessage: "Checkout return URLs must use the configured Eventoren origin",
+  })
+  expect(billing.checkoutCallsGet()).toBe(0)
+  const orders = await t.run(async (ctx) => ctx.db.query("ticketOrders").collect())
+  expect(orders).toHaveLength(0)
+})
+
+test("canonicalizes same-origin checkout return URLs before persistence", async () => {
+  environmentSet()
+  billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey723456789012345678901234"),
+    successUrl: "https://eventoren.test:443/checkout/success?result=paid#complete",
+    cancelUrl: "https://eventoren.test:443/checkout/cancel?result=cancelled",
+  })
+
+  expect(result.success).toBe(true)
+  const orders = await t.run(async (ctx) => ctx.db.query("ticketOrders").collect())
+  expect(orders).toHaveLength(1)
+  expect(JSON.parse(orders[0]?.checkoutContextJson ?? "{}")).toMatchObject({
+    successUrl: "https://eventoren.test/checkout/success?result=paid#complete",
+    cancelUrl: "https://eventoren.test/checkout/cancel?result=cancelled",
+  })
 })
 
 test("does not release a still-payable pending session, then issues exactly once after Billing paid", async () => {
@@ -389,7 +559,7 @@ test("keeps participant names associated with quantities and lines through reser
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
   const adminToken = await tokenFor(adminId)
-  const catalogVersion = await seedCatalog(t, adminToken)
+  await seedCatalog(t, adminToken)
   const addedTier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
     eventKey: "ticket-event",
     tierKey: "vip",

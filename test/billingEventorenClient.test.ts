@@ -6,6 +6,7 @@ afterEach(() => {
   delete process.env.EVENTOREN_BILLING_ORGANIZATION_ID
   delete process.env.EVENTOREN_BILLING_API_CREDENTIAL
   delete process.env.EVENTOREN_BILLING_STRIPE_MODE
+  delete process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST
   delete process.env.EVENTOREN_PUBLIC_BASE_URL
 })
 
@@ -61,6 +62,59 @@ function statusResponse(paymentReference: string, payment: "pending" | "expired"
   )
 }
 
+function fulfillmentResponse(paymentReference: string) {
+  return new Response(
+    JSON.stringify({
+      success: true,
+      data: {
+        orderReference: "billing-order-1",
+        paymentReference,
+        fulfillmentReference: "fulfillment-1",
+        status: "accepted",
+        replayed: false,
+      },
+    }),
+    { status: 200 },
+  )
+}
+
+function fulfillmentInput() {
+  return {
+    organizationId: "eventoren-test",
+    orderReference: "billing-order-1",
+    paymentReference: "payment_checkoutkey123456789012345678901234",
+    event: {
+      eventKey: "event-1",
+      title: "Event",
+      startsAt: "2027-01-01T18:00:00.000Z",
+      endsAt: "2027-01-01T22:00:00.000Z",
+      doorsAt: "2027-01-01T17:00:00.000Z",
+      venue: "Hall",
+      city: "Berlin",
+      address: "Street 1",
+    },
+    tickets: [
+      {
+        ticketId: "ticket-1",
+        admissionCode: "admission-1",
+        sequence: 1,
+        tierKey: "standard",
+        tierLabel: "Standard",
+      },
+    ],
+    onlineTicketUrl: "https://eventoren.test/tickets/order-1",
+    locale: "de" as const,
+    legalContext: {
+      cta: "Kostenpflichtig buchen",
+      termsAccepted: true as const,
+      privacyAcknowledged: true as const,
+      documentSetRevision: `sha256:${"a".repeat(64)}`,
+      termsMarkdown: "# Terms",
+      privacyMarkdown: "# Privacy",
+    },
+  }
+}
+
 function checkoutInput() {
   return {
     organizationId: "eventoren-test",
@@ -93,6 +147,8 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
       const body = JSON.parse(String(init?.body)) as { paymentReference: string }
       return checkoutResponse(body.paymentReference)
     }
+    if (url.pathname.endsWith("/ticket-fulfillment"))
+      return fulfillmentResponse("payment_checkoutkey123456789012345678901234")
     if (url.pathname.endsWith("/status")) return statusResponse("payment_checkoutkey123456789012345678901234")
     if (url.pathname.endsWith("/expire"))
       return statusResponse("payment_checkoutkey123456789012345678901234", "expired")
@@ -101,6 +157,7 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
   const config = billingEventorenClient.configRead({ fetcher })
   expect(config.success).toBe(true)
   if (!config.success) return
+  expect(config.data.fulfillmentEnabled).toBe(false)
 
   const catalog = await billingEventorenClient.catalogPush(config.data, {
     organizationId: "eventoren-test",
@@ -147,12 +204,14 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
     config.data,
     "payment_checkoutkey123456789012345678901234",
   )
+  const fulfillment = await billingEventorenClient.ticketFulfillmentPrepare(config.data, fulfillmentInput())
 
   expect(catalog).toMatchObject({ success: true, data: { catalogVersion: 7, eventCount: 1 } })
   expect(checkout).toMatchObject({ success: true, data: { status: "checkout_created", url: expect.any(String) } })
   expect(status).toMatchObject({ success: true, data: { kind: "status", data: { payment: "pending" } } })
   expect(expiration).toMatchObject({ success: true, data: { kind: "status", data: { payment: "expired" } } })
-  expect(requests).toHaveLength(4)
+  expect(fulfillment).toMatchObject({ success: true, data: { status: "accepted", replayed: false } })
+  expect(requests).toHaveLength(5)
   expect(requests[0]?.url).toBe("https://billing.test/api/checkout/organizations/eventoren/catalog")
   expect(requests[0]?.init).toMatchObject({
     method: "POST",
@@ -168,6 +227,8 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
   })
   expect(requests[2]?.url).toContain("/status?organizationId=eventoren-test")
   expect(requests[3]?.url).toContain("/expire?organizationId=eventoren-test")
+  expect(requests[4]?.url).toBe("https://billing.test/api/checkout/organizations/eventoren/ticket-fulfillment")
+  expect(JSON.parse(String(requests[4]?.init?.body))).toMatchObject({ organizationId: "eventoren-test" })
 })
 
 test("preserves 404 semantics and normalizes Billing transport errors", async () => {

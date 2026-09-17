@@ -6,7 +6,10 @@ import type { EventorenCatalogUpsertResponse } from "billing/contracts/eventoren
 import type { EventorenTicketCheckoutCreateRequest } from "billing/contracts/eventorenTicketCheckoutCreateRequestSchema"
 import type { EventorenTicketCheckoutCreateResponse } from "billing/contracts/eventorenTicketCheckoutCreateResponseSchema"
 import type { EventorenTicketCheckoutStatusResponse } from "billing/contracts/eventorenTicketCheckoutStatusResponseSchema"
+import type { EventorenTicketFulfillmentPrepareRequest } from "billing/contracts/eventorenTicketFulfillmentPrepareRequestSchema"
+import type { EventorenTicketFulfillmentPrepareResponse } from "billing/contracts/eventorenTicketFulfillmentPrepareResponseSchema"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
+import { ticketCheckoutFulfillmentActivationIsEnabled } from "./ticketCheckoutFulfillmentActivationIsEnabled.js"
 
 type BillingEventorenFetcher = NonNullable<BillingClientCreateOptions["fetcher"]>
 
@@ -20,6 +23,7 @@ type BillingEventorenConfig = {
   apiCredential: string
   stripeMode: "live" | "test"
   publicBaseUrl: string
+  fulfillmentEnabled: boolean
   client: BillingClient
 }
 
@@ -66,6 +70,7 @@ export const billingEventorenClient = {
       apiCredential,
       stripeMode,
       publicBaseUrl,
+      fulfillmentEnabled: ticketCheckoutFulfillmentActivationIsEnabled(organizationId),
       client: clientResult.data,
     })
   },
@@ -148,6 +153,22 @@ export const billingEventorenClient = {
     }
     return createResult({ kind: "status" as const, data: result.data })
   },
+
+  async ticketFulfillmentPrepare(
+    config: BillingEventorenConfig,
+    input: EventorenTicketFulfillmentPrepareRequest,
+  ): PromiseResult<EventorenTicketFulfillmentPrepareResponse["data"]> {
+    const result = await config.client.eventorenTicketFulfillmentPrepare(input)
+    if (!result.success)
+      return billingOperationError(
+        "billingEventorenTicketFulfillmentPrepare",
+        result,
+        "Billing fulfillment returned HTTP",
+        "Billing returned an invalid fulfillment response",
+        "Billing fulfillment request failed",
+      )
+    return createResult(result.data)
+  },
 }
 
 function billingOperationError(
@@ -186,7 +207,12 @@ function billingRequestInitNormalize(init: RequestInit | undefined): RequestInit
 function billingRequestTargetNormalize(input: RequestInfo | URL, method: string | undefined): RequestInfo | URL {
   if (method !== "POST") return input
   const target = new URL(String(input))
-  if (!target.pathname.endsWith("/catalog") && !target.pathname.endsWith("/ticket-checkout")) return input
+  if (
+    !target.pathname.endsWith("/catalog") &&
+    !target.pathname.endsWith("/ticket-checkout") &&
+    !target.pathname.endsWith("/ticket-fulfillment")
+  )
+    return input
   target.search = ""
   return target.toString()
 }

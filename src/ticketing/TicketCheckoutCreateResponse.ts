@@ -6,5 +6,6 @@ export type TicketCheckoutCreateResponse = {
   readonly status: "checkout_created" | "paid"
   readonly paymentStatus: "pending" | "paid"
   readonly url?: string
+  readonly fulfillmentEligible: boolean
   readonly replayed: boolean
 }

@@ -22,10 +22,22 @@ export function ticketCheckoutContextCanonicalize(input: {
     termsAccepted: true
     privacyAcknowledged: true
     documentSetRevision: string
+    termsMarkdown?: string
+    privacyMarkdown?: string
   }
 }): string {
   return JSON.stringify({
     ...input,
+    legalContext: {
+      cta: input.legalContext.cta,
+      documentSetRevision: input.legalContext.documentSetRevision,
+      privacyAcknowledged: input.legalContext.privacyAcknowledged,
+      ...(input.legalContext.privacyMarkdown !== undefined
+        ? { privacyMarkdown: input.legalContext.privacyMarkdown }
+        : {}),
+      termsAccepted: input.legalContext.termsAccepted,
+      ...(input.legalContext.termsMarkdown !== undefined ? { termsMarkdown: input.legalContext.termsMarkdown } : {}),
+    },
     tickets: [...input.tickets]
       .sort((left, right) => left.tierKey.localeCompare(right.tierKey))
       .map((ticket) => ({

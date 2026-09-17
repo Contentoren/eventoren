@@ -1,6 +1,6 @@
-import { action } from "#convex/_generated/server.js"
 import { v } from "convex/values"
 import { internal } from "#convex/_generated/api.js"
+import { action } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
 import { billingEventorenClient } from "./billingEventorenClient.js"
 import { ticketOrderAccessResolve } from "./ticketOrderAccessResolve.js"
@@ -34,6 +34,8 @@ export const ticketCheckoutCreateAction = action({
       termsAccepted: v.literal(true),
       privacyAcknowledged: v.literal(true),
       documentSetRevision: v.string(),
+      termsMarkdown: v.optional(v.string()),
+      privacyMarkdown: v.optional(v.string()),
     }),
   },
   handler: async (
@@ -47,6 +49,7 @@ export const ticketCheckoutCreateAction = action({
     status: "checkout_created" | "paid"
     paymentStatus: "pending" | "paid"
     url?: string
+    fulfillmentEligible: boolean
     replayed: boolean
   }> => {
     const op = "ticketCheckoutCreateAction"
@@ -60,8 +63,9 @@ export const ticketCheckoutCreateAction = action({
     const config = billingEventorenClient.configRead()
     if (!config.success) return config
     const locale = args.locale ?? "de"
-    const urlResult = checkoutUrlsValidate(config.data.publicBaseUrl, args.successUrl, args.cancelUrl)
+    const urlResult = checkoutUrlsCanonicalize(config.data.publicBaseUrl, args.successUrl, args.cancelUrl)
     if (!urlResult.success) return urlResult
+    const { successUrl, cancelUrl } = urlResult.data
     const email = args.customer.email.trim().toLowerCase()
     const givenName = args.customer.givenName.trim()
     const familyName = args.customer.familyName.trim()
@@ -93,11 +97,12 @@ export const ticketCheckoutCreateAction = action({
       catalogVersion: args.catalogVersion,
       tickets,
       stripeMode: config.data.stripeMode,
-      successUrl: args.successUrl,
-      cancelUrl: args.cancelUrl,
+      successUrl,
+      cancelUrl,
       locale,
       legalContext: args.legalContext,
       paymentReference,
+      fulfillmentEligible: config.data.fulfillmentEnabled,
     })
     if (!prepared.success) return prepared
     if (prepared.data.status === "paid")
@@ -107,6 +112,7 @@ export const ticketCheckoutCreateAction = action({
         stripeMode: prepared.data.stripeMode,
         status: "paid" as const,
         paymentStatus: "paid" as const,
+        fulfillmentEligible: prepared.data.fulfillmentEligible,
         replayed: true,
       })
     if (prepared.data.status === "checkout_created" && prepared.data.checkoutUrl && prepared.data.billingOrderReference)
@@ -118,6 +124,7 @@ export const ticketCheckoutCreateAction = action({
         status: "checkout_created" as const,
         paymentStatus: "pending" as const,
         url: prepared.data.checkoutUrl,
+        fulfillmentEligible: prepared.data.fulfillmentEligible,
         replayed: true,
       })
 
@@ -134,11 +141,16 @@ export const ticketCheckoutCreateAction = action({
       catalogVersion: args.catalogVersion,
       tickets: tickets.map(({ tierKey, quantity }) => ({ tierKey, quantity })),
       stripeMode: config.data.stripeMode,
-      successUrl: args.successUrl,
-      cancelUrl: args.cancelUrl,
+      successUrl,
+      cancelUrl,
       locale,
       customer: { email },
-      legalContext: args.legalContext,
+      legalContext: {
+        cta: args.legalContext.cta,
+        termsAccepted: args.legalContext.termsAccepted,
+        privacyAcknowledged: args.legalContext.privacyAcknowledged,
+        documentSetRevision: args.legalContext.documentSetRevision,
+      },
     })
     if (!billingResult.success) return billingResult
     if (
@@ -162,21 +174,32 @@ export const ticketCheckoutCreateAction = action({
       status: "checkout_created" as const,
       paymentStatus: "pending" as const,
       url: marked.data.checkoutUrl,
+      fulfillmentEligible: prepared.data.fulfillmentEligible,
       replayed: prepared.data.replayed || marked.data.replayed,
     })
   },
 })
 
-function checkoutUrlsValidate(publicBaseUrl: string, successUrl: string, cancelUrl: string): Result<void> {
-  const op = "ticketCheckoutUrlsValidate"
+function checkoutUrlsCanonicalize(
+  publicBaseUrl: string,
+  successUrl: string,
+  cancelUrl: string,
+): Result<{ successUrl: string; cancelUrl: string }> {
+  const op = "ticketCheckoutUrlsCanonicalize"
   try {
     const expectedOrigin = new URL(publicBaseUrl).origin
-    const success = new URL(successUrl)
-    const cancel = new URL(cancelUrl)
-    if (success.origin !== expectedOrigin || cancel.origin !== expectedOrigin)
+    const success = checkoutUrlCanonicalize(successUrl, expectedOrigin)
+    const cancel = checkoutUrlCanonicalize(cancelUrl, expectedOrigin)
+    if (!success || !cancel)
       return createResultError(op, "Checkout return URLs must use the configured Eventoren origin")
-    return createResult(undefined)
+    return createResult({ successUrl: success, cancelUrl: cancel })
   } catch (error) {
     return createResultError(op, "Checkout return URLs are invalid", String(error))
   }
+}
+
+function checkoutUrlCanonicalize(value: string, expectedOrigin: string): string | undefined {
+  const url = new URL(value)
+  if (url.origin !== expectedOrigin) return undefined
+  return new URL(`${url.pathname}${url.search}${url.hash}`, expectedOrigin).toString()
 }
