@@ -56,7 +56,7 @@ Beim fehlgeschlagenen Ticket-Checkout wegen fehlender oder ungültiger Pflichtan
 
 ## Status
 
-Task 3 abgeschlossen: Die Teilnehmervalidierung liefert alle ungültigen aktiven Ticketpositionen und behält Mengen- und Trim-Handling unverändert bei. `TicketCheckoutForm` rendert Danger-Styling und `aria-invalid` nur für vom State als ungültig gemeldete Kontakt- und Teilnehmerfelder nach einem Sendeversuch. Typecheck, Tests, `format:check` und eine begrenzte Browserprüfung der Demo sind bestanden. Die Browserprüfung des normalen Checkouts steht noch aus, sofern sie in den verbleibenden Planaufgaben enthalten ist.
+Task 4 abgeschlossen und der Plan ist vollständig abgeschlossen: Die Pflichtfeldfehler werden reaktiv aggregiert und feldweise aktualisiert. Die Browserprüfung bestätigt den exakten Alert `Fülle alle Pflichtfelder aus`; ausschließlich ungültige Kontakt- und Teilnehmerfelder werden markiert, das Telefon bleibt unmarkiert, und ein korrigiertes Feld wird einzeln entmarkiert. Alle Verifikationen sind bestanden.
 
 ## Current Context
 
@@ -65,7 +65,7 @@ Task 3 abgeschlossen: Die Teilnehmervalidierung liefert alle ungültigen aktiven
 - `src/ticketing/ticketContactValidate.ts` prüft getrimmte Namen und E-Mail und liefert die vollständige feldweise Fehlerausgabe unter Beibehaltung der bestehenden Regeln und normalisierten Erfolgsdaten.
 - `src/ticketing/ticketParticipantNamesValidate.ts` prüft aktive Ticketmengen und liefert alle ungültigen Teilnehmerfelder zurück; Mengen- und Trim-Handling bleiben unverändert.
 - `src/ticketing/TicketCheckoutForm.tsx` setzt `noValidate`, nutzt `Input` aus `#ui/input/input/Input.jsx`, zeigt `state.errorMessage()` als globale `role="alert"` und rendert Danger-Styling sowie `aria-invalid` nur für vom State als ungültig gemeldete Kontakt- und Teilnehmerfelder nach einem Sendeversuch.
-- Die bestehenden Änderungs-Handler löschen derzeit bei jeder Eingabe die gesamte globale Meldung. Diese UX bleibt für die globale Meldung erhalten, während der neue Pflichtfeldzustand nur den jeweils geänderten Schlüssel aktualisiert.
+- Die bestehenden Änderungs-Handler löschen bei jeder Eingabe weiterhin die globale Meldung. Nach dem ersten Sendeversuch aktualisiert der Pflichtfeldzustand dabei nur den jeweils geänderten Schlüssel und entfernt dessen Markierung unmittelbar nach gültiger Korrektur.
 - `TicketCheckoutForm` wird sowohl von `/checkout` als auch von `src/demo/ui/DemoCheckout.tsx` verwendet. Eine Erweiterung des State-Vertrags muss daher beide State-Fabriken berücksichtigen; die Demo übergibt weiterhin `relaxedValidation`.
-- Es existiert derzeit kein dedizierter UI-Test für `TicketCheckoutForm` oder `aria-invalid`; die neue Regressionabdeckung muss deshalb auf pure State-/Validator-Tests und eine gezielte Browserprüfung mit vorhandenen Testwerkzeugen setzen.
-- Typecheck, Tests, `format:check` und die begrenzte Browserprüfung der Demo sind bestanden. Die Browserprüfung des normalen Checkouts steht noch aus, sofern sie in den verbleibenden Planaufgaben enthalten ist.
+- Die Regressionabdeckung erfolgt über fokussierte State-/Validator-Tests und die gezielte Browserprüfung mit vorhandenen Testwerkzeugen.
+- Typecheck, Tests, `format:check` und die Browserprüfung des normalen Checkouts sind bestanden; alle beschriebenen Verifikationsfälle wurden erfolgreich geprüft.

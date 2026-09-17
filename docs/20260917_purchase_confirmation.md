@@ -1,7 +1,11 @@
 # Purchase confirmation with four PDF attachments
 
-Status: task 1 partially implemented — the authenticated Billing fulfillment route and evidence persistence are implemented;
-downstream worker/orchestration remains deferred.
+Status: tasks 1–5 implemented; task 6 verification is partial; activation remains pending the tax decision and deployment verification.
+
+Last updated: 2026-09-17.
+
+User implementation authorization is complete. No overall implementation permission is pending. Production activation remains
+disabled for new orders until the authoritative tax basis/rate is supplied and the deployed runtimes are verified.
 
 ## Goal
 
@@ -27,21 +31,27 @@ Include a prominent **Open your tickets** link and a plain-text equivalent. Cust
 
 ## Current context
 
-- Eventoren creates ticket orders through Billing. Its paid-state mutation issues tickets atomically; payment reconciliation currently depends on the customer opening the order page.
-- Eventoren already displays online tickets with QR codes, but guest access relies on browser-local storage. An ordinary order URL is insufficient for an email opened on another device.
-- Billing's existing accepted-order email path generates legal PDFs, renders email-generator Markdown into branded HTML/text, and sends via organization-configured Resend or SMTP. Existing attachments are invoice, terms, privacy.
-- Billing currently creates invoices through Lexware and has existing Chromium-based PDF infrastructure for accepted-order/legal PDFs. A dedicated ticket HTML template is not yet part of the verified implementation; reuse the infrastructure without assuming a generic ticket-PDF API.
+- Eventoren creates ticket orders through Billing. Its paid-state mutation issues tickets atomically and schedules idempotent fulfillment work only for newly created orders whose persisted `fulfillmentEligible` value is true. Convex runs payment reconciliation and fulfillment preparation on scheduled five-minute paths.
+- Eventoren now issues/reuses an opaque, revocable, order-scoped access capability and passes a stable `/checkout#ticketAccess=...` URL to Billing. The public access query resolves the hashed token without checkout localStorage or login.
+- Billing's existing accepted-order email path generates legal PDFs, renders email-generator Markdown into branded HTML/text, and sends via organization-configured Resend or SMTP. The Eventoren confirmation path now prepares the ticket PDF, Lexware invoice/PDF, accepted legal PDFs, and one email with exactly four attachments, in the required order; it retries durable work and records ambiguous send outcomes for manual reconciliation.
+- In the correct sibling repository `/home/leo/projects/billing` (not `invoicegen`), the implemented files are
+  `src/checkout/server/eventorenTicketConfirmationProcess.ts`, `src/checkout/server/eventorenTicketConfirmationWorker.ts`,
+  `src/checkout/server/eventorenTicketInvoiceEnsure.ts`, and `src/checkout/server/eventorenTicketPdfEnsure.ts`.
+  `appBootstrap` installs the worker and starts recovery.
+- Billing creates Eventoren invoices through Lexware and renders the combined ticket PDF with its existing isolated Chromium infrastructure. The renderer supports four tickets per A4 page with overflow pages as needed.
 - The user chose Billing's existing rendering pipeline for ticket PDF rendering. Lexware remains the invoice source.
 - Eventoren's installed email-generator package has authentication templates, not Billing's Markdown-generation API. Reuse Billing's existing rendering integration rather than adding a separate Eventoren mail pipeline.
-- Eventoren ticket checkout is a separate Billing path. The `relation.dynamicContext` branch in `src/payments/stripeCheckoutSessionPaidProcess.ts` marks payment paid and returns before invoice processing. Wiring Eventoren into Lexware invoice creation/PDF retrieval requires code, not merely organization configuration.
-- Eventoren passes legal acceptance/revision evidence to Billing. Confirm availability of the actual revision-matched legal document bodies before reusing Billing's accepted-order PDF generator.
+- Eventoren ticket checkout remains a separate Billing path. Its implemented invoice ensure reuses the stable Stripe session/order identity and existing purchase records where possible; retries must not create another invoice.
+- Eventoren passes legal acceptance/revision evidence to Billing, and the implemented confirmation process renders the persisted accepted terms/privacy bodies rather than mutable latest text.
+- Eventoren invoice activation is currently blocked when the paid commercial snapshot lacks an authoritative tax basis and rate. The confirmation process refuses to send an incomplete email when the invoice artifact is missing.
+- The only activation switch is Eventoren's Convex runtime environment variable `EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST`, captured as `fulfillmentEligible` at order creation. Setting a frontend `.env.production` value alone does not activate fulfillment. The allowlist remains empty/disabled for new orders and there is no backfill.
 
-## Proposed decisions
+## Decisions
 
 - **Eventoren owns fulfillment:** ticket issuance, inventory, ticket QR identity, customer ticket access, and the ticket PDF request data.
 - **Billing owns invoices and delivery:** reuse its Lexware integration, organization sender configuration, existing Chromium-based PDF infrastructure, legal PDF generation, email-generator integration, and delivery tracking. Billing validates Eventoren's authoritative ticket data, renders/stores the actual ticket PDF, and attaches it first.
 - **Lexware supplies the invoice PDF:** Billing creates the invoice and downloads its PDF through the existing Lexware integration. Do not locally render a replacement invoice.
-- **Billing renders the ticket PDF:** add a dedicated ticket HTML template to Billing's existing Chromium-based PDF infrastructure, using authoritative issued-ticket data from Eventoren. Billing stores/reuses the actual generated PDF.
+- **Billing renders the ticket PDF:** use the implemented dedicated ticket HTML template in Billing's existing Chromium-based PDF infrastructure, using authoritative issued-ticket data from Eventoren. Billing stores/reuses the generated PDF.
 - **One combined ticket PDF per order:** Billing produces one combined PDF with up to four tickets per A4 page and overflow pages as needed, preserving exactly four attachments even when several tickets are purchased. Each ticket has its own unique, scan-readable admission QR.
 - **One confirmation per Eventoren order:** checkout currently creates an order per event. Cross-event/cart-wide invoice and email consolidation is not included.
 - **Mobile access lasts through the event:** use an opaque, revocable, order-scoped read-only link usable without login. Do not use a short-lived login link that expires before admission. Do not grant refund, transfer, or administrative permissions through this link.
@@ -52,10 +62,9 @@ Include a prominent **Open your tickets** link and a plain-text equivalent. Cust
 
 ### 1. Define the cross-service contracts
 
-Status: partial — shared request/response contracts, exact legal snapshot persistence, and the authenticated Billing
-handler/route are defined; downstream fulfillment orchestration is deferred to the next implementation context.
+Status: implemented.
 
-Define an authenticated, idempotent fulfillment-ready request from Eventoren to Billing, keyed by the stable Billing/Eventoren order mapping. It contains immutable authoritative issued-ticket data or references, the online-ticket URL, and legal revision reference. Billing validates ownership and authoritative payment state, then renders/stores the ticket PDF from that validated data with its dedicated ticket HTML template; do not accept customer-supplied fulfillment claims or arbitrary fetch URLs.
+The implemented contract is an authenticated, idempotent fulfillment-ready request from Eventoren to Billing, keyed by the stable Billing/Eventoren order mapping. It contains immutable authoritative issued-ticket data or references, the online-ticket URL, and legal revision reference. Billing validates ownership and authoritative payment state, then renders/stores the ticket PDF from that validated data with its dedicated ticket HTML template; it does not accept customer-supplied fulfillment claims or arbitrary fetch URLs.
 
 Current task-1 contract decision: the standalone Billing package exports
 `eventorenTicketFulfillmentPrepareRequestSchema`,
@@ -69,8 +78,9 @@ with opaque `ticketId`, admission QR `admissionCode`, sequence, tier key/label, 
 any arbitrary URL from this request. The response is `{ orderReference, paymentReference, fulfillmentReference,
 status: "accepted" | "prepared", replayed }` inside the standard success envelope. Billing authenticates the
 organization credential, validates the paid Eventoren checkout and immutable evidence, and persists this request
-idempotently. No PDF, invoice, email, provider, or downstream side effect is performed. The route is included in Billing
-OpenAPI; the worker/orchestration remains deferred.
+idempotently. The preparation route itself performs no PDF, invoice, email, or provider side effect; the installed Eventoren
+confirmation worker consumes the accepted fulfillment and performs those durable downstream steps. The route is included in
+Billing OpenAPI.
 
 Checkout activation decision: Eventoren uses the disabled-by-default explicit allowlist environment variable
 `EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST`, containing comma-separated exact Billing organization IDs.
@@ -86,7 +96,10 @@ constant must be refreshed with `bun run legal:checkout-revision` whenever eithe
 require that exact revision and exact Markdown bodies; the accepted revision and bodies are persisted on new orders.
 Replayed orders are not revalidated against current sources, including legacy orders with the previous checkout context shape.
 
-Confirm how Eventoren's existing checkout snapshot maps to Lexware invoice creation, invoice identity, customer/tax data, and accepted legal document content. Reuse existing Billing invoice records where present; retries must not create another invoice. Keep existing non-Eventoren invoice emails unchanged.
+The implemented invoice path maps Eventoren's checkout snapshot to Lexware invoice identity, customer data, and accepted legal
+document content. It reuses existing Billing invoice records where present; retries must not create another invoice. The
+authoritative Eventoren tax basis/rate is still required before activation. Existing non-Eventoren invoice emails remain
+unchanged.
 
 Relevant files:
 - Eventoren: `src/ticketing/convex/billingEventorenClient.ts`, `src/ticketing/convex/ticketTables.ts`.
@@ -94,66 +107,103 @@ Relevant files:
 
 ### 2. Make fulfillment browser-independent
 
-Status: pending approval. Depends on task 1.
+Status: implemented.
 
-Add server-scheduled reconciliation of unsettled Eventoren orders using the existing scoped Billing status API. Continue handling late settlement after reservation expiry through existing inventory-conflict behavior; do not rely solely on browser polling or redirect success.
+Eventoren has server-scheduled reconciliation and fulfillment preparation using the existing scoped Billing status API. The
+Convex cron invokes `ticketFulfillmentWorkScheduledAction` every five minutes; it reads due work and invokes
+`ticketFulfillmentPrepareAction`. Work is created idempotently by `ticketFulfillmentWorkEnsure` only for paid,
+`fulfillmentEligible` orders, preserves the request snapshot, ensures access, and records the prepared Billing fulfillment.
+The flow does not rely solely on browser polling or redirect success.
 
-When the existing paid mutation successfully issues tickets, atomically record pending confirmation work. A retryable server action prepares fulfillment and notifies Billing using the stable order key. Do not queue a normal confirmation for `paid_inventory_conflict`, non-paid orders, or orders without the expected issued tickets. Retrying reconciliation or fulfillment must not reissue tickets.
+When the existing paid mutation successfully issues tickets, it schedules pending fulfillment work. A retryable server action
+prepares fulfillment and notifies Billing using the stable order key. It does not queue normal confirmation work for
+`paid_inventory_conflict`, non-paid orders, or orders without the expected issued tickets. Retrying reconciliation or
+fulfillment does not reissue tickets.
 
-Relevant files: `convex/crons.ts`, `src/ticketing/convex/ticketPaymentReconcileAction.ts`, `src/ticketing/convex/ticketPaymentStatusApplyMutation.ts`.
+Relevant files: `convex/crons.ts`, `src/ticketing/convex/ticketFulfillmentWorkScheduledAction.ts`,
+`src/ticketing/convex/ticketFulfillmentPrepareAction.ts`, `src/ticketing/convex/ticketFulfillmentWorkEnsure.ts`,
+`src/ticketing/convex/ticketPaymentReconcileAction.ts`, and `src/ticketing/convex/ticketPaymentStatusApplyMutation.ts`.
 
 ### 3. Enable the emailed mobile ticket link
 
-Status: pending approval. Depends on task 1.
+Status: implemented.
 
-Extend the existing order/ticket access flow with a server-issued, read-only bearer link. Exchange/resolve the token without depending on checkout localStorage; keep it out of analytics/logs and third-party referrers. Reuse the current ticket view and `#ui/...` components, retaining QR readability on phones. Use the same link in the confirmation email and optionally on the ticket PDF.
+The existing order/ticket access flow now has a server-issued, read-only bearer link. The internal capability mutation
+creates/reuses the capability and returns `/checkout#ticketAccess=<token>`. The public access query hashes/resolves the
+guest token, rejects missing or revoked access, and returns the ticket-order projection without depending on checkout
+localStorage. The current ticket view and `#ui/...` components remain the display path, and the same link is used in the
+confirmation email.
 
-Relevant files: `src/routes/checkout.tsx`, `src/ticketing/convex/ticketOrderAccessResolve.ts`, `src/ticketing/convex/ticketOrderGetQuery.ts`, `src/ticketing/TicketOrderWalletPass.tsx`.
+Relevant files: `src/routes/checkout.tsx`, `src/ticketing/convex/ticketOrderAccessCapabilityEnsureMutation.ts`,
+`src/ticketing/convex/ticketOrderAccessCapabilityEnsure.ts`, `src/ticketing/convex/ticketOrderByAccessTokenQuery.ts`,
+`src/ticketing/ticketOrderByAccessTokenGet.ts`, and `src/ticketing/ticketOrderEmailAccessPageStateCreate.ts`.
 
 ### 4. Add ticket PDF rendering in Billing
 
-Status: pending approval. Depends on task 1; can run independently of tasks 2–3 once the contract is agreed.
+Status: implemented.
 
-Add a dedicated ticket HTML template to Billing's existing Chromium-based PDF infrastructure, with validated ticket input from Eventoren. Produce one combined PDF with up to four tickets per A4 page and overflow pages as needed. Include event title/date/time/timezone/location, ticket type, issued ticket identifier, purchaser/attendee information where already available, and each ticket's existing admission QR payload. Each ticket must retain a unique, scan-readable admission QR; do not invent a new check-in identity or substitute the online-order link for the admission QR.
+Billing has a dedicated Eventoren ticket HTML template and uses its existing isolated Chromium-based PDF infrastructure with
+validated Eventoren input. It produces one combined PDF with up to four tickets per A4 page and overflow pages as needed,
+including event/location data, ticket identity, attendee data where available, and each ticket's unique admission QR. The
+online-order link is not substituted for the admission QR.
 
-Eventoren supplies authoritative issued-ticket data through the authenticated fulfillment contract. Billing renders and stores/reuses the actual generated PDF through its private artifact infrastructure. Verify and reuse the existing Chromium/PDF artifact path, but do not assume a generic reusable ticket-PDF API exists; this task adds the ticket-specific HTML template. Keep ticket templates separate from legal document templates.
+Eventoren supplies authoritative issued-ticket data through the authenticated fulfillment contract. Billing renders and
+stores/reuses the generated PDF through its private artifact infrastructure. The exact implementation is in
+`src/checkout/server/eventorenTicketPdfEnsure.ts` and the related Eventoren ticket HTML/QR modules; there is no
+`invoicegen` integration or generic invoicegen ticket-PDF API. Ticket templates remain separate from legal document templates.
 
-Relevant Billing starting point: `src/legal/acceptedOrderLegalPdfEnsure.ts` and the Chromium-based PDF infrastructure it uses.
+The renderer layout contract supports 4 tickets → 1 A4 page and 5 tickets → 2 A4 pages.
+
+Relevant Billing files: `src/checkout/server/eventorenTicketPdfEnsure.ts`,
+`src/checkout/server/eventorenTicketHtmlCreate.ts`, `src/checkout/server/eventorenTicketPdfEnsure.test.ts`, and the
+Chromium-based infrastructure shared with `src/legal/acceptedOrderLegalPdfEnsure.ts`.
 
 ### 5. Compose and send the four-attachment confirmation in Billing
 
-Status: pending approval. Depends on tasks 1–4.
+Status: implemented; activation is blocked until Eventoren's authoritative invoice tax policy is supplied.
 
-Adapt the Eventoren-specific fulfillment path to create/retrieve its Lexware invoice and obtain the actual ticket PDF rendered/stored by Billing. Generate/cache terms and privacy PDFs from the legal documents accepted for that order, not mutable latest text and not Contentoren's documents. Preserve the accepted language/revision.
+The Eventoren-specific Billing path creates/retrieves its idempotent Lexware invoice and obtains the actual stored ticket PDF.
+It generates terms and privacy PDFs from the legal documents accepted for that order, not mutable latest text and not
+Contentoren's documents, and preserves the accepted language/revision. The implemented process ensures, in order, ticket,
+invoice, terms, and privacy PDFs before sending.
 
-Render the confirmation with Billing's existing email-generator integration: purchase summary, event information, and prominent mobile ticket CTA, with a plain-text URL. Send only once all four PDFs are ready; do not send an invoice-only email first. Set attachment filenames, PDF content types, and array order explicitly. Select `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf` for English confirmation/order language, or `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf` for German confirmation/order language. The selected names must preserve the ticket/invoice/terms/privacy order and exactly four attachments.
+The confirmation uses Billing's existing email-generator integration for the purchase summary, event information, prominent
+mobile ticket CTA, and plain-text URL. It sends only after all four PDF artifacts are available; it never sends an
+invoice-only or otherwise incomplete email. Attachment filenames, PDF content types, and array order are explicit: select
+`tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf` for English confirmation/order language, or `Tickets.pdf`,
+`Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf` for German confirmation/order language. The selected names
+preserve the ticket/invoice/terms/privacy order and exactly four attachments.
 
-Persist retryable confirmation state and a stable provider idempotency key. Reuse Billing's existing email tracking but verify it covers this separate checkout path. SMTP deterministic Message-ID does not guarantee exactly-once delivery after ambiguous failures; do not claim that guarantee. Automatic retries and manual resend must remain distinct operations.
+The confirmation worker persists retryable state and a stable provider idempotency key. It runs from Billing `appBootstrap`
+on a one-minute interval, recovers stale claims, retries up to five times with bounded delays, and distinguishes failed sends
+from unknown outcomes requiring manual reconciliation. SMTP deterministic Message-ID does not guarantee exactly-once delivery
+after ambiguous failures; automatic retries and manual resend remain distinct operations.
 
-Relevant Billing files: `src/invoicing/acceptedOrderInvoiceEmailSend.ts`, `src/invoicing/orderConfirmationEmailRender.ts`, `src/legal/acceptedOrderLegalPdfEnsure.ts`, `src/platform/email/organizationEmailSend.ts`.
+Relevant Billing files: `src/checkout/server/eventorenTicketConfirmationProcess.ts`,
+`src/checkout/server/eventorenTicketConfirmationWorker.ts`, `src/checkout/server/eventorenTicketInvoiceEnsure.ts`,
+`src/checkout/server/eventorenTicketPdfEnsure.ts`, `src/invoicing/orderConfirmationEmailRender.ts`,
+`src/legal/acceptedOrderLegalPdfEnsure.ts`, and `src/platform/email/organizationEmailSend.ts`.
 
 ### 6. Verify the complete purchase flow
 
-Status: pending approval. Depends on tasks 2–5.
+Status: partial verification. The implementation is present; no live-provider or deployed-runtime verification has been completed.
 
-- Successful payment sends the confirmation even if the buyer closes the checkout tab.
-- Received message has exactly four PDF attachments in ticket/invoice/terms/privacy payload order, with `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf` for English confirmation/order language, and `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf` for German confirmation/order language.
-- Multiple purchased tickets produce one combined PDF with up to four tickets per A4 page and overflow pages as needed; every ticket has a unique, scan-readable admission QR matching its issued online ticket.
-- Invoice totals/identity and legal revisions match the purchase.
-- Email CTA opens readable tickets on a clean mobile browser without login or previous localStorage.
+- Successful payment schedules server-side fulfillment even if the buyer closes the checkout tab; live delivery is not yet verified.
+- Implemented send contract: the received message has exactly four PDF attachments in ticket/invoice/terms/privacy payload order, with `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf` for English confirmation/order language, and `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf` for German confirmation/order language.
+- Implemented PDF contract: multiple purchased tickets produce one combined PDF with up to four tickets per A4 page and overflow pages as needed; every ticket has a unique, scan-readable admission QR matching its issued online ticket.
+- The implemented path validates invoice totals/identity and legal revisions against the purchase.
+- The email CTA is implemented for a clean mobile browser without login or previous localStorage, but a clean-device real-token E2E is blocked by the remote deployment missing the required Convex query.
 - Repeated payment events, reconciliation, and job retries do not create duplicate tickets/invoices or normal duplicate confirmation jobs.
-- PDF or provider failure retries without sending an incomplete email.
+- PDF or provider failure retries without sending an incomplete email; a missing test invoice PDF therefore produces no confirmation email.
 - Inventory-conflict purchases do not send a normal ticket confirmation.
 - Existing Contentoren and other Billing invoice-email flows remain unchanged.
 
-Use existing test tooling/libraries first. Browser verification must cover the received HTML CTA and mobile ticket display; inspect raw message attachment ordering separately.
+Remaining verification prerequisites are the authoritative tax decision, deployment/runtime configuration, live providers,
+received-message attachment ordering, and clean-device real-token E2E.
 
 ## Review decisions
 
 The up-to-four-tickets-per-A4-page layout is approved, including overflow pages and a unique, scan-readable admission QR per ticket. The plan uses Billing's existing Chromium-based PDF infrastructure with a new dedicated ticket HTML template: Eventoren sends authoritative issued-ticket data to Billing, which renders/stores the combined PDF and attaches it first; Lexware remains the invoice PDF source and Billing/Lexware ownership is unchanged. The combined PDF and exactly four attachments (ticket, invoice, terms, privacy) remain in scope. Attachment filenames follow the confirmation/order language: English uses `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf`; German uses `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf`, without changing the order or count.
 
-Invoicegen integration, changes, and contract work are out of scope.
-
-Tasks 2–6 remain pending review and are not authorized by this context. Confirm the invoice issuer/Billing organization
-for Eventoren purchases and the desired mobile-link validity after the event before those tasks begin. Task 1 remains
-partial until downstream fulfillment orchestration is implemented.
+Invoicegen integration, changes, and contract work are out of scope. Billing Chromium remains the PDF renderer; the contract
+is exactly four attachments, with up to four tickets per A4 page and overflow pages as needed.

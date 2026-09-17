@@ -28,8 +28,9 @@ authenticated `eventorenTicketFulfillmentPrepare` client method targeting
 `POST /api/checkout/organizations/eventoren/ticket-fulfillment`. The request carries the stable Billing
 `orderReference` and `paymentReference`, Eventoren-issued admission codes and ticket IDs, event/tier labels,
 `startsAt`/`endsAt`/`doorsAt`, venue/city/address, `onlineTicketUrl`, locale, and accepted legal Markdown snapshots.
-Billing treats `onlineTicketUrl` as a customer-facing link and must not fetch it or any other request URL. No Billing
-handler, route worker, invoice, email, PDF, or provider side effect is part of this task.
+Billing treats `onlineTicketUrl` as a customer-facing link and must not fetch it or any other request URL. The
+authenticated route itself only validates and persists the request; the downstream Billing worker, invoice/PDF
+pipeline, and email delivery are separate asynchronous implementation stages described below.
 
 The legal snapshot revision is deterministic: remove the YAML front matter from `src/legal/agb.md` and
 `src/legal/datenschutz.md`, trim each resulting Markdown body, serialize exactly
@@ -81,6 +82,51 @@ Production uses the private Convex values
 `EVENTOREN_BILLING_STRIPE_MODE=live`. The existing routing is correct; no
 additional bridge or public preview route is needed.
 
+## Temporary local/preview fallback
+
+If Billing is unavailable during local/preview UI work, set
+`PUBLIC_CHECKOUT_BILLING_BYPASS=true` in the frontend environment and restart
+the existing preview service. It is effective only with
+`PUBLIC_ENV_MODE=development` or `PUBLIC_ENV_MODE=preview` and routes `/checkout` to the existing fixture-only
+`/demo/checkout` flow. No Convex order, reservation, payment, ticket, or Billing
+request is created. Leave it `false` (or unset) for production.
+
+For a temporary direct-purchase walkthrough that also skips the contact,
+participant, and legal form fields, additionally set
+`PUBLIC_CHECKOUT_FORM_BYPASS=true`:
+
+```dotenv
+PUBLIC_ENV_MODE=preview
+PUBLIC_CHECKOUT_BILLING_BYPASS=true
+PUBLIC_CHECKOUT_FORM_BYPASS=true
+```
+
+The second switch is effective only when the existing Billing bypass is
+active. `/checkout` then reuses `DemoCheckout` and completes its fixture-only
+paid confirmation locally as soon as the demo cart contains an available
+fixture ticket. No form interaction, Convex call, or Billing request occurs.
+Both switches are explicitly guarded against `PUBLIC_ENV_MODE=production`;
+keep them `false` or unset in production. Restart the existing preview
+service after changing frontend environment values.
+
 Inventory is released automatically when an unpaid pre-Billing reservation has no Billing payment context, when Billing reports `payment: "failed"`, or after the scheduled reservation expiry successfully calls Billing's authenticated `POST /api/checkout/organizations/eventoren/ticket-checkout/:paymentReference/expire` operation and receives `payment: "expired"`. The latter is projected locally as terminal `status: "expired", paymentStatus: "expired"` and released in one Convex mutation. Provider errors, invalid responses, and a still-`pending` response retain the reservation and schedule another expiry attempt; they are never inferred as abandonment. The mutation verifies payment correlation and rechecks paid state, so a concurrent paid reconciliation wins without releasing paid inventory. A missing Billing payment context keeps the pre-Billing `released` path for reservations whose Billing request never persisted.
 
 Billing's implementation guards its expiration persistence with the exact organization, Stripe mode, Session ID, and pending payment state, and its webhook path never demotes paid truth. The remaining cross-service race is: Billing returns `expired`, Eventoren releases, then Stripe completes payment and Billing's late paid webhook upgrades Billing's local projection to `paid`. Eventoren cannot atomically coordinate that external transition; its paid reconciliation therefore records `paid_inventory_conflict` without issuing tickets or touching another order's inventory. This is payment-fulfilment fallout, not an oversell path, and is intentionally not treated as permission to release on `pending` or ambiguous provider errors.
+
+## Fulfillment activation runbook (disabled by default; prerequisites outstanding)
+
+`EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST` is the one explicit activation switch. It is a comma-separated allowlist of exact Billing organization IDs; an unset or empty value disables fulfillment. The intended activation value is one authoritative Billing organization ID, not a guessed or generated default. Only a newly inserted Eventoren checkout evaluates the allowlist. The resulting `fulfillmentEligible` value is persisted on that order; replays use the stored value and legacy orders without it remain ineligible. Changing the environment cannot activate, deactivate, or retroactively change an existing order, and there is no backfill.
+
+Before activation, the user/operator must populate the authoritative checkout commercial snapshot tax policy (`taxBasis` and `taxRatePercent`) for new orders. Billing does not infer, default, or backfill either value. If either field is missing, the Eventoren invoice is blocked with `INVOICE_TAX_POLICY_MISSING` until the user policy is configured upstream; no invoice provider call is made for that blocked attempt. Existing snapshots are not rewritten, so orders created before the policy is populated remain blocked rather than being backfilled.
+
+### Deployment and migration order
+
+This is an operational sequence, not an activation performed by this repository:
+
+1. Keep the allowlist unset/empty and do not configure a fulfillment provider while preparing the rollout.
+2. Deploy Eventoren's Convex schema and functions, including `ticketCheckoutCreateAction`, `ticketPaymentStatusApplyMutation`, `ticketPaymentReconcileScheduledAction`, `ticketFulfillmentWorkEnsure`, `ticketFulfillmentWorkScheduledAction`, `ticketFulfillmentWorkDueQuery`, `ticketFulfillmentPrepareAction`, `ticketFulfillmentWorkClaimMutation`, `ticketFulfillmentWorkContextQuery`, `ticketFulfillmentWorkOrderIdQuery`, `ticketFulfillmentWorkOnlineUrlEnsureMutation`, `ticketFulfillmentWorkPreparedMutation`, `ticketFulfillmentWorkRetryMutation`, and the access-capability functions used by the preparation action. Keep the existing five-minute payment-reconciliation and fulfillment-work cron entries deployed.
+3. Deploy Billing with migrations `0048_eventoren_ticket_fulfillments.sql`, `0049_eventoren_ticket_invoice_state.sql`, and `0050_eventoren_ticket_confirmation_state.sql`. Billing applies SQLite migrations during startup before it starts the durable Eventoren confirmation worker.
+4. Verify the Eventoren-to-Billing package compatibility and the empty-allowlist behavior in the target environments. Do not enable the allowlist until the authoritative tax policy is present in the snapshot-producing path.
+5. Only after those checks may the operator deliberately set the single exact Billing organization ID in `EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST` and restart the existing services. This document does not authorize deployment, flag changes, provider setup, or claiming readiness to activate.
+
+Billing's worker starts with the Billing application bootstrap, performs an initial bounded recovery, then wakes on new work and its interval. It prepares one combined ticket PDF, one Lexware invoice PDF when available, and the two accepted legal PDFs; it sends exactly one email only after all four artifacts exist. In test mode, an unavailable Lexware draft PDF is recorded as `skipped_test`; for this Eventoren four-PDF path that means no email is sent, not an invoice-only or incomplete confirmation. It does not turn a missing tax policy into a sendable invoice. A `sending` or `unknown` confirmation state is reported as `manual_reconciliation_required`, not as a generic retryable `failed` result.
