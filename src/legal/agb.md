@@ -1,57 +1,93 @@
 ---
-title: "[Platzhalter] Allgemeine Geschäftsbedingungen (AGB)"
+title: Allgemeine Geschäftsbedingungen
 ---
 
-> **Hinweis / Disclaimer (Platzhalter):**  
-> Dies ist ein **vorübergehender Platzhalter-Entwurf** der Allgemeinen Geschäftsbedingungen (AGB) zu Entwicklungs-, Test- und Demonstrationszwecken für die Plattform **Eventoren**. Dieser Entwurf stellt keine rechtsverbindliche Vereinbarung dar und wird vor Aufnahme des regulären Geschäftsbetriebs durch eine anwaltlich geprüfte Fassung ersetzt.
+## Allgemeine Geschäftsbedingungen für die Nutzung der Onlineplattform zur Ticketverkauf für Parties und Events
 
-## 1. Geltungsbereich und Vertragsgegenstand
+## 1. Geltungsbereich
 
-1. Diese Allgemeinen Geschäftsbedingungen (nachfolgend „AGB“) gelten für die Nutzung der Plattform **Eventoren** (erreichbar unter [https://eventoren.leonardomora.de](https://eventoren.leonardomora.de)) sowie für sämtliche Ticketkäufe, Reservierungen und damit verbundenen Dienstleistungen, die über diese Plattform abgewickelt werden.
-2. Soweit auf der Plattform Tickets für Veranstaltungen dritter Veranstalter angeboten werden, tritt Eventoren – sofern nicht ausdrücklich anders angegeben – lediglich als Vermittlerin bzw. technischer Ticket-Vertriebspartner im Namen und auf Rechnung des jeweiligen Veranstalters auf. In diesem Fall kommt der Vertrag über den Veranstaltungsbesuch unmittelbar zwischen dem Ticketkäufer und dem jeweiligen Veranstalter zustande.
-3. Ergänzend können für den Besuch einzelner Veranstaltungen die Hausordnungen und AGB des jeweiligen Veranstalters bzw. des Betreibers der Veranstaltungsstätte gelten.
+**1.1** Diese Allgemeinen Geschäftsbedingungen (nachfolgend „AGB“) regeln die vertraglichen Beziehungen zwischen der eventoren.de (eine Marke von Semesterkur UG (haftungsbeschränkt)), nachfolgend „Veranstalter“ oder „wir“, und den Nutzern (nachfolgend „Nutzer“ oder „Sie“ oder „Teilnehmer/in“) der Onlineplattform zur Ticketverkauf für Parties und Events (nachfolgend „Plattform“).
 
-## 2. Vertragsabschluss und Ticketkauf
+**1.2** Durch die Nutzung unserer Plattform erklären Sie sich mit diesen AGB einverstanden. Wenn Sie mit diesen AGB nicht einverstanden sind, dürfen Sie unsere Plattform nicht nutzen.
 
-1. Die Präsentation von Veranstaltungen und Tickets auf Eventoren stellt noch kein rechtlich bindendes Angebot dar, sondern eine Aufforderung zur Abgabe eines Angebots durch den Kunden (Invitatio ad offerendum).
-2. Der Kunde wählt die gewünschten Tickets aus, legt diese in den virtuellen Warenkorb und durchläuft den Checkout-Prozess (als registrierter Nutzer oder Gast).
-3. Durch Anklicken des den Bestellvorgang abschließenden Buttons (z. B. „Zahlungspflichtig bestellen“) gibt der Kunde ein verbindliches Kaufangebot ab.
-4. Der Vertrag kommt mit Zugang der Auftrags- und Bestellbestätigung per E-Mail bzw. mit der Bereitstellung der digitalen Tickets zustande.
+**1.3** Abweichende Vertragsbedingungen des Kunden werden nicht anerkannt, es sei denn, ticket.io stimmt ihrer Geltung ausdrücklich schriftlich zu.
 
-## 3. Preise, Gebühren und Zahlungsabwicklung
+## 2. Registrierung
 
-1. Alle auf der Plattform angegebenen Preise verstehen sich als Endpreise in Euro (€) inklusive der jeweils geltenden gesetzlichen Mehrwertsteuer.
-2. Etwaige anfallende Service-, Buchungs- oder Zahlungsgebühren werden im Warenkorb und vor Abschluss des Bestellvorgangs transparent aufgeschlüsselt.
-3. Zur Bezahlung stehen die im Checkout-Prozess jeweils angebotenen Zahlungsmethoden zur Verfügung (z. B. Kreditkarte, Lastschrift/SEPA, PayPal oder weitere digitale Zahlungsdienstleister).
-4. Der Gesamtbetrag ist mit Vertragsschluss sofort zur Zahlung fällig. Scheitert eine Zahlung (z. B. wegen mangelnder Kontodeckung oder Rücklastschrift), ist Eventoren berechtigt, die Bestellung zu stornieren und die Tickets wieder freizugeben.
+**2.1** Zur Nutzung der Plattform und zum Erwerb von Tickets können Sie sich registrieren und ein Nutzerkonto erstellen. Die Registrierung ist kostenlos und freiwillig.
 
-## 4. Bereitstellung, Einlasskontrolle und Weitergabe
+**2.2** Sie sind verpflichtet, während der Registrierung wahrheitsgemäße und aktuelle Informationen anzugeben. Sie sind allein verantwortlich für die Sicherheit und Vertraulichkeit Ihres Passworts und Nutzerkontos.
 
-1. Tickets werden nach erfolgreicher Bezahlung primär digital (z. B. als QR-Code, Wallet-Pass oder PDF-Download) sowie per E-Mail bereitgestellt. Ein postalischer Versand findet standardmäßig nicht statt.
-2. Jedes digitale Ticket ist mit einem eindeutigen Code / QR-Code versehen. Am Einlass der jeweiligen Veranstaltung berechtigt nur die erstmalige Vorlage des unbeschädigten und lesbaren QR-Codes zum Zutritt.
-3. Der Weiterverkauf von Tickets zu gewerblichen Zwecken oder zu überhöhten Preisen auf dem Zweitmarkt ist untersagt.
-4. Bei personalisierten Tickets ist am Einlass auf Verlangen ein amtlicher Lichtbildausweis vorzulegen, der mit dem Namen auf dem Ticket übereinstimmt.
+**2.3** Das Passwort darf nicht an Dritte weitergegeben werden. Erlangt ein Kunde Kenntnis von dem Missbrauch seiner Zugangsdaten, so hat er Eventoren.de unverzüglich darüber zu informieren.
 
-## 5. Widerrufsbelehrung und Stornierung
+## 3. Ticketkauf
 
-1. **Ausschluss des Widerrufsrechts bei Freizeitveranstaltungen:**  
-   Gemäß § 312g Abs. 2 Nr. 9 BGB besteht bei Verträgen zur Erbringung von Dienstleistungen im Zusammenhang mit Freizeitbetätigungen, wenn der Vertrag für die Erbringung einen spezifischen Termin oder Zeitraum vorsieht, **kein gesetzliches Widerrufsrecht**. Jeder Kauf von termingebundenen Veranstaltungstickets ist daher unmittelbar nach Bestätigung verbindlich.
-2. Eine freiwillige Rückgabe oder Stornierung von Tickets durch den Kunden ist ausgeschlossen, es sei denn, der Veranstalter räumt dies in seinen gesonderten Bedingungen ausdrücklich ein.
+**3.1** Die Plattform ermöglicht es Ihnen, Tickets für Parties und Events von Dritten zu erwerben. Die Preise, Verfügbarkeiten und Bedingungen für den Ticketkauf werden von den jeweiligen Veranstaltern festgelegt und sind auf der Plattform ersichtlich.
 
-## 6. Verlegung oder Ausfall von Veranstaltungen
+**3.2** Der Vertrag über den Ticketkauf kommt direkt zwischen Ihnen und dem jeweiligen Veranstalter zustande. Wir sind lediglich Vermittler und übernehmen keine Verantwortung für die Qualität oder Durchführung der Veranstaltungen. Eventoren.de vertreibt die Tickets im Auftrag des jeweiligen Veranstalters als Vermittlerin oder als Kommissionärin, es sei denn, sie ist im Einzelfall ausdrücklich selbst als Veranstalter ausgewiesen.
 
-1. Bei Absage, Verlegung oder wesentlicher Änderung einer Veranstaltung richten sich die Ansprüche des Kunden (z. B. Rückerstattung des Ticketpreises oder Gültigkeit für den Nachholtermin) nach den gesetzlichen Bestimmungen und den Bedingungen des jeweiligen Veranstalters.
-2. Im Falle einer Rückabwicklung über Eventoren wird der Ticketpreis nach Freigabe durch den Veranstalter über die ursprünglich genutzte Zahlungsmethode erstattet. Bereits erbrachte Serviceleistungen oder Systemgebühren können hiervon ausgenommen sein.
+**3.3** Tickets können ausschließlich bei Eventoren.de erworben werden.
 
-## 7. Haftung und Plattformverfügbarkeit
+**3.4** Sie bestätigen, dass Sie mindestens 18 Jahre alt sind, um Tickets über unsere Plattform zu kaufen.
 
-1. Eventoren haftet unbeschränkt für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit sowie für vorsätzlich oder grob fahrlässig verursachte Schäden.
-2. Bei leichter Fahrlässigkeit haftet Eventoren nur bei Verletzung einer wesentlichen Vertragspflicht (Kardinalpflicht), beschränkt auf den vertragstypischen, vorhersehbaren Schaden.
-3. Für Mängel, Leistungsstörungen oder Schäden, die im Rahmen der Durchführung der gebuchten Veranstaltung selbst entstehen, haftet ausschließlich der jeweilige Veranstalter.
-4. Eventoren bemüht sich um eine kontinuierliche Verfügbarkeit der Plattform, kann jedoch keine unterbrechungsfreie Erreichbarkeit garantieren (z. B. wegen Wartungsarbeiten oder Störungen im Internet).
+**3.5** Sofern nicht anders vereinbart, ist es nicht gestattet, Eintrittskarten gewerblich weiterzuverkaufen. Ein nichtgewerblicher Weiterverkauf ist nur zu einem Preis erlaubt, der dem Preis der Eintrittskarten zuzüglich der beim ursprünglichen Kauf angefallenen nachgewiesenen Gebühren/Kosten entspricht (z. B. Porto- und Versandkosten), jedoch maximal 20 % über dem ausgewiesenen Preis. Bei Verstoß gegen diese Bedingung behält sich der jeweilige Veranstalter das Recht vor, den Zutritt zur Veranstaltung ohne Rückerstattung zu verweigern.
 
-## 8. Schlussbestimmungen
+Eventoren.de behält sich das Recht vor, eine Bestellung zu stornieren, für die bereits eine Transaktionsnummer / Bestellnummer / Ordernummer zugeteilt wurde, wenn der Kunde gegen spezifische Bedingungen verstößt, die vom Veranstalter und/oder Eventoren.de im Rahmen des Vorverkaufs festgelegt wurden oder versucht, diese zu umgehen (z. B. durch den Verstoß gegen Beschränkungen hinsichtlich der Ticketmenge pro Kunde, insbesondere gegen Weiterveräußerungsverbote, den Versuch, sich durch die Anmeldung und Nutzung mehrerer Nutzerprofile zu umgehen, usw.). Außerdem behält sich Eventoren.de das Recht vor, Bestellungen zu stornieren, wenn offene Forderungen aus früheren Geschäftsbeziehungen mit dem Kunden bestehen. Ohne vorherige schriftliche Zustimmung des jeweiligen Veranstalters ist es insbesondere nicht gestattet, Tickets für gewerbliche Werbe- und Marketingzwecke (z. B. als Gewinn für gewerbliche Preisausschreiben und/oder andere gewerbliche Gewinnspiele) zu verwenden oder Tickets im Zugangs- und/oder Eingangsbereich der Veranstaltungsstätte, der unter das Hausrecht des Veranstalters fällt, weiterzuverkaufen. Die Stornierung/Rücktrittserklärung kann auch durch die Gutschrift der gezahlten Beträge erfolgen.
 
-1. Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts (CISG). Bei Verbrauchern gilt diese Rechtswahl nur insoweit, als nicht der gewährte Schutz durch zwingende Bestimmungen des Rechts des Staates, in dem der Verbraucher seinen gewöhnlichen Aufenthalt hat, entzogen wird.
-2. Sofern der Kunde Kaufmann im Sinne des HGB, juristische Person des öffentlichen Rechts oder öffentlich-rechtliches Sondervermögen ist, ist Berlin ausschließlicher Gerichtsstand für alle Streitigkeiten aus diesem Vertrag.
-3. Sollten einzelne Bestimmungen dieser AGB ganz oder teilweise unwirksam sein oder werden, berührt dies die Gültigkeit der übrigen Bestimmungen nicht.
+## 4. Digitale Zutrittsberechtigungen in Form des Eventoren-Online-Tickets
+
+**4.1** Eventoren.de bietet für ausgewählte Veranstaltungen den Erwerb der Eintrittsberechtigung in Form des Eventoren-Online-Ticket an. Hierbei handelt es sich um eine besondere Art der Nutzung und Verwaltung der Eintrittsberechtigung in digitaler Form über E-Mail.
+
+**4.2** Eine Eintrittskarte in Papier- oder anderer physischer Form wird beim Erwerb eines Eventoren-Online-Ticket nicht versandt. Stattdessen wird das Eventoren-Online-Ticket im EVENTIM-Account des Kunden hinterlegt. Von dort aus kann der Kunde seine Eventoren-Online-Tickets verwalten und sie für den Zutritt zur jeweiligen Veranstaltung verwenden. Hierfür muss das mobile Endgerät beim Einlass mitgeführt und auf Verlangen des Ordnungspersonals mit dem Eventoren-Online-Ticket vorgezeigt werden.
+
+**4.3** Die berechtigte Inhaberschaft des Kunden zur Nutzung von Eventoren-Online-Tickets kann jederzeit durch beispielsweise ein TAN-Verfahren überprüft werden. Bei entsprechenden Systemmeldungen oder E-Mails zur Aufforderung der Authentifizierung, beispielsweise in Form des TAN-Verfahrens, muss der Kunde das Authentifizierungsverfahren durchlaufen, um weiterhin seine Eventoren-Online-Tickets nutzen zu können. Andernfalls kann der Zugriff auf Eventoren-Online-Tickets gegebenenfalls bis zur ordnungsgemäßen Absolvierung des Überprüfungsprozesses (der im TAN-Verfahren beispielsweise durch die Eingabe der korrekten TAN besteht) gesperrt werden.
+
+**4.4** Um Eintrittsberechtigungen in Form des Eventoren-Online-Ticket zu nutzen, benötigt der Kunde ein kompatibles mobiles Endgerät und muss gegebenenfalls bei der Bestellung seine Mobiltelefonnummer angeben (sowie gegebenenfalls weitere Informationen, je nach den Hinweisen auf der jeweiligen Bestellseite auf der Plattform).
+
+## 5. Zahlung
+
+**5.1** Die Zahlung für Tickets erfolgt über die auf der Plattform verfügbaren Zahlungsmethoden. Alle Zahlungen sind in Euro (EUR) zu leisten.
+
+**5.2** Im Falle einer Stornierung oder eines Widerrufs gelten die Stornierungsbedingungen des jeweiligen Veranstalters. Wir erstatten keine Ticketkosten, es sei denn, dies ist gesetzlich vorgeschrieben.
+
+## 6. Sicherheitskontrollen
+
+**6.1** Beim Einlass können aus Sicherheits- und Ordnungsgründen sowie zur Müllvermeidung Sicherheitskontrollen mit Körperkontrollen (Bodychecks) durch den Ordnungsdienst durchgeführt werden. Der Veranstalter behält sich das Recht vor, den Zugang zur Veranstaltung zu verweigern, wenn ein Besucher nicht zugelassene Gegenstände oder Substanzen mitführt oder ein sonstiges Sicherheits- oder Gesundheitsrisiko für den Besucher oder andere Besucher besteht (z. B. aggressives Verhalten, fehlender Nachweis der Zutrittsberechtigung) oder das verwendete Ticket für den Zutritt ungültig ist oder der Besucher anderweitig gegen die AGB verstößt.
+
+**6.2** Wir behalten uns das Recht vor, auch während der Veranstaltung stichprobenartige Sicherheitskontrollen durchzuführen, um die Sicherheit der Veranstaltung zu gewährleisten.
+
+**6.3** Falls der Besucher den Zutritt zur Veranstaltung verweigert bekommt oder von der Veranstaltung entfernt wird, besteht kein Anspruch auf Rückerstattung des Ticketpreises.
+
+**6.4** Wir behalten uns das Recht vor, den Zutritt zu verweigern, wenn ein Besucher sich weigert, Gegenstände, die nach unserer vernünftigen Einschätzung Gefahren oder Störungen für andere Personen im Rahmen der Veranstaltung darstellen könnten. Der Veranstalter ist nicht verpflichtet, diese Gegenstände aufzubewahren, und übernimmt keine Haftung für deren Verlust.
+
+## 7. Haftungsausschluss
+
+**7.1** Wir haften nicht für Schäden, die Ihnen durch die Nutzung der Plattform oder den Kauf von Tickets entstehen, es sei denn, die Schäden wurden durch grobe Fahrlässigkeit oder Vorsatz unsererseits verursacht.
+
+**7.2** Wir übernehmen keine Gewährleistung für die Richtigkeit, Vollständigkeit oder Verfügbarkeit der Informationen auf der Plattform.
+
+## 8. Datenschutz
+
+**8.1** Ihre personenbezogenen Daten werden gemäß unserer Datenschutzerklärung behandelt. Durch die Nutzung der Plattform stimmen Sie der Verarbeitung Ihrer Daten gemäß unserer Datenschutzerklärung zu.
+
+## 9. Verwertung von Ton- und Bildaufnahmen
+
+**9.1** Der/Die Teilnehmer/in willigt unwiderruflich in die unentgeltliche Verwendung seines/ihres Bildnisses und seiner/ihrer Stimme für Fotografien, Live-Übertragungen, Sendungen und/oder Aufzeichnungen von Bild und/oder Tonaufnahmen, die vom Veranstalter, dessen Beauftragten oder sonstigen Dritten im Zusammenhang mit der Veranstaltung erstellt werden, sowie deren anschließende Verwertung in allen gegenwärtigen und zukünftigen Medien (wie insbesondere in Form von Ton- und Bildtonträgern sowie der digitalen Verbreitung, bspw. über das Internet) ein.
+
+## 10. Änderungen der AGB
+
+**10.1** Wir behalten uns das Recht vor, diese AGB jederzeit zu ändern. Änderungen werden auf der Plattform veröffentlicht und treten unverzüglich nach ihrer Veröffentlichung in Kraft.
+
+## 11. Schlussbestimmungen
+
+**11.1** Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts (CISG).
+
+**11.2** Gerichtsstand für alle Streitigkeiten im Zusammenhang mit diesen AGB und der Nutzung der Plattform ist Berlin.
+
+**11.3** Sollte eine Regelung dieser Allgemeinen Geschäftsbedingungen unwirksam sein oder werden, so bleibt die Wirksamkeit der übrigen Bestimmungen hiervon unberührt. Für Eingabe- und Rechenfehler wird nicht gehaftet.
+
+Semesterkur UG (haftungsbeschränkt)<br>
+Ernst-Weyden-Straße 15<br>
+51105 Köln
+
+Stand: September 2023

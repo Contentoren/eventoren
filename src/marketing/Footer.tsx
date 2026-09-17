@@ -17,8 +17,8 @@ export function Footer(props: { readonly linkHref?: (href: string) => string } =
       <nav aria-label="Legal">
         {link("/impressum", "Impressum")}
         {link("/datenschutz", "Datenschutz")}
-        {link("/terms", "Terms")}
-        {link("/privacy", "Privacy")}
+        {link("/terms", "AGB")}
+        {link("/privacy", "Datenschutzerklärung")}
       </nav>
     </footer>
   )

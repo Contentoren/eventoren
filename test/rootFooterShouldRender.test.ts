@@ -5,9 +5,11 @@ const siteFrameRouteIds = [
   "/",
   "/agb",
   "/checkout",
+  "/datenschutz",
   "/kontakt",
   "/warenkorb",
   "/events/$eventId",
+  "/impressum",
   "/admin",
   "/sign-in",
   "/sign-in-enter-otp",
@@ -62,8 +64,6 @@ test("root footer is omitted for every SiteFrame-owned route", () => {
 })
 
 test("root footer remains for root-only routes", () => {
-  expect(rootFooterShouldRender([{ routeId: "/impressum", status: "success" }])).toBe(true)
-  expect(rootFooterShouldRender([{ routeId: "/datenschutz", status: "success" }])).toBe(true)
   expect(rootFooterShouldRender([{ routeId: "/privacy", status: "success" }])).toBe(true)
   expect(rootFooterShouldRender([{ routeId: "/terms", status: "success" }])).toBe(true)
   expect(rootFooterShouldRender([{ routeId: "/bestellungen", status: "success" }])).toBe(true)

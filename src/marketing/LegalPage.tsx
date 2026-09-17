@@ -1,18 +1,21 @@
 import { Link } from "@tanstack/solid-router"
 
-export function LegalPage(props: { readonly html: () => string; readonly homeHref?: string }) {
+export function LegalPage(props: { readonly html: () => string; readonly homeHref?: string; readonly title?: string }) {
   return (
-    <main class="min-h-screen bg-gray-50 px-4 py-12 text-gray-900 sm:px-6 sm:py-14 lg:px-8 lg:py-20">
-      <div class="mx-auto max-w-5xl">
+    <main id="content" tabindex="-1" class="flex-1 px-4 py-10 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
+      <div class="mx-auto max-w-3xl">
         <Link
           to={props.homeHref ?? "/"}
-          class="mb-8 inline-flex items-center gap-2 text-sm text-gray-600 transition-colors hover:text-gray-900 sm:mb-10"
+          class="focus-ring mb-10 inline-flex rounded-control text-sm font-medium text-content-muted transition-colors hover:text-brand-strong sm:mb-12"
         >
-          ← Back to homepage
+          ← Zurück zur Startseite
         </Link>
-        <section class="mb-14 rounded-2xl border border-gray-200 bg-white px-8 py-12 shadow-sm sm:mb-20 sm:px-16 sm:py-14 lg:mb-24 lg:px-20 lg:py-16">
-          <article class="markdown-body" innerHTML={props.html()} />
-        </section>
+        {props.title ? (
+          <h1 class="mb-10 text-4xl leading-tight font-bold tracking-tight text-content sm:mb-12 sm:text-5xl">
+            {props.title}
+          </h1>
+        ) : null}
+        <article class="markdown-body" innerHTML={props.html()} />
       </div>
     </main>
   )

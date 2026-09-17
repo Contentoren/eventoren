@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/solid-router"
+import { SiteFrame } from "../components/SiteFrame.tsx"
 import markdownCss from "../markdown.css?url"
 import { legal } from "../lib/legal.js"
 import { seo } from "../lib/seo.js"
@@ -17,5 +18,9 @@ export const Route = createFileRoute("/datenschutz")({
       { rel: "stylesheet", href: markdownCss },
     ],
   }),
-  component: () => <LegalPage html={Route.useLoaderData()} />,
+  component: () => (
+    <SiteFrame>
+      <LegalPage html={Route.useLoaderData()} title="Datenschutzerklärung" />
+    </SiteFrame>
+  ),
 })

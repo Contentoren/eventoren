@@ -12,7 +12,7 @@ export function SiteFooter(props: { readonly linkHref?: (href: string) => string
       </Link>
     ) : (
       <Link
-        to={href as "/impressum" | "/agb" | "/kontakt"}
+        to={href as "/impressum" | "/agb" | "/datenschutz" | "/kontakt"}
         class="focus-ring rounded-control transition-colors hover:text-content"
       >
         {label}
@@ -26,6 +26,7 @@ export function SiteFooter(props: { readonly linkHref?: (href: string) => string
         <nav class="flex gap-4" aria-label="Rechtliche Informationen">
           {link("/impressum", "Impressum")}
           {link("/agb", "AGB")}
+          {link("/datenschutz", "Datenschutz")}
           {link("/kontakt", "Kontakt", "transition-colors hover:text-content")}
         </nav>
       </div>

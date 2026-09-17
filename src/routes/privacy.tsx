@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/solid-router"
-import markdownCss from "../markdown.css?url"
 import { legal } from "../lib/legal.js"
 import { seo } from "../lib/seo.js"
+import markdownCss from "../markdown.css?url"
 import { LegalPage } from "../marketing/LegalPage.js"
 
 export const Route = createFileRoute("/privacy")({
   loader: () => legal.htmlGet("privacy"),
   head: () => ({
     meta: seo.pageMeta({
-      title: "Privacy",
-      description: "Information about how this website collects, uses, and protects personal data.",
+      title: "Datenschutzerklärung | Eventoren",
+      description: "Datenschutzerklärung von Eventoren: Informationen zur Verarbeitung personenbezogener Daten.",
       path: "/privacy",
     }),
     links: [
