@@ -11,12 +11,12 @@ import { ticketCartTotalCalculate } from "../../ticketing/ticketCartTotalCalcula
 import { ticketCheckoutStepLabels } from "../../ticketing/ticketCheckoutStepLabels.ts"
 import { ticketCheckoutStepOrder } from "../../ticketing/ticketCheckoutStepOrder.ts"
 import { ticketCheckoutText } from "../../ticketing/ticketCheckoutText.ts"
+import { ticketParticipantFieldKeyCreate } from "../../ticketing/ticketParticipantFieldKeyCreate.ts"
 import { ticketParticipantNamesAlign } from "../../ticketing/ticketParticipantNamesAlign.ts"
 import { ticketParticipantNamesValidate } from "../../ticketing/ticketParticipantNamesValidate.ts"
-import { ticketParticipantFieldKeyCreate } from "../../ticketing/ticketParticipantFieldKeyCreate.ts"
 import { ticketPriceFormat } from "../../ticketing/ticketPriceFormat.ts"
-import { demoCartStore } from "./demoCartStore.ts"
 import { demoText } from "../model/demoText.ts"
+import { demoCartStore } from "./demoCartStore.ts"
 
 type DemoCheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
@@ -32,6 +32,7 @@ export function demoCheckoutFormStateCreate(inputs: {
   empty?: boolean
   error?: boolean
   relaxedValidation?: boolean
+  skipForm?: boolean
 }) {
   const contact = createSignalObject<TicketContact>({
     firstName: "Alex",
@@ -139,40 +140,47 @@ export function demoCheckoutFormStateCreate(inputs: {
       errorMessage.set(demoText("checkoutEmptyCart"))
       return
     }
-    if (!legalAccepted.get()) {
+    if (!inputs.skipForm && !legalAccepted.get()) {
       errorMessage.set(demoText("checkoutLegalRequired"))
       return
     }
     submitAttempted.set(true)
-    const invalidContactFields = inputs.relaxedValidation
-      ? []
-      : demoContactRequiredFields.filter((field) => demoContactFieldInvalid(field, contact.get()[field]))
+    const invalidContactFields =
+      inputs.skipForm || inputs.relaxedValidation
+        ? []
+        : demoContactRequiredFields.filter((field) => demoContactFieldInvalid(field, contact.get()[field]))
     const alignedParticipantNames = ticketParticipantNamesAlign(participantNames.get(), items())
-    const invalidParticipantFields = items().flatMap((item) =>
-      item.cart.lines.flatMap((line) => {
-        if (line.quantity <= 0) return []
-        const names = alignedParticipantNames[item.event.id]?.[line.tierId] ?? []
-        return Array.from({ length: line.quantity }, (_, ticketIndex) =>
-          names[ticketIndex]?.trim().length
-            ? []
-            : [ticketParticipantFieldKeyCreate(item.event.id, line.tierId, ticketIndex)],
-        ).flat()
-      }),
-    )
+    const invalidParticipantFields = inputs.skipForm
+      ? []
+      : items().flatMap((item) =>
+          item.cart.lines.flatMap((line) => {
+            if (line.quantity <= 0) return []
+            const names = alignedParticipantNames[item.event.id]?.[line.tierId] ?? []
+            return Array.from({ length: line.quantity }, (_, ticketIndex) =>
+              names[ticketIndex]?.trim().length
+                ? []
+                : [ticketParticipantFieldKeyCreate(item.event.id, line.tierId, ticketIndex)],
+            ).flat()
+          }),
+        )
     const invalidFields: readonly TicketRequiredFieldKey[] = [...invalidContactFields, ...invalidParticipantFields]
     invalidRequiredFields.set(invalidFields)
     if (invalidFields.length > 0) {
       errorMessage.set(text.requiredFields)
       return
     }
-    const validatedParticipantNames = ticketParticipantNamesValidate(
-      participantNames.get(),
-      items(),
-      text.participantRequired,
-    )
-    if (!validatedParticipantNames.success) {
-      errorMessage.set(validatedParticipantNames.errorMessage)
-      return
+    let validatedParticipantNames = ticketParticipantNamesAlign(participantNames.get(), items())
+    if (!inputs.skipForm) {
+      const participantValidation = ticketParticipantNamesValidate(
+        participantNames.get(),
+        items(),
+        text.participantRequired,
+      )
+      if (!participantValidation.success) {
+        errorMessage.set(participantValidation.errorMessage)
+        return
+      }
+      validatedParticipantNames = participantValidation.data
     }
     if (inputs.error) {
       errorMessage.set("Die lokale Demo-Zahlung konnte nicht abgeschlossen werden.")
@@ -252,7 +260,8 @@ export function demoCheckoutFormStateCreate(inputs: {
                 tierName: tier.name,
                 priceCents: tier.priceCents,
                 feeCents: tier.feeCents,
-                participantName: validatedParticipantNames.data[item.event.id]?.[line.tierId]?.[ticketIndex],
+                participantName:
+                  validatedParticipantNames[item.event.id]?.[line.tierId]?.[ticketIndex]?.trim() || undefined,
                 issuedAt: now,
               }
             })
@@ -263,6 +272,11 @@ export function demoCheckoutFormStateCreate(inputs: {
     completedOrders.set(orders)
     isSubmitting.set(false)
   }
+
+  createEffect(() => {
+    if (!inputs.skipForm || items().length === 0 || completedOrders.get().length > 0) return
+    void confirmPayment()
+  })
 
   return {
     items,

@@ -1,5 +1,8 @@
 # Copy this file to .env/development and fill in local or deployment values.
 PUBLIC_ENV_MODE=development
+# Temporary local/preview-only checkout switches; keep both false for the real checkout.
+PUBLIC_CHECKOUT_BILLING_BYPASS=false
+PUBLIC_CHECKOUT_FORM_BYPASS=false
 
 # BEGIN project-creator assets-service settings
 # Assets-service settings for this project. Fill non-secret values locally or in deployment configuration.

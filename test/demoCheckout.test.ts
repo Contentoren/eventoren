@@ -1,10 +1,10 @@
-import { createRoot } from "solid-js"
 import { expect, test } from "bun:test"
+import { createRoot } from "solid-js"
 import { language } from "../src/app/i18n/language.ts"
 import { languageSignal } from "../src/app/i18n/languageSignal.ts"
 import { demoCatalogEvents } from "../src/demo/fixtures/demoCatalogEvents.ts"
-import { demoCheckoutFormStateCreate } from "../src/demo/state/demoCheckoutFormStateCreate.ts"
 import { demoCartStore } from "../src/demo/state/demoCartStore.ts"
+import { demoCheckoutFormStateCreate } from "../src/demo/state/demoCheckoutFormStateCreate.ts"
 
 test("numbers demo tickets uniquely across ticket tiers", async () => {
   languageSignal.set(language.en)
@@ -48,5 +48,31 @@ test("numbers demo tickets uniquely across ticket tiers", async () => {
     dispose?.()
     demoCartStore.clear()
     languageSignal.set(language.en)
+  }
+})
+
+test("completes a direct fixture checkout without form or legal input", async () => {
+  demoCartStore.clear()
+  demoCartStore.addOrUpdate({
+    eventId: "kraftklub-arena-berlin",
+    lines: [{ tierId: "innenraum", quantity: 1 }],
+  })
+
+  let state: ReturnType<typeof demoCheckoutFormStateCreate> | undefined
+  let dispose: (() => void) | undefined
+  createRoot((rootDispose) => {
+    dispose = rootDispose
+    state = demoCheckoutFormStateCreate({ events: demoCatalogEvents, skipForm: true })
+  })
+
+  try {
+    if (!state) throw new Error("demo checkout state was not created")
+    await state.confirmPayment()
+
+    expect(state.completedOrders()).toHaveLength(1)
+    expect(state.completedOrders()[0]?.tickets[0]?.participantName).toBeUndefined()
+  } finally {
+    dispose?.()
+    demoCartStore.clear()
   }
 })

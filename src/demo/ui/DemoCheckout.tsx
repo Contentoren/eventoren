@@ -1,19 +1,24 @@
-import { For, Show } from "solid-js"
 import { Link } from "@tanstack/solid-router"
+import { For, Show } from "solid-js"
 import { TicketCheckoutForm } from "../../ticketing/TicketCheckoutForm.tsx"
 import { TicketOrderWalletPass } from "../../ticketing/TicketOrderWalletPass.tsx"
 import { UiContainer } from "../../ui/UiContainer.tsx"
 import { demoCatalogEvents } from "../fixtures/demoCatalogEvents.ts"
-import { demoCheckoutFormStateCreate } from "../state/demoCheckoutFormStateCreate.ts"
 import { demoText } from "../model/demoText.ts"
+import { demoCheckoutFormStateCreate } from "../state/demoCheckoutFormStateCreate.ts"
 import { DemoSiteFrame } from "./DemoSiteFrame.tsx"
 
-export function DemoCheckout(props: { readonly empty?: boolean; readonly error?: boolean }) {
+export function DemoCheckout(props: {
+  readonly empty?: boolean
+  readonly error?: boolean
+  readonly skipForm?: boolean
+}) {
   const state = demoCheckoutFormStateCreate({
     events: demoCatalogEvents,
     empty: props.empty,
     error: props.error,
     relaxedValidation: true,
+    skipForm: props.skipForm,
   })
   const currentId = props.empty ? "checkout-empty" : props.error ? "checkout-error" : "checkout"
 
@@ -22,7 +27,7 @@ export function DemoCheckout(props: { readonly empty?: boolean; readonly error?:
       <main id="content" tabindex="-1">
         <UiContainer class="flex flex-col gap-space-7 py-space-7">
           <Show
-            when={state.completedOrders().length === 0}
+            when={state.completedOrders().length === 0 && (!props.skipForm || state.items().length === 0)}
             fallback={
               <div class="flex flex-col gap-space-6">
                 <div class="flex flex-col gap-space-3">
