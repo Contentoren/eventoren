@@ -6,6 +6,7 @@ import { UiCard } from "../ui/UiCard.tsx"
 import type { TicketCart } from "./TicketCart.ts"
 import { TicketCartSummary } from "./TicketCartSummary.tsx"
 import type { TicketCheckoutFormState } from "./TicketCheckoutFormState.ts"
+import { ticketParticipantFieldKeyCreate } from "./ticketParticipantFieldKeyCreate.ts"
 import { ticketCheckoutText } from "./ticketCheckoutText.ts"
 
 export function TicketCheckoutForm(props: {
@@ -23,21 +24,13 @@ export function TicketCheckoutForm(props: {
 
   return (
     <div class="flex flex-col gap-space-6">
-      <Show when={state.errorMessage()}>
-        <p
-          role="alert"
-          class="rounded-control border border-danger/50 bg-danger-soft px-space-4 py-space-3 text-sm font-medium text-danger"
-        >
-          {state.errorMessage()}
-        </p>
-      </Show>
-
       <Show when={state.step() === "kontakt"}>
         <div class="grid gap-space-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <UiCard>
             <form
               class="flex flex-col gap-space-4"
               aria-labelledby="checkout-contact"
+              noValidate
               onSubmit={(event) => {
                 event.preventDefault()
                 state.confirmPayment()
@@ -58,9 +51,14 @@ export function TicketCheckoutForm(props: {
                     name="given-name"
                     autocomplete="given-name"
                     required={!props.relaxedValidation}
+                    aria-invalid={state.isFieldInvalid("firstName") ? "true" : undefined}
                     value={state.contact().firstName}
                     onInput={(event) => state.contactFieldChange("firstName", event.currentTarget.value)}
-                    class="focus-ring h-11 w-full rounded-control border border-border-strong bg-surface-muted px-space-4 text-sm text-content"
+                    class="focus-ring h-11 w-full rounded-control border px-space-4 text-sm"
+                    classList={{
+                      "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid("firstName"),
+                      "border-danger/50 bg-danger-soft text-danger": state.isFieldInvalid("firstName"),
+                    }}
                   />
                 </div>
                 <div>
@@ -72,9 +70,14 @@ export function TicketCheckoutForm(props: {
                     name="family-name"
                     autocomplete="family-name"
                     required={!props.relaxedValidation}
+                    aria-invalid={state.isFieldInvalid("lastName") ? "true" : undefined}
                     value={state.contact().lastName}
                     onInput={(event) => state.contactFieldChange("lastName", event.currentTarget.value)}
-                    class="focus-ring h-11 w-full rounded-control border border-border-strong bg-surface-muted px-space-4 text-sm text-content"
+                    class="focus-ring h-11 w-full rounded-control border px-space-4 text-sm"
+                    classList={{
+                      "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid("lastName"),
+                      "border-danger/50 bg-danger-soft text-danger": state.isFieldInvalid("lastName"),
+                    }}
                   />
                 </div>
               </div>
@@ -89,9 +92,14 @@ export function TicketCheckoutForm(props: {
                   autocomplete="email"
                   required={!props.relaxedValidation}
                   aria-describedby="checkout-email-hint"
+                  aria-invalid={state.isFieldInvalid("email") ? "true" : undefined}
                   value={state.contact().email}
                   onInput={(event) => state.contactFieldChange("email", event.currentTarget.value)}
-                  class="focus-ring h-11 w-full rounded-control border border-border-strong bg-surface-muted px-space-4 text-sm text-content"
+                  class="focus-ring h-11 w-full rounded-control border px-space-4 text-sm"
+                  classList={{
+                    "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid("email"),
+                    "border-danger/50 bg-danger-soft text-danger": state.isFieldInvalid("email"),
+                  }}
                 />
                 <p id="checkout-email-hint" class="mt-space-2 text-sm text-content-muted">
                   {text().emailHint}
@@ -126,6 +134,7 @@ export function TicketCheckoutForm(props: {
                   <For each={state.participantFields()}>
                     {(field) => {
                       const inputId = `checkout-participant-${field.eventId}-${field.tierId}-${field.ticketIndex}`
+                      const fieldKey = ticketParticipantFieldKeyCreate(field.eventId, field.tierId, field.ticketIndex)
                       return (
                         <div>
                           <label for={inputId} class="mb-space-2 block text-sm font-medium text-content">
@@ -137,6 +146,7 @@ export function TicketCheckoutForm(props: {
                             name={`participant-${field.eventId}-${field.tierId}-${field.ticketIndex}`}
                             autocomplete="name"
                             required
+                            aria-invalid={state.isFieldInvalid(fieldKey) ? "true" : undefined}
                             value={field.value}
                             onInput={(event) =>
                               state.participantNameChange(
@@ -146,7 +156,11 @@ export function TicketCheckoutForm(props: {
                                 event.currentTarget.value,
                               )
                             }
-                            class="focus-ring h-11 rounded-control border-border-strong bg-surface-muted px-space-4 text-sm text-content"
+                            class="focus-ring h-11 rounded-control border px-space-4 text-sm"
+                            classList={{
+                              "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid(fieldKey),
+                              "border-danger/50 bg-danger-soft text-danger": state.isFieldInvalid(fieldKey),
+                            }}
                           />
                         </div>
                       )
@@ -198,12 +212,16 @@ export function TicketCheckoutForm(props: {
                   </span>
                 </label>
 
-                <UiButton
-                  type="submit"
-                  size="lg"
-                  block
-                  disabled={state.isCartEmpty() || state.isSubmitting() || !state.legalAccepted()}
-                >
+                <Show when={state.errorMessage()}>
+                  <p
+                    role="alert"
+                    class="rounded-control border border-danger/50 bg-danger-soft px-space-4 py-space-3 text-sm font-medium text-danger"
+                  >
+                    {state.errorMessage()}
+                  </p>
+                </Show>
+
+                <UiButton type="submit" size="lg" block disabled={state.isCartEmpty() || state.isSubmitting()}>
                   {state.isSubmitting() ? text().submitting : (props.submitLabel ?? text().submit)}
                 </UiButton>
               </section>

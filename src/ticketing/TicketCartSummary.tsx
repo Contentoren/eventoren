@@ -152,24 +152,27 @@ export function TicketCartSummary(props: {
 
         <div class="flex flex-col gap-space-3 rounded-control border border-border-subtle bg-surface-muted/50 p-space-4">
           <p class="text-xs font-medium text-content">{text().paymentMethods}</p>
-          <ul class="flex flex-wrap items-center gap-space-3" aria-label={text().supportedPaymentMethods}>
-            <li>
-              <img src="/payment-visa.svg" alt="Visa" class="h-10 w-auto" />
+          <ul
+            class="flex w-full flex-nowrap items-center justify-between gap-space-2"
+            aria-label={text().supportedPaymentMethods}
+          >
+            <li class="min-w-0 flex-1">
+              <img src="/payment-visa.svg" alt="Visa" class="h-10 w-full object-contain" />
             </li>
-            <li>
-              <img src="/payment-mastercard.svg" alt="Mastercard" class="h-10 w-auto" />
+            <li class="min-w-0 flex-1">
+              <img src="/payment-mastercard.svg" alt="Mastercard" class="h-10 w-full object-contain" />
             </li>
-            <li>
-              <img src="/payment-american-express.svg" alt="American Express" class="h-10 w-auto" />
+            <li class="min-w-0 flex-1">
+              <img src="/payment-american-express.svg" alt="American Express" class="h-10 w-full object-contain" />
             </li>
-            <li>
-              <img src="/payment-discover.svg" alt="Discover" class="h-10 w-auto" />
+            <li class="min-w-0 flex-1">
+              <img src="/payment-discover.svg" alt="Discover" class="h-10 w-full object-contain" />
             </li>
-            <li>
-              <img src="/payment-paypal.svg" alt="PayPal" class="h-10 w-auto" />
+            <li class="min-w-0 flex-1">
+              <img src="/payment-paypal.svg" alt="PayPal" class="h-10 w-full object-contain" />
             </li>
-            <li>
-              <img src="/payment-klarna.svg" alt="Klarna" class="h-10 w-auto" />
+            <li class="min-w-0 flex-1">
+              <img src="/payment-klarna.svg" alt="Klarna" class="h-10 w-full object-contain" />
             </li>
           </ul>
         </div>

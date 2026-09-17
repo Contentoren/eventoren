@@ -9,7 +9,12 @@ import { demoText } from "../model/demoText.ts"
 import { DemoSiteFrame } from "./DemoSiteFrame.tsx"
 
 export function DemoCheckout(props: { readonly empty?: boolean; readonly error?: boolean }) {
-  const state = demoCheckoutFormStateCreate({ events: demoCatalogEvents, empty: props.empty, error: props.error })
+  const state = demoCheckoutFormStateCreate({
+    events: demoCatalogEvents,
+    empty: props.empty,
+    error: props.error,
+    relaxedValidation: true,
+  })
   const currentId = props.empty ? "checkout-empty" : props.error ? "checkout-error" : "checkout"
 
   return (

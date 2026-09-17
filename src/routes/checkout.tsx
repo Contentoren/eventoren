@@ -1,24 +1,30 @@
-import { createFileRoute, Link } from "@tanstack/solid-router"
+import { createFileRoute } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
 import { Show } from "solid-js"
+import { envBaseUrlAppResult } from "#src/app/env/public/envBaseUrlAppResult.ts"
 import { SiteFrame } from "../components/SiteFrame.tsx"
 import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 import { checkoutPageStateCreate } from "../ticketing/checkoutPageStateCreate.ts"
+import { TicketCheckoutEmptyState } from "../ticketing/TicketCheckoutEmptyState.tsx"
 import { TicketCheckoutForm } from "../ticketing/TicketCheckoutForm.tsx"
-import { ticketCheckoutFormStateCreate } from "../ticketing/ticketCheckoutFormStateCreate.ts"
-import { ticketCheckoutSearchParse } from "../ticketing/ticketCheckoutSearchParse.ts"
-import { ticketCheckoutSearchOrderIdsParse } from "../ticketing/ticketCheckoutSearchOrderIdsParse.ts"
-import { ticketCheckoutText } from "../ticketing/ticketCheckoutText.ts"
 import { TicketOrderStatusPage } from "../ticketing/TicketOrderStatusPage.tsx"
+import { ticketCheckoutFormStateCreate } from "../ticketing/ticketCheckoutFormStateCreate.ts"
+import { ticketCheckoutSearchOrderIdsParse } from "../ticketing/ticketCheckoutSearchOrderIdsParse.ts"
+import { ticketCheckoutSearchParse } from "../ticketing/ticketCheckoutSearchParse.ts"
+import { ticketCheckoutText } from "../ticketing/ticketCheckoutText.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { catalogEventsPublicGet } from "../server/catalogEventsPublicGet.js"
 
 const getCatalogEvents = createServerFn({ method: "GET" }).handler(catalogEventsPublicGet)
+const getAppOrigin = createServerFn({ method: "GET" }).handler(() => envBaseUrlAppResult())
 
 export const Route = createFileRoute("/checkout")({
   head: () => seoHeadCreate("/checkout"),
   validateSearch: ticketCheckoutSearchParse,
-  loader: () => getCatalogEvents(),
+  loader: async () => {
+    const [catalog, appOrigin] = await Promise.all([getCatalogEvents(), getAppOrigin()])
+    return { catalog, appOrigin }
+  },
   component: CheckoutPage,
 })
 
@@ -36,7 +42,8 @@ function CheckoutPage() {
 }
 
 function CheckoutFormPage(props: { state: ReturnType<typeof checkoutPageStateCreate> }) {
-  const formState = ticketCheckoutFormStateCreate({ items: props.state.items })
+  const loaderData = Route.useLoaderData()
+  const formState = ticketCheckoutFormStateCreate({ items: props.state.items, appOrigin: () => loaderData().appOrigin })
   const text = ticketCheckoutText
   return (
     <SiteFrame>
@@ -47,20 +54,12 @@ function CheckoutFormPage(props: { state: ReturnType<typeof checkoutPageStateCre
           <Show
             when={props.state.hasItems()}
             fallback={
-              <div class="flex flex-col items-start gap-space-4">
-                <p
-                  role="alert"
-                  class="rounded-control border border-danger/50 bg-danger-soft px-space-4 py-space-3 text-sm font-medium text-danger"
-                >
-                  {props.state.errorMessage()}
-                </p>
-                <Link
-                  to={props.state.fallbackPath()}
-                  class="focus-ring rounded-control text-sm font-semibold text-brand-accent underline underline-offset-4 hover:text-content"
-                >
-                  {props.state.fallbackPath() === "/warenkorb" ? text().backToCart : text().backToEvents}
-                </Link>
-              </div>
+              <TicketCheckoutEmptyState
+                title={text().checkoutUnavailable}
+                message={props.state.errorMessage()}
+                fallbackPath={props.state.fallbackPath()}
+                returnLabel={props.state.fallbackPath() === "/warenkorb" ? text().backToCart : text().backToEvents}
+              />
             }
           >
             <TicketCheckoutForm items={props.state.items()} state={formState} />

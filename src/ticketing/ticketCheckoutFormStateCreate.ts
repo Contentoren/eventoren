@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/solid-router"
 import { createEffect, createMemo, on, onMount } from "solid-js"
+import type { Result } from "#result"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import { language } from "../app/i18n/language.ts"
 import { languageSignal } from "../app/i18n/languageSignal.ts"
@@ -10,11 +11,14 @@ import type { TicketCheckoutFormState } from "./TicketCheckoutFormState.ts"
 import type { TicketCheckoutStep } from "./TicketCheckoutStep.ts"
 import type { TicketContact } from "./TicketContact.ts"
 import type { TicketParticipantNames } from "./TicketParticipantNames.ts"
+import type { TicketRequiredFieldKey } from "./TicketRequiredFieldKey.ts"
 import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
 import { ticketCheckoutCreate } from "./ticketCheckoutCreate.ts"
 import { ticketCheckoutKeyCreate } from "./ticketCheckoutKeyCreate.ts"
 import { ticketCheckoutLegalDocumentRevision } from "./ticketCheckoutLegalDocumentRevision.ts"
+import { ticketCheckoutLegalDocumentSnapshot } from "./ticketCheckoutLegalDocumentSnapshot.ts"
+import { ticketCheckoutReturnUrlCreate } from "./ticketCheckoutReturnUrlCreate.ts"
 import { ticketCheckoutSearchOrderIds } from "./ticketCheckoutSearchOrderIds.ts"
 import { ticketCheckoutStepLabels } from "./ticketCheckoutStepLabels.ts"
 import { ticketCheckoutStepOrder } from "./ticketCheckoutStepOrder.ts"
@@ -25,20 +29,31 @@ import { ticketContactEmpty } from "./ticketContactEmpty.ts"
 import { ticketContactValidate } from "./ticketContactValidate.ts"
 import { ticketGuestAccessTokenCreate } from "./ticketGuestAccessTokenCreate.ts"
 import { ticketOrderAccessStorageUpsert } from "./ticketOrderAccessStorageUpsert.ts"
+import { ticketParticipantFieldKeyCreate } from "./ticketParticipantFieldKeyCreate.ts"
 import { ticketParticipantNamesAlign } from "./ticketParticipantNamesAlign.ts"
 import { ticketParticipantNamesValidate } from "./ticketParticipantNamesValidate.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 
 type CheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
+const ticketContactRequiredFields = ["firstName", "lastName", "email"] as const
+
+function ticketContactFieldInvalid(field: (typeof ticketContactRequiredFields)[number], value: string) {
+  if (field === "firstName" || field === "lastName") return value.trim().length < 2
+  return !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim())
+}
+
 export function ticketCheckoutFormStateCreate(inputs: {
   items: () => readonly CheckoutItem[]
+  appOrigin: () => Result<string>
 }): TicketCheckoutFormState {
   const navigate = useNavigate()
   const contact = createSignalObject<TicketContact>(ticketContactEmpty())
   const step = createSignalObject<TicketCheckoutStep>("kontakt")
   const errorMessage = createSignalObject("")
   const isSubmitting = createSignalObject(false)
+  const submitAttempted = createSignalObject(false)
+  const invalidRequiredFields = createSignalObject<readonly TicketRequiredFieldKey[]>([])
   const legalAccepted = createSignalObject(false)
   const participantNames = createSignalObject<TicketParticipantNames>(ticketParticipantNamesAlign({}, inputs.items()))
 
@@ -48,12 +63,6 @@ export function ticketCheckoutFormStateCreate(inputs: {
     const draft = ticketContactDraftLoad()
     if (draft.success) contact.set(draft.data)
   })
-
-  createEffect(
-    on(inputs.items, (items) => {
-      participantNames.set(ticketParticipantNamesAlign(participantNames.get(), items))
-    }),
-  )
 
   const stepLabels = createMemo(() => ticketCheckoutStepOrder.map((entry) => ticketCheckoutStepLabels()[entry]))
   const stepIndex = createMemo(() => ticketCheckoutStepOrder.indexOf(step.get()))
@@ -90,8 +99,28 @@ export function ticketCheckoutFormStateCreate(inputs: {
     ),
   )
 
+  createEffect(
+    on(inputs.items, (items) => {
+      participantNames.set(ticketParticipantNamesAlign(participantNames.get(), items))
+      if (!submitAttempted.get()) return
+      const activeParticipantFields = participantFields().map((field) =>
+        ticketParticipantFieldKeyCreate(field.eventId, field.tierId, field.ticketIndex),
+      )
+      invalidRequiredFields.set(
+        invalidRequiredFields
+          .get()
+          .filter((key) => !key.startsWith("participant:") || activeParticipantFields.includes(key)),
+      )
+    }),
+  )
+
   const contactFieldChange = (field: keyof TicketContact, value: string) => {
     contact.set({ ...contact.get(), [field]: value })
+    if (submitAttempted.get() && (field === "firstName" || field === "lastName" || field === "email")) {
+      const invalid = ticketContactFieldInvalid(field, value)
+      const current = invalidRequiredFields.get().filter((key) => key !== field)
+      invalidRequiredFields.set(invalid ? [...current, field] : current)
+    }
     errorMessage.set("")
     persistDraft()
   }
@@ -109,6 +138,11 @@ export function ticketCheckoutFormStateCreate(inputs: {
       ...aligned,
       [eventId]: { ...aligned[eventId], [tierId]: lineNames },
     })
+    if (submitAttempted.get()) {
+      const key = ticketParticipantFieldKeyCreate(eventId, tierId, ticketIndex)
+      const current = invalidRequiredFields.get().filter((fieldKey) => fieldKey !== key)
+      invalidRequiredFields.set(value.trim().length === 0 ? [...current, key] : current)
+    }
     errorMessage.set("")
   }
 
@@ -121,6 +155,29 @@ export function ticketCheckoutFormStateCreate(inputs: {
     }
     if (!legalAccepted.get()) {
       errorMessage.set(text.legalRequired)
+      return
+    }
+
+    submitAttempted.set(true)
+    const invalidContactFields = ticketContactRequiredFields.filter((field) =>
+      ticketContactFieldInvalid(field, contact.get()[field]),
+    )
+    const alignedParticipantNames = ticketParticipantNamesAlign(participantNames.get(), inputs.items())
+    const invalidParticipantFields = inputs.items().flatMap((item) =>
+      item.cart.lines.flatMap((line) => {
+        if (line.quantity <= 0) return []
+        const names = alignedParticipantNames[item.event.id]?.[line.tierId] ?? []
+        return Array.from({ length: line.quantity }, (_, ticketIndex) =>
+          names[ticketIndex]?.trim().length
+            ? []
+            : [ticketParticipantFieldKeyCreate(item.event.id, line.tierId, ticketIndex)],
+        ).flat()
+      }),
+    )
+    const invalidFields: readonly TicketRequiredFieldKey[] = [...invalidContactFields, ...invalidParticipantFields]
+    invalidRequiredFields.set(invalidFields)
+    if (invalidFields.length > 0) {
+      errorMessage.set(text.requiredFields)
       return
     }
 
@@ -140,6 +197,12 @@ export function ticketCheckoutFormStateCreate(inputs: {
       return
     }
 
+    const appOrigin = inputs.appOrigin()
+    if (!appOrigin.success) {
+      errorMessage.set(appOrigin.errorMessage)
+      return
+    }
+
     const token = userTokenGet()
     const guestAccessToken = token ? undefined : ticketGuestAccessTokenCreate()
     const createdOrderIds: string[] = []
@@ -150,8 +213,12 @@ export function ticketCheckoutFormStateCreate(inputs: {
     try {
       for (const item of inputs.items()) {
         const checkoutKey = ticketCheckoutKeyCreate()
-        const returnUrl = new URL("/checkout", window.location.origin)
-        returnUrl.searchParams.set("checkout", checkoutKey)
+        const returnUrl = ticketCheckoutReturnUrlCreate(appOrigin.data, checkoutKey)
+        if (!returnUrl.success) {
+          errorMessage.set(returnUrl.errorMessage)
+          isSubmitting.set(false)
+          return
+        }
         const created = await ticketCheckoutCreate({
           token: token || undefined,
           guestAccessToken,
@@ -165,8 +232,8 @@ export function ticketCheckoutFormStateCreate(inputs: {
               quantity: line.quantity,
               participantNames: [...(validatedParticipantNames.data[item.event.id]?.[line.tierId] ?? [])],
             })),
-          successUrl: returnUrl.toString(),
-          cancelUrl: returnUrl.toString(),
+          successUrl: returnUrl.data,
+          cancelUrl: returnUrl.data,
           locale: languageSignal.get() === language.de ? "de" : "en",
           customer: {
             email: validated.data.email,
@@ -179,6 +246,8 @@ export function ticketCheckoutFormStateCreate(inputs: {
             termsAccepted: true,
             privacyAcknowledged: true,
             documentSetRevision: ticketCheckoutLegalDocumentRevision,
+            termsMarkdown: ticketCheckoutLegalDocumentSnapshot.termsMarkdown,
+            privacyMarkdown: ticketCheckoutLegalDocumentSnapshot.privacyMarkdown,
           },
         })
         if (!created.success) {
@@ -227,11 +296,13 @@ export function ticketCheckoutFormStateCreate(inputs: {
     stepLabels,
     errorMessage: errorMessage.get,
     isSubmitting: isSubmitting.get,
+    submitAttempted: submitAttempted.get,
     isCartEmpty,
     totalLabel,
     legalAccepted: legalAccepted.get,
     participantNames: participantNames.get,
     participantFields,
+    isFieldInvalid: (key) => invalidRequiredFields.get().includes(key),
     legalAcceptanceChange,
     contactFieldChange,
     participantNameChange,

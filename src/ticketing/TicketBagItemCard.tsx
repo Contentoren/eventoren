@@ -124,6 +124,7 @@ export function TicketBagItemCard(props: {
               <select
                 id={`bag-qty-${props.item.tierId}`}
                 value={props.item.quantity}
+                ref={(element) => (element.value = String(props.item.quantity))}
                 onChange={(e) => props.onQuantityChange(Number.parseInt(e.currentTarget.value, 10))}
                 class="focus-ring h-10 rounded-lg border border-border-strong/60 bg-surface px-space-3 text-sm font-semibold text-content"
               >

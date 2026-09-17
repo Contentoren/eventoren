@@ -48,48 +48,29 @@ export function TicketBagSummary(props: {
         </div>
       </div>
 
-      {/* Apple-style Reassurance & Protection Card */}
-      <div class="rounded-2xl border border-border-subtle bg-surface-muted/60 p-space-5 dark:border-border-strong/20 dark:bg-surface-muted/20">
-        <h3 class="text-sm font-semibold uppercase tracking-wider text-content-muted">Deine Vorteile & Sicherheit</h3>
-
-        <ul class="mt-space-3 flex flex-col gap-space-3 text-sm font-medium text-content">
-          <li class="flex items-center gap-space-3">
-            <span
-              aria-hidden="true"
-              class="flex size-7 shrink-0 items-center justify-center rounded-full border border-brand-accent/20 bg-brand-soft text-brand-accent"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                <path d="m9 12 2 2 4-4" />
-              </svg>
-            </span>
-            <span>100 % Original-Tickets direkt vom Veranstalter</span>
+      <div class="flex flex-col gap-space-3 rounded-control border border-border-subtle bg-surface-muted/50 p-space-4">
+        <p class="text-xs font-medium text-content">Zahlungsmethoden</p>
+        <ul
+          class="flex w-full flex-nowrap items-center justify-between gap-space-2"
+          aria-label="Unterstützte Zahlungsmethoden"
+        >
+          <li class="min-w-0 flex-1">
+            <img src="/payment-visa.svg" alt="Visa" class="h-10 w-full object-contain" />
           </li>
-
-          <li class="flex items-center gap-space-3">
-            <span
-              aria-hidden="true"
-              class="flex size-7 shrink-0 items-center justify-center rounded-full border border-brand-accent/20 bg-brand-soft text-brand-accent"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5">
-                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            </span>
-            <span>Sichere 256-Bit SSL-Zahlungsabwicklung</span>
+          <li class="min-w-0 flex-1">
+            <img src="/payment-mastercard.svg" alt="Mastercard" class="h-10 w-full object-contain" />
           </li>
-
-          <li class="flex items-center gap-space-3">
-            <span
-              aria-hidden="true"
-              class="flex size-7 shrink-0 items-center justify-center rounded-full border border-brand-accent/20 bg-brand-soft text-brand-accent"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5">
-                <rect width="20" height="16" x="2" y="4" rx="2" />
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-              </svg>
-            </span>
-            <span>Sofortige Zusendung & Apple- & Google-Wallet-Export</span>
+          <li class="min-w-0 flex-1">
+            <img src="/payment-american-express.svg" alt="American Express" class="h-10 w-full object-contain" />
+          </li>
+          <li class="min-w-0 flex-1">
+            <img src="/payment-discover.svg" alt="Discover" class="h-10 w-full object-contain" />
+          </li>
+          <li class="min-w-0 flex-1">
+            <img src="/payment-paypal.svg" alt="PayPal" class="h-10 w-full object-contain" />
+          </li>
+          <li class="min-w-0 flex-1">
+            <img src="/payment-klarna.svg" alt="Klarna" class="h-10 w-full object-contain" />
           </li>
         </ul>
       </div>

@@ -12,6 +12,7 @@ test("localizes shared checkout copy and step labels", () => {
     orderSummary: "Order summary",
     directCheckout: "Go directly to checkout",
     perTicket: "per ticket",
+    checkoutUnavailable: "Checkout unavailable",
   })
   expect(demoText("checkoutTitle")).toBe("Checkout")
   expect(demoText("checkoutSubmitLabel")).toBe("Complete demo order")
@@ -23,6 +24,7 @@ test("localizes shared checkout copy and step labels", () => {
     orderSummary: "Bestellübersicht",
     directCheckout: "Direkt zur Kasse",
     perTicket: "pro Ticket",
+    checkoutUnavailable: "Checkout nicht möglich",
   })
   expect(demoText("checkoutTitle")).toBe("Kasse")
   expect(demoText("checkoutSubmitLabel")).toBe("Demo-Bestellung abschließen")
