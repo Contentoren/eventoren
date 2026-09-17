@@ -10,4 +10,18 @@ crons.interval(
   {},
 )
 
+crons.interval(
+  "reconcile ticket payments and fulfillment",
+  { minutes: 5 },
+  internal.ticketing.ticketPaymentReconcileScheduledAction,
+  {},
+)
+
+crons.interval(
+  "prepare ticket fulfillment",
+  { minutes: 5 },
+  internal.ticketing.ticketFulfillmentWorkScheduledAction,
+  {},
+)
+
 export default crons

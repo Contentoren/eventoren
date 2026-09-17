@@ -40,6 +40,7 @@ function billingMock(
   expirationPayment: "pending" | "paid" | "failed" | "expired" = "expired",
 ) {
   let checkoutCalls = 0
+  let fulfillmentCalls = 0
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input)
     let paymentReference = "payment_checkoutkey123456789012345678901234"
@@ -81,6 +82,28 @@ function billingMock(
         { status: 201 },
       )
     }
+    if (url.endsWith("/ticket-fulfillment")) {
+      fulfillmentCalls += 1
+      let body: { orderReference?: string; paymentReference?: string } = {}
+      try {
+        body = JSON.parse(String(init?.body)) as typeof body
+      } catch {
+        // The fulfillment assertion below only needs the stable correlation fields.
+      }
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            orderReference: body.orderReference ?? "order_billing1",
+            paymentReference: body.paymentReference ?? paymentReference,
+            fulfillmentReference: `fulfillment_${fulfillmentCalls}`,
+            status: "accepted",
+            replayed: fulfillmentCalls > 1,
+          },
+        }),
+        { status: 200 },
+      )
+    }
     if (url.includes("/expire"))
       return new Response(
         JSON.stringify({
@@ -106,7 +129,7 @@ function billingMock(
         JSON.stringify({
           success: true,
           data: {
-            paymentReference: "payment_checkoutkey123456789012345678901234",
+            paymentReference: decodeURIComponent(url.split("/").at(-2) ?? paymentReference),
             orderReference: "order_billing1",
             stripeMode: "test",
             status: payment === "failed" ? "failed" : payment === "pending" ? "checkout_created" : "checkout_created",
@@ -119,7 +142,7 @@ function billingMock(
     return new Response(null, { status: 404 })
   })
   vi.stubGlobal("fetch", fetchMock)
-  return { fetchMock, checkoutCallsGet: () => checkoutCalls }
+  return { fetchMock, checkoutCallsGet: () => checkoutCalls, fulfillmentCallsGet: () => fulfillmentCalls }
 }
 
 async function seedCatalog(t: ReturnType<typeof convexTest>, token: string) {
@@ -647,6 +670,169 @@ test("keeps participant names associated with quantities and lines through reser
       tickets: [{ participantName: "Ada" }, { participantName: "Grace" }, { participantName: "Lin" }],
     },
   })
+
+  const capability = await t.run(async (ctx) => {
+    const delivery = await ctx.db.query("ticketOrderDeliveries").collect()
+    const order = await ctx.db.get(checkout.data.orderId as never)
+    return { delivery: delivery[0], order }
+  })
+  expect(capability.delivery?.accessTokenSnapshot).toMatch(/^[A-Za-z0-9_-]{32,256}$/u)
+  expect(capability.order?.emailAccessDigest).toMatch(/^[a-f0-9]{64}$/u)
+  if (!capability.delivery) return
+
+  const emailWallet = await t.query(api.ticketing.ticketOrderByAccessTokenQuery, {
+    guestAccessToken: capability.delivery.accessTokenSnapshot,
+  })
+  expect(emailWallet.success).toBe(true)
+  if (emailWallet.success)
+    expect(emailWallet.data.tickets.map((ticket) => ticket.participantName)).toEqual(["Ada", "Grace", "Lin"])
+  const invalidEmailWallet = await t.query(api.ticketing.ticketOrderByAccessTokenQuery, {
+    guestAccessToken: `${capability.delivery.accessTokenSnapshot.slice(0, -1)}x`,
+  })
+  expect(invalidEmailWallet.success).toBe(false)
+
+  const otherOrderId = await t.run(async (ctx) => {
+    const order = await ctx.db.get(checkout.data.orderId as never)
+    if (!order) throw new Error("paid order is missing")
+    const { _id: _ignoredId, _creationTime: _ignoredCreationTime, ...snapshot } = order
+    return await ctx.db.insert("ticketOrders", {
+      ...snapshot,
+      checkoutKey: "othercheckoutkey423456789012345678901234",
+      paymentReference: "payment_other_order",
+      emailAccessDigest: undefined,
+      emailAccessRevokedAt: undefined,
+    })
+  })
+  const crossOrder = await t.query(api.ticketing.ticketOrderGetQuery, {
+    orderId: otherOrderId,
+    guestAccessToken: capability.delivery.accessTokenSnapshot,
+  })
+  expect(crossOrder.success).toBe(false)
+
+  const link = await t.mutation(internal.ticketing.ticketOrderAccessCapabilityEnsureMutation, {
+    orderId: checkout.data.orderId as never,
+    publicBaseUrl: "https://tickets.example",
+  })
+  expect(link).toMatchObject({
+    success: true,
+    data: {
+      accessUrl: `https://tickets.example/checkout#ticketAccess=${capability.delivery.accessTokenSnapshot}`,
+      replayed: true,
+    },
+  })
+  const revoked = await t.mutation(internal.ticketing.ticketOrderAccessCapabilityRevokeMutation, {
+    orderId: checkout.data.orderId as never,
+  })
+  expect(revoked.success).toBe(true)
+  const revokedEmailWallet = await t.query(api.ticketing.ticketOrderByAccessTokenQuery, {
+    guestAccessToken: capability.delivery.accessTokenSnapshot,
+  })
+  expect(revokedEmailWallet.success).toBe(false)
+})
+
+test("reconciles a paid close-tab checkout and prepares one immutable fulfillment request", async () => {
+  vi.useFakeTimers()
+  environmentSet()
+  process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST = "eventoren-test"
+  const billing = billingMock("paid")
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const checkout = await t.action(
+    api.ticketing.ticketCheckoutCreateAction,
+    checkoutArgs(
+      await tokenFor(userId),
+      await seedCatalog(t, await tokenFor(adminId)),
+      "checkoutkey523456789012345678901234",
+    ),
+  )
+  expect(checkout).toMatchObject({ success: true, data: { fulfillmentEligible: true } })
+  if (!checkout.success) return
+
+  const reconciled = await t.action(internal.ticketing.ticketPaymentReconcileScheduledAction, {})
+  expect(reconciled).toMatchObject({ success: true, data: { checked: 1 } })
+  await t.finishAllScheduledFunctions(vi.runAllTimers)
+  await t.run(async (ctx) => {
+    const work = await ctx.db.query("ticketFulfillmentWork").first()
+    if (work) await ctx.db.patch("ticketFulfillmentWork", work._id, { leaseUntil: 0, nextAttemptAt: 0 })
+  })
+  const replay = await t.action(internal.ticketing.ticketFulfillmentPrepareAction, {
+    workId: await t.run(async (ctx) => {
+      const work = await ctx.db.query("ticketFulfillmentWork").first()
+      if (!work) throw new Error("fulfillment work was not created")
+      return work._id
+    }),
+  })
+  expect(replay.success).toBe(true)
+  expect(billing.fulfillmentCallsGet()).toBeLessThanOrEqual(1)
+  const state = await t.run(async (ctx) => {
+    const work = await ctx.db.query("ticketFulfillmentWork").first()
+    const deliveries = await ctx.db.query("ticketOrderDeliveries").collect()
+    const tickets = await ctx.db.query("ticketIssued").collect()
+    return { work, deliveries, tickets }
+  })
+  expect(state.work).toMatchObject({ attemptCount: 1 })
+  expect(state.deliveries).toHaveLength(1)
+  expect(state.tickets).toHaveLength(1)
+})
+
+test("retries fulfillment preparation without issuing another ticket or access token", async () => {
+  environmentSet()
+  process.env.EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST = "eventoren-test"
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const checkout = await t.action(
+    api.ticketing.ticketCheckoutCreateAction,
+    checkoutArgs(
+      await tokenFor(userId),
+      await seedCatalog(t, await tokenFor(adminId)),
+      "checkoutkey623456789012345678901234",
+    ),
+  )
+  expect(checkout.success).toBe(true)
+  if (!checkout.success) return
+  const paid = await t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+    orderId: checkout.data.orderId as never,
+    paymentReference: checkout.data.paymentReference,
+    billingOrderReference: "order_billing1",
+    stripeMode: "test",
+    payment: "paid",
+  })
+  expect(paid).toMatchObject({ success: true, data: { status: "paid", ticketCount: 1 } })
+  const workId = await t.run(async (ctx) => {
+    const work = await ctx.db.query("ticketFulfillmentWork").first()
+    if (!work) throw new Error("fulfillment work was not created")
+    return work._id
+  })
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input).includes("/ticket-fulfillment")) return new Response("temporary", { status: 503 })
+      return await billing.fetchMock(input, init)
+    }),
+  )
+  const failed = await t.action(internal.ticketing.ticketFulfillmentPrepareAction, { workId })
+  expect(failed).toMatchObject({ success: true, data: { retryAt: expect.any(Number) } })
+  await t.run(async (ctx) => await ctx.db.patch(workId, { nextAttemptAt: 0, leaseUntil: 0 }))
+  process.env.EVENTOREN_PUBLIC_BASE_URL = "https://eventoren-new.example"
+  vi.stubGlobal("fetch", billing.fetchMock)
+  const retried = await t.action(internal.ticketing.ticketFulfillmentPrepareAction, { workId })
+  expect(retried).toMatchObject({ success: true, data: { prepared: true } })
+  const state = await t.run(async (ctx) => {
+    const work = await ctx.db.get(workId)
+    const deliveries = await ctx.db.query("ticketOrderDeliveries").collect()
+    const tickets = await ctx.db.query("ticketIssued").collect()
+    return { work, deliveries, tickets }
+  })
+  expect(state.work).toMatchObject({ status: "prepared", attemptCount: 2 })
+  expect(state.deliveries).toHaveLength(1)
+  expect(state.tickets).toHaveLength(1)
+  expect(billing.fulfillmentCallsGet()).toBe(1)
+  const fulfillmentCall = billing.fetchMock.mock.calls.find(([input]) => String(input).includes("/ticket-fulfillment"))
+  expect(fulfillmentCall?.[1]?.body).toContain("https://eventoren.test/checkout#ticketAccess=")
+  process.env.EVENTOREN_PUBLIC_BASE_URL = "https://eventoren.test"
 })
 
 test("rejects a payment correlation mismatch without changing inventory", async () => {
@@ -917,4 +1103,5 @@ test("paid expiration result issues once and late paid truth after release canno
     status: "checkout_created",
     paymentStatus: "pending",
   })
+  expect(await t.run(async (ctx) => ctx.db.query("ticketFulfillmentWork").collect())).toHaveLength(0)
 })

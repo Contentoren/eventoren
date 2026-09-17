@@ -21,11 +21,19 @@ const ticketPaymentStatusValidator = v.union(
 
 const ticketReservationStatusValidator = v.union(v.literal("active"), v.literal("released"), v.literal("consumed"))
 
+const ticketFulfillmentWorkStatusValidator = v.union(
+  v.literal("pending"),
+  v.literal("preparing"),
+  v.literal("prepared"),
+)
+
 export const ticketTables = {
   ticketOrders: defineTable({
     checkoutKey: v.string(),
     ownerUserId: v.optional(vIdUser),
     guestAccessDigest: v.optional(v.string()),
+    emailAccessDigest: v.optional(v.string()),
+    emailAccessRevokedAt: v.optional(v.string()),
     customerEmail: v.string(),
     customerGivenName: v.optional(v.string()),
     customerFamilyName: v.optional(v.string()),
@@ -71,8 +79,17 @@ export const ticketTables = {
   })
     .index("checkoutKey", ["checkoutKey"])
     .index("paymentReference", ["paymentReference"])
+    .index("statusAndUpdatedAt", ["status", "updatedAt"])
+    .index("emailAccessDigest", ["emailAccessDigest"])
     .index("ownerUserId", ["ownerUserId"])
     .index("ownerUserIdAndCreatedAt", ["ownerUserId", "createdAt"]),
+
+  ticketOrderDeliveries: defineTable({
+    orderId: v.id("ticketOrders"),
+    accessTokenSnapshot: v.string(),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  }).index("orderId", ["orderId"]),
 
   ticketOrderLines: defineTable({
     orderId: v.id("ticketOrders"),
@@ -121,6 +138,27 @@ export const ticketTables = {
   })
     .index("orderId", ["orderId"])
     .index("paymentReference", ["paymentReference"]),
+
+  ticketFulfillmentWork: defineTable({
+    orderId: v.id("ticketOrders"),
+    paymentReference: v.string(),
+    billingOrderReference: v.string(),
+    stripeMode: v.optional(v.union(v.literal("live"), v.literal("test"))),
+    requestSnapshotJson: v.string(),
+    onlineTicketUrl: v.optional(v.string()),
+    status: ticketFulfillmentWorkStatusValidator,
+    attemptCount: v.number(),
+    nextAttemptAt: v.number(),
+    leaseUntil: v.optional(v.number()),
+    lastError: v.optional(v.string()),
+    fulfillmentReference: v.optional(v.string()),
+    preparedAt: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("orderId", ["orderId"])
+    .index("stripeModeAndStatusAndNextAttemptAt", ["stripeMode", "status", "nextAttemptAt"])
+    .index("statusAndNextAttemptAt", ["status", "nextAttemptAt"]),
 
   ticketIssued: defineTable({
     orderId: v.id("ticketOrders"),

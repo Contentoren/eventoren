@@ -1,8 +1,11 @@
 import { v } from "convex/values"
+import { internal } from "#convex/_generated/api.js"
 import type { Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
+import { ticketFulfillmentWorkEnsure } from "./ticketFulfillmentWorkEnsure.js"
+import { ticketOrderAccessCapabilityEnsure } from "./ticketOrderAccessCapabilityEnsure.js"
 
 const paymentStatusValidator = v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"))
 
@@ -135,13 +138,22 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       return createResult({ orderId: order._id, status: "failed", paymentStatus: "failed", ticketCount: 0 })
     }
 
-    if (order.status === "paid")
+    if (order.status === "paid") {
+      const capability = await ticketOrderAccessCapabilityEnsure(ctx, order._id)
+      if (!capability.success) return capability
+      await ticketFulfillmentWorkScheduleIfEligible(
+        ctx,
+        order._id,
+        order.fulfillmentEligible,
+        order.billingOrderReference ?? args.billingOrderReference,
+      )
       return createResult({
         orderId: order._id,
         status: order.status,
         paymentStatus: order.paymentStatus,
         ticketCount: await ticketCountGet(ctx, order._id),
       })
+    }
     if (
       order.status === "failed" ||
       order.status === "expired" ||
@@ -246,6 +258,9 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       lastCheckedAt: now,
       updatedAt: now,
     })
+    const capability = await ticketOrderAccessCapabilityEnsure(ctx, order._id)
+    if (!capability.success) return capability
+    await ticketFulfillmentWorkScheduleIfEligible(ctx, order._id, order.fulfillmentEligible, args.billingOrderReference)
     return createResult({ orderId: order._id, status: "paid", paymentStatus: "paid", ticketCount: sequence })
   },
 })
@@ -261,6 +276,18 @@ async function ticketIssuedCodeCreate(ctx: MutationCtx): PromiseResult<string> {
     if (!existing) return createResult(code)
   }
   return createResultError(op, "Could not generate a unique ticket code")
+}
+
+async function ticketFulfillmentWorkScheduleIfEligible(
+  ctx: MutationCtx,
+  orderId: Id<"ticketOrders">,
+  fulfillmentEligible: boolean | undefined,
+  billingOrderReference: string | undefined,
+) {
+  if (fulfillmentEligible !== true || billingOrderReference === undefined) return
+  const work = await ticketFulfillmentWorkEnsure(ctx, orderId, billingOrderReference)
+  if (!work.success || !work.data.created) return
+  await ctx.scheduler.runAfter(0, internal.ticketing.ticketFulfillmentPrepareAction, { workId: work.data.workId })
 }
 
 async function ticketCountGet(ctx: MutationCtx, orderId: Id<"ticketOrders">) {
