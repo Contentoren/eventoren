@@ -18,7 +18,9 @@ export const ticketOrderGetQuery = query({
     const authorized =
       (accessResult.data.userId !== undefined && order.ownerUserId === accessResult.data.userId) ||
       (accessResult.data.guestAccessDigest !== undefined &&
-        order.guestAccessDigest === accessResult.data.guestAccessDigest)
+        (order.guestAccessDigest === accessResult.data.guestAccessDigest ||
+          (order.emailAccessDigest === accessResult.data.guestAccessDigest &&
+            order.emailAccessRevokedAt === undefined)))
     if (!authorized) return createResultError("ticketOrderGetQuery", "The order was not found")
     return createResult(await ticketOrderProjectionCreate(ctx, args.orderId))
   },
