@@ -6,7 +6,6 @@ import { Input } from "#ui/input/input/Input.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
-import { LanguageSelector } from "../app/i18n/LanguageSelector.tsx"
 import { SiteFrame } from "../components/SiteFrame.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import type { OrganizerEventDetailPageState } from "./OrganizerEventDetailPageState.ts"
@@ -24,7 +23,7 @@ export function OrganizerEventDetailPage(props: {
       <main id="content" tabindex="-1" class="flex-1">
         <UiContainer width="wide" class="flex flex-col gap-space-6 py-space-8 sm:py-space-10">
           <header class="flex flex-col gap-space-3">
-            <div class="flex flex-wrap items-center justify-between gap-space-3">
+            <div class="flex flex-wrap items-center gap-space-3">
               <Show
                 when={props.backHref}
                 fallback={
@@ -39,7 +38,6 @@ export function OrganizerEventDetailPage(props: {
                   </a>
                 )}
               </Show>
-              <LanguageSelector />
             </div>
             <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">{state.text().area}</p>
             <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">

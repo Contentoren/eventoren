@@ -3,7 +3,6 @@ import type { Accessor } from "solid-js"
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import type { UserRole } from "../auth/model_field/userRole.ts"
-import { LanguageSelector } from "../app/i18n/LanguageSelector.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { SiteHeaderCartButton } from "./SiteHeaderCartButton.tsx"
 import { SiteHeaderLogo } from "./SiteHeaderLogo.tsx"
@@ -51,7 +50,7 @@ export function SiteHeader(
                         <Link
                           to={link.to}
                           activeOptions={{ exact: link.exact }}
-                          activeProps={{ class: "bg-brand-soft text-brand-accent", "aria-current": "page" }}
+                          activeProps={{ class: "text-brand-accent", "aria-current": "page" }}
                           inactiveProps={{ class: "text-content-muted hover:bg-surface-muted hover:text-content" }}
                           class="focus-ring rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors"
                         >
@@ -84,7 +83,6 @@ export function SiteHeader(
           </nav>
 
           <div class="flex items-center gap-2 max-md:gap-0">
-            <LanguageSelector />
             <SiteHeaderCartButton
               quantity={state.cartQuantity()}
               label={state.cartLabel()}

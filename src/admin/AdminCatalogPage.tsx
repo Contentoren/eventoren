@@ -7,7 +7,6 @@ import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import type { EventCategory } from "../events/EventCategory.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
-import { LanguageSelector } from "../app/i18n/LanguageSelector.tsx"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import { AdminMemberManagement } from "./AdminMemberManagement.tsx"
 import type { AdminMemberManagementState } from "./AdminMemberManagementState.ts"
@@ -23,12 +22,7 @@ export function AdminCatalogPage(props: {
     <main id="content" tabindex="-1">
       <UiContainer width="wide" class="flex flex-col gap-8 py-10">
         <header class="flex flex-col gap-3">
-          <div class="flex items-center justify-between gap-4">
-            <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Administration</p>
-            <Show when={props.memberState}>
-              <LanguageSelector />
-            </Show>
-          </div>
+          <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Administration</p>
           <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">Events & Ticketprodukte</h1>
           <p class="max-w-3xl text-sm leading-relaxed text-content-muted">
             {props.description ??

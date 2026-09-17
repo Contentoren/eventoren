@@ -3,7 +3,6 @@ import type { JSX, ParentComponent } from "solid-js"
 import { For, Show } from "solid-js"
 import { Dynamic } from "solid-js/web"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
-import { LanguageSelector } from "../app/i18n/LanguageSelector.tsx"
 import { SiteFrame } from "../components/SiteFrame.tsx"
 import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
@@ -22,10 +21,7 @@ export function OrganizerEventListPage(props: {
       <main id="content" tabindex="-1" class="flex-1">
         <UiContainer width="wide" class="flex flex-col gap-space-8 py-space-8 sm:py-space-10">
           <header class="flex flex-col gap-space-3">
-            <div class="flex items-center justify-between gap-space-4">
-              <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">{state.text().area}</p>
-              <LanguageSelector />
-            </div>
+            <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">{state.text().area}</p>
             <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">{state.text().eventsTitle}</h1>
             <p class="max-w-2xl text-content-muted">{state.text().eventsDescription}</p>
           </header>

@@ -1,7 +1,6 @@
 import type { JSX } from "solid-js"
 import { For } from "solid-js"
 import { Link } from "@tanstack/solid-router"
-import { LanguageSelector } from "../../app/i18n/LanguageSelector.tsx"
 import { demoScenarioText } from "../model/demoScenarioText.ts"
 import { demoText } from "../model/demoText.ts"
 import { demoScenarios } from "../model/demoScenarios.js"
@@ -16,7 +15,6 @@ export function DemoShell(props: { readonly currentId: string; readonly children
           </Link>
           <div class="flex items-center gap-3">
             <span class="text-sm text-slate-500">{demoText("shellDetail")}</span>
-            <LanguageSelector />
           </div>
         </div>
       </header>
