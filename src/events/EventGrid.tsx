@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js"
+import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { EventCard } from "./EventCard.tsx"
 import type { EventItem } from "./EventItem.ts"
 
@@ -11,9 +12,13 @@ export function EventGrid(props: {
     <Show
       when={props.events.length > 0}
       fallback={
-        <p class="rounded-card border border-dashed border-border-strong bg-surface-muted p-space-7 text-center text-sm text-content-muted">
+        <CardWrapper
+          role="status"
+          aria-live="polite"
+          class="border-dashed border-border-strong bg-surface-muted p-space-7 text-center shadow-none"
+        >
           {props.emptyMessage ?? "Keine Events gefunden. Passe deine Filter an."}
-        </p>
+        </CardWrapper>
       }
     >
       <ul
