@@ -1,5 +1,5 @@
 import type { Accessor } from "solid-js"
-import { createMemo, onCleanup, onMount } from "solid-js"
+import { createEffect, createMemo, on, onCleanup, onMount } from "solid-js"
 import { useLocation } from "@tanstack/solid-router"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import { languageSignal } from "../app/i18n/languageSignal.ts"
@@ -39,11 +39,11 @@ export function siteHeaderStateCreate(
     if (!hasInjectedSession) {
       userSessionBrowserRestore()
       sessionHydrated.set(true)
-      syncCart()
     }
 
-    if (hasInjectedSession || typeof window === "undefined") return
+    if (typeof window === "undefined") return
 
+    syncCart()
     window.addEventListener(ticketCartDraftEventName, syncCart)
     window.addEventListener("storage", syncCart)
 
@@ -52,6 +52,12 @@ export function siteHeaderStateCreate(
       window.removeEventListener("storage", syncCart)
     })
   })
+
+  createEffect(
+    on(location, () => {
+      if (typeof window !== "undefined") syncCart()
+    }),
+  )
 
   const cartQuantity = inputs.cartQuantity ?? createMemo(() => ticketCartDraftTotalQuantity(cart.get()))
 

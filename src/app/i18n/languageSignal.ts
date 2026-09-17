@@ -1,3 +1,4 @@
+import { onCleanup, onMount } from "solid-js"
 import * as a from "valibot"
 import { createResult, createResultError } from "#result"
 import { type Language, languageDefault, languageSchema } from "#src/app/i18n/language.ts"
@@ -39,11 +40,9 @@ export function languageSaveToLocalStorage(language: Language) {
   localStorage.setItem(languageLocalStorageKey, language)
 }
 
-import { onCleanup, onMount } from "solid-js"
-
 export function languageSignalRegisterHandler(signal = languageSignal) {
   function handleStorageEvent(event: StorageEvent) {
-    if (event.key != languageLocalStorageKey) return
+    if (event.key !== languageLocalStorageKey) return
     if (event.newValue == null) return
     const parsing = a.safeParse(languageSchema, event.newValue)
     if (parsing.success) {
@@ -51,19 +50,27 @@ export function languageSignalRegisterHandler(signal = languageSignal) {
     }
   }
   onMount(() => {
-    if (typeof window == "undefined") return
-    const stored = languageLoadFromLocalStorage()
-    const browserLanguage = languageFromBrowser()
-    if (stored.success) {
-      signal.set(stored.data)
-    } else if (browserLanguage !== undefined) {
-      signal.set(browserLanguage)
-    }
-    window.addEventListener("storage", handleStorageEvent)
-  })
-  onCleanup(() => {
-    if (typeof window == "undefined") return
-    window.removeEventListener("storage", handleStorageEvent)
+    if (typeof window === "undefined") return
+
+    let cancelled = false
+    // Keep the first hydrated render on the server's deterministic language.
+    queueMicrotask(() => {
+      if (cancelled) return
+
+      const stored = languageLoadFromLocalStorage()
+      const browserLanguage = languageFromBrowser()
+      if (stored.success) {
+        signal.set(stored.data)
+      } else if (browserLanguage !== undefined) {
+        signal.set(browserLanguage)
+      }
+      window.addEventListener("storage", handleStorageEvent)
+    })
+
+    onCleanup(() => {
+      cancelled = true
+      window.removeEventListener("storage", handleStorageEvent)
+    })
   })
 }
 

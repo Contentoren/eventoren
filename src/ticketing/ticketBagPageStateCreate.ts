@@ -18,7 +18,7 @@ export function ticketBagPageStateCreate() {
   const navigate = useNavigate()
   const routeApi = getRouteApi("/warenkorb")
   const catalog = routeApi.useLoaderData()
-  const [cart, setCart] = createSignal<TicketCartDraft>(ticketCartDraftLoad())
+  const [cart, setCart] = createSignal<TicketCartDraft>([])
 
   const syncCart = () => {
     setCart(ticketCartDraftLoad())
