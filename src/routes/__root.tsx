@@ -1,9 +1,10 @@
-import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/solid-router"
+import { createRootRoute, HeadContent, Link, Outlet, Scripts } from "@tanstack/solid-router"
 import type { JSX } from "solid-js"
 import { Suspense } from "solid-js"
 import { HydrationScript } from "solid-js/web"
-import { rootDocumentStateCreate } from "../app/i18n/rootDocumentStateCreate.ts"
 import { logoutMarkerConsumeStateCreate } from "#src/auth/ui/logoutMarkerConsumeStateCreate.ts"
+import { ErrorPage } from "#ui/static/pages/ErrorPage.jsx"
+import { rootDocumentStateCreate } from "../app/i18n/rootDocumentStateCreate.ts"
 import { seo } from "../lib/seo.js"
 import { NotFoundPage } from "../marketing/NotFoundPage.js"
 import { RootFooter } from "../marketing/RootFooter.js"
@@ -33,6 +34,7 @@ export const Route = createRootRoute({
     ],
   }),
   component: PublicRootContent,
+  errorComponent: RootErrorPage,
   notFoundComponent: NotFoundPage,
   shellComponent: RootDocument,
 })
@@ -44,6 +46,19 @@ function PublicRootContent() {
     <>
       <Outlet />
     </>
+  )
+}
+
+function RootErrorPage() {
+  return (
+    <ErrorPage title="Something went wrong" subtitle="Please try again later.">
+      <Link
+        to="/"
+        class="mt-6 inline-flex rounded-control bg-brand px-space-4 py-space-2 text-sm font-semibold text-brand-content hover:bg-brand-strong"
+      >
+        Back home
+      </Link>
+    </ErrorPage>
   )
 }
 
