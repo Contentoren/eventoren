@@ -50,6 +50,54 @@ test("does not start Zitadel login without an application signing secret", async
   })
 })
 
+test("rejects a Zitadel callback received on a non-canonical origin", async () => {
+  await withEnvironment(async () => {
+    let fetchCalled = false
+    await withFetch(
+      async () => {
+        fetchCalled = true
+        return Response.json({ access_token: "access-token" })
+      },
+      async () => {
+        const startResponse = await eventorenZitadel.loginStart(
+          new Request("https://eventoren.example.test/login/zitadel"),
+        )
+        const cookie = startResponse.headers.get("set-cookie")
+        const location = new URL(startResponse.headers.get("location") ?? "")
+        const response = await eventorenZitadel.loginComplete(
+          new Request(
+            `https://alternate.example.test/login/zitadel/callback?code=authorization-code&state=${location.searchParams.get("state")}`,
+            { headers: { cookie: cookie?.split(";", 1)[0] ?? "" } },
+          ),
+        )
+
+        expect(response.status).toBe(400)
+        expect(fetchCalled).toBe(false)
+      },
+    )
+  })
+})
+
+test("does not start Zitadel login with a redirect URI outside the configured origin", async () => {
+  await withEnvironment(async () => {
+    process.env.ZITADEL_REDIRECT_URI = "https://alternate.example.test/login/zitadel/callback"
+
+    const response = await eventorenZitadel.loginStart(new Request("https://eventoren.example.test/login/zitadel"))
+
+    expect(response.status).toBe(503)
+  })
+})
+
+test("does not derive the Zitadel origin from the incoming request", async () => {
+  await withEnvironment(async () => {
+    delete process.env.PUBLIC_BASE_URL_APP
+
+    const response = await eventorenZitadel.loginStart(new Request("https://eventoren.example.test/login/zitadel"))
+
+    expect(response.status).toBe(503)
+  })
+})
+
 async function withFetch(
   implementation: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
   callback: () => Promise<void>,

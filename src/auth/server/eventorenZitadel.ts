@@ -1,5 +1,5 @@
-import { api } from "#convex/_generated/api.js"
 import { ConvexHttpClient } from "convex/browser"
+import { api } from "#convex/_generated/api.js"
 import { convexUrlGet } from "#src/server/convexUrlGet.ts"
 import { eventorenSessionCookie } from "./eventorenSessionCookie.ts"
 import { eventorenZitadelProviderCreate } from "./eventorenZitadelProviderCreate.ts"
@@ -19,8 +19,10 @@ type UserInfo = Record<string, unknown>
 
 export const eventorenZitadel = {
   async loginStart(request: Request): Promise<Response> {
-    const config = configuration(request)
+    const config = configuration()
     if (!config) return new Response("Eventoren-Zitadel ist nicht konfiguriert.", { status: 503 })
+    if (new URL(request.url).origin !== config.appOrigin)
+      return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 400)
 
     const state = randomValue()
     const verifier = randomValue()
@@ -45,14 +47,14 @@ export const eventorenZitadel = {
   },
 
   async loginComplete(request: Request): Promise<Response> {
-    const config = configuration(request)
+    const config = configuration()
     if (!config) return new Response("Eventoren-Zitadel ist nicht konfiguriert.", { status: 503 })
 
     const url = new URL(request.url)
     const login = await eventorenSessionCookie.loginRead(request.headers.get("cookie") ?? undefined)
     const state = url.searchParams.get("state") ?? ""
     const code = url.searchParams.get("code") ?? ""
-    if (url.searchParams.get("error") || !login || !code || login.state !== state) {
+    if (url.origin !== config.appOrigin || url.searchParams.get("error") || !login || !code || login.state !== state) {
       return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 400)
     }
 
@@ -95,20 +97,61 @@ function loginErrorResponse(request: Request, message: string, status: number): 
   })
 }
 
-function configuration(request: Request): ZitadelConfiguration | undefined {
+function configuration(): ZitadelConfiguration | undefined {
   const clientId = process.env.ZITADEL_CLIENT_ID?.trim()
   const clientSecret = process.env.ZITADEL_CLIENT_SECRET?.trim()
   const authSecret = process.env.AUTH_SECRET?.trim()
   if (!clientId || !clientSecret || !authSecret || authSecret.startsWith("replace-with-")) return undefined
 
-  const appOrigin = (process.env.PUBLIC_BASE_URL_APP?.trim() || new URL(request.url).origin).replace(/\/$/u, "")
+  const appOrigin = originRead(process.env.PUBLIC_BASE_URL_APP?.trim())
+  if (!appOrigin) return undefined
   const issuer = (process.env.ZITADEL_ISSUER?.trim() || defaultIssuer).replace(/\/$/u, "")
+  const redirectUri = redirectUriRead(process.env.ZITADEL_REDIRECT_URI?.trim(), appOrigin)
+  if (!redirectUri) return undefined
   return {
     issuer,
     clientId,
     clientSecret,
     appOrigin,
-    redirectUri: process.env.ZITADEL_REDIRECT_URI?.trim() || `${appOrigin}/login/zitadel/callback`,
+    redirectUri,
+  }
+}
+
+function originRead(value: string | undefined): string | undefined {
+  if (!value) return undefined
+  try {
+    const url = new URL(value)
+    if (
+      (url.protocol !== "http:" && url.protocol !== "https:") ||
+      url.username ||
+      url.password ||
+      url.pathname !== "/" ||
+      url.search ||
+      url.hash
+    )
+      return undefined
+    return url.origin
+  } catch {
+    return undefined
+  }
+}
+
+function redirectUriRead(value: string | undefined, appOrigin: string): string | undefined {
+  const redirectUri = value || `${appOrigin}/login/zitadel/callback`
+  try {
+    const url = new URL(redirectUri)
+    if (
+      url.origin !== appOrigin ||
+      url.username ||
+      url.password ||
+      url.pathname !== "/login/zitadel/callback" ||
+      url.search ||
+      url.hash
+    )
+      return undefined
+    return url.toString()
+  } catch {
+    return undefined
   }
 }
 
