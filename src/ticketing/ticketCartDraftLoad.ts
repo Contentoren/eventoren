@@ -1,6 +1,7 @@
 import type { TicketCart } from "./TicketCart.ts"
 import type { TicketCartDraft } from "./TicketCartDraft.ts"
 import { ticketCartDraftKey } from "./ticketCartDraftKey.ts"
+import { ticketCartDraftMaxAgeMs } from "./ticketCartDraftMaxAgeMs.ts"
 import { ticketCartSearchParse } from "./ticketCartSearchParse.ts"
 
 const isTicketCart = (value: unknown): value is TicketCart => {
@@ -23,7 +24,7 @@ const isTicketCart = (value: unknown): value is TicketCart => {
   })
 }
 
-export function ticketCartDraftLoad(): TicketCartDraft {
+export function ticketCartDraftLoad(now: number = Date.now()): TicketCartDraft {
   if (typeof localStorage === "undefined") return []
 
   let raw: string | null = null
@@ -42,7 +43,25 @@ export function ticketCartDraftLoad(): TicketCartDraft {
   }
   if (typeof parsed !== "object" || parsed === null) return []
 
-  const candidate = parsed as { version?: unknown; carts?: unknown; eventId?: unknown; tickets?: unknown }
+  const candidate = parsed as {
+    version?: unknown
+    carts?: unknown
+    eventId?: unknown
+    tickets?: unknown
+    savedAt?: unknown
+  }
+
+  if (typeof candidate.savedAt === "number") {
+    if (now - candidate.savedAt > ticketCartDraftMaxAgeMs || candidate.savedAt > now) {
+      try {
+        localStorage.removeItem(ticketCartDraftKey)
+      } catch {
+        // ignore removal error
+      }
+      return []
+    }
+  }
+
   if (candidate.version === 2) {
     if (!Array.isArray(candidate.carts) || !candidate.carts.every(isTicketCart)) return []
     return candidate.carts

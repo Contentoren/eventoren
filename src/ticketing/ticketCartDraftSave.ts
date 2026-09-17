@@ -8,14 +8,14 @@ import { ticketCartDraftTotalQuantity } from "./ticketCartDraftTotalQuantity.ts"
 
 const op = "ticketCartDraftSave"
 
-export function ticketCartDraftSave(draft: TicketCartDraft): Result<null> {
+export function ticketCartDraftSave(draft: TicketCartDraft, savedAt: number = Date.now()): Result<null> {
   if (typeof localStorage === "undefined") return createResult(null)
 
   try {
     if (draft.length === 0 || ticketCartDraftTotalQuantity(draft) <= 0) {
       localStorage.removeItem(ticketCartDraftKey)
     } else {
-      localStorage.setItem(ticketCartDraftKey, JSON.stringify({ version: 2, carts: draft }))
+      localStorage.setItem(ticketCartDraftKey, JSON.stringify({ version: 2, carts: draft, savedAt }))
     }
   } catch (error) {
     return createResultError(op, "Warenkorb konnte nicht gespeichert werden.", error)
