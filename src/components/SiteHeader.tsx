@@ -4,6 +4,7 @@ import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import type { UserRole } from "../auth/model_field/userRole.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
+import { UiButton } from "../ui/UiButton.tsx"
 import { SiteHeaderCartButton } from "./SiteHeaderCartButton.tsx"
 import { SiteHeaderLogo } from "./SiteHeaderLogo.tsx"
 import { SiteHeaderMobileMenu } from "./SiteHeaderMobileMenu.tsx"
@@ -95,23 +96,22 @@ export function SiteHeader(
             <Show
               when={props.checkoutHref}
               fallback={
-                <Button
+                <UiButton
                   size="sm"
-                  variant="none"
-                  class="bg-brand text-brand-content hover:bg-brand-strong max-sm:hidden sm:inline-flex"
+                  class="max-sm:hidden sm:inline-flex"
                   disabled={!state.cartHasItems()}
                   onClick={() => navigate({ to: "/checkout" })}
                 >
                   Zur Kasse
-                </Button>
+                </UiButton>
               }
             >
               {(checkoutHref) => (
                 <Link
                   to={checkoutHref()}
                   aria-disabled={!state.cartHasItems()}
-                  class="inline-flex h-10 items-center justify-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong max-sm:hidden sm:inline-flex"
-                  classList={{ "pointer-events-none opacity-50": !state.cartHasItems() }}
+                  class="focus-ring inline-flex h-9 items-center justify-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong max-sm:hidden sm:inline-flex"
+                  classList={{ "pointer-events-none opacity-70": !state.cartHasItems() }}
                 >
                   Zur Kasse
                 </Link>

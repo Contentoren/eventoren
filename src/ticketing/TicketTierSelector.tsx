@@ -27,7 +27,7 @@ export function TicketTierSelector(props: {
         <For each={state.rows()}>
           {(row) => (
             <li>
-              <UiCard>
+              <UiCard padded={false} class="p-5">
                 <div class="flex flex-col gap-space-4 sm:flex-row sm:items-start sm:justify-between">
                   <div class="flex flex-col gap-space-2">
                     <p class="text-base font-semibold text-content">{row.name}</p>

@@ -30,7 +30,7 @@ export function EventCatalogView(props: {
         <EventBookingThankYouBanner onDismiss={props.dismissBookingSuccess} />
       </Show>
 
-      <UiContainer class="flex flex-col gap-space-6 py-space-8 sm:py-12">
+      <UiContainer class="flex flex-col gap-space-6 py-5">
         <Show when={props.error.length > 0 && props.events.length === 0}>
           <div class="flex flex-wrap items-center justify-between gap-space-3 rounded-card border border-danger/50 bg-danger-soft p-space-6">
             <p class="text-sm text-danger" role="alert">

@@ -51,12 +51,12 @@ function PublicRootContent() {
 
 function RootErrorPage() {
   return (
-    <ErrorPage title="Something went wrong" subtitle="Please try again later.">
+    <ErrorPage title="Etwas ist schiefgelaufen" subtitle="Bitte versuchen Sie es später erneut.">
       <Link
         to="/"
         class="mt-6 inline-flex rounded-control bg-brand px-space-4 py-space-2 text-sm font-semibold text-brand-content hover:bg-brand-strong"
       >
-        Back home
+        Zurück zur Startseite
       </Link>
     </ErrorPage>
   )

@@ -22,7 +22,7 @@ export function EventGrid(props: {
       }
     >
       <ul
-        class="mx-auto grid w-full max-w-6xl grid-cols-1 gap-x-space-4 gap-y-space-6 pt-7 sm:grid-cols-2 lg:grid-cols-3"
+        class="mx-auto grid w-full max-w-6xl grid-cols-1 gap-x-space-4 gap-y-space-6 py-5 sm:grid-cols-2 lg:grid-cols-3"
         aria-label="Eventliste"
       >
         <For each={props.events}>

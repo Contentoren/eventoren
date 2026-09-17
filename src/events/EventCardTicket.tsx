@@ -35,7 +35,7 @@ export function EventCardTicket(props: { event: EventItem; href?: string }) {
         </div>
 
         {/* Content section with generous gap */}
-        <div class="flex items-start gap-space-5 p-space-4">
+        <div class="flex items-start gap-space-5 p-5">
           {/* Stub date block */}
           <div class="flex w-14 shrink-0 flex-col items-center rounded-control bg-brand py-space-2 text-brand-content">
             <span class="text-xs font-bold uppercase tracking-wide opacity-90">{state.dateParts().weekday}</span>
@@ -54,12 +54,12 @@ export function EventCardTicket(props: { event: EventItem; href?: string }) {
         </div>
 
         {/* Perforation: dashed rule kept flush inside the rectangle */}
-        <div aria-hidden="true" class="mt-auto px-space-4">
+        <div aria-hidden="true" class="mt-auto px-5">
           <div class="border-t border-dashed border-border-subtle" />
         </div>
 
         {/* Footer row with generous spacing and comfortable button */}
-        <div class="flex items-center justify-between gap-space-3 p-space-4">
+        <div class="flex items-center justify-between gap-space-3 p-5">
           <p class="text-base font-bold text-content">{state.priceLabel()}</p>
           <span
             data-testid="module-content-list-item-cta"

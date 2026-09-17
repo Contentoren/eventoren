@@ -57,7 +57,7 @@ export function TicketCheckoutForm(props: {
                     class="focus-ring h-11 w-full rounded-control border px-space-4 text-sm"
                     classList={{
                       "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid("firstName"),
-                      "border-danger/50 bg-danger-soft text-danger": state.isFieldInvalid("firstName"),
+                      "!border-danger/50 !bg-danger-soft text-content": state.isFieldInvalid("firstName"),
                     }}
                   />
                 </div>
@@ -76,7 +76,7 @@ export function TicketCheckoutForm(props: {
                     class="focus-ring h-11 w-full rounded-control border px-space-4 text-sm"
                     classList={{
                       "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid("lastName"),
-                      "border-danger/50 bg-danger-soft text-danger": state.isFieldInvalid("lastName"),
+                      "!border-danger/50 !bg-danger-soft text-content": state.isFieldInvalid("lastName"),
                     }}
                   />
                 </div>
@@ -98,7 +98,7 @@ export function TicketCheckoutForm(props: {
                   class="focus-ring h-11 w-full rounded-control border px-space-4 text-sm"
                   classList={{
                     "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid("email"),
-                    "border-danger/50 bg-danger-soft text-danger": state.isFieldInvalid("email"),
+                    "!border-danger/50 !bg-danger-soft text-content": state.isFieldInvalid("email"),
                   }}
                 />
                 <p id="checkout-email-hint" class="mt-space-2 text-sm text-content-muted">
@@ -159,7 +159,7 @@ export function TicketCheckoutForm(props: {
                             class="focus-ring h-11 rounded-control border px-space-4 text-sm"
                             classList={{
                               "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid(fieldKey),
-                              "border-danger/50 bg-danger-soft text-danger": state.isFieldInvalid(fieldKey),
+                              "!border-danger/50 !bg-danger-soft text-content": state.isFieldInvalid(fieldKey),
                             }}
                           />
                         </div>

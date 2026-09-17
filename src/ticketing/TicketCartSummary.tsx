@@ -150,7 +150,7 @@ export function TicketCartSummary(props: {
           </Show>
         </div>
 
-        <div class="flex flex-col gap-space-3 rounded-control border border-border-subtle bg-surface-muted/50 p-space-4">
+        <div class="flex flex-col gap-space-3 rounded-control border border-border-subtle bg-surface-muted/50 p-space-3">
           <p class="text-xs font-medium text-content">{text().paymentMethods}</p>
           <ul
             class="flex w-full flex-nowrap items-center justify-between gap-space-2"
