@@ -1,7 +1,5 @@
 import { createMemo } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
-import { language } from "../../app/i18n/language.ts"
-import { languageSignal } from "../../app/i18n/languageSignal.ts"
 import type { AdminMemberManagementState } from "../../admin/AdminMemberManagementState.ts"
 import type { AdminZitadelMember } from "../../admin/AdminZitadelMember.ts"
 import { adminMemberManagementText } from "../../admin/adminMemberManagementText.ts"
@@ -79,8 +77,7 @@ export function demoAdminMemberManagementStateCreate(
     if (!timestamp) return "—"
     const date = new Date(timestamp)
     if (Number.isNaN(date.valueOf())) return "—"
-    const locale = languageSignal.get() === language.de ? "de-DE" : "en-GB"
-    return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(date)
+    return new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" }).format(date)
   }
 
   return {

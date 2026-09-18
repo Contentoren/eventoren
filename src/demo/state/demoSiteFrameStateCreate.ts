@@ -12,6 +12,7 @@ export function demoSiteFrameStateCreate(inputs: {
   return {
     header: {
       session: () => ({ role: typeof inputs.sessionRole === "function" ? inputs.sessionRole() : inputs.sessionRole }),
+      language: "de" as const,
       navLinkHref: demoSiteNavHref,
       logoHref: "/demo/events",
       cartHref: "/demo/cart",

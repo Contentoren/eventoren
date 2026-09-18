@@ -58,12 +58,13 @@ export const demoStaticPages = {
       "<h1>Impressum</h1><p><strong>Eventoren GmbH</strong><br>Musterstraße 123<br>10115 Berlin</p><h2>Kontakt</h2><p>partner@eventoren.de<br>+49 (0) 30 12345678</p>",
     datenschutz:
       "<h1>Datenschutzerklärung</h1><p>Diese Demo zeigt die veröffentlichte Datenschutzseite mit lokalen Fixture-Daten.</p><h2>Deine Rechte</h2><p>Du kannst Auskunft, Berichtigung oder Löschung deiner personenbezogenen Daten verlangen.</p>",
-    privacy: "<h1>Privacy Policy</h1><p>This local demo fixture describes how Eventoren handles personal data.</p>",
+    privacy:
+      "<h1>Datenschutzerklärung</h1><p>Diese lokale Demo zeigt, wie Eventoren mit personenbezogenen Daten umgeht.</p>",
     terms:
-      "<h1>Terms of Service</h1><p>This local demo fixture describes the terms that apply to the Eventoren website.</p>",
+      "<h1>Allgemeine Geschäftsbedingungen</h1><p>Diese lokale Demo beschreibt die Bedingungen für die Nutzung der Eventoren-Website.</p>",
     agb: {
       title: "[Platzhalter] Allgemeine Geschäftsbedingungen (AGB)",
-      html: "<blockquote><p><strong>Hinweis / Disclaimer:</strong> Dies ist ein lokaler Platzhalter für die AGB-Demo.</p></blockquote><h2>1. Geltungsbereich und Vertragsgegenstand</h2><p>Diese AGB gelten für die Nutzung der Plattform Eventoren sowie für Ticketkäufe und damit verbundene Dienstleistungen.</p><h2>2. Ticketkauf</h2><p>Preise, Gebühren und Ticketinformationen werden vor Abschluss des Bestellvorgangs transparent angezeigt.</p>",
+      html: "<blockquote><p><strong>Hinweis:</strong> Dies ist ein lokaler Platzhalter für die AGB-Demo.</p></blockquote><h2>1. Geltungsbereich und Vertragsgegenstand</h2><p>Diese AGB gelten für die Nutzung der Plattform Eventoren sowie für Ticketkäufe und damit verbundene Dienstleistungen.</p><h2>2. Ticketkauf</h2><p>Preise, Gebühren und Ticketinformationen werden vor Abschluss des Bestellvorgangs transparent angezeigt.</p>",
     },
   },
 } as const

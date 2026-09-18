@@ -6,7 +6,7 @@ import { LegalPage } from "../../marketing/LegalPage.tsx"
 
 export const Route = createFileRoute("/demo/datenschutz")({
   head: () =>
-    demoRouteHeadCreate("Datenschutz demo", "Review the local Eventoren privacy fixture.", "/demo/datenschutz"),
+    demoRouteHeadCreate("Datenschutz-Demo", "Lokale Eventoren-Demo der Datenschutzerklärung.", "/demo/datenschutz"),
   component: () => (
     <DemoScenarioFrame currentId="datenschutz">
       <LegalPage html={() => demoStaticPages.legal.datenschutz} homeHref="/demo" />

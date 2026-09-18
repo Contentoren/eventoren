@@ -1,15 +1,12 @@
 import { createMemo } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import { language } from "../../app/i18n/language.ts"
-import { languageSignal } from "../../app/i18n/languageSignal.ts"
 import type { SiteHeaderNavLink } from "../../components/SiteHeaderNavLink.ts"
 import { siteHeaderNavLinks } from "../../components/siteHeaderNavLinks.ts"
 
 export function demoNavigationMenuStateCreate() {
   const open = createSignalObject(true)
-  const links = createMemo<readonly SiteHeaderNavLink[]>(() =>
-    siteHeaderNavLinks(languageSignal.get() === language.de ? language.de : language.en, "admin"),
-  )
+  const links = createMemo<readonly SiteHeaderNavLink[]>(() => siteHeaderNavLinks(language.de, "admin"))
 
   return {
     open: open.get,

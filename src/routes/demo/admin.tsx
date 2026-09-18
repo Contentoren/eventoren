@@ -6,8 +6,8 @@ export const Route = createFileRoute("/demo/admin")({
   head: () => ({
     meta: [
       ...seo.pageMeta({
-        title: "Catalog administration demo",
-        description: "Edit a local Eventoren event catalog fixture without auth or backend calls.",
+        title: "Katalogverwaltung-Demo",
+        description: "Lokale Eventoren-Demo zur Bearbeitung eines Eventkatalogs ohne Anmeldung oder Backend-Aufrufe.",
         path: "/demo/admin",
       }),
       { name: "robots", content: "noindex, nofollow" },

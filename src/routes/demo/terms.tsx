@@ -5,7 +5,8 @@ import { DemoScenarioFrame } from "../../demo/ui/DemoScenarioFrame.tsx"
 import { LegalPage } from "../../marketing/LegalPage.tsx"
 
 export const Route = createFileRoute("/demo/terms")({
-  head: () => demoRouteHeadCreate("Terms demo", "Review the local Eventoren English terms fixture.", "/demo/terms"),
+  head: () =>
+    demoRouteHeadCreate("AGB-Demo", "Lokale Eventoren-Demo der Allgemeinen Geschäftsbedingungen.", "/demo/terms"),
   component: () => (
     <DemoScenarioFrame currentId="terms">
       <LegalPage html={() => demoStaticPages.legal.terms} homeHref="/demo" />
