@@ -8,6 +8,7 @@ describe("ticketOrderEmailAccessTokenParse", () => {
   })
 
   test("rejects malformed and cross-channel fragments", () => {
+    expect(ticketOrderEmailAccessTokenParse("#ticketAccess=").success).toBe(false)
     expect(ticketOrderEmailAccessTokenParse("#ticketAccess=short").success).toBe(false)
     expect(ticketOrderEmailAccessTokenParse("?ticketAccess=some-token").success).toBe(false)
     expect(ticketOrderEmailAccessTokenParse(`#ticketAccess=${"a".repeat(64)}&orderId=other`).success).toBe(false)

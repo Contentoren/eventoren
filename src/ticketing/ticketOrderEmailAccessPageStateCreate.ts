@@ -2,17 +2,16 @@ import { useNavigate } from "@tanstack/solid-router"
 import { onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { TicketOrderProjection } from "./TicketOrderProjection.ts"
+import { ticketCheckoutText } from "./ticketCheckoutText.ts"
 import { ticketOrderAccessStorageUpsert } from "./ticketOrderAccessStorageUpsert.ts"
 import { ticketOrderByAccessTokenGet } from "./ticketOrderByAccessTokenGet.ts"
+import { ticketOrderEmailAccessModeDetect } from "./ticketOrderEmailAccessModeDetect.ts"
+import { ticketOrderEmailAccessModeStateCreate } from "./ticketOrderEmailAccessModeStateCreate.ts"
 import { ticketOrderEmailAccessTokenParse } from "./ticketOrderEmailAccessTokenParse.ts"
-
-const accessHashPrefix = "#ticketAccess="
 
 export function ticketOrderEmailAccessPageStateCreate() {
   const navigate = useNavigate()
-  const isActive = createSignalObject(
-    typeof window !== "undefined" && window.location.hash.startsWith(accessHashPrefix),
-  )
+  const modeState = ticketOrderEmailAccessModeStateCreate()
   const isLoading = createSignalObject(true)
   const isRefreshing = createSignalObject(false)
   const errorMessage = createSignalObject("")
@@ -53,10 +52,12 @@ export function ticketOrderEmailAccessPageStateCreate() {
 
   onMount(() => {
     const accessHash = window.location.hash
+    modeState.initialize(accessHash)
+    if (!modeState.isActive()) return
     ticketOrderEmailAccessHashClear()
     const parsed = ticketOrderEmailAccessTokenParse(accessHash)
     if (!parsed.success) {
-      errorMessage.set("Dieser Ticket-Link ist ungültig.")
+      errorMessage.set(ticketCheckoutText().ticketAccessInvalid)
       isLoading.set(false)
       return
     }
@@ -65,7 +66,7 @@ export function ticketOrderEmailAccessPageStateCreate() {
   })
 
   return {
-    isActive: isActive.get,
+    isActive: modeState.isActive,
     isLoading: isLoading.get,
     isRefreshing: isRefreshing.get,
     errorMessage: errorMessage.get,
@@ -76,6 +77,6 @@ export function ticketOrderEmailAccessPageStateCreate() {
 }
 
 function ticketOrderEmailAccessHashClear(): void {
-  if (!window.location.hash.startsWith(accessHashPrefix)) return
+  if (!ticketOrderEmailAccessModeDetect(window.location.hash)) return
   window.history.replaceState(null, document.title, `${window.location.pathname}${window.location.search}`)
 }

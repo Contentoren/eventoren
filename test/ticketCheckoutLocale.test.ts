@@ -13,6 +13,8 @@ test("localizes shared checkout copy and step labels", () => {
     directCheckout: "Go directly to checkout",
     perTicket: "per ticket",
     checkoutUnavailable: "Checkout unavailable",
+    ticketAccessInvalid: "This ticket link is invalid.",
+    ticketAccessNotFound: "The order was not found.",
   })
   expect(demoText("checkoutTitle")).toBe("Checkout")
   expect(demoText("checkoutSubmitLabel")).toBe("Complete demo order")
@@ -25,6 +27,8 @@ test("localizes shared checkout copy and step labels", () => {
     directCheckout: "Direkt zur Kasse",
     perTicket: "pro Ticket",
     checkoutUnavailable: "Checkout nicht möglich",
+    ticketAccessInvalid: "Dieser Ticket-Link ist ungültig.",
+    ticketAccessNotFound: "Die Bestellung wurde nicht gefunden.",
   })
   expect(demoText("checkoutTitle")).toBe("Kasse")
   expect(demoText("checkoutSubmitLabel")).toBe("Demo-Bestellung abschließen")

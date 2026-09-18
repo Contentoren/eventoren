@@ -5,6 +5,7 @@ import { createResult } from "../ui/createResult.ts"
 import { createResultError } from "../ui/createResultError.ts"
 import type { Result } from "../ui/Result.ts"
 import type { TicketOrderProjection } from "./TicketOrderProjection.ts"
+import { ticketCheckoutText } from "./ticketCheckoutText.ts"
 
 const op = "ticketOrderByAccessTokenGet"
 
@@ -14,7 +15,13 @@ export async function ticketOrderByAccessTokenGet(
 ): Promise<Result<TicketOrderProjection>> {
   try {
     const response = await client.query(api.ticketing.ticketOrderByAccessTokenQuery, { guestAccessToken: accessToken })
-    if (!response.success) return createResultError(op, response.errorMessage, response)
+    if (!response.success) {
+      const errorMessage =
+        response.errorMessage === "The order was not found"
+          ? ticketCheckoutText().ticketAccessNotFound
+          : response.errorMessage
+      return createResultError(op, errorMessage, response)
+    }
     if (!isTicketOrderProjection(response.data)) return createResultError(op, "Bestellung hat ein ungültiges Format.")
     return createResult(response.data)
   } catch (error) {

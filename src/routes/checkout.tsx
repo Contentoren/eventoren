@@ -51,13 +51,25 @@ function CheckoutPage() {
   const orderIds = () => ticketCheckoutSearchOrderIdsParse(search().orders)
   const isStatusPage = () => orderIds().length > 0 || Boolean(search().checkout)
 
-  if (emailAccessState.isActive()) return <TicketOrderEmailAccessPage state={emailAccessState} />
-  if (isStatusPage()) {
-    return <TicketOrderStatusPage orderIds={orderIds()} checkoutKey={search().checkout} />
-  }
-  if (loaderData().bypassBilling) return <DemoCheckout skipForm={loaderData().skipCheckoutForm} />
-
-  return <CheckoutFormPage appOrigin={loaderData().appOrigin} />
+  return (
+    <Show
+      when={emailAccessState.isActive()}
+      fallback={
+        <Show
+          when={isStatusPage()}
+          fallback={
+            <Show when={loaderData().bypassBilling} fallback={<CheckoutFormPage appOrigin={loaderData().appOrigin} />}>
+              <DemoCheckout skipForm={loaderData().skipCheckoutForm} />
+            </Show>
+          }
+        >
+          <TicketOrderStatusPage orderIds={orderIds()} checkoutKey={search().checkout} />
+        </Show>
+      }
+    >
+      <TicketOrderEmailAccessPage state={emailAccessState} />
+    </Show>
+  )
 }
 
 function CheckoutFormPage(props: { appOrigin: ReturnType<typeof envBaseUrlAppResult> }) {
