@@ -1,8 +1,9 @@
+import { useLocation } from "@tanstack/solid-router"
 import type { Accessor } from "solid-js"
 import { createEffect, createMemo, on, onCleanup, onMount } from "solid-js"
-import { useLocation } from "@tanstack/solid-router"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
-import { languageSignal } from "../app/i18n/languageSignal.ts"
+import type { Language } from "../app/i18n/language.ts"
+import { languageDefault } from "../app/i18n/language.ts"
 import type { UserRole } from "../auth/model_field/userRole.ts"
 import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
 import { userSessionSignal } from "../auth/ui/signals/userSessionSignal.ts"
@@ -10,13 +11,14 @@ import type { TicketCartDraft } from "../ticketing/TicketCartDraft.ts"
 import { ticketCartDraftEventName } from "../ticketing/ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "../ticketing/ticketCartDraftLoad.ts"
 import { ticketCartDraftTotalQuantity } from "../ticketing/ticketCartDraftTotalQuantity.ts"
-import type { SiteHeaderOverlay } from "./SiteHeaderOverlay.ts"
 import type { SiteHeaderNavLink } from "./SiteHeaderNavLink.ts"
+import type { SiteHeaderOverlay } from "./SiteHeaderOverlay.ts"
 import { siteHeaderNavLinks } from "./siteHeaderNavLinks.ts"
 
 export function siteHeaderStateCreate(
   inputs: {
     readonly session?: { readonly role?: UserRole } | Accessor<{ readonly role?: UserRole } | undefined>
+    readonly language?: Language
     readonly cartQuantity?: Accessor<number>
     readonly navLinkIsActive?: (link: SiteHeaderNavLink, href: string, pathname: string) => boolean
     readonly cartIsActive?: (href: string, pathname: string) => boolean
@@ -84,7 +86,7 @@ export function siteHeaderStateCreate(
   return {
     navLinks: createMemo(() =>
       siteHeaderNavLinks(
-        languageSignal.get(),
+        inputs.language ?? languageDefault,
         hasInjectedSession ? injectedSessionRole() : userSessionSignal.get()?.profile.role,
         sessionHydrated.get(),
       ),

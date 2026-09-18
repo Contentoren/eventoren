@@ -14,7 +14,7 @@ export function Footer(props: { readonly linkHref?: (href: string) => string } =
 
   return (
     <footer class="border-t p-4 text-sm">
-      <nav aria-label="Legal">
+      <nav aria-label="Rechtliche Informationen">
         {link("/impressum", "Impressum")}
         {link("/datenschutz", "Datenschutz")}
         {link("/terms", "AGB")}

@@ -1,26 +1,12 @@
 import { expect, test } from "bun:test"
 import { language } from "../src/app/i18n/language.ts"
 import { languageSignal } from "../src/app/i18n/languageSignal.ts"
-import { demoText } from "../src/demo/model/demoText.ts"
 import { ticketCheckoutStepLabels } from "../src/ticketing/ticketCheckoutStepLabels.ts"
 import { ticketCheckoutText } from "../src/ticketing/ticketCheckoutText.ts"
+import { ticketOrderWalletText } from "../src/ticketing/ticketOrderWalletText.ts"
 
-test("localizes shared checkout copy and step labels", () => {
+test("keeps checkout and order wallet copy German-only", () => {
   languageSignal.set(language.en)
-  expect(ticketCheckoutText()).toMatchObject({
-    title: "Checkout",
-    orderSummary: "Order summary",
-    directCheckout: "Go directly to checkout",
-    perTicket: "per ticket",
-    checkoutUnavailable: "Checkout unavailable",
-    ticketAccessInvalid: "This ticket link is invalid.",
-    ticketAccessNotFound: "The order was not found.",
-  })
-  expect(demoText("checkoutTitle")).toBe("Checkout")
-  expect(demoText("checkoutSubmitLabel")).toBe("Complete demo order")
-  expect(ticketCheckoutStepLabels()).toEqual({ kontakt: "Contact & payment", bestaetigung: "Confirmation" })
-
-  languageSignal.set(language.de)
   expect(ticketCheckoutText()).toMatchObject({
     title: "Kasse",
     orderSummary: "Bestellübersicht",
@@ -29,10 +15,20 @@ test("localizes shared checkout copy and step labels", () => {
     checkoutUnavailable: "Checkout nicht möglich",
     ticketAccessInvalid: "Dieser Ticket-Link ist ungültig.",
     ticketAccessNotFound: "Die Bestellung wurde nicht gefunden.",
+    locale: "de",
   })
-  expect(demoText("checkoutTitle")).toBe("Kasse")
-  expect(demoText("checkoutSubmitLabel")).toBe("Demo-Bestellung abschließen")
   expect(ticketCheckoutStepLabels()).toEqual({ kontakt: "Kontakt & Zahlung", bestaetigung: "Bestätigung" })
+  expect(ticketOrderWalletText()).toMatchObject({
+    walletTicket: "Eventoren Wallet-Ticket",
+    venue: "Ort",
+    paid: "Bezahlt",
+    pending: "Zahlung wird bestätigt",
+    failed: "Zahlung fehlgeschlagen",
+    total: "Gesamt inkl. Gebühren",
+    tickets: "Deine Tickets",
+    participant: "Teilnehmer:in",
+    qrCodeFor: "QR-Code für Ticket",
+  })
 
-  languageSignal.set(language.en)
+  languageSignal.set(language.de)
 })

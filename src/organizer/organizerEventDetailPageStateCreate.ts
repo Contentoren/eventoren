@@ -1,7 +1,6 @@
-import { createEffect, on, onCleanup, onMount } from "solid-js"
 import type { PaginationOptions } from "convex/server"
+import { createEffect, on, onCleanup, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
-import { languageSignal } from "../app/i18n/languageSignal.ts"
 import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
 import { userTokenGet } from "../auth/ui/signals/userSessionSignal.ts"
 import type { OrganizerDataResult } from "./OrganizerDataResult.ts"
@@ -38,7 +37,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
   const actionError = createSignalObject<DetailActionError | null>(null)
   const actionSuccess = createSignalObject<DetailActionSuccess | null>(null)
   const duplicateInfo = createSignalObject<OrganizerDuplicateInfo | null>(null)
-  const text = () => organizerTextGet(languageSignal.get())
+  const text = () => organizerTextGet()
   let searchTimer: ReturnType<typeof setTimeout> | undefined
   let scannerFeedbackClear = () => {}
   let ticketListRevision = 0
@@ -299,7 +298,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     }
   }
 
-  const locale = () => (languageSignal.get() === "de" ? "de-DE" : "en-GB")
+  const locale = () => "de-DE"
   const currency = (priceCents: number) =>
     new Intl.NumberFormat(locale(), { style: "currency", currency: "EUR" }).format(priceCents / 100)
   const dateTime = (value: string | null) => {
@@ -310,7 +309,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     if (milliseconds === null) return text().unknown
     const minutes = Math.floor(milliseconds / 60_000)
     const seconds = Math.floor((milliseconds % 60_000) / 1_000)
-    return languageSignal.get() === "de" ? `${minutes} Min. ${seconds} Sek.` : `${minutes} min ${seconds} sec`
+    return `${minutes} Min. ${seconds} Sek.`
   }
 
   const scanner = organizerTicketScannerStateCreate({ text, scanCode: ticketCheckInCode })

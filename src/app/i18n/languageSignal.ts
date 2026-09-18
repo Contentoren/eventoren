@@ -1,7 +1,6 @@
 import { onCleanup, onMount } from "solid-js"
-import * as a from "valibot"
 import { createResult, createResultError } from "#result"
-import { type Language, languageDefault, languageSchema } from "#src/app/i18n/language.ts"
+import { type Language, languageDefault } from "#src/app/i18n/language.ts"
 import { languageFromBrowser } from "#src/app/i18n/languageFromBrowser.ts"
 import { createSignalObject, type SignalObject } from "#ui/utils/createSignalObject.ts"
 
@@ -27,12 +26,10 @@ export function languageLoadFromLocalStorage() {
   const op = "languageLoadFromLocalStorage"
   if (typeof localStorage === "undefined") return createResultError(op, "localStorage not defined")
   const read = localStorage.getItem(languageLocalStorageKey)
-  if (!read) return createResultError(op, "no language saved in localStorage")
-  const parsing = a.safeParse(languageSchema, read)
-  if (!parsing.success) {
-    return createResultError(op, a.summarize(parsing.issues), read)
-  }
-  return createResult(parsing.output)
+  if (read === null) return createResultError(op, "no language saved in localStorage")
+
+  // Stored language values may come from an older multilingual UI. Resolve all of them to German.
+  return createResult(languageDefault)
 }
 
 export function languageSaveToLocalStorage(language: Language) {
@@ -43,11 +40,8 @@ export function languageSaveToLocalStorage(language: Language) {
 export function languageSignalRegisterHandler(signal = languageSignal) {
   function handleStorageEvent(event: StorageEvent) {
     if (event.key !== languageLocalStorageKey) return
-    if (event.newValue == null) return
-    const parsing = a.safeParse(languageSchema, event.newValue)
-    if (parsing.success) {
-      signal.set(parsing.output)
-    }
+    if (event.newValue === null) return
+    signal.set(languageDefault)
   }
   onMount(() => {
     if (typeof window === "undefined") return

@@ -2,19 +2,21 @@ import { Link, useNavigate } from "@tanstack/solid-router"
 import type { Accessor } from "solid-js"
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import type { Language } from "../app/i18n/language.ts"
 import type { UserRole } from "../auth/model_field/userRole.ts"
-import { UiContainer } from "../ui/UiContainer.tsx"
 import { UiButton } from "../ui/UiButton.tsx"
+import { UiContainer } from "../ui/UiContainer.tsx"
 import { SiteHeaderCartButton } from "./SiteHeaderCartButton.tsx"
 import { SiteHeaderLogo } from "./SiteHeaderLogo.tsx"
 import { SiteHeaderMobileMenu } from "./SiteHeaderMobileMenu.tsx"
-import { SiteHeaderSkipLink } from "./SiteHeaderSkipLink.tsx"
 import type { SiteHeaderNavLink } from "./SiteHeaderNavLink.ts"
+import { SiteHeaderSkipLink } from "./SiteHeaderSkipLink.tsx"
 import { siteHeaderStateCreate } from "./siteHeaderStateCreate.ts"
 
 export function SiteHeader(
   props: {
     readonly session?: { readonly role?: UserRole } | Accessor<{ readonly role?: UserRole } | undefined>
+    readonly language?: Language
     readonly navLinkHref?: (link: SiteHeaderNavLink) => string
     readonly logoHref?: string
     readonly cartHref?: string
@@ -27,6 +29,7 @@ export function SiteHeader(
   const navigate = useNavigate()
   const state = siteHeaderStateCreate({
     session: props.session,
+    language: props.language,
     cartQuantity: props.cartQuantity,
     navLinkIsActive: props.navLinkIsActive,
     cartIsActive: props.cartIsActive,
@@ -40,7 +43,7 @@ export function SiteHeader(
         <div class="flex h-16 items-center justify-between gap-space-5 max-md:gap-space-2">
           <SiteHeaderLogo class="max-md:px-space-1" href={props.logoHref} />
 
-          <nav aria-label="Main navigation" class="max-md:hidden">
+          <nav aria-label="Hauptnavigation" class="max-md:hidden">
             <ul class="flex items-center gap-space-1">
               <For each={state.navLinks()}>
                 {(link) => (

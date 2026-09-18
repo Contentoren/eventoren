@@ -1,5 +1,10 @@
-export function adminMemberManagementText() {
-  return {
+import { expect, test } from "bun:test"
+import { adminMemberManagementText } from "../src/admin/adminMemberManagementText.ts"
+
+test("admin member-management copy is German", () => {
+  const text = adminMemberManagementText()
+
+  expect(text).toMatchObject({
     actionError: "Die Organizer-Rolle konnte nicht geändert werden.",
     empty: "Keine Mitglieder gefunden.",
     grant: "Organizer-Rolle vergeben",
@@ -22,6 +27,8 @@ export function adminMemberManagementText() {
     title: "Mitglieder & Organizer-Rollen",
     total: "[X] Mitglieder",
     updating: "Wird gespeichert …",
-    roleName: (role: string) => ({ admin: "Admin", customer: "Kunde", organizer: "Organizer" })[role] ?? role,
-  }
-}
+  })
+  expect(text.roleName("admin")).toBe("Admin")
+  expect(text.roleName("customer")).toBe("Kunde")
+  expect(text.roleName("organizer")).toBe("Organizer")
+})

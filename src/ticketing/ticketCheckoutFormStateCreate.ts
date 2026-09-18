@@ -2,8 +2,6 @@ import { useNavigate } from "@tanstack/solid-router"
 import { createEffect, createMemo, on, onMount } from "solid-js"
 import type { Result } from "#result"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
-import { language } from "../app/i18n/language.ts"
-import { languageSignal } from "../app/i18n/languageSignal.ts"
 import { userTokenGet } from "../auth/ui/signals/userSessionSignal.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import type { TicketCart } from "./TicketCart.ts"
@@ -181,7 +179,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
       return
     }
 
-    const validated = ticketContactValidate(contact.get(), text.locale)
+    const validated = ticketContactValidate(contact.get())
     if (!validated.success) {
       errorMessage.set(validated.errorMessage)
       return
@@ -234,7 +232,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
             })),
           successUrl: returnUrl.data,
           cancelUrl: returnUrl.data,
-          locale: languageSignal.get() === language.de ? "de" : "en",
+          locale: "de",
           customer: {
             email: validated.data.email,
             givenName: validated.data.firstName,

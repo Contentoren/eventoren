@@ -1,13 +1,15 @@
 import type { Accessor, JSX } from "solid-js"
+import type { Language } from "../app/i18n/language.ts"
 import type { UserRole } from "../auth/model_field/userRole.ts"
-import type { SiteHeaderNavLink } from "./SiteHeaderNavLink.ts"
 import { SiteFooter } from "./SiteFooter.tsx"
 import { SiteHeader } from "./SiteHeader.tsx"
+import type { SiteHeaderNavLink } from "./SiteHeaderNavLink.ts"
 
 export function SiteFrame(props: {
   children: JSX.Element
   header?: {
     readonly session?: { readonly role?: UserRole } | Accessor<{ readonly role?: UserRole } | undefined>
+    readonly language?: Language
     readonly navLinkHref?: (link: SiteHeaderNavLink) => string
     readonly logoHref?: string
     readonly cartHref?: string

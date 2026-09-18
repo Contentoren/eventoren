@@ -41,7 +41,7 @@ describe("organizer ticket scanner QR compatibility", () => {
     expect(decoded.getText()).toBe(code)
   })
 
-  test("localizes simulated camera errors and scan outcomes after a language switch", async () => {
+  test("keeps simulated camera errors and scan outcomes in German", async () => {
     languageSignal.set(language.de)
     let dispose: (() => void) | undefined
     let state: ReturnType<typeof organizerTicketScannerStateCreate> | undefined
@@ -50,7 +50,7 @@ describe("organizer ticket scanner QR compatibility", () => {
     createRoot((rootDispose) => {
       dispose = rootDispose
       state = organizerTicketScannerStateCreate({
-        text: () => organizerTextGet(languageSignal.get()),
+        text: () => organizerTextGet(),
         scanCode: async () => {
           if (scanSuccess) return { success: true, data: {} as OrganizerTicket }
           return {
@@ -65,24 +65,24 @@ describe("organizer ticket scanner QR compatibility", () => {
     try {
       if (!state) throw new Error("scanner state was not created")
       state.scannerPermissionDeniedSimulate()
-      expect(state.scannerErrorMessage()).toBe(organizerTextGet(language.de).scannerPermissionDenied)
+      expect(state.scannerErrorMessage()).toBe(organizerTextGet().scannerPermissionDenied)
 
       languageSignal.set(language.en)
-      expect(state.scannerErrorMessage()).toBe(organizerTextGet(language.en).scannerPermissionDenied)
+      expect(state.scannerErrorMessage()).toBe(organizerTextGet().scannerPermissionDenied)
 
       await state.scannerCodeSimulate("TKT-demo")
       expect(state.scannerErrorMessage()).toBe("")
-      expect(state.scannerOutcome()?.message).toBe(organizerTextGet(language.en).scanSuccess)
+      expect(state.scannerOutcome()?.message).toBe(organizerTextGet().scanSuccess)
 
       languageSignal.set(language.de)
-      expect(state.scannerOutcome()?.message).toBe(organizerTextGet(language.de).scanSuccess)
+      expect(state.scannerOutcome()?.message).toBe(organizerTextGet().scanSuccess)
 
       scanSuccess = false
       await state.scannerCodeSimulate("TKT-demo-duplicate")
-      expect(state.scannerOutcome()?.message).toBe(organizerTextGet(language.de).duplicateTitle)
+      expect(state.scannerOutcome()?.message).toBe(organizerTextGet().duplicateTitle)
 
       languageSignal.set(language.en)
-      expect(state.scannerOutcome()?.message).toBe(organizerTextGet(language.en).duplicateTitle)
+      expect(state.scannerOutcome()?.message).toBe(organizerTextGet().duplicateTitle)
     } finally {
       dispose?.()
       languageSignal.set(language.en)
@@ -96,7 +96,7 @@ describe("organizer ticket scanner QR compatibility", () => {
     createRoot((rootDispose) => {
       dispose = rootDispose
       state = organizerTicketScannerStateCreate({
-        text: () => organizerTextGet(languageSignal.get()),
+        text: () => organizerTextGet(),
         scanCode: async () => {
           throw new Error("backend unavailable")
         },
@@ -109,7 +109,7 @@ describe("organizer ticket scanner QR compatibility", () => {
       expect(state.scannerCheckingIn()).toBe(false)
       expect(state.scannerErrorMessage()).toBe("")
       expect(state.scannerOutcome()?.kind).toBe("denied")
-      expect(state.scannerOutcome()?.message).toBe(organizerTextGet(language.en).actionFailed)
+      expect(state.scannerOutcome()?.message).toBe(organizerTextGet().actionFailed)
     } finally {
       dispose?.()
     }

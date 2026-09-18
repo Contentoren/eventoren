@@ -1,8 +1,9 @@
 import { createEffect, createMemo } from "solid-js"
-import { languageSignal, languageSignalRegisterHandler } from "./languageSignal.ts"
+import { languageDefault } from "./language.ts"
+import { languageSignalRegisterHandler } from "./languageSignal.ts"
 
 export function rootDocumentStateCreate() {
-  const selectedLanguage = createMemo(() => languageSignal.get())
+  const selectedLanguage = createMemo(() => languageDefault)
   languageSignalRegisterHandler()
   createEffect(() => {
     if (typeof document === "undefined") return

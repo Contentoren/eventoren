@@ -1,6 +1,5 @@
 import { createMemo, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
-import { languageSignal } from "../app/i18n/languageSignal.ts"
 import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
 import { userTokenGet } from "../auth/ui/signals/userSessionSignal.ts"
 import type { OrganizerDataSource } from "./OrganizerDataSource.ts"
@@ -18,7 +17,7 @@ export function organizerEventListPageStateCreate(inputs?: {
   const events = createSignalObject<readonly OrganizerEvent[]>([])
   const loading = createSignalObject(true)
   const errorMessage = createSignalObject("")
-  const text = createMemo(() => organizerTextGet(languageSignal.get()))
+  const text = createMemo(organizerTextGet)
 
   const eventListLoad = async () => {
     try {
@@ -37,9 +36,9 @@ export function organizerEventListPageStateCreate(inputs?: {
     void eventListLoad()
   })
 
-  const groups = createMemo(() => organizerEventsGroup(events.get(), languageSignal.get()))
+  const groups = createMemo(() => organizerEventsGroup(events.get()))
   const eventTime = (value: string) =>
-    new Intl.DateTimeFormat(languageSignal.get() === "de" ? "de-DE" : "en-GB", {
+    new Intl.DateTimeFormat("de-DE", {
       hour: "2-digit",
       minute: "2-digit",
     }).format(new Date(value))
@@ -47,9 +46,13 @@ export function organizerEventListPageStateCreate(inputs?: {
   return { groups, text, loading: loading.get, errorMessage: errorMessage.get, eventTime }
 }
 
-function organizerEventsGroup(events: readonly OrganizerEvent[], language: string): readonly OrganizerEventGroup[] {
-  const locale = language === "de" ? "de-DE" : "en-GB"
-  const formatter = new Intl.DateTimeFormat(locale, { weekday: "long", day: "2-digit", month: "long", year: "numeric" })
+function organizerEventsGroup(events: readonly OrganizerEvent[]): readonly OrganizerEventGroup[] {
+  const formatter = new Intl.DateTimeFormat("de-DE", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  })
   const groups = new Map<string, OrganizerEventGroup>()
   for (const event of [...events].sort((left, right) => Date.parse(left.startsAt) - Date.parse(right.startsAt))) {
     const date = new Date(event.startsAt)

@@ -1,11 +1,10 @@
 import { createMemo, onMount } from "solid-js"
-import { language } from "../app/i18n/language.ts"
-import { languageSignal } from "../app/i18n/languageSignal.ts"
+import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
 import { userTokenGet } from "../auth/ui/signals/userSessionSignal.ts"
-import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { AdminMemberManagementState } from "./AdminMemberManagementState.ts"
 import type { AdminZitadelMember } from "./AdminZitadelMember.ts"
+import { adminMemberManagementInvitationFormat } from "./adminMemberManagementInvitationFormat.ts"
 import { adminMemberManagementText } from "./adminMemberManagementText.ts"
 import { adminZitadelMembersList } from "./adminZitadelMembersList.ts"
 import { adminZitadelOrganizerGrant } from "./adminZitadelOrganizerGrant.ts"
@@ -69,14 +68,6 @@ export function adminMemberManagementStateCreate(): AdminMemberManagementState {
     successMessage.set(operation === "grant" ? text().granted : text().revoked)
   }
 
-  const invitationFormat = (timestamp: string | undefined) => {
-    if (!timestamp) return "—"
-    const date = new Date(timestamp)
-    if (Number.isNaN(date.valueOf())) return "—"
-    const locale = languageSignal.get() === language.de ? "de-DE" : "en-GB"
-    return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(date)
-  }
-
   onMount(() => {
     userSessionBrowserRestore()
     void reload()
@@ -84,7 +75,7 @@ export function adminMemberManagementStateCreate(): AdminMemberManagementState {
 
   return {
     errorMessage: errorMessage.get,
-    invitationFormat,
+    invitationFormat: adminMemberManagementInvitationFormat,
     isLoading: isLoading.get,
     isUpdating: (zitadelUserId) => updatingMemberIds.get().includes(zitadelUserId),
     members: members.get,

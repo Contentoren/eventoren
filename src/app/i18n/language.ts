@@ -10,7 +10,7 @@ export const language = {
   tj: "tj",
 } as const
 
-export const languageDefault: Language = language.en
+export const languageDefault: typeof language.de = language.de
 
 export function isEn(l: Language): boolean {
   return l === language.en

@@ -4,19 +4,18 @@ import { userRoleCanAccessOrganizer, userRoleIsDevOrAdmin } from "../auth/model_
 import type { SiteHeaderNavLink } from "./SiteHeaderNavLink.ts"
 
 export function siteHeaderNavLinks(
-  language: Language,
+  _language: Language,
   role?: UserRole,
   sessionHydrated = true,
 ): readonly SiteHeaderNavLink[] {
-  const isGerman = language === "de"
   const activeRole = sessionHydrated ? role : undefined
   return [
-    { to: "/", label: isGerman ? "Events entdecken" : "Discover events", exact: true },
+    { to: "/", label: "Events entdecken", exact: true },
     ...(activeRole && userRoleCanAccessOrganizer(activeRole)
-      ? [{ to: "/organizer" as const, label: isGerman ? "Veranstalter" : "Organizer", exact: false }]
+      ? [{ to: "/organizer" as const, label: "Veranstalter", exact: false }]
       : []),
     ...(activeRole && userRoleIsDevOrAdmin(activeRole)
-      ? [{ to: "/admin" as const, label: isGerman ? "Verwaltung" : "Administration", exact: false }]
+      ? [{ to: "/admin" as const, label: "Verwaltung", exact: false }]
       : []),
   ] satisfies readonly SiteHeaderNavLink[]
 }

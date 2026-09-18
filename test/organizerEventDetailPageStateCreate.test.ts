@@ -34,13 +34,17 @@ describe("organizer event detail state", () => {
       state.scannerPermissionDeniedSimulate()
       await state.ticketCheckIn()
 
-      expect(state.successMessage()).toBe(organizerTextGet(language.de).actionSuccess)
+      expect(state.successMessage()).toBe(organizerTextGet().actionSuccess)
       expect(state.errorMessage()).toBe("")
       expect(state.scannerErrorMessage()).toBe("")
 
       languageSignal.set(language.en)
-      expect(state.successMessage()).toBe(organizerTextGet(language.en).actionSuccess)
+      expect(state.successMessage()).toBe(organizerTextGet().actionSuccess)
       expect(state.errorMessage()).toBe("")
+      expect(state.currency(123_456)).toContain("1.234,56")
+      expect(state.currency(123_456)).toContain("€")
+      expect(state.dateTime("2026-09-18T14:05:00.000Z")).toContain("18.09.2026")
+      expect(state.elapsed(125_000)).toBe("2 Min. 5 Sek.")
     } finally {
       dispose?.()
       languageSignal.set(language.en)
@@ -73,9 +77,9 @@ describe("organizer event detail state", () => {
       await state.ticketCheckIn()
 
       expect(state.successMessage()).toBe("")
-      expect(state.errorMessage()).toBe(organizerTextGet(language.de).duplicateTitle)
+      expect(state.errorMessage()).toBe(organizerTextGet().duplicateTitle)
       languageSignal.set(language.en)
-      expect(state.errorMessage()).toBe(organizerTextGet(language.en).duplicateTitle)
+      expect(state.errorMessage()).toBe(organizerTextGet().duplicateTitle)
     } finally {
       dispose?.()
       languageSignal.set(language.en)
@@ -111,7 +115,7 @@ describe("organizer event detail state", () => {
       state.ticketSelect(ticket)
       await state.ticketCheckIn()
       expect(state.actionPending()).toBe(false)
-      expect(state.errorMessage()).toBe(organizerTextGet(language.en).actionFailed)
+      expect(state.errorMessage()).toBe(organizerTextGet().actionFailed)
     } finally {
       dispose?.()
     }
