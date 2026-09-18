@@ -17,6 +17,7 @@ PublishPort=127.0.0.1:@API_PORT@:3211
 Volume=eventoren-convex-preview-data.volume:/convex/data
 EnvironmentFile=@ENV_FILE@
 Environment=DOCUMENT_RETENTION_DELAY=172800
+Environment=MALLOC_ARENA_MAX=2
 Environment=RUST_LOG=info
 Notify=healthy
 HealthCmd=curl -f http://localhost:3210/version
