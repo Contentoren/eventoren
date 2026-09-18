@@ -4,6 +4,7 @@ import type { EventItem } from "#src/events/EventItem.ts"
 export function catalogEventToEventItem(
   event: Doc<"catalogEvents">,
   tiers: readonly Doc<"catalogTicketTiers">[],
+  syncedCatalogVersion?: number,
 ): EventItem {
   const sortedTiers = [...tiers].sort((a, b) => a.sortOrder - b.sortOrder)
   const eventTiers = sortedTiers.map((tier) => ({
@@ -18,7 +19,7 @@ export function catalogEventToEventItem(
 
   return {
     id: event.eventKey,
-    catalogVersion: event.catalogVersion,
+    catalogVersion: Math.max(event.catalogVersion, syncedCatalogVersion ?? 0),
     title: event.title,
     subtitle: event.subtitle,
     description: event.description,

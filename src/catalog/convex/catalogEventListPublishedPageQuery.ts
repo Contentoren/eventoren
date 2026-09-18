@@ -67,6 +67,10 @@ export const catalogEventListPublishedPageQuery = query({
         maximumRowsRead: pageSize,
         maximumBytesRead: maxPageBytes,
       })
+    const syncState = await ctx.db
+      .query("catalogSyncStates")
+      .withIndex("key", (q) => q.eq("key", "catalog"))
+      .unique()
 
     const now = new Date()
     const matchingEvents = sourcePage.page.filter((event) => catalogEventFilterMatches(event, filter, now))
@@ -76,7 +80,7 @@ export const catalogEventListPublishedPageQuery = query({
           .query("catalogTicketTiers")
           .withIndex("eventId", (q) => q.eq("eventId", event._id))
           .collect()
-        return catalogEventToEventItem(event, tiers)
+        return catalogEventToEventItem(event, tiers, syncState?.syncedVersion)
       }),
     )
 

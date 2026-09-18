@@ -15,6 +15,10 @@ export const catalogEventGetPublishedQuery = query({
       .query("catalogTicketTiers")
       .withIndex("eventId", (q) => q.eq("eventId", event._id))
       .collect()
-    return catalogEventToEventItem(event, tiers)
+    const syncState = await ctx.db
+      .query("catalogSyncStates")
+      .withIndex("key", (q) => q.eq("key", "catalog"))
+      .unique()
+    return catalogEventToEventItem(event, tiers, syncState?.syncedVersion)
   },
 })

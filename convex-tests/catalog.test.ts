@@ -35,9 +35,9 @@ async function tokenFor(userId: string) {
 function eventArgs(token: string, status?: "draft" | "published" | "archived") {
   return {
     eventKey: "catalog-event",
-    title: "Catalog event",
-    subtitle: "A published event",
-    description: "A catalog test event",
+    title: "Katalogveranstaltung",
+    subtitle: "Eine veröffentlichte Veranstaltung",
+    description: "Eine Katalog-Testveranstaltung",
     category: "konzerte" as const,
     startsAt: "2026-10-01T18:00:00.000Z",
     endsAt: "2026-10-01T22:00:00.000Z",
@@ -47,7 +47,7 @@ function eventArgs(token: string, status?: "draft" | "published" | "archived") {
     address: "Teststraße 1",
     organizer: "Eventoren",
     imageUrl: "/images/test.webp",
-    imageAlt: "Test event",
+    imageAlt: "Testveranstaltung",
     tags: ["test"],
     ...(status ? { status } : {}),
     token,
@@ -60,9 +60,9 @@ type CatalogTierInsert = Omit<Doc<"catalogTicketTiers">, "_id" | "_creationTime"
 function catalogEventInsert(overrides: Partial<CatalogEventInsert> = {}): CatalogEventInsert {
   return {
     eventKey: "catalog-event",
-    title: "Catalog event",
-    subtitle: "A published event",
-    description: "A catalog test event",
+    title: "Katalogveranstaltung",
+    subtitle: "Eine veröffentlichte Veranstaltung",
+    description: "Eine Katalog-Testveranstaltung",
     category: "konzerte",
     startsAt: "2026-10-01T18:00:00.000Z",
     endsAt: "2026-10-01T22:00:00.000Z",
@@ -72,7 +72,7 @@ function catalogEventInsert(overrides: Partial<CatalogEventInsert> = {}): Catalo
     address: "Teststraße 1",
     organizer: "Eventoren",
     imageUrl: "/images/test.webp",
-    imageAlt: "Test event",
+    imageAlt: "Testveranstaltung",
     tags: ["test"],
     status: "published",
     catalogVersion: 1,
@@ -87,7 +87,7 @@ function catalogTierInsert(eventId: Doc<"catalogEvents">["_id"], overrides: Part
     eventId,
     tierKey: "standard",
     name: "Standard",
-    description: "General admission",
+    description: "Freie Platzwahl",
     priceCents: 2500,
     feeCents: 250,
     capacity: 10,
@@ -140,7 +140,7 @@ test("admin writes are versioned and published reads match EventItem", async () 
     eventKey: "catalog-event",
     tierKey: "standard",
     name: "Standard",
-    description: "General admission",
+    description: "Freie Platzwahl",
     priceCents: 2500,
     feeCents: 250,
     capacity: 10,
@@ -161,14 +161,55 @@ test("admin writes are versioned and published reads match EventItem", async () 
   expect(items).toHaveLength(1)
   expect(item).toMatchObject({
     id: "catalog-event",
-    title: "Catalog event",
+    title: "Katalogveranstaltung",
+    subtitle: "Eine veröffentlichte Veranstaltung",
+    description: "Eine Katalog-Testveranstaltung",
+    imageAlt: "Testveranstaltung",
     soldOut: false,
-    tiers: [{ id: "standard", priceCents: 2500, feeCents: 250, capacity: 10, available: 10 }],
+    tiers: [
+      {
+        id: "standard",
+        name: "Standard",
+        description: "Freie Platzwahl",
+        priceCents: 2500,
+        feeCents: 250,
+        capacity: 10,
+        available: 10,
+      },
+    ],
   })
   expect(published.data.catalogVersion).toBeGreaterThan(event.data.catalogVersion)
 
   const syncState = await t.run(async (ctx) => ctx.db.query("catalogSyncStates").collect())
   expect(syncState).toMatchObject([{ version: published.data.catalogVersion, status: "pending", attempts: 0 }])
+})
+
+test("published events use the latest Billing-synced catalog version for checkout", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  await t.run(async (ctx) => {
+    const now = new Date().toISOString()
+    const eventId = await ctx.db.insert("catalogEvents", catalogEventInsert({ catalogVersion: 13 }))
+    await ctx.db.insert("catalogTicketTiers", catalogTierInsert(eventId, { catalogVersion: 13 }))
+    await ctx.db.insert("catalogSyncStates", {
+      key: "catalog",
+      version: 16,
+      status: "synced",
+      syncedVersion: 16,
+      syncedDigest: "a".repeat(64),
+      attempts: 0,
+      lastChangedByUserId: adminId,
+      updatedAt: now,
+    })
+  })
+
+  const listed = await t.query(api.catalog.catalogEventListPublishedQuery, {})
+  const detail = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "catalog-event" })
+  const page = await catalogPublishedPageGet(t, { query: "", location: "", category: "alle", timeWindow: "alle" }, 10)
+
+  expect(listed[0]?.catalogVersion).toBe(16)
+  expect(detail?.catalogVersion).toBe(16)
+  expect(page.page[0]?.catalogVersion).toBe(16)
 })
 
 test("published page is public and excludes draft and archived events", async () => {
@@ -365,7 +406,7 @@ test("tier capacity cannot undercut reserved and sold inventory", async () => {
     eventKey: "catalog-event",
     tierKey: "standard",
     name: "Standard",
-    description: "General admission",
+    description: "Freie Platzwahl",
     priceCents: 2500,
     feeCents: 250,
     capacity: 10,
@@ -393,7 +434,7 @@ test("tier capacity cannot undercut reserved and sold inventory", async () => {
     eventKey: "catalog-event",
     tierKey: "standard",
     name: "Standard",
-    description: "General admission",
+    description: "Freie Platzwahl",
     priceCents: 2500,
     feeCents: 250,
     capacity: 2,
@@ -403,7 +444,7 @@ test("tier capacity cannot undercut reserved and sold inventory", async () => {
     eventKey: "catalog-event",
     tierKey: "standard",
     name: "Standard",
-    description: "General admission",
+    description: "Freie Platzwahl",
     priceCents: 2500,
     feeCents: 250,
     capacity: 4,
