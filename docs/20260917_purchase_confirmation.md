@@ -1,6 +1,6 @@
 # Purchase confirmation with four PDF attachments
 
-Status: tasks 1–5 implemented; production deployment is complete; task 6 verification is partial and activation remains pending real-provider verification. The Eventoren tax decision is resolved through the organization presentation policy.
+Status: test-mode invoice exception implemented, deployed to preview, and verified through actual sandbox purchase, delivered three-PDF confirmation, and clean-mobile emailed-link access. Live purchases retain the four-PDF contract; production activation remains disabled.
 
 Last updated: 2026-09-18.
 
@@ -9,6 +9,8 @@ migrations/backend and the approved configured VAT policy are deployed. Producti
 deployed. Production activation remains disabled for new orders until real-provider and delivery verification is complete.
 
 ## Goal
+
+Mode-specific requirement: the persisted checkout `stripeMode` determines invoice behavior. Test-mode purchases skip invoice generation entirely, including all Lexware contact/invoice/PDF calls, and send exactly three PDFs: tickets, terms, privacy, in that order. No placeholder invoice is generated or attached, and the email must not claim an invoice is attached. Live-mode purchases retain the four-PDF requirement below. References to four PDFs throughout this document apply to live mode; test mode uses this explicit exception.
 
 After a successful purchase and ticket issuance, send one order-confirmation email using email-generator for branded HTML and plain text. Attach exactly four PDFs, in this MIME attachment order. Select the filenames from the confirmation/order language:
 
@@ -46,9 +48,11 @@ Include a prominent **Open your tickets** link and a plain-text equivalent. Cust
 - Eventoren passes legal acceptance/revision evidence to Billing, and the implemented confirmation process renders the persisted accepted terms/privacy bodies rather than mutable latest text.
 - New Eventoren checkouts load the tax policy from Billing's organization presentation configuration and persist it in the immutable commercial snapshot. The confirmation process uses that snapshot for the invoice and refuses to send an incomplete email when the invoice artifact is missing. Legacy paid snapshots without a tax policy remain blocked; they are not retroactively reinterpreted.
 - The only activation switch is Eventoren's Convex runtime environment variable `EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST`, captured as `fulfillmentEligible` at order creation. Setting a frontend `.env.production` value alone does not activate fulfillment. The production allowlist remains empty/disabled for new orders and there is no backfill.
+- Preview uses persisted `gross_inclusive` / `1900` organization tax configuration, organization SMTP settings, and a dedicated Stripe test webhook targeting preview Billing. Preview checkout bypasses are disabled. Public catalog projections use the synchronized catalog version.
 
 ## Decisions
 
+- **Test-mode invoice exception:** skip the Eventoren invoice ensure path entirely when the persisted checkout mode is `test`. Use the existing confirmation worker, rendering, transport, and idempotency. Other Billing invoice flows are unchanged. Tests must prove zero invoice-provider calls and three attachments in both languages while retaining live-mode four-attachment coverage.
 - **Eventoren owns fulfillment:** ticket issuance, inventory, ticket QR identity, customer ticket access, and the ticket PDF request data.
 - **Billing owns invoices and delivery:** reuse its Lexware integration, organization sender configuration, existing Chromium-based PDF infrastructure, legal PDF generation, email-generator integration, and delivery tracking. Billing validates Eventoren's authoritative ticket data, renders/stores the actual ticket PDF, and attaches it first.
 - **Lexware supplies the invoice PDF:** Billing creates the invoice and downloads its PDF through the existing Lexware integration. Do not locally render a replacement invoice.
@@ -163,7 +167,7 @@ Chromium-based infrastructure shared with `src/legal/acceptedOrderLegalPdfEnsure
 
 ### 5. Compose and send the four-attachment confirmation in Billing
 
-Status: implemented; production deployment is complete; activation remains pending real-provider and delivery verification.
+Status: live-mode path and test-mode three-attachment exception implemented and unit-tested. Test mode bypasses invoice ensure and purchase creation; both languages are covered. Worker retry and activation semantics are unchanged. Preview deployment and actual test-mode delivered-email verification are complete.
 
 The Eventoren-specific Billing path creates/retrieves its idempotent Lexware invoice and obtains the actual stored ticket PDF.
 It generates terms and privacy PDFs from the legal documents accepted for that order, not mutable latest text and not
@@ -189,24 +193,26 @@ Relevant Billing files: `src/checkout/server/eventorenTicketConfirmationProcess.
 
 ### 6. Verify the complete purchase flow
 
-Status: partial verification after production deployment. Production Billing migrations/backend, the approved configured VAT policy, Convex functions, and frontend are deployed; the fulfillment allowlist remains empty.
+Status: sandbox verification complete for the test-mode exception, including actual three-PDF email delivery and clean-mobile access from its link. Live-provider four-PDF delivery remains unverified. Preview allowlist is restored to unset; production activation remains disabled.
 
-- Successful payment schedules server-side fulfillment even if the buyer closes the checkout tab; a real sandbox/paid-order delivery is still outstanding.
+- A real Stripe sandbox purchase has completed and issued five tickets through server reconciliation. That order retains `fulfillmentEligible: false`; it does not verify enabled-order confirmation scheduling or delivery.
 - Local isolated integration covers actual ticket and accepted-legal PDFs plus real email-transport serialization, using a FAKE Lexware provider with a watermarked test invoice PDF; it does not verify a live provider.
 - Implemented send contract: the received message has exactly four PDF attachments in ticket/invoice/terms/privacy payload order, with `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf` for English confirmation/order language, and `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf` for German confirmation/order language.
 - Implemented PDF contract: multiple purchased tickets produce one combined PDF with up to four tickets per A4 page and overflow pages as needed; every ticket has a unique, scan-readable admission QR matching its issued online ticket.
 - The implemented path validates invoice totals/identity and legal revisions against the purchase.
-- The latest frontend SSR hydration fix is browser-verified: invalid and empty/64-character token routes show the intended exclusive error states and clear the URL hash. Valid clean-mobile access with a real token remains outstanding.
+- Invalid and empty/64-character token routes show the intended exclusive error states and clear the URL hash. Valid capability access is verified in a clean mobile browser without login or original checkout storage, including all five rendered QR codes and refresh. Actual browser QR payload decoding remains unverified.
 - Repeated payment events, reconciliation, and job retries do not create duplicate tickets/invoices or normal duplicate confirmation jobs.
 - PDF or provider failure retries without sending an incomplete email; a missing test invoice PDF therefore produces no confirmation email.
 - Inventory-conflict purchases do not send a normal ticket confirmation.
 - Existing Contentoren and other Billing invoice-email flows remain unchanged.
 
-Remaining verification prerequisite: run a real sandbox/paid order through the real Lexware provider and configured email
-transport, receive a delivered email with the four attachments, and open its valid real token on a clean mobile browser.
-The Lexware test environment may return no PDF; activation cannot proceed on that result. No actual customer emails or
-invoices have been sent/generated, and no fulfillment enablement has been performed; activation remains pending these
-checks.
+Current sandbox coverage includes a newly eligible paid purchase, one actual delivered German confirmation with ordered
+`Tickets.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf`, five tickets across two PDF pages, accepted legal snapshot content,
+HTML/text ticket links, and clean-mobile access to all five rendered QR codes before and after refresh. Test mode creates
+no purchase/invoice record. Replay checks preserve the issued tickets and sent confirmation. Automatic machine decoding
+of rendered QR images remains unverified. SMTP ambiguous outcomes retain manual-reconciliation semantics rather than
+automatic resend guarantees. Preview allowlist is unset; existing ineligible orders are not backfilled.
+Live-mode four-PDF behavior retains automated coverage; sandbox verification does not establish live-provider delivery.
 
 ## Review decisions
 
