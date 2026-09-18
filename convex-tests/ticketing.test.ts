@@ -575,7 +575,7 @@ test("does not release a still-payable pending session, then issues exactly once
   expect(finalInventory.tickets).toHaveLength(1)
 })
 
-test("keeps participant names associated with quantities and lines through reservation, issuance, wallet data, and paid retries", async () => {
+test("keeps participant names through paid retries and serves order QR codes through revocable guest access", async () => {
   environmentSet()
   billingMock()
   const t = convexTest(schema, modules)
@@ -606,6 +606,8 @@ test("keeps participant names associated with quantities and lines through reser
   const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(checkout).toMatchObject({ success: true, data: { status: "checkout_created" } })
   if (!checkout.success) return
+  // Checkout itself has no emailed access capability; paid ticket issuance creates it.
+  expect(await t.run(async (ctx) => ctx.db.query("ticketOrderDeliveries").collect())).toHaveLength(0)
 
   const changedReplay = await t.action(api.ticketing.ticketCheckoutCreateAction, {
     ...args,
@@ -680,14 +682,31 @@ test("keeps participant names associated with quantities and lines through reser
   expect(capability.order?.emailAccessDigest).toMatch(/^[a-f0-9]{64}$/u)
   if (!capability.delivery) return
 
+  const link = await t.mutation(internal.ticketing.ticketOrderAccessCapabilityEnsureMutation, {
+    orderId: checkout.data.orderId as never,
+    publicBaseUrl: "https://tickets.example",
+  })
+  expect(link).toMatchObject({
+    success: true,
+    data: {
+      accessUrl: `https://tickets.example/checkout#ticketAccess=${capability.delivery.accessTokenSnapshot}`,
+      replayed: true,
+    },
+  })
+  if (!link.success) return
+  const guestAccessToken = decodeURIComponent(new URL(link.data.accessUrl).hash.slice("#ticketAccess=".length))
+
+  // No user token is supplied: the emailed guest capability alone returns the order's QR payload.
   const emailWallet = await t.query(api.ticketing.ticketOrderByAccessTokenQuery, {
-    guestAccessToken: capability.delivery.accessTokenSnapshot,
+    guestAccessToken,
   })
   expect(emailWallet.success).toBe(true)
-  if (emailWallet.success)
+  if (emailWallet.success) {
     expect(emailWallet.data.tickets.map((ticket) => ticket.participantName)).toEqual(["Ada", "Grace", "Lin"])
+    expect(emailWallet.data.tickets.map((ticket) => ticket.code)).toEqual(tickets.map((ticket) => ticket.code))
+  }
   const invalidEmailWallet = await t.query(api.ticketing.ticketOrderByAccessTokenQuery, {
-    guestAccessToken: `${capability.delivery.accessTokenSnapshot.slice(0, -1)}x`,
+    guestAccessToken: `${guestAccessToken.slice(0, -1)}x`,
   })
   expect(invalidEmailWallet.success).toBe(false)
 
@@ -705,27 +724,16 @@ test("keeps participant names associated with quantities and lines through reser
   })
   const crossOrder = await t.query(api.ticketing.ticketOrderGetQuery, {
     orderId: otherOrderId,
-    guestAccessToken: capability.delivery.accessTokenSnapshot,
+    guestAccessToken,
   })
   expect(crossOrder.success).toBe(false)
 
-  const link = await t.mutation(internal.ticketing.ticketOrderAccessCapabilityEnsureMutation, {
-    orderId: checkout.data.orderId as never,
-    publicBaseUrl: "https://tickets.example",
-  })
-  expect(link).toMatchObject({
-    success: true,
-    data: {
-      accessUrl: `https://tickets.example/checkout#ticketAccess=${capability.delivery.accessTokenSnapshot}`,
-      replayed: true,
-    },
-  })
   const revoked = await t.mutation(internal.ticketing.ticketOrderAccessCapabilityRevokeMutation, {
     orderId: checkout.data.orderId as never,
   })
   expect(revoked.success).toBe(true)
   const revokedEmailWallet = await t.query(api.ticketing.ticketOrderByAccessTokenQuery, {
-    guestAccessToken: capability.delivery.accessTokenSnapshot,
+    guestAccessToken,
   })
   expect(revokedEmailWallet.success).toBe(false)
 })
