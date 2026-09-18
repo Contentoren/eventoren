@@ -1,90 +1,82 @@
 import { For, Show } from "solid-js"
-import { eventDateFormat } from "../events/eventDateFormat.ts"
-import { eventTimeFormat } from "../events/eventTimeFormat.ts"
-import { UiBadge } from "../ui/UiBadge.tsx"
-import { UiCard } from "../ui/UiCard.tsx"
+import { Details } from "#ui/interactive/details/Details.jsx"
+import { Badge } from "#ui/static/badge/Badge.jsx"
+import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import type { TicketOrderProjection } from "./TicketOrderProjection.ts"
 import { TicketQrCode } from "./TicketQrCode.tsx"
-import { ticketOrderWalletText } from "./ticketOrderWalletText.ts"
-import { ticketPriceFormat } from "./ticketPriceFormat.ts"
+import { ticketOrderWalletPassStateCreate } from "./ticketOrderWalletPassStateCreate.ts"
 
 export function TicketOrderWalletPass(props: { order: TicketOrderProjection }) {
-  const order = () => props.order
-  const text = ticketOrderWalletText
+  const state = ticketOrderWalletPassStateCreate({ order: () => props.order })
+
   return (
-    <UiCard class="overflow-hidden p-0">
-      <header class="flex flex-col gap-space-2 bg-linear-to-br from-brand-strong to-brand px-space-6 py-space-6 text-brand-content">
-        <p class="text-sm font-semibold uppercase tracking-widest text-brand-content">{text().walletTicket}</p>
-        <h2 class="text-xl font-semibold leading-snug">{order().eventTitle}</h2>
-        <p class="text-sm font-medium text-brand-content">
-          {eventDateFormat(order().eventStartsAt)} · {eventTimeFormat(order().eventStartsAt)}
-        </p>
+    <CardWrapper class="overflow-hidden border-border-strong bg-surface p-0 text-content">
+      <header class="flex items-start justify-between gap-space-4 border-b border-border-subtle px-space-5 py-space-4 sm:px-space-6">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Kaufübersicht</p>
+          <h2 class="mt-space-1 text-xl font-semibold leading-snug text-content">{state.order().eventTitle}</h2>
+        </div>
+        <Badge variant={state.statusVariant()} class="shrink-0">
+          {state.statusLabel()}
+        </Badge>
       </header>
 
-      <div class="flex flex-col gap-space-6 p-space-6">
-        <dl class="grid gap-space-4 sm:grid-cols-2">
+      <div class="flex flex-col gap-space-5 p-space-5 sm:p-space-6">
+        <dl class="grid grid-cols-2 gap-x-space-4 gap-y-space-4">
           <div>
-            <dt class="text-sm text-content-muted">{text().venue}</dt>
-            <dd class="text-sm font-medium text-content">
-              {order().venue}, {order().city}
-            </dd>
-            <dd class="text-sm text-content-muted">{order().address}</dd>
+            <dt class="text-xs font-medium uppercase tracking-wide text-content-muted">Datum</dt>
+            <dd class="mt-space-1 text-sm font-medium text-content">{state.dateTime()}</dd>
           </div>
           <div>
-            <dt class="text-sm text-content-muted">{text().purchaser}</dt>
-            <dd class="text-sm font-medium text-content">
-              {order().contact.givenName} {order().contact.familyName}
-            </dd>
-            <dd class="text-sm text-content-muted">{order().contact.email}</dd>
-          </div>
-          <div>
-            <dt class="text-sm text-content-muted">{text().status}</dt>
-            <dd class="text-sm font-medium text-content">
-              {order().paymentStatus === "paid"
-                ? text().paid
-                : order().paymentStatus === "pending"
-                  ? text().pending
-                  : text().failed}
+            <dt class="text-xs font-medium uppercase tracking-wide text-content-muted">Ort</dt>
+            <dd class="mt-space-1 text-sm font-medium text-content">
+              {state.order().venue}, {state.order().city}
             </dd>
           </div>
           <div>
-            <dt class="text-sm text-content-muted">{text().total}</dt>
-            <dd class="text-sm font-semibold text-content">{ticketPriceFormat(order().totalCents)}</dd>
+            <dt class="text-xs font-medium uppercase tracking-wide text-content-muted">Bestellnummer</dt>
+            <dd class="mt-space-1 break-all font-mono text-xs font-medium text-content">{state.orderReference()}</dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-content-muted">Betrag</dt>
+            <dd class="mt-space-1 text-sm font-semibold text-content">{state.total()}</dd>
           </div>
         </dl>
 
         <Show
-          when={order().tickets.length > 0}
+          when={state.order().tickets.length > 0}
           fallback={
-            <p class="rounded-control bg-surface-muted p-space-4 text-sm text-content-muted">{text().passPending}</p>
+            <p class="rounded-control bg-surface-muted p-space-4 text-sm leading-relaxed text-content-muted">
+              {state.ticketsUnavailableMessage()}
+            </p>
           }
         >
-          <div class="flex flex-col gap-space-4 border-t border-border-subtle pt-space-5">
-            <h3 class="text-base font-semibold text-content">{text().tickets}</h3>
-            <For each={order().tickets}>
+          <div class="flex flex-col gap-space-3 border-t border-border-subtle pt-space-5">
+            <div class="flex items-center justify-between gap-space-3">
+              <h3 class="text-base font-semibold text-content">Deine Tickets</h3>
+              <Badge variant="subtle">{state.ticketCountLabel()}</Badge>
+            </div>
+            <p class="text-sm text-content-muted">Öffne ein Ticket, um den QR-Code für den Einlass anzuzeigen.</p>
+            <For each={state.order().tickets}>
               {(ticket) => (
-                <div class="flex flex-col gap-space-4 rounded-card border border-border-subtle p-space-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p class="font-medium text-content">{ticket.tierName}</p>
-                    <p class="text-sm text-content-muted">
-                      {text().participant}:{" "}
-                      {ticket.participantName ??
-                        `${order().contact.givenName} ${order().contact.familyName} (${text().purchaserFallback})`}
-                    </p>
-                    <p class="text-sm text-content-muted">
-                      {text().ticket} {ticket.sequence} · {ticket.code}
+                <Details
+                  class="border-border-subtle bg-surface shadow-none dark:bg-surface"
+                  summaryClass="flex-row items-center p-space-4"
+                  title={state.ticketTitle(ticket)}
+                  subtitle={state.participantName(ticket)}
+                >
+                  <div class="flex flex-col items-center gap-space-3 border-t border-border-subtle bg-surface-muted p-space-5">
+                    <TicketQrCode value={ticket.code} label={state.ticketQrLabel(ticket)} />
+                    <p class="max-w-sm text-center text-xs leading-relaxed text-content-muted">
+                      Zeige diesen Code am Einlass vor. Gib ihn nicht an andere Personen weiter.
                     </p>
                   </div>
-                  <TicketQrCode value={ticket.code} label={`${text().qrCodeFor} ${ticket.code}`} />
-                </div>
+                </Details>
               )}
             </For>
-            <UiBadge tone="success">
-              {order().tickets.length} {order().tickets.length === 1 ? text().ticket : text().ticketsPlural}
-            </UiBadge>
           </div>
         </Show>
       </div>
-    </UiCard>
+    </CardWrapper>
   )
 }
