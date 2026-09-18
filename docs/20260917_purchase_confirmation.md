@@ -1,11 +1,12 @@
 # Purchase confirmation with four PDF attachments
 
-Status: tasks 1–5 implemented; task 6 verification is partial; activation remains pending the tax decision and deployment verification.
+Status: tasks 1–5 implemented; production deployment is complete; task 6 verification is partial and activation remains pending real-provider verification. The Eventoren tax decision is resolved through the organization presentation policy.
 
-Last updated: 2026-09-17.
+Last updated: 2026-09-18.
 
-User implementation authorization is complete. No overall implementation permission is pending. Production activation remains
-disabled for new orders until the authoritative tax basis/rate is supplied and the deployed runtimes are verified.
+User implementation authorization is complete. No overall implementation permission is pending. Production Billing
+migrations/backend and the approved configured VAT policy are deployed. Production Convex functions and frontend are
+deployed. Production activation remains disabled for new orders until real-provider and delivery verification is complete.
 
 ## Goal
 
@@ -43,14 +44,15 @@ Include a prominent **Open your tickets** link and a plain-text equivalent. Cust
 - Eventoren's installed email-generator package has authentication templates, not Billing's Markdown-generation API. Reuse Billing's existing rendering integration rather than adding a separate Eventoren mail pipeline.
 - Eventoren ticket checkout remains a separate Billing path. Its implemented invoice ensure reuses the stable Stripe session/order identity and existing purchase records where possible; retries must not create another invoice.
 - Eventoren passes legal acceptance/revision evidence to Billing, and the implemented confirmation process renders the persisted accepted terms/privacy bodies rather than mutable latest text.
-- Eventoren invoice activation is currently blocked when the paid commercial snapshot lacks an authoritative tax basis and rate. The confirmation process refuses to send an incomplete email when the invoice artifact is missing.
-- The only activation switch is Eventoren's Convex runtime environment variable `EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST`, captured as `fulfillmentEligible` at order creation. Setting a frontend `.env.production` value alone does not activate fulfillment. The allowlist remains empty/disabled for new orders and there is no backfill.
+- New Eventoren checkouts load the tax policy from Billing's organization presentation configuration and persist it in the immutable commercial snapshot. The confirmation process uses that snapshot for the invoice and refuses to send an incomplete email when the invoice artifact is missing. Legacy paid snapshots without a tax policy remain blocked; they are not retroactively reinterpreted.
+- The only activation switch is Eventoren's Convex runtime environment variable `EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST`, captured as `fulfillmentEligible` at order creation. Setting a frontend `.env.production` value alone does not activate fulfillment. The production allowlist remains empty/disabled for new orders and there is no backfill.
 
 ## Decisions
 
 - **Eventoren owns fulfillment:** ticket issuance, inventory, ticket QR identity, customer ticket access, and the ticket PDF request data.
 - **Billing owns invoices and delivery:** reuse its Lexware integration, organization sender configuration, existing Chromium-based PDF infrastructure, legal PDF generation, email-generator integration, and delivery tracking. Billing validates Eventoren's authoritative ticket data, renders/stores the actual ticket PDF, and attaches it first.
 - **Lexware supplies the invoice PDF:** Billing creates the invoice and downloads its PDF through the existing Lexware integration. Do not locally render a replacement invoice.
+- **Eventoren tax policy:** For a new Eventoren checkout, Billing loads `taxBasis` and `taxRateBasisPoints` with `organizationPresentationConfigLoad`; the current organization configuration is `gross_inclusive` and `1900` basis points (19%). The resolved policy is persisted with the checkout commercial snapshot. Ticket and fee gross amounts are unchanged and no additional VAT charge is added. Replays use the persisted snapshot even if current configuration is changed or missing; legacy snapshots without a policy remain unchanged and blocked for invoicing.
 - **Billing renders the ticket PDF:** use the implemented dedicated ticket HTML template in Billing's existing Chromium-based PDF infrastructure, using authoritative issued-ticket data from Eventoren. Billing stores/reuses the generated PDF.
 - **One combined ticket PDF per order:** Billing produces one combined PDF with up to four tickets per A4 page and overflow pages as needed, preserving exactly four attachments even when several tickets are purchased. Each ticket has its own unique, scan-readable admission QR.
 - **One confirmation per Eventoren order:** checkout currently creates an order per event. Cross-event/cart-wide invoice and email consolidation is not included.
@@ -97,9 +99,10 @@ require that exact revision and exact Markdown bodies; the accepted revision and
 Replayed orders are not revalidated against current sources, including legacy orders with the previous checkout context shape.
 
 The implemented invoice path maps Eventoren's checkout snapshot to Lexware invoice identity, customer data, and accepted legal
-document content. It reuses existing Billing invoice records where present; retries must not create another invoice. The
-authoritative Eventoren tax basis/rate is still required before activation. Existing non-Eventoren invoice emails remain
-unchanged.
+document content. It reuses existing Billing invoice records where present; retries must not create another invoice. New
+Eventoren checkouts source tax policy from `organizationPresentationConfigLoad`, converting the configured
+`taxRateBasisPoints` into the persisted commercial snapshot; invoice creation reads that immutable snapshot rather than current
+configuration. Existing non-Eventoren invoice emails remain unchanged.
 
 Relevant files:
 - Eventoren: `src/ticketing/convex/billingEventorenClient.ts`, `src/ticketing/convex/ticketTables.ts`.
@@ -160,7 +163,7 @@ Chromium-based infrastructure shared with `src/legal/acceptedOrderLegalPdfEnsure
 
 ### 5. Compose and send the four-attachment confirmation in Billing
 
-Status: implemented; activation is blocked until Eventoren's authoritative invoice tax policy is supplied.
+Status: implemented; production deployment is complete; activation remains pending real-provider and delivery verification.
 
 The Eventoren-specific Billing path creates/retrieves its idempotent Lexware invoice and obtains the actual stored ticket PDF.
 It generates terms and privacy PDFs from the legal documents accepted for that order, not mutable latest text and not
@@ -186,20 +189,24 @@ Relevant Billing files: `src/checkout/server/eventorenTicketConfirmationProcess.
 
 ### 6. Verify the complete purchase flow
 
-Status: partial verification. The implementation is present; no live-provider or deployed-runtime verification has been completed.
+Status: partial verification after production deployment. Production Billing migrations/backend, the approved configured VAT policy, Convex functions, and frontend are deployed; the fulfillment allowlist remains empty.
 
-- Successful payment schedules server-side fulfillment even if the buyer closes the checkout tab; live delivery is not yet verified.
+- Successful payment schedules server-side fulfillment even if the buyer closes the checkout tab; a real sandbox/paid-order delivery is still outstanding.
+- Local isolated integration covers actual ticket and accepted-legal PDFs plus real email-transport serialization, using a FAKE Lexware provider with a watermarked test invoice PDF; it does not verify a live provider.
 - Implemented send contract: the received message has exactly four PDF attachments in ticket/invoice/terms/privacy payload order, with `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf` for English confirmation/order language, and `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf` for German confirmation/order language.
 - Implemented PDF contract: multiple purchased tickets produce one combined PDF with up to four tickets per A4 page and overflow pages as needed; every ticket has a unique, scan-readable admission QR matching its issued online ticket.
 - The implemented path validates invoice totals/identity and legal revisions against the purchase.
-- The email CTA is implemented for a clean mobile browser without login or previous localStorage, but a clean-device real-token E2E is blocked by the remote deployment missing the required Convex query.
+- The latest frontend SSR hydration fix is browser-verified: invalid and empty/64-character token routes show the intended exclusive error states and clear the URL hash. Valid clean-mobile access with a real token remains outstanding.
 - Repeated payment events, reconciliation, and job retries do not create duplicate tickets/invoices or normal duplicate confirmation jobs.
 - PDF or provider failure retries without sending an incomplete email; a missing test invoice PDF therefore produces no confirmation email.
 - Inventory-conflict purchases do not send a normal ticket confirmation.
 - Existing Contentoren and other Billing invoice-email flows remain unchanged.
 
-Remaining verification prerequisites are the authoritative tax decision, deployment/runtime configuration, live providers,
-received-message attachment ordering, and clean-device real-token E2E.
+Remaining verification prerequisite: run a real sandbox/paid order through the real Lexware provider and configured email
+transport, receive a delivered email with the four attachments, and open its valid real token on a clean mobile browser.
+The Lexware test environment may return no PDF; activation cannot proceed on that result. No actual customer emails or
+invoices have been sent/generated, and no fulfillment enablement has been performed; activation remains pending these
+checks.
 
 ## Review decisions
 
