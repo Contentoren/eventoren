@@ -1,4 +1,4 @@
-import { For, Show } from "solid-js"
+import { For, Index, Show } from "solid-js"
 import { Input } from "#ui/input/input/Input.jsx"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiButton } from "../ui/UiButton.tsx"
@@ -131,28 +131,33 @@ export function TicketCheckoutForm(props: {
                   <p class="mt-space-2 text-sm text-content-muted">{text().participantDescription}</p>
                 </div>
                 <div class="grid gap-space-4 sm:grid-cols-2">
-                  <For each={state.participantFields()}>
+                  <Index each={state.participantFields()}>
                     {(field) => {
-                      const inputId = `checkout-participant-${field.eventId}-${field.tierId}-${field.ticketIndex}`
-                      const fieldKey = ticketParticipantFieldKeyCreate(field.eventId, field.tierId, field.ticketIndex)
+                      const currentField = field()
+                      const inputId = `checkout-participant-${currentField.eventId}-${currentField.tierId}-${currentField.ticketIndex}`
+                      const fieldKey = ticketParticipantFieldKeyCreate(
+                        currentField.eventId,
+                        currentField.tierId,
+                        currentField.ticketIndex,
+                      )
                       return (
                         <div>
                           <label for={inputId} class="mb-space-2 block text-sm font-medium text-content">
-                            {text().participantName} · {field.eventTitle} · {field.tierName} · {text().ticket}{" "}
-                            {field.ticketIndex + 1}
+                            {text().participantName} · {currentField.eventTitle} · {currentField.tierName} ·{" "}
+                            {text().ticket} {currentField.ticketIndex + 1}
                           </label>
                           <Input
                             id={inputId}
-                            name={`participant-${field.eventId}-${field.tierId}-${field.ticketIndex}`}
+                            name={`participant-${currentField.eventId}-${currentField.tierId}-${currentField.ticketIndex}`}
                             autocomplete="name"
                             required
                             aria-invalid={state.isFieldInvalid(fieldKey) ? "true" : undefined}
-                            value={field.value}
+                            value={currentField.value}
                             onInput={(event) =>
                               state.participantNameChange(
-                                field.eventId,
-                                field.tierId,
-                                field.ticketIndex,
+                                currentField.eventId,
+                                currentField.tierId,
+                                currentField.ticketIndex,
                                 event.currentTarget.value,
                               )
                             }
@@ -165,7 +170,7 @@ export function TicketCheckoutForm(props: {
                         </div>
                       )
                     }}
-                  </For>
+                  </Index>
                 </div>
               </section>
 

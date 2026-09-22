@@ -2,9 +2,10 @@ import { useNavigate } from "@tanstack/solid-router"
 import { createEffect, createMemo, on, onMount } from "solid-js"
 import type { Result } from "#result"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
-import { userTokenGet } from "../auth/ui/signals/userSessionSignal.ts"
+import { eventorenAuthContextUse } from "../auth/ui/eventorenAuthContextUse.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import type { TicketCart } from "./TicketCart.ts"
+import type { TicketCheckoutCreateInput } from "./TicketCheckoutCreateInput.ts"
 import type { TicketCheckoutFormState } from "./TicketCheckoutFormState.ts"
 import type { TicketCheckoutStep } from "./TicketCheckoutStep.ts"
 import type { TicketContact } from "./TicketContact.ts"
@@ -31,6 +32,7 @@ import { ticketParticipantFieldKeyCreate } from "./ticketParticipantFieldKeyCrea
 import { ticketParticipantNamesAlign } from "./ticketParticipantNamesAlign.ts"
 import { ticketParticipantNamesValidate } from "./ticketParticipantNamesValidate.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
+import { ticketingServerRead } from "./ticketingServerRead.ts"
 
 type CheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
@@ -46,6 +48,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
   appOrigin: () => Result<string>
 }): TicketCheckoutFormState {
   const navigate = useNavigate()
+  const auth = eventorenAuthContextUse()
   const contact = createSignalObject<TicketContact>(ticketContactEmpty())
   const step = createSignalObject<TicketCheckoutStep>("kontakt")
   const errorMessage = createSignalObject("")
@@ -201,8 +204,9 @@ export function ticketCheckoutFormStateCreate(inputs: {
       return
     }
 
-    const token = userTokenGet()
-    const guestAccessToken = token ? undefined : ticketGuestAccessTokenCreate()
+    if (!auth.ready()) await auth.refresh()
+    const authenticated = Boolean(auth.identity())
+    const guestAccessToken = authenticated ? undefined : ticketGuestAccessTokenCreate()
     const createdOrderIds: string[] = []
     let redirectUrl: string | undefined
     isSubmitting.set(true)
@@ -217,9 +221,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
           isSubmitting.set(false)
           return
         }
-        const created = await ticketCheckoutCreate({
-          token: token || undefined,
-          guestAccessToken,
+        const checkoutInput: Omit<TicketCheckoutCreateInput, "token" | "guestAccessToken"> = {
           checkoutKey,
           eventKey: item.event.id,
           catalogVersion: item.event.catalogVersion,
@@ -247,7 +249,10 @@ export function ticketCheckoutFormStateCreate(inputs: {
             termsMarkdown: ticketCheckoutLegalDocumentSnapshot.termsMarkdown,
             privacyMarkdown: ticketCheckoutLegalDocumentSnapshot.privacyMarkdown,
           },
-        })
+        }
+        const created = authenticated
+          ? await (await ticketingServerRead()).checkoutCreate({ data: checkoutInput })
+          : await ticketCheckoutCreate({ ...checkoutInput, guestAccessToken })
         if (!created.success) {
           errorMessage.set(created.errorMessage)
           isSubmitting.set(false)

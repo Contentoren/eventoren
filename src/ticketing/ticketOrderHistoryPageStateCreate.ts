@@ -1,20 +1,24 @@
 import { createEffect, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
-import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
 import type { TicketOrderProjection } from "./TicketOrderProjection.ts"
 import type { TicketOrderSummary } from "./TicketOrderSummary.ts"
 import { ticketOrderGet } from "./ticketOrderGet.ts"
 import { ticketOrderListMine } from "./ticketOrderListMine.ts"
+import { ticketingServerRead } from "./ticketingServerRead.ts"
 
 const pageSize = 50
 
 export function ticketOrderHistoryPageStateCreate(inputs: {
-  readonly token: () => string
+  readonly authenticated?: () => boolean
+  readonly authenticationKey?: () => string | undefined
+  readonly ready?: () => boolean
+  /** Legacy test seam; production uses the cookie-backed server operations. */
+  readonly token?: () => string
   readonly listMine?: typeof ticketOrderListMine
   readonly getOrder?: typeof ticketOrderGet
 }) {
-  const listMine = inputs.listMine ?? ticketOrderListMine
-  const getOrder = inputs.getOrder ?? ticketOrderGet
+  const listMine = inputs.listMine
+  const getOrder = inputs.getOrder
   const orders = createSignalObject<readonly TicketOrderSummary[]>([])
   const cursor = createSignalObject<string | null>(null)
   const isDone = createSignalObject(false)
@@ -26,7 +30,8 @@ export function ticketOrderHistoryPageStateCreate(inputs: {
   const detailError = createSignalObject("")
   let listRevision = 0
   let detailRevision = 0
-  let activeToken: string | undefined
+  let activeAuthentication = false
+  let activeAuthenticationKey = ""
   const isAuthenticated = createSignalObject(false)
 
   const detailReset = () => {
@@ -37,12 +42,20 @@ export function ticketOrderHistoryPageStateCreate(inputs: {
     detailError.set("")
   }
 
-  const pageLoad = async (pageCursor: string | null, revision: number, token: string) => {
-    if (!token || isLoading.get()) return
+  const pageLoad = async (
+    pageCursor: string | null,
+    revision: number,
+    authenticated: boolean,
+    authenticationKey: string,
+  ) => {
+    if (!authenticated || isLoading.get()) return
     isLoading.set(true)
     listError.set("")
-    const result = await listMine({ token, paginationOpts: { numItems: pageSize, cursor: pageCursor } })
-    if (revision !== listRevision || token !== activeToken) return
+    const paginationOpts = { numItems: pageSize, cursor: pageCursor }
+    const result = listMine
+      ? await listMine({ token: inputs.token?.() ?? "", paginationOpts })
+      : await (await ticketingServerRead()).orderListMine({ data: { paginationOpts } })
+    if (revision !== listRevision || authenticationKey !== activeAuthenticationKey) return
 
     isLoading.set(false)
     if (!result.success) {
@@ -66,15 +79,13 @@ export function ticketOrderHistoryPageStateCreate(inputs: {
     isLoading.set(false)
     listError.set("")
     detailReset()
-    const token = activeToken ?? ""
-    if (!token) return
-    void pageLoad(null, revision, token)
+    if (!activeAuthentication) return
+    void pageLoad(null, revision, activeAuthentication, activeAuthenticationKey)
   }
 
   const loadMore = () => {
-    const token = activeToken ?? ""
-    if (!token || isLoading.get() || isDone.get()) return
-    void pageLoad(cursor.get(), listRevision, token)
+    if (!activeAuthentication || isLoading.get() || isDone.get()) return
+    void pageLoad(cursor.get(), listRevision, activeAuthentication, activeAuthenticationKey)
   }
 
   const retryList = () => {
@@ -86,16 +97,23 @@ export function ticketOrderHistoryPageStateCreate(inputs: {
   }
 
   const selectOrder = async (orderId: string) => {
-    const token = activeToken ?? ""
-    if (!token) return
+    if (!activeAuthentication) return
     detailRevision += 1
     const revision = detailRevision
     selectedOrderId.set(orderId)
     selectedOrder.set(null)
     detailError.set("")
     isDetailLoading.set(true)
-    const result = await getOrder({ orderId, token })
-    if (revision !== detailRevision || token !== activeToken || selectedOrderId.get() !== orderId) return
+    const result = getOrder
+      ? await getOrder({ orderId, token: inputs.token?.() ?? "" })
+      : await (await ticketingServerRead()).orderGet({ data: { orderId } })
+    if (
+      revision !== detailRevision ||
+      authenticationStateRead() !== activeAuthentication ||
+      authenticationKeyRead() !== activeAuthenticationKey ||
+      selectedOrderId.get() !== orderId
+    )
+      return
 
     isDetailLoading.set(false)
     if (!result.success) {
@@ -106,13 +124,18 @@ export function ticketOrderHistoryPageStateCreate(inputs: {
   }
 
   const sessionSync = () => {
-    userSessionBrowserRestore()
-    const token = inputs.token()
-    if (token === activeToken) return
-    activeToken = token
-    isAuthenticated.set(Boolean(token))
+    if (inputs.ready && !inputs.ready()) return
+    const authenticated = inputs.authenticated ? inputs.authenticated() : Boolean(inputs.token?.())
+    const authenticationKey = authenticationKeyRead()
+    if (authenticated === activeAuthentication && authenticationKey === activeAuthenticationKey) return
+    activeAuthentication = authenticated
+    activeAuthenticationKey = authenticationKey
+    isAuthenticated.set(authenticated)
     reset()
   }
+
+  const authenticationStateRead = () => (inputs.authenticated ? inputs.authenticated() : Boolean(inputs.token?.()))
+  const authenticationKeyRead = () => inputs.authenticationKey?.() ?? inputs.token?.() ?? ""
 
   onMount(sessionSync)
   createEffect(sessionSync)

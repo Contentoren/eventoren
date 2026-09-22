@@ -12,6 +12,9 @@ export function TicketOrderStatusPage(props: {
   checkoutKey?: string
   state?: TicketOrderStatusPageState
   cartHref?: string
+  eventsHref?: string
+  ordersHref?: string
+  hideRefreshingMessage?: boolean
 }) {
   const state = ticketOrderStatusPageViewStateCreate({
     orderIds: () => props.orderIds,
@@ -82,7 +85,12 @@ export function TicketOrderStatusPage(props: {
               {state.errorMessage()}
             </p>
           </Show>
-          <Show when={state.isRefreshing()}>
+          <Show when={!state.hasOrders() && !state.errorMessage()}>
+            <CardWrapper class="border-border-strong bg-surface text-content">
+              <p class="text-sm text-content-muted">Keine Bestelldaten gefunden.</p>
+            </CardWrapper>
+          </Show>
+          <Show when={state.isRefreshing() && !props.hideRefreshingMessage}>
             <p class="text-center text-sm text-content-muted" aria-live="polite">
               Zahlungsstatus wird aktualisiert …
             </p>
@@ -92,7 +100,14 @@ export function TicketOrderStatusPage(props: {
           </section>
         </Show>
 
-        <div class="flex flex-col gap-space-3 border-t border-border-subtle pt-space-5 sm:flex-row sm:flex-wrap">
+        <div class="flex flex-col gap-space-3 border-t border-border-subtle pt-space-5 sm:flex-row sm:flex-wrap sm:items-center">
+          <LinkButtonInternal
+            to={props.eventsHref ?? "/"}
+            variant="none"
+            class="w-full bg-brand text-brand-content hover:bg-brand-strong sm:w-auto"
+          >
+            Weitere Events entdecken
+          </LinkButtonInternal>
           <Button
             variant="outline"
             class="w-full border-border-strong bg-surface sm:w-auto"
@@ -101,9 +116,13 @@ export function TicketOrderStatusPage(props: {
           >
             Status aktualisieren
           </Button>
-          <LinkButtonInternal to="/" variant="outline" class="w-full sm:w-auto">
-            Weitere Events entdecken
-          </LinkButtonInternal>
+          <Show when={props.ordersHref}>
+            {(ordersHref) => (
+              <LinkButtonInternal to={ordersHref()} variant="link" class="w-full sm:w-auto">
+                Meine Bestellungen
+              </LinkButtonInternal>
+            )}
+          </Show>
           {props.cartHref ? (
             <LinkButtonExternal href={props.cartHref} variant="link" class="w-full sm:w-auto">
               Zum Warenkorb

@@ -15,6 +15,7 @@ export { ticketOrderAccessCapabilityEnsureMutation } from "#src/ticketing/convex
 export { ticketOrderAccessCapabilityRevokeMutation } from "#src/ticketing/convex/ticketOrderAccessCapabilityRevokeMutation.ts"
 export { ticketOrderByAccessTokenQuery } from "#src/ticketing/convex/ticketOrderByAccessTokenQuery.ts"
 export { ticketOrderGetQuery } from "#src/ticketing/convex/ticketOrderGetQuery.ts"
+export { ticketOrderListAdminPaginatedQuery } from "#src/ticketing/convex/ticketOrderListAdminPaginatedQuery.ts"
 export { ticketOrderListMinePaginatedQuery } from "#src/ticketing/convex/ticketOrderListMinePaginatedQuery.ts"
 export { ticketOrderListMineQuery } from "#src/ticketing/convex/ticketOrderListMineQuery.ts"
 export { ticketOrderPaymentContextQuery } from "#src/ticketing/convex/ticketOrderPaymentContextQuery.ts"

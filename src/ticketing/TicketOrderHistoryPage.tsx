@@ -2,7 +2,7 @@ import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
-import { userTokenGet } from "../auth/ui/signals/userSessionSignal.ts"
+import { eventorenAuthContextUse } from "../auth/ui/eventorenAuthContextUse.ts"
 import { eventDateFormat } from "../events/eventDateFormat.ts"
 import { eventTimeFormat } from "../events/eventTimeFormat.ts"
 import { UiBadge } from "../ui/UiBadge.tsx"
@@ -13,9 +13,20 @@ import { ticketOrderHistoryPageStateCreate } from "./ticketOrderHistoryPageState
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 
 export function TicketOrderHistoryPage(
-  props: { readonly state?: TicketOrderHistoryPageState; readonly signInHref?: string } = {},
+  props: {
+    readonly state?: TicketOrderHistoryPageState
+    readonly signInHref?: string
+    readonly eventsHref?: string
+  } = {},
 ) {
-  const state = props.state ?? ticketOrderHistoryPageStateCreate({ token: userTokenGet })
+  const auth = eventorenAuthContextUse()
+  const state =
+    props.state ??
+    ticketOrderHistoryPageStateCreate({
+      authenticated: () => Boolean(auth.identity()),
+      authenticationKey: () => auth.identity()?.userId,
+      ready: auth.ready,
+    })
 
   return (
     <main id="content" tabindex="-1">
@@ -35,12 +46,12 @@ export function TicketOrderHistoryPage(
             <CardWrapper class="flex flex-col items-start gap-space-4">
               <p class="text-sm text-content-muted">Melde dich an, um deine Bestellhistorie zu sehen.</p>
               {props.signInHref ? (
-                <a
-                  href={props.signInHref}
+                <Link
+                  to={props.signInHref}
                   class="focus-ring rounded-control text-sm font-semibold text-brand-accent underline underline-offset-4"
                 >
                   Zur Anmeldung
-                </a>
+                </Link>
               ) : (
                 <Link
                   to="/sign-in"
@@ -73,9 +84,19 @@ export function TicketOrderHistoryPage(
           </Show>
 
           <Show when={!state.isLoading() && !state.listError() && state.orders().length === 0}>
-            <CardWrapper class="flex flex-col gap-space-3">
+            <CardWrapper class="flex flex-col items-start gap-space-3">
               <h2 class="text-lg font-semibold text-content">Noch keine Bestellungen</h2>
               <p class="text-sm text-content-muted">Sobald du Tickets bestellst, erscheinen sie hier.</p>
+              <Show when={props.eventsHref}>
+                {(eventsHref) => (
+                  <Link
+                    to={eventsHref()}
+                    class="focus-ring inline-flex h-10 items-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content hover:bg-brand-strong"
+                  >
+                    Events entdecken
+                  </Link>
+                )}
+              </Show>
             </CardWrapper>
           </Show>
 

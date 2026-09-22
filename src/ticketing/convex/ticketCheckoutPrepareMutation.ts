@@ -6,6 +6,7 @@ import { createResult, createResultError, type PromiseResult } from "#result"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 import { ticketCheckoutLegalDocumentRevision } from "../ticketCheckoutLegalDocumentRevision.js"
 import { ticketCheckoutLegalDocumentSnapshot } from "../ticketCheckoutLegalDocumentSnapshot.js"
+import { ticketMaxPerOrder } from "../ticketMaxPerOrder.js"
 import { ticketCheckoutContextCanonicalize } from "./ticketCheckoutContextCanonicalize.js"
 
 const ticketSelectionValidator = v.object({
@@ -221,6 +222,8 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       })
     }
     if (lineInputs.length === 0) return createResultError(op, "At least one ticket is required")
+    if (lineInputs.reduce((total, line) => total + line.quantity, 0) > ticketMaxPerOrder)
+      return createResultError(op, `The maximum number of tickets per order is ${ticketMaxPerOrder}`)
     if (subtotalCents + feeCents < 1) return createResultError(op, "The selected tickets are not payable")
     const now = new Date().toISOString()
     const expiresAt = Date.now() + 15 * 60 * 1000

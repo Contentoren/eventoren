@@ -472,6 +472,52 @@ test("requires participant names for every newly checked-out ticket", async () =
   expect(orders).toHaveLength(0)
 })
 
+test("rejects checkout orders whose total ticket quantity exceeds the order maximum", async () => {
+  environmentSet()
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const adminToken = await tokenFor(adminId)
+  await seedCatalog(t, adminToken)
+  const addedTier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    eventKey: "ticket-event",
+    tierKey: "vip",
+    name: "VIP",
+    description: "VIP ticket",
+    priceCents: 4_000,
+    feeCents: 500,
+    capacity: 20,
+    token: adminToken,
+  })
+  expect(addedTier.success).toBe(true)
+  if (!addedTier.success) return
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...checkoutArgs(await tokenFor(userId), addedTier.data.catalogVersion, "checkoutkey923456789012345678901234"),
+    tickets: [
+      { tierKey: "standard", quantity: 2, participantNames: ["Ada", "Grace"] },
+      {
+        tierKey: "vip",
+        quantity: 9,
+        participantNames: ["Lin", "Max", "Noah", "Oskar", "Pia", "Quinn", "Ruth", "Sven", "Tara"],
+      },
+    ],
+  })
+
+  expect(result).toMatchObject({ success: false, errorMessage: "The maximum number of tickets per order is 10" })
+  expect(billing.checkoutCallsGet()).toBe(0)
+  const inventory = await t.run(async (ctx) => {
+    const orders = await ctx.db.query("ticketOrders").collect()
+    const reservations = await ctx.db.query("ticketReservations").collect()
+    const tiers = await ctx.db.query("catalogTicketTiers").collect()
+    return { orders, reservations, tiers }
+  })
+  expect(inventory.orders).toHaveLength(0)
+  expect(inventory.reservations).toHaveLength(0)
+  expect(inventory.tiers.every((tier) => tier.reserved === 0)).toBe(true)
+})
+
 test("rejects checkout return URLs outside the configured Eventoren origin", async () => {
   environmentSet()
   const billing = billingMock()

@@ -89,6 +89,31 @@ test("loads summaries page-by-page with the required page size", async () => {
   })
 })
 
+test("loads authenticated history without a browser session token", async () => {
+  const listMine = mock(
+    async (input: { token: string; paginationOpts: { cursor: string | null; numItems: number } }) => {
+      expect(input.token).toBe("")
+      return createResult(pageCreate([summaryCreate("cookie-order")], "done", true))
+    },
+  )
+
+  await new Promise<void>((resolve) => {
+    createRoot((dispose) => {
+      const state = ticketOrderHistoryPageStateCreate({
+        authenticated: () => true,
+        ready: () => true,
+        listMine,
+      })
+      state.sessionSync()
+      void flush().then(() => {
+        expect(state.orders().map((order) => order.id)).toEqual(["cookie-order"])
+        dispose()
+        resolve()
+      })
+    })
+  })
+})
+
 test("ignores stale pages and details after the authenticated user changes", async () => {
   let firstPageResolve: ((value: ReturnType<typeof createResult<TicketOrderListPage>>) => void) | undefined
   const firstPage = new Promise<ReturnType<typeof createResult<TicketOrderListPage>>>((resolve) => {

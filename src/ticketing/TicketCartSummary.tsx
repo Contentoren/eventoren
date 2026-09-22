@@ -27,11 +27,17 @@ export function TicketCartSummary(props: {
   return (
     <UiCard>
       <section class="flex flex-col gap-space-5" aria-labelledby={state.headingId}>
-        <div class="flex items-center justify-between gap-space-2 border-b border-border-subtle pb-space-3">
-          <h2 id={state.headingId} class="text-base font-semibold text-content">
-            {text().orderSummary}
-          </h2>
-          <span class="text-xs font-medium text-content-muted">{state.quantityLabel()}</span>
+        <div class="flex items-center gap-space-3 border-b border-border-subtle pb-space-3">
+          <div class="size-16 shrink-0 overflow-hidden rounded-control bg-surface-muted">
+            <img src={props.event.imageUrl} alt={props.event.imageAlt} class="size-full object-cover" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <h2 id={state.headingId} class="text-base font-semibold text-content">
+              {props.event.title}
+            </h2>
+            <p class="mt-0.5 truncate text-sm text-content-muted">{props.event.subtitle}</p>
+          </div>
+          <span class="shrink-0 text-xs font-medium text-content-muted">{state.quantityLabel()}</span>
         </div>
 
         <div class="flex flex-col gap-space-4">

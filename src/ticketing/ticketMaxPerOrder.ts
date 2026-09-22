@@ -1,1 +1,1 @@
-export const ticketMaxPerOrder = 8
+export const ticketMaxPerOrder = 10

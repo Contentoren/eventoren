@@ -80,6 +80,7 @@ export const ticketTables = {
     .index("checkoutKey", ["checkoutKey"])
     .index("paymentReference", ["paymentReference"])
     .index("statusAndUpdatedAt", ["status", "updatedAt"])
+    .index("createdAt", ["createdAt"])
     .index("emailAccessDigest", ["emailAccessDigest"])
     .index("ownerUserId", ["ownerUserId"])
     .index("ownerUserIdAndCreatedAt", ["ownerUserId", "createdAt"]),
