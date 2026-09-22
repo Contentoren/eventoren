@@ -1,7 +1,9 @@
-import { onMount } from "solid-js"
+import { createEffect, onMount } from "solid-js"
 import { languageDefault } from "#src/app/i18n/language.ts"
 import { apiAuthSignInViaEmail } from "#src/auth/api_client/apiAuthSignInViaEmail.ts"
 import { apiAuthSignInViaPw } from "#src/auth/api_client/apiAuthSignInViaPw.ts"
+import { eventorenAuthIdentityCreate } from "#src/auth/model/eventorenAuthIdentityCreate.ts"
+import { eventorenAuthContextUse } from "#src/auth/ui/eventorenAuthContextUse.ts"
 import { userSessionSignal } from "#src/auth/ui/signals/userSessionSignal.ts"
 import { userSessionsSignalAdd } from "#src/auth/ui/signals/userSessionsSignal.ts"
 import { userSessionCallbackConsume } from "#src/auth/ui/userSessionCallbackConsume.ts"
@@ -13,8 +15,17 @@ export function signInPageStateCreate(inputs: { readonly returnTo: () => string 
   const email = createSignalObject("")
   const password = createSignalObject("")
   const isSubmitting = createSignalObject(false)
+  const auth = eventorenAuthContextUse()
   const returnTo = () => safeReturnTo(inputs.returnTo())
   const loginUrl = () => `/login/zitadel?returnTo=${encodeURIComponent(returnTo())}`
+  let hasNavigated = false
+
+  const navigateToReturn = () => {
+    if (typeof window === "undefined") return
+    if (hasNavigated) return
+    hasNavigated = true
+    window.location.assign(returnTo())
+  }
 
   const emailInput = (event: InputEvent & { currentTarget: HTMLInputElement }) => email.set(event.currentTarget.value)
   const passwordInput = (event: InputEvent & { currentTarget: HTMLInputElement }) =>
@@ -27,7 +38,8 @@ export function signInPageStateCreate(inputs: { readonly returnTo: () => string 
       (session) => {
         userSessionsSignalAdd(session)
         userSessionSignal.set(session)
-        window.location.assign(returnTo())
+        auth.identityApply(eventorenAuthIdentityCreate(session.profile))
+        navigateToReturn()
       },
     )
   }
@@ -47,12 +59,17 @@ export function signInPageStateCreate(inputs: { readonly returnTo: () => string 
       errorMessage.set("Die Anmeldung konnte nicht übernommen werden. Bitte versuche es erneut.")
       return
     }
-    window.location.assign(returnTo())
+    navigateToReturn()
+  })
+
+  createEffect(() => {
+    if (!auth.ready() || !auth.identity()) return
+    navigateToReturn()
   })
 
   async function submit<T>(
     request: () => Promise<{ success: true; data: T } | { success: false; errorMessage?: string }>,
-    onSuccess: (data: T) => void,
+    onSuccess: (data: T) => void | Promise<void>,
   ) {
     errorMessage.set("")
     isSubmitting.set(true)
@@ -62,7 +79,7 @@ export function signInPageStateCreate(inputs: { readonly returnTo: () => string 
       errorMessage.set(result.errorMessage || "Die Anmeldung ist fehlgeschlagen.")
       return
     }
-    onSuccess(result.data)
+    await onSuccess(result.data)
   }
 
   return {

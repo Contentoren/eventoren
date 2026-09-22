@@ -10,5 +10,6 @@ export async function apiAuthSignInViaEmailEnterOtp(props: SignInViaEmailEnterOt
     apiAuthBasePath + apiPathAuth.signInViaEmailEnterOtp,
     props,
     userSessionSchema,
+    { sessionAdoption: "replace" },
   )
 }

@@ -40,6 +40,52 @@ test("exchanges the Zitadel callback code with the configured client authenticat
   })
 })
 
+test("redirects cookie-authenticated Zitadel callbacks without a session token in the URL", async () => {
+  await withEnvironment(async () => {
+    await withFetch(
+      async (input, init) => {
+        const request = new Request(input, init)
+        if (request.url.endsWith("/oauth/v2/token")) return Response.json({ access_token: "access-token" })
+        if (request.url.endsWith("/oidc/v1/userinfo")) return Response.json({ sub: "zitadel-user" })
+        return Response.json({
+          status: "success",
+          value: {
+            success: true,
+            data: {
+              token: "session-token",
+              profile: { userId: "user-1", name: "Ada", role: "user" },
+              hasPw: false,
+              signedInMethod: "zitadel",
+              signedInAt: "2026-09-22T00:00:00.000Z",
+              expiresAt: "2026-09-23T00:00:00.000Z",
+            },
+          },
+        })
+      },
+      async () => {
+        const startResponse = await eventorenZitadel.loginStart(
+          new Request("https://eventoren.example.test/login/zitadel?returnTo=%2Fadmin"),
+        )
+        const cookie = startResponse.headers.get("set-cookie")
+        const location = new URL(startResponse.headers.get("location") ?? "")
+        const callbackResponse = await eventorenZitadel.loginComplete(
+          new Request(
+            `https://eventoren.example.test/login/zitadel/callback?code=authorization-code&state=${location.searchParams.get("state")}`,
+            { headers: { cookie: cookie?.split(";", 1)[0] ?? "" } },
+          ),
+        )
+
+        const redirectUrl = new URL(callbackResponse.headers.get("location") ?? "")
+        expect(callbackResponse.status).toBe(302)
+        expect(redirectUrl.pathname).toBe("/sign-in")
+        expect(redirectUrl.searchParams.get("returnTo")).toBe("/admin")
+        expect(redirectUrl.searchParams.has("userSession")).toBe(false)
+        expect(callbackResponse.headers.get("set-cookie")).toContain("eventoren-session=session-token")
+      },
+    )
+  })
+})
+
 test("does not start Zitadel login without an application signing secret", async () => {
   await withEnvironment(async () => {
     delete process.env.AUTH_SECRET
@@ -95,6 +141,23 @@ test("does not derive the Zitadel origin from the incoming request", async () =>
     const response = await eventorenZitadel.loginStart(new Request("https://eventoren.example.test/login/zitadel"))
 
     expect(response.status).toBe(503)
+  })
+})
+
+test("accepts Zitadel login start behind reverse proxy forwarding headers", async () => {
+  await withEnvironment(async () => {
+    const response = await eventorenZitadel.loginStart(
+      new Request("http://eventoren.leonardomora.de/login/zitadel?returnTo=%2Fadmin", {
+        headers: {
+          host: "eventoren.example.test",
+          "x-forwarded-host": "eventoren.example.test",
+          "x-forwarded-proto": "https",
+        },
+      }),
+    )
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get("location")).toContain("https://auth.contentoren.de/oauth/v2/authorize")
   })
 })
 

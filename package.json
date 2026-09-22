@@ -105,7 +105,8 @@
     "@solid-primitives/keyed": "^1.5.3",
     "@solid-primitives/scheduled": "^1.5.3",
     "@zxing/browser": "^0.1.5",
-    "@zxing/library": "^0.21.0"
+    "@zxing/library": "^0.21.0",
+    "nodemailer": "^10.0.10"
   },
   "devDependencies": {
     "@adaptive-ds/assets-optimizer": "^0.20.0",

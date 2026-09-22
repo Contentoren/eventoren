@@ -1,33 +1,52 @@
-import { onMount } from "solid-js"
-import { userSessionSignal } from "#src/auth/ui/signals/userSessionSignal.ts"
+import { createResult, createResultError, type PromiseResult } from "#result"
+import { eventorenSsoAttemptsExhaust } from "#src/auth/model/eventorenSsoAttemptsExhaust.ts"
 import { userSessionsClear } from "#src/auth/ui/signals/userSessionsClear.ts"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
+import { eventorenAuthContextUse } from "./eventorenAuthContextUse.ts"
 
 export function eventorenAuthControlStateCreate() {
-  const browserReady = createSignalObject(false)
+  const auth = eventorenAuthContextUse()
+  const errorMessage = createSignalObject("")
 
-  onMount(() => {
-    browserReady.set(true)
-  })
-
-  const logout = async (event: SubmitEvent) => {
+  const logout = async (event: SubmitEvent): PromiseResult<void> => {
     event.preventDefault()
-    const token = userSessionSignal.get()?.token
-    userSessionsClear()
+    errorMessage.set("")
+    let response: Response
     try {
-      await fetch("/logout", {
+      response = await fetch("/logout", {
         method: "POST",
         credentials: "same-origin",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ token }),
       })
-    } finally {
-      window.location.assign("/")
+    } catch (error) {
+      const result = createResultError(
+        "eventorenAuthControlLogout",
+        "Die Abmeldung konnte nicht abgeschlossen werden.",
+        error instanceof Error ? error.message : String(error),
+      )
+      errorMessage.set(result.errorMessage)
+      return result
     }
+    if (!response.ok) {
+      const result = createResultError(
+        "eventorenAuthControlLogout",
+        "Die Abmeldung konnte nicht abgeschlossen werden.",
+        `${response.status} ${response.statusText}`.trim(),
+      )
+      errorMessage.set(result.errorMessage)
+      return result
+    }
+
+    eventorenSsoAttemptsExhaust()
+    userSessionsClear()
+    auth.clear()
+    window.location.assign("/")
+    return createResult(undefined)
   }
 
   return {
-    isAuthenticated: () => browserReady.get() && userSessionSignal.get() !== null,
+    isAuthenticated: () => auth.ready() && auth.identity() !== null,
+    errorMessage: errorMessage.get,
     logout,
   }
 }

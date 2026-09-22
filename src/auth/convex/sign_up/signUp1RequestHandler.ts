@@ -83,7 +83,11 @@ export async function signUp1RequestHandler(ctx: ActionCtx, request: Request): P
   const confirmUrl = new URL(pageRouteAuth.signUpConfirmEmail, hostnameApp)
   confirmUrl.searchParams.set("email", email)
   confirmUrl.searchParams.set("code", code)
-  await sendEmailSignUp(name, email, code, confirmUrl.toString(), l)
+  const sendResult = await sendEmailSignUp(ctx, name, email, code, confirmUrl.toString(), l)
+  if (!sendResult.success) {
+    console.error(op, sendResult)
+    return new Response(jsonStringifyPretty(sendResult), { status: 502 })
+  }
 
   return new Response("Sign up code sent", { status: 200 })
 }

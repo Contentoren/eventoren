@@ -10,5 +10,6 @@ export async function apiAuthSignUpConfirmEmail(props: SignInViaEmailEnterOtpTyp
     apiAuthBasePath + apiPathAuth.signUpConfirmEmail,
     props,
     userSessionSchema,
+    { sessionAdoption: "replace" },
   )
 }

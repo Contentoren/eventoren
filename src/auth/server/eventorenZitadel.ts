@@ -21,7 +21,7 @@ export const eventorenZitadel = {
   async loginStart(request: Request): Promise<Response> {
     const config = configuration()
     if (!config) return new Response("Eventoren-Zitadel ist nicht konfiguriert.", { status: 503 })
-    if (new URL(request.url).origin !== config.appOrigin)
+    if (requestOriginRead(request) !== config.appOrigin)
       return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 400)
 
     const state = randomValue()
@@ -54,7 +54,13 @@ export const eventorenZitadel = {
     const login = await eventorenSessionCookie.loginRead(request.headers.get("cookie") ?? undefined)
     const state = url.searchParams.get("state") ?? ""
     const code = url.searchParams.get("code") ?? ""
-    if (url.origin !== config.appOrigin || url.searchParams.get("error") || !login || !code || login.state !== state) {
+    if (
+      requestOriginRead(request) !== config.appOrigin ||
+      url.searchParams.get("error") ||
+      !login ||
+      !code ||
+      login.state !== state
+    ) {
       return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 400)
     }
 
@@ -79,7 +85,6 @@ export const eventorenZitadel = {
 
     const redirectUrl = new URL("/sign-in", config.appOrigin)
     redirectUrl.searchParams.set("returnTo", login.returnTo)
-    redirectUrl.searchParams.set("userSession", JSON.stringify(sessionResult.data))
     const headers = new Headers({ location: redirectUrl.toString() })
     headers.append("set-cookie", eventorenSessionCookie.loginClear(requestIsSecure(request)))
     headers.append(
@@ -204,6 +209,15 @@ function returnToRead(value: string | null, appOrigin: string): string {
   } catch {
     return "/"
   }
+}
+
+function requestOriginRead(request: Request): string {
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host")
+  if (host) {
+    const proto = request.headers.get("x-forwarded-proto") || (requestIsSecure(request) ? "https" : "http")
+    return `${proto}://${host}`
+  }
+  return new URL(request.url).origin
 }
 
 function requestIsSecure(request: Request): boolean {

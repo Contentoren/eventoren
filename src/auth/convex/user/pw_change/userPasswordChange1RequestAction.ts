@@ -73,7 +73,7 @@ async function userPasswordChange1RequestActionFn(
   confirmUrl.searchParams.set("step", "2")
   const url = confirmUrl.toString()
 
-  const sendResult = await sendEmailChangePassword(user.name, user.email, otp, url, args.l)
+  const sendResult = await sendEmailChangePassword(ctx, user.name, user.email, otp, url, args.l)
   if (!sendResult.success) {
     return sendResult
   }

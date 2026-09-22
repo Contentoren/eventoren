@@ -1,8 +1,6 @@
-import { apiAuthBasePath } from "#src/auth/api_client/apiAuthBasePath.ts"
-import { apiAuthFetch } from "#src/auth/api_client/apiAuthFetch.ts"
 import type { UserEmailChangeTypePublic } from "#src/auth/convex/user/email_change/userEmailChange1RequestAction.ts"
-import { apiPathAuth } from "#src/auth/url/apiPathAuth.ts"
+import { eventorenEmailChangeServerFn } from "#src/auth/server/eventorenEmailChangeServerFn.ts"
 
-export async function apiAuthEmailChange(props: UserEmailChangeTypePublic) {
-  return apiAuthFetch("apiAuthEmailChange", apiAuthBasePath + apiPathAuth.emailChangeRequest, props)
+export async function apiAuthEmailChange(props: Omit<UserEmailChangeTypePublic, "token">) {
+  return eventorenEmailChangeServerFn({ data: props })
 }

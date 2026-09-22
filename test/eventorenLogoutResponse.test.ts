@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test"
 import { eventorenLogoutResponse } from "../src/auth/server/eventorenLogoutResponse.ts"
 
-test("revokes the cookie and persisted client session tokens before redirecting", async () => {
+test("revokes the cookie session and clears auth state without accepting a browser token", async () => {
   const previousConvexUrl = process.env.VITE_CONVEX_URL
   const previousAuthSecret = process.env.AUTH_SECRET
   const previousFetch = globalThis.fetch
@@ -24,14 +24,14 @@ test("revokes the cookie and persisted client session tokens before redirecting"
       new Request("https://eventoren.example.test/logout", {
         method: "POST",
         headers: { cookie: "eventoren-session=cookie-token", "content-type": "application/json" },
-        body: JSON.stringify({ token: "persisted-token" }),
+        body: JSON.stringify({}),
       }),
     )
 
     expect(response.status).toBe(303)
     expect(response.headers.get("location")).toBe("/")
     expect(response.headers.get("set-cookie")).toContain("eventoren-logout=1")
-    expect(requests).toEqual([{ token: "cookie-token" }, { token: "persisted-token" }])
+    expect(requests).toEqual([{ token: "cookie-token" }])
   } finally {
     globalThis.fetch = previousFetch
     restore("VITE_CONVEX_URL", previousConvexUrl)

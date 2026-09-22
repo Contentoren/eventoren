@@ -5,5 +5,7 @@ import { userSessionSchema } from "#src/auth/model/UserSession.ts"
 import { apiPathAuth } from "#src/auth/url/apiPathAuth.ts"
 
 export async function apiAuthSignInViaPw(props: SignInViaPwType) {
-  return apiAuthFetch("apiClientSignInViaPw", apiAuthBasePath + apiPathAuth.signInViaPw, props, userSessionSchema)
+  return apiAuthFetch("apiClientSignInViaPw", apiAuthBasePath + apiPathAuth.signInViaPw, props, userSessionSchema, {
+    sessionAdoption: "replace",
+  })
 }

@@ -57,7 +57,11 @@ export async function signInViaEmail1RequestHandler(ctx: ActionCtx, request: Req
   const confirmUrl = new URL(pageRouteAuth.signInEnterOtp, baseUrlApp)
   confirmUrl.searchParams.set("email", email)
   confirmUrl.searchParams.set("code", code)
-  await sendEmailSignIn(email, code, confirmUrl.toString(), l)
+  const sendResult = await sendEmailSignIn(ctx, email, code, confirmUrl.toString(), l)
+  if (!sendResult.success) {
+    console.error(op, sendResult)
+    return new Response(jsonStringifyPretty(sendResult), { status: 502 })
+  }
 
   return new Response("Sign in code sent", { status: 200 })
 }

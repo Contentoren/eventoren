@@ -1,5 +1,6 @@
 import { createResult, createResultError } from "#result"
 import * as a from "valibot"
+import { eventorenSsoAttemptsReset } from "#src/auth/model/eventorenSsoAttemptsReset.ts"
 import { type UserSession, userSessionSchema } from "#src/auth/model/UserSession.ts"
 import { userSessionSignal } from "#src/auth/ui/signals/userSessionSignal.ts"
 import { userSessionsSignalAdd } from "#src/auth/ui/signals/userSessionsSignal.ts"
@@ -37,6 +38,7 @@ export function userSessionCallbackConsume(href: string, options: UserSessionCal
 }
 
 function userSessionCallbackSessionPersist(userSession: UserSession): void {
+  eventorenSsoAttemptsReset()
   userSessionsSignalAdd(userSession)
   userSessionSignal.set(userSession)
 }

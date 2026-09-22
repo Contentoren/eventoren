@@ -96,7 +96,7 @@ async function userEmailChange1RequestActionFn(ctx: ActionCtx, args: UserEmailCh
   confirmUrl.searchParams.set("step", "2")
   const url = confirmUrl.toString()
 
-  const sendResult = await sendEmailChangeEmail(user.name, args.newEmail, otp, url, args.l)
+  const sendResult = await sendEmailChangeEmail(ctx, user.name, args.newEmail, otp, url, args.l)
   if (!sendResult.success) {
     return sendResult
   }

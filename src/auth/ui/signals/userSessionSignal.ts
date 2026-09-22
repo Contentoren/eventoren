@@ -9,16 +9,6 @@ const userSessionsSessionStorageKey = "userSession"
 
 export const userSessionSignal: SignalObject<UserSession | null> = createUserSessionsSignal()
 
-export function userSessionGet(): UserSession {
-  return userSessionSignal.get() as UserSession
-}
-
-export function userTokenGet(): string {
-  const session = userSessionSignal.get()
-  if (!session) return ""
-  return session.token
-}
-
 function createUserSessionsSignal(): SignalObject<UserSession | null> {
   const signal = createSignalObject<UserSession | null>(null)
 
