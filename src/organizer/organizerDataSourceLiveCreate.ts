@@ -1,21 +1,23 @@
-import type { ConvexHttpClient } from "convex/browser"
 import type { PaginationOptions } from "convex/server"
-import { api } from "#convex/_generated/api.js"
-import { apiClientCreate } from "../client/apiClient.ts"
 import type { OrganizerDataResult } from "./OrganizerDataResult.ts"
 import type { OrganizerDataSource } from "./OrganizerDataSource.ts"
 import type { OrganizerEvent } from "./OrganizerEvent.ts"
 import type { OrganizerEventListPage } from "./OrganizerEventListPage.ts"
 import type { OrganizerTicketListPage } from "./OrganizerTicketListPage.ts"
 
-export function organizerDataSourceLiveCreate(client: ConvexHttpClient = apiClientCreate()): OrganizerDataSource {
+type OrganizerDataSourceServer = typeof import("./organizerDataSourceServerCreate.ts").organizerDataSourceServerCreate
+type OrganizerDataSourceServerValue = ReturnType<OrganizerDataSourceServer>
+let serverTransport: Promise<OrganizerDataSourceServerValue> | undefined
+
+export function organizerDataSourceLiveCreate(): OrganizerDataSource {
   return {
-    eventList: async (token) => {
+    eventList: async () => {
+      const transport = await organizerDataSourceServerRead()
       const events: OrganizerEvent[] = []
       let cursor: string | null = null
       while (true) {
         const result = await resultRead<OrganizerEventListPage>(() =>
-          client.query(api.organizer.organizerEventListQuery, { token, paginationOpts: { numItems: 50, cursor } }),
+          transport.eventList({ data: { paginationOpts: { numItems: 50, cursor } } }),
         )
         if (!result.success) return result
         events.push(...result.data.page)
@@ -23,50 +25,46 @@ export function organizerDataSourceLiveCreate(client: ConvexHttpClient = apiClie
         cursor = result.data.continueCursor
       }
     },
-    eventGet: async (eventKey, token) =>
-      resultRead(() => client.query(api.organizer.organizerEventGetQuery, { eventKey, token })),
-    ticketList: async (eventKey, search, token, paginationOpts: PaginationOptions) =>
+    eventGet: async (eventKey) =>
+      resultRead(() => organizerDataSourceServerRead().then((server) => server.eventGet({ data: { eventKey } }))),
+    ticketList: async (eventKey, search, paginationOpts: PaginationOptions) =>
       resultRead<OrganizerTicketListPage>(() =>
-        client.query(api.organizer.organizerEventTicketListQuery, {
-          eventKey,
-          ...(search.trim() ? { search: search.trim() } : {}),
-          token,
-          paginationOpts,
-        }),
+        organizerDataSourceServerRead().then((server) =>
+          server.ticketList({
+            data: { eventKey, ...(search.trim() ? { search: search.trim() } : {}), paginationOpts },
+          }),
+        ),
       ),
-    ticketGet: async (eventKey, ticketId, token) =>
-      resultRead(() => client.query(api.organizer.organizerEventTicketGetQuery, { eventKey, ticketId, token })),
-    ticketCheckIn: async (eventKey, ticketId, token) =>
+    ticketGet: async (eventKey, ticketId) =>
+      resultRead(() =>
+        organizerDataSourceServerRead().then((server) => server.ticketGet({ data: { eventKey, ticketId } })),
+      ),
+    ticketCheckIn: async (eventKey, ticketId) =>
       resultRead(async () => {
-        const result = await client.mutation(api.organizer.organizerTicketCheckInMutation, {
-          eventKey,
-          ticketId,
-          token,
-        })
+        const result = await (await organizerDataSourceServerRead()).ticketCheckIn({ data: { eventKey, ticketId } })
         if (!result.success) return result
         return { success: true as const, data: result.data.ticket }
       }),
-    ticketCheckInCode: async (eventKey, ticketCode, token) =>
+    ticketCheckInCode: async (eventKey, ticketCode) =>
       resultRead(async () => {
-        const result = await client.mutation(api.organizer.organizerTicketCheckInMutation, {
-          eventKey,
-          ticketCode,
-          token,
-        })
+        const result = await (await organizerDataSourceServerRead()).ticketCheckIn({ data: { eventKey, ticketCode } })
         if (!result.success) return result
         return { success: true as const, data: result.data.ticket }
       }),
-    ticketReset: async (eventKey, ticketId, token) =>
+    ticketReset: async (eventKey, ticketId) =>
       resultRead(async () => {
-        const result = await client.mutation(api.organizer.organizerTicketCheckInResetMutation, {
-          eventKey,
-          ticketId,
-          token,
-        })
+        const result = await (await organizerDataSourceServerRead()).ticketReset({ data: { eventKey, ticketId } })
         if (!result.success) return result
         return { success: true as const, data: result.data.ticket }
       }),
   }
+}
+
+async function organizerDataSourceServerRead(): Promise<OrganizerDataSourceServerValue> {
+  serverTransport ??= import("./organizerDataSourceServerCreate.ts").then(({ organizerDataSourceServerCreate }) =>
+    organizerDataSourceServerCreate(),
+  )
+  return serverTransport
 }
 
 async function resultRead<T>(read: () => Promise<unknown>): Promise<OrganizerDataResult<T>> {

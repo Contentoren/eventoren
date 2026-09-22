@@ -83,12 +83,12 @@ export function OrganizerEventListPage(props: {
                               }
                             >
                               {(eventHref) => (
-                                <a
-                                  href={eventHref()(event.eventKey)}
+                                <Link
+                                  to={eventHref()(event.eventKey)}
                                   class="focus-ring inline-flex min-h-10 items-center justify-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong"
                                 >
                                   {state.text().eventOpen}
-                                </a>
+                                </Link>
                               )}
                             </Show>
                           </div>

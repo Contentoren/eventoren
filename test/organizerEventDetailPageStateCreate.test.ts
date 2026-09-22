@@ -22,7 +22,6 @@ describe("organizer event detail state", () => {
         initialTicketId: () => "",
         searchReplace: () => {},
         dataSource: demoOrganizerDataSourceCreate(),
-        token: () => "demo",
       })
     })
 
@@ -64,7 +63,6 @@ describe("organizer event detail state", () => {
         initialTicketId: () => "",
         searchReplace: () => {},
         dataSource: demoOrganizerDataSourceCreate(),
-        token: () => "demo",
       })
     })
 
@@ -104,7 +102,6 @@ describe("organizer event detail state", () => {
             throw new Error("backend unavailable")
           },
         },
-        token: () => "demo",
       })
     })
 
@@ -130,7 +127,7 @@ describe("organizer event detail state", () => {
     const calls: { readonly search: string; readonly cursor: string | null }[] = []
     const dataSource: OrganizerDataSource = {
       ...demoOrganizerDataSourceCreate(),
-      ticketList: async (_eventKey, query, _token, paginationOpts) => {
+      ticketList: async (_eventKey, query, paginationOpts) => {
         calls.push({ search: query, cursor: paginationOpts.cursor })
         const search = query.trim().toLowerCase()
         if (!search && paginationOpts.cursor === null) {
@@ -177,7 +174,6 @@ describe("organizer event detail state", () => {
         initialTicketId: () => "",
         searchReplace: () => {},
         dataSource,
-        token: () => "demo",
       })
     })
 

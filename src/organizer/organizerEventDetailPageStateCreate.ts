@@ -1,8 +1,6 @@
 import type { PaginationOptions } from "convex/server"
 import { createEffect, on, onCleanup, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
-import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
-import { userTokenGet } from "../auth/ui/signals/userSessionSignal.ts"
 import type { OrganizerDataResult } from "./OrganizerDataResult.ts"
 import type { OrganizerDataSource } from "./OrganizerDataSource.ts"
 import type { OrganizerDuplicateInfo } from "./OrganizerDuplicateInfo.ts"
@@ -22,7 +20,6 @@ export function organizerEventDetailPageStateCreate(inputs: {
   readonly initialTicketId: () => string
   readonly searchReplace: (search: string, ticketId: string) => void
   readonly dataSource?: OrganizerDataSource
-  readonly token?: () => string
 }): OrganizerEventDetailPageState {
   const dataSource = inputs.dataSource ?? organizerDataSourceLiveCreate()
   const event = createSignalObject<OrganizerEvent | undefined>(undefined)
@@ -43,7 +40,6 @@ export function organizerEventDetailPageStateCreate(inputs: {
   let ticketListRevision = 0
   let activeEventKey = inputs.eventKey()
 
-  const tokenRead = () => inputs.token?.() ?? userTokenGet()
   const errorMessage = () => {
     const message = actionError.get()
     if (!message) return ""
@@ -63,7 +59,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     let nextCursor = pageCursor
     while (true) {
       const paginationOpts: PaginationOptions = { numItems: pageSize, cursor: nextCursor }
-      const result = await dataSource.ticketList(inputs.eventKey(), searchValue, tokenRead(), paginationOpts)
+      const result = await dataSource.ticketList(inputs.eventKey(), searchValue, paginationOpts)
       if (revision !== ticketListRevision || searchValue !== search.get()) return
       if (!result.success) {
         actionSuccess.set(null)
@@ -116,7 +112,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     const known = tickets.get().find((ticket) => ticket.id === ticketId)
     if (known) return selectedTicket.set(known)
     try {
-      const result = await dataSource.ticketGet(inputs.eventKey(), ticketId as OrganizerTicket["id"], tokenRead())
+      const result = await dataSource.ticketGet(inputs.eventKey(), ticketId as OrganizerTicket["id"])
       if (revision !== ticketListRevision || selectedTicketId.get() !== ticketId) return
       if (!result.success) {
         selectedTicket.set(undefined)
@@ -136,7 +132,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
   const eventLoad = async () => {
     const eventKey = inputs.eventKey()
     try {
-      const eventResult = await dataSource.eventGet(eventKey, tokenRead())
+      const eventResult = await dataSource.eventGet(eventKey)
       if (inputs.eventKey() !== eventKey) return
       if (eventResult.success) event.set(eventResult.data)
     } catch {
@@ -145,7 +141,6 @@ export function organizerEventDetailPageStateCreate(inputs: {
   }
 
   onMount(() => {
-    if (!inputs.dataSource) userSessionBrowserRestore()
     void eventLoad()
     void ticketLoad(search.get(), ticketListRevision)
   })
@@ -255,7 +250,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     if (!ticket || actionPending.get()) return
     actionPending.set(true)
     try {
-      resultApply(await dataSource.ticketCheckIn(inputs.eventKey(), ticket.id, tokenRead()), "check-in")
+      resultApply(await dataSource.ticketCheckIn(inputs.eventKey(), ticket.id), "check-in")
     } catch {
       resultApply({ success: false, errorMessage: text().actionFailed }, "check-in")
     } finally {
@@ -273,7 +268,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     }
     actionPending.set(true)
     try {
-      const result = await dataSource.ticketCheckInCode(inputs.eventKey(), ticketCode, tokenRead())
+      const result = await dataSource.ticketCheckInCode(inputs.eventKey(), ticketCode)
       resultApply(result, "check-in")
       return result
     } catch {
@@ -290,7 +285,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     if (!ticket || actionPending.get()) return
     actionPending.set(true)
     try {
-      resultApply(await dataSource.ticketReset(inputs.eventKey(), ticket.id, tokenRead()), "reset")
+      resultApply(await dataSource.ticketReset(inputs.eventKey(), ticket.id), "reset")
     } catch {
       resultApply({ success: false, errorMessage: text().actionFailed }, "reset")
     } finally {

@@ -33,9 +33,9 @@ export function OrganizerEventDetailPage(props: {
                 }
               >
                 {(backHref) => (
-                  <a href={backHref()} class="focus-ring text-sm font-semibold text-brand-accent hover:underline">
+                  <Link to={backHref()} class="focus-ring text-sm font-semibold text-brand-accent hover:underline">
                     ← {state.text().back}
-                  </a>
+                  </Link>
                 )}
               </Show>
             </div>

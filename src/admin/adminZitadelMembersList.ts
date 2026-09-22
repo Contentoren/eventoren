@@ -9,7 +9,7 @@ import type { AdminZitadelMember } from "./AdminZitadelMember.ts"
 const op = "adminZitadelMembersList"
 
 export async function adminZitadelMembersList(
-  input: { readonly search?: string; readonly token: string },
+  input: { readonly limit?: number; readonly offset?: number; readonly search?: string; readonly token: string },
   client?: ConvexHttpClient,
 ): Promise<Result<{ readonly members: readonly AdminZitadelMember[]; readonly total: number }>> {
   try {
