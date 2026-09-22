@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/solid-router"
-import { demoRouteHeadCreate } from "../../demo/model/demoRouteHeadCreate.ts"
-import { DemoAdmin } from "../../demo/ui/DemoAdmin.tsx"
+import { demoLegacyRouteRedirect } from "../../demo/model/demoLegacyRouteRedirect.ts"
 
 export const Route = createFileRoute("/demo/admin-error")({
-  head: () =>
-    demoRouteHeadCreate("Admin member error demo", "Review the member management error state.", "/demo/admin-error"),
-  component: () => <DemoAdmin memberScenario="error" />,
+  beforeLoad: ({ location }) => demoLegacyRouteRedirect("/demo/admin/events-error", location),
 })

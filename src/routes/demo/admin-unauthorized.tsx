@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/solid-router"
-import { demoRouteHeadCreate } from "../../demo/model/demoRouteHeadCreate.ts"
-import { DemoAdmin } from "../../demo/ui/DemoAdmin.tsx"
+import { demoLegacyRouteRedirect } from "../../demo/model/demoLegacyRouteRedirect.ts"
 
 export const Route = createFileRoute("/demo/admin-unauthorized")({
-  head: () =>
-    demoRouteHeadCreate("Unauthorized admin demo", "Review the admin access state.", "/demo/admin-unauthorized"),
-  component: () => <DemoAdmin authorized={false} />,
+  beforeLoad: ({ location }) => demoLegacyRouteRedirect("/demo/admin/events-unauthorized", location),
 })

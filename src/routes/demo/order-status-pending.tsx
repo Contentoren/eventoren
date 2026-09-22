@@ -1,13 +1,6 @@
 import { createFileRoute } from "@tanstack/solid-router"
-import { demoRouteHeadCreate } from "../../demo/model/demoRouteHeadCreate.ts"
-import { DemoOrderStatus } from "../../demo/ui/DemoOrderStatus.tsx"
+import { demoLegacyRouteRedirect } from "../../demo/model/demoLegacyRouteRedirect.ts"
 
 export const Route = createFileRoute("/demo/order-status-pending")({
-  head: () =>
-    demoRouteHeadCreate(
-      "Pending order status demo",
-      "Review a pending order confirmation.",
-      "/demo/order-status-pending",
-    ),
-  component: () => <DemoOrderStatus scenario="pending" />,
+  beforeLoad: ({ location }) => demoLegacyRouteRedirect("/demo/customer/order-status-pending", location),
 })

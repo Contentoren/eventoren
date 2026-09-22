@@ -1,4 +1,5 @@
 import { OrganizerEventDetailPage } from "../../organizer/OrganizerEventDetailPage.tsx"
+import { demoFlowContextUse } from "../state/demoFlowContextUse.ts"
 import { demoOrganizerEventDetailPageStateCreate } from "../state/demoOrganizerEventDetailPageStateCreate.ts"
 import { DemoOrganizerScannerSimulation } from "./DemoOrganizerScannerSimulation.tsx"
 import { DemoSiteFrame } from "./DemoSiteFrame.tsx"
@@ -9,7 +10,8 @@ export function DemoOrganizerEventDetail(props: {
   readonly initialTicketId: () => string
   readonly searchReplace: (search: string, ticketId: string) => void
 }) {
-  const state = demoOrganizerEventDetailPageStateCreate(props)
+  const flow = demoFlowContextUse()
+  const state = demoOrganizerEventDetailPageStateCreate({ ...props, flow })
 
   return (
     <OrganizerEventDetailPage
@@ -19,7 +21,7 @@ export function DemoOrganizerEventDetail(props: {
           {frameProps.children}
         </DemoSiteFrame>
       )}
-      backHref="/demo/organizer"
+      backHref="/demo/admin/organizer"
       scannerSimulation={<DemoOrganizerScannerSimulation state={state} />}
     />
   )

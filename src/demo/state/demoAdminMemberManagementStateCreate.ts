@@ -4,30 +4,65 @@ import type { AdminMemberManagementState } from "../../admin/AdminMemberManageme
 import type { AdminZitadelMember } from "../../admin/AdminZitadelMember.ts"
 import { adminMemberManagementText } from "../../admin/adminMemberManagementText.ts"
 import { demoAdminMembers } from "../fixtures/demoAdminMembers.ts"
+import type { DemoFlowContextValue } from "./demoFlowContext.ts"
+import { demoFlowContextUse } from "./demoFlowContextUse.ts"
 
 export function demoAdminMemberManagementStateCreate(
-  scenario: "populated" | "empty" | "error" = "populated",
+  inputs?:
+    | "populated"
+    | "empty"
+    | "error"
+    | {
+        scenario?: "populated" | "empty" | "error"
+        flow?: DemoFlowContextValue
+      },
 ): AdminMemberManagementState {
-  const members = createSignalObject<readonly AdminZitadelMember[]>(scenario === "empty" ? [] : demoAdminMembers)
-  const total = createSignalObject(members.get().length)
+  const scenario = typeof inputs === "string" ? inputs : (inputs?.scenario ?? "populated")
+  const flow = typeof inputs === "object" && inputs?.flow ? inputs.flow : demoFlowContextUse()
+
+  const baseMembers = createSignalObject<readonly AdminZitadelMember[]>(scenario === "empty" ? [] : demoAdminMembers)
   const search = createSignalObject("")
-  const isLoading = createSignalObject(false)
   const updatingMemberIds = createSignalObject<readonly string[]>([])
-  const errorMessage = createSignalObject(scenario === "error" ? "Die Mitglieder konnten nicht geladen werden." : "")
+  const baseErrorMessage = createSignalObject(
+    scenario === "error" ? "Die Mitglieder konnten nicht geladen werden." : "",
+  )
   const successMessage = createSignalObject("")
   const text = createMemo(adminMemberManagementText)
 
+  const hasFlow = () => flow.hasFlowStates()
+  const isLoading = () => (hasFlow() ? flow.isLoading() : false)
+  const isError = () => (hasFlow() ? flow.isError() : scenario === "error")
+  const isEmpty = () => (hasFlow() ? flow.isEmpty() : scenario === "empty")
+  const hasLoaded = () => (hasFlow() ? !flow.isLoading() && !flow.isError() : scenario !== "error")
+
+  const members = () => {
+    if (isLoading() || isError() || isEmpty()) return []
+    return baseMembers.get()
+  }
+
+  const total = () => members().length
+
+  const errorMessage = () => {
+    if (isError()) return "Die Mitglieder konnten nicht geladen werden."
+    return baseErrorMessage.get()
+  }
+
   const reload = async () => {
+    if (hasFlow() && (flow.isError() || flow.isEmpty())) {
+      flow.setState("loaded")
+      baseMembers.set(demoAdminMembers)
+      baseErrorMessage.set("")
+      return
+    }
+
     if (scenario === "error") {
-      members.set([])
-      total.set(0)
-      errorMessage.set(text().loadError)
+      baseMembers.set([])
+      baseErrorMessage.set(text().loadError)
       successMessage.set("")
       return
     }
 
-    isLoading.set(true)
-    errorMessage.set("")
+    baseErrorMessage.set("")
     successMessage.set("")
     await Promise.resolve()
     const query = search.get().trim().toLowerCase()
@@ -40,9 +75,7 @@ export function demoAdminMemberManagementStateCreate(
               .filter((value): value is string => Boolean(value))
               .some((value) => value.toLowerCase().includes(query))
           })
-    members.set(filtered)
-    total.set(filtered.length)
-    isLoading.set(false)
+    baseMembers.set(filtered)
   }
 
   const searchChange = (value: string) => search.set(value)
@@ -50,15 +83,15 @@ export function demoAdminMemberManagementStateCreate(
 
   const roleChange = async (member: AdminZitadelMember) => {
     updatingMemberIds.set([...updatingMemberIds.get(), member.zitadelUserId])
-    errorMessage.set("")
+    baseErrorMessage.set("")
     successMessage.set("")
     await Promise.resolve()
     const organizerGranted = !member.organizerGranted
     const zitadelRoles: AdminZitadelMember["zitadelRoles"] = organizerGranted
       ? Array.from(new Set<"customer" | "organizer" | "admin">([...member.zitadelRoles, "organizer"]))
       : member.zitadelRoles.filter((role) => role !== "organizer")
-    members.set(
-      members.get().map((candidate) =>
+    baseMembers.set(
+      baseMembers.get().map((candidate) =>
         candidate.zitadelUserId === member.zitadelUserId
           ? {
               ...candidate,
@@ -81,11 +114,12 @@ export function demoAdminMemberManagementStateCreate(
   }
 
   return {
-    errorMessage: errorMessage.get,
+    errorMessage,
+    hasLoaded,
     invitationFormat,
-    isLoading: isLoading.get,
+    isLoading,
     isUpdating: (zitadelUserId) => updatingMemberIds.get().includes(zitadelUserId),
-    members: members.get,
+    members,
     reload,
     roleChange,
     search: search.get,
@@ -93,6 +127,6 @@ export function demoAdminMemberManagementStateCreate(
     searchSubmit,
     successMessage: successMessage.get,
     text,
-    total: total.get,
+    total,
   }
 }

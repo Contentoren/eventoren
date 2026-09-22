@@ -67,7 +67,7 @@ export function demoOrganizerDataSourceCreate(inputs?: { readonly emptyEvents?: 
       const event = demoOrganizerEvents.find((candidate) => candidate.eventKey === eventKey)
       return event ? { success: true, data: event } : error("organizer.event.not-found")
     },
-    ticketList: async (eventKey, search, _token, paginationOpts: PaginationOptions) => {
+    ticketList: async (eventKey, search, paginationOpts: PaginationOptions) => {
       const normalizedSearch = search.trim().toLocaleLowerCase()
       const matchingTickets = tickets.filter(
         (ticket) =>

@@ -25,6 +25,19 @@ test("demo shell and navigation copy stays German regardless of app language", (
     "controlsTitle",
     "controlsClose",
     "controlsDirectory",
+    "groupCustomerTitle",
+    "groupCustomerDescription",
+    "groupCustomerEntry",
+    "groupAdminTitle",
+    "groupAdminDescription",
+    "groupAdminEntry",
+    "groupSharedTitle",
+    "groupSharedDescription",
+    "groupSharedEntry",
+    "quickEntriesTitle",
+    "quickEntryCustomer",
+    "quickEntryAdmin",
+    "quickEntryScanner",
   ] as const
 
   languageSignal.set(language.en)

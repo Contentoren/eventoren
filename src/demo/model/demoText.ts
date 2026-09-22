@@ -26,6 +26,19 @@ type DemoTextKey =
   | "controlsTitle"
   | "controlsClose"
   | "controlsDirectory"
+  | "groupCustomerTitle"
+  | "groupCustomerDescription"
+  | "groupCustomerEntry"
+  | "groupAdminTitle"
+  | "groupAdminDescription"
+  | "groupAdminEntry"
+  | "groupSharedTitle"
+  | "groupSharedDescription"
+  | "groupSharedEntry"
+  | "quickEntriesTitle"
+  | "quickEntryCustomer"
+  | "quickEntryAdmin"
+  | "quickEntryScanner"
 
 type DemoCheckoutTextKey = Extract<DemoTextKey, `checkout${string}`>
 type DemoUiTextKey = Exclude<DemoTextKey, DemoCheckoutTextKey>
@@ -48,6 +61,19 @@ const texts: Record<DemoUiTextKey, string> = {
   controlsTitle: "Demo-Navigation",
   controlsClose: "Schließen",
   controlsDirectory: "Zum Demo-Verzeichnis",
+  groupCustomerTitle: "Kunden",
+  groupCustomerDescription: "Ticketkauf, Evententdeckung, Warenkorb, Kasse und persönliche Bestellhistorie.",
+  groupCustomerEntry: "Zum Eventkatalog",
+  groupAdminTitle: "Administration (inkl. Ticket-Scan)",
+  groupAdminDescription: "Eventkatalogverwaltung, Bestellungen, Mitgliederverwaltung und Einlasskontrolle.",
+  groupAdminEntry: "Zur Katalogverwaltung",
+  groupSharedTitle: "Gemeinsame Beispiele",
+  groupSharedDescription: "Kontakt, FAQ, Anmeldeabläufe und statische Informationsseiten.",
+  groupSharedEntry: "Zu Kontakt & FAQ",
+  quickEntriesTitle: "Direkte Einstiege",
+  quickEntryCustomer: "Kunden-Flow",
+  quickEntryAdmin: "Administration",
+  quickEntryScanner: "Ticket-Scanner",
 }
 
 const checkoutTexts: Record<DemoCheckoutTextKey, string> = {

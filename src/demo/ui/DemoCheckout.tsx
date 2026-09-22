@@ -6,6 +6,7 @@ import { UiContainer } from "../../ui/UiContainer.tsx"
 import { demoCatalogEvents } from "../fixtures/demoCatalogEvents.ts"
 import { demoText } from "../model/demoText.ts"
 import { demoCheckoutFormStateCreate } from "../state/demoCheckoutFormStateCreate.ts"
+import { demoFlowContextUse } from "../state/demoFlowContextUse.ts"
 import { DemoSiteFrame } from "./DemoSiteFrame.tsx"
 
 export function DemoCheckout(props: {
@@ -13,12 +14,14 @@ export function DemoCheckout(props: {
   readonly error?: boolean
   readonly skipForm?: boolean
 }) {
+  const flow = demoFlowContextUse()
   const state = demoCheckoutFormStateCreate({
     events: demoCatalogEvents,
     empty: props.empty,
     error: props.error,
     relaxedValidation: true,
     skipForm: props.skipForm,
+    flow,
   })
   const currentId = props.empty ? "checkout-empty" : props.error ? "checkout-error" : "checkout"
 
@@ -27,66 +30,86 @@ export function DemoCheckout(props: {
       <main id="content" tabindex="-1">
         <UiContainer class="flex flex-col gap-space-7 py-space-7">
           <Show
-            when={state.completedOrders().length === 0 && (!props.skipForm || state.items().length === 0)}
+            when={!state.isLoading()}
             fallback={
-              <div class="flex flex-col gap-space-6">
-                <div class="flex flex-col gap-space-3">
-                  <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">
-                    {demoText("checkoutOrderEyebrow")}
-                  </p>
-                  <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">
-                    {demoText("checkoutCompletedTitle")}
-                  </h1>
-                  <p class="max-w-2xl text-sm leading-relaxed text-content-muted">
-                    {demoText("checkoutCompletedDescription")}
-                  </p>
-                </div>
-                <For each={state.completedOrders()}>{(order) => <TicketOrderWalletPass order={order} />}</For>
-                <div class="flex flex-wrap gap-space-3">
-                  <Link
-                    to="/demo/events"
-                    class="focus-ring inline-flex h-11 items-center rounded-control bg-brand px-space-5 text-sm font-semibold text-brand-content"
-                  >
-                    {demoText("checkoutDiscoverEvents")}
-                  </Link>
-                  <Link
-                    to="/demo/cart"
-                    class="focus-ring inline-flex h-11 items-center rounded-control px-space-5 text-sm font-semibold text-content underline"
-                  >
-                    {demoText("checkoutCartLink")}
-                  </Link>
-                </div>
+              <div
+                class="rounded-card border border-border-subtle bg-surface-muted p-space-6 text-sm text-content-muted"
+                aria-live="polite"
+              >
+                Kasse wird geladen …
               </div>
             }
           >
-            <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">{demoText("checkoutTitle")}</h1>
             <Show
-              when={state.items().length > 0}
+              when={state.completedOrders().length === 0 && (!props.skipForm || state.items().length === 0)}
               fallback={
-                <div class="flex flex-col items-start gap-space-4">
-                  <p
-                    role="alert"
-                    class="rounded-control border border-danger/50 bg-danger-soft px-space-4 py-space-3 text-sm font-medium text-danger"
-                  >
-                    {demoText("checkoutEmptyCart")}
-                  </p>
-                  <Link
-                    to="/demo/cart"
-                    class="focus-ring rounded-control text-sm font-semibold text-brand-accent underline underline-offset-4"
-                  >
-                    {demoText("checkoutCartLinkShort")}
-                  </Link>
+                <div class="flex flex-col gap-space-6">
+                  <div class="flex flex-col gap-space-3">
+                    <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">
+                      {demoText("checkoutOrderEyebrow")}
+                    </p>
+                    <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">
+                      {demoText("checkoutCompletedTitle")}
+                    </h1>
+                    <p class="max-w-2xl text-sm leading-relaxed text-content-muted">
+                      {demoText("checkoutCompletedDescription")}
+                    </p>
+                  </div>
+                  <For each={state.completedOrders()}>{(order) => <TicketOrderWalletPass order={order} />}</For>
+                  <div class="flex flex-wrap items-center gap-space-3">
+                    <Link
+                      to="/demo/customer/order-status"
+                      class="focus-ring inline-flex h-11 items-center rounded-control bg-brand px-space-5 text-sm font-semibold text-brand-content"
+                    >
+                      Bestellstatus anzeigen
+                    </Link>
+                    <Link
+                      to="/demo/customer/orders"
+                      class="focus-ring inline-flex h-11 items-center rounded-control border border-border px-space-5 text-sm font-semibold text-content hover:bg-surface-muted"
+                    >
+                      Meine Bestellungen
+                    </Link>
+                    <Link
+                      to="/demo/customer/events"
+                      class="focus-ring inline-flex h-11 items-center rounded-control px-space-5 text-sm font-semibold text-brand-accent hover:underline"
+                    >
+                      {demoText("checkoutDiscoverEvents")}
+                    </Link>
+                  </div>
                 </div>
               }
             >
-              <TicketCheckoutForm
-                items={state.items()}
-                state={state}
-                legalLinks={{ terms: "/demo", privacy: "/demo" }}
-                paymentDescription={demoText("checkoutPaymentDescription")}
-                submitLabel={demoText("checkoutSubmitLabel")}
-                relaxedValidation
-              />
+              <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">
+                {demoText("checkoutTitle")}
+              </h1>
+              <Show
+                when={state.items().length > 0}
+                fallback={
+                  <div class="flex flex-col items-start gap-space-4">
+                    <p
+                      role="alert"
+                      class="rounded-control border border-danger/50 bg-danger-soft px-space-4 py-space-3 text-sm font-medium text-danger"
+                    >
+                      {demoText("checkoutEmptyCart")}
+                    </p>
+                    <Link
+                      to="/demo/customer/cart"
+                      class="focus-ring rounded-control text-sm font-semibold text-brand-accent underline underline-offset-4"
+                    >
+                      {demoText("checkoutCartLinkShort")}
+                    </Link>
+                  </div>
+                }
+              >
+                <TicketCheckoutForm
+                  items={state.items()}
+                  state={state}
+                  legalLinks={{ terms: "/demo/agb", privacy: "/demo/datenschutz" }}
+                  paymentDescription={demoText("checkoutPaymentDescription")}
+                  submitLabel={demoText("checkoutSubmitLabel")}
+                  relaxedValidation
+                />
+              </Show>
             </Show>
           </Show>
         </UiContainer>

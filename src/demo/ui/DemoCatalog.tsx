@@ -1,10 +1,12 @@
 import { EventCatalogView } from "../../events/EventCatalogView.tsx"
 import { demoCatalogEvents } from "../fixtures/demoCatalogEvents.ts"
 import { demoCatalogPageStateCreate } from "../state/demoCatalogPageStateCreate.ts"
+import { demoFlowContextUse } from "../state/demoFlowContextUse.ts"
 import { DemoSiteFrame } from "./DemoSiteFrame.tsx"
 
 export function DemoCatalog(props: { readonly scenario?: "default" | "empty" | "error" | "booking-success" }) {
-  const state = demoCatalogPageStateCreate({ events: demoCatalogEvents, scenario: props.scenario })
+  const flow = demoFlowContextUse()
+  const state = demoCatalogPageStateCreate({ events: demoCatalogEvents, scenario: props.scenario, flow })
   const scenario = props.scenario ?? "default"
 
   return (
@@ -14,14 +16,14 @@ export function DemoCatalog(props: { readonly scenario?: "default" | "empty" | "
         events={state.visibleEvents()}
         resultCount={state.resultCount()}
         isDone={true}
-        isLoading={false}
+        isLoading={state.isLoading()}
         error={state.error()}
         isBookingSuccess={state.isBookingSuccess()}
         dismissBookingSuccess={state.dismissBookingSuccess}
         applyFilter={state.applyFilter}
         loadMore={() => undefined}
-        retry={() => undefined}
-        eventHref={(event) => `/demo/events/${event.id}`}
+        retry={state.retry}
+        eventHref={(event) => `/demo/customer/events/${event.id}`}
       />
     </DemoSiteFrame>
   )

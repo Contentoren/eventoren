@@ -18,6 +18,9 @@ import { ticketPriceFormat } from "../../ticketing/ticketPriceFormat.ts"
 import { demoText } from "../model/demoText.ts"
 import { demoCartStore } from "./demoCartStore.ts"
 
+import type { DemoFlowContextValue } from "./demoFlowContext.ts"
+import { demoFlowContextUse } from "./demoFlowContextUse.ts"
+
 type DemoCheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
 const demoContactRequiredFields = ["firstName", "lastName", "email"] as const
@@ -33,7 +36,14 @@ export function demoCheckoutFormStateCreate(inputs: {
   error?: boolean
   relaxedValidation?: boolean
   skipForm?: boolean
+  flow?: DemoFlowContextValue
 }) {
+  const flow = inputs.flow ?? demoFlowContextUse()
+  const hasFlow = () => flow.hasFlowStates()
+  const isLoading = () => (hasFlow() ? flow.isLoading() : false)
+  const isFlowError = () => (hasFlow() ? flow.isError() : Boolean(inputs.error))
+  const isFlowEmpty = () => (hasFlow() ? flow.isEmpty() : Boolean(inputs.empty))
+
   const contact = createSignalObject<TicketContact>({
     firstName: "Alex",
     lastName: "Demo",
@@ -50,7 +60,7 @@ export function demoCheckoutFormStateCreate(inputs: {
   const legalAccepted = createSignalObject(false)
   const completedOrders = createSignalObject<readonly TicketOrderProjection[]>([])
   const items = createMemo<readonly DemoCheckoutItem[]>(() =>
-    (inputs.empty ? [] : demoCartStore.draft())
+    (isFlowEmpty() || isLoading() ? [] : demoCartStore.draft())
       .map((cart) => {
         const event = inputs.events.find((candidate) => candidate.id === cart.eventId)
         return event ? { event, cart } : undefined
@@ -284,7 +294,9 @@ export function demoCheckoutFormStateCreate(inputs: {
     step: step.get,
     stepIndex,
     stepLabels,
-    errorMessage: errorMessage.get,
+    errorMessage: () =>
+      isFlowError() ? "Die lokale Demo-Zahlung konnte nicht abgeschlossen werden." : errorMessage.get(),
+    isLoading,
     isSubmitting: isSubmitting.get,
     submitAttempted: submitAttempted.get,
     isCartEmpty: () => total().quantity === 0,

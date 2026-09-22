@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/solid-router"
-import { demoRouteHeadCreate } from "../../demo/model/demoRouteHeadCreate.ts"
-import { DemoOrderStatus } from "../../demo/ui/DemoOrderStatus.tsx"
+import { demoLegacyRouteRedirect } from "../../demo/model/demoLegacyRouteRedirect.ts"
 
 export const Route = createFileRoute("/demo/order-status")({
-  head: () => demoRouteHeadCreate("Order status demo", "Review a local paid order confirmation.", "/demo/order-status"),
-  component: () => <DemoOrderStatus scenario="paid" />,
+  beforeLoad: ({ location }) => demoLegacyRouteRedirect("/demo/customer/order-status", location),
 })

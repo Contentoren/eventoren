@@ -19,7 +19,7 @@ export function demoNavigationMenuStateCreate() {
 
 function demoNavigationHref(path: string): string {
   if (path === "/kontakt") return "/demo/contact"
-  if (path === "/organizer") return "/demo/organizer"
-  if (path === "/admin") return "/demo/admin"
-  return "/demo/events"
+  if (path === "/organizer") return "/demo/admin/organizer"
+  if (path === "/admin") return "/demo/admin/events"
+  return "/demo/customer/events"
 }

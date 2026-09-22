@@ -2,28 +2,49 @@ import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { TicketOrderHistoryPageState } from "../../ticketing/TicketOrderHistoryPageState.ts"
 import type { TicketOrderProjection } from "../../ticketing/TicketOrderProjection.ts"
 import { demoTicketOrders } from "../fixtures/demoTicketOrders.ts"
+import type { DemoFlowContextValue } from "./demoFlowContext.ts"
+import { demoFlowContextUse } from "./demoFlowContextUse.ts"
 
 export function demoOrderHistoryPageStateCreate(
-  scenario: "populated" | "empty" | "error" | "signed-out" = "populated",
+  inputs?:
+    | "populated"
+    | "empty"
+    | "error"
+    | "signed-out"
+    | {
+        scenario?: "populated" | "empty" | "error" | "signed-out"
+        flow?: DemoFlowContextValue
+      },
 ): TicketOrderHistoryPageState {
-  const orders = createSignalObject(scenario === "populated" ? demoTicketOrders.summaries : [])
+  const scenario = typeof inputs === "string" ? inputs : (inputs?.scenario ?? "populated")
+  const flow = typeof inputs === "object" && inputs?.flow ? inputs.flow : demoFlowContextUse()
+
+  const isAuthenticated = createSignalObject(scenario !== "signed-out")
   const isDone = createSignalObject(true)
-  const isLoading = createSignalObject(false)
-  const listError = createSignalObject(
-    scenario === "error" ? "Die Demo-Bestellungen konnten nicht geladen werden." : "",
-  )
   const selectedOrderId = createSignalObject<string | null>(null)
   const selectedOrder = createSignalObject<TicketOrderProjection | null>(null)
   const isDetailLoading = createSignalObject(false)
   const detailError = createSignalObject("")
-  const isAuthenticated = createSignalObject(scenario !== "signed-out")
 
-  const loadMore = () => undefined
-  const retryList = () => {
-    if (scenario !== "error") return
-    orders.set(demoTicketOrders.summaries)
-    listError.set("")
+  const hasFlow = () => flow.hasFlowStates()
+  const isLoading = () => (hasFlow() ? flow.isLoading() : false)
+  const isError = () => (hasFlow() ? flow.isError() : scenario === "error")
+  const isEmpty = () => (hasFlow() ? flow.isEmpty() : scenario === "empty")
+
+  const orders = () => {
+    if (isLoading() || isError() || isEmpty() || scenario === "signed-out") return []
+    return demoTicketOrders.summaries
   }
+
+  const listError = () => {
+    if (isError()) return "Die Demo-Bestellungen konnten nicht geladen werden."
+    return ""
+  }
+
+  const retryList = () => {
+    flow.setState("loaded")
+  }
+
   const selectOrder = async (orderId: string) => {
     selectedOrderId.set(orderId)
     selectedOrder.set(null)
@@ -38,10 +59,12 @@ export function demoOrderHistoryPageStateCreate(
     }
     selectedOrder.set(order)
   }
+
   const retryDetail = () => {
     const orderId = selectedOrderId.get()
     if (orderId) void selectOrder(orderId)
   }
+
   const closeDetail = () => {
     selectedOrderId.set(null)
     selectedOrder.set(null)
@@ -50,16 +73,16 @@ export function demoOrderHistoryPageStateCreate(
   }
 
   return {
-    orders: orders.get,
+    orders,
     isDone: isDone.get,
-    isLoading: isLoading.get,
-    listError: listError.get,
+    isLoading,
+    listError,
     selectedOrderId: selectedOrderId.get,
     selectedOrder: selectedOrder.get,
     isDetailLoading: isDetailLoading.get,
     detailError: detailError.get,
     isAuthenticated: isAuthenticated.get,
-    loadMore,
+    loadMore: () => undefined,
     retryList,
     selectOrder,
     retryDetail,

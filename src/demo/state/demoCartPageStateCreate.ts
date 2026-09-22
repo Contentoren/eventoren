@@ -103,7 +103,7 @@ export function demoCartPageStateCreate(inputs: { events: readonly EventItem[]; 
       demoCartStore.clear()
     },
     checkout: () => {
-      if (!isEmpty()) navigate({ to: "/demo/checkout" })
+      if (!isEmpty()) navigate({ to: "/demo/customer/checkout" })
     },
   }
 }

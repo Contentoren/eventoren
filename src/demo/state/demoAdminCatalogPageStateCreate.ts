@@ -6,6 +6,9 @@ import type { AdminTierDraft } from "../../admin/AdminTierDraft.ts"
 import type { EventItem } from "../../events/EventItem.ts"
 import type { EventTicketTier } from "../../events/EventTicketTier.ts"
 
+import type { DemoFlowContextValue } from "./demoFlowContext.ts"
+import { demoFlowContextUse } from "./demoFlowContextUse.ts"
+
 const emptyEventDraft = (): AdminEventDraft => ({
   eventKey: "",
   title: "",
@@ -38,21 +41,41 @@ const emptyTierDraft = (): AdminTierDraft => ({
 export function demoAdminCatalogPageStateCreate(inputs: {
   events: readonly EventItem[]
   authorized?: boolean
+  flow?: DemoFlowContextValue
 }): AdminCatalogPageState {
-  const events = createSignalObject<readonly EventItem[]>(inputs.events)
-  const selectedEventKey = createSignalObject("")
-  const eventDraft = createSignalObject<AdminEventDraft>(emptyEventDraft())
+  const flow = inputs.flow ?? demoFlowContextUse()
+  const firstEvent = inputs.events[0]
+  const baseEvents = createSignalObject<readonly EventItem[]>(inputs.events)
+  const selectedEventKey = createSignalObject(firstEvent?.id ?? "")
+  const eventDraft = createSignalObject<AdminEventDraft>(firstEvent ? eventToDraft(firstEvent) : emptyEventDraft())
   const tierDraft = createSignalObject<AdminTierDraft>(emptyTierDraft())
-  const errorMessage = createSignalObject("")
+  const baseErrorMessage = createSignalObject("")
   const successMessage = createSignalObject("")
   const isSaving = createSignalObject(false)
-  const selectedEvent = createMemo(() => events.get().find((event) => event.id === selectedEventKey.get()))
+  const hiddenCategories = createSignalObject<readonly string[]>([])
+
+  const hasFlow = () => flow.hasFlowStates()
+  const isLoading = () => (hasFlow() ? flow.isLoading() : false)
+  const isError = () => (hasFlow() ? flow.isError() : false)
+  const isEmpty = () => (hasFlow() ? flow.isEmpty() : false)
+
+  const events = () => {
+    if (isLoading() || isError() || isEmpty()) return []
+    return baseEvents.get()
+  }
+
+  const errorMessage = () => {
+    if (isError()) return "Der Eventkatalog konnte nicht geladen werden."
+    return baseErrorMessage.get()
+  }
+
+  const selectedEvent = createMemo(() => events().find((event) => event.id === selectedEventKey.get()))
 
   const selectEvent = (event: EventItem) => {
     selectedEventKey.set(event.id)
     eventDraft.set(eventToDraft(event))
     tierDraft.set(emptyTierDraft())
-    errorMessage.set("")
+    baseErrorMessage.set("")
     successMessage.set("")
   }
 
@@ -60,18 +83,18 @@ export function demoAdminCatalogPageStateCreate(inputs: {
     selectedEventKey.set("")
     eventDraft.set(emptyEventDraft())
     tierDraft.set(emptyTierDraft())
-    errorMessage.set("")
+    baseErrorMessage.set("")
     successMessage.set("")
   }
 
   const eventFieldChange = <K extends keyof AdminEventDraft>(field: K, value: AdminEventDraft[K]) => {
     eventDraft.set({ ...eventDraft.get(), [field]: value })
-    errorMessage.set("")
+    baseErrorMessage.set("")
   }
 
   const tierFieldChange = <K extends keyof AdminTierDraft>(field: K, value: AdminTierDraft[K]) => {
     tierDraft.set({ ...tierDraft.get(), [field]: value })
-    errorMessage.set("")
+    baseErrorMessage.set("")
   }
 
   const selectTier = (tier: EventTicketTier) => {
@@ -82,20 +105,20 @@ export function demoAdminCatalogPageStateCreate(inputs: {
       priceCents: String(tier.priceCents),
       feeCents: String(tier.feeCents),
       capacity: String(tier.capacity),
-      sortOrder: "0",
+      sortOrder: String(tier.sortOrder ?? 0),
     })
-    errorMessage.set("")
+    baseErrorMessage.set("")
     successMessage.set("")
   }
 
   const saveEvent = async () => {
     const draft = eventDraft.get()
     if (!draft.eventKey.trim() || !draft.title.trim()) {
-      errorMessage.set("Event-Key und Titel sind erforderlich.")
+      baseErrorMessage.set("Event-Key und Titel sind erforderlich.")
       return
     }
     isSaving.set(true)
-    const previous = events.get().find((event) => event.id === draft.eventKey)
+    const previous = baseEvents.get().find((event) => event.id === draft.eventKey)
     const updated: EventItem = {
       ...(previous ?? emptyEventAsItem(draft)),
       ...draft,
@@ -105,30 +128,31 @@ export function demoAdminCatalogPageStateCreate(inputs: {
       tiers: previous?.tiers ?? [],
       soldOut: previous?.soldOut ?? false,
     }
-    events.set([updated, ...events.get().filter((event) => event.id !== updated.id)])
+    baseEvents.set([updated, ...baseEvents.get().filter((event) => event.id !== updated.id)])
     selectedEventKey.set(updated.id)
     eventDraft.set(eventToDraft(updated))
     isSaving.set(false)
     successMessage.set("Event lokal gespeichert. Die Demo-Daten wurden aktualisiert.")
-    errorMessage.set("")
+    baseErrorMessage.set("")
+    return updated.id
   }
 
   const saveTier = async () => {
     const eventKey = eventDraft.get().eventKey.trim()
     const draft = tierDraft.get()
     if (!eventKey || !draft.tierKey.trim() || !draft.name.trim()) {
-      errorMessage.set("Event-Key, Tier-Key und Name sind erforderlich.")
+      baseErrorMessage.set("Event-Key, Tier-Key und Name sind erforderlich.")
       return
     }
     const priceCents = nonNegativeIntegerParse(draft.priceCents)
     const feeCents = nonNegativeIntegerParse(draft.feeCents)
     const capacity = nonNegativeIntegerParse(draft.capacity)
     if (priceCents === null || feeCents === null || capacity === null) {
-      errorMessage.set("Preis, Gebühr und Kapazität müssen ganze Zahlen ab 0 sein.")
+      baseErrorMessage.set("Preis, Gebühr und Kapazität müssen ganze Zahlen ab 0 sein.")
       return
     }
     isSaving.set(true)
-    const event = events.get().find((candidate) => candidate.id === eventKey)
+    const event = baseEvents.get().find((candidate) => candidate.id === eventKey)
     if (event) {
       const existingTier = event.tiers.find((tier) => tier.id === draft.tierKey)
       const nextTier: EventTicketTier = {
@@ -145,41 +169,65 @@ export function demoAdminCatalogPageStateCreate(inputs: {
         catalogVersion: event.catalogVersion + 1,
         tiers: [nextTier, ...event.tiers.filter((tier) => tier.id !== nextTier.id)],
       }
-      events.set([updated, ...events.get().filter((candidate) => candidate.id !== eventKey)])
+      baseEvents.set([updated, ...baseEvents.get().filter((candidate) => candidate.id !== eventKey)])
     }
     tierDraft.set(emptyTierDraft())
     isSaving.set(false)
     successMessage.set("Ticketprodukt lokal gespeichert. Bestand und Preise gelten nur in dieser Demo.")
-    errorMessage.set("")
+    baseErrorMessage.set("")
+  }
+
+  const deleteTier = async () => {
+    const eventKey = eventDraft.get().eventKey.trim()
+    const tierKey = tierDraft.get().tierKey.trim()
+    if (!eventKey || !tierKey) {
+      baseErrorMessage.set("Bitte wähle zuerst ein Ticketprodukt.")
+      return
+    }
+    const event = baseEvents.get().find((candidate) => candidate.id === eventKey)
+    if (!event) return
+
+    isSaving.set(true)
+    baseEvents.set([
+      { ...event, catalogVersion: event.catalogVersion + 1, tiers: event.tiers.filter((tier) => tier.id !== tierKey) },
+      ...baseEvents.get().filter((candidate) => candidate.id !== eventKey),
+    ])
+    tierDraft.set(emptyTierDraft())
+    isSaving.set(false)
+    successMessage.set("Ticketprodukt lokal gelöscht. Diese Änderung bleibt lokal in der Demo.")
+    baseErrorMessage.set("")
   }
 
   const publishEvent = async () => {
     const eventKey = eventDraft.get().eventKey.trim()
     if (!eventKey) {
-      errorMessage.set("Bitte wähle zuerst ein Event.")
+      baseErrorMessage.set("Bitte wähle zuerst ein Event.")
       return
     }
     eventFieldChange("status", "published")
-    const event = events.get().find((candidate) => candidate.id === eventKey)
+    const event = baseEvents.get().find((candidate) => candidate.id === eventKey)
     if (event)
-      events.set([
+      baseEvents.set([
         { ...event, catalogVersion: event.catalogVersion + 1 },
-        ...events.get().filter((candidate) => candidate.id !== eventKey),
+        ...baseEvents.get().filter((candidate) => candidate.id !== eventKey),
       ])
     successMessage.set("Event veröffentlicht. Diese Änderung bleibt lokal in der Demo.")
   }
 
-  const firstEvent = inputs.events[0]
-  if (firstEvent) selectEvent(firstEvent)
+  const hideCategory = async (category: string) => {
+    hiddenCategories.set([...new Set([...hiddenCategories.get(), category])])
+  }
 
   return {
-    events: events.get,
+    events,
+    hiddenCategories: hiddenCategories.get,
     selectedEvent,
     selectedEventKey: selectedEventKey.get,
     eventDraft: eventDraft.get,
     tierDraft: tierDraft.get,
     isAuthorized: () => inputs.authorized ?? true,
-    errorMessage: errorMessage.get,
+    isLoading,
+    errorMessage,
     successMessage: successMessage.get,
     isSaving: isSaving.get,
     selectEvent,
@@ -189,7 +237,9 @@ export function demoAdminCatalogPageStateCreate(inputs: {
     selectTier,
     saveEvent,
     saveTier,
+    deleteTier,
     publishEvent,
+    hideCategory,
   }
 }
 

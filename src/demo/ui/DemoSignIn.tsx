@@ -7,7 +7,7 @@ export function DemoSignIn(props: { readonly error?: boolean }) {
 
   return (
     <DemoScenarioFrame currentId={props.error ? "auth-sign-in-error" : "auth-sign-in"}>
-      <SignInPage returnTo="/demo/orders" state={state} />
+      <SignInPage returnTo="/demo/customer/orders" state={state} />
     </DemoScenarioFrame>
   )
 }

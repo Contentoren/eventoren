@@ -7,7 +7,12 @@ export function DemoSignInOtp(props: { readonly error?: boolean }) {
 
   return (
     <DemoScenarioFrame currentId={props.error ? "auth-otp-error" : "auth-otp"}>
-      <SignInEnterOtpPage initialEmail="alex@example.test" initialCode="246810" returnTo="/demo/orders" state={state} />
+      <SignInEnterOtpPage
+        initialEmail="alex@example.test"
+        initialCode="246810"
+        returnTo="/demo/customer/orders"
+        state={state}
+      />
     </DemoScenarioFrame>
   )
 }

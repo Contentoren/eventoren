@@ -47,6 +47,14 @@ const scenarioTexts: Partial<Record<DemoScenario["id"], DemoScenarioCopy>> = {
     title: "Checkout-Fehler",
     detail: "Lokalen Fehler beim Abschließen der Kasse anzeigen",
   },
+  "checkout-loading": {
+    title: "Checkout lädt",
+    detail: "Ladezustand der Bestellbestätigung anzeigen",
+  },
+  "checkout-loaded": {
+    title: "Checkout geladen",
+    detail: "Geladenen Zustand der Bestellbestätigung anzeigen",
+  },
   "order-status-paid": {
     title: "Bestellbestätigung",
     detail: "Bezahlten Status und Wallet-Ticket anzeigen",
@@ -62,6 +70,18 @@ const scenarioTexts: Partial<Record<DemoScenario["id"], DemoScenarioCopy>> = {
   admin: {
     title: "Katalogverwaltung",
     detail: "Event bearbeiten, Ticketprodukte aktualisieren und lokale Änderungen veröffentlichen",
+  },
+  "admin-orders": {
+    title: "Admin-Bestellungen",
+    detail: "Alle Ticketbestellungen einsehen, Status prüfen und weitere Einträge nachladen",
+  },
+  "admin-members": {
+    title: "Admin-Mitglieder",
+    detail: "Mitgliederliste durchsuchen und Veranstalterrechte direkt verwalten",
+  },
+  "admin-organizers": {
+    title: "Veranstalterverwaltung",
+    detail: "Mitglieder mit aktiver Veranstalterrolle einsehen",
   },
   "admin-new": {
     title: "Neuer Evententwurf",

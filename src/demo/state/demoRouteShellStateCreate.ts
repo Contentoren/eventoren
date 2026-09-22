@@ -10,20 +10,22 @@ export function demoRouteShellStateCreate() {
   const pathname = () => location().pathname
   const isDirectory = () => pathname() === "/demo" || pathname() === "/demo/"
   const currentId = () => {
-    if (pathname().startsWith("/demo/events/")) return "event-detail"
-    if (pathname().startsWith("/demo/organizer/event/")) return "organizer-event"
+    if (pathname() === "/demo/customer/events/missing") return "event-detail-missing"
+    if (pathname().startsWith("/demo/customer/events/")) return "event-detail"
+    if (pathname().startsWith("/demo/admin/organizer/event/")) return "organizer-event"
     return demoScenarioRead(pathname()).id
   }
   const sessionRole = (): UserRole | undefined => {
-    if (pathname().startsWith("/demo/organizer")) return "organizer"
+    if (pathname().startsWith("/demo/admin/organizer")) return "organizer"
     if (pathname().startsWith("/demo/admin")) return "admin"
     return undefined
   }
   const cartQuantity = () => {
-    if (pathname() === "/demo/checkout-empty") return 0
+    if (pathname() === "/demo/customer/checkout-empty") return 0
     return ticketCartDraftTotalQuantity(demoCartStore.draft())
   }
+  const search = () => location().searchStr
   const frame = demoSiteFrameStateCreate({ sessionRole, cartQuantity })
 
-  return { isDirectory, currentId, frame }
+  return { isDirectory, currentId, frame, pathname, search }
 }

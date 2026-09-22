@@ -7,10 +7,10 @@ describe("organizer demo datasource", () => {
     const populated = demoOrganizerDataSourceCreate()
     const empty = demoOrganizerDataSourceCreate({ emptyEvents: true })
 
-    expect((await populated.eventList("demo")).success).toBe(true)
-    expect(await empty.eventList("demo")).toEqual({ success: true, data: [] })
+    expect((await populated.eventList()).success).toBe(true)
+    expect(await empty.eventList()).toEqual({ success: true, data: [] })
 
-    const result = await populated.ticketList("xyz", "Robin", "demo", { numItems: 50, cursor: null })
+    const result = await populated.ticketList("xyz", "Robin", { numItems: 50, cursor: null })
     expect(result.success).toBe(true)
     if (!result.success) return
     expect(result.data.page.map((ticket) => ticket.ticketNumber)).toEqual(["EVT-XYZ-0001"])
@@ -18,20 +18,20 @@ describe("organizer demo datasource", () => {
 
   test("supports successful check-in, duplicate details, reset and re-check-in", async () => {
     const dataSource = demoOrganizerDataSourceCreate()
-    const first = await dataSource.ticketCheckInCode("xyz", demoOrganizerScanScenarios.success, "demo")
+    const first = await dataSource.ticketCheckInCode("xyz", demoOrganizerScanScenarios.success)
     expect(first.success).toBe(true)
     if (!first.success) return
 
-    const duplicate = await dataSource.ticketCheckInCode("xyz", demoOrganizerScanScenarios.success, "demo")
+    const duplicate = await dataSource.ticketCheckInCode("xyz", demoOrganizerScanScenarios.success)
     expect(duplicate.success).toBe(false)
     if (duplicate.success) return
     expect(duplicate.errorCode).toBe("organizer.check-in.duplicate")
     expect(duplicate.errorData).toContain("Mara Demo")
     expect(duplicate.errorData).toContain("EVT-XYZ-0001")
 
-    const reset = await dataSource.ticketReset("xyz", first.data.id, "demo")
+    const reset = await dataSource.ticketReset("xyz", first.data.id)
     expect(reset.success).toBe(true)
-    const rechecked = await dataSource.ticketCheckIn("xyz", first.data.id, "demo")
+    const rechecked = await dataSource.ticketCheckIn("xyz", first.data.id)
     expect(rechecked.success).toBe(true)
   })
 
@@ -45,7 +45,7 @@ describe("organizer demo datasource", () => {
     ] as const
 
     for (const [code, expectedError] of scenarios) {
-      const result = await dataSource.ticketCheckInCode("xyz", code, "demo")
+      const result = await dataSource.ticketCheckInCode("xyz", code)
       expect(result.success).toBe(false)
       if (!result.success) expect(result.errorCode).toBe(expectedError)
     }

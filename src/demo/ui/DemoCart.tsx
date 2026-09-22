@@ -10,8 +10,8 @@ export function DemoCart(props: { readonly empty?: boolean }) {
     <DemoSiteFrame currentId={props.empty ? "cart-empty" : "cart"} cartQuantity={state.totalQuantity}>
       <TicketBagPageView
         state={state}
-        eventHref={(event) => `/demo/events/${event.id}`}
-        eventsHref="/demo/events"
+        eventHref={(event) => `/demo/customer/events/${event.id}`}
+        eventsHref="/demo/customer/events"
         showClearBag
       />
     </DemoSiteFrame>

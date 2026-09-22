@@ -20,7 +20,7 @@ export function demoSignInEnterOtpPageStateCreate(error = false): SignInEnterOtp
     isSubmitting.set(true)
     await Promise.resolve()
     isSubmitting.set(false)
-    navigate({ to: "/demo/orders" })
+    navigate({ to: "/demo/customer/orders" })
   }
 
   return { email, code, errorMessage, isSubmitting, emailInput, codeInput, submit }

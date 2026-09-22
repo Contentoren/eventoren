@@ -14,9 +14,9 @@ export function demoSiteFrameStateCreate(inputs: {
       session: () => ({ role: typeof inputs.sessionRole === "function" ? inputs.sessionRole() : inputs.sessionRole }),
       language: "de" as const,
       navLinkHref: demoSiteNavHref,
-      logoHref: "/demo/events",
-      cartHref: "/demo/cart",
-      checkoutHref: "/demo/checkout",
+      logoHref: "/demo/customer/events",
+      cartHref: "/demo/customer/cart",
+      checkoutHref: "/demo/customer/checkout",
       cartQuantity,
       navLinkIsActive: demoSiteNavIsActive,
       cartIsActive: demoSiteCartIsActive,
@@ -26,9 +26,9 @@ export function demoSiteFrameStateCreate(inputs: {
 }
 
 function demoSiteNavHref(link: SiteHeaderNavLink) {
-  if (link.to === "/organizer") return "/demo/organizer"
-  if (link.to === "/admin") return "/demo/admin"
-  return "/demo/events"
+  if (link.to === "/organizer") return "/demo/admin/organizer"
+  if (link.to === "/admin") return "/demo/admin/events"
+  return "/demo/customer/events"
 }
 
 function demoSiteFooterHref(href: string) {
@@ -40,18 +40,21 @@ function demoSiteFooterHref(href: string) {
 function demoSiteNavIsActive(link: SiteHeaderNavLink, _href: string, pathname: string) {
   if (link.to === "/organizer") {
     return (
-      pathname === "/demo/organizer" || pathname === "/demo/organizer-empty" || pathname.startsWith("/demo/organizer/")
+      pathname === "/demo/admin/organizer" ||
+      pathname === "/demo/admin/organizer-empty" ||
+      pathname.startsWith("/demo/admin/organizer/")
     )
   }
-  if (link.to === "/admin") return pathname === "/demo/admin"
+  if (link.to === "/admin") return pathname.startsWith("/demo/admin")
   return (
-    pathname === "/demo/events" ||
-    pathname === "/demo/events-empty" ||
-    pathname === "/demo/events-error" ||
-    pathname === "/demo/events-booking-success"
+    pathname === "/demo/customer/events" ||
+    pathname === "/demo/customer/events-empty" ||
+    pathname === "/demo/customer/events-error" ||
+    pathname === "/demo/customer/events-booking-success" ||
+    pathname.startsWith("/demo/customer/events/")
   )
 }
 
 function demoSiteCartIsActive(_href: string, pathname: string) {
-  return pathname === "/demo/cart" || pathname === "/demo/cart-empty"
+  return pathname === "/demo/customer/cart" || pathname === "/demo/customer/cart-empty"
 }

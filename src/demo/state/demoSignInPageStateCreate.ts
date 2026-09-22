@@ -8,8 +8,8 @@ export function demoSignInPageStateCreate(error = false): SignInPageState {
   const password = createSignalObject("demo-password")
   const isSubmitting = createSignalObject(false)
   const errorMessage = createSignalObject(error ? "Die Demo-Anmeldung wurde abgelehnt. Versuche es erneut." : "")
-  const returnTo = () => "/demo/orders"
-  const loginUrl = () => "/demo/orders"
+  const returnTo = () => "/demo/customer/orders"
+  const loginUrl = () => "/demo/customer/orders"
 
   const emailInput = (event: InputEvent & { currentTarget: HTMLInputElement }) => email.set(event.currentTarget.value)
   const passwordInput = (event: InputEvent & { currentTarget: HTMLInputElement }) =>
@@ -23,7 +23,7 @@ export function demoSignInPageStateCreate(error = false): SignInPageState {
     isSubmitting.set(true)
     await Promise.resolve()
     isSubmitting.set(false)
-    navigate({ to: "/demo/orders" })
+    navigate({ to: "/demo/customer/orders" })
   }
   const submitEmail = async (event: SubmitEvent) => {
     event.preventDefault()
