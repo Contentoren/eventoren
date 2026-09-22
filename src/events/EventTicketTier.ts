@@ -6,4 +6,5 @@ export type EventTicketTier = {
   feeCents: number
   capacity: number
   available: number
+  sortOrder?: number
 }

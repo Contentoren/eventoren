@@ -1,1 +1,1 @@
-export type EventCategory = "konzerte" | "festivals" | "kultur" | "sport" | "reisen"
+export type EventCategory = string

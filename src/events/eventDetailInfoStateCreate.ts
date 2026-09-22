@@ -1,10 +1,8 @@
 import { createMemo, createSignal } from "solid-js"
-import type { EventCollageImage } from "./EventCollageImage.ts"
 import type { EventFaqItem } from "./EventFaqItem.ts"
 import type { EventHighlightDetail } from "./EventHighlightDetail.ts"
 import type { EventItem } from "./EventItem.ts"
 import type { EventScheduleItem } from "./EventScheduleItem.ts"
-import { eventCollageImagesGet } from "./eventCollageImagesGet.ts"
 import { eventExclusionsGet } from "./eventExclusionsGet.ts"
 import { eventFaqsGet } from "./eventFaqsGet.ts"
 import { eventHighlightDetailByTag } from "./eventHighlightDetailByTag.ts"
@@ -22,9 +20,6 @@ export function eventDetailInfoStateCreate(inputs: { event: () => EventItem }) {
   const hasHighlights = createMemo(() => inputs.event().tags.length > 0)
   const highlights = createMemo<readonly EventHighlightDetail[]>(() =>
     inputs.event().tags.map((tag) => eventHighlightDetailByTag(tag)),
-  )
-  const collageImages = createMemo<readonly [EventCollageImage, EventCollageImage, EventCollageImage]>(() =>
-    eventCollageImagesGet(inputs.event()),
   )
   const inclusions = createMemo<readonly string[]>(() => eventInclusionsGet(inputs.event()))
   const hasInclusions = createMemo(() => inclusions().length > 0)
@@ -59,7 +54,6 @@ export function eventDetailInfoStateCreate(inputs: { event: () => EventItem }) {
   }
 
   return {
-    collageImages,
     description,
     exclusions,
     faqs,

@@ -8,7 +8,7 @@ import { eventPriceFrom } from "./eventPriceFrom.ts"
 import { eventTimeFormat } from "./eventTimeFormat.ts"
 
 export function eventCardStateCreate(inputs: { event: () => EventItem }) {
-  const categoryLabel = createMemo(() => eventCategoryLabels[inputs.event().category])
+  const categoryLabel = createMemo(() => eventCategoryLabels[inputs.event().category] ?? inputs.event().category)
   const dateLabel = createMemo(() => eventDateFormat(inputs.event().startsAt))
   const dateParts = createMemo(() => eventDateParts(inputs.event().startsAt))
   const timeLabel = createMemo(() => eventTimeFormat(inputs.event().startsAt))

@@ -80,38 +80,6 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
           </div>
         </Show>
 
-        <div class="flex flex-col gap-space-4 pt-space-2">
-          <h2 class="text-xl font-semibold text-content">Dein Erlebnis, deine Erinnerungen</h2>
-          <div class="grid grid-cols-1 gap-space-3 sm:grid-cols-2">
-            <div class="group relative h-72 overflow-hidden rounded-card border border-border-subtle/60 bg-surface-muted sm:h-full sm:min-h-full">
-              <img
-                src={state.collageImages()[0].src}
-                alt={state.collageImages()[0].alt}
-                loading="lazy"
-                class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            </div>
-            <div class="grid grid-cols-2 gap-space-3 sm:grid-cols-1">
-              <div class="group relative h-40 overflow-hidden rounded-card border border-border-subtle/60 bg-surface-muted sm:h-60">
-                <img
-                  src={state.collageImages()[1].src}
-                  alt={state.collageImages()[1].alt}
-                  loading="lazy"
-                  class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-              <div class="group relative h-40 overflow-hidden rounded-card border border-border-subtle/60 bg-surface-muted sm:h-60">
-                <img
-                  src={state.collageImages()[2].src}
-                  alt={state.collageImages()[2].alt}
-                  loading="lazy"
-                  class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
         <Show when={state.hasInclusions()}>
           <div class="flex flex-col border-t border-border-subtle/40 pt-space-4">
             <Button

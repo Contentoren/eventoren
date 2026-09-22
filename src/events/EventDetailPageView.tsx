@@ -1,4 +1,4 @@
-import type { Accessor } from "solid-js"
+import type { Accessor, JSX } from "solid-js"
 import type { TicketCart } from "../ticketing/TicketCart.ts"
 import { TicketCartSummary } from "../ticketing/TicketCartSummary.tsx"
 import { TicketStickyCta } from "../ticketing/TicketStickyCta.tsx"
@@ -17,12 +17,14 @@ export function EventDetailPageView(props: {
     goToCart: () => void
     goToCheckout: () => void
   }
+  breadcrumb?: JSX.Element
 }) {
   return (
     <main id="content" tabindex="-1">
       <EventDetailBanner imageUrl={props.event.imageUrl} imageAlt={props.event.imageAlt} />
 
       <UiContainer class="flex flex-col gap-space-7 pt-space-3 pb-28 sm:py-space-7 lg:pb-space-7">
+        {props.breadcrumb}
         <EventDetailHeader event={props.event} />
 
         <div class="grid gap-space-7 lg:grid-cols-[minmax(0,1fr)_20rem]">

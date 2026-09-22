@@ -7,7 +7,7 @@ import { eventPriceFrom } from "./eventPriceFrom.ts"
 import { eventTimeFormat } from "./eventTimeFormat.ts"
 
 export function eventDetailHeaderStateCreate(inputs: { event: () => EventItem }) {
-  const categoryLabel = createMemo(() => eventCategoryLabels[inputs.event().category])
+  const categoryLabel = createMemo(() => eventCategoryLabels[inputs.event().category] ?? inputs.event().category)
 
   const totalAvailable = createMemo(() => inputs.event().tiers.reduce((sum, tier) => sum + tier.available, 0))
   const isSoldOut = createMemo(() => inputs.event().soldOut || totalAvailable() === 0)

@@ -81,9 +81,9 @@ export function EventCardTicket(props: { event: EventItem; href?: string }) {
 function EventCardLink(props: { event: EventItem; href?: string; children: JSX.Element }) {
   if (props.href) {
     return (
-      <a href={props.href} class="focus-ring flex h-full flex-col">
+      <Link to={props.href} class="focus-ring flex h-full flex-col">
         {props.children}
-      </a>
+      </Link>
     )
   }
 
