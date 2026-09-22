@@ -74,11 +74,6 @@ yarn-error.log*
 .pnpm-debug.log*
 package-lock.json
 pnpm-lock.yaml
-# Dotenv and local secret files
-.env/*
-!.env/
-!.env/development.example
-!.env/production.example
 .integration-secrets/
 # npm publishing
 .npmrc

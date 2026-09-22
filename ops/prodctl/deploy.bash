@@ -25,7 +25,6 @@ tar \
   --directory="$REPO_DIR" \
   --exclude-vcs \
   --exclude='.env' \
-  --exclude='.env/*' \
   --exclude='.env.*' \
   --exclude='*.env' \
   --exclude='node_modules' \

@@ -6,15 +6,16 @@ REPO_DIR="$(cd "$SCRIPT_DIR/../.." >/dev/null 2>&1 && pwd)"
 command -v prodctl >/dev/null 2>&1 || { echo "error: prodctl is required" >&2; exit 1; }
 command -v python3 >/dev/null 2>&1 || { echo "error: python3 is required" >&2; exit 1; }
 APP="eventoren"
-ENV_DIRECTORY="$REPO_DIR/.env"
-ENV_FILE="$ENV_DIRECTORY/production"
+ENV_FILE="$REPO_DIR/.env.production"
 
-if [[ -L "$ENV_DIRECTORY" || ( -e "$ENV_DIRECTORY" && ! -d "$ENV_DIRECTORY" ) ]]; then
-  echo "error: $ENV_DIRECTORY must be a directory" >&2
+if [[ -L "$ENV_FILE" || ( -e "$ENV_FILE" && ! -f "$ENV_FILE" ) ]]; then
+  echo "error: $ENV_FILE must be a regular file" >&2
   exit 1
 fi
-mkdir -p "$ENV_DIRECTORY"
-chmod 700 "$ENV_DIRECTORY"
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo "error: $ENV_FILE is required" >&2
+  exit 1
+fi
 
 if ! prodctl status "$APP" >/dev/null 2>&1; then
   prodctl create "$APP" --type quadlet --mem "${PRODCTL_MEMORY:-4G}" --cpu "${PRODCTL_CPU:-200%}" \

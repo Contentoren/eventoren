@@ -8,6 +8,7 @@ import type { ContentEntry } from "./src/app/content/contentList.js"
 import { allContent, isPublishedAtBuild } from "./src/app/content/contentList.js"
 
 export default defineConfig({
+  envPrefix: ["VITE_", "PUBLIC_"],
   plugins: [
     tailwindcss(),
     tanstackStart({
@@ -25,6 +26,9 @@ export default defineConfig({
     outDir: "dist",
     assetsDir: "assets",
     emptyOutDir: true,
+  },
+  ssr: {
+    noExternal: [/^@corvu\//],
   },
   server: {
     allowedHosts: ["eventoren.leonardomora.de"],
