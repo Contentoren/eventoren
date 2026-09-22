@@ -4,7 +4,7 @@ import { classArr } from "#ui/utils/classArr.js"
 export const classesInput = classArr(
   "inline-flex", // layout
   "w-full", // sizing
-  "bg-gray-50 dark:bg-gray-700", // bg
+  "bg-surface-muted text-content", // bg/text
   "border border-input", // borders
   "rounded-md", // border radius
   "px-3 py-2", // spacing

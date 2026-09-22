@@ -11,8 +11,7 @@ export const Textarea: Component<ComponentProps<"textarea">> = (p) => {
       class={classMerge(
         "flex", // layout
         "min-h-[80px] w-full", // sizing
-        // "bg-transparent", // background
-        "bg-gray-50 dark:bg-gray-700", // bg
+        "bg-surface-muted text-content", // bg/text
         "rounded-md border border-input", // borders
         "placeholder:text-muted-foreground", // typography
         "px-3 py-2", // spacing

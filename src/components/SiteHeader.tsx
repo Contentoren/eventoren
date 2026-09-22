@@ -39,9 +39,9 @@ export function SiteHeader(
     <header class="sticky top-0 z-30 border-b border-border-subtle bg-surface-base/90 text-content backdrop-blur-xl">
       <SiteHeaderSkipLink />
 
-      <UiContainer width="wide" class="max-md:px-space-3">
+      <UiContainer>
         <div class="flex h-16 items-center justify-between gap-space-5 max-md:gap-space-2">
-          <SiteHeaderLogo class="max-md:px-space-1" href={props.logoHref} />
+          <SiteHeaderLogo href={props.logoHref} />
 
           <nav aria-label="Hauptnavigation" class="max-md:hidden">
             <ul class="flex items-center gap-space-1">

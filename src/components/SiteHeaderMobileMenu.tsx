@@ -34,8 +34,8 @@ export function SiteHeaderMobileMenu(props: {
                     }
                   >
                     {(linkHref) => (
-                      <a
-                        href={linkHref()(link)}
+                      <Link
+                        to={linkHref()(link)}
                         onClick={() => props.onClose()}
                         class="focus-ring flex min-h-11 items-center rounded-control px-space-4 text-base font-semibold transition-colors hover:bg-surface-muted"
                         classList={{
@@ -44,7 +44,7 @@ export function SiteHeaderMobileMenu(props: {
                         aria-current={props.isLinkActive?.(link, linkHref()(link)) ? "page" : undefined}
                       >
                         {link.label}
-                      </a>
+                      </Link>
                     )}
                   </Show>
                 </li>

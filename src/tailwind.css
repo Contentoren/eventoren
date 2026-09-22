@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Eventoren is light-only; dark utilities require an explicit theme class, not OS preference. */
+/* Dark utilities require an explicit theme class, not OS preference. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @source "./**/*.{ts,tsx}";
@@ -57,6 +57,22 @@
   :root {
     color-scheme: light;
     accent-color: var(--color-brand);
+  }
+
+  .dark {
+    color-scheme: dark;
+    --color-surface-base: #020617;
+    --color-surface: #0f172a;
+    --color-surface-muted: #1e293b;
+    --color-surface-inverted: #f8fafc;
+    --color-border-subtle: #334155;
+    --color-border-strong: #64748b;
+    --color-content: #f8fafc;
+    --color-content-muted: #cbd5e1;
+    --color-content-inverted: #0f172a;
+    --color-brand-soft: #134e4a;
+    --color-brand-accent: #5eead4;
+    --color-brand-content: #042f2e;
   }
 
   html {

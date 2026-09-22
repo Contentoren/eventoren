@@ -64,13 +64,21 @@ export function setThemeToBrowser(t: ThemeVariant) {
 }
 
 function setBrowserThemeDark() {
-  // console.log("setBrowserThemeDark")
-  document.documentElement.classList.add("dark")
+  themeBrowserApply("dark")
 }
 
 function setBrowserThemeLight() {
-  // console.log("setBrowserThemeLight")
-  document.documentElement.classList.remove("dark")
+  themeBrowserApply("light")
+}
+
+function themeBrowserApply(mode: "light" | "dark") {
+  const root = document.documentElement
+  const isDark = mode === themeVariant.dark
+  root.classList.toggle("dark", isDark)
+  root.classList.toggle("light", !isDark)
+  root.dataset.theme = mode
+  root.style.colorScheme = mode
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", isDark ? "#020617" : "#f8fafc")
 }
 
 // 2023: 93% - https://caniuse.com/?search=prefers-color-scheme

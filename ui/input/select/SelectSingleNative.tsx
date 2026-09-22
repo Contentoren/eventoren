@@ -33,11 +33,11 @@ export function SelectSingleNative(p: SelectSingleNativeProps) {
       id={p.id}
       class={classArr(
         "block w-full p-2.5",
-        "text-gray-900 dark:text-white", // text
+        "text-content", // text
         "placeholder:text-muted-foreground", // text placeholder
-        "bg-gray-50 dark:bg-gray-700", // bg
-        "rounded-lg border border-gray-300 dark:border-gray-500", // border
-        "focus:ring-blue-500 focus:border-blue-500 dark:focus:border-blue-500 dark:focus:ring-blue-500",
+        "bg-surface-muted", // bg
+        "rounded-lg border border-input", // border
+        "focus:ring-ring focus:border-ring",
         p.disabled && classesDisabledDirectly,
         p.class,
       )}
@@ -77,7 +77,7 @@ interface SelectItemProps extends MayHaveClass {
 
 function SelectItem(p: SelectItemProps) {
   return (
-    <option value={p.itemValue} class={p.class}>
+    <option value={p.itemValue} class={classArr("bg-surface text-content", p.class)}>
       {getDisplayValue(p.itemValue, p.valueText)}
     </option>
   )

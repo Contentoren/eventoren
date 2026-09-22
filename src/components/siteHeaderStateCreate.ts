@@ -5,8 +5,7 @@ import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import type { Language } from "../app/i18n/language.ts"
 import { languageDefault } from "../app/i18n/language.ts"
 import type { UserRole } from "../auth/model_field/userRole.ts"
-import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
-import { userSessionSignal } from "../auth/ui/signals/userSessionSignal.ts"
+import { eventorenAuthContextUse } from "../auth/ui/eventorenAuthContextUse.ts"
 import type { TicketCartDraft } from "../ticketing/TicketCartDraft.ts"
 import { ticketCartDraftEventName } from "../ticketing/ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "../ticketing/ticketCartDraftLoad.ts"
@@ -25,23 +24,21 @@ export function siteHeaderStateCreate(
   } = {},
 ) {
   const location = useLocation()
+  const auth = eventorenAuthContextUse()
   const hasInjectedSession = inputs.session !== undefined
   const injectedSessionRole = () =>
     typeof inputs.session === "function" ? inputs.session()?.role : inputs.session?.role
   const overlay = createSignalObject<SiteHeaderOverlay>("none")
   const menuOpen = createSignalObject(false)
   const cart = createSignalObject<TicketCartDraft>([])
-  const sessionHydrated = createSignalObject(hasInjectedSession)
+  const sessionHydrated = createSignalObject(hasInjectedSession || auth.ready())
 
   const syncCart = () => {
     cart.set(ticketCartDraftLoad())
   }
 
   onMount(() => {
-    if (!hasInjectedSession) {
-      userSessionBrowserRestore()
-      sessionHydrated.set(true)
-    }
+    if (!hasInjectedSession) sessionHydrated.set(true)
 
     if (typeof window === "undefined") return
 
@@ -87,7 +84,7 @@ export function siteHeaderStateCreate(
     navLinks: createMemo(() =>
       siteHeaderNavLinks(
         inputs.language ?? languageDefault,
-        hasInjectedSession ? injectedSessionRole() : userSessionSignal.get()?.profile.role,
+        hasInjectedSession ? injectedSessionRole() : auth.identity()?.role,
         sessionHydrated.get(),
       ),
     ),

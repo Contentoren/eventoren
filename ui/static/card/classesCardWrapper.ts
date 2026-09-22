@@ -1,8 +1,8 @@
 import { classArr } from "#ui/utils/classArr.js"
 
 export const classesRoundedShadowLg = "rounded-lg shadow-lg"
-export const classesCardWrapperBorderDark = "dark:border dark:border-gray-500"
-export const classesCardWrapperBg = "bg-white dark:bg-zinc-800"
+export const classesCardWrapperBorderDark = "border border-border"
+export const classesCardWrapperBg = "bg-surface"
 
 export const classesCardWrapper = classArr(
   classesRoundedShadowLg, // card shadows/padding

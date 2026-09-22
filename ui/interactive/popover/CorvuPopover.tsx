@@ -40,6 +40,8 @@ export function CorvuPopover(p: CorvuPopoverProps) {
       onOpenChange={p.onOpenChange}
     >
       <Popover.Trigger
+        id={p.id}
+        type={p.type ?? "button"}
         class={buttonCva2(
           p.variant,
           p.size,
