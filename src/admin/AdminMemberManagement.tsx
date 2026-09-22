@@ -65,15 +65,20 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
           </Show>
 
           <Show
-            when={!state.isLoading()}
+            when={state.hasLoaded()}
             fallback={
-              <p role="status" class="py-6 text-center text-sm text-content-muted">
-                {state.text().loading}
-              </p>
+              <Show when={!state.errorMessage()}>
+                <p role="status" class="py-6 text-center text-sm text-content-muted">
+                  {state.text().loading}
+                </p>
+              </Show>
             }
           >
             <div class="flex items-center justify-between gap-3 text-sm text-content-muted">
               <span>{state.text().total.replace("[X]", String(state.total()))}</span>
+              <Show when={state.isLoading()}>
+                <span class="text-xs">{state.text().loading}</span>
+              </Show>
             </div>
             <Show
               when={state.members().length > 0}

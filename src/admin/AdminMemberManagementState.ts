@@ -4,6 +4,7 @@ import type { adminMemberManagementText } from "./adminMemberManagementText.ts"
 
 export type AdminMemberManagementState = {
   readonly errorMessage: Accessor<string>
+  readonly hasLoaded: Accessor<boolean>
   readonly invitationFormat: (timestamp: string | undefined) => string
   readonly isLoading: Accessor<boolean>
   readonly isUpdating: (zitadelUserId: string) => boolean

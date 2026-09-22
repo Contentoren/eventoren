@@ -1,35 +1,40 @@
 import { createMemo, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
-import { userSessionBrowserRestore } from "../auth/ui/signals/userSessionBrowserRestore.ts"
-import { userTokenGet } from "../auth/ui/signals/userSessionSignal.ts"
 import type { AdminMemberManagementState } from "./AdminMemberManagementState.ts"
 import type { AdminZitadelMember } from "./AdminZitadelMember.ts"
 import { adminMemberManagementInvitationFormat } from "./adminMemberManagementInvitationFormat.ts"
 import { adminMemberManagementText } from "./adminMemberManagementText.ts"
-import { adminZitadelMembersList } from "./adminZitadelMembersList.ts"
-import { adminZitadelOrganizerGrant } from "./adminZitadelOrganizerGrant.ts"
+import type { adminZitadelMembersList } from "./adminZitadelMembersList.ts"
+import type { adminZitadelOrganizerGrant } from "./adminZitadelOrganizerGrant.ts"
 
-export function adminMemberManagementStateCreate(): AdminMemberManagementState {
+export function adminMemberManagementStateCreate(
+  inputs: { readonly list?: AdminMemberList; readonly roleChange?: AdminMemberRoleChange } = {},
+): AdminMemberManagementState {
+  const list = inputs.list
   const members = createSignalObject<readonly AdminZitadelMember[]>([])
   const total = createSignalObject(0)
   const search = createSignalObject(searchFromUrl())
-  const isLoading = createSignalObject(false)
+  const hasLoaded = createSignalObject(false)
+  const isLoading = createSignalObject(true)
   const updatingMemberIds = createSignalObject<readonly string[]>([])
   const errorMessage = createSignalObject("")
   const successMessage = createSignalObject("")
   const text = createMemo(adminMemberManagementText)
 
   const reload = async () => {
-    const token = userTokenGet()
-    if (!token) return errorMessage.set(text().sessionRequired)
+    if (!list) {
+      isLoading.set(false)
+      return errorMessage.set(text().sessionRequired)
+    }
     isLoading.set(true)
     errorMessage.set("")
     successMessage.set("")
-    const result = await adminZitadelMembersList({ search: search.get().trim() || undefined, token })
+    const result = await list({ search: search.get().trim() || undefined })
     isLoading.set(false)
     if (!result.success) return errorMessage.set(text().loadError)
     members.set(result.data.members)
     total.set(result.data.total)
+    hasLoaded.set(true)
   }
 
   const searchChange = (value: string) => {
@@ -42,13 +47,17 @@ export function adminMemberManagementStateCreate(): AdminMemberManagementState {
   }
 
   const roleChange = async (member: AdminZitadelMember) => {
-    const token = userTokenGet()
-    if (!token) return errorMessage.set(text().sessionRequired)
     const operation = member.organizerGranted ? "revoke" : "grant"
     updatingMemberIds.set([...updatingMemberIds.get(), member.zitadelUserId])
     errorMessage.set("")
     successMessage.set("")
-    const result = await adminZitadelOrganizerGrant({ operation, token, zitadelUserId: member.zitadelUserId })
+    let result: AdminMemberRoleChangeResult
+    if (inputs.roleChange) {
+      result = await inputs.roleChange({ operation, zitadelUserId: member.zitadelUserId })
+    } else {
+      updatingMemberIds.set(updatingMemberIds.get().filter((id) => id !== member.zitadelUserId))
+      return errorMessage.set(text().sessionRequired)
+    }
     updatingMemberIds.set(updatingMemberIds.get().filter((id) => id !== member.zitadelUserId))
     if (!result.success) return errorMessage.set(text().actionError)
     members.set(
@@ -69,12 +78,12 @@ export function adminMemberManagementStateCreate(): AdminMemberManagementState {
   }
 
   onMount(() => {
-    userSessionBrowserRestore()
     void reload()
   })
 
   return {
     errorMessage: errorMessage.get,
+    hasLoaded: hasLoaded.get,
     invitationFormat: adminMemberManagementInvitationFormat,
     isLoading: isLoading.get,
     isUpdating: (zitadelUserId) => updatingMemberIds.get().includes(zitadelUserId),
@@ -89,6 +98,14 @@ export function adminMemberManagementStateCreate(): AdminMemberManagementState {
     total: total.get,
   }
 }
+
+type AdminMemberRoleChange = (input: {
+  readonly operation: "grant" | "revoke"
+  readonly zitadelUserId: string
+}) => Promise<AdminMemberRoleChangeResult>
+
+type AdminMemberRoleChangeResult = Awaited<ReturnType<typeof adminZitadelOrganizerGrant>>
+type AdminMemberList = (input: { readonly search?: string }) => ReturnType<typeof adminZitadelMembersList>
 
 function searchFromUrl(): string {
   if (typeof window === "undefined") return ""
