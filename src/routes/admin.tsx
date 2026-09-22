@@ -1,14 +1,16 @@
-import { createFileRoute, redirect } from "@tanstack/solid-router"
+import { createFileRoute, Link, Outlet, redirect } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
-import { AdminCatalogPage } from "../admin/AdminCatalogPage.tsx"
-import { adminCatalogPageStateCreate } from "../admin/adminCatalogPageStateCreate.ts"
-import { adminMemberManagementStateCreate } from "../admin/adminMemberManagementStateCreate.ts"
+import { Show } from "solid-js"
 import { eventorenAdminAccessRead } from "#src/auth/server/eventorenAdminAccessRead.ts"
-import { SiteFrame } from "../components/SiteFrame.tsx"
-import { catalogEventsPublicGet } from "../server/catalogEventsPublicGet.js"
+import { ErrorPage } from "#ui/static/pages/ErrorPage.jsx"
+import { AdminShell } from "../admin/AdminShell.tsx"
+import { type AdminRouteLoaderData, adminRouteLoaderResolve } from "../admin/adminRouteLoaderResolve.ts"
+import { adminRouteText } from "../admin/adminRouteText.ts"
+import { ErrorPageActions } from "../components/ErrorPageActions.tsx"
 import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
+import { catalogEventsAdminGet } from "../server/catalogEventsAdminGet.ts"
 
-const getCatalogEvents = createServerFn({ method: "GET" }).handler(catalogEventsPublicGet)
+const getCatalogEvents = createServerFn({ method: "GET" }).handler(catalogEventsAdminGet)
 const getAdminAccess = createServerFn({ method: "GET" }).handler(eventorenAdminAccessRead)
 
 export const Route = createFileRoute("/admin")({
@@ -16,31 +18,42 @@ export const Route = createFileRoute("/admin")({
     ...seoHeadCreate("/"),
     meta: [...seoHeadCreate("/").meta, { name: "robots", content: "noindex, nofollow" }],
   }),
-  loader: async () => {
-    const accessResult = await getAdminAccess()
-    if (!accessResult.success) {
-      if (accessResult.errorMessage === "Eventoren-Adminrolle erforderlich") throw redirect({ to: "/" })
-      throw redirect({ to: "/sign-in", search: { returnTo: "/admin" } })
-    }
-    return {
-      eventsResult: await getCatalogEvents(),
-      isServerAuthorized: true,
-    }
-  },
+  loader: () =>
+    adminRouteLoaderResolve({
+      getAdminAccess,
+      getCatalogEvents,
+      redirect,
+    }),
   component: () => {
     const loaderData = Route.useLoaderData()
-    const state = adminCatalogPageStateCreate({
-      events: () => {
-        const result = loaderData().eventsResult
-        return result.success ? result.data : []
-      },
-      isServerAuthorized: () => loaderData().isServerAuthorized,
-    })
-    const memberState = adminMemberManagementStateCreate()
+    const text = adminRouteText()
     return (
-      <SiteFrame>
-        <AdminCatalogPage state={state} memberState={memberState} />
-      </SiteFrame>
+      <Show
+        when={
+          loaderData().authorized
+            ? (loaderData() as Extract<
+                AdminRouteLoaderData<Awaited<ReturnType<typeof getCatalogEvents>>>,
+                { authorized: true }
+              >)
+            : undefined
+        }
+        fallback={
+          <ErrorPage title={text.accessDeniedTitle} subtitle={text.accessDeniedSubtitle}>
+            <ErrorPageActions showSignOut={true}>
+              <Link
+                to="/"
+                class="inline-flex rounded-control bg-brand px-space-4 py-space-2 text-sm font-semibold text-brand-content hover:bg-brand-strong"
+              >
+                {text.backToHome}
+              </Link>
+            </ErrorPageActions>
+          </ErrorPage>
+        }
+      >
+        <AdminShell>
+          <Outlet />
+        </AdminShell>
+      </Show>
     )
   },
 })

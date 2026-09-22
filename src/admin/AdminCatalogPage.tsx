@@ -1,26 +1,36 @@
+import { mdiClose } from "@adaptive-ds/mdi/mdiClose.js"
+import { Link } from "@tanstack/solid-router"
+import type { JSX } from "solid-js"
 import { For, Show } from "solid-js"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
 import { Textarea } from "#ui/input/textarea/Textarea.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import { ButtonIcon } from "#ui/interactive/button/ButtonIcon.jsx"
+import { CorvuPopover } from "#ui/interactive/popover/CorvuPopover.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
-import type { EventCategory } from "../events/EventCategory.ts"
+import { eventCategoryLabels } from "../events/eventCategoryLabels.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import { AdminMemberManagement } from "./AdminMemberManagement.tsx"
 import type { AdminMemberManagementState } from "./AdminMemberManagementState.ts"
+import { adminCategoryPickerStateCreate } from "./adminCategoryPickerStateCreate.ts"
 
 export function AdminCatalogPage(props: {
   state: AdminCatalogPageState
   memberState?: AdminMemberManagementState
   description?: string
+  headerSlot?: JSX.Element
+  eventViewHref?: (eventKey: string) => string
 }) {
   const state = props.state
+  const categoryPicker = adminCategoryPickerStateCreate({ catalog: state })
 
   return (
     <main id="content" tabindex="-1">
       <UiContainer width="wide" class="flex flex-col gap-8 py-10">
+        {props.headerSlot}
         <header class="flex flex-col gap-3">
           <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Verwaltung</p>
           <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">Events & Ticketprodukte</h1>
@@ -70,27 +80,38 @@ export function AdminCatalogPage(props: {
                 </Button>
               </div>
               <Show
-                when={state.events().length > 0}
-                fallback={<p class="mt-4 text-sm text-content-muted">Noch keine veröffentlichten Events im Katalog.</p>}
+                when={!state.isLoading?.()}
+                fallback={
+                  <p class="mt-4 text-sm text-content-muted" aria-live="polite">
+                    Events werden geladen …
+                  </p>
+                }
               >
-                <ul class="mt-4 flex flex-col gap-2">
-                  <For each={state.events()}>
-                    {(event) => (
-                      <li>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          class="w-full rounded-md border border-border p-3 text-left transition-colors hover:bg-surface-muted"
-                          classList={{ "bg-surface-muted": state.selectedEventKey() === event.id }}
-                          onClick={() => state.selectEvent(event)}
-                        >
-                          <span class="block truncate text-sm font-semibold text-content">{event.title}</span>
-                          <span class="mt-1 block text-xs text-content-muted">{event.id}</span>
-                        </Button>
-                      </li>
-                    )}
-                  </For>
-                </ul>
+                <Show
+                  when={state.events().length > 0}
+                  fallback={
+                    <p class="mt-4 text-sm text-content-muted">Noch keine veröffentlichten Events im Katalog.</p>
+                  }
+                >
+                  <ul class="mt-4 flex flex-col gap-2">
+                    <For each={state.events()}>
+                      {(event) => (
+                        <li>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            class="w-full rounded-md border border-border p-3 text-left transition-colors hover:bg-surface-muted"
+                            classList={{ "bg-surface-muted": state.selectedEventKey() === event.id }}
+                            onClick={() => state.selectEvent(event)}
+                          >
+                            <span class="block truncate text-sm font-semibold text-content">{event.title}</span>
+                            <span class="mt-1 block text-xs text-content-muted">{event.id}</span>
+                          </Button>
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                </Show>
               </Show>
             </CardWrapper>
 
@@ -183,20 +204,57 @@ export function AdminCatalogPage(props: {
                   </div>
                   <div>
                     <Label for="admin-event-category">Kategorie</Label>
-                    <select
+                    <CorvuPopover
                       id="admin-event-category"
-                      class="mt-2 block w-full rounded-md border border-input bg-gray-50 p-2.5 text-gray-900 dark:bg-gray-700 dark:text-white"
-                      value={state.eventDraft().category}
-                      onChange={(event) =>
-                        state.eventFieldChange("category", event.currentTarget.value as EventCategory)
-                      }
+                      open={categoryPicker.categoryPickerOpen()}
+                      onOpenChange={categoryPicker.categoryPickerOpenChange}
+                      variant="outline"
+                      class="mt-2 w-full justify-start"
+                      buttonChildren={eventCategoryLabels[state.eventDraft().category] ?? state.eventDraft().category}
+                      innerClass="w-[min(24rem,calc(100vw-2rem))]"
                     >
-                      <option value="konzerte">Konzerte</option>
-                      <option value="festivals">Festivals</option>
-                      <option value="kultur">Kultur</option>
-                      <option value="sport">Sport</option>
-                      <option value="reisen">Reisen</option>
-                    </select>
+                      <div class="flex max-h-96 flex-col gap-4 overflow-y-auto p-1">
+                        <div class="flex flex-col gap-2">
+                          <p class="text-sm font-semibold text-content">Vorhandene Kategorien</p>
+                          <For each={categoryPicker.categoryOptions()}>
+                            {(category) => (
+                              <div class="flex gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  class="flex-1"
+                                  onClick={() => categoryPicker.categorySelect(category)}
+                                >
+                                  {eventCategoryLabels[category] ?? category}
+                                </Button>
+                                <ButtonIcon
+                                  type="button"
+                                  variant="outline"
+                                  icon={mdiClose}
+                                  aria-label={`Kategorie ${eventCategoryLabels[category] ?? category} entfernen`}
+                                  onClick={() => void categoryPicker.categoryRemove(category)}
+                                />
+                              </div>
+                            )}
+                          </For>
+                        </div>
+                        <form
+                          class="flex flex-col gap-3 border-t border-border pt-4"
+                          onSubmit={(event) => {
+                            event.preventDefault()
+                            categoryPicker.categoryCreate()
+                          }}
+                        >
+                          <Label for="admin-new-event-category">Neue Kategorie</Label>
+                          <Input
+                            id="admin-new-event-category"
+                            value={categoryPicker.newCategory.get()}
+                            onInput={(event) => categoryPicker.newCategory.set(event.currentTarget.value)}
+                          />
+                          <Button type="submit">Kategorie hinzufügen</Button>
+                        </form>
+                      </div>
+                    </CorvuPopover>
                   </div>
                   <div>
                     <Label for="admin-event-status">Katalogstatus</Label>
@@ -243,6 +301,14 @@ export function AdminCatalogPage(props: {
                     >
                       Veröffentlichen
                     </Button>
+                    <Show when={props.eventViewHref && state.selectedEventKey()}>
+                      <Link
+                        to={props.eventViewHref?.(state.selectedEventKey())}
+                        class="focus-ring inline-flex h-10 items-center justify-center rounded-control border border-border px-space-4 text-sm font-semibold text-content transition-colors hover:bg-surface-muted"
+                      >
+                        Öffentliche Ansicht ↗
+                      </Link>
+                    </Show>
                   </div>
                 </form>
               </CardWrapper>
@@ -261,24 +327,22 @@ export function AdminCatalogPage(props: {
                       {state.selectedEvent()?.title ?? "Event zuerst speichern"}
                     </span>
                   </div>
-                  <Show when={state.selectedEvent()?.tiers.length}>
-                    <ul class="flex flex-wrap gap-2" aria-label="Vorhandene Ticketprodukte">
-                      <For each={state.selectedEvent()?.tiers ?? []}>
-                        {(tier) => (
-                          <li>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              class="rounded-full px-3 py-1 text-xs text-content-muted hover:bg-surface-muted"
-                              onClick={() => state.selectTier(tier)}
-                            >
-                              {tier.name} · {tier.available} verfügbar
-                            </Button>
-                          </li>
-                        )}
-                      </For>
-                    </ul>
-                  </Show>
+                  <ul class="flex flex-wrap gap-2" aria-label="Vorhandene Ticketprodukte">
+                    <For each={state.selectedEvent()?.tiers ?? []}>
+                      {(tier) => (
+                        <li>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            class="rounded-full px-3 py-1 text-xs text-content-muted hover:bg-surface-muted"
+                            onClick={() => state.selectTier(tier)}
+                          >
+                            {tier.name} · {tier.available} verfügbar
+                          </Button>
+                        </li>
+                      )}
+                    </For>
+                  </ul>
                   <p class="text-xs text-content-muted">
                     Bei bestehenden Produkten bitte die gesamte Kapazität eingeben; reservierte und verkaufte Mengen
                     bleiben serverseitig geschützt.

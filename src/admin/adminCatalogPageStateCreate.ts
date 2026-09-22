@@ -1,16 +1,15 @@
-import { createMemo, onMount } from "solid-js"
-import { userRoleIsDevOrAdmin } from "../auth/model_field/userRole.ts"
-import { userSessionSignal, userTokenGet } from "#src/auth/ui/signals/userSessionSignal.ts"
-import { userSessionBrowserRestore } from "#src/auth/ui/signals/userSessionBrowserRestore.ts"
-import { catalogEventPublish } from "../catalog/client/catalogEventPublish.ts"
-import { catalogEventUpsert } from "../catalog/client/catalogEventUpsert.ts"
-import { catalogTicketTierUpsert } from "../catalog/client/catalogTicketTierUpsert.ts"
+import { onMount } from "solid-js"
+import { createSignalObject } from "#ui/utils/createSignalObject.js"
+import type { CatalogEventUpsertInput } from "../catalog/client/CatalogEventUpsertInput.ts"
+import type { CatalogTicketTierDeleteInput } from "../catalog/client/CatalogTicketTierDeleteInput.ts"
+import type { CatalogTicketTierUpsertInput } from "../catalog/client/CatalogTicketTierUpsertInput.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import type { EventTicketTier } from "../events/EventTicketTier.ts"
+import type { Result } from "../ui/Result.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import type { AdminEventDraft } from "./AdminEventDraft.ts"
+import type { AdminEventItem } from "./AdminEventItem.ts"
 import type { AdminTierDraft } from "./AdminTierDraft.ts"
-import { createSignalObject } from "#ui/utils/createSignalObject.js"
 
 const emptyEventDraft = (): AdminEventDraft => ({
   eventKey: "",
@@ -42,32 +41,48 @@ const emptyTierDraft = (): AdminTierDraft => ({
 })
 
 export function adminCatalogPageStateCreate(inputs: {
-  events: () => readonly EventItem[]
+  events: () => readonly AdminEventItem[]
+  eventsLoadError?: () => string
   isServerAuthorized: () => boolean
+  reloadEvents: () => Promise<
+    | { readonly success: true; readonly data: readonly AdminEventItem[] }
+    | { readonly success: false; readonly errorMessage: string }
+  >
+  eventUpsert?: (
+    input: Omit<CatalogEventUpsertInput, "token">,
+  ) => Promise<Result<{ readonly eventKey: string; readonly catalogVersion: number }>>
+  ticketTierDelete?: (
+    input: Omit<CatalogTicketTierDeleteInput, "token">,
+  ) => Promise<Result<{ readonly tierKey: string; readonly catalogVersion: number }>>
+  ticketTierUpsert?: (
+    input: Omit<CatalogTicketTierUpsertInput, "token">,
+  ) => Promise<Result<{ readonly tierKey: string; readonly catalogVersion: number }>>
+  eventPublish?: (input: {
+    readonly eventKey: string
+  }) => Promise<Result<{ readonly eventKey: string; readonly catalogVersion: number }>>
+  categoryHiddenList?: () => Promise<Result<readonly string[]>>
+  categoryHide?: (input: { readonly category: string }) => Promise<Result<void>>
 }): AdminCatalogPageState {
-  const events = createSignalObject<readonly EventItem[]>(inputs.events())
+  const events = createSignalObject<readonly AdminEventItem[]>(inputs.events())
   const selectedEventKey = createSignalObject("")
   const eventDraft = createSignalObject<AdminEventDraft>(emptyEventDraft())
   const tierDraft = createSignalObject<AdminTierDraft>(emptyTierDraft())
-  const errorMessage = createSignalObject("")
+  const errorMessage = createSignalObject(inputs.eventsLoadError?.() ?? "")
   const successMessage = createSignalObject("")
   const isSaving = createSignalObject(false)
-  const authenticatedSession = createSignalObject(userSessionSignal.get())
+  const hiddenCategories = createSignalObject<readonly string[]>([])
   onMount(() => {
-    userSessionBrowserRestore()
-    authenticatedSession.set(userSessionSignal.get())
+    void hiddenCategoriesLoad()
   })
 
-  const isAuthorized = createMemo(() => {
-    if (inputs.isServerAuthorized()) return true
-    const session = authenticatedSession.get()
-    return session !== null && userRoleIsDevOrAdmin(session.profile.role)
-  })
-  const selectedEvent = createMemo(() => events.get().find((event) => event.id === selectedEventKey.get()))
+  const isAuthorized = () => inputs.isServerAuthorized()
+  const selectedEvent = () => events.get().find((event) => event.id === selectedEventKey.get())
 
   const selectEvent = (event: EventItem) => {
-    selectedEventKey.set(event.id)
-    eventDraft.set(eventToDraft(event))
+    const adminEvent = events.get().find((candidate) => candidate.id === event.id)
+    if (!adminEvent) return
+    selectedEventKey.set(adminEvent.id)
+    eventDraft.set(eventToDraft(adminEvent))
     tierDraft.set(emptyTierDraft())
     errorMessage.set("")
     successMessage.set("")
@@ -99,121 +114,227 @@ export function adminCatalogPageStateCreate(inputs: {
       priceCents: String(tier.priceCents),
       feeCents: String(tier.feeCents),
       capacity: String(tier.capacity),
-      sortOrder: "0",
+      sortOrder: String(tier.sortOrder ?? 0),
     })
     errorMessage.set("")
     successMessage.set("")
   }
 
-  const saveEvent = async () => {
-    const token = userTokenGet()
-    if (!token) return errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
-    const draft = eventDraft.get()
-    if (!draft.eventKey.trim() || !draft.title.trim()) return errorMessage.set("Event-Key und Titel sind erforderlich.")
-    isSaving.set(true)
-    const saved = await catalogEventUpsert({
-      ...draft,
-      eventKey: draft.eventKey.trim(),
-      tags: splitTags(draft.tags),
-      token,
-    })
-    isSaving.set(false)
-    if (!saved.success) return errorMessage.set(saved.errorMessage)
-
-    const previous = events.get().find((event) => event.id === draft.eventKey)
-    const updated: EventItem = {
-      ...(previous ?? emptyEventAsItem(draft)),
-      ...draft,
-      id: draft.eventKey,
-      catalogVersion: saved.data.catalogVersion,
-      tags: splitTags(draft.tags),
-      tiers: previous?.tiers ?? [],
-      soldOut: previous?.soldOut ?? false,
+  const reloadEvents = async (): Promise<readonly AdminEventItem[] | undefined> => {
+    let result: Awaited<ReturnType<typeof inputs.reloadEvents>>
+    try {
+      result = await inputs.reloadEvents()
+    } catch {
+      errorMessage.set("Admin-Veranstaltungen konnten nicht geladen werden.")
+      successMessage.set("")
+      return undefined
     }
-    events.set([updated, ...events.get().filter((event) => event.id !== updated.id)])
-    selectedEventKey.set(updated.id)
-    eventDraft.set(eventToDraft(updated))
-    successMessage.set("Event gespeichert. Änderungen werden an den Verkaufskatalog synchronisiert.")
-    errorMessage.set("")
+    if (!result.success) {
+      errorMessage.set(result.errorMessage)
+      successMessage.set("")
+      return undefined
+    }
+    events.set(result.data)
+    return result.data
+  }
+
+  const saveEvent = async () => {
+    if (!inputs.eventUpsert) {
+      errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
+      return
+    }
+    const draft = eventDraft.get()
+    if (!draft.eventKey.trim() || !draft.title.trim()) {
+      errorMessage.set("Event-Key und Titel sind erforderlich.")
+      return
+    }
+    isSaving.set(true)
+    try {
+      const saved = await inputs.eventUpsert({
+        ...draft,
+        eventKey: draft.eventKey.trim(),
+        tags: splitTags(draft.tags),
+      })
+      if (!saved.success) {
+        errorMessage.set(saved.errorMessage)
+        return
+      }
+
+      const refreshedEvents = await reloadEvents()
+      if (!refreshedEvents) return undefined
+      const updated = refreshedEvents.find((event) => event.id === saved.data.eventKey)
+      if (!updated) {
+        errorMessage.set("Das gespeicherte Event konnte nicht erneut geladen werden.")
+        return undefined
+      }
+      selectedEventKey.set(updated.id)
+      eventDraft.set(eventToDraft(updated))
+      successMessage.set("Event gespeichert. Änderungen werden an den Verkaufskatalog synchronisiert.")
+      errorMessage.set("")
+      return updated.id
+    } catch {
+      errorMessage.set("Event konnte nicht gespeichert werden.")
+      successMessage.set("")
+      return undefined
+    } finally {
+      isSaving.set(false)
+    }
   }
 
   const saveTier = async () => {
-    const token = userTokenGet()
     const eventKey = eventDraft.get().eventKey.trim()
     const draft = tierDraft.get()
-    if (!token) return errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
-    if (!eventKey || !draft.tierKey.trim() || !draft.name.trim())
-      return errorMessage.set("Event-Key, Tier-Key und Name sind erforderlich.")
+    if (!inputs.ticketTierUpsert) {
+      errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
+      return
+    }
+    if (!eventKey || !draft.tierKey.trim() || !draft.name.trim()) {
+      errorMessage.set("Event-Key, Tier-Key und Name sind erforderlich.")
+      return
+    }
     const priceCents = nonNegativeIntegerParse(draft.priceCents)
     const feeCents = nonNegativeIntegerParse(draft.feeCents)
     const capacity = nonNegativeIntegerParse(draft.capacity)
     const sortOrder = nonNegativeIntegerParse(draft.sortOrder)
-    if (priceCents === null) return errorMessage.set("Der Preis muss eine ganze Zahl ab 0 sein.")
-    if (feeCents === null) return errorMessage.set("Die Gebühr muss eine ganze Zahl ab 0 sein.")
-    if (capacity === null) return errorMessage.set("Die Kapazität ist erforderlich und muss eine ganze Zahl ab 0 sein.")
-    if (sortOrder === null) return errorMessage.set("Die Sortierung muss eine ganze Zahl ab 0 sein.")
+    if (priceCents === null) {
+      errorMessage.set("Der Preis muss eine ganze Zahl ab 0 sein.")
+      return
+    }
+    if (feeCents === null) {
+      errorMessage.set("Die Gebühr muss eine ganze Zahl ab 0 sein.")
+      return
+    }
+    if (capacity === null) {
+      errorMessage.set("Die Kapazität ist erforderlich und muss eine ganze Zahl ab 0 sein.")
+      return
+    }
+    if (sortOrder === null) {
+      errorMessage.set("Die Sortierung muss eine ganze Zahl ab 0 sein.")
+      return
+    }
 
     isSaving.set(true)
-    const saved = await catalogTicketTierUpsert({
-      eventKey,
-      tierKey: draft.tierKey.trim(),
-      name: draft.name.trim(),
-      description: draft.description.trim(),
-      priceCents,
-      feeCents,
-      capacity,
-      sortOrder,
-      token,
-    })
-    isSaving.set(false)
-    if (!saved.success) return errorMessage.set(saved.errorMessage)
-
-    const event = events.get().find((candidate) => candidate.id === eventKey)
-    if (event) {
-      const existingTier = event.tiers.find((tier) => tier.id === draft.tierKey)
-      const nextTier = {
-        id: draft.tierKey,
+    try {
+      const saved = await inputs.ticketTierUpsert({
+        eventKey,
+        tierKey: draft.tierKey.trim(),
         name: draft.name.trim(),
         description: draft.description.trim(),
         priceCents,
         feeCents,
         capacity,
-        available: existingTier?.available ?? capacity,
+        sortOrder,
+      })
+      if (!saved.success) {
+        errorMessage.set(saved.errorMessage)
+        return
       }
-      const updated = {
-        ...event,
-        catalogVersion: saved.data.catalogVersion,
-        tiers: [nextTier, ...event.tiers.filter((tier) => tier.id !== nextTier.id)],
-      }
-      events.set([updated, ...events.get().filter((candidate) => candidate.id !== eventKey)])
+
+      if (!(await reloadEvents())) return
+      tierDraft.set(emptyTierDraft())
+      successMessage.set("Ticketprodukt gespeichert. Der Bestand bleibt serverseitig maßgeblich.")
+      errorMessage.set("")
+    } catch {
+      errorMessage.set("Ticketprodukt konnte nicht gespeichert werden.")
+      successMessage.set("")
+    } finally {
+      isSaving.set(false)
     }
-    tierDraft.set(emptyTierDraft())
-    successMessage.set("Ticketprodukt gespeichert. Der Bestand bleibt serverseitig maßgeblich.")
-    errorMessage.set("")
+  }
+
+  const deleteTier = async () => {
+    const eventKey = eventDraft.get().eventKey.trim()
+    const tierKey = tierDraft.get().tierKey.trim()
+    if (!inputs.ticketTierDelete) {
+      errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
+      return
+    }
+    if (!eventKey || !tierKey) {
+      errorMessage.set("Bitte wähle zuerst ein Ticketprodukt.")
+      return
+    }
+
+    isSaving.set(true)
+    try {
+      const deleted = await inputs.ticketTierDelete({ eventKey, tierKey })
+      if (!deleted.success) {
+        errorMessage.set(deleted.errorMessage)
+        return
+      }
+
+      if (!(await reloadEvents())) return
+      tierDraft.set(emptyTierDraft())
+      successMessage.set("Ticketprodukt gelöscht.")
+      errorMessage.set("")
+    } catch {
+      errorMessage.set("Ticketprodukt konnte nicht gelöscht werden.")
+      successMessage.set("")
+    } finally {
+      isSaving.set(false)
+    }
   }
 
   const publishEvent = async () => {
-    const token = userTokenGet()
     const eventKey = eventDraft.get().eventKey.trim()
-    if (!token) return errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
-    if (!eventKey) return errorMessage.set("Bitte wähle zuerst ein Event.")
+    if (!inputs.eventPublish) {
+      errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
+      return
+    }
+    if (!eventKey) {
+      errorMessage.set("Bitte wähle zuerst ein Event.")
+      return
+    }
     isSaving.set(true)
-    const published = await catalogEventPublish({ eventKey, token })
-    isSaving.set(false)
-    if (!published.success) return errorMessage.set(published.errorMessage)
-    const event = events.get().find((candidate) => candidate.id === eventKey)
-    if (event)
-      events.set([
-        { ...event, catalogVersion: published.data.catalogVersion },
-        ...events.get().filter((candidate) => candidate.id !== eventKey),
-      ])
-    eventFieldChange("status", "published")
-    successMessage.set("Event veröffentlicht. Der öffentliche Katalog wird innerhalb des Cache-Fensters aktualisiert.")
-    errorMessage.set("")
+    try {
+      const published = await inputs.eventPublish({ eventKey })
+      if (!published.success) {
+        errorMessage.set(published.errorMessage)
+        return
+      }
+      const refreshedEvents = await reloadEvents()
+      if (!refreshedEvents) return
+      const event = refreshedEvents.find((candidate) => candidate.id === published.data.eventKey)
+      if (!event) {
+        errorMessage.set("Das veröffentlichte Event konnte nicht erneut geladen werden.")
+        return
+      }
+      selectedEventKey.set(event.id)
+      eventDraft.set(eventToDraft(event))
+      successMessage.set(
+        "Event veröffentlicht. Der öffentliche Katalog wird innerhalb des Cache-Fensters aktualisiert.",
+      )
+      errorMessage.set("")
+    } catch {
+      errorMessage.set("Event konnte nicht veröffentlicht werden.")
+      successMessage.set("")
+    } finally {
+      isSaving.set(false)
+    }
+  }
+
+  const hiddenCategoriesLoad = async () => {
+    if (!inputs.categoryHiddenList) return
+    const result = await inputs.categoryHiddenList()
+    if (!result.success) return errorMessage.set(result.errorMessage)
+    hiddenCategories.set(result.data)
+  }
+
+  const hideCategory = async (category: string) => {
+    if (!inputs.categoryHide) {
+      errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
+      return
+    }
+    const result = await inputs.categoryHide({ category })
+    if (!result.success) {
+      errorMessage.set(result.errorMessage)
+      return
+    }
+    hiddenCategories.set([...new Set([...hiddenCategories.get(), category])])
   }
 
   return {
     events: events.get,
+    hiddenCategories: hiddenCategories.get,
     selectedEvent: selectedEvent,
     selectedEventKey: selectedEventKey.get,
     eventDraft: eventDraft.get,
@@ -229,11 +350,13 @@ export function adminCatalogPageStateCreate(inputs: {
     selectTier,
     saveEvent,
     saveTier,
+    deleteTier,
     publishEvent,
+    hideCategory,
   }
 }
 
-function eventToDraft(event: EventItem): AdminEventDraft {
+function eventToDraft(event: AdminEventItem): AdminEventDraft {
   return {
     eventKey: event.id,
     title: event.title,
@@ -250,18 +373,7 @@ function eventToDraft(event: EventItem): AdminEventDraft {
     imageUrl: event.imageUrl,
     imageAlt: event.imageAlt,
     tags: event.tags.join(", "),
-    status: "published",
-  }
-}
-
-function emptyEventAsItem(draft: AdminEventDraft): EventItem {
-  return {
-    ...draft,
-    id: draft.eventKey,
-    catalogVersion: 0,
-    tags: splitTags(draft.tags),
-    tiers: [],
-    soldOut: false,
+    status: event.status,
   }
 }
 

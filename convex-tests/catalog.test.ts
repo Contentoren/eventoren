@@ -184,6 +184,33 @@ test("admin writes are versioned and published reads match EventItem", async () 
   expect(syncState).toMatchObject([{ version: published.data.catalogVersion, status: "pending", attempts: 0 }])
 })
 
+test("admins can delete unused ticket tiers but not tiers with inventory", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const token = await tokenFor(adminId)
+  const eventId = await t.run(async (ctx) => ctx.db.insert("catalogEvents", catalogEventInsert()))
+  await t.run(async (ctx) => {
+    await ctx.db.insert("catalogTicketTiers", catalogTierInsert(eventId, { tierKey: "unused" }))
+    await ctx.db.insert("catalogTicketTiers", catalogTierInsert(eventId, { tierKey: "sold", sold: 1 }))
+  })
+
+  const deleted = await t.mutation(api.catalog.catalogTicketTierDeleteMutation, {
+    eventKey: "catalog-event",
+    tierKey: "unused",
+    token,
+  })
+  const rejected = await t.mutation(api.catalog.catalogTicketTierDeleteMutation, {
+    eventKey: "catalog-event",
+    tierKey: "sold",
+    token,
+  })
+  const tiers = await t.run(async (ctx) => ctx.db.query("catalogTicketTiers").collect())
+
+  expect(deleted.success).toBe(true)
+  expect(rejected.success).toBe(false)
+  expect(tiers.map((tier) => tier.tierKey)).toEqual(["sold"])
+})
+
 test("published events use the latest Billing-synced catalog version for checkout", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")

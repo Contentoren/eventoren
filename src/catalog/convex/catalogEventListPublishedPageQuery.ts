@@ -14,14 +14,7 @@ const cursorVersion = 1
 const eventFilterValidator = v.object({
   query: v.string(),
   location: v.string(),
-  category: v.union(
-    v.literal("alle"),
-    v.literal("konzerte"),
-    v.literal("festivals"),
-    v.literal("kultur"),
-    v.literal("sport"),
-    v.literal("reisen"),
-  ),
+  category: v.string(),
   timeWindow: v.union(v.literal("alle"), v.literal("heute"), v.literal("wochenende"), v.literal("monat")),
 })
 

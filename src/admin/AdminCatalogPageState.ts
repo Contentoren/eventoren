@@ -6,11 +6,13 @@ import type { AdminTierDraft } from "./AdminTierDraft.ts"
 
 export type AdminCatalogPageState = {
   events: Accessor<readonly EventItem[]>
+  hiddenCategories: Accessor<readonly string[]>
   selectedEvent: Accessor<EventItem | undefined>
   selectedEventKey: Accessor<string>
   eventDraft: Accessor<AdminEventDraft>
   tierDraft: Accessor<AdminTierDraft>
   isAuthorized: Accessor<boolean>
+  isLoading?: Accessor<boolean>
   errorMessage: Accessor<string>
   successMessage: Accessor<string>
   isSaving: Accessor<boolean>
@@ -19,7 +21,9 @@ export type AdminCatalogPageState = {
   eventFieldChange: <K extends keyof AdminEventDraft>(field: K, value: AdminEventDraft[K]) => void
   tierFieldChange: <K extends keyof AdminTierDraft>(field: K, value: AdminTierDraft[K]) => void
   selectTier: (tier: EventTicketTier) => void
-  saveEvent: () => Promise<void>
+  saveEvent: () => Promise<string | undefined>
   saveTier: () => Promise<void>
+  deleteTier: () => Promise<void>
   publishEvent: () => Promise<void>
+  hideCategory: (category: string) => Promise<void>
 }

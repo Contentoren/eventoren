@@ -10,13 +10,7 @@ export const catalogTables = {
     title: v.string(),
     subtitle: v.string(),
     description: v.string(),
-    category: v.union(
-      v.literal("konzerte"),
-      v.literal("festivals"),
-      v.literal("kultur"),
-      v.literal("sport"),
-      v.literal("reisen"),
-    ),
+    category: v.string(),
     startsAt: v.string(),
     endsAt: v.string(),
     doorsAt: v.string(),
@@ -53,6 +47,12 @@ export const catalogTables = {
   })
     .index("eventId", ["eventId"])
     .index("eventIdAndTierKey", ["eventId", "tierKey"]),
+
+  catalogHiddenCategories: defineTable({
+    category: v.string(),
+    hiddenAt: v.string(),
+    hiddenByUserId: vIdUser,
+  }).index("category", ["category"]),
 
   catalogSyncStates: defineTable({
     key: v.literal("catalog"),

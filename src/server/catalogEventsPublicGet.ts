@@ -26,7 +26,7 @@ export function catalogEventsPublicGet(input: CatalogEventsPublicGetInput = {}) 
   if (existing) return existing()
 
   const cache = publicWebPageDataCacheCreate({
-    ttlSeconds: 60,
+    ttlSeconds: 0,
     query: () => apiClientCatalogEventListPublishedGet(apiClientCreate(convexUrl)),
   })
   catalogEventsPublicCaches.set(convexUrl, cache)

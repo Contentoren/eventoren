@@ -15,6 +15,7 @@ export function catalogEventToEventItem(
     feeCents: tier.feeCents,
     capacity: tier.capacity,
     available: tier.capacity - tier.reserved - tier.sold,
+    sortOrder: tier.sortOrder,
   }))
 
   return {
