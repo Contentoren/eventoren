@@ -4,10 +4,7 @@ import type { PageNameAuth, pageNameAuth } from "./pageNameAuth.js"
 export type PageRouteAuth = keyof typeof pageNameAuth
 
 export const pageRouteAuth = {
-  signUp: "/sign-up",
-  signUpConfirmEmail: "/sign-up-confirm-email",
   signIn: "/sign-in",
-  signInEnterOtp: "/sign-in-enter-otp",
   signInError: "/sign-in-error",
   userProfileMe: "/profile",
   userProfileMeEdit: "/profile/edit",
@@ -18,12 +15,9 @@ export const pageRouteAuth = {
   userProfileView: "/u/:username",
 } as const satisfies Record<PageNameAuth, string>
 
-export function urlPageSignUp(email?: string, returnPath?: string) {
-  return pageRouteAuth.signUp + "?" + serializeSearchParams(email, returnPath)
-}
-
-export function urlPageSignIn(email?: string, returnPath?: string) {
-  return pageRouteAuth.signIn + "?" + serializeSearchParams(email, returnPath)
+export function urlPageSignIn(returnPath?: string) {
+  if (!returnPath) return pageRouteAuth.signIn
+  return pageRouteAuth.signIn + "?" + serializeSearchParams(returnPath)
 }
 
 export function urlUserProfileView(username: string) {
@@ -54,13 +48,8 @@ export function urlUserProfileMeDelete() {
   return pageRouteAuth.userProfileMeDelete
 }
 
-function serializeSearchParams(email?: string, returnPath?: string) {
+function serializeSearchParams(returnPath: string) {
   const obj: Record<string, string> = {}
-  if (email) {
-    obj.email = email
-  }
-  if (returnPath) {
-    obj.returnPath = returnPath
-  }
+  obj.returnPath = returnPath
   return serializeUrlParams(obj)
 }

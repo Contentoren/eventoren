@@ -15,7 +15,6 @@ const siteFrameRouteIds = new Set([
   "/impressum",
   "/admin",
   "/sign-in",
-  "/sign-in-enter-otp",
   "/organizer",
   "/organizer_/event/$eventId",
   "/demo/events",

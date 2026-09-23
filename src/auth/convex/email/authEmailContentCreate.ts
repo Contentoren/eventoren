@@ -1,6 +1,6 @@
 import type { Language } from "#src/app/i18n/language.ts"
 
-type AuthEmailKind = "emailChange" | "orgInvitation" | "passwordChange" | "signIn" | "signUp"
+type AuthEmailKind = "emailChange" | "orgInvitation" | "passwordChange"
 
 type AuthEmailContentInput = {
   kind: AuthEmailKind
@@ -49,104 +49,6 @@ function authEmailCopy(input: AuthEmailContentInput) {
   const isEnglish = input.language === "en"
   const isRussian = input.language === "ru"
   const isTajik = input.language === "tj"
-  if (input.kind === "signUp") {
-    return isEnglish
-      ? copy(
-          "Confirm your Eventoren account",
-          "Confirm your email address",
-          "Use this code to finish signing up.",
-          "Confirm email",
-          "Hello {{name}},",
-          "This code expires soon.",
-          "For help, contact",
-          "Eventoren",
-          "",
-        )
-      : isRussian
-        ? copy(
-            "Подтвердите аккаунт Eventoren",
-            "Подтверждение электронной почты",
-            "Используйте этот код, чтобы завершить регистрацию.",
-            "Подтвердить почту",
-            "Здравствуйте, {{name}}!",
-            "Срок действия кода скоро истечёт.",
-            "По вопросам обращайтесь:",
-            "Eventoren",
-            "",
-          )
-        : isTajik
-          ? copy(
-              "Ҳисоби Eventoren-ро тасдиқ кунед",
-              "Тасдиқи почтаи электронӣ",
-              "Барои анҷоми сабтином ин рамзро истифода баред.",
-              "Тасдиқи почта",
-              "Салом, {{name}}!",
-              "Муҳлати рамз ба зудӣ ба охир мерасад.",
-              "Барои кӯмак муроҷиат кунед:",
-              "Eventoren",
-              "Use the button to accept this invitation.",
-            )
-          : copy(
-              "Eventoren-Konto bestätigen",
-              "E-Mail-Adresse bestätigen",
-              "Verwenden Sie diesen Code, um die Registrierung abzuschließen.",
-              "E-Mail bestätigen",
-              "Hallo {{name}},",
-              "Der Code läuft bald ab.",
-              "Bei Fragen wenden Sie sich an",
-              "Eventoren",
-              "Verwenden Sie die Schaltfläche, um die Einladung anzunehmen.",
-            )
-  }
-  if (input.kind === "signIn") {
-    return isEnglish
-      ? copy(
-          "Your Eventoren sign-in code",
-          "Sign in to Eventoren",
-          "Use this code to sign in.",
-          "Sign in",
-          "Hello {{name}},",
-          "This code expires soon.",
-          "For help, contact",
-          "Eventoren",
-          "",
-        )
-      : isRussian
-        ? copy(
-            "Код входа в Eventoren",
-            "Вход в Eventoren",
-            "Используйте этот код для входа.",
-            "Войти",
-            "Здравствуйте, {{name}}!",
-            "Срок действия кода скоро истечёт.",
-            "По вопросам обращайтесь:",
-            "Eventoren",
-            "",
-          )
-        : isTajik
-          ? copy(
-              "Рамзи воридшавӣ ба Eventoren",
-              "Воридшавӣ ба Eventoren",
-              "Барои ворид шудан ин рамзро истифода баред.",
-              "Ворид шудан",
-              "Салом, {{name}}!",
-              "Муҳлати рамз ба зудӣ ба охир мерасад.",
-              "Барои кӯмак муроҷиат кунед:",
-              "Eventoren",
-              "",
-            )
-          : copy(
-              "Ihr Eventoren-Anmeldecode",
-              "Bei Eventoren anmelden",
-              "Verwenden Sie diesen Code zur Anmeldung.",
-              "Anmelden",
-              "Hallo {{name}},",
-              "Der Code läuft bald ab.",
-              "Bei Fragen wenden Sie sich an",
-              "Eventoren",
-              "",
-            )
-  }
   if (input.kind === "passwordChange") {
     return isEnglish
       ? copy(

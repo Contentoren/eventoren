@@ -12,8 +12,6 @@ const authEmailKindValidator = v.union(
   v.literal("emailChange"),
   v.literal("orgInvitation"),
   v.literal("passwordChange"),
-  v.literal("signIn"),
-  v.literal("signUp"),
 )
 
 const sendAuthEmailValidator = v.object({
