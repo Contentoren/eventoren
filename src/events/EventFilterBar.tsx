@@ -1,8 +1,6 @@
-import { For } from "solid-js"
+import { SelectSingle } from "#ui/input/select/SelectSingle.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
-import type { EventCategory } from "./EventCategory.ts"
 import type { EventFilter } from "./EventFilter.ts"
-import type { EventTimeWindow } from "./EventTimeWindow.ts"
 import { eventFilterBarStateCreate } from "./eventFilterBarStateCreate.ts"
 
 export function EventFilterBar(props: {
@@ -35,21 +33,22 @@ export function EventFilterBar(props: {
                 <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3z" />
               </svg>
             </span>
-            <select
-              id="event-filter-category"
-              aria-label="Kategorie"
-              value={props.filter.category}
-              onChange={(event) => state.selectCategory(event.currentTarget.value as EventCategory | "alle")}
-              class="h-full w-full cursor-pointer appearance-none bg-transparent pr-space-6 text-sm font-medium text-content focus:outline-none"
-            >
-              <For each={state.categoryOptions()}>
-                {(option) => (
-                  <option value={option.value} class="bg-surface text-content">
-                    {option.label}
-                  </option>
-                )}
-              </For>
-            </select>
+            <SelectSingle
+              class="h-full min-w-0 flex-1"
+              buttonProps={{
+                id: "event-filter-category",
+                "aria-label": "Kategorie",
+                variant: "none",
+                size: "none",
+                class:
+                  "flex h-full w-full items-center justify-start pr-space-6 text-left text-sm font-medium text-content focus:outline-none",
+              }}
+              valueSignal={state.categorySignal}
+              getOptions={() => state.categoryOptions().map((option) => ({ type: "item", value: option.value }))}
+              valueText={(value) => state.categoryOptions().find((option) => option.value === value)?.label ?? value}
+              innerClass="flex min-w-48 flex-col"
+              listOptionClass="w-full px-space-4 py-space-2"
+            />
             <span class="pointer-events-none absolute right-space-4 text-content-muted" aria-hidden="true">
               <svg
                 class="size-4"
@@ -95,21 +94,22 @@ export function EventFilterBar(props: {
                 <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m0 16H5V10h14zM9 14H7v-2h2zm4 0h-2v-2h2zm4 0h-2v-2h2zm-8 4H7v-2h2zm4 0h-2v-2h2zm4 0h-2v-2h2z" />
               </svg>
             </span>
-            <select
-              id="event-filter-date"
-              aria-label="Datum"
-              value={props.filter.timeWindow}
-              onChange={(event) => state.selectTimeWindow(event.currentTarget.value as EventTimeWindow)}
-              class="h-full w-full cursor-pointer appearance-none bg-transparent pr-space-6 text-sm font-medium text-content focus:outline-none"
-            >
-              <For each={state.timeWindowOptions()}>
-                {(option) => (
-                  <option value={option.value} class="bg-surface text-content">
-                    {option.label}
-                  </option>
-                )}
-              </For>
-            </select>
+            <SelectSingle
+              class="h-full min-w-0 flex-1"
+              buttonProps={{
+                id: "event-filter-date",
+                "aria-label": "Datum",
+                variant: "none",
+                size: "none",
+                class:
+                  "flex h-full w-full items-center justify-start pr-space-6 text-left text-sm font-medium text-content focus:outline-none",
+              }}
+              valueSignal={state.timeWindowSignal}
+              getOptions={() => state.timeWindowOptions().map((option) => ({ type: "item", value: option.value }))}
+              valueText={(value) => state.timeWindowOptions().find((option) => option.value === value)?.label ?? value}
+              innerClass="flex min-w-48 flex-col"
+              listOptionClass="w-full px-space-4 py-space-2"
+            />
             <span class="pointer-events-none absolute right-space-4 text-content-muted" aria-hidden="true">
               <svg
                 class="size-4"

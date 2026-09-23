@@ -31,16 +31,15 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                         size="none"
                         id={buttonId}
                         type="button"
-                        class="group flex w-full items-center justify-between gap-space-4 py-space-4 text-left transition-colors focus-visible:focus-ring"
-                        aria-expanded={state.isHighlightExpanded(item.tag)}
+                        class="group flex w-full items-center justify-between gap-space-4 py-space-4 text-left transition-colors active:scale-100 focus-visible:focus-ring"
+                        aria-expanded={state.isHighlightExpanded(index())}
                         aria-controls={contentId}
-                        onClick={() => state.toggleHighlight(item.tag)}
+                        onClick={() => state.toggleHighlight(index())}
                       >
                         <div class="flex flex-col gap-0.5">
                           <span class="text-sm font-semibold text-content transition-colors group-hover:text-brand-accent">
                             {item.title}
                           </span>
-                          <span class="text-xs text-content-muted">{item.descriptor}</span>
                         </div>
                         <div
                           class="flex size-7 shrink-0 items-center justify-center rounded-full border border-border-subtle/60 bg-surface-muted/40 text-content-muted transition-colors group-hover:border-border-strong group-hover:text-content"
@@ -49,7 +48,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                           <svg
                             class={classArr(
                               "size-4 stroke-[2] transition-transform duration-200",
-                              state.isHighlightExpanded(item.tag) && "rotate-180",
+                              state.isHighlightExpanded(index()) && "rotate-180",
                             )}
                             viewBox="0 0 16 16"
                             fill="none"
@@ -62,14 +61,14 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                         </div>
                       </Button>
 
-                      <Show when={state.isHighlightExpanded(item.tag)}>
+                      <Show when={state.isHighlightExpanded(index())}>
                         <div
                           id={contentId}
                           role="region"
                           aria-labelledby={buttonId}
-                          class="pb-space-4 pt-space-1 text-sm leading-relaxed text-content-muted"
+                          class="whitespace-pre-line pb-space-4 pt-space-1 text-sm leading-relaxed text-content-muted"
                         >
-                          {item.detail}
+                          {item.description}
                         </div>
                       </Show>
                     </li>
@@ -87,7 +86,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
               size="none"
               id="event-inclusions-button"
               type="button"
-              class="group flex w-full items-center justify-between gap-space-4 py-space-2 text-left transition-colors focus-visible:focus-ring"
+              class="group flex w-full items-center justify-between gap-space-4 py-space-2 text-left transition-colors active:scale-100 focus-visible:focus-ring"
               aria-expanded={state.isInclusionsExpanded()}
               aria-controls="event-inclusions-panel"
               onClick={() => state.toggleInclusions()}
@@ -158,7 +157,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
               size="none"
               id="event-exclusions-button"
               type="button"
-              class="group flex w-full items-center justify-between gap-space-4 py-space-2 text-left transition-colors focus-visible:focus-ring"
+              class="group flex w-full items-center justify-between gap-space-4 py-space-2 text-left transition-colors active:scale-100 focus-visible:focus-ring"
               aria-expanded={state.isExclusionsExpanded()}
               aria-controls="event-exclusions-panel"
               onClick={() => state.toggleExclusions()}
@@ -229,7 +228,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
               size="none"
               id="event-schedule-button"
               type="button"
-              class="group flex w-full items-center justify-between gap-space-4 py-space-2 text-left transition-colors focus-visible:focus-ring"
+              class="group flex w-full items-center justify-between gap-space-4 py-space-2 text-left transition-colors active:scale-100 focus-visible:focus-ring"
               aria-expanded={state.isScheduleExpanded()}
               aria-controls="event-schedule-panel"
               onClick={() => state.toggleSchedule()}
@@ -308,7 +307,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                         size="none"
                         id={buttonId}
                         type="button"
-                        class="focus-ring group flex w-full items-center justify-between gap-space-4 p-space-5 text-left transition-colors hover:bg-surface-muted/50 sm:p-space-6"
+                        class="focus-ring group flex w-full items-center justify-between gap-space-4 p-space-5 text-left transition-colors hover:bg-surface-muted/50 active:scale-100 sm:p-space-6"
                         aria-expanded={state.isFaqExpanded(faq.id)}
                         aria-controls={contentId}
                         onClick={() => state.toggleFaq(faq.id)}

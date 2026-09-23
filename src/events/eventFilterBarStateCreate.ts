@@ -1,4 +1,5 @@
 import { createMemo } from "solid-js"
+import type { SignalObject } from "#ui/utils/createSignalObject.js"
 import type { EventCategory } from "./EventCategory.ts"
 import type { EventFilter } from "./EventFilter.ts"
 import type { EventTimeWindow } from "./EventTimeWindow.ts"
@@ -36,6 +37,14 @@ export function eventFilterBarStateCreate(inputs: {
   const selectLocation = (location: string) => inputs.onFilterChange({ ...inputs.filter(), location })
   const selectCategory = (category: EventFilter["category"]) => inputs.onFilterChange({ ...inputs.filter(), category })
   const selectTimeWindow = (timeWindow: EventTimeWindow) => inputs.onFilterChange({ ...inputs.filter(), timeWindow })
+  const categorySignal: SignalObject<string> = {
+    get: () => inputs.filter().category,
+    set: (value) => selectCategory(value as EventFilter["category"]),
+  }
+  const timeWindowSignal: SignalObject<string> = {
+    get: () => inputs.filter().timeWindow,
+    set: (value) => selectTimeWindow(value as EventTimeWindow),
+  }
   const submitSearch = (event?: SubmitEvent) => {
     event?.preventDefault()
     inputs.onFilterChange(inputs.filter())
@@ -44,6 +53,8 @@ export function eventFilterBarStateCreate(inputs: {
   return {
     categoryOptions,
     timeWindowOptions,
+    categorySignal,
+    timeWindowSignal,
     resultLabel,
     selectQuery,
     selectLocation,
