@@ -18,7 +18,7 @@ Allow event administrators to upload an image using drag/drop or a file picker w
 3. Verification: focused backend tests/type checks, then browser verification of event editor, URL compatibility, and upload behavior when runtime credentials are available.
 
 ## Current context
-- Task 1 implemented locally; task 2 next; task 3 pending.
+- Tasks 1–2 implemented locally; task 3 in progress.
 - Backend upload contract: adminImageUploadFromSession(FormData) returns Result containing detail/card/organizer URLs. Save detail as imageUrl and all variants as imageVariants; manual URL edits clear variants.
 - Node action uses the service HTTP contracts because the SDK root includes a Bun-only export. Runtime configuration is documented in docs/event_image_backend.md.
 - Existing local CLI access works; dedicated runtime identity and deployed Convex credentials are not established.
