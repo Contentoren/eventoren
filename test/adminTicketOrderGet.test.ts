@@ -79,7 +79,7 @@ test("host-side development detail lookup uses Billing preview loopback instead 
       success: true,
       data: { stripeError: "Billing payment details returned HTTP 404" },
     })
-    expect(new URL(targets[2]).origin).toBe("http://169.254.1.2:3146")
+    expect(new URL(targets[2]!).origin).toBe("http://169.254.1.2:3146")
 
     process.env.NODE_ENV = "development"
     process.env.EVENTOREN_BILLING_BASE_URL = "https://billing.example.test"
@@ -88,7 +88,7 @@ test("host-side development detail lookup uses Billing preview loopback instead 
       success: true,
       data: { stripeError: "Billing payment details returned HTTP 404" },
     })
-    expect(new URL(targets[3]).origin).toBe("https://billing.example.test")
+    expect(new URL(targets[3]!).origin).toBe("https://billing.example.test")
   } finally {
     globalThis.fetch = previous.fetch
     for (const [key, value] of [
