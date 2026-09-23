@@ -44,7 +44,7 @@ function serviceFetch(input: string | URL | Request, init?: RequestInit): Promis
   else if (url.pathname.endsWith("/assets/asset-1/reprocess")) data = { workflowId: "target" }
   else if (url.pathname.endsWith("/current")) data = { catalog: { outputs: catalogOutputs } }
   else if (url.pathname.endsWith("/environments/production") || url.pathname.endsWith("/environments/development"))
-    data = { id: "environment-1", publicBaseUrl: "https://assets.example/" }
+    data = { id: "environment-1", publicBaseUrl: "https://assets.example/eventoren/public/" }
   else throw new Error("unexpected service request")
   return Promise.resolve(Response.json({ ok: true, data }))
 }
@@ -82,9 +82,9 @@ test("sends signed PUT without bearer token, waits for both workflows, returns o
     success: true,
     data: {
       assetId: "asset-1",
-      detail: "https://assets.example/images/detail.avif",
-      card: "https://assets.example/images/card.avif",
-      organizer: "https://assets.example/images/organizer.avif",
+      detail: "https://assets.example/eventoren/public/images/detail.avif",
+      card: "https://assets.example/eventoren/public/images/card.avif",
+      organizer: "https://assets.example/eventoren/public/images/organizer.avif",
     },
   })
   expect(calls.find((call) => call.path.endsWith("/uploads/intent"))?.body).toMatchObject({

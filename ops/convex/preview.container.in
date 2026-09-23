@@ -12,6 +12,11 @@ AutoUpdate=registry
 # rootless network and map only pasta's host-gateway address to host loopback;
 # this avoids the public Caddy hairpin without exposing Billing on a host port.
 Network=pasta:--map-host-loopback=169.254.1.2
+# Node actions call internal functions through CONVEX_CLOUD_ORIGIN. The public
+# hostname hairpins to this host and is not reachable from the pasta container;
+# keep HTTPS/SNI intact while routing only this deployment's origins to Caddy.
+AddHost=eventoren-convex.leonardomora.de:169.254.1.2
+AddHost=eventoren-api.leonardomora.de:169.254.1.2
 PublishPort=127.0.0.1:@CONVEX_PORT@:3210
 PublishPort=127.0.0.1:@API_PORT@:3211
 Volume=eventoren-convex-preview-data.volume:/convex/data

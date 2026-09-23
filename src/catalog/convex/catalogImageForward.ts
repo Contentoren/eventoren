@@ -130,7 +130,9 @@ export async function catalogImageForward(input: {
     )
     if (!match || match.path.startsWith("/") || match.path.split("/").some((segment) => segment === ".." || !segment))
       return null
-    return new URL(`/${match.path}`, target.data.publicBaseUrl).toString()
+    // The environment base can include the project's R2 prefix/public namespace.
+    // A root-relative URL would discard that configured path.
+    return new URL(match.path, `${target.data.publicBaseUrl.replace(/\/+$/, "")}/`).toString()
   })
   if (urls.some((url) => !url)) return fail("published variant lookup")
   return createResult({ assetId: completed.data.assetId, detail: urls[0]!, card: urls[1]!, organizer: urls[2]! })

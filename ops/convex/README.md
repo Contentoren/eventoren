@@ -15,6 +15,12 @@ host-gateway address `169.254.1.2` to host loopback. This lets an action reach
 the existing Billing systemd service at `http://169.254.1.2:3146` without a
 bridge process or a public Billing port.
 
+Node-runtime actions also call internal Convex functions through this instance's
+`CONVEX_CLOUD_ORIGIN`. The public Eventoren Convex hostname cannot hairpin from
+the preview container, so its backend and site hostnames resolve to the same
+host-gateway address inside that container only. TLS/SNI and public origins stay
+unchanged; Caddy serves the request through the existing private loopback path.
+
 ## Configuration
 
 Set this in the private, ignored `.env.development` file:
