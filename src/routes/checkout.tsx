@@ -82,18 +82,20 @@ function CheckoutFormPage(props: { appOrigin: ReturnType<typeof envBaseUrlAppRes
         <UiContainer class="flex flex-col gap-space-7 py-space-7">
           <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">{text().title}</h1>
 
-          <Show
-            when={state.hasItems()}
-            fallback={
-              <TicketCheckoutEmptyState
-                title={text().checkoutUnavailable}
-                message={state.errorMessage()}
-                fallbackPath={state.fallbackPath()}
-                returnLabel={state.fallbackPath() === "/warenkorb" ? text().backToCart : text().backToEvents}
-              />
-            }
-          >
-            <TicketCheckoutForm items={state.items()} state={formState} />
+          <Show when={state.isReady()}>
+            <Show
+              when={state.hasItems()}
+              fallback={
+                <TicketCheckoutEmptyState
+                  title={text().checkoutUnavailable}
+                  message={state.errorMessage()}
+                  fallbackPath={state.fallbackPath()}
+                  returnLabel={state.fallbackPath() === "/warenkorb" ? text().backToCart : text().backToEvents}
+                />
+              }
+            >
+              <TicketCheckoutForm items={state.items()} state={formState} />
+            </Show>
           </Show>
         </UiContainer>
       </main>

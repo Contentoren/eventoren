@@ -22,6 +22,7 @@ export function checkoutPageStateCreate() {
   const loaderData = routeApi.useLoaderData()
   const catalog = createMemo(() => loaderData().catalog)
   const cart = createSignalObject<TicketCartDraft>([])
+  const cartLoaded = createSignalObject(false)
 
   const syncCart = () => {
     cart.set(ticketCartDraftLoad())
@@ -29,6 +30,7 @@ export function checkoutPageStateCreate() {
 
   onMount(() => {
     syncCart()
+    cartLoaded.set(true)
 
     if (typeof window === "undefined") return
 
@@ -68,6 +70,7 @@ export function checkoutPageStateCreate() {
   })
 
   const groups = createMemo(() => items())
+  const isReady = createMemo(() => Boolean(search().event?.trim()) || cartLoaded.get())
   const hasItems = createMemo(() => items().length > 0)
   const errorMessage = createMemo(() => {
     const text = ticketCheckoutText()
@@ -84,5 +87,5 @@ export function checkoutPageStateCreate() {
   })
   const fallbackPath = createMemo<"/" | "/warenkorb">(() => (search().event?.trim() ? "/" : "/warenkorb"))
 
-  return { items, groups, hasItems, errorMessage, fallbackPath }
+  return { items, groups, isReady, hasItems, errorMessage, fallbackPath }
 }
