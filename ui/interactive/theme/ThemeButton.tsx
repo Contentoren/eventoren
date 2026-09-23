@@ -25,10 +25,13 @@ export function ThemeButton(p: ThemeButtonProps) {
   const [themeReady, setThemeReady] = createSignal(false)
 
   onMount(() => {
-    themeInit()
+    const removeStorageListener = themeInit()
     setThemeReady(true)
     window.addEventListener("keydown", handleGlobalKeyDown)
-    onCleanup(() => window.removeEventListener("keydown", handleGlobalKeyDown))
+    onCleanup(() => {
+      window.removeEventListener("keydown", handleGlobalKeyDown)
+      removeStorageListener?.()
+    })
   })
 
   return (

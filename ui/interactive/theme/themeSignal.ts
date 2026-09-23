@@ -21,7 +21,7 @@ export function themeInit() {
   if (isServer) return // Skip during SSR
   const theme = getThemeFromStorageOrBrowserPref()
   themeSet(theme, false)
-  themeRegisterStorageListener()
+  return themeRegisterStorageListener()
 }
 
 export function themeSet(theme: ThemeVariant, saveToStorage: boolean) {
