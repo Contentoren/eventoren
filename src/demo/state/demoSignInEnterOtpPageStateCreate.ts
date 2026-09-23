@@ -1,8 +1,7 @@
 import { useNavigate } from "@tanstack/solid-router"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
-import type { SignInEnterOtpPageState } from "../../auth/ui/SignInEnterOtpPageState.ts"
 
-export function demoSignInEnterOtpPageStateCreate(error = false): SignInEnterOtpPageState {
+export function demoSignInEnterOtpPageStateCreate(error = false) {
   const navigate = useNavigate()
   const email = createSignalObject("alex@example.test")
   const code = createSignalObject("246810")
