@@ -2,7 +2,6 @@ import type { JSX } from "solid-js"
 import type { Result } from "#result"
 import type { EventorenAuthIdentity } from "#src/auth/model/EventorenAuthIdentity.ts"
 import { eventorenCurrentUserServerFn } from "#src/auth/server/eventorenCurrentUserServerFn.ts"
-import { eventorenSessionAdoptServerFn } from "#src/auth/server/eventorenSessionAdoptServerFn.ts"
 import { eventorenAuthContext } from "./eventorenAuthContext.ts"
 import { eventorenAuthProviderStateCreate } from "./eventorenAuthProviderStateCreate.ts"
 
@@ -14,7 +13,6 @@ export function EventorenAuthProvider(props: {
 }) {
   const state = eventorenAuthProviderStateCreate({
     currentUserRead: () => eventorenCurrentUserServerFn(),
-    sessionAdopt: (session, mode) => eventorenSessionAdoptServerFn({ data: { token: session.token, mode } }),
     initialIdentity: props.initialIdentity,
     initialIdentityResult: props.initialIdentityResult,
     isDemo: props.isDemo,

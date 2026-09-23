@@ -1,6 +1,5 @@
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { eventorenSsoAttemptsExhaust } from "#src/auth/model/eventorenSsoAttemptsExhaust.ts"
-import { userSessionsClear } from "#src/auth/ui/signals/userSessionsClear.ts"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import { eventorenAuthContextUse } from "./eventorenAuthContextUse.ts"
 
@@ -38,7 +37,6 @@ export function eventorenAuthControlStateCreate() {
     }
 
     eventorenSsoAttemptsExhaust()
-    userSessionsClear()
     auth.clear()
     window.location.assign("/")
     return createResult(undefined)

@@ -1,13 +1,15 @@
 import { mdiCodeBraces } from "@adaptive-ds/mdi/mdiCodeBraces.js"
 import { mdiCodeJson } from "@adaptive-ds/mdi/mdiCodeJson.js"
 import { hasDevMode } from "#src/app/config/hasDevMode.ts"
+import { eventorenAuthContextUse } from "#src/auth/ui/eventorenAuthContextUse.ts"
 import { inDevModeSignal, onDevModeSignalRegisterHandler } from "#src/app/config/inDevModeSignal.ts"
 import { ttt } from "#ui/i18n/ttt.ts"
 import { ToggleButtonIconOnly } from "#ui/interactive/toggle/ToggleButtonIconOnly.jsx"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.ts"
 
 export function DevModeToggle(p: MayHaveClass) {
-  if (!hasDevMode()) return null
+  const auth = eventorenAuthContextUse()
+  if (!hasDevMode(auth.identity())) return null
   onDevModeSignalRegisterHandler()
   return (
     <ToggleButtonIconOnly

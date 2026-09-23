@@ -1,21 +1,14 @@
 import { onMount } from "solid-js"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
 import type { EventorenAuthIdentity } from "#src/auth/model/EventorenAuthIdentity.ts"
-import type { UserSession } from "#src/auth/model/UserSession.ts"
-import { userSessionBrowserRestore } from "#src/auth/ui/signals/userSessionBrowserRestore.ts"
-import { userSessionSignal } from "#src/auth/ui/signals/userSessionSignal.ts"
-import { userSessionsClear } from "#src/auth/ui/signals/userSessionsClear.ts"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import type { EventorenAuthContextValue } from "./eventorenAuthContext.ts"
 import { logoutMarkerConsumeStateCreate } from "./logoutMarkerConsumeStateCreate.ts"
 
 type EventorenAuthProviderStateInputs = {
   readonly currentUserRead: () => PromiseResult<EventorenAuthIdentity | null>
-  readonly sessionAdopt: (session: UserSession, mode: "legacy" | "replace") => PromiseResult<EventorenAuthIdentity>
   readonly initialIdentity?: () => EventorenAuthIdentity | null
   readonly initialIdentityResult?: () => Result<EventorenAuthIdentity | null>
-  readonly legacySessionRead?: () => UserSession | null
-  readonly legacySessionClear?: () => void
   readonly isDemo?: () => boolean
 }
 
@@ -32,14 +25,6 @@ export function eventorenAuthProviderStateCreate(inputs: EventorenAuthProviderSt
     isDemo() || (initialIdentityResult?.success === true && initialIdentityResult.data !== null),
   )
   const currentUserRead = inputs.currentUserRead
-  const sessionAdopt = inputs.sessionAdopt
-  const legacySessionRead =
-    inputs.legacySessionRead ??
-    (() => {
-      userSessionBrowserRestore()
-      return userSessionSignal.get()
-    })
-  const legacySessionClear = inputs.legacySessionClear ?? userSessionsClear
   let bootstrapPromise: PromiseResult<EventorenAuthIdentity | null> | undefined
   let lifecycleVersion = 0
 
@@ -56,22 +41,6 @@ export function eventorenAuthProviderStateCreate(inputs: EventorenAuthProviderSt
     }
   }
 
-  const sessionAdoptSafe = async (
-    session: UserSession,
-    mode: "legacy" | "replace",
-  ): PromiseResult<EventorenAuthIdentity> => {
-    if (isDemo()) return createResultError("eventorenAuthProviderDemoSessionAdopt", "Demo-Sitzungen sind deaktiviert.")
-    try {
-      return await sessionAdopt(session, mode)
-    } catch (error) {
-      return createResultError(
-        "eventorenAuthProviderSessionAdopt",
-        "Die Anmeldung konnte nicht übernommen werden.",
-        error instanceof Error ? error.message : String(error),
-      )
-    }
-  }
-
   const refresh = async (): PromiseResult<EventorenAuthIdentity | null> => {
     const version = lifecycleVersion
     if (isDemo()) {
@@ -83,23 +52,6 @@ export function eventorenAuthProviderStateCreate(inputs: EventorenAuthProviderSt
     if (version !== lifecycleVersion) return result
     if (!result.success) {
       ready.set(false)
-      return result
-    }
-    identity.set(result.data)
-    ready.set(true)
-    return result
-  }
-
-  const adoptSession = async (session: UserSession): PromiseResult<EventorenAuthIdentity> => {
-    const version = lifecycleVersion
-    if (isDemo()) {
-      ready.set(true)
-      return createResultError("eventorenAuthProviderDemoSessionAdopt", "Demo-Sitzungen sind deaktiviert.")
-    }
-    const result = await sessionAdoptSafe(session, "replace")
-    if (version !== lifecycleVersion) return result
-    if (!result.success) {
-      ready.set(true)
       return result
     }
     identity.set(result.data)
@@ -131,13 +83,6 @@ export function eventorenAuthProviderStateCreate(inputs: EventorenAuthProviderSt
         return createResult(null)
       }
 
-      if (hasInitialIdentity && initialIdentity) {
-        if (version !== lifecycleVersion) return createResult(initialIdentity)
-        identity.set(initialIdentity)
-        ready.set(true)
-        return createResult(initialIdentity)
-      }
-
       if (hasInitialIdentity) {
         if (!initialIdentityResult) {
           ready.set(false)
@@ -147,28 +92,10 @@ export function eventorenAuthProviderStateCreate(inputs: EventorenAuthProviderSt
           ready.set(false)
           return initialIdentityResult
         }
-
-        const legacySession = legacySessionRead()
-        if (!legacySession) {
-          if (version !== lifecycleVersion) return createResult(null)
-          identity.set(null)
-          ready.set(true)
-          return createResult(null)
-        }
-
-        const adoptionResult = await sessionAdoptSafe(legacySession, "legacy")
-        if (version !== lifecycleVersion) return createResult(adoptionResult.success ? adoptionResult.data : null)
-        if (!adoptionResult.success) {
-          legacySessionClear()
-          identity.set(null)
-          ready.set(true)
-          return createResult(null)
-        }
-
-        if (adoptionResult.data.userId !== legacySession.profile.userId) legacySessionClear()
-        identity.set(adoptionResult.data)
+        if (version !== lifecycleVersion) return createResult(initialIdentityResult.data)
+        identity.set(initialIdentityResult.data)
         ready.set(true)
-        return createResult(adoptionResult.data)
+        return createResult(initialIdentityResult.data)
       }
 
       const currentResult = await currentUserReadSafe()
@@ -177,35 +104,9 @@ export function eventorenAuthProviderStateCreate(inputs: EventorenAuthProviderSt
         ready.set(false)
         return currentResult
       }
-      if (currentResult.data) {
-        const browserSession = userSessionSignal.get()
-        if (browserSession && browserSession.profile.userId !== currentResult.data.userId) userSessionsClear()
-        identity.set(currentResult.data)
-        ready.set(true)
-        return currentResult
-      }
-
-      const legacySession = legacySessionRead()
-      if (!legacySession) {
-        if (version !== lifecycleVersion) return createResult(null)
-        identity.set(null)
-        ready.set(true)
-        return createResult(null)
-      }
-
-      const adoptionResult = await sessionAdoptSafe(legacySession, "legacy")
-      if (version !== lifecycleVersion) return createResult(adoptionResult.success ? adoptionResult.data : null)
-      if (!adoptionResult.success) {
-        legacySessionClear()
-        identity.set(null)
-        ready.set(true)
-        return createResult(null)
-      }
-
-      if (adoptionResult.data.userId !== legacySession.profile.userId) legacySessionClear()
-      identity.set(adoptionResult.data)
+      identity.set(currentResult.data)
       ready.set(true)
-      return createResult(adoptionResult.data)
+      return currentResult
     })()
     bootstrapPromise = pending
     return pending
@@ -221,7 +122,6 @@ export function eventorenAuthProviderStateCreate(inputs: EventorenAuthProviderSt
     ready: ready.get,
     identityApply,
     refresh,
-    adoptSession,
     clear,
   }
   return { context, bootstrap }

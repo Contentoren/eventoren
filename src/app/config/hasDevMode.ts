@@ -1,9 +1,8 @@
 import { userRoleIsDev } from "#src/auth/model_field/userRole.ts"
-import { userSessionsSignal } from "#src/auth/ui/signals/userSessionsSignal.ts"
+import type { EventorenAuthIdentity } from "#src/auth/model/EventorenAuthIdentity.ts"
 import { isDevEnv } from "#ui/env/isDevEnv.ts"
 
-export function hasDevMode(): boolean {
+export function hasDevMode(identity?: Pick<EventorenAuthIdentity, "role"> | null): boolean {
   if (isDevEnv()) return true
-  const sessions = userSessionsSignal.get()
-  return sessions.some((s) => userRoleIsDev(s.profile.role))
+  return identity ? userRoleIsDev(identity.role) : false
 }
