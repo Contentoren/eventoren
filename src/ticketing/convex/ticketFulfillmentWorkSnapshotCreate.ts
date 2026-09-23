@@ -1,4 +1,5 @@
 import type { EventorenTicketFulfillmentPrepareRequest } from "billing/contracts/eventorenTicketFulfillmentPrepareRequestSchema"
+import type { TicketPdfTicket } from "pdf-generator"
 import type { Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
@@ -43,14 +44,28 @@ export async function ticketFulfillmentWorkSnapshotCreate(
     },
     tickets: tickets
       .sort((left, right) => left.sequence - right.sequence)
-      .map((ticket) => ({
-        ticketId: ticket._id,
-        admissionCode: ticket.code,
-        sequence: ticket.sequence,
-        tierKey: ticket.tierKey,
-        tierLabel: ticket.tierName,
-        ...(ticket.participantName !== undefined ? { participantName: ticket.participantName } : {}),
-      })),
+      .map((ticket) => {
+        const pdfTicket: TicketPdfTicket = {
+          code: ticket.code,
+          eventTitle: ticket.eventTitle,
+          eventStartsAt: ticket.eventStartsAt,
+          tierName: ticket.tierName,
+          sequence: ticket.sequence,
+          eventDoorsAt: ticket.eventDoorsAt,
+          venue: ticket.venue,
+          city: ticket.city,
+          address: ticket.address,
+          ...(ticket.participantName !== undefined ? { participantName: ticket.participantName } : {}),
+        }
+        return {
+          ticketId: ticket._id,
+          admissionCode: pdfTicket.code,
+          sequence: ticket.sequence,
+          tierKey: ticket.tierKey,
+          tierLabel: pdfTicket.tierName,
+          ...(pdfTicket.participantName !== undefined ? { participantName: pdfTicket.participantName } : {}),
+        }
+      }),
     locale: checkoutContext.data.locale,
     legalContext: {
       cta: checkoutContext.data.cta,

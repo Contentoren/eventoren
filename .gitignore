@@ -7,7 +7,6 @@ out
 /build/
 
 # Bun package manager
-bun.lock
 bun.lockb
 
 # TypeScript
