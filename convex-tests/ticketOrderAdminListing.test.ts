@@ -55,6 +55,34 @@ test("rejects the all-orders query for an ordinary user", async () => {
   expect(result.success).toBe(false)
 })
 
+test("filters orders by event across paginated results", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await userInsert(t, "admin")
+  const ownerId = await userInsert(t, "user")
+  await orderInsert(t, ownerId, "first@example.test", "2026-09-20T10:00:00.000Z", "selected")
+  await orderInsert(t, ownerId, "other@example.test", "2026-09-21T10:00:00.000Z", "other")
+  await orderInsert(t, ownerId, "last@example.test", "2026-09-22T10:00:00.000Z", "selected")
+  const token = await createToken(adminId, authSecret)
+  const first = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
+    token,
+    eventKey: "selected",
+    paginationOpts: { cursor: null, numItems: 1 },
+  })
+  expect(first.success).toBe(true)
+  if (!first.success) return
+  expect(first.data.page.map((order: { customerEmail: string }) => order.customerEmail)).toEqual(["last@example.test"])
+  const second = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
+    token,
+    eventKey: "selected",
+    paginationOpts: { cursor: first.data.continueCursor, numItems: 1 },
+  })
+  expect(second.success).toBe(true)
+  if (!second.success) return
+  expect(second.data.page.map((order: { customerEmail: string }) => order.customerEmail)).toEqual([
+    "first@example.test",
+  ])
+})
+
 test("allows admins to read local order detail and rejects ordinary users", async () => {
   const t = convexTest(schema, modules)
   const adminId = await userInsert(t, "admin")
@@ -92,6 +120,7 @@ async function orderInsert(
   ownerUserId: Id<"users">,
   customerEmail: string,
   createdAt: string,
+  eventKey = "event",
 ) {
   return await t.run(async (ctx) =>
     ctx.db.insert("ticketOrders", {
@@ -103,7 +132,7 @@ async function orderInsert(
       customerAddress: "Musterstraße 12, 50667 Köln",
       customerPhone: "+49 221 123456",
       contactSnapshotJson: "{}",
-      eventKey: "event",
+      eventKey,
       eventTitle: "Testveranstaltung",
       eventSubtitle: "",
       eventDescription: "",

@@ -16,6 +16,7 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
   const baseOrders = inputs?.orders ?? demoAdminTicketOrders
 
   const ordersSignal = createSignalObject<readonly AdminTicketOrderSummary[]>(baseOrders)
+  const selectedEvent = createSignalObject("")
   const isDone = createSignalObject(false)
   const isMoreLoading = createSignalObject(false)
   const baseErrorMessage = createSignalObject("")
@@ -27,7 +28,7 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
 
   const orders = () => {
     if (isLoading() || isError() || isEmpty()) return []
-    return ordersSignal.get()
+    return ordersSignal.get().filter((order) => !selectedEvent.get() || order.eventKey === selectedEvent.get())
   }
 
   const errorMessage = () => {
@@ -61,6 +62,12 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
     isLoading,
     loadMore,
     orders,
+    eventSignal: selectedEvent,
+    eventOptions: () => [
+      { type: "item" as const, value: "" },
+      ...Array.from(new Set(baseOrders.map((order) => order.eventKey)), (value) => ({ type: "item" as const, value })),
+    ],
+    eventText: (event) => baseOrders.find((order) => order.eventKey === event)?.eventTitle ?? "Alle Events",
     paymentLabel: (status: AdminTicketOrderSummary["paymentStatus"]) =>
       ({ pending: "Offen", paid: "Bezahlt", failed: "Fehlgeschlagen", expired: "Abgelaufen" })[status],
     paymentTone: (status: AdminTicketOrderSummary["paymentStatus"]) =>

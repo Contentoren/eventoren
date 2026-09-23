@@ -10,6 +10,9 @@ export type AdminTicketOrdersPageState = {
   readonly isLoading: Accessor<boolean>
   readonly loadMore: () => Promise<void>
   readonly orders: Accessor<readonly AdminTicketOrderSummary[]>
+  readonly eventSignal: { readonly get: () => string; readonly set: (event: string) => void }
+  readonly eventOptions: () => { readonly type: "item"; readonly value: string }[]
+  readonly eventText: (event: string) => string
   readonly paymentLabel: (status: AdminTicketOrderSummary["paymentStatus"]) => string | undefined
   readonly paymentTone: (status: AdminTicketOrderSummary["paymentStatus"]) => "success" | "warning" | "danger"
   readonly priceFormat: (cents: number) => string

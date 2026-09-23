@@ -12,6 +12,7 @@ const maxPageBytes = 256 * 1024
 export const ticketOrderListAdminPaginatedQuery = query({
   args: {
     token: v.string(),
+    eventKey: v.optional(v.string()),
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args): PromiseResult<unknown> =>
@@ -26,7 +27,11 @@ export const ticketOrderListAdminPaginatedQuery = query({
       )
         return createResultError(op, `numItems must be between 1 and ${maxPageSize}`)
 
-      const page = await authorizedCtx.db.query("ticketOrders").withIndex("createdAt").order("desc").paginate({
+      const eventKey = authorizedArgs.eventKey
+      const ordersQuery = eventKey
+        ? authorizedCtx.db.query("ticketOrders").withIndex("eventKeyAndCreatedAt", (q) => q.eq("eventKey", eventKey))
+        : authorizedCtx.db.query("ticketOrders").withIndex("createdAt")
+      const page = await ordersQuery.order("desc").paginate({
         cursor: authorizedArgs.paginationOpts.cursor,
         endCursor: authorizedArgs.paginationOpts.endCursor,
         numItems: authorizedArgs.paginationOpts.numItems,

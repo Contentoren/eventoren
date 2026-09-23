@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test"
 import { createRoot } from "solid-js"
 import type { AdminTicketOrderDetails } from "../src/admin/AdminTicketOrderDetails.ts"
+import type { AdminTicketOrderListPage } from "../src/admin/AdminTicketOrderListPage.ts"
 import { adminTicketOrdersPageStateCreate } from "../src/admin/adminTicketOrdersPageStateCreate.ts"
 
 test("a late detail response cannot replace a newer order or reopen a closed detail", async () => {
@@ -34,6 +35,31 @@ test("a late detail response cannot replace a newer order or reopen a closed det
     expect(state.selectedOrderId()).toBeNull()
     expect(state.detailsLoading()).toBe(false)
     expect(state.detailsError()).toBe("")
+    dispose()
+  })
+})
+
+test("a late page response cannot replace orders after changing the event", async () => {
+  await createRoot(async (dispose) => {
+    const pending: ((value: { success: true; data: AdminTicketOrderListPage }) => void)[] = []
+    const state = adminTicketOrdersPageStateCreate({
+      list: () => new Promise((resolve) => pending.push(resolve)),
+    })
+    const oldRequest = state.loadMore()
+    state.eventSignal.set("new-event")
+    state.reload()
+    pending[0]?.({
+      success: true,
+      data: { page: [{ id: "old" } as AdminTicketOrderListPage["page"][number]], continueCursor: "old", isDone: true },
+    })
+    await oldRequest
+    expect(state.orders()).toEqual([])
+    pending[1]?.({
+      success: true,
+      data: { page: [{ id: "new" } as AdminTicketOrderListPage["page"][number]], continueCursor: "new", isDone: true },
+    })
+    await Promise.resolve()
+    expect(state.orders().map((order) => order.id)).toEqual(["new"])
     dispose()
   })
 })

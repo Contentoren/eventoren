@@ -10,12 +10,13 @@ import { convexUrlGet } from "./convexUrlGet.ts"
 const op = "adminTicketOrdersGet"
 
 export async function adminTicketOrdersGet(input: {
+  readonly eventKey?: string
   readonly paginationOpts: PaginationOptions
 }): Promise<Result<AdminTicketOrderListPage>> {
   const tokenResult = adminSessionTokenRead(getRequestHeader("cookie"))
   if (!tokenResult.success) return createResultError(op, tokenResult.errorMessage)
   return adminTicketOrdersList(
-    { token: tokenResult.data, paginationOpts: input.paginationOpts },
+    { token: tokenResult.data, eventKey: input.eventKey, paginationOpts: input.paginationOpts },
     apiClientCreate(convexUrlGet()),
   )
 }

@@ -10,7 +10,7 @@ import type { AdminTicketOrderListPage } from "./AdminTicketOrderListPage.ts"
 const op = "adminTicketOrdersList"
 
 export async function adminTicketOrdersList(
-  input: { readonly token: string; readonly paginationOpts: PaginationOptions },
+  input: { readonly token: string; readonly eventKey?: string; readonly paginationOpts: PaginationOptions },
   client: ConvexHttpClient = apiClientCreate(),
 ): Promise<Result<AdminTicketOrderListPage>> {
   try {

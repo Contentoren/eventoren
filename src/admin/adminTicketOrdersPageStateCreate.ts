@@ -1,5 +1,6 @@
-import { onMount } from "solid-js"
+import { createEffect, on, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
+import type { AdminEventItem } from "./AdminEventItem.ts"
 import { ticketPriceFormat } from "../ticketing/ticketPriceFormat.ts"
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
 import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
@@ -9,9 +10,16 @@ const pageSize = 50
 const dateFormatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" })
 
 export function adminTicketOrdersPageStateCreate(
-  inputs: { readonly list?: AdminTicketOrdersList; readonly getDetails?: AdminTicketOrderDetailsGet } = {},
+  inputs: {
+    readonly list?: AdminTicketOrdersList
+    readonly getDetails?: AdminTicketOrderDetailsGet
+    readonly events?: () => readonly AdminEventItem[]
+    readonly eventSignal?: { readonly get: () => string; readonly set: (event: string) => void }
+  } = {},
 ) {
   const list = inputs.list
+  const defaultEvent = createSignalObject("")
+  const eventSignal = inputs.eventSignal ?? defaultEvent
   const orders = createSignalObject<readonly AdminTicketOrderSummary[]>([])
   const cursor = createSignalObject<string | null>(null)
   const isDone = createSignalObject(false)
@@ -22,13 +30,19 @@ export function adminTicketOrdersPageStateCreate(
   const detailsError = createSignalObject("")
   const detailsLoading = createSignalObject(false)
   let detailRequest = 0
+  let listRequest = 0
 
   const pageLoad = async () => {
     if (!list) return errorMessage.set("Die Admin-Sitzung ist nicht verfügbar.")
     if (isLoading.get() || isDone.get()) return
+    const request = listRequest
     isLoading.set(true)
     errorMessage.set("")
-    const result = await list({ paginationOpts: { cursor: cursor.get(), numItems: pageSize } })
+    const result = await list({
+      eventKey: eventSignal.get() || undefined,
+      paginationOpts: { cursor: cursor.get(), numItems: pageSize },
+    })
+    if (request !== listRequest) return
     isLoading.set(false)
     if (!result.success) return errorMessage.set(result.errorMessage)
     const knownIds = new Set(orders.get().map((order) => order.id))
@@ -38,6 +52,7 @@ export function adminTicketOrdersPageStateCreate(
   }
 
   const reload = () => {
+    listRequest++
     orders.set([])
     cursor.set(null)
     isDone.set(false)
@@ -68,9 +83,8 @@ export function adminTicketOrdersPageStateCreate(
     detailsLoading.set(false)
   }
 
-  onMount(() => {
-    reload()
-  })
+  if (inputs.eventSignal) createEffect(on(eventSignal.get, reload))
+  else onMount(reload)
 
   return {
     customerName: (order: AdminTicketOrderSummary) =>
@@ -81,6 +95,12 @@ export function adminTicketOrdersPageStateCreate(
     isLoading: isLoading.get,
     loadMore: pageLoad,
     orders: orders.get,
+    eventSignal,
+    eventOptions: () => [
+      { type: "item" as const, value: "" },
+      ...(inputs.events?.() ?? []).map((event) => ({ type: "item" as const, value: event.id })),
+    ],
+    eventText: (event: string) => (inputs.events?.() ?? []).find((item) => item.id === event)?.title ?? "Alle Events",
     paymentLabel: (status: AdminTicketOrderSummary["paymentStatus"]) =>
       ({ pending: "Offen", paid: "Bezahlt", failed: "Fehlgeschlagen", expired: "Abgelaufen" })[status],
     paymentTone: (status: AdminTicketOrderSummary["paymentStatus"]) =>
@@ -97,6 +117,7 @@ export function adminTicketOrdersPageStateCreate(
 }
 
 type AdminTicketOrdersList = (input: {
+  readonly eventKey?: string
   readonly paginationOpts: Parameters<typeof adminTicketOrdersList>[0]["paginationOpts"]
 }) => ReturnType<typeof adminTicketOrdersList>
 
