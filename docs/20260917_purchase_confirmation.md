@@ -1,8 +1,8 @@
-# Purchase confirmation with four PDF attachments
+# Purchase confirmation with mode-specific PDF attachments
 
-Status: the live-mode and test-mode four-PDF paths are implemented and covered by rendered-PDF tests. Test mode uses a clearly marked non-fiscal invoice PDF rendered locally from the persisted purchase snapshot and never calls Lexware. The live production Billing organization `org_8a374e4c864f49cc92d9c0020babacdc` is independently verified on the fulfillment allowlist, and fresh checkouts use `gross_inclusive` with `taxRateBasisPoints` `1900`. Production auth-email delivery is verified through the internal-gateway SMTP route and IMAP. The remaining gap is one paid production purchase with end-to-end four-PDF confirmation delivery; it is not a missing allowlist or fresh-checkout tax configuration.
+Status: the live-mode four-PDF path and the test-mode three-PDF path are implemented and covered by rendered-PDF tests. Test confirmations intentionally omit the invoice because Lexware is the fiscal invoice source: test mode renders ticket, terms, and privacy only and makes no Lexware calls. The live production Billing organization `org_8a374e4c864f49cc92d9c0020babacdc` is independently verified on the fulfillment allowlist, and fresh checkouts use `gross_inclusive` with `taxRateBasisPoints` `1900`. Production auth-email delivery is verified through the internal-gateway SMTP route and IMAP. The remaining gap is one paid production purchase with end-to-end live four-PDF confirmation delivery; it is not a missing allowlist or fresh-checkout tax configuration.
 
-Last updated: 2026-09-22.
+Last updated: 2026-09-23.
 
 User implementation authorization is complete. No overall implementation permission is pending. Production Billing
 migrations/backend and the approved configured VAT policy are deployed. Production Convex functions and frontend are
@@ -14,25 +14,25 @@ remain in private deployment configuration.
 
 ## Goal
 
-Every Eventoren order-confirmation email must contain exactly four PDFs, in this order: ticket, invoice, terms, privacy. Live-mode purchases obtain the invoice PDF from Lexware. Test-mode purchases avoid Lexware and use a clearly marked non-fiscal test-invoice PDF rendered from the immutable purchase snapshot.
+Every live Eventoren order-confirmation email must contain exactly four PDFs, in this order: ticket, invoice, terms, privacy. Live-mode purchases obtain the invoice PDF from Lexware. Test confirmations are the explicit Lexware-driven exception: they contain exactly three actually rendered PDFs, in this order: ticket, terms, privacy. They omit the invoice rather than replacing it with a local non-fiscal document and make no Lexware calls.
 
-After a successful purchase and ticket issuance, send one order-confirmation email using email-generator for branded HTML and plain text. Attach exactly four PDFs, in this MIME attachment order. Select the filenames from the confirmation/order language:
+After a successful purchase and ticket issuance, send one order-confirmation email using email-generator for branded HTML and plain text. Attach the mode-specific PDFs in this MIME attachment order. Select the filenames from the confirmation/order language:
 
-**English:**
+**English live:**
 
 1. `tickets.pdf`
 2. `invoice.pdf`
 3. `terms.pdf`
 4. `privacy.pdf`
 
-**German:**
+**German live:**
 
 1. `Tickets.pdf`
 2. `Rechnung.pdf`
 3. `AGB.pdf`
 4. `Datenschutzerklaerung.pdf`
 
-Language-appropriate filenames do not change the required attachment order or four-file count.
+Language-appropriate filenames do not change the required attachment order or mode-specific file count. Test mode uses only `tickets.pdf`, `terms.pdf`, and `privacy.pdf` (or `Tickets.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf` in German); there is no `invoice.pdf`/`Rechnung.pdf` test attachment.
 
 Include a prominent **Open your tickets** link and a plain-text equivalent. Customers must be able to open it on a different phone/browser without the original checkout session and show their ticket QR codes without opening a PDF.
 
@@ -40,35 +40,34 @@ Include a prominent **Open your tickets** link and a plain-text equivalent. Cust
 
 - Eventoren creates ticket orders through Billing. Its paid-state mutation issues tickets atomically and schedules idempotent fulfillment work only for newly created orders whose persisted `fulfillmentEligible` value is true. Convex runs payment reconciliation and fulfillment preparation on scheduled five-minute paths.
 - Eventoren now issues/reuses an opaque, revocable, order-scoped access capability and passes a stable `/checkout#ticketAccess=...` URL to Billing. The public access query resolves the hashed token without checkout localStorage or login.
-- Billing's existing accepted-order email path generates legal PDFs, renders email-generator Markdown into branded HTML/text, and sends via organization-configured Resend or SMTP. The Eventoren confirmation path prepares the ticket PDF, invoice PDF, accepted legal PDFs, and one email with exactly four attachments, in the required order; it retries durable work and records ambiguous send outcomes for manual reconciliation. Live mode uses Lexware; test mode renders a clearly marked non-fiscal invoice locally without Lexware.
+- Billing's existing accepted-order email path generates legal PDFs, renders email-generator Markdown into branded HTML/text, and sends via organization-configured Resend or SMTP. The Eventoren confirmation path prepares the ticket PDF, accepted legal PDFs, and one email; live mode adds the Lexware invoice as the second attachment for exactly four PDFs, while test mode intentionally sends exactly three PDFs and makes no Lexware call. It retries durable work and records ambiguous send outcomes for manual reconciliation.
 - In the correct sibling repository `/home/leo/projects/billing` (not `invoicegen`), the implemented files are
   `src/checkout/server/eventorenTicketConfirmationProcess.ts`, `src/checkout/server/eventorenTicketConfirmationWorker.ts`,
-  `src/checkout/server/eventorenTicketInvoiceEnsure.ts`, `src/checkout/server/eventorenTicketPdfEnsure.ts`, and
-  `src/checkout/server/eventorenTicketTestInvoicePdfEnsure.ts`.
+  `src/checkout/server/eventorenTicketInvoiceEnsure.ts`, and `src/checkout/server/eventorenTicketPdfEnsure.ts`.
   `appBootstrap` installs the worker and starts recovery.
-- Billing creates live Eventoren invoices through Lexware, renders test-mode non-fiscal invoice artifacts locally, and renders the combined ticket PDF with its existing isolated Chromium infrastructure. The ticket renderer supports four tickets per A4 page with overflow pages as needed.
+- Billing creates live Eventoren invoices through Lexware and renders the combined ticket PDF with its existing isolated Chromium infrastructure. Test Eventoren confirmations do not create a local invoice artifact. The ticket renderer supports four tickets per A4 page with overflow pages as needed.
 - The user chose Billing's existing rendering pipeline for ticket PDF rendering. Lexware remains the invoice source.
 - Eventoren's installed email-generator package has authentication templates, not Billing's Markdown-generation API. Reuse Billing's existing rendering integration rather than adding a separate Eventoren mail pipeline.
 - Eventoren ticket checkout remains a separate Billing path. Its implemented invoice ensure reuses the stable Stripe session/order identity and existing purchase records where possible; retries must not create another invoice.
 - Eventoren passes legal acceptance/revision evidence to Billing, and the implemented confirmation process renders the persisted accepted terms/privacy bodies rather than mutable latest text.
-- New Eventoren checkouts load the tax policy from Billing's organization presentation configuration and persist it in the immutable commercial snapshot. Live invoicing uses that persisted policy and refuses to send when the invoice artifact is missing. Test mode renders a non-fiscal artifact from the persisted amounts and details without inferring a fiscal policy. Legacy paid snapshots without a tax policy remain blocked for live invoicing; they are not retroactively reinterpreted.
+- New Eventoren checkouts load the tax policy from Billing's organization presentation configuration and persist it in the immutable commercial snapshot. Live invoicing uses that persisted policy and refuses to send when the invoice artifact is missing. Test confirmations do not render or infer an invoice and do not call Lexware. Legacy paid snapshots without a tax policy remain blocked for live invoicing; they are not retroactively reinterpreted.
 - The only activation switch is Eventoren's Convex runtime environment variable `EVENTOREN_BILLING_FULFILLMENT_ORGANIZATION_ALLOWLIST`, captured as `fulfillmentEligible` at order creation. The design is disabled by default: setting a frontend `.env.production` value alone does not activate fulfillment, and an empty allowlist leaves the ordinary checkout behavior unchanged. The live production Billing organization `org_8a374e4c864f49cc92d9c0020babacdc` is independently verified as enabled on the runtime allowlist; this task did not change or apply that value, and there is no backfill.
 - Production auth-email delivery is verified through `authEmail:sendAuthEmailInternalAction`, the fixed internal-gateway TCP 587 route with TLS verification for `email.contentoren.de`, and an IMAP receipt. Current browser SSO is Zitadel via `/sign-in` → `/login/zitadel`; `/sign-up` has no intended active UI. The retained custom signup backend-action test proves transport only, not a browser signup page or paid-order confirmation delivery; do not add or recommend a new signup route.
 - Preview uses persisted `gross_inclusive` / `1900` organization tax configuration, organization SMTP settings, and a dedicated Stripe test webhook targeting preview Billing. Preview checkout bypasses are disabled. Public catalog projections use the synchronized catalog version.
 
 ## Decisions
 
-- **Four-PDF contract:** both persisted checkout modes require ticket, invoice, terms, and privacy attachments in that order. Live mode keeps the Lexware invoice path. Test mode uses Billing's clearly marked non-fiscal Chromium/Pandoc renderer without Lexware calls. Other Billing invoice flows are unchanged.
+- **Mode-specific PDF contract:** live persisted checkouts require ticket, Lexware invoice, terms, and privacy attachments in that order. Test persisted checkouts require only ticket, terms, and privacy attachments in that order; they omit the invoice and make no Lexware calls. Other Billing invoice flows are unchanged.
 - **Eventoren owns fulfillment:** ticket issuance, inventory, ticket QR identity, customer ticket access, and the ticket PDF request data.
 - **Billing owns invoices and delivery:** reuse its Lexware integration, organization sender configuration, existing Chromium-based PDF infrastructure, legal PDF generation, email-generator integration, and delivery tracking. Billing validates Eventoren's authoritative ticket data, renders/stores the actual ticket PDF, and attaches it first.
-- **Lexware supplies the live invoice PDF:** Billing creates the live invoice and downloads its PDF through the existing Lexware integration. Test mode uses the separate clearly marked non-fiscal renderer; it never locally replaces a live Lexware invoice.
-- **Eventoren tax policy:** For a new Eventoren checkout, Billing loads `taxBasis` and `taxRateBasisPoints` with `organizationPresentationConfigLoad`; the current organization configuration is `gross_inclusive` and `1900` basis points (19%). The resolved policy is persisted with the checkout commercial snapshot. Ticket and fee gross amounts are unchanged and no additional VAT charge is added. Live replays use the persisted snapshot even if current configuration is changed or missing; legacy snapshots without a policy remain unchanged and blocked for live invoicing. Test artifacts display any persisted policy details but are explicitly non-fiscal.
+- **Lexware supplies the live invoice PDF:** Billing creates the live invoice and downloads its PDF through the existing Lexware integration. Test mode has no invoice attachment and never calls Lexware; generic generated-offer test-invoice workflows are separate.
+- **Eventoren tax policy:** For a new Eventoren checkout, Billing loads `taxBasis` and `taxRateBasisPoints` with `organizationPresentationConfigLoad`; the current organization configuration is `gross_inclusive` and `1900` basis points (19%). The resolved policy is persisted with the checkout commercial snapshot. Ticket and fee gross amounts are unchanged and no additional VAT charge is added. Live replays use the persisted snapshot even if current configuration is changed or missing; legacy snapshots without a policy remain unchanged and blocked for live invoicing. Test confirmations do not render an invoice or apply a fiscal policy.
 - **Billing renders the ticket PDF:** use the implemented dedicated ticket HTML template in Billing's existing Chromium-based PDF infrastructure, using authoritative issued-ticket data from Eventoren. Billing stores/reuses the generated PDF.
-- **One combined ticket PDF per order:** Billing produces one combined PDF with up to four tickets per A4 page and overflow pages as needed, preserving exactly four attachments even when several tickets are purchased. Each ticket has its own unique, scan-readable admission QR.
+- **One combined ticket PDF per order:** Billing produces one combined PDF with up to four tickets per A4 page and overflow pages as needed, preserving the live four-attachment or test three-attachment contract even when several tickets are purchased. Each ticket has its own unique, scan-readable admission QR.
 - **One confirmation per Eventoren order:** checkout currently creates an order per event. Cross-event/cart-wide invoice and email consolidation is not included.
 - **Mobile access lasts through the event:** use an opaque, revocable, order-scoped read-only link usable without login. Do not use a short-lived login link that expires before admission. Do not grant refund, transfer, or administrative permissions through this link.
 - Preserve the requested attachment order in the send payload. Mail clients may choose their own display ordering.
-- **Language-appropriate attachment filenames:** select filenames from the confirmation/order language. For English use `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf`; for German use `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf`. Keep the same ticket/invoice/terms/privacy order and exactly four attachments in both languages.
+- **Language-appropriate attachment filenames:** select filenames from the confirmation/order language. Live English uses `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf`; live German uses `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf`. Test mode omits the invoice filename and keeps ticket, terms, privacy order in both languages.
 
 ## Approach and tasks
 
@@ -171,22 +170,22 @@ Relevant Billing files: `src/checkout/server/eventorenTicketPdfEnsure.ts`,
 `src/checkout/server/eventorenTicketHtmlCreate.ts`, `src/checkout/server/eventorenTicketPdfEnsure.test.ts`, and the
 Chromium-based infrastructure shared with `src/legal/acceptedOrderLegalPdfEnsure.ts`.
 
-### 5. Compose and send the four-attachment confirmation in Billing
+### 5. Compose and send the mode-specific confirmation in Billing
 
-Status: implemented and unit-tested with actual ticket, test-invoice, and legal rendering in test mode, plus actual ticket/legal rendering and a mocked Lexware PDF in live mode. Worker retry and activation semantics are unchanged. The paid production purchase and four-PDF confirmation remain unverified.
+Status: implemented and unit-tested with three test-mode attachments (ticket and legal PDFs) without Lexware, plus four live-mode attachments with actual ticket/legal rendering and a mocked Lexware PDF. Worker retry and activation semantics are unchanged. The paid production purchase and live four-PDF confirmation remain unverified.
 
-The Eventoren-specific Billing path creates/retrieves its idempotent Lexware invoice in live mode and obtains the actual stored ticket PDF.
+The Eventoren-specific Billing path creates/retrieves its idempotent Lexware invoice in live mode and obtains the actual stored ticket PDF. In test mode it does not create an invoice artifact or call Lexware.
 It generates terms and privacy PDFs from the legal documents accepted for that order, not mutable latest text and not
 Contentoren's documents, and preserves the accepted language/revision. The process must ensure, in order, ticket, invoice,
-terms, and privacy PDFs before sending. Test mode renders the invoice attachment locally from the persisted commercial and
-customer snapshot, with a prominent non-fiscal test notice and no Lexware call.
+terms, and privacy PDFs before sending in live mode. In test mode it ensures only ticket, terms, and privacy PDFs and sends
+without an invoice attachment or Lexware call.
 
 The confirmation uses Billing's existing email-generator integration for the purchase summary, event information, prominent
-mobile ticket CTA, and plain-text URL. It sends only after all four PDF artifacts are available; it never sends an
+mobile ticket CTA, and plain-text URL. It sends only after all mode-specific PDF artifacts are available; it never sends an
 invoice-only or otherwise incomplete email. Attachment filenames, PDF content types, and array order are explicit: select
 `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf` for English confirmation/order language, or `Tickets.pdf`,
-`Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf` for German confirmation/order language. The selected names
-preserve the ticket/invoice/terms/privacy order and exactly four attachments.
+`Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf` for German live confirmation/order language. Test mode omits the
+invoice filename and preserves ticket/terms/privacy order with exactly three attachments.
 
 The confirmation worker persists retryable state and a stable provider idempotency key. It runs from Billing `appBootstrap`
 on a one-minute interval, recovers stale claims, retries up to five times with bounded delays, and distinguishes failed sends
@@ -201,11 +200,12 @@ Relevant Billing files: `src/checkout/server/eventorenTicketConfirmationProcess.
 
 ### 6. Verify the complete purchase flow
 
-Status: automated coverage verifies the four-PDF contract in both persisted checkout modes. Production activation and
+Status: automated coverage verifies three ordered test-mode PDFs and four ordered live-mode PDFs in both persisted checkout
+modes. Production activation and
 real-provider confirmation delivery remain outside this task.
 
-- Test-mode Billing coverage renders ticket, non-fiscal test-invoice, terms, and privacy PDFs through the existing local
-  Chromium/Pandoc pipeline, sends no Lexware request, and checks the localized attachment order and PDF bytes.
+- Test-mode Billing coverage checks exactly ticket, terms, and privacy attachments, sends no Lexware request, and checks the
+  localized attachment order and PDF bytes.
 - Live-mode Billing coverage renders the ticket and accepted legal PDFs, uses a mocked Lexware PDF source, and checks the
   localized attachment order, email link, and serialized PDF bytes.
 - The implemented PDF contract produces one combined ticket PDF with up to four tickets per A4 page and overflow pages
@@ -221,12 +221,12 @@ real-provider confirmation delivery remain outside this task.
 
 ## Review decisions
 
-The up-to-four-tickets-per-A4-page layout is approved, including overflow pages and a unique, scan-readable admission QR per ticket. The plan uses Billing's existing Chromium-based PDF infrastructure with a new dedicated ticket HTML template: Eventoren sends authoritative issued-ticket data to Billing, which renders/stores the combined PDF and attaches it first; Lexware remains the invoice PDF source and Billing/Lexware ownership is unchanged. The combined PDF and exactly four attachments (ticket, invoice, terms, privacy) remain in scope. Attachment filenames follow the confirmation/order language: English uses `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf`; German uses `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf`, without changing the order or count.
+The up-to-four-tickets-per-A4-page layout is approved, including overflow pages and a unique, scan-readable admission QR per ticket. The plan uses Billing's existing Chromium-based PDF infrastructure with a new dedicated ticket HTML template: Eventoren sends authoritative issued-ticket data to Billing, which renders/stores the combined PDF and attaches it first; Lexware remains the live invoice PDF source and Billing/Lexware ownership is unchanged. Live confirmations have exactly four attachments (ticket, invoice, terms, privacy); test confirmations have exactly three (ticket, terms, privacy) and no Lexware call. Live attachment filenames follow the confirmation/order language: English uses `tickets.pdf`, `invoice.pdf`, `terms.pdf`, and `privacy.pdf`; German uses `Tickets.pdf`, `Rechnung.pdf`, `AGB.pdf`, and `Datenschutzerklaerung.pdf`.
 
 Invoicegen integration, changes, and contract work are out of scope. Billing Chromium remains the PDF renderer; the contract
-is exactly four attachments, with up to four tickets per A4 page and overflow pages as needed.
+is mode-specific: four live attachments or three test attachments, with up to four tickets per A4 page and overflow pages as needed.
 
 Current verification status: the live production Billing allowlist entry for `org_8a374e4c864f49cc92d9c0020babacdc`,
 fresh-checkout `gross_inclusive` / `1900` tax configuration, and production auth SMTP delivery are independently
-verified. The only remaining confirmation gap is an actual paid production purchase through the complete four-PDF
+verified. The only remaining confirmation gap is an actual paid production purchase through the complete live four-PDF
 path. Browser authentication remains Zitadel SSO; `/sign-up` is not an intended active UI.
