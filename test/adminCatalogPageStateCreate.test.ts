@@ -299,12 +299,17 @@ describe("admin catalog page state", () => {
   test("does not replace a manually edited image URL when an upload finishes", async () => {
     await createRoot(async (dispose) => {
       try {
-        let resolveUpload!: (result: ReturnType<typeof createResult<{ assetId: string; detail: string; card: string; organizer: string }>>) => void
+        let resolveUpload!: (
+          result: ReturnType<typeof createResult<{ assetId: string; detail: string; card: string; organizer: string }>>,
+        ) => void
         const state = adminCatalogPageStateCreate({
           events: () => [],
           isServerAuthorized: () => true,
           reloadEvents: async () => ({ success: true, data: [] }),
-          imageUpload: () => new Promise((resolve) => { resolveUpload = resolve }),
+          imageUpload: () =>
+            new Promise((resolve) => {
+              resolveUpload = resolve
+            }),
         })
         state.eventFieldChange("eventKey", "new-event")
         state.eventFieldChange("title", "Edited title")
@@ -312,7 +317,14 @@ describe("admin catalog page state", () => {
         const upload = form.imageUpload(new File(["image"], "event.png", { type: "image/png" }))
 
         form.imageUrlChange("https://example.com/manual.webp")
-        resolveUpload(createResult({ assetId: "asset", detail: "https://example.com/upload.webp", card: "card", organizer: "organizer" }))
+        resolveUpload(
+          createResult({
+            assetId: "asset",
+            detail: "https://example.com/upload.webp",
+            card: "card",
+            organizer: "organizer",
+          }),
+        )
         await upload
 
         expect(state.eventDraft().imageUrl).toBe("https://example.com/manual.webp")
@@ -327,18 +339,38 @@ describe("admin catalog page state", () => {
   test("ignores an upload after the draft is reset to the same event key", async () => {
     await createRoot(async (dispose) => {
       try {
-        let resolveUpload!: (result: ReturnType<typeof createResult<{ assetId: string; detail: string; card: string; organizer: string }>>) => void
+        let resolveUpload!: (
+          result: ReturnType<typeof createResult<{ assetId: string; detail: string; card: string; organizer: string }>>,
+        ) => void
         const event: AdminEventItem = {
-          id: "same-event", status: "draft", catalogVersion: 1, title: "Current title", subtitle: "", description: "",
-          category: "konzerte" as const, startsAt: "2026-10-01T18:00:00.000Z", endsAt: "2026-10-01T22:00:00.000Z",
-          doorsAt: "2026-10-01T17:00:00.000Z", venue: "Hall", city: "Berlin", address: "", organizer: "Eventoren",
-          imageUrl: "https://example.com/current.webp", imageAlt: "", tags: [], soldOut: false, tiers: [],
+          id: "same-event",
+          status: "draft",
+          catalogVersion: 1,
+          title: "Current title",
+          subtitle: "",
+          description: "",
+          category: "konzerte" as const,
+          startsAt: "2026-10-01T18:00:00.000Z",
+          endsAt: "2026-10-01T22:00:00.000Z",
+          doorsAt: "2026-10-01T17:00:00.000Z",
+          venue: "Hall",
+          city: "Berlin",
+          address: "",
+          organizer: "Eventoren",
+          imageUrl: "https://example.com/current.webp",
+          imageAlt: "",
+          tags: [],
+          soldOut: false,
+          tiers: [],
         }
         const state = adminCatalogPageStateCreate({
           events: () => [event],
           isServerAuthorized: () => true,
           reloadEvents: async () => ({ success: true, data: [event] }),
-          imageUpload: () => new Promise((resolve) => { resolveUpload = resolve }),
+          imageUpload: () =>
+            new Promise((resolve) => {
+              resolveUpload = resolve
+            }),
         })
         state.selectEvent(event)
         const form = adminEventDetailsFormStateCreate({ catalog: state })
@@ -346,7 +378,14 @@ describe("admin catalog page state", () => {
 
         state.selectEvent(event)
         state.eventFieldChange("title", "Newer title")
-        resolveUpload(createResult({ assetId: "asset", detail: "https://example.com/upload.webp", card: "card", organizer: "organizer" }))
+        resolveUpload(
+          createResult({
+            assetId: "asset",
+            detail: "https://example.com/upload.webp",
+            card: "card",
+            organizer: "organizer",
+          }),
+        )
         await upload
 
         expect(state.eventDraft().imageUrl).toBe(event.imageUrl)
