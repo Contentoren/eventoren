@@ -30,6 +30,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
   const selectedTicketId = createSignalObject(inputs.initialTicketId())
   const search = createSignalObject(inputs.initialSearch())
   const loading = createSignalObject(true)
+  const hydrated = createSignalObject(false)
   const actionPending = createSignalObject(false)
   const actionError = createSignalObject<DetailActionError | null>(null)
   const actionSuccess = createSignalObject<DetailActionSuccess | null>(null)
@@ -141,6 +142,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
   }
 
   onMount(() => {
+    hydrated.set(true)
     void eventLoad()
     void ticketLoad(search.get(), ticketListRevision)
   })
@@ -318,6 +320,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     search: search.get,
     text,
     loading: loading.get,
+    hydrated: hydrated.get,
     isDone: isDone.get,
     actionPending: actionPending.get,
     errorMessage,

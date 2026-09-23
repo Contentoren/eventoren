@@ -34,11 +34,14 @@ export function organizerEventListPageStateCreate(inputs?: {
   })
 
   const groups = createMemo(() => organizerEventsGroup(events.get()))
-  const eventTime = (value: string) =>
-    new Intl.DateTimeFormat("de-DE", {
+  const eventTime = (value: string) => {
+    const date = new Date(value)
+    if (Number.isNaN(date.valueOf())) return "—"
+    return new Intl.DateTimeFormat("de-DE", {
       hour: "2-digit",
       minute: "2-digit",
-    }).format(new Date(value))
+    }).format(date)
+  }
 
   return { groups, text, loading: loading.get, errorMessage: errorMessage.get, eventTime }
 }

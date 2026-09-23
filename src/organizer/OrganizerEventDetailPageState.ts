@@ -5,6 +5,7 @@ import type { OrganizerText } from "./OrganizerText.ts"
 import type { OrganizerTicket } from "./OrganizerTicket.ts"
 
 export type OrganizerEventDetailPageState = {
+  readonly hydrated: () => boolean
   readonly event: () => OrganizerEvent | undefined
   readonly tickets: () => readonly OrganizerTicket[]
   readonly selectedTicket: () => OrganizerTicket | undefined

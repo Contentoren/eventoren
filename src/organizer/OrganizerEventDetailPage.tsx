@@ -135,6 +135,29 @@ export function OrganizerEventDetailPage(props: {
                 </p>
               </Show>
             </div>
+            <form
+              aria-label="Ticket-Code manuell prüfen"
+              class="flex flex-wrap items-end gap-space-3"
+              data-hydrated={state.hydrated() ? "true" : "false"}
+              onSubmit={(event) => {
+                event.preventDefault()
+                const ticketCode = new FormData(event.currentTarget).get("ticket-code")
+                if (typeof ticketCode === "string") void state.scannerCodeSimulate(ticketCode)
+              }}
+            >
+              <div class="min-w-0 flex-1">
+                <label for="organizer-ticket-code" class="text-sm font-semibold text-content">
+                  Ticket-Code
+                </label>
+                <Input
+                  id="organizer-ticket-code"
+                  name="ticket-code"
+                  autocomplete="off"
+                  class="mt-space-2 w-full font-mono"
+                />
+              </div>
+              <Button type="submit">Ticket-Code prüfen</Button>
+            </form>
           </CardWrapper>
 
           <div class="grid min-h-[32rem] gap-space-6 lg:grid-cols-[minmax(18rem,0.85fr)_minmax(22rem,1.15fr)]">

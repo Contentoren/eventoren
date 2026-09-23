@@ -21,9 +21,8 @@ export function OrganizerEventListPage(props: {
   return (
     <Dynamic component={props.frame ?? SiteFrame}>
       <main id="content" tabindex="-1" class="flex-1">
-        <UiContainer width="wide" class="flex flex-col gap-space-8 py-space-8 sm:py-space-10">
+        <UiContainer width="wide" class="flex flex-col gap-space-7 py-space-7 sm:py-10">
           <header class="flex flex-col gap-space-3">
-            <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">{state.text().area}</p>
             <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">{state.text().eventsTitle}</h1>
             <p class="max-w-2xl text-content-muted">{state.text().eventsDescription}</p>
           </header>
@@ -49,7 +48,7 @@ export function OrganizerEventListPage(props: {
             </CardWrapper>
           </Show>
 
-          <div class="flex flex-col gap-space-8">
+          <div class="flex flex-col gap-space-7">
             <For each={state.groups()}>
               {(group) => (
                 <section aria-labelledby={`organizer-date-${group.key}`} class="flex flex-col gap-space-4">
