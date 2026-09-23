@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import { imageList as serviceImageList } from "../app/assets/service/imageList.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import type { TicketBagItem } from "./TicketBagItem.ts"
@@ -32,8 +33,16 @@ export function TicketBagItemCard(props: {
             class="focus-ring relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl border border-border-subtle/60 sm:aspect-square sm:w-28 md:w-32"
           >
             <img
-              src={eventImageUrlGet(props.event.imageUrl)}
-              alt={props.event.imageAlt}
+              src={eventImageUrlGet(
+                props.event.id === "pilates-christmas-event-2027-final"
+                  ? `/${serviceImageList.pilates_card.path}`
+                  : props.event.imageUrl,
+              )}
+              alt={
+                props.event.id === "pilates-christmas-event-2027-final"
+                  ? (serviceImageList.pilates_card.metadata.alt ?? props.event.imageAlt)
+                  : props.event.imageAlt
+              }
               loading="lazy"
               class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -45,8 +54,16 @@ export function TicketBagItemCard(props: {
             class="focus-ring relative aspect-[4/3] w-full shrink-0 overflow-hidden rounded-xl border border-border-subtle/60 sm:aspect-square sm:w-28 md:w-32"
           >
             <img
-              src={eventImageUrlGet(props.event.imageUrl)}
-              alt={props.event.imageAlt}
+              src={eventImageUrlGet(
+                props.event.id === "pilates-christmas-event-2027-final"
+                  ? `/${serviceImageList.pilates_card.path}`
+                  : props.event.imageUrl,
+              )}
+              alt={
+                props.event.id === "pilates-christmas-event-2027-final"
+                  ? (serviceImageList.pilates_card.metadata.alt ?? props.event.imageAlt)
+                  : props.event.imageAlt
+              }
               loading="lazy"
               class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
@@ -117,25 +134,37 @@ export function TicketBagItemCard(props: {
 
           {/* Controls: Quantity & Remove */}
           <div class="mt-space-2 flex items-center gap-space-5 border-t border-border-subtle/60 pt-space-3 dark:border-border-strong/20">
-            <div class="flex items-center gap-space-2.5">
+            <div class="flex items-center gap-space-4">
               <label for={`bag-qty-${props.item.tierId}`} class="text-sm font-medium text-content-muted">
                 Anzahl:
               </label>
-              <select
-                id={`bag-qty-${props.item.tierId}`}
-                value={props.item.quantity}
-                ref={(element) => (element.value = String(props.item.quantity))}
-                onChange={(e) => props.onQuantityChange(Number.parseInt(e.currentTarget.value, 10))}
-                class="focus-ring h-10 rounded-lg border border-border-strong/60 bg-surface px-space-3 text-sm font-semibold text-content"
-              >
-                <For each={quantityOptions()}>
-                  {(qty) => (
-                    <option value={qty} selected={qty === props.item.quantity}>
-                      {qty}
-                    </option>
-                  )}
-                </For>
-              </select>
+              <div class="relative">
+                <select
+                  id={`bag-qty-${props.item.tierId}`}
+                  value={props.item.quantity}
+                  ref={(element) => (element.value = String(props.item.quantity))}
+                  onChange={(e) => props.onQuantityChange(Number.parseInt(e.currentTarget.value, 10))}
+                  class="focus-ring h-10 appearance-none rounded-lg border border-border-strong/60 bg-surface pl-space-4 pr-9 text-sm font-semibold text-content"
+                >
+                  <For each={quantityOptions()}>
+                    {(qty) => (
+                      <option value={qty} selected={qty === props.item.quantity}>
+                        {qty}
+                      </option>
+                    )}
+                  </For>
+                </select>
+                <svg
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  class="pointer-events-none absolute right-space-4 top-1/2 size-4 -translate-y-1/2 text-content-muted"
+                  aria-hidden="true"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m5 7.5 5 5 5-5" />
+                </svg>
+              </div>
             </div>
 
             <Button

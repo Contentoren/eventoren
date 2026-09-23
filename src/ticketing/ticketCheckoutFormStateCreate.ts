@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/solid-router"
+import { useNavigate, useRouter } from "@tanstack/solid-router"
 import { createEffect, createMemo, on, onMount } from "solid-js"
 import type { Result } from "#result"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
@@ -49,11 +49,13 @@ export function ticketCheckoutFormStateCreate(inputs: {
   appOrigin: () => Result<string>
 }): TicketCheckoutFormState {
   const navigate = useNavigate()
+  const router = useRouter()
   const auth = eventorenAuthContextUse()
   const contact = createSignalObject<TicketContact>(ticketContactEmpty())
   const step = createSignalObject<TicketCheckoutStep>("kontakt")
   const errorMessage = createSignalObject("")
   const isSubmitting = createSignalObject(false)
+  const hydrated = createSignalObject(false)
   const submitAttempted = createSignalObject(false)
   const invalidRequiredFields = createSignalObject<readonly TicketRequiredFieldKey[]>([])
   const legalAccepted = createSignalObject(false)
@@ -64,6 +66,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
   onMount(() => {
     const draft = ticketContactDraftLoad()
     if (draft.success) contact.set(draft.data)
+    hydrated.set(true)
   })
 
   const stepLabels = createMemo(() => ticketCheckoutStepOrder.map((entry) => ticketCheckoutStepLabels()[entry]))
@@ -206,11 +209,34 @@ export function ticketCheckoutFormStateCreate(inputs: {
     }
 
     if (!auth.ready()) await auth.refresh()
+    isSubmitting.set(true)
+    const submittedItems = inputs.items()
+    try {
+      await router.invalidate()
+    } catch {
+      errorMessage.set(text.catalogUnavailable)
+      isSubmitting.set(false)
+      return
+    }
+    const refreshedItems = inputs.items()
+    if (
+      refreshedItems.length !== submittedItems.length ||
+      submittedItems.some(
+        (item, index) =>
+          JSON.stringify({ ...item.event, catalogVersion: 0 }) !==
+            JSON.stringify({ ...refreshedItems[index]?.event, catalogVersion: 0 }) ||
+          JSON.stringify(item.cart.lines) !== JSON.stringify(refreshedItems[index]?.cart.lines),
+      )
+    ) {
+      errorMessage.set(text.catalogChanged)
+      isSubmitting.set(false)
+      return
+    }
+
     const authenticated = Boolean(auth.identity())
     const guestAccessToken = authenticated ? undefined : ticketGuestAccessTokenCreate()
     const createdOrderIds: string[] = []
     let redirectUrl: string | undefined
-    isSubmitting.set(true)
     errorMessage.set("")
 
     try {
@@ -256,7 +282,12 @@ export function ticketCheckoutFormStateCreate(inputs: {
           ? await (await ticketingServerRead()).checkoutCreate({ data: checkoutInput })
           : await ticketCheckoutCreate({ ...checkoutInput, guestAccessToken })
         if (!created.success) {
-          errorMessage.set(created.errorMessage)
+          if (created.errorMessage === "The catalog version is stale") {
+            await router.invalidate()
+            errorMessage.set(ticketCheckoutText().catalogChanged)
+          } else {
+            errorMessage.set(created.errorMessage)
+          }
           isSubmitting.set(false)
           return
         }
@@ -295,6 +326,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
   }
 
   return {
+    hydrated: hydrated.get,
     contact: contact.get,
     step: step.get,
     stepIndex,

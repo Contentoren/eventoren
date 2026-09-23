@@ -5,6 +5,7 @@ import type { TicketParticipantNames } from "./TicketParticipantNames.ts"
 import type { TicketRequiredFieldKey } from "./TicketRequiredFieldKey.ts"
 
 export type TicketCheckoutFormState = {
+  hydrated: Accessor<boolean>
   contact: Accessor<TicketContact>
   step: Accessor<TicketCheckoutStep>
   stepIndex: Accessor<number>

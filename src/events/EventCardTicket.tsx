@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/solid-router"
 import { type JSX, Show } from "solid-js"
+import { imageList as serviceImageList } from "../app/assets/service/imageList.ts"
 import { classArr } from "../ui/classArr.ts"
 import { UiBadge } from "../ui/UiBadge.tsx"
 import type { EventItem } from "./EventItem.ts"
@@ -16,8 +17,16 @@ export function EventCardTicket(props: { event: EventItem; href?: string }) {
         {/* Taller vertical image aspect ratio */}
         <div class="relative aspect-[4/3] overflow-hidden bg-surface-muted">
           <img
-            src={eventImageUrlGet(props.event.imageVariants?.card ?? props.event.imageUrl)}
-            alt={props.event.imageAlt}
+            src={eventImageUrlGet(
+              props.event.id === "pilates-christmas-event-2027-final"
+                ? `/${serviceImageList.pilates_card.path}`
+                : (props.event.imageVariants?.card ?? props.event.imageUrl),
+            )}
+            alt={
+              props.event.id === "pilates-christmas-event-2027-final"
+                ? (serviceImageList.pilates_card.metadata.alt ?? props.event.imageAlt)
+                : props.event.imageAlt
+            }
             loading="lazy"
             width="1200"
             height="900"

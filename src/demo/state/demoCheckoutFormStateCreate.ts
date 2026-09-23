@@ -1,4 +1,4 @@
-import { createEffect, createMemo, on } from "solid-js"
+import { createEffect, createMemo, on, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { EventItem } from "../../events/EventItem.ts"
 import type { TicketCart } from "../../ticketing/TicketCart.ts"
@@ -57,10 +57,12 @@ export function demoCheckoutFormStateCreate(inputs: {
     inputs.error ? "Die lokale Demo-Zahlung konnte nicht abgeschlossen werden." : "",
   )
   const isSubmitting = createSignalObject(false)
+  const hydrated = createSignalObject(false)
   const submitAttempted = createSignalObject(false)
   const invalidRequiredFields = createSignalObject<readonly TicketRequiredFieldKey[]>([])
   const legalAccepted = createSignalObject(false)
   const completedOrders = createSignalObject<readonly TicketOrderProjection[]>([])
+  onMount(() => hydrated.set(true))
   const items = createMemo<readonly DemoCheckoutItem[]>(() =>
     (isFlowEmpty() || isLoading() ? [] : demoCartStore.draft())
       .map((cart) => {
@@ -291,6 +293,7 @@ export function demoCheckoutFormStateCreate(inputs: {
   })
 
   return {
+    hydrated: hydrated.get,
     items,
     contact: contact.get,
     step: step.get,

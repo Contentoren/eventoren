@@ -1,4 +1,5 @@
 import type { Accessor, JSX } from "solid-js"
+import { imageList as serviceImageList } from "../app/assets/service/imageList.ts"
 import type { TicketCart } from "../ticketing/TicketCart.ts"
 import { TicketCartSummary } from "../ticketing/TicketCartSummary.tsx"
 import { TicketStickyCta } from "../ticketing/TicketStickyCta.tsx"
@@ -13,6 +14,7 @@ export function EventDetailPageView(props: {
   event: EventItem
   state: {
     cart: Accessor<TicketCart>
+    hydrated?: Accessor<boolean>
     applyCart: (cart: TicketCart) => void
     goToCart: () => void
     goToCheckout: () => void
@@ -20,10 +22,18 @@ export function EventDetailPageView(props: {
   breadcrumb?: JSX.Element
 }) {
   return (
-    <main id="content" tabindex="-1">
+    <main id="content" tabindex="-1" data-hydrated={props.state.hydrated?.() ? "true" : undefined}>
       <EventDetailBanner
-        imageUrl={props.event.imageVariants?.detail ?? props.event.imageUrl}
-        imageAlt={props.event.imageAlt}
+        imageUrl={
+          props.event.id === "pilates-christmas-event-2027-final"
+            ? `/${serviceImageList.pilates_detail.path}`
+            : (props.event.imageVariants?.detail ?? props.event.imageUrl)
+        }
+        imageAlt={
+          props.event.id === "pilates-christmas-event-2027-final"
+            ? (serviceImageList.pilates_detail.metadata.alt ?? props.event.imageAlt)
+            : props.event.imageAlt
+        }
       />
 
       <UiContainer class="flex flex-col gap-space-7 pt-space-3 pb-28 sm:py-space-7 lg:pb-space-7">

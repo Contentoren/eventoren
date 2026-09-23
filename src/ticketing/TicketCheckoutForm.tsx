@@ -13,14 +13,12 @@ export function TicketCheckoutForm(props: {
   items: readonly { readonly event: EventItem; readonly cart: TicketCart }[]
   state: TicketCheckoutFormState
   legalLinks?: { terms: string; privacy: string }
-  paymentDescription?: string
   submitLabel?: string
   relaxedValidation?: boolean
 }) {
   const state = props.state
   const text = ticketCheckoutText
   const legalLinks = props.legalLinks ?? { terms: "/agb", privacy: "/datenschutz" }
-  const paymentDescription = () => props.paymentDescription ?? text().paymentDescription
 
   return (
     <div class="flex flex-col gap-space-6">
@@ -29,6 +27,7 @@ export function TicketCheckoutForm(props: {
           <UiCard>
             <form
               class="flex flex-col gap-space-4"
+              data-hydrated={state.hydrated() ? "true" : "false"}
               aria-labelledby="checkout-contact"
               noValidate
               onSubmit={(event) => {
@@ -148,7 +147,6 @@ export function TicketCheckoutForm(props: {
                   <h2 id="checkout-participants" class="text-lg font-semibold text-content">
                     {text().participantTitle}
                   </h2>
-                  <p class="mt-space-2 text-sm text-content-muted">{text().participantDescription}</p>
                 </div>
                 <div class="grid gap-space-4 sm:grid-cols-2">
                   <Index each={state.participantFields()}>
@@ -163,8 +161,7 @@ export function TicketCheckoutForm(props: {
                       return (
                         <div>
                           <label for={inputId} class="mb-space-2 block text-sm font-medium text-content">
-                            {text().participantName} · {currentField.eventTitle} · {currentField.tierName} ·{" "}
-                            {text().ticket} {currentField.ticketIndex + 1}
+                            {currentField.tierName}
                           </label>
                           <Input
                             id={inputId}
@@ -194,35 +191,17 @@ export function TicketCheckoutForm(props: {
                 </div>
               </section>
 
-              <section
-                class="flex flex-col gap-space-4 border-t border-border-subtle pt-space-4"
-                aria-labelledby="checkout-payment"
-              >
-                <h2 id="checkout-payment" class="text-lg font-semibold text-content">
-                  {text().payment}
-                </h2>
-                <p class="text-sm text-content-muted">{paymentDescription()}</p>
-
-                <dl class="flex flex-col gap-space-3 border-t border-border-subtle pt-space-4">
-                  <div class="flex items-baseline justify-between gap-space-4">
-                    <dt class="text-sm text-content-muted">{text().purchaser}</dt>
-                    <dd class="text-sm font-medium text-content">
-                      {state.contact().firstName} {state.contact().lastName}
-                    </dd>
-                  </div>
-                  <div class="flex items-baseline justify-between gap-space-4">
-                    <dt class="text-base font-semibold text-content">{text().amountDue}</dt>
-                    <dd class="text-base font-semibold text-content">{state.totalLabel()}</dd>
-                  </div>
-                </dl>
-
-                <label for="checkout-legal-acceptance" class="flex items-start gap-space-3 text-sm text-content-muted">
+              <section class="flex flex-col gap-space-4 border-t border-border-subtle pt-space-4">
+                <label
+                  for="checkout-legal-acceptance"
+                  class="flex items-start gap-space-3 rounded-control border border-brand-accent/30 bg-brand-soft p-space-4 text-base font-medium text-content"
+                >
                   <Input
                     id="checkout-legal-acceptance"
                     type="checkbox"
                     checked={state.legalAccepted()}
                     onChange={(event) => state.legalAcceptanceChange(event.currentTarget.checked)}
-                    class="mt-1 size-4 accent-brand"
+                    class="mt-0.5 size-5 shrink-0 accent-brand"
                   />
                   <span>
                     {text().legalBeforeTerms}{" "}

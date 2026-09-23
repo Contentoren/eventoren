@@ -105,7 +105,6 @@ export function DemoCheckout(props: {
                   items={state.items()}
                   state={state}
                   legalLinks={{ terms: "/demo/agb", privacy: "/demo/datenschutz" }}
-                  paymentDescription={demoText("checkoutPaymentDescription")}
                   submitLabel={demoText("checkoutSubmitLabel")}
                   relaxedValidation
                 />
