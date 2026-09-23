@@ -1,10 +1,9 @@
-import { createEffect, onMount } from "solid-js"
+import { createEffect } from "solid-js"
 import { eventorenSsoAttemptRecord } from "#src/auth/model/eventorenSsoAttemptRecord.ts"
 import { eventorenSsoAttemptsReset } from "#src/auth/model/eventorenSsoAttemptsReset.ts"
 import { eventorenSsoPreferenceRead } from "#src/auth/model/eventorenSsoPreferenceRead.ts"
 import { eventorenSsoPreferenceWrite } from "#src/auth/model/eventorenSsoPreferenceWrite.ts"
 import { eventorenSsoReturnToResolve } from "#src/auth/model/eventorenSsoReturnToResolve.ts"
-import { userSessionCallbackConsume } from "#src/auth/ui/userSessionCallbackConsume.ts"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import { eventorenAuthContextUse } from "./eventorenAuthContextUse.ts"
 
@@ -18,16 +17,15 @@ export function eventorenSsoPageStateCreate(inputs: {
   const auth = eventorenAuthContextUse()
 
   const returnTarget = () => eventorenSsoReturnToResolve(inputs.returnTo())
+  const loginDestination = () => `/login/zitadel?returnTo=${encodeURIComponent(returnTarget())}`
 
   const isAuthenticated = () => (inputs.isServerAuthorized?.() ?? false) || (auth.ready() && auth.identity() !== null)
 
   const login = () => {
     pending.set(true)
     errorMessage.set(null)
-    const target = returnTarget()
-    const destination = `/login/zitadel?returnTo=${encodeURIComponent(target)}`
     if (typeof window !== "undefined") {
-      window.location.assign(destination)
+      window.location.assign(loginDestination())
     }
   }
 
@@ -38,16 +36,6 @@ export function eventorenSsoPageStateCreate(inputs: {
       if (typeof window !== "undefined") window.location.assign(returnTarget())
     })
   }
-
-  onMount(() => {
-    const consumeResult = userSessionCallbackConsume(window.location.href)
-    if (consumeResult.success && consumeResult.data.hasUserSession && consumeResult.data.sessionPersisted) {
-      eventorenSsoAttemptsReset()
-      if (typeof window !== "undefined") {
-        window.location.assign(returnTarget())
-      }
-    }
-  })
 
   let hasNavigatedAuthenticated = false
   createEffect(() => {
@@ -110,6 +98,7 @@ export function eventorenSsoPageStateCreate(inputs: {
     errorMessage: errorMessage.get,
     autoSignIn: autoSignIn.get,
     autoSignInToggle,
+    loginDestination,
     loginClick: login,
     retrySession,
     returnTarget,

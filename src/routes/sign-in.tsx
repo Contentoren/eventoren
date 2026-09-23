@@ -1,13 +1,13 @@
-import { createFileRoute } from "@tanstack/solid-router"
-import { SignInPage } from "#src/auth/ui/SignInPage.tsx"
-import { SiteFrame } from "../components/SiteFrame.tsx"
+import { createFileRoute, redirect } from "@tanstack/solid-router"
 import { signInSearchParse } from "./-signInSearchParse.ts"
 
 export const Route = createFileRoute("/sign-in")({
   validateSearch: signInSearchParse,
-  component: () => (
-    <SiteFrame>
-      <SignInPage returnTo={Route.useSearch()().returnTo} />
-    </SiteFrame>
-  ),
+  beforeLoad: ({ search }) => {
+    throw redirect({
+      to: "/sso",
+      ...(search.returnTo ? { search: { returnTo: search.returnTo } } : {}),
+    })
+  },
+  component: () => null,
 })

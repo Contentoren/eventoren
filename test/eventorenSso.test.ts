@@ -1,5 +1,4 @@
 import { describe, expect, it } from "bun:test"
-import { eventorenLocalStorageRead } from "../src/auth/model/eventorenLocalStorageRead.ts"
 import { eventorenSsoAttemptRecord } from "../src/auth/model/eventorenSsoAttemptRecord.ts"
 import { eventorenSsoAttemptsExhaust } from "../src/auth/model/eventorenSsoAttemptsExhaust.ts"
 import { eventorenSsoAttemptsRead } from "../src/auth/model/eventorenSsoAttemptsRead.ts"
@@ -8,6 +7,7 @@ import { eventorenSsoPreferenceRead } from "../src/auth/model/eventorenSsoPrefer
 import { eventorenSsoPreferenceWrite } from "../src/auth/model/eventorenSsoPreferenceWrite.ts"
 import { eventorenSsoReturnToResolve } from "../src/auth/model/eventorenSsoReturnToResolve.ts"
 import { eventorenSsoStorageKeys } from "../src/auth/model/eventorenSsoStorageKeys.ts"
+import { eventorenSsoPageStateCreate } from "../src/auth/ui/eventorenSsoPageStateCreate.ts"
 
 class MemoryStorage implements Storage {
   private items = new Map<string, string>()
@@ -142,6 +142,28 @@ describe("eventoren SSO state and semantics", () => {
     expect(eventorenSsoReturnToResolve("//malicious.example.com")).toBe("/")
     expect(eventorenSsoReturnToResolve("/admin")).toBe("/admin")
     expect(eventorenSsoReturnToResolve("/bestellungen?page=1#details")).toBe("/bestellungen?page=1#details")
+  })
+
+  it("triggers Zitadel navigation with the resolved return destination", () => {
+    const previousWindow = globalThis.window
+    let assignedHref = ""
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { location: { assign: (href: string) => (assignedHref = href) } },
+    })
+
+    try {
+      const state = eventorenSsoPageStateCreate({ returnTo: () => "/admin?tab=members#pending" })
+
+      expect(state.loginDestination()).toBe("/login/zitadel?returnTo=%2Fadmin%3Ftab%3Dmembers%23pending")
+      state.loginClick()
+
+      expect(assignedHref).toBe("/login/zitadel?returnTo=%2Fadmin%3Ftab%3Dmembers%23pending")
+      expect(state.isPending()).toBe(true)
+    } finally {
+      if (previousWindow === undefined) delete (globalThis as { window?: Window }).window
+      else Object.defineProperty(globalThis, "window", { configurable: true, value: previousWindow })
+    }
   })
 
   it("gracefully handles storage failures without throwing", () => {

@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { Checkbox } from "#ui/input/check/Checkbox.tsx"
-import { Button } from "#ui/interactive/button/Button.tsx"
 import { buttonVariant } from "#ui/interactive/button/buttonCva.ts"
+import { LinkButtonExternal } from "#ui/interactive/link/LinkButton.tsx"
 import type { EventorenSsoPageState } from "./EventorenSsoPageState.ts"
 import { eventorenSsoPageStateCreate } from "./eventorenSsoPageStateCreate.ts"
 
@@ -43,15 +43,14 @@ export function EventorenSsoPage(props: {
       </Show>
 
       <div class="flex flex-col gap-space-3">
-        <Button
+        <LinkButtonExternal
           variant={buttonVariant.filledIndigo}
           size="lg"
-          onClick={state.loginClick}
-          disabled={state.isPending()}
+          href={state.loginDestination()}
           class="w-full justify-center"
         >
           {state.isPending() ? "Wird angemeldet …" : "Continue with Zitadel"}
-        </Button>
+        </LinkButtonExternal>
       </div>
 
       <div class="flex items-center justify-center">
