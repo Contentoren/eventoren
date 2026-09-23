@@ -34,11 +34,22 @@ export function AdminShell(props: { readonly children: JSX.Element; readonly are
           mobileChildren={<AdminSidebarContent state={state} />}
         />
         <div class="flex min-w-0 flex-1 flex-col">
-          <header class="sticky top-0 z-20 flex min-h-14 items-center gap-3 border-b border-border bg-surface-base/90 px-4 py-2 backdrop-blur-xl">
-            <SidebarToggle {...state.sidebarState} variant="ghost" />
-            <Icon path={state.activeNavigationItem().icon} class="size-5 shrink-0 text-content-muted" />
-            <h1 class="truncate text-base font-semibold">{state.activeNavigationItem().label}</h1>
-          </header>
+          <Show
+            when={props.area === "organizer"}
+            fallback={
+              <SidebarToggle
+                {...state.sidebarState}
+                variant="outline"
+                class="fixed bottom-4 right-4 z-20 bg-surface-base shadow-md"
+              />
+            }
+          >
+            <header class="sticky top-0 z-20 flex min-h-14 items-center gap-3 border-b border-border bg-surface-base/90 px-4 py-2 backdrop-blur-xl">
+              <SidebarToggle {...state.sidebarState} variant="ghost" />
+              <Icon path={state.activeNavigationItem().icon} class="size-5 shrink-0 text-content-muted" />
+              <h1 class="truncate text-base font-semibold">{state.activeNavigationItem().label}</h1>
+            </header>
+          </Show>
           <div class="min-w-0 flex-1">{props.children}</div>
         </div>
       </div>

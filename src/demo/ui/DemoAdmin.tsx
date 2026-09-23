@@ -20,6 +20,8 @@ export function DemoAdmin(props: {
         description="Änderungen werden sofort in der lokalen Fixture-Liste übernommen. Es werden keine Sitzungen, Mutationen oder Serverdaten verwendet."
         headerSlot={<DemoAdminNav />}
         eventViewHref={(eventKey) => `/demo/customer/events/${eventKey}`}
+        newEventHref="/demo/admin/events/new"
+        isNewEventPage={props.newEvent}
       />
     </DemoScenarioFrame>
   )

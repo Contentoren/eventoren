@@ -10,7 +10,7 @@ import type { adminEventNewRouteStateCreate } from "./adminEventNewRouteStateCre
 export function AdminEventNewPage(props: { state: ReturnType<typeof adminEventNewRouteStateCreate> }) {
   return (
     <main id="content" tabindex="-1">
-      <UiContainer width="wide" class="flex max-w-4xl flex-col gap-6 py-8">
+      <UiContainer width="wide" class="flex max-w-none flex-col gap-6 px-[18px]! py-8">
         <AdminEventDetailHeader
           event={props.state.catalog.selectedEvent()}
           isNew={!props.state.catalog.selectedEventKey()}

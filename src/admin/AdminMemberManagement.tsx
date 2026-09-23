@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js"
+import { Dynamic } from "solid-js/web"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
 import { Checkbox } from "#ui/input/check/Checkbox.jsx"
@@ -28,10 +29,6 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
           </For>
         </div>
       </div>
-      <div>
-        <p class="text-xs font-semibold uppercase tracking-wide text-content-muted">{state.text().invitation}</p>
-        <p class="mt-2 text-sm text-content">{state.invitationFormat(member.organizerInvitedAt)}</p>
-      </div>
       <Button
         class="w-full lg:w-auto"
         variant={member.organizerGranted ? "outline" : undefined}
@@ -50,7 +47,7 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
 
   return (
     <section aria-labelledby="admin-member-management-title" class="flex flex-col gap-5">
-      <CardWrapper>
+      <Dynamic component={viewPreference?.view() === "tiles" ? CardWrapper : "div"}>
         <div class="flex flex-col gap-5">
           <div>
             <h2 id="admin-member-management-title" class="text-xl font-semibold text-content">
@@ -139,7 +136,7 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
               <ul
                 class={
                   viewPreference?.view() === "tiles"
-                    ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+                    ? "grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
                     : "flex flex-col divide-y divide-border"
                 }
                 aria-label={state.text().title}
@@ -150,12 +147,12 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
                       <Show
                         when={viewPreference?.view() === "tiles"}
                         fallback={
-                          <div class="grid gap-4 py-4 sm:py-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(10rem,0.8fr)_minmax(11rem,0.8fr)_auto] lg:items-center">
+                          <div class="grid gap-4 py-4 sm:py-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(10rem,0.8fr)_auto] lg:items-center">
                             {memberDetails(member)}
                           </div>
                         }
                       >
-                        <CardWrapper class="flex h-full flex-col justify-between gap-5">
+                        <CardWrapper class="flex h-full flex-col justify-between gap-5 border-2 border-border-strong bg-surface shadow-sm">
                           {memberDetails(member)}
                         </CardWrapper>
                       </Show>
@@ -166,7 +163,7 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
             </Show>
           </Show>
         </div>
-      </CardWrapper>
+      </Dynamic>
     </section>
   )
 }
