@@ -38,9 +38,9 @@ export default {
   async fetch(request, env) {
     runtimeEnvironmentApply(env)
     const requestUrl = new URL(request.url)
-    if (requestUrl.hostname === "www.eventoren.contentoren.de") {
+    if (requestUrl.hostname === "www.eventoren.de") {
       requestUrl.protocol = "https:"
-      requestUrl.hostname = "eventoren.contentoren.de"
+      requestUrl.hostname = "eventoren.de"
       requestUrl.port = ""
       return new Response(null, { status: 301, headers: { location: requestUrl.toString() } })
     }

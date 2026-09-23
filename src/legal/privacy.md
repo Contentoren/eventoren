@@ -74,7 +74,7 @@ Für die Erstellung und Abwicklung einer Zahlung übermittelt die Anwendung Best
 
 ## 6. Eingesetzte Dienste und nicht belegte Analysewerkzeuge
 
-Das Repository belegt den Betrieb der Webanwendung, eines Convex-Backends, des konfigurierten OpenID-Connect-Dienstes und des Billing-Dienstes. Das Frontend wird mit Cloudflare Pages ausgeliefert; als öffentliche Backend- und Authentifizierungsadressen sind unter anderem `eventoren-convex.contentoren.de`, `eventoren-api.contentoren.de` und `auth.contentoren.de` konfiguriert.
+Das Repository belegt den Betrieb der Webanwendung, eines Convex-Backends, des konfigurierten OpenID-Connect-Dienstes und des Billing-Dienstes. Das Frontend wird mit Cloudflare Pages ausgeliefert; als öffentliche Backend- und Authentifizierungsadressen sind unter anderem `convex.eventoren.de`, `api.eventoren.de` und `auth.contentoren.de` konfiguriert.
 
 Die konkrete Betreiber- und Auftragsverarbeiterstruktur, die Serverstandorte, die Auftragsverarbeitungsverträge und die Drittlandübermittlungen dieser Dienste sind im Repository nicht vollständig angegeben. Sie dürfen daher nicht als abschließend geklärt vorausgesetzt werden.
 

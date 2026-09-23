@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 REDIRECTS_FILE="$REPO_DIR/src/www-redirect/_redirects"
-EXPECTED_RULE='https://www.eventoren.contentoren.de/* https://eventoren.contentoren.de/:splat 301'
+EXPECTED_RULE='https://www.eventoren.de/* https://eventoren.de/:splat 301'
 
 regular_file_require() {
   local path="$1"
@@ -23,8 +23,8 @@ if ! command -v curl >/dev/null 2>&1; then
   exit 1
 fi
 
-CHECK_URL="${WWW_REDIRECT_CHECK_URL:-https://www.eventoren.contentoren.de/some/path?param=1}"
-EXPECTED_LOCATION="${WWW_REDIRECT_EXPECTED_LOCATION:-https://eventoren.contentoren.de/some/path?param=1}"
+CHECK_URL="${WWW_REDIRECT_CHECK_URL:-https://www.eventoren.de/some/path?param=1}"
+EXPECTED_LOCATION="${WWW_REDIRECT_EXPECTED_LOCATION:-https://eventoren.de/some/path?param=1}"
 STATUS="$(curl --silent --show-error --head --output /dev/null --write-out '%{http_code}' "$CHECK_URL")"
 LOCATION="$(curl --silent --show-error --head --output /dev/null --write-out '%{redirect_url}' "$CHECK_URL")"
 if [[ "$STATUS" != "301" || "$LOCATION" != "$EXPECTED_LOCATION" ]]; then
@@ -70,4 +70,4 @@ for (const [name, command] of Object.entries(scripts)) {
 }
 '
 
-echo "Verified the eventoren-www-redirect redirect artifact and live eventoren.contentoren.de redirect."
+echo "Verified the eventoren-www-redirect redirect artifact and live eventoren.de redirect."

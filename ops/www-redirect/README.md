@@ -1,8 +1,8 @@
 # WWW redirect
 
-The normal Cloudflare Pages deployment adds `www.eventoren.contentoren.de` as a custom-domain alias of the
+The normal Cloudflare Pages deployment adds `www.eventoren.de` as a custom-domain alias of the
 `eventoren` Pages project and provisions its proxied CNAME to `eventoren.pages.dev`.
-The Pages alias provides TLS coverage. SSR output redirects only the exact `www.eventoren.contentoren.de` hostname in
+The Pages alias provides TLS coverage. SSR output redirects only the exact `www.eventoren.de` hostname in
 the generated worker with HTTP 301 while preserving path and query; the standalone Pages artifact uses
 the equivalent hostname-scoped `_redirects` rule for SSG deployments.
 

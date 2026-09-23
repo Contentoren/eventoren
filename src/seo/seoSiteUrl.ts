@@ -1,1 +1,1 @@
-export const seoSiteUrl = "https://eventoren.leonardomora.de"
+export const seoSiteUrl = "https://eventoren.de"

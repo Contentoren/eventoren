@@ -4,7 +4,7 @@ import { isPublishedAtBuild } from "../app/content/contentList.js"
 import { getAbsoluteContentImageUrl } from "../app/content/contentImages.js"
 type Meta = JSX.MetaHTMLAttributes<HTMLMetaElement>
 
-const siteUrl = "https://eventoren.contentoren.de"
+const siteUrl = "https://eventoren.de"
 const siteName = "eventoren"
 const siteDescription = "A public Solid website built with Adaptive DS."
 const ogImage = siteUrl + "/logo.svg"

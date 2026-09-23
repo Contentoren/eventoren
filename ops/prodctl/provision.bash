@@ -19,15 +19,15 @@ fi
 
 if ! prodctl status "$APP" >/dev/null 2>&1; then
   prodctl create "$APP" --type quadlet --mem "${PRODCTL_MEMORY:-4G}" --cpu "${PRODCTL_CPU:-200%}" \
-  --route convex:eventoren-convex.contentoren.de \
-  --route api:eventoren-api.contentoren.de
+  --route convex:convex.eventoren.de \
+  --route api:api.eventoren.de
 fi
 
 status_json="$(prodctl status "$APP" --json)"
 reconcile_prodctl_routes() {
   local status_json="$1"
   local route_operations
-  route_operations="$(python3 - "$status_json" "eventoren-convex.contentoren.de" "eventoren-api.contentoren.de" <<'PY'
+  route_operations="$(python3 - "$status_json" "convex.eventoren.de" "api.eventoren.de" <<'PY'
 import json
 import sys
 
@@ -87,7 +87,7 @@ PY
   done <<<"$route_operations"
 
   status_json="$(prodctl status "$APP" --json)"
-  python3 - "$status_json" "eventoren-convex.contentoren.de" "eventoren-api.contentoren.de" <<'PY'
+  python3 - "$status_json" "convex.eventoren.de" "api.eventoren.de" <<'PY'
 import json
 import sys
 
@@ -142,7 +142,7 @@ if [[ -z "$admin_key" || "$admin_key" == *$'
   exit 1
 fi
 
-python3 - "$ENV_FILE" "https://eventoren.contentoren.de" "https://eventoren-convex.contentoren.de" "https://eventoren-api.contentoren.de" \
+python3 - "$ENV_FILE" "https://eventoren.de" "https://convex.eventoren.de" "https://api.eventoren.de" \
   3<<<"$admin_key" <<'PY'
 import os
 import re
@@ -335,7 +335,7 @@ registry_project_edit() {
   done
 }
 
-registry_project_edit convex "$convex_port" "eventoren-convex.contentoren.de"
-registry_project_edit api "$api_port" "eventoren-api.contentoren.de"
+registry_project_edit convex "$convex_port" "convex.eventoren.de"
+registry_project_edit api "$api_port" "api.eventoren.de"
 
 echo "Production Convex infrastructure is ready; .env.production is configured"

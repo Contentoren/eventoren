@@ -22,9 +22,9 @@ fi
 
 umask 077
 cat >"$env_file" <<EOF
-CONVEX_CLOUD_ORIGIN=https://eventoren-convex.contentoren.de
-CONVEX_SITE_ORIGIN=https://eventoren-api.contentoren.de
-NEXT_PUBLIC_DEPLOYMENT_URL=https://eventoren-convex.contentoren.de
+CONVEX_CLOUD_ORIGIN=https://convex.eventoren.de
+CONVEX_SITE_ORIGIN=https://api.eventoren.de
+NEXT_PUBLIC_DEPLOYMENT_URL=https://convex.eventoren.de
 INSTANCE_NAME=production
 INSTANCE_SECRET=$instance_secret
 DISABLE_BEACON=true

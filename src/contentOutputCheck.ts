@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { allContent, isPublishedAtBuild } from "./app/content/contentList.js"
 
 const distClient = join(process.cwd(), "dist", "client")
-const siteUrl = "https://eventoren.contentoren.de"
+const siteUrl = "https://eventoren.de"
 const buildDate = new Date().toISOString().slice(0, 10)
 const failures: string[] = []
 const sitemap = await readOutput("sitemap.xml")
