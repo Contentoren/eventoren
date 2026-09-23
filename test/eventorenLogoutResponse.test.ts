@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test"
 import { eventorenLogoutResponse } from "../src/auth/server/eventorenLogoutResponse.ts"
 
-test("revokes the cookie session and clears auth state without accepting a browser token", async () => {
+test("revokes the cookie session, ignores a legacy body token, and clears auth state", async () => {
   const previousConvexUrl = process.env.VITE_CONVEX_URL
   const previousAuthSecret = process.env.AUTH_SECRET
   const previousFetch = globalThis.fetch
@@ -24,12 +24,13 @@ test("revokes the cookie session and clears auth state without accepting a brows
       new Request("https://eventoren.example.test/logout", {
         method: "POST",
         headers: { cookie: "eventoren-session=cookie-token", "content-type": "application/json" },
-        body: JSON.stringify({}),
+        body: JSON.stringify({ token: "browser-token" }),
       }),
     )
 
     expect(response.status).toBe(303)
     expect(response.headers.get("location")).toBe("/")
+    expect(response.headers.get("set-cookie")).toContain("eventoren-session=;")
     expect(response.headers.get("set-cookie")).toContain("eventoren-logout=1")
     expect(requests).toEqual([{ token: "cookie-token" }])
   } finally {
