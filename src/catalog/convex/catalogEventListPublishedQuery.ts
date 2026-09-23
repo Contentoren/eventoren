@@ -16,7 +16,7 @@ export const catalogEventListPublishedQuery = query({
       events.map(async (event) => {
         const tiers = await ctx.db
           .query("catalogTicketTiers")
-          .withIndex("eventId", (q) => q.eq("eventId", event._id))
+          .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", event._id).eq("archivedAt", undefined))
           .collect()
         return catalogEventToEventItem(event, tiers, syncState?.syncedVersion)
       }),

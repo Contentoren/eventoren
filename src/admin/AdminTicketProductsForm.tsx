@@ -8,8 +8,11 @@ import { eventPriceFormat } from "../events/eventPriceFormat.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import { adminTicketProductsFormStateCreate } from "./adminTicketProductsFormStateCreate.ts"
 
-export function AdminTicketProductsForm(props: { state: AdminCatalogPageState }) {
-  const state = adminTicketProductsFormStateCreate(props.state)
+export function AdminTicketProductsForm(props: {
+  state: AdminCatalogPageState
+  formState?: ReturnType<typeof adminTicketProductsFormStateCreate>
+}) {
+  const state = props.formState ?? adminTicketProductsFormStateCreate(props.state)
 
   return (
     <div class="grid items-start gap-5 lg:grid-cols-[minmax(15rem,0.8fr)_minmax(0,1.4fr)]">
@@ -28,18 +31,20 @@ export function AdminTicketProductsForm(props: { state: AdminCatalogPageState })
             <For each={props.state.selectedEvent()?.tiers ?? []}>
               {(tier) => (
                 <li>
-                  <button
+                  <Button
                     type="button"
-                    class={`w-full rounded-lg border p-3 text-left transition-colors ${props.state.tierDraft().tierKey === tier.id ? "border-brand bg-brand/10" : "border-border bg-surface hover:bg-surface-muted"}`}
+                    variant="none"
+                    size="none"
+                    class={`flex w-full flex-col items-stretch justify-start rounded-lg border p-3 text-left font-normal transition-colors ${props.state.tierDraft().tierKey === tier.id ? "border-brand bg-brand/10" : "border-border bg-surface hover:bg-surface-muted"}`}
                     aria-pressed={props.state.tierDraft().tierKey === tier.id}
                     onClick={() => state.selectTier(tier)}
                   >
                     <span class="block font-semibold text-content">{tier.name}</span>
                     <span class="mt-1 block text-sm text-content-muted">{eventPriceFormat(tier.priceCents)}</span>
                     <span class="mt-1 block text-xs text-content-muted">
-                      {tier.available} verfügbar · {tier.capacity} gesamt
+                      {tier.sold ?? 0} verkauft · {tier.available} verfügbar · {tier.capacity} gesamt
                     </span>
-                  </button>
+                  </Button>
                 </li>
               )}
             </For>
@@ -105,14 +110,7 @@ export function AdminTicketProductsForm(props: { state: AdminCatalogPageState })
 
           <details class="rounded-lg border border-border bg-surface-muted p-4 text-content">
             <summary class="cursor-pointer font-semibold">Erweitert</summary>
-            <div class="mt-4 grid gap-4 sm:grid-cols-2">
-              <Field
-                id="admin-tier-key"
-                label="Technischer Produkt-Key"
-                required
-                value={props.state.tierDraft().tierKey}
-                onInput={(value) => props.state.tierFieldChange("tierKey", value)}
-              />
+            <div class="mt-4">
               <Field
                 id="admin-tier-sort"
                 label="Sortierung"
@@ -135,7 +133,9 @@ export function AdminTicketProductsForm(props: { state: AdminCatalogPageState })
               <Button type="submit" disabled={props.state.isSaving()}>
                 {props.state.isSaving() ? "Speichert …" : "Ticketprodukt speichern"}
               </Button>
-              <Show when={props.state.tierDraft().tierKey}>
+              <Show
+                when={props.state.selectedEvent()?.tiers.some((tier) => tier.id === props.state.tierDraft().tierKey)}
+              >
                 <Button
                   type="button"
                   variant="outline"

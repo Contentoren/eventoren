@@ -52,12 +52,18 @@ export const catalogEventListAdminPageQuery = query({
       for (const event of eventPage.page) {
         const tiers = await authorizedCtx.db
           .query("catalogTicketTiers")
-          .withIndex("eventId", (q) => q.eq("eventId", event._id))
+          .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", event._id).eq("archivedAt", undefined))
           .take(maxTicketTiersPerEvent + 1)
         if (tiers.length > maxTicketTiersPerEvent) {
           return createResultError(op, `An event cannot expose more than ${maxTicketTiersPerEvent} ticket tiers`)
         }
-        page.push({ ...catalogEventToEventItem(event, tiers, syncState?.syncedVersion), status: event.status })
+        const item = catalogEventToEventItem(event, tiers, syncState?.syncedVersion)
+        const soldByTierKey = new Map(tiers.map((tier) => [tier.tierKey, tier.sold]))
+        page.push({
+          ...item,
+          tiers: item.tiers.map((tier) => ({ ...tier, sold: soldByTierKey.get(tier.id) ?? 0 })),
+          status: event.status,
+        })
       }
 
       return createResult({

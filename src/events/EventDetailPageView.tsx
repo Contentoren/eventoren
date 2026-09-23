@@ -21,7 +21,10 @@ export function EventDetailPageView(props: {
 }) {
   return (
     <main id="content" tabindex="-1">
-      <EventDetailBanner imageUrl={props.event.imageUrl} imageAlt={props.event.imageAlt} />
+      <EventDetailBanner
+        imageUrl={props.event.imageVariants?.detail ?? props.event.imageUrl}
+        imageAlt={props.event.imageAlt}
+      />
 
       <UiContainer class="flex flex-col gap-space-7 pt-space-3 pb-28 sm:py-space-7 lg:pb-space-7">
         {props.breadcrumb}

@@ -20,6 +20,9 @@ const catalogEventArgsValidator = v.object({
   address: v.string(),
   organizer: v.string(),
   imageUrl: v.string(),
+  imageVariants: v.optional(
+    v.object({ assetId: v.string(), detail: v.string(), card: v.string(), organizer: v.string() }),
+  ),
   imageAlt: v.string(),
   tags: v.array(v.string()),
   status: v.optional(v.union(v.literal("draft"), v.literal("published"), v.literal("archived"))),
@@ -44,13 +47,20 @@ async function catalogEventUpsertAuthorizedFn(
     .query("catalogEvents")
     .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
     .unique()
+  // An explicit manual URL change invalidates the previous uploaded image references.
+  const imageVariants =
+    args.imageVariants && args.imageUrl === args.imageVariants.detail
+      ? args.imageVariants
+      : args.imageUrl === existing?.imageUrl
+        ? existing.imageVariants
+        : undefined
   const status = args.status ?? existing?.status ?? "draft"
 
   if (status === "published") {
     const tier = existing
       ? await ctx.db
           .query("catalogTicketTiers")
-          .withIndex("eventId", (q) => q.eq("eventId", existing._id))
+          .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", existing._id).eq("archivedAt", undefined))
           .first()
       : null
     if (!tier) return createResultError("catalogEventUpsertMutation", "Published events need a ticket tier")
@@ -74,6 +84,7 @@ async function catalogEventUpsertAuthorizedFn(
     address: args.address,
     organizer: args.organizer,
     imageUrl: args.imageUrl,
+    imageVariants,
     imageAlt: args.imageAlt,
     tags: args.tags,
     status,

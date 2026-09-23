@@ -13,7 +13,7 @@ export const catalogEventGetPublishedQuery = query({
 
     const tiers = await ctx.db
       .query("catalogTicketTiers")
-      .withIndex("eventId", (q) => q.eq("eventId", event._id))
+      .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", event._id).eq("archivedAt", undefined))
       .collect()
     const syncState = await ctx.db
       .query("catalogSyncStates")

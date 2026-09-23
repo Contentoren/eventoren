@@ -1,5 +1,6 @@
 import type { EventCategory } from "./EventCategory.ts"
 import type { EventTicketTier } from "./EventTicketTier.ts"
+import type { EventImageVariants } from "./EventImageVariants.ts"
 
 export type EventItem = {
   id: string
@@ -16,6 +17,7 @@ export type EventItem = {
   address: string
   organizer: string
   imageUrl: string
+  imageVariants?: EventImageVariants
   imageAlt: string
   tags: readonly string[]
   soldOut: boolean

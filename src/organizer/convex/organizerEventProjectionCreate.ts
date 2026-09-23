@@ -7,6 +7,7 @@ export function organizerEventProjectionCreate(event: Doc<"catalogEvents">): Org
     eventKey: event.eventKey,
     title: event.title,
     imageUrl: event.imageUrl,
+    imageVariants: event.imageVariants,
     imageAlt: event.imageAlt,
     startsAt: event.startsAt,
     endsAt: event.endsAt,

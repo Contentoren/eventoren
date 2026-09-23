@@ -19,6 +19,14 @@ export const catalogTables = {
     address: v.string(),
     organizer: v.string(),
     imageUrl: v.string(),
+    imageVariants: v.optional(
+      v.object({
+        assetId: v.string(),
+        detail: v.string(),
+        card: v.string(),
+        organizer: v.string(),
+      }),
+    ),
     imageAlt: v.string(),
     tags: v.array(v.string()),
     status: catalogEventStatusValidator,
@@ -30,6 +38,16 @@ export const catalogTables = {
     .index("startsAt", ["startsAt"])
     .index("statusAndStartsAt", ["status", "startsAt"]),
 
+  catalogImageStages: defineTable({
+    ownerId: vIdUser,
+    filename: v.string(),
+    mediaType: v.string(),
+    byteSize: v.number(),
+    storageId: v.optional(v.id("_storage")),
+    status: v.union(v.literal("pending"), v.literal("registered"), v.literal("processing")),
+    expiresAt: v.number(),
+  }).index("storageId", ["storageId"]),
+
   catalogTicketTiers: defineTable({
     eventId: v.id("catalogEvents"),
     tierKey: v.string(),
@@ -40,12 +58,14 @@ export const catalogTables = {
     capacity: v.number(),
     reserved: v.number(),
     sold: v.number(),
+    archivedAt: v.optional(v.string()),
     sortOrder: v.number(),
     catalogVersion: v.number(),
     createdAt: v.string(),
     updatedAt: v.string(),
   })
     .index("eventId", ["eventId"])
+    .index("eventIdAndArchivedAt", ["eventId", "archivedAt", "tierKey"])
     .index("eventIdAndTierKey", ["eventId", "tierKey"]),
 
   catalogHiddenCategories: defineTable({

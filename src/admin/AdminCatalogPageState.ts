@@ -1,6 +1,8 @@
 import type { Accessor } from "solid-js"
 import type { EventItem } from "../events/EventItem.ts"
 import type { EventTicketTier } from "../events/EventTicketTier.ts"
+import type { EventImageVariants } from "../events/EventImageVariants.ts"
+import type { Result } from "../ui/Result.ts"
 import type { AdminEventDraft } from "./AdminEventDraft.ts"
 import type { AdminTierDraft } from "./AdminTierDraft.ts"
 
@@ -10,6 +12,7 @@ export type AdminCatalogPageState = {
   selectedEvent: Accessor<EventItem | undefined>
   selectedEventKey: Accessor<string>
   eventDraft: Accessor<AdminEventDraft>
+  eventDraftRevision?: Accessor<number>
   tierDraft: Accessor<AdminTierDraft>
   isAuthorized: Accessor<boolean>
   isLoading?: Accessor<boolean>
@@ -24,6 +27,8 @@ export type AdminCatalogPageState = {
   saveEvent: () => Promise<string | undefined>
   saveTier: () => Promise<void>
   deleteTier: () => Promise<void>
+  refreshEvents?: () => Promise<void>
   publishEvent: () => Promise<void>
   hideCategory: (category: string) => Promise<void>
+  imageUpload?: (file: File) => Promise<Result<EventImageVariants>>
 }

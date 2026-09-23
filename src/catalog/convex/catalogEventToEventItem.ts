@@ -6,7 +6,7 @@ export function catalogEventToEventItem(
   tiers: readonly Doc<"catalogTicketTiers">[],
   syncedCatalogVersion?: number,
 ): EventItem {
-  const sortedTiers = [...tiers].sort((a, b) => a.sortOrder - b.sortOrder)
+  const sortedTiers = tiers.filter((tier) => !tier.archivedAt).sort((a, b) => a.sortOrder - b.sortOrder)
   const eventTiers = sortedTiers.map((tier) => ({
     id: tier.tierKey,
     name: tier.name,
@@ -33,6 +33,7 @@ export function catalogEventToEventItem(
     address: event.address,
     organizer: event.organizer,
     imageUrl: event.imageUrl,
+    imageVariants: event.imageVariants,
     imageAlt: event.imageAlt,
     tags: event.tags,
     soldOut: eventTiers.length > 0 && eventTiers.every((tier) => tier.available === 0),

@@ -39,14 +39,18 @@ async function catalogTicketTierDeleteAuthorizedFn(
     .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", args.tierKey))
     .unique()
   if (!tier) return createResultError(op, "Ticket tier not found")
-  if (tier.reserved + tier.sold > 0)
-    return createResultError(op, "Ticket tiers with reserved or sold inventory cannot be deleted")
+  if (tier.archivedAt) return createResultError(op, "Ticket tier not found")
+  if (tier.reserved > 0) return createResultError(op, "Ticket tiers with active reservations cannot be deleted")
 
   const now = new Date().toISOString()
   const versionResult = await catalogSyncAdvanceFn(ctx, args.userId, now)
   if (!versionResult.success) return versionResult
   const catalogVersion = versionResult.data
-  await ctx.db.delete(tier._id)
+  if (tier.sold > 0) {
+    await ctx.db.patch("catalogTicketTiers", tier._id, { archivedAt: now, catalogVersion, updatedAt: now })
+  } else {
+    await ctx.db.delete(tier._id)
+  }
   await ctx.db.patch("catalogEvents", event._id, { catalogVersion, updatedAt: now })
 
   return createResult({ tierKey: args.tierKey, catalogVersion })

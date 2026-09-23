@@ -184,7 +184,7 @@ test("admin writes are versioned and published reads match EventItem", async () 
   expect(syncState).toMatchObject([{ version: published.data.catalogVersion, status: "pending", attempts: 0 }])
 })
 
-test("admins can delete unused ticket tiers but not tiers with inventory", async () => {
+test("admins delete unused tiers and hide sold tiers while retaining historical inventory", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const token = await tokenFor(adminId)
@@ -199,16 +199,53 @@ test("admins can delete unused ticket tiers but not tiers with inventory", async
     tierKey: "unused",
     token,
   })
-  const rejected = await t.mutation(api.catalog.catalogTicketTierDeleteMutation, {
+  const archived = await t.mutation(api.catalog.catalogTicketTierDeleteMutation, {
     eventKey: "catalog-event",
     tierKey: "sold",
     token,
   })
   const tiers = await t.run(async (ctx) => ctx.db.query("catalogTicketTiers").collect())
+  const published = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "catalog-event" })
+  const admin = await t.query(api.catalog.catalogEventListAdminPageQuery, {
+    token,
+    paginationOpts: { numItems: 10, cursor: null },
+  })
 
   expect(deleted.success).toBe(true)
-  expect(rejected.success).toBe(false)
+  expect(archived.success).toBe(true)
   expect(tiers.map((tier) => tier.tierKey)).toEqual(["sold"])
+  expect(tiers[0]?.sold).toBe(1)
+  expect(tiers[0]?.archivedAt).toBeDefined()
+  expect(published?.tiers).toEqual([])
+  expect(admin.success && admin.data.page[0]?.tiers).toEqual([])
+  const reuse = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    eventKey: "catalog-event",
+    tierKey: "sold",
+    name: "Reused",
+    description: "",
+    priceCents: 2500,
+    feeCents: 0,
+    capacity: 10,
+    token,
+  })
+  expect(reuse.success).toBe(false)
+})
+
+test("ticket products with active reservations cannot be deleted", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const token = await tokenFor(adminId)
+  const eventId = await t.run(async (ctx) => ctx.db.insert("catalogEvents", catalogEventInsert()))
+  await t.run(async (ctx) => ctx.db.insert("catalogTicketTiers", catalogTierInsert(eventId, { reserved: 1 })))
+
+  const result = await t.mutation(api.catalog.catalogTicketTierDeleteMutation, {
+    eventKey: "catalog-event",
+    tierKey: "standard",
+    token,
+  })
+
+  expect(result.success).toBe(false)
+  expect(await t.run(async (ctx) => ctx.db.query("catalogTicketTiers").first())).toMatchObject({ reserved: 1 })
 })
 
 test("published events use the latest Billing-synced catalog version for checkout", async () => {

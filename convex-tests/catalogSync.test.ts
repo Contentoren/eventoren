@@ -142,6 +142,20 @@ test("builds a stable indexed snapshot in bounded batches and pages", async () =
   expect(chunks.map((chunk) => chunk.chunkIndex)).toEqual(Array.from({ length: 33 }, (_, index) => index))
 })
 
+test("archived ticket products are excluded from the Billing catalog snapshot", async () => {
+  const t = convexTest(schema, modules)
+  await seedCatalog(t, 1)
+  await t.run(async (ctx) => {
+    const tier = await ctx.db.query("catalogTicketTiers").first()
+    if (!tier) throw new Error("tier missing")
+    await ctx.db.patch("catalogTicketTiers", tier._id, { archivedAt: "2026-09-15T00:01:00.000Z", sold: 1 })
+  })
+
+  await buildUntilReady(t, 1)
+
+  expect((await readSnapshotEvents(t, 1))[0]?.tiers).toEqual([])
+})
+
 test("retries reuse immutable version chunks and requestedVersion selects that version", async () => {
   const t = convexTest(schema, modules)
   await seedCatalog(t, 1)

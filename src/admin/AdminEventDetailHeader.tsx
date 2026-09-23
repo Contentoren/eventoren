@@ -11,8 +11,7 @@ export function AdminEventDetailHeader(props: { event?: EventItem; isNew?: boole
       </Link>
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Eventverwaltung</p>
-          <h1 class="mt-1 text-2xl font-semibold tracking-tight text-content sm:text-3xl">
+          <h1 class="text-2xl font-semibold tracking-tight text-content sm:text-3xl">
             {props.isNew ? "Neues Event" : (props.event?.title ?? "Event")}
           </h1>
         </div>

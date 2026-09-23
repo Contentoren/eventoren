@@ -96,9 +96,49 @@ test("authorized admin event loading includes every status and ticket data neede
       feeCents: 250,
       capacity: 10,
       available: 5,
+      sold: 3,
       sortOrder: 0,
     },
   ])
+})
+
+test("admin ticket sales count updates when sold inventory changes", async () => {
+  const t = convexTest(schema, modules)
+  const token = await userTokenCreate(t, "admin")
+  await t.run(async (ctx) => {
+    const eventId = await ctx.db.insert("catalogEvents", catalogEventInsert("draft"))
+    await ctx.db.insert("catalogTicketTiers", {
+      eventId,
+      tierKey: "standard",
+      name: "Standard",
+      description: "",
+      priceCents: 2500,
+      feeCents: 0,
+      capacity: 10,
+      reserved: 0,
+      sold: 1,
+      sortOrder: 0,
+      catalogVersion: 1,
+      createdAt: "2026-09-01T00:00:00.000Z",
+      updatedAt: "2026-09-01T00:00:00.000Z",
+    })
+  })
+  const list = () =>
+    t.query(api.catalog.catalogEventListAdminPageQuery, {
+      token,
+      paginationOpts: { numItems: 10, cursor: null },
+    })
+  const before = await list()
+  expect(before.success && before.data.page[0]?.tiers[0]?.sold).toBe(1)
+
+  await t.run(async (ctx) => {
+    const tier = await ctx.db.query("catalogTicketTiers").first()
+    if (!tier) throw new Error("ticket product missing")
+    await ctx.db.patch("catalogTicketTiers", tier._id, { sold: 2 })
+  })
+
+  const after = await list()
+  expect(after.success && after.data.page[0]?.tiers[0]?.sold).toBe(2)
 })
 
 test("admin event loading rejects missing tokens and non-admin users", async () => {

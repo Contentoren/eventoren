@@ -1,4 +1,5 @@
 import type { EventCategory } from "../../events/EventCategory.ts"
+import type { EventImageVariants } from "../../events/EventImageVariants.ts"
 
 export type CatalogEventUpsertInput = {
   readonly eventKey: string
@@ -14,6 +15,7 @@ export type CatalogEventUpsertInput = {
   readonly address: string
   readonly organizer: string
   readonly imageUrl: string
+  readonly imageVariants?: EventImageVariants
   readonly imageAlt: string
   readonly tags: string[]
   readonly status?: "draft" | "published" | "archived"

@@ -1,3 +1,4 @@
+import { onCleanup, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { EventTicketTier } from "../events/EventTicketTier.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
@@ -5,8 +6,12 @@ import { adminEuroFromCents } from "./adminEuroFromCents.ts"
 import { adminEuroToCents } from "./adminEuroToCents.ts"
 
 export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageState) {
-  const priceEuro = createSignalObject("")
-  const feeEuro = createSignalObject("")
+  const priceEuro = createSignalObject(
+    catalog.tierDraft().priceCents ? adminEuroFromCents(Number(catalog.tierDraft().priceCents)) : "",
+  )
+  const feeEuro = createSignalObject(
+    catalog.tierDraft().feeCents ? adminEuroFromCents(Number(catalog.tierDraft().feeCents)) : "",
+  )
   const validationMessage = createSignalObject("")
 
   const selectTier = (tier: EventTicketTier) => {
@@ -32,6 +37,14 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
     feeEuro.set("")
     validationMessage.set("")
   }
+
+  onMount(() => {
+    if (!catalog.tierDraft().tierKey) newTier()
+    const refreshInterval = setInterval(() => {
+      void catalog.refreshEvents?.()
+    }, 30_000)
+    onCleanup(() => clearInterval(refreshInterval))
+  })
 
   const submit = async (event: SubmitEvent) => {
     event.preventDefault()

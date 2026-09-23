@@ -53,6 +53,7 @@ async function catalogTicketTierUpsertAuthorizedFn(
     .query("catalogTicketTiers")
     .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", args.tierKey))
     .unique()
+  if (existing?.archivedAt) return createResultError(op, "An archived ticket tier key cannot be reused")
   const reserved = existing?.reserved ?? 0
   const sold = existing?.sold ?? 0
   if (args.capacity < reserved + sold) {

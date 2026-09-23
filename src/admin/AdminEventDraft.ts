@@ -1,4 +1,5 @@
 import type { EventCategory } from "../events/EventCategory.ts"
+import type { EventImageVariants } from "../events/EventImageVariants.ts"
 
 export type AdminEventDraft = {
   eventKey: string
@@ -14,6 +15,7 @@ export type AdminEventDraft = {
   address: string
   organizer: string
   imageUrl: string
+  imageVariants?: EventImageVariants
   imageAlt: string
   tags: string
   status: "draft" | "published" | "archived"

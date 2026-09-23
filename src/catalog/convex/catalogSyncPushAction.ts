@@ -100,7 +100,10 @@ export const catalogSyncPushAction = internalAction({
     const billingPayload = {
       organizationId: config.data.organizationId,
       catalogVersion: args.requestedVersion,
-      events: events as EventorenCatalogUpsertRequest["events"],
+      // Billing's strict event schema has no imageVariants; retain them in local snapshots only.
+      events: events.map(
+        ({ imageVariants: _imageVariants, ...event }) => event,
+      ) as EventorenCatalogUpsertRequest["events"],
     } satisfies EventorenCatalogUpsertRequest
     const serializedBillingPayload = JSON.stringify(billingPayload)
     const serializedBillingPayloadBytes = new TextEncoder().encode(serializedBillingPayload).byteLength

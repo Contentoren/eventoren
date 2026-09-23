@@ -28,7 +28,7 @@ async function catalogEventPublishAuthorizedFn(
 
   const tier = await ctx.db
     .query("catalogTicketTiers")
-    .withIndex("eventId", (q) => q.eq("eventId", event._id))
+    .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", event._id).eq("archivedAt", undefined))
     .first()
   if (!tier) return createResultError(op, "Published events need a ticket tier")
 

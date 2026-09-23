@@ -5,6 +5,7 @@ import type { CatalogTicketTierDeleteInput } from "../catalog/client/CatalogTick
 import type { CatalogTicketTierUpsertInput } from "../catalog/client/CatalogTicketTierUpsertInput.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import type { EventTicketTier } from "../events/EventTicketTier.ts"
+import type { EventImageVariants } from "../events/EventImageVariants.ts"
 import type { Result } from "../ui/Result.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import type { AdminEventDraft } from "./AdminEventDraft.ts"
@@ -62,10 +63,12 @@ export function adminCatalogPageStateCreate(inputs: {
   }) => Promise<Result<{ readonly eventKey: string; readonly catalogVersion: number }>>
   categoryHiddenList?: () => Promise<Result<readonly string[]>>
   categoryHide?: (input: { readonly category: string }) => Promise<Result<void>>
+  imageUpload?: (file: File) => Promise<Result<EventImageVariants>>
 }): AdminCatalogPageState {
   const events = createSignalObject<readonly AdminEventItem[]>(inputs.events())
   const selectedEventKey = createSignalObject("")
   const eventDraft = createSignalObject<AdminEventDraft>(emptyEventDraft())
+  const eventDraftRevision = createSignalObject(0)
   const tierDraft = createSignalObject<AdminTierDraft>(emptyTierDraft())
   const errorMessage = createSignalObject(inputs.eventsLoadError?.() ?? "")
   const successMessage = createSignalObject("")
@@ -82,6 +85,7 @@ export function adminCatalogPageStateCreate(inputs: {
     const adminEvent = events.get().find((candidate) => candidate.id === event.id)
     if (!adminEvent) return
     selectedEventKey.set(adminEvent.id)
+    eventDraftRevision.set(eventDraftRevision.get() + 1)
     eventDraft.set(eventToDraft(adminEvent))
     tierDraft.set(emptyTierDraft())
     errorMessage.set("")
@@ -90,6 +94,7 @@ export function adminCatalogPageStateCreate(inputs: {
 
   const startNewEvent = () => {
     selectedEventKey.set("")
+    eventDraftRevision.set(eventDraftRevision.get() + 1)
     eventDraft.set(emptyEventDraft())
     tierDraft.set(emptyTierDraft())
     errorMessage.set("")
@@ -154,6 +159,7 @@ export function adminCatalogPageStateCreate(inputs: {
         ...draft,
         eventKey: draft.eventKey.trim(),
         tags: splitTags(draft.tags),
+        status: draft.status === "published" && !selectedEvent()?.tiers.length ? "draft" : draft.status,
       })
       if (!saved.success) {
         errorMessage.set(saved.errorMessage)
@@ -275,15 +281,16 @@ export function adminCatalogPageStateCreate(inputs: {
   }
 
   const publishEvent = async () => {
-    const eventKey = eventDraft.get().eventKey.trim()
     if (!inputs.eventPublish) {
       errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
       return
     }
-    if (!eventKey) {
+    if (!selectedEventKey.get()) {
       errorMessage.set("Bitte wähle zuerst ein Event.")
       return
     }
+    const eventKey = await saveEvent()
+    if (!eventKey) return
     isSaving.set(true)
     try {
       const published = await inputs.eventPublish({ eventKey })
@@ -338,6 +345,7 @@ export function adminCatalogPageStateCreate(inputs: {
     selectedEvent: selectedEvent,
     selectedEventKey: selectedEventKey.get,
     eventDraft: eventDraft.get,
+    eventDraftRevision: eventDraftRevision.get,
     tierDraft: tierDraft.get,
     isAuthorized,
     errorMessage: errorMessage.get,
@@ -351,8 +359,12 @@ export function adminCatalogPageStateCreate(inputs: {
     saveEvent,
     saveTier,
     deleteTier,
+    refreshEvents: async () => {
+      if (!isSaving.get()) await reloadEvents()
+    },
     publishEvent,
     hideCategory,
+    imageUpload: inputs.imageUpload,
   }
 }
 
@@ -371,6 +383,7 @@ function eventToDraft(event: AdminEventItem): AdminEventDraft {
     address: event.address,
     organizer: event.organizer,
     imageUrl: event.imageUrl,
+    imageVariants: event.imageVariants,
     imageAlt: event.imageAlt,
     tags: event.tags.join(", "),
     status: event.status,

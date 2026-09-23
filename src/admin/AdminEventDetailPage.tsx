@@ -12,7 +12,7 @@ import type { adminEventDetailRouteStateCreate } from "./adminEventDetailRouteSt
 export function AdminEventDetailPage(props: { state: ReturnType<typeof adminEventDetailRouteStateCreate> }) {
   return (
     <main id="content" tabindex="-1">
-      <UiContainer width="wide" class="flex max-w-4xl flex-col gap-6 py-8">
+      <UiContainer width="wide" class="flex flex-col gap-6 py-8">
         <Show
           when={props.state.event()}
           fallback={
@@ -32,11 +32,11 @@ export function AdminEventDetailPage(props: { state: ReturnType<typeof adminEven
             <>
               <AdminEventDetailHeader event={event()} />
               <AdminEventTabs eventKey={props.state.eventKey()} tab={props.state.tab()} />
-              <AdminEventFeedback state={props.state.catalog} />
               <Show
                 when={props.state.tab() === "products"}
                 fallback={<AdminEventDetailsForm state={props.state.catalog} />}
               >
+                <AdminEventFeedback state={props.state.catalog} />
                 <AdminTicketProductsForm state={props.state.catalog} />
               </Show>
             </>

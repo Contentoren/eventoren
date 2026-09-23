@@ -66,7 +66,7 @@ export const catalogSyncSnapshotBuildMutation = internalMutation({
         return createResultError(op, `Catalog event ${event.eventKey} is newer than requestedVersion`)
       const tierPage = await ctx.db
         .query("catalogTicketTiers")
-        .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id))
+        .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", event._id).eq("archivedAt", undefined))
         .order("asc")
         .take(catalogSyncLimits.billingMaxTiersPerEvent + 1)
       if (tierPage.length > catalogSyncLimits.billingMaxTiersPerEvent)
@@ -91,6 +91,7 @@ export const catalogSyncSnapshotBuildMutation = internalMutation({
         address: event.address,
         organizer: event.organizer,
         imageUrl: event.imageUrl,
+        ...(event.imageVariants ? { imageVariants: event.imageVariants } : {}),
         imageAlt: event.imageAlt,
         tags: event.tags,
         status: event.status,

@@ -16,7 +16,7 @@ export function EventCardTicket(props: { event: EventItem; href?: string }) {
         {/* Taller vertical image aspect ratio */}
         <div class="relative aspect-[4/3] overflow-hidden bg-surface-muted">
           <img
-            src={eventImageUrlGet(props.event.imageUrl)}
+            src={eventImageUrlGet(props.event.imageVariants?.card ?? props.event.imageUrl)}
             alt={props.event.imageAlt}
             loading="lazy"
             width="1200"

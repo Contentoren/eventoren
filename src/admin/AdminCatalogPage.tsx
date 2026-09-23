@@ -32,7 +32,6 @@ export function AdminCatalogPage(props: {
       <UiContainer width="wide" class="flex flex-col gap-8 py-10">
         {props.headerSlot}
         <header class="flex flex-col gap-3">
-          <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Verwaltung</p>
           <h1 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">Events & Ticketprodukte</h1>
           <p class="max-w-3xl text-sm leading-relaxed text-content-muted">
             {props.description ??
