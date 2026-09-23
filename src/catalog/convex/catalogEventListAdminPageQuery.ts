@@ -50,6 +50,7 @@ export const catalogEventListAdminPageQuery = query({
         .unique()
       const page: AdminEventItem[] = []
       for (const event of eventPage.page) {
+        if (event.deletedAt) continue
         const tiers = await authorizedCtx.db
           .query("catalogTicketTiers")
           .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", event._id).eq("archivedAt", undefined))

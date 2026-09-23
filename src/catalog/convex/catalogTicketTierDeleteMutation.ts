@@ -32,7 +32,7 @@ async function catalogTicketTierDeleteAuthorizedFn(
     .query("catalogEvents")
     .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
     .unique()
-  if (!event) return createResultError(op, "Event not found")
+  if (!event || event.deletedAt) return createResultError(op, "Event not found")
 
   const tier = await ctx.db
     .query("catalogTicketTiers")

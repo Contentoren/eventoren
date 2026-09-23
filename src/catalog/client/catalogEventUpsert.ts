@@ -17,6 +17,10 @@ export async function catalogEventUpsert(
     if (!response.success) return createResultError(op, response.errorMessage, response)
     return createResult(response.data)
   } catch (error) {
-    return createResultError(op, "Event konnte nicht gespeichert werden.", error)
+    return createResultError(
+      op,
+      `Event konnte nicht gespeichert werden: ${error instanceof Error ? error.message : String(error)}`,
+      error,
+    )
   }
 }

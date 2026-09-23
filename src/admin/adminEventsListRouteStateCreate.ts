@@ -32,6 +32,11 @@ export function adminEventsListRouteStateCreate() {
     })
   const eventChange = (event: string) =>
     void navigate({ to: "/admin/events", search: { ...search(), event: event || undefined }, replace: true })
+  const deleteEvent = (eventKey: string, title: string) => {
+    if (!window.confirm(`Event „${title}“ wirklich löschen? Bestehende Bestellungen bleiben erhalten.`)) return
+    if (search().event === eventKey) eventChange("")
+    void catalog.deleteEvent(eventKey)
+  }
   return {
     catalog,
     filteredEvents,
@@ -45,5 +50,6 @@ export function adminEventsListRouteStateCreate() {
     ],
     eventText: (id: string) => catalog.events().find((event) => event.id === id)?.title ?? "Alle Events",
     searchChange,
+    deleteEvent,
   }
 }

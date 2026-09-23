@@ -207,6 +207,7 @@ function eventExclusionsFallback(event: EventItem): readonly string[] {
 }
 
 export function eventExclusionsGet(event: EventItem): readonly string[] {
+  if (event.exclusions !== undefined) return event.exclusions
   const exact = mockExclusionsById[event.id]
   if (exact && exact.length > 0) {
     return exact

@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/solid-start"
 import { adminImageUploadFromSession } from "#src/server/adminImageUploadFromSession.ts"
 import { catalogCategoryHiddenListFromSession } from "#src/server/catalogCategoryHiddenListFromSession.ts"
 import { catalogCategoryHideFromSession } from "#src/server/catalogCategoryHideFromSession.ts"
+import { catalogEventDeleteFromSession } from "#src/server/catalogEventDeleteFromSession.ts"
 import { catalogEventPublishFromSession } from "#src/server/catalogEventPublishFromSession.ts"
 import { catalogEventsAdminGet } from "#src/server/catalogEventsAdminGet.ts"
 import { catalogEventUpsertFromSession } from "#src/server/catalogEventUpsertFromSession.ts"
@@ -24,6 +25,9 @@ const deleteAdminTicketTier = createServerFn({ method: "POST" })
 const publishAdminEvent = createServerFn({ method: "POST" })
   .validator((input: Parameters<typeof catalogEventPublishFromSession>[0]) => input)
   .handler(({ data }) => catalogEventPublishFromSession(data))
+const deleteAdminEvent = createServerFn({ method: "POST" })
+  .validator((input: Parameters<typeof catalogEventDeleteFromSession>[0]) => input)
+  .handler(({ data }) => catalogEventDeleteFromSession(data))
 const getHiddenAdminCategories = createServerFn({ method: "GET" }).handler(catalogCategoryHiddenListFromSession)
 const hideAdminCategory = createServerFn({ method: "POST" })
   .validator((input: Parameters<typeof catalogCategoryHideFromSession>[0]) => input)
@@ -54,6 +58,7 @@ export function adminEventsRouteStateCreate() {
     ticketTierDelete: (input) => deleteAdminTicketTier({ data: input }),
     ticketTierUpsert: (input) => saveAdminTicketTier({ data: input }),
     eventPublish: (input) => publishAdminEvent({ data: input }),
+    eventDelete: (input) => deleteAdminEvent({ data: input }),
     categoryHiddenList: () => getHiddenAdminCategories(),
     categoryHide: (input) => hideAdminCategory({ data: input }),
     imageUpload: (file) => {

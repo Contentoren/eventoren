@@ -5,6 +5,9 @@ import type { AdminEventDraft } from "../../admin/AdminEventDraft.ts"
 import type { AdminTierDraft } from "../../admin/AdminTierDraft.ts"
 import type { EventItem } from "../../events/EventItem.ts"
 import type { EventTicketTier } from "../../events/EventTicketTier.ts"
+import { eventHighlightsGet } from "../../events/eventHighlightsGet.ts"
+import { eventInclusionsGet } from "../../events/eventInclusionsGet.ts"
+import { eventExclusionsGet } from "../../events/eventExclusionsGet.ts"
 
 import type { DemoFlowContextValue } from "./demoFlowContext.ts"
 import { demoFlowContextUse } from "./demoFlowContextUse.ts"
@@ -24,7 +27,9 @@ const emptyEventDraft = (): AdminEventDraft => ({
   organizer: "",
   imageUrl: "",
   imageAlt: "",
-  tags: "",
+  highlights: [],
+  inclusions: [],
+  exclusions: [],
   status: "draft",
 })
 
@@ -32,6 +37,10 @@ const emptyTierDraft = (): AdminTierDraft => ({
   tierKey: "",
   name: "",
   description: "",
+  startsAt: "",
+  doorsAt: "",
+  additionalDoorsAt: [],
+  endsAt: "",
   priceCents: "",
   feeCents: "",
   capacity: "",
@@ -105,6 +114,10 @@ export function demoAdminCatalogPageStateCreate(inputs: {
       tierKey: tier.id,
       name: tier.name,
       description: tier.description,
+      startsAt: tier.startsAt ?? selectedEvent()?.startsAt ?? "",
+      doorsAt: tier.doorsAt ?? selectedEvent()?.doorsAt ?? "",
+      additionalDoorsAt: [...(tier.additionalDoorsAt ?? [])],
+      endsAt: tier.endsAt ?? selectedEvent()?.endsAt ?? "",
       priceCents: String(tier.priceCents),
       feeCents: String(tier.feeCents),
       capacity: String(tier.capacity),
@@ -120,6 +133,10 @@ export function demoAdminCatalogPageStateCreate(inputs: {
       baseErrorMessage.set("Event-Key und Titel sind erforderlich.")
       return
     }
+    if (draft.highlights.some((highlight) => !highlight.title.trim())) {
+      baseErrorMessage.set("Jedes Highlight benötigt einen Titel.")
+      return
+    }
     isSaving.set(true)
     const previous = baseEvents.get().find((event) => event.id === draft.eventKey)
     const updated: EventItem = {
@@ -127,7 +144,13 @@ export function demoAdminCatalogPageStateCreate(inputs: {
       ...draft,
       id: draft.eventKey.trim(),
       catalogVersion: (previous?.catalogVersion ?? 0) + 1,
-      tags: splitTags(draft.tags),
+      highlights: draft.highlights.map((highlight) => ({
+        title: highlight.title.trim(),
+        description: highlight.description.trim(),
+      })),
+      inclusions: draft.inclusions.map((item) => item.trim()).filter(Boolean),
+      exclusions: draft.exclusions.map((item) => item.trim()).filter(Boolean),
+      tags: draft.highlights.map((highlight) => highlight.title.trim()),
       tiers: previous?.tiers ?? [],
       soldOut: previous?.soldOut ?? false,
     }
@@ -147,6 +170,13 @@ export function demoAdminCatalogPageStateCreate(inputs: {
       baseErrorMessage.set("Event-Key, Tier-Key und Name sind erforderlich.")
       return
     }
+    if (
+      (draft.additionalDoorsAt.length && !draft.doorsAt.trim()) ||
+      draft.additionalDoorsAt.some((value) => !value.trim() || Number.isNaN(Date.parse(value)))
+    ) {
+      baseErrorMessage.set("Bitte gib für jeden Einlass ein gültiges Datum mit Uhrzeit ein.")
+      return
+    }
     const priceCents = nonNegativeIntegerParse(draft.priceCents)
     const feeCents = nonNegativeIntegerParse(draft.feeCents)
     const capacity = nonNegativeIntegerParse(draft.capacity)
@@ -162,6 +192,10 @@ export function demoAdminCatalogPageStateCreate(inputs: {
         id: draft.tierKey.trim(),
         name: draft.name.trim(),
         description: draft.description.trim(),
+        startsAt: draft.startsAt,
+        doorsAt: draft.doorsAt.trim() || draft.startsAt,
+        additionalDoorsAt: [...draft.additionalDoorsAt],
+        endsAt: draft.endsAt,
         priceCents,
         feeCents,
         capacity,
@@ -199,6 +233,28 @@ export function demoAdminCatalogPageStateCreate(inputs: {
     isSaving.set(false)
     successMessage.set("Ticketprodukt lokal gelöscht. Diese Änderung bleibt lokal in der Demo.")
     baseErrorMessage.set("")
+  }
+
+  const reorderTier = async (tierKey: string, targetKey: string) => {
+    const event = selectedEvent()
+    if (!event) return
+    const tiers = [...event.tiers]
+    const from = tiers.findIndex((tier) => tier.id === tierKey)
+    const to = tiers.findIndex((tier) => tier.id === targetKey)
+    if (from < 0 || to < 0 || from === to) return
+    const [moved] = tiers.splice(from, 1)
+    if (!moved) return
+    tiers.splice(to, 0, moved)
+    baseEvents.set(
+      baseEvents
+        .get()
+        .map((item) =>
+          item.id === event.id
+            ? { ...item, tiers: tiers.map((tier, index) => ({ ...tier, sortOrder: index + 1 })) }
+            : item,
+        ),
+    )
+    successMessage.set("Reihenfolge der Ticketprodukte lokal gespeichert.")
   }
 
   const publishEvent = async () => {
@@ -241,8 +297,14 @@ export function demoAdminCatalogPageStateCreate(inputs: {
     selectTier,
     saveEvent,
     saveTier,
+    reorderTier,
     deleteTier,
     publishEvent,
+    deleteEvent: async (eventKey: string) => {
+      baseEvents.set(baseEvents.get().filter((event) => event.id !== eventKey))
+      if (selectedEventKey.get() === eventKey) startNewEvent()
+      successMessage.set("Event lokal gelöscht. Diese Änderung bleibt lokal in der Demo.")
+    },
     hideCategory,
   }
 }
@@ -263,7 +325,9 @@ function eventToDraft(event: EventItem): AdminEventDraft {
     organizer: event.organizer,
     imageUrl: event.imageUrl,
     imageAlt: event.imageAlt,
-    tags: event.tags.join(", "),
+    highlights: [...eventHighlightsGet(event)],
+    inclusions: [...eventInclusionsGet(event)],
+    exclusions: [...eventExclusionsGet(event)],
     status: "published",
   }
 }
@@ -273,17 +337,10 @@ function emptyEventAsItem(draft: AdminEventDraft): EventItem {
     ...draft,
     id: draft.eventKey,
     catalogVersion: 0,
-    tags: splitTags(draft.tags),
+    tags: draft.highlights.map((highlight) => highlight.title.trim()),
     tiers: [],
     soldOut: false,
   }
-}
-
-function splitTags(value: string): string[] {
-  return value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter((tag) => tag.length > 0)
 }
 
 function nonNegativeIntegerParse(value: string): number | null {

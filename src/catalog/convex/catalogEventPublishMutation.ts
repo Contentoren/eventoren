@@ -22,7 +22,7 @@ async function catalogEventPublishAuthorizedFn(
     .query("catalogEvents")
     .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
     .unique()
-  if (!event) return createResultError(op, "Event not found")
+  if (!event || event.deletedAt) return createResultError(op, "Event not found")
   if (event.status === "published")
     return createResult({ eventKey: event.eventKey, catalogVersion: event.catalogVersion })
 

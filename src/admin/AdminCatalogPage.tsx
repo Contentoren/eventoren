@@ -7,12 +7,15 @@ import { Label } from "#ui/input/label/Label.jsx"
 import { Textarea } from "#ui/input/textarea/Textarea.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { ButtonIcon } from "#ui/interactive/button/ButtonIcon.jsx"
+import { buttonCva2 } from "#ui/interactive/button/buttonCva.js"
+import { classesButtonClickAnimation } from "#ui/interactive/button/classesButtonClickAnimation.js"
 import { CorvuPopover } from "#ui/interactive/popover/CorvuPopover.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { eventCategoryLabels } from "../events/eventCategoryLabels.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
+import { AdminEventHighlightsFields } from "./AdminEventHighlightsFields.tsx"
 import { AdminMemberManagement } from "./AdminMemberManagement.tsx"
 import type { AdminMemberManagementState } from "./AdminMemberManagementState.ts"
 import { adminCategoryPickerStateCreate } from "./adminCategoryPickerStateCreate.ts"
@@ -23,6 +26,8 @@ export function AdminCatalogPage(props: {
   description?: string
   headerSlot?: JSX.Element
   eventViewHref?: (eventKey: string) => string
+  newEventHref?: string
+  isNewEventPage?: boolean
 }) {
   const state = props.state
   const categoryPicker = adminCategoryPickerStateCreate({ catalog: state })
@@ -74,9 +79,22 @@ export function AdminCatalogPage(props: {
             <CardWrapper>
               <div class="flex items-center justify-between gap-3">
                 <h2 class="text-lg font-semibold text-content">Veröffentlichte Events</h2>
-                <Button size="sm" variant="outline" onClick={state.startNewEvent}>
-                  Neu
-                </Button>
+                <Show when={!props.isNewEventPage || state.selectedEventKey()}>
+                  <Show
+                    when={!props.isNewEventPage && props.newEventHref}
+                    fallback={
+                      <Button size="sm" variant="outline" onClick={state.startNewEvent}>
+                        Neu
+                      </Button>
+                    }
+                  >
+                    {(href) => (
+                      <Link to={href()} class={buttonCva2("outline", "sm", classesButtonClickAnimation)}>
+                        Neu
+                      </Link>
+                    )}
+                  </Show>
+                </Show>
               </div>
               <Show
                 when={!state.isLoading?.()}
@@ -273,12 +291,7 @@ export function AdminCatalogPage(props: {
                       <option value="archived">Archiviert</option>
                     </select>
                   </div>
-                  <Field
-                    id="admin-event-tags"
-                    label="Tags (kommagetrennt)"
-                    value={state.eventDraft().tags}
-                    onInput={(value) => state.eventFieldChange("tags", value)}
-                  />
+                  <AdminEventHighlightsFields state={state} />
                   <div>
                     <Label for="admin-event-description">Beschreibung</Label>
                     <Textarea

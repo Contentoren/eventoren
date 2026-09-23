@@ -7,6 +7,32 @@ import type { AdminEventItem } from "../src/admin/AdminEventItem.ts"
 import { createResult } from "../src/ui/createResult.ts"
 
 describe("admin catalog page state", () => {
+  test("saves editable included and excluded lines without blank entries", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        let saved: { inclusions?: string[]; exclusions?: string[] } | undefined
+        const state = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+          eventUpsert: async (input) => {
+            saved = input
+            return createResult({ eventKey: input.eventKey, catalogVersion: 1 })
+          },
+        })
+        state.eventFieldChange("eventKey", "concert")
+        state.eventFieldChange("title", "Concert")
+        state.eventFieldChange("inclusions", [" Ticket ", "  ", "Entry"])
+        state.eventFieldChange("exclusions", [" Travel "])
+        await state.saveEvent()
+        expect(saved?.inclusions).toEqual(["Ticket", "Entry"])
+        expect(saved?.exclusions).toEqual(["Travel"])
+      } finally {
+        dispose()
+      }
+    })
+  })
+
   test("saves an unsaved event before its first ticket and keeps the publish selection", async () => {
     await createRoot(async (dispose) => {
       try {
@@ -69,6 +95,8 @@ describe("admin catalog page state", () => {
         catalog.eventFieldChange("status", "published")
         catalog.tierFieldChange("tierKey", "standard")
         catalog.tierFieldChange("name", "Standard")
+        catalog.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
+        catalog.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
         catalog.tierFieldChange("priceCents", "2500")
         catalog.tierFieldChange("feeCents", "0")
         catalog.tierFieldChange("capacity", "20")
@@ -117,6 +145,100 @@ describe("admin catalog page state", () => {
         await state.saveEvent()
 
         expect(savedStatus).toBe("draft")
+      } finally {
+        dispose()
+      }
+    })
+  })
+
+  test("prefills legacy tier times from its event while preserving tier-specific times", () => {
+    const event: AdminEventItem = {
+      id: "concert",
+      status: "draft",
+      catalogVersion: 1,
+      title: "Concert",
+      subtitle: "",
+      description: "",
+      category: "konzerte",
+      startsAt: "2026-10-01T18:00:00.000Z",
+      endsAt: "2026-10-01T22:00:00.000Z",
+      doorsAt: "2026-10-01T17:00:00.000Z",
+      venue: "Hall",
+      city: "Berlin",
+      address: "",
+      organizer: "Eventoren",
+      imageUrl: "",
+      imageAlt: "",
+      tags: [],
+      soldOut: false,
+      tiers: [],
+    }
+    const state = adminCatalogPageStateCreate({
+      events: () => [event],
+      isServerAuthorized: () => true,
+      reloadEvents: async () => ({ success: true, data: [event] }),
+    })
+    state.selectEvent(event)
+    state.selectTier({
+      id: "legacy",
+      name: "Legacy",
+      description: "",
+      priceCents: 1000,
+      feeCents: 0,
+      capacity: 10,
+      available: 10,
+    })
+    expect(state.tierDraft()).toMatchObject({ startsAt: event.startsAt, doorsAt: event.doorsAt, endsAt: event.endsAt })
+    state.selectTier({
+      id: "custom",
+      name: "Custom",
+      description: "",
+      startsAt: "2026-10-02T18:00:00.000Z",
+      doorsAt: "2026-10-02T17:00:00.000Z",
+      endsAt: "2026-10-02T23:00:00.000Z",
+      priceCents: 1000,
+      feeCents: 0,
+      capacity: 10,
+      available: 10,
+    })
+    expect(state.tierDraft()).toMatchObject({
+      startsAt: "2026-10-02T18:00:00.000Z",
+      doorsAt: "2026-10-02T17:00:00.000Z",
+      endsAt: "2026-10-02T23:00:00.000Z",
+    })
+  })
+
+  test("requires tier start and end and defaults blank doors time to start when saving", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        let received: { startsAt: string; doorsAt: string; endsAt: string } | undefined
+        const state = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+          ticketTierUpsert: async (input) => {
+            received = input
+            return createResult({ tierKey: input.tierKey, catalogVersion: 1 })
+          },
+        })
+        state.eventFieldChange("eventKey", "concert")
+        state.tierFieldChange("tierKey", "standard")
+        state.tierFieldChange("name", "Standard")
+        state.tierFieldChange("priceCents", "1000")
+        state.tierFieldChange("feeCents", "0")
+        state.tierFieldChange("capacity", "10")
+        await state.saveTier()
+        expect(state.errorMessage()).toBe("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
+        expect(received).toBeUndefined()
+
+        state.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
+        state.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
+        await state.saveTier()
+        expect(received).toMatchObject({
+          startsAt: "2026-10-01T18:00:00.000Z",
+          doorsAt: "2026-10-01T18:00:00.000Z",
+          endsAt: "2026-10-01T22:00:00.000Z",
+        })
       } finally {
         dispose()
       }
@@ -246,6 +368,32 @@ describe("admin catalog page state", () => {
     })
   })
 
+  test("shows the reason when saving an event rejects", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        const state = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+          eventUpsert: async () => {
+            throw new Error("Verbindung zum Katalog fehlgeschlagen")
+          },
+        })
+        state.eventFieldChange("eventKey", "new-event")
+        state.eventFieldChange("title", "New event")
+
+        await state.saveEvent()
+
+        expect(state.errorMessage()).toBe(
+          "Event konnte nicht gespeichert werden: Verbindung zum Katalog fehlgeschlagen",
+        )
+        expect(state.isSaving()).toBe(false)
+      } finally {
+        dispose()
+      }
+    })
+  })
+
   test("turns an unexpected ticket mutation rejection into feedback and always ends the saving state", async () => {
     await createRoot(async (dispose) => {
       try {
@@ -260,6 +408,8 @@ describe("admin catalog page state", () => {
         state.eventFieldChange("eventKey", "existing-event")
         state.tierFieldChange("tierKey", "standard")
         state.tierFieldChange("name", "Standard")
+        state.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
+        state.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
         state.tierFieldChange("priceCents", "2501")
         state.tierFieldChange("feeCents", "0")
         state.tierFieldChange("capacity", "10")

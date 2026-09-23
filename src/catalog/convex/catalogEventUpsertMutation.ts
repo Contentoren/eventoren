@@ -25,6 +25,9 @@ const catalogEventArgsValidator = v.object({
   ),
   imageAlt: v.string(),
   tags: v.array(v.string()),
+  highlights: v.optional(v.array(v.object({ title: v.string(), description: v.string() }))),
+  inclusions: v.optional(v.array(v.string())),
+  exclusions: v.optional(v.array(v.string())),
   status: v.optional(v.union(v.literal("draft"), v.literal("published"), v.literal("archived"))),
   token: v.string(),
 })
@@ -47,6 +50,7 @@ async function catalogEventUpsertAuthorizedFn(
     .query("catalogEvents")
     .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
     .unique()
+  if (existing?.deletedAt) return createResultError("catalogEventUpsertMutation", "Deleted event keys cannot be reused")
   // An explicit manual URL change invalidates the previous uploaded image references.
   const imageVariants =
     args.imageVariants && args.imageUrl === args.imageVariants.detail
@@ -87,6 +91,9 @@ async function catalogEventUpsertAuthorizedFn(
     imageVariants,
     imageAlt: args.imageAlt,
     tags: args.tags,
+    highlights: args.highlights ?? existing?.highlights,
+    inclusions: args.inclusions ?? existing?.inclusions,
+    exclusions: args.exclusions ?? existing?.exclusions,
     status,
     catalogVersion,
     updatedAt: now,

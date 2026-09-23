@@ -26,9 +26,11 @@ export type AdminCatalogPageState = {
   selectTier: (tier: EventTicketTier) => void
   saveEvent: () => Promise<string | undefined>
   saveTier: () => Promise<void>
+  reorderTier: (tierKey: string, targetKey: string) => Promise<void>
   deleteTier: () => Promise<void>
   refreshEvents?: () => Promise<void>
   publishEvent: () => Promise<void>
+  deleteEvent: (eventKey: string) => Promise<void>
   hideCategory: (category: string) => Promise<void>
   imageUpload?: (file: File) => Promise<Result<EventImageVariants>>
 }

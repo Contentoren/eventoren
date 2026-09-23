@@ -6,6 +6,9 @@ import type { CatalogTicketTierUpsertInput } from "../catalog/client/CatalogTick
 import type { EventItem } from "../events/EventItem.ts"
 import type { EventTicketTier } from "../events/EventTicketTier.ts"
 import type { EventImageVariants } from "../events/EventImageVariants.ts"
+import { eventHighlightsGet } from "../events/eventHighlightsGet.ts"
+import { eventInclusionsGet } from "../events/eventInclusionsGet.ts"
+import { eventExclusionsGet } from "../events/eventExclusionsGet.ts"
 import type { Result } from "../ui/Result.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import type { AdminEventDraft } from "./AdminEventDraft.ts"
@@ -27,7 +30,9 @@ const emptyEventDraft = (): AdminEventDraft => ({
   organizer: "",
   imageUrl: "",
   imageAlt: "",
-  tags: "",
+  highlights: [],
+  inclusions: [],
+  exclusions: [],
   status: "draft",
 })
 
@@ -35,6 +40,10 @@ const emptyTierDraft = (): AdminTierDraft => ({
   tierKey: "",
   name: "",
   description: "",
+  startsAt: "",
+  doorsAt: "",
+  additionalDoorsAt: [],
+  endsAt: "",
   priceCents: "",
   feeCents: "",
   capacity: "",
@@ -59,6 +68,9 @@ export function adminCatalogPageStateCreate(inputs: {
     input: Omit<CatalogTicketTierUpsertInput, "token">,
   ) => Promise<Result<{ readonly tierKey: string; readonly catalogVersion: number }>>
   eventPublish?: (input: {
+    readonly eventKey: string
+  }) => Promise<Result<{ readonly eventKey: string; readonly catalogVersion: number }>>
+  eventDelete?: (input: {
     readonly eventKey: string
   }) => Promise<Result<{ readonly eventKey: string; readonly catalogVersion: number }>>
   categoryHiddenList?: () => Promise<Result<readonly string[]>>
@@ -116,6 +128,10 @@ export function adminCatalogPageStateCreate(inputs: {
       tierKey: tier.id,
       name: tier.name,
       description: tier.description,
+      startsAt: tier.startsAt ?? selectedEvent()?.startsAt ?? "",
+      doorsAt: tier.doorsAt ?? selectedEvent()?.doorsAt ?? "",
+      additionalDoorsAt: [...(tier.additionalDoorsAt ?? [])],
+      endsAt: tier.endsAt ?? selectedEvent()?.endsAt ?? "",
       priceCents: String(tier.priceCents),
       feeCents: String(tier.feeCents),
       capacity: String(tier.capacity),
@@ -144,6 +160,7 @@ export function adminCatalogPageStateCreate(inputs: {
   }
 
   const saveEvent = async () => {
+    successMessage.set("")
     if (!inputs.eventUpsert) {
       errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
       return
@@ -153,12 +170,22 @@ export function adminCatalogPageStateCreate(inputs: {
       errorMessage.set("Event-Key und Titel sind erforderlich.")
       return
     }
+    if (draft.highlights.some((highlight) => !highlight.title.trim())) {
+      errorMessage.set("Jedes Highlight benötigt einen Titel.")
+      return
+    }
     isSaving.set(true)
     try {
       const saved = await inputs.eventUpsert({
         ...draft,
         eventKey: draft.eventKey.trim(),
-        tags: splitTags(draft.tags),
+        highlights: draft.highlights.map((highlight) => ({
+          title: highlight.title.trim(),
+          description: highlight.description.trim(),
+        })),
+        inclusions: draft.inclusions.map((item) => item.trim()).filter(Boolean),
+        exclusions: draft.exclusions.map((item) => item.trim()).filter(Boolean),
+        tags: draft.highlights.map((highlight) => highlight.title.trim()),
         status: draft.status === "published" && !selectedEvent()?.tiers.length ? "draft" : draft.status,
       })
       if (!saved.success) {
@@ -178,8 +205,10 @@ export function adminCatalogPageStateCreate(inputs: {
       successMessage.set("Event gespeichert. Änderungen werden an den Verkaufskatalog synchronisiert.")
       errorMessage.set("")
       return updated.id
-    } catch {
-      errorMessage.set("Event konnte nicht gespeichert werden.")
+    } catch (error) {
+      errorMessage.set(
+        `Event konnte nicht gespeichert werden: ${error instanceof Error ? error.message : String(error)}`,
+      )
       successMessage.set("")
       return undefined
     } finally {
@@ -196,6 +225,14 @@ export function adminCatalogPageStateCreate(inputs: {
     }
     if (!eventKey || !draft.tierKey.trim() || !draft.name.trim()) {
       errorMessage.set("Event-Key, Tier-Key und Name sind erforderlich.")
+      return
+    }
+    if (!draft.startsAt.trim() || !draft.endsAt.trim()) {
+      errorMessage.set("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
+      return
+    }
+    if (draft.additionalDoorsAt.some((value) => !value.trim() || Number.isNaN(Date.parse(value)))) {
+      errorMessage.set("Bitte gib für jeden Einlass ein gültiges Datum mit Uhrzeit ein.")
       return
     }
     const priceCents = nonNegativeIntegerParse(draft.priceCents)
@@ -226,6 +263,10 @@ export function adminCatalogPageStateCreate(inputs: {
         tierKey: draft.tierKey.trim(),
         name: draft.name.trim(),
         description: draft.description.trim(),
+        startsAt: draft.startsAt,
+        doorsAt: draft.doorsAt.trim() || draft.startsAt,
+        additionalDoorsAt: draft.additionalDoorsAt,
+        endsAt: draft.endsAt,
         priceCents,
         feeCents,
         capacity,
@@ -244,6 +285,65 @@ export function adminCatalogPageStateCreate(inputs: {
       errorMessage.set("Ticketprodukt konnte nicht gespeichert werden.")
       successMessage.set("")
     } finally {
+      isSaving.set(false)
+    }
+  }
+
+  const reorderTier = async (tierKey: string, targetKey: string) => {
+    const event = selectedEvent()
+    if (!event || !inputs.ticketTierUpsert || isSaving.get()) return
+    const tiers = [...event.tiers]
+    const from = tiers.findIndex((tier) => tier.id === tierKey)
+    const to = tiers.findIndex((tier) => tier.id === targetKey)
+    if (from < 0 || to < 0 || from === to) return
+
+    const [moved] = tiers.splice(from, 1)
+    if (!moved) return
+    tiers.splice(to, 0, moved)
+    const tiersWithEventTimes = tiers.map((tier) => ({
+      ...tier,
+      startsAt: tier.startsAt ?? event.startsAt,
+      endsAt: tier.endsAt ?? event.endsAt,
+    }))
+    if (tiersWithEventTimes.some((tier) => !tier.startsAt.trim() || !tier.endsAt.trim())) {
+      errorMessage.set("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
+      return
+    }
+    isSaving.set(true)
+    errorMessage.set("")
+    successMessage.set("")
+    events.set(events.get().map((item) => (item.id === event.id ? { ...item, tiers } : item)))
+    try {
+      for (const [index, tier] of tiersWithEventTimes.entries()) {
+        if (tier.sortOrder === index + 1) continue
+        const saved = await inputs.ticketTierUpsert({
+          eventKey: event.id,
+          tierKey: tier.id,
+          name: tier.name,
+          description: tier.description,
+          startsAt: tier.startsAt,
+          doorsAt: tier.doorsAt?.trim() || event.doorsAt?.trim() || tier.startsAt,
+          additionalDoorsAt: tier.additionalDoorsAt ?? [],
+          endsAt: tier.endsAt,
+          priceCents: tier.priceCents,
+          feeCents: tier.feeCents,
+          capacity: tier.capacity,
+          sortOrder: index + 1,
+        })
+        if (!saved.success) {
+          errorMessage.set(saved.errorMessage)
+          return
+        }
+      }
+      successMessage.set("Reihenfolge der Ticketprodukte gespeichert.")
+    } catch {
+      errorMessage.set("Die Reihenfolge der Ticketprodukte konnte nicht gespeichert werden.")
+    } finally {
+      const message = errorMessage.get()
+      await reloadEvents()
+      if (message) errorMessage.set(message)
+      const selected = selectedEvent()?.tiers.find((tier) => tier.id === tierDraft.get().tierKey)
+      if (selected) tierDraft.set({ ...tierDraft.get(), sortOrder: String(selected.sortOrder ?? 0) })
       isSaving.set(false)
     }
   }
@@ -281,6 +381,7 @@ export function adminCatalogPageStateCreate(inputs: {
   }
 
   const publishEvent = async () => {
+    successMessage.set("")
     if (!inputs.eventPublish) {
       errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
       return
@@ -295,13 +396,18 @@ export function adminCatalogPageStateCreate(inputs: {
     try {
       const published = await inputs.eventPublish({ eventKey })
       if (!published.success) {
+        successMessage.set("")
         errorMessage.set(published.errorMessage)
         return
       }
       const refreshedEvents = await reloadEvents()
-      if (!refreshedEvents) return
+      if (!refreshedEvents) {
+        successMessage.set("")
+        return
+      }
       const event = refreshedEvents.find((candidate) => candidate.id === published.data.eventKey)
       if (!event) {
+        successMessage.set("")
         errorMessage.set("Das veröffentlichte Event konnte nicht erneut geladen werden.")
         return
       }
@@ -313,6 +419,28 @@ export function adminCatalogPageStateCreate(inputs: {
       errorMessage.set("")
     } catch {
       errorMessage.set("Event konnte nicht veröffentlicht werden.")
+      successMessage.set("")
+    } finally {
+      isSaving.set(false)
+    }
+  }
+
+  const deleteEvent = async (eventKey: string) => {
+    if (!inputs.eventDelete || isSaving.get()) return
+    isSaving.set(true)
+    try {
+      const deleted = await inputs.eventDelete({ eventKey })
+      if (!deleted.success) {
+        errorMessage.set(deleted.errorMessage)
+        successMessage.set("")
+        return
+      }
+      events.set(events.get().filter((event) => event.id !== eventKey))
+      if (selectedEventKey.get() === eventKey) startNewEvent()
+      successMessage.set("Event gelöscht. Bestehende Bestellungen und Tickets bleiben erhalten.")
+      errorMessage.set("")
+    } catch {
+      errorMessage.set("Event konnte nicht gelöscht werden.")
       successMessage.set("")
     } finally {
       isSaving.set(false)
@@ -358,11 +486,13 @@ export function adminCatalogPageStateCreate(inputs: {
     selectTier,
     saveEvent,
     saveTier,
+    reorderTier,
     deleteTier,
     refreshEvents: async () => {
       if (!isSaving.get()) await reloadEvents()
     },
     publishEvent,
+    deleteEvent,
     hideCategory,
     imageUpload: inputs.imageUpload,
   }
@@ -385,16 +515,11 @@ function eventToDraft(event: AdminEventItem): AdminEventDraft {
     imageUrl: event.imageUrl,
     imageVariants: event.imageVariants,
     imageAlt: event.imageAlt,
-    tags: event.tags.join(", "),
+    highlights: [...eventHighlightsGet(event)],
+    inclusions: [...eventInclusionsGet(event)],
+    exclusions: [...eventExclusionsGet(event)],
     status: event.status,
   }
-}
-
-function splitTags(value: string): string[] {
-  return value
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter((tag) => tag.length > 0)
 }
 
 function nonNegativeIntegerParse(value: string): number | null {

@@ -1,8 +1,10 @@
+import { mdiDelete } from "@adaptive-ds/mdi/mdiDelete.js"
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
 import { Input } from "#ui/input/input/Input.jsx"
 import { SelectSingle } from "#ui/input/select/SelectSingle.jsx"
 import { SelectSingleNative } from "#ui/input/select/SelectSingleNative.jsx"
+import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
@@ -25,9 +27,11 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
     <>
       <div class="min-w-0">
         <p class="truncate font-semibold text-content">{event.title}</p>
-        <p class="mt-1 truncate text-xs text-content-muted">{event.organizer || event.category}</p>
+        <p class="mt-1 truncate text-xs text-content-muted">Veranstalter: {event.organizer || "Nicht angegeben"}</p>
+        <p class="truncate text-xs text-content-muted">Kategorie: {event.category || "Nicht angegeben"}</p>
       </div>
       <p class="text-sm text-content">
+        <span class="text-content-muted">Datum: </span>
         {event.startsAt
           ? new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" }).format(
               new Date(event.startsAt),
@@ -35,11 +39,14 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
           : "Termin offen"}
       </p>
       <p class="truncate text-sm text-content-muted">
-        {[event.venue, event.city].filter(Boolean).join(", ") || "Ort offen"}
+        Ort: {[event.venue, event.city].filter(Boolean).join(", ") || "Ort offen"}
       </p>
-      <Badge variant="subtle" class="w-fit">
-        {adminEventStatusLabel("status" in event ? event.status : "published")}
-      </Badge>
+      <div class="flex flex-wrap items-center gap-1">
+        <span class="text-sm text-content-muted">Status:</span>
+        <Badge variant="subtle" class="w-fit">
+          {adminEventStatusLabel("status" in event ? event.status : "published")}
+        </Badge>
+      </div>
     </>
   )
 
@@ -59,7 +66,7 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
           </Link>
         </header>
         <AdminEventFeedback state={props.state.catalog} />
-        <CardWrapper class="p-0">
+        <div>
           <div class="grid gap-3 border-b border-border p-4 sm:grid-cols-[minmax(0,1fr)_14rem_12rem]">
             <Input
               aria-label="Events suchen"
@@ -104,25 +111,49 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                     <Show
                       when={viewPreference?.view() === "tiles"}
                       fallback={
-                        <Link
-                          to="/admin/events/$eventKey"
-                          params={{ eventKey: event.id }}
-                          search={{}}
-                          class="grid gap-2 p-4 transition-colors hover:bg-surface-muted sm:grid-cols-[minmax(0,1fr)_14rem_10rem_7rem] sm:items-center"
-                        >
-                          {eventDetails(event)}
-                        </Link>
+                        <div class="flex items-center gap-2 pr-4 hover:bg-surface-muted">
+                          <Link
+                            to="/admin/events/$eventKey"
+                            params={{ eventKey: event.id }}
+                            search={{}}
+                            class="grid min-w-0 flex-1 gap-2 p-4 transition-colors sm:grid-cols-[minmax(0,1fr)_14rem_10rem_7rem] sm:items-center"
+                          >
+                            {eventDetails(event)}
+                          </Link>
+                          <ButtonIconOnly
+                            type="button"
+                            variant="none"
+                            icon={mdiDelete}
+                            iconClass="group-hover:text-red-400"
+                            title={`Event ${event.title} löschen`}
+                            class="text-content-muted"
+                            disabled={props.state.catalog.isSaving()}
+                            onClick={() => props.state.deleteEvent(event.id, event.title)}
+                            aria-label={`Event ${event.title} löschen`}
+                          />
+                        </div>
                       }
                     >
-                      <CardWrapper class="h-full p-0">
+                      <CardWrapper class="relative h-full p-0">
                         <Link
                           to="/admin/events/$eventKey"
                           params={{ eventKey: event.id }}
                           search={{}}
-                          class="grid h-full gap-3 p-4 transition-colors hover:bg-surface-muted"
+                          class="grid h-full gap-3 p-4 pr-14 transition-colors hover:bg-surface-muted"
                         >
                           {eventDetails(event)}
                         </Link>
+                        <ButtonIconOnly
+                          type="button"
+                          variant="none"
+                          icon={mdiDelete}
+                          iconClass="group-hover:text-red-400"
+                          title={`Event ${event.title} löschen`}
+                          class="absolute right-3 top-3 text-content-muted"
+                          disabled={props.state.catalog.isSaving()}
+                          onClick={() => props.state.deleteEvent(event.id, event.title)}
+                          aria-label={`Event ${event.title} löschen`}
+                        />
                       </CardWrapper>
                     </Show>
                   </li>
@@ -130,7 +161,7 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
               </For>
             </ul>
           </Show>
-        </CardWrapper>
+        </div>
       </UiContainer>
     </main>
   )

@@ -88,6 +88,9 @@ function catalogTierInsert(eventId: Doc<"catalogEvents">["_id"], overrides: Part
     tierKey: "standard",
     name: "Standard",
     description: "Freie Platzwahl",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
     priceCents: 2500,
     feeCents: 250,
     capacity: 10,
@@ -127,6 +130,73 @@ test("rejects catalog writes without an admin role", async () => {
   expect(regularUser.success).toBe(false)
 })
 
+test("deleting an event hides it without removing its order or ticket tier", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t, "user")
+  const token = await tokenFor(adminId)
+  const userToken = await tokenFor(userId)
+  const eventId = await t.run(async (ctx) => ctx.db.insert("catalogEvents", catalogEventInsert()))
+  const tierId = await t.run(async (ctx) =>
+    ctx.db.insert("catalogTicketTiers", catalogTierInsert(eventId, { sold: 1 })),
+  )
+  const orderId = await t.run(async (ctx) =>
+    ctx.db.insert("ticketOrders", {
+      checkoutKey: "deleted-event-order",
+      customerEmail: "buyer@example.com",
+      contactSnapshotJson: "{}",
+      eventKey: "catalog-event",
+      eventTitle: "Katalogveranstaltung",
+      eventSubtitle: "",
+      eventDescription: "",
+      eventStartsAt: "2026-10-01T18:00:00.000Z",
+      eventEndsAt: "",
+      eventDoorsAt: "",
+      venue: "Test hall",
+      city: "Berlin",
+      address: "",
+      organizer: "Eventoren",
+      imageUrl: "",
+      imageAlt: "",
+      catalogVersion: 1,
+      subtotalCents: 2500,
+      feeCents: 250,
+      totalCents: 2750,
+      checkoutContextJson: "{}",
+      paymentReference: "deleted-event-payment",
+      stripeMode: "test",
+      status: "paid",
+      paymentStatus: "paid",
+      reservationExpiresAt: 0,
+      createdAt: "2026-09-01T00:00:00.000Z",
+      updatedAt: "2026-09-01T00:00:00.000Z",
+    }),
+  )
+  const denied = await t.mutation(api.catalog.catalogEventDeleteMutation, {
+    eventKey: "catalog-event",
+    token: userToken,
+  })
+  expect(denied.success).toBe(false)
+
+  const deleted = await t.mutation(api.catalog.catalogEventDeleteMutation, { eventKey: "catalog-event", token })
+  expect(deleted.success).toBe(true)
+  const adminPage = await t.query(api.catalog.catalogEventListAdminPageQuery, {
+    token,
+    paginationOpts: { numItems: 10, cursor: null },
+  })
+  expect(adminPage.success && adminPage.data.page).toEqual([])
+  expect(await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "catalog-event" })).toBeNull()
+  const retained = await t.run(async (ctx) => ({
+    event: await ctx.db.get("catalogEvents", eventId),
+    tier: await ctx.db.get("catalogTicketTiers", tierId),
+    order: await ctx.db.get("ticketOrders", orderId),
+  }))
+  expect(retained.event).toMatchObject({ status: "archived", deletedAt: expect.any(String) })
+  expect(retained.tier?.sold).toBe(1)
+  expect(retained.order?.eventTitle).toBe("Katalogveranstaltung")
+  expect((await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))).success).toBe(false)
+})
+
 test("admin writes are versioned and published reads match EventItem", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
@@ -141,6 +211,9 @@ test("admin writes are versioned and published reads match EventItem", async () 
     tierKey: "standard",
     name: "Standard",
     description: "Freie Platzwahl",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
     priceCents: 2500,
     feeCents: 250,
     capacity: 10,
@@ -171,6 +244,9 @@ test("admin writes are versioned and published reads match EventItem", async () 
         id: "standard",
         name: "Standard",
         description: "Freie Platzwahl",
+        startsAt: "2026-10-01T18:00:00.000Z",
+        doorsAt: "2026-10-01T17:00:00.000Z",
+        endsAt: "2026-10-01T22:00:00.000Z",
         priceCents: 2500,
         feeCents: 250,
         capacity: 10,
@@ -182,6 +258,146 @@ test("admin writes are versioned and published reads match EventItem", async () 
 
   const syncState = await t.run(async (ctx) => ctx.db.query("catalogSyncStates").collect())
   expect(syncState).toMatchObject([{ version: published.data.catalogVersion, status: "pending", attempts: 0 }])
+})
+
+test("event inclusions and exclusions preserve omitted values and explicitly saved empty arrays", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const token = await tokenFor(adminId)
+
+  const initial = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    ...eventArgs(token, "draft"),
+    inclusions: ["Eintrittskarte"],
+    exclusions: ["Anreise"],
+  })
+  expect(initial.success).toBe(true)
+
+  const legacyUpdate = await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
+  expect(legacyUpdate.success).toBe(true)
+  const preserved = await t.run(async (ctx) =>
+    ctx.db
+      .query("catalogEvents")
+      .withIndex("eventKey", (q) => q.eq("eventKey", "catalog-event"))
+      .unique(),
+  )
+  expect(preserved).toMatchObject({ inclusions: ["Eintrittskarte"], exclusions: ["Anreise"] })
+
+  const cleared = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    ...eventArgs(token, "draft"),
+    inclusions: [],
+    exclusions: [],
+  })
+  expect(cleared.success).toBe(true)
+  const adminPage = await t.query(api.catalog.catalogEventListAdminPageQuery, {
+    token,
+    paginationOpts: { numItems: 10, cursor: null },
+  })
+  expect(adminPage.success && adminPage.data.page[0]).toMatchObject({ inclusions: [], exclusions: [] })
+})
+
+test("tier upsert requires start and end times and defaults empty doors time to start", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const token = await tokenFor(adminId)
+  await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
+
+  const missingStart = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    eventKey: "catalog-event",
+    tierKey: "invalid-start",
+    name: "Invalid start",
+    description: "",
+    startsAt: " ",
+    doorsAt: "",
+    endsAt: "2026-10-01T22:00:00.000Z",
+    priceCents: 2500,
+    feeCents: 250,
+    capacity: 10,
+    token,
+  })
+  const missingEnd = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    eventKey: "catalog-event",
+    tierKey: "invalid-end",
+    name: "Invalid end",
+    description: "",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "",
+    endsAt: "",
+    priceCents: 2500,
+    feeCents: 250,
+    capacity: 10,
+    token,
+  })
+  const upserted = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    eventKey: "catalog-event",
+    tierKey: "standard",
+    name: "Standard",
+    description: "",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "",
+    endsAt: "2026-10-01T22:00:00.000Z",
+    priceCents: 2500,
+    feeCents: 250,
+    capacity: 10,
+    token,
+  })
+
+  expect(missingStart).toMatchObject({ success: false, errorMessage: "Start time is required" })
+  expect(missingEnd).toMatchObject({ success: false, errorMessage: "End time is required" })
+  expect(upserted.success).toBe(true)
+  await t.mutation(api.catalog.catalogEventPublishMutation, { eventKey: "catalog-event", token })
+  const projected = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "catalog-event" })
+  expect(projected?.tiers[0]).toMatchObject({
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T18:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
+  })
+})
+
+test("tier upsert rejects malformed ISO start, admission, and end times", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const token = await tokenFor(adminId)
+  await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
+
+  const validTimes = {
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
+  }
+  const baseArgs = {
+    eventKey: "catalog-event",
+    name: "Standard",
+    description: "",
+    priceCents: 2500,
+    feeCents: 250,
+    capacity: 10,
+    token,
+  }
+  const invalidStart = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...baseArgs,
+    tierKey: "invalid-start",
+    ...validTimes,
+    startsAt: "tomorrow evening",
+  })
+  const invalidDoors = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...baseArgs,
+    tierKey: "invalid-doors",
+    ...validTimes,
+    doorsAt: "2026-02-30T17:00:00.000Z",
+  })
+  const invalidEnd = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...baseArgs,
+    tierKey: "invalid-end",
+    ...validTimes,
+    endsAt: "not-a-date",
+  })
+
+  expect(invalidStart).toMatchObject({ success: false, errorMessage: "Start time must be a valid ISO date and time" })
+  expect(invalidDoors).toMatchObject({
+    success: false,
+    errorMessage: "Admission time must be a valid ISO date and time",
+  })
+  expect(invalidEnd).toMatchObject({ success: false, errorMessage: "End time must be a valid ISO date and time" })
 })
 
 test("admins delete unused tiers and hide sold tiers while retaining historical inventory", async () => {
@@ -223,6 +439,9 @@ test("admins delete unused tiers and hide sold tiers while retaining historical 
     tierKey: "sold",
     name: "Reused",
     description: "",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
     priceCents: 2500,
     feeCents: 0,
     capacity: 10,
@@ -471,6 +690,9 @@ test("tier capacity cannot undercut reserved and sold inventory", async () => {
     tierKey: "standard",
     name: "Standard",
     description: "Freie Platzwahl",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
     priceCents: 2500,
     feeCents: 250,
     capacity: 10,
@@ -499,6 +721,9 @@ test("tier capacity cannot undercut reserved and sold inventory", async () => {
     tierKey: "standard",
     name: "Standard",
     description: "Freie Platzwahl",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
     priceCents: 2500,
     feeCents: 250,
     capacity: 2,
@@ -509,6 +734,9 @@ test("tier capacity cannot undercut reserved and sold inventory", async () => {
     tierKey: "standard",
     name: "Standard",
     description: "Freie Platzwahl",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
     priceCents: 2500,
     feeCents: 250,
     capacity: 4,

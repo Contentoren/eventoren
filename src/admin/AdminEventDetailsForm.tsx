@@ -11,13 +11,14 @@ import { eventCategoryLabels } from "../events/eventCategoryLabels.ts"
 import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import { AdminEventFeedback } from "./AdminEventFeedback.tsx"
+import { AdminEventHighlightsFields } from "./AdminEventHighlightsFields.tsx"
 import { adminEventDetailsFormStateCreate } from "./adminEventDetailsFormStateCreate.ts"
 
 export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onSaved?: (eventKey: string) => void }) {
   const state = adminEventDetailsFormStateCreate({ catalog: props.state, onSaved: props.onSaved })
 
   return (
-    <form class="flex flex-col gap-6" onSubmit={state.submit}>
+    <form class="flex flex-col gap-6" data-hydrated={state.hydrated() ? "true" : "false"} onSubmit={state.submit}>
       <div>
         <h2 class="text-lg font-semibold text-content">Eventdetails</h2>
         <p class="mt-1 text-sm text-content-muted">Alle Angaben für Darstellung und Veröffentlichung.</p>
@@ -219,13 +220,35 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
               />
             </Show>
           </fieldset>
-          <Field
-            id="admin-event-tags"
-            label="Tags (kommagetrennt)"
-            class="sm:col-span-2"
-            value={props.state.eventDraft().tags}
-            onInput={(value) => props.state.eventFieldChange("tags", value)}
-          />
+        </div>
+      </FormSection>
+
+      <FormSection title="Highlights">
+        <AdminEventHighlightsFields state={props.state} />
+      </FormSection>
+
+      <FormSection title="Leistungen">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <Label for="admin-event-inclusions">Inklusive</Label>
+            <Textarea
+              id="admin-event-inclusions"
+              class="mt-2 min-h-32"
+              value={props.state.eventDraft().inclusions.join("\n")}
+              onInput={(event) => props.state.eventFieldChange("inclusions", event.currentTarget.value.split("\n"))}
+            />
+            <p class="mt-1 text-sm text-content-muted">Eine Leistung pro Zeile.</p>
+          </div>
+          <div>
+            <Label for="admin-event-exclusions">Nicht enthalten</Label>
+            <Textarea
+              id="admin-event-exclusions"
+              class="mt-2 min-h-32"
+              value={props.state.eventDraft().exclusions.join("\n")}
+              onInput={(event) => props.state.eventFieldChange("exclusions", event.currentTarget.value.split("\n"))}
+            />
+            <p class="mt-1 text-sm text-content-muted">Eine Leistung pro Zeile.</p>
+          </div>
         </div>
       </FormSection>
 
@@ -263,20 +286,20 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
           {state.validationMessage()}
         </p>
       </Show>
+      <AdminEventFeedback state={props.state} />
       <div class="flex flex-wrap items-center gap-3 border-t border-border pt-5">
-        <Button type="submit" disabled={props.state.isSaving() || state.imageUploading()}>
-          {props.state.isSaving() ? "Speichert …" : "Änderungen speichern"}
+        <Button type="submit" disabled={props.state.isSaving() || state.imageUploading() || !!state.pendingAction()}>
+          {state.pendingAction() === "save" ? "Speichert …" : "Änderungen speichern"}
         </Button>
         <Button
           type="button"
           variant="filledGreen"
-          disabled={props.state.isSaving() || state.imageUploading() || !state.canPublish()}
+          disabled={props.state.isSaving() || state.imageUploading() || !!state.pendingAction() || !state.canPublish()}
           onClick={state.publish}
         >
-          Veröffentlichen
+          {state.pendingAction() === "publish" ? "Wird veröffentlicht …" : "Veröffentlichen"}
         </Button>
       </div>
-      <AdminEventFeedback state={props.state} />
     </form>
   )
 }

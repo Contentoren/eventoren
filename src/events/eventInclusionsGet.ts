@@ -211,6 +211,7 @@ function eventInclusionsFallback(event: EventItem): readonly string[] {
 }
 
 export function eventInclusionsGet(event: EventItem): readonly string[] {
+  if (event.inclusions !== undefined) return event.inclusions
   const exact = mockInclusionsById[event.id]
   if (exact && exact.length > 0) {
     return exact

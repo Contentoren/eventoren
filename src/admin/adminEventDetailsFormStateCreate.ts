@@ -1,4 +1,4 @@
-import { createMemo } from "solid-js"
+import { createMemo, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import type { AdminEventDraft } from "./AdminEventDraft.ts"
@@ -11,6 +11,8 @@ export function adminEventDetailsFormStateCreate(inputs: {
   onSaved?: (eventKey: string) => void
 }) {
   const validationMessage = createSignalObject("")
+  const hydrated = createSignalObject(false)
+  onMount(() => hydrated.set(true))
   const categoryPicker = adminCategoryPickerStateCreate({ catalog: inputs.catalog })
   const statusSignal = {
     get: () => inputs.catalog.eventDraft().status,
@@ -22,6 +24,7 @@ export function adminEventDetailsFormStateCreate(inputs: {
   const imageUploading = createSignalObject(false)
   const imageUploadError = createSignalObject("")
   const imageDragActive = createSignalObject(false)
+  const pendingAction = createSignalObject<"save" | "publish" | null>(null)
   let imageRequestRevision = 0
 
   const imageUrlChange = (value: string) => {
@@ -76,15 +79,30 @@ export function adminEventDetailsFormStateCreate(inputs: {
 
   const submit = async (event: SubmitEvent) => {
     event.preventDefault()
-    if (imageUploading.get()) return
+    if (imageUploading.get() || pendingAction.get()) return
     validationMessage.set("")
-    await inputs.catalog.saveEvent()
-    const eventKey = inputs.catalog.selectedEventKey()
-    if (eventKey && !inputs.catalog.errorMessage()) inputs.onSaved?.(eventKey)
+    pendingAction.set("save")
+    try {
+      const eventKey = await inputs.catalog.saveEvent()
+      if (eventKey) inputs.onSaved?.(eventKey)
+    } finally {
+      pendingAction.set(null)
+    }
+  }
+
+  const publish = async () => {
+    if (imageUploading.get() || pendingAction.get()) return
+    pendingAction.set("publish")
+    try {
+      await inputs.catalog.publishEvent()
+    } finally {
+      pendingAction.set(null)
+    }
   }
 
   return {
     categoryPicker,
+    hydrated: hydrated.get,
     validationMessage: validationMessage.get,
     statusSignal,
     statusOptions: () => ["draft", "published", "archived"],
@@ -104,9 +122,8 @@ export function adminEventDetailsFormStateCreate(inputs: {
     imageDragStart: () => imageDragActive.set(true),
     imageDragEnd: () => imageDragActive.set(false),
     canPublish,
+    pendingAction: pendingAction.get,
     submit,
-    publish: () => {
-      if (!imageUploading.get()) void inputs.catalog.publishEvent()
-    },
+    publish,
   }
 }
