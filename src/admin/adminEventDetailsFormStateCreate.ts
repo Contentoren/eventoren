@@ -33,11 +33,11 @@ export function adminEventDetailsFormStateCreate(inputs: {
   const imageUpload = async (file?: File) => {
     if (!file || imageUploading.get()) return
     const eventKey = inputs.catalog.eventDraft().eventKey
-    const draftRevision = inputs.catalog.eventDraftRevision?.() ?? 0
+    const draftRevision = inputs.catalog.eventDraftRevision()
     const requestRevision = ++imageRequestRevision
     const isCurrentUpload = () =>
       requestRevision === imageRequestRevision &&
-      (inputs.catalog.eventDraftRevision?.() ?? 0) === draftRevision &&
+      inputs.catalog.eventDraftRevision() === draftRevision &&
       inputs.catalog.eventDraft().eventKey === eventKey
     imageUploadError.set("")
     imageUploading.set(true)

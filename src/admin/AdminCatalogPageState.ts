@@ -12,7 +12,7 @@ export type AdminCatalogPageState = {
   selectedEvent: Accessor<EventItem | undefined>
   selectedEventKey: Accessor<string>
   eventDraft: Accessor<AdminEventDraft>
-  eventDraftRevision?: Accessor<number>
+  eventDraftRevision: Accessor<number>
   tierDraft: Accessor<AdminTierDraft>
   isAuthorized: Accessor<boolean>
   isLoading?: Accessor<boolean>

@@ -48,6 +48,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
   const baseEvents = createSignalObject<readonly EventItem[]>(inputs.events)
   const selectedEventKey = createSignalObject(firstEvent?.id ?? "")
   const eventDraft = createSignalObject<AdminEventDraft>(firstEvent ? eventToDraft(firstEvent) : emptyEventDraft())
+  const eventDraftRevision = createSignalObject(0)
   const tierDraft = createSignalObject<AdminTierDraft>(emptyTierDraft())
   const baseErrorMessage = createSignalObject("")
   const successMessage = createSignalObject("")
@@ -73,6 +74,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
 
   const selectEvent = (event: EventItem) => {
     selectedEventKey.set(event.id)
+    eventDraftRevision.set(eventDraftRevision.get() + 1)
     eventDraft.set(eventToDraft(event))
     tierDraft.set(emptyTierDraft())
     baseErrorMessage.set("")
@@ -81,6 +83,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
 
   const startNewEvent = () => {
     selectedEventKey.set("")
+    eventDraftRevision.set(eventDraftRevision.get() + 1)
     eventDraft.set(emptyEventDraft())
     tierDraft.set(emptyTierDraft())
     baseErrorMessage.set("")
@@ -224,6 +227,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
     selectedEvent,
     selectedEventKey: selectedEventKey.get,
     eventDraft: eventDraft.get,
+    eventDraftRevision: eventDraftRevision.get,
     tierDraft: tierDraft.get,
     isAuthorized: () => inputs.authorized ?? true,
     isLoading,
