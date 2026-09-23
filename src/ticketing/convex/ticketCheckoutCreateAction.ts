@@ -27,6 +27,7 @@ export const ticketCheckoutCreateAction = action({
       email: v.string(),
       givenName: v.string(),
       familyName: v.string(),
+      address: v.string(),
       phone: v.string(),
     }),
     legalContext: v.object({
@@ -69,7 +70,8 @@ export const ticketCheckoutCreateAction = action({
     const email = args.customer.email.trim().toLowerCase()
     const givenName = args.customer.givenName.trim()
     const familyName = args.customer.familyName.trim()
-    if (!email || !givenName || !familyName) return createResultError(op, "Customer contact is incomplete")
+    const address = args.customer.address.trim()
+    if (!email || !givenName || !familyName || !address) return createResultError(op, "Customer contact is incomplete")
     if (!/^\S+@\S+\.\S+$/u.test(email)) return createResultError(op, "Customer email is invalid")
 
     const tickets = args.tickets.map((ticket) => ({
@@ -92,6 +94,7 @@ export const ticketCheckoutCreateAction = action({
       customerEmail: email,
       customerGivenName: givenName,
       customerFamilyName: familyName,
+      customerAddress: address,
       customerPhone: args.customer.phone.trim(),
       eventKey: args.eventKey,
       catalogVersion: args.catalogVersion,

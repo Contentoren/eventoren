@@ -15,6 +15,7 @@ export function ticketCheckoutContextCanonicalize(input: {
     email: string
     givenName: string
     familyName: string
+    address: string
     phone: string
   }
   legalContext: {

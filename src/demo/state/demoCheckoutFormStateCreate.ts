@@ -23,10 +23,11 @@ import { demoFlowContextUse } from "./demoFlowContextUse.ts"
 
 type DemoCheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
-const demoContactRequiredFields = ["firstName", "lastName", "email"] as const
+const demoContactRequiredFields = ["firstName", "lastName", "email", "address"] as const
 
 function demoContactFieldInvalid(field: (typeof demoContactRequiredFields)[number], value: string) {
   if (field === "firstName" || field === "lastName") return value.trim().length < 2
+  if (field === "address") return value.trim().length < 3
   return !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim())
 }
 
@@ -48,6 +49,7 @@ export function demoCheckoutFormStateCreate(inputs: {
     firstName: "Alex",
     lastName: "Demo",
     email: "alex@example.test",
+    address: "Musterstraße 1",
     phone: "",
   })
   const step = createSignalObject<TicketCheckoutStep>("kontakt")
@@ -85,7 +87,7 @@ export function demoCheckoutFormStateCreate(inputs: {
 
   const contactFieldChange = (field: keyof TicketContact, value: string) => {
     contact.set({ ...contact.get(), [field]: value })
-    const requiredField = field === "firstName" || field === "lastName" || field === "email" ? field : undefined
+    const requiredField = field === "phone" ? undefined : field
     if (submitAttempted.get() && !inputs.relaxedValidation && requiredField) {
       const current = invalidRequiredFields.get().filter((key) => key !== requiredField)
       invalidRequiredFields.set(demoContactFieldInvalid(requiredField, value) ? [...current, requiredField] : current)

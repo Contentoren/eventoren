@@ -32,6 +32,7 @@ export function ticketCheckoutText() {
     lastName: "Nachname",
     email: "E-Mail",
     emailHint: "An diese Adresse senden wir deine Ticketbestätigung.",
+    address: "Adresse",
     phone: "Telefon (optional)",
     participantTitle: "Teilnehmernamen",
     participantDescription:

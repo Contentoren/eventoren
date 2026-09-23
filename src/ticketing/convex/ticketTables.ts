@@ -37,6 +37,7 @@ export const ticketTables = {
     customerEmail: v.string(),
     customerGivenName: v.optional(v.string()),
     customerFamilyName: v.optional(v.string()),
+    customerAddress: v.optional(v.string()),
     customerPhone: v.optional(v.string()),
     contactSnapshotJson: v.string(),
     eventKey: v.string(),

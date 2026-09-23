@@ -16,6 +16,7 @@ export type TicketCheckoutCreateInput = {
     readonly email: string
     readonly givenName: string
     readonly familyName: string
+    readonly address: string
     readonly phone: string
   }
   readonly legalContext: {

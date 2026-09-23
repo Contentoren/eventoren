@@ -1,1 +1,6 @@
-export type TicketRequiredFieldKey = "firstName" | "lastName" | "email" | `participant:${string}:${string}:${number}`
+export type TicketRequiredFieldKey =
+  | "firstName"
+  | "lastName"
+  | "email"
+  | "address"
+  | `participant:${string}:${string}:${number}`

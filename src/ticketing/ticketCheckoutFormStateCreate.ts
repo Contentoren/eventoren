@@ -36,10 +36,11 @@ import { ticketingServerRead } from "./ticketingServerRead.ts"
 
 type CheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
-const ticketContactRequiredFields = ["firstName", "lastName", "email"] as const
+const ticketContactRequiredFields = ["firstName", "lastName", "email", "address"] as const
 
 function ticketContactFieldInvalid(field: (typeof ticketContactRequiredFields)[number], value: string) {
   if (field === "firstName" || field === "lastName") return value.trim().length < 2
+  if (field === "address") return value.trim().length < 3
   return !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim())
 }
 
@@ -117,7 +118,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
 
   const contactFieldChange = (field: keyof TicketContact, value: string) => {
     contact.set({ ...contact.get(), [field]: value })
-    if (submitAttempted.get() && (field === "firstName" || field === "lastName" || field === "email")) {
+    if (submitAttempted.get() && field !== "phone") {
       const invalid = ticketContactFieldInvalid(field, value)
       const current = invalidRequiredFields.get().filter((key) => key !== field)
       invalidRequiredFields.set(invalid ? [...current, field] : current)
@@ -239,6 +240,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
             email: validated.data.email,
             givenName: validated.data.firstName,
             familyName: validated.data.lastName,
+            address: validated.data.address,
             phone: validated.data.phone,
           },
           legalContext: {

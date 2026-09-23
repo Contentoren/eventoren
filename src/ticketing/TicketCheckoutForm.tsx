@@ -120,6 +120,26 @@ export function TicketCheckoutForm(props: {
                 />
               </div>
 
+              <div>
+                <label for="checkout-address" class="mb-space-2 block text-sm font-medium text-content">
+                  {text().address}
+                </label>
+                <Input
+                  id="checkout-address"
+                  name="street-address"
+                  autocomplete="street-address"
+                  required={!props.relaxedValidation}
+                  aria-invalid={state.isFieldInvalid("address") ? "true" : undefined}
+                  value={state.contact().address}
+                  onInput={(event) => state.contactFieldChange("address", event.currentTarget.value)}
+                  class="focus-ring h-11 w-full rounded-control border px-space-4 text-sm"
+                  classList={{
+                    "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid("address"),
+                    "!border-danger/50 !bg-danger-soft text-content": state.isFieldInvalid("address"),
+                  }}
+                />
+              </div>
+
               <section
                 class="flex flex-col gap-space-4 border-t border-border-subtle pt-space-4"
                 aria-labelledby="checkout-participants"

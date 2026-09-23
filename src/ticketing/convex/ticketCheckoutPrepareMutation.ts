@@ -23,6 +23,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     customerEmail: v.string(),
     customerGivenName: v.string(),
     customerFamilyName: v.string(),
+    customerAddress: v.string(),
     customerPhone: v.string(),
     eventKey: v.string(),
     catalogVersion: v.number(),
@@ -74,6 +75,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         email: args.customerEmail,
         givenName: args.customerGivenName,
         familyName: args.customerFamilyName,
+        address: args.customerAddress,
         phone: args.customerPhone,
       },
       legalContext: args.legalContext,
@@ -91,6 +93,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         email: args.customerEmail,
         givenName: args.customerGivenName,
         familyName: args.customerFamilyName,
+        address: args.customerAddress,
         phone: args.customerPhone,
       },
       legalContext: {
@@ -157,6 +160,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         email: args.customerEmail,
         givenName: args.customerGivenName,
         familyName: args.customerFamilyName,
+        address: args.customerAddress,
         phone: args.customerPhone,
       },
       legalContext: acceptedLegalContext,
@@ -203,7 +207,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         .query("catalogTicketTiers")
         .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", selection.tierKey))
         .unique()
-      if (!tier) return createResultError(op, "The ticket tier was not found")
+      if (!tier || tier.archivedAt) return createResultError(op, "The ticket tier was not found")
       const available = tier.capacity - tier.reserved - tier.sold
       if (selection.quantity > available) return createResultError(op, "The requested ticket quantity is unavailable")
       subtotalCents += tier.priceCents * selection.quantity
@@ -234,11 +238,13 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       customerEmail: args.customerEmail,
       customerGivenName: args.customerGivenName,
       customerFamilyName: args.customerFamilyName,
+      customerAddress: args.customerAddress,
       customerPhone: args.customerPhone,
       contactSnapshotJson: JSON.stringify({
         email: args.customerEmail,
         givenName: args.customerGivenName,
         familyName: args.customerFamilyName,
+        address: args.customerAddress,
         phone: args.customerPhone,
       }),
       eventKey: event.eventKey,

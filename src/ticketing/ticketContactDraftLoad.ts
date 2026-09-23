@@ -31,6 +31,7 @@ export function ticketContactDraftLoad(): Result<TicketContact> {
     firstName: typeof candidate.firstName === "string" ? candidate.firstName : "",
     lastName: typeof candidate.lastName === "string" ? candidate.lastName : "",
     email: typeof candidate.email === "string" ? candidate.email : "",
+    address: typeof candidate.address === "string" ? candidate.address : "",
     phone: typeof candidate.phone === "string" ? candidate.phone : "",
   })
 }
