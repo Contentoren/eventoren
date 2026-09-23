@@ -149,6 +149,27 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
     }
     if (url.pathname.endsWith("/ticket-fulfillment"))
       return fulfillmentResponse("payment_checkoutkey123456789012345678901234")
+    if (url.pathname.endsWith("/payment-details"))
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            paymentReference: "payment_checkoutkey123456789012345678901234",
+            orderReference: "order_123abc",
+            stripeMode: "test",
+            session: null,
+            charge: {
+              billingDetails: { name: null, email: null, phone: null, address: null },
+              paymentMethod: { type: "card", card: { brand: "visa", last4: "4242", expMonth: 7, expYear: 2030 } },
+              amountCents: 1000,
+              currency: "eur",
+              status: "succeeded",
+              receiptUrl: "https://stripe.test/receipt",
+            },
+          },
+        }),
+        { status: 200 },
+      )
     if (url.pathname.endsWith("/status")) return statusResponse("payment_checkoutkey123456789012345678901234")
     if (url.pathname.endsWith("/expire"))
       return statusResponse("payment_checkoutkey123456789012345678901234", "expired")
@@ -205,13 +226,17 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
     "payment_checkoutkey123456789012345678901234",
   )
   const fulfillment = await billingEventorenClient.ticketFulfillmentPrepare(config.data, fulfillmentInput())
+  const paymentDetails = await billingEventorenClient.ticketPaymentDetailsGet(config.data, {
+    paymentReference: "payment_checkoutkey123456789012345678901234",
+    orderReference: "order_123abc",
+  })
 
   expect(catalog).toMatchObject({ success: true, data: { catalogVersion: 7, eventCount: 1 } })
   expect(checkout).toMatchObject({ success: true, data: { status: "checkout_created", url: expect.any(String) } })
   expect(status).toMatchObject({ success: true, data: { kind: "status", data: { payment: "pending" } } })
   expect(expiration).toMatchObject({ success: true, data: { kind: "status", data: { payment: "expired" } } })
   expect(fulfillment).toMatchObject({ success: true, data: { status: "accepted", replayed: false } })
-  expect(requests).toHaveLength(5)
+  expect(requests).toHaveLength(6)
   expect(requests[0]?.url).toBe("https://billing.test/api/checkout/organizations/eventoren/catalog")
   expect(requests[0]?.init).toMatchObject({
     method: "POST",
@@ -229,6 +254,13 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
   expect(requests[3]?.url).toContain("/expire?organizationId=eventoren-test")
   expect(requests[4]?.url).toBe("https://billing.test/api/checkout/organizations/eventoren/ticket-fulfillment")
   expect(JSON.parse(String(requests[4]?.init?.body))).toMatchObject({ organizationId: "eventoren-test" })
+  expect(paymentDetails).toMatchObject({
+    success: true,
+    data: { charge: { paymentMethod: { card: { last4: "4242" } } } },
+  })
+  expect(requests[5]?.url).toContain("/ticket-checkout/payment_checkoutkey123456789012345678901234/payment-details?")
+  expect(requests[5]?.url).toContain("organizationId=eventoren-test")
+  expect(requests[5]?.url).toContain("orderReference=order_123abc")
 })
 
 test("preserves 404 semantics and normalizes Billing transport errors", async () => {

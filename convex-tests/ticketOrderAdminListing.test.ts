@@ -32,6 +32,13 @@ test("lists orders from different customers newest first for admin and dev roles
       "second@example.test",
       "first@example.test",
     ])
+    expect(result.data.page[0].eventKey).toBe("event")
+    expect(result.data.page[0]).toMatchObject({
+      customerGivenName: "Erika",
+      customerFamilyName: "Musterfrau",
+      customerAddress: "Musterstraße 12, 50667 Köln",
+      customerPhone: "+49 221 123456",
+    })
   }
 })
 
@@ -48,6 +55,33 @@ test("rejects the all-orders query for an ordinary user", async () => {
   expect(result.success).toBe(false)
 })
 
+test("allows admins to read local order detail and rejects ordinary users", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await userInsert(t, "admin")
+  const userId = await userInsert(t, "user")
+  const orderId = await orderInsert(t, userId, "private@example.test", "2026-09-21T10:00:00.000Z")
+
+  const allowed = await t.query(api.ticketing.ticketOrderGetAdminQuery, {
+    token: await createToken(adminId, authSecret),
+    orderId,
+  })
+  expect(allowed.success).toBe(true)
+  if (allowed.success)
+    expect(allowed.data).toMatchObject({
+      customerEmail: "private@example.test",
+      customerGivenName: "Erika",
+      customerFamilyName: "Musterfrau",
+      customerAddress: "Musterstraße 12, 50667 Köln",
+      customerPhone: "+49 221 123456",
+    })
+
+  const rejected = await t.query(api.ticketing.ticketOrderGetAdminQuery, {
+    token: await createToken(userId, authSecret),
+    orderId,
+  })
+  expect(rejected.success).toBe(false)
+})
+
 async function userInsert(t: ReturnType<typeof convexTest>, role: "admin" | "dev" | "user") {
   const now = new Date().toISOString()
   return await t.run(async (ctx) => ctx.db.insert("users", { name: role, role, createdAt: now, updatedAt: now }))
@@ -59,11 +93,15 @@ async function orderInsert(
   customerEmail: string,
   createdAt: string,
 ) {
-  await t.run(async (ctx) =>
+  return await t.run(async (ctx) =>
     ctx.db.insert("ticketOrders", {
       checkoutKey: `checkout-${customerEmail}`,
       ownerUserId,
       customerEmail,
+      customerGivenName: "Erika",
+      customerFamilyName: "Musterfrau",
+      customerAddress: "Musterstraße 12, 50667 Köln",
+      customerPhone: "+49 221 123456",
       contactSnapshotJson: "{}",
       eventKey: "event",
       eventTitle: "Testveranstaltung",

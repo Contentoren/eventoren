@@ -67,5 +67,11 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
       status === "paid" ? ("success" as const) : status === "pending" ? ("warning" as const) : ("danger" as const),
     priceFormat: ticketPriceFormat,
     reload,
+    details: () => null,
+    selectedOrderId: () => null,
+    detailsError: () => "",
+    detailsLoading: () => false,
+    orderOpen: async () => {},
+    orderClose: () => {},
   }
 }

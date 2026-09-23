@@ -1,5 +1,6 @@
 import type { Accessor } from "solid-js"
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
+import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
 
 export type AdminTicketOrdersPageState = {
   readonly customerName: (order: AdminTicketOrderSummary) => string
@@ -13,4 +14,10 @@ export type AdminTicketOrdersPageState = {
   readonly paymentTone: (status: AdminTicketOrderSummary["paymentStatus"]) => "success" | "warning" | "danger"
   readonly priceFormat: (cents: number) => string
   readonly reload: () => void
+  readonly details: Accessor<AdminTicketOrderDetails | null>
+  readonly selectedOrderId: Accessor<string | null>
+  readonly detailsError: Accessor<string>
+  readonly detailsLoading: Accessor<boolean>
+  readonly orderOpen: (orderId: string) => Promise<void>
+  readonly orderClose: () => void
 }

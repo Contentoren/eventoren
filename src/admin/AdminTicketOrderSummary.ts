@@ -3,6 +3,9 @@ export type AdminTicketOrderSummary = {
   readonly customerEmail: string
   readonly customerFamilyName?: string
   readonly customerGivenName?: string
+  readonly customerAddress?: string
+  readonly customerPhone?: string
+  readonly eventKey: string
   readonly eventStartsAt: string
   readonly eventTitle: string
   readonly paymentReference: string

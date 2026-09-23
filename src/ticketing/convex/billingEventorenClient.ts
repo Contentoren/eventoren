@@ -8,6 +8,7 @@ import type { EventorenTicketCheckoutCreateResponse } from "billing/contracts/ev
 import type { EventorenTicketCheckoutStatusResponse } from "billing/contracts/eventorenTicketCheckoutStatusResponseSchema"
 import type { EventorenTicketFulfillmentPrepareRequest } from "billing/contracts/eventorenTicketFulfillmentPrepareRequestSchema"
 import type { EventorenTicketFulfillmentPrepareResponse } from "billing/contracts/eventorenTicketFulfillmentPrepareResponseSchema"
+import type { EventorenTicketPaymentDetailsResponse } from "billing/contracts/eventorenTicketPaymentDetailsResponseSchema"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
 import { ticketCheckoutFulfillmentActivationIsEnabled } from "./ticketCheckoutFulfillmentActivationIsEnabled.js"
 
@@ -15,6 +16,7 @@ type BillingEventorenFetcher = NonNullable<BillingClientCreateOptions["fetcher"]
 
 type BillingEventorenConfigOptions = {
   fetcher?: BillingEventorenFetcher
+  baseUrl?: string
 }
 
 type BillingEventorenConfig = {
@@ -39,7 +41,7 @@ type BillingStatusLookup =
 export const billingEventorenClient = {
   configRead(options: BillingEventorenConfigOptions = {}): Result<BillingEventorenConfig> {
     const op = "billingEventorenConfigRead"
-    const baseUrl = process.env.EVENTOREN_BILLING_BASE_URL?.trim().replace(/\/$/u, "")
+    const baseUrl = (options.baseUrl ?? process.env.EVENTOREN_BILLING_BASE_URL)?.trim().replace(/\/$/u, "")
     const organizationId = process.env.EVENTOREN_BILLING_ORGANIZATION_ID?.trim()
     const apiCredential = process.env.EVENTOREN_BILLING_API_CREDENTIAL?.trim()
     const stripeMode = process.env.EVENTOREN_BILLING_STRIPE_MODE?.trim()
@@ -169,6 +171,30 @@ export const billingEventorenClient = {
       )
     return createResult(result.data)
   },
+
+  async ticketPaymentDetailsGet(
+    config: BillingEventorenConfig,
+    input: { readonly paymentReference: string; readonly orderReference: string },
+  ): PromiseResult<EventorenTicketPaymentDetailsResponse["data"]> {
+    const op = "billingEventorenTicketPaymentDetailsGet"
+    try {
+      const result = await config.client.eventorenTicketPaymentDetailsGet({
+        ...input,
+        organizationId: config.organizationId,
+      })
+      if (!result.success)
+        return billingOperationError(
+          op,
+          result,
+          "Billing payment details returned HTTP",
+          "Billing returned invalid payment details",
+          "Billing payment details request failed",
+        )
+      return createResult(result.data)
+    } catch {
+      return createResultError(op, "Billing payment details request failed")
+    }
+  },
 }
 
 function billingOperationError(
@@ -210,7 +236,8 @@ function billingRequestTargetNormalize(input: RequestInfo | URL, method: string 
   if (
     !target.pathname.endsWith("/catalog") &&
     !target.pathname.endsWith("/ticket-checkout") &&
-    !target.pathname.endsWith("/ticket-fulfillment")
+    !target.pathname.endsWith("/ticket-fulfillment") &&
+    !target.pathname.endsWith("/payment-details")
   )
     return input
   target.search = ""
