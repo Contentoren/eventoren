@@ -1,13 +1,52 @@
 import { For, Show } from "solid-js"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
+import { Checkbox } from "#ui/input/check/Checkbox.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
+import { adminListViewPreferenceContextUse } from "../viewPreference/adminListViewPreferenceContextUse.ts"
 import type { AdminMemberManagementState } from "./AdminMemberManagementState.ts"
 
 export function AdminMemberManagement(props: { readonly state: AdminMemberManagementState }) {
   const state = props.state
+  const viewPreference = adminListViewPreferenceContextUse()
+
+  const memberDetails = (member: ReturnType<typeof state.members>[number]) => (
+    <>
+      <div class="min-w-0">
+        <p class="truncate font-semibold text-content">{member.displayName || member.userName}</p>
+        <p class="truncate text-sm text-content-muted">
+          {member.email ?? member.preferredLoginName ?? member.userName}
+        </p>
+      </div>
+      <div>
+        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-content-muted">{state.text().role}</p>
+        <div class="flex flex-wrap gap-2">
+          <For each={member.zitadelRoles}>
+            {(role) => <Badge variant="subtle">{state.text().roleName(role)}</Badge>}
+          </For>
+        </div>
+      </div>
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-content-muted">{state.text().invitation}</p>
+        <p class="mt-2 text-sm text-content">{state.invitationFormat(member.organizerInvitedAt)}</p>
+      </div>
+      <Button
+        class="w-full lg:w-auto"
+        variant={member.organizerGranted ? "outline" : undefined}
+        disabled={state.isUpdating(member.zitadelUserId)}
+        aria-label={`${member.organizerGranted ? state.text().revoke : state.text().grant}: ${member.displayName || member.userName}`}
+        onClick={() => void state.roleChange(member)}
+      >
+        {state.isUpdating(member.zitadelUserId)
+          ? state.text().updating
+          : member.organizerGranted
+            ? state.text().revoke
+            : state.text().grant}
+      </Button>
+    </>
+  )
 
   return (
     <section aria-labelledby="admin-member-management-title" class="flex flex-col gap-5">
@@ -40,6 +79,19 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
             <Button type="submit" disabled={state.isLoading()}>
               {state.text().searchSubmit}
             </Button>
+            <div class="flex flex-wrap items-center gap-3 sm:pb-2" role="group" aria-label={state.text().roleFilter}>
+              <For each={["admin", "organizer"] as const}>
+                {(role) => (
+                  <Checkbox
+                    id={`admin-member-role-${role}`}
+                    checked={state.roleFilter().includes(role)}
+                    onChange={() => state.roleFilterToggle(role)}
+                  >
+                    {state.text().roleName(role)}
+                  </Checkbox>
+                )}
+              </For>
+            </div>
           </form>
 
           <Show when={state.errorMessage()}>
@@ -84,45 +136,29 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
               when={state.members().length > 0}
               fallback={<p class="py-6 text-center text-sm text-content-muted">{state.text().empty}</p>}
             >
-              <ul class="flex flex-col divide-y divide-border" aria-label={state.text().title}>
+              <ul
+                class={
+                  viewPreference?.view() === "tiles"
+                    ? "grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+                    : "flex flex-col divide-y divide-border"
+                }
+                aria-label={state.text().title}
+              >
                 <For each={state.members()}>
                   {(member) => (
-                    <li class="grid gap-4 py-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(10rem,0.8fr)_minmax(11rem,0.8fr)_auto] lg:items-center">
-                      <div class="min-w-0">
-                        <p class="truncate font-semibold text-content">{member.displayName || member.userName}</p>
-                        <p class="truncate text-sm text-content-muted">
-                          {member.email ?? member.preferredLoginName ?? member.userName}
-                        </p>
-                      </div>
-                      <div>
-                        <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-content-muted">
-                          {state.text().role}
-                        </p>
-                        <div class="flex flex-wrap gap-2">
-                          <For each={member.zitadelRoles}>
-                            {(role) => <Badge variant="subtle">{state.text().roleName(role)}</Badge>}
-                          </For>
-                        </div>
-                      </div>
-                      <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-content-muted">
-                          {state.text().invitation}
-                        </p>
-                        <p class="mt-2 text-sm text-content">{state.invitationFormat(member.organizerInvitedAt)}</p>
-                      </div>
-                      <Button
-                        class="w-full lg:w-auto"
-                        variant={member.organizerGranted ? "outline" : undefined}
-                        disabled={state.isUpdating(member.zitadelUserId)}
-                        aria-label={`${member.organizerGranted ? state.text().revoke : state.text().grant}: ${member.displayName || member.userName}`}
-                        onClick={() => void state.roleChange(member)}
+                    <li>
+                      <Show
+                        when={viewPreference?.view() === "tiles"}
+                        fallback={
+                          <div class="grid gap-4 py-4 sm:py-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(10rem,0.8fr)_minmax(11rem,0.8fr)_auto] lg:items-center">
+                            {memberDetails(member)}
+                          </div>
+                        }
                       >
-                        {state.isUpdating(member.zitadelUserId)
-                          ? state.text().updating
-                          : member.organizerGranted
-                            ? state.text().revoke
-                            : state.text().grant}
-                      </Button>
+                        <CardWrapper class="flex h-full flex-col justify-between gap-5">
+                          {memberDetails(member)}
+                        </CardWrapper>
+                      </Show>
                     </li>
                   )}
                 </For>

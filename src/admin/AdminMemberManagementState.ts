@@ -9,6 +9,8 @@ export type AdminMemberManagementState = {
   readonly isLoading: Accessor<boolean>
   readonly isUpdating: (zitadelUserId: string) => boolean
   readonly members: Accessor<readonly AdminZitadelMember[]>
+  readonly roleFilter: Accessor<readonly ("admin" | "organizer")[]>
+  readonly roleFilterToggle: (role: "admin" | "organizer") => void
   readonly reload: () => Promise<void>
   readonly roleChange: (member: AdminZitadelMember) => Promise<void>
   readonly search: Accessor<string>

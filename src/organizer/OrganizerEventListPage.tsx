@@ -6,6 +6,7 @@ import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { SiteFrame } from "../components/SiteFrame.tsx"
 import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
+import { adminListViewPreferenceContextUse } from "../viewPreference/adminListViewPreferenceContextUse.ts"
 import type { OrganizerEventListPageState } from "./OrganizerEventListPageState.ts"
 
 export function OrganizerEventListPage(props: {
@@ -15,6 +16,7 @@ export function OrganizerEventListPage(props: {
   readonly demoControls?: JSX.Element
 }) {
   const state = props.state
+  const viewPreference = adminListViewPreferenceContextUse()
 
   return (
     <Dynamic component={props.frame ?? SiteFrame}>
@@ -54,18 +56,40 @@ export function OrganizerEventListPage(props: {
                   <h2 id={`organizer-date-${group.key}`} class="text-xl font-semibold capitalize text-content">
                     {group.heading}
                   </h2>
-                  <div class="grid gap-space-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div
+                    class={
+                      viewPreference?.view() === "tiles"
+                        ? "grid gap-space-4 sm:grid-cols-2 lg:grid-cols-3"
+                        : "flex flex-col gap-space-2"
+                    }
+                  >
                     <For each={group.events}>
                       {(event) => (
-                        <CardWrapper class="overflow-hidden p-0">
+                        <CardWrapper
+                          class={
+                            viewPreference?.view() === "tiles"
+                              ? "overflow-hidden p-0"
+                              : "flex items-center gap-space-3 overflow-hidden p-space-2 sm:gap-space-4 sm:p-space-3"
+                          }
+                        >
                           <img
-                            src={eventImageUrlGet(event.imageUrl)}
+                            src={eventImageUrlGet(event.imageVariants?.organizer ?? event.imageUrl)}
                             alt={event.imageAlt}
                             loading="lazy"
                             decoding="async"
-                            class="aspect-[16/9] w-full object-cover"
+                            class={
+                              viewPreference?.view() === "tiles"
+                                ? "aspect-[16/9] w-full object-cover"
+                                : "aspect-square w-16 shrink-0 rounded-control object-cover sm:w-20"
+                            }
                           />
-                          <div class="flex flex-col gap-space-3 p-space-4">
+                          <div
+                            class={
+                              viewPreference?.view() === "tiles"
+                                ? "flex flex-col gap-space-3 p-space-4"
+                                : "flex min-w-0 flex-1 flex-col gap-space-2 sm:flex-row sm:items-center sm:justify-between"
+                            }
+                          >
                             <div>
                               <p class="text-sm font-semibold text-brand-accent">{state.eventTime(event.startsAt)}</p>
                               <h3 class="mt-space-1 text-lg font-semibold text-content">{event.title}</h3>

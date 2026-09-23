@@ -1,5 +1,6 @@
 import { getRouteApi } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
+import { adminImageUploadFromSession } from "#src/server/adminImageUploadFromSession.ts"
 import { catalogCategoryHiddenListFromSession } from "#src/server/catalogCategoryHiddenListFromSession.ts"
 import { catalogCategoryHideFromSession } from "#src/server/catalogCategoryHideFromSession.ts"
 import { catalogEventPublishFromSession } from "#src/server/catalogEventPublishFromSession.ts"
@@ -27,6 +28,9 @@ const getHiddenAdminCategories = createServerFn({ method: "GET" }).handler(catal
 const hideAdminCategory = createServerFn({ method: "POST" })
   .validator((input: Parameters<typeof catalogCategoryHideFromSession>[0]) => input)
   .handler(({ data }) => catalogCategoryHideFromSession(data))
+const uploadAdminImage = createServerFn({ method: "POST" })
+  .validator((data: FormData) => data)
+  .handler(({ data }) => adminImageUploadFromSession(data))
 
 export function adminEventsRouteStateCreate() {
   const data = adminRoute.useLoaderData()
@@ -52,5 +56,10 @@ export function adminEventsRouteStateCreate() {
     eventPublish: (input) => publishAdminEvent({ data: input }),
     categoryHiddenList: () => getHiddenAdminCategories(),
     categoryHide: (input) => hideAdminCategory({ data: input }),
+    imageUpload: (file) => {
+      const data = new FormData()
+      data.set("file", file)
+      return uploadAdminImage({ data })
+    },
   })
 }

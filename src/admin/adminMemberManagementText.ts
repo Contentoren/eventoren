@@ -15,6 +15,7 @@ export function adminMemberManagementText() {
     revoke: "Organizer-Rolle entziehen",
     revoked: "Organizer-Rolle wurde entzogen.",
     role: "Rollen",
+    roleFilter: "Rollen filtern",
     search: "Mitglieder suchen",
     searchHint: "Name, Benutzername oder E-Mail",
     searchSubmit: "Suchen",

@@ -28,7 +28,6 @@ function AdminMembersRoute() {
     <main id="content" tabindex="-1">
       <UiContainer width="wide" class="flex flex-col gap-8 py-10">
         <header class="flex flex-col gap-3">
-          <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Verwaltung</p>
           <h2 class="text-3xl font-semibold tracking-tight text-content sm:text-4xl">Mitglieder</h2>
         </header>
         <AdminMemberManagement state={state} />

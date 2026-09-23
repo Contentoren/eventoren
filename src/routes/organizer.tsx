@@ -2,6 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
 import { eventorenOrganizerAccessRead } from "../auth/server/eventorenOrganizerAccessRead.ts"
 import { OrganizerEventListPage } from "../organizer/OrganizerEventListPage.tsx"
+import { OrganizerShell } from "../organizer/OrganizerShell.tsx"
 import { organizerEventListPageStateCreate } from "../organizer/organizerEventListPageStateCreate.ts"
 import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 
@@ -20,6 +21,6 @@ export const Route = createFileRoute("/organizer")({
   },
   component: () => {
     const state = organizerEventListPageStateCreate()
-    return <OrganizerEventListPage state={state} />
+    return <OrganizerEventListPage state={state} frame={OrganizerShell} />
   },
 })

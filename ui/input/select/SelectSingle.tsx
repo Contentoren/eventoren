@@ -6,6 +6,7 @@ import type { SelectSingleTexts } from "#ui/input/select/SelectSingleTexts.js"
 import { selectSingleTextDefault } from "#ui/input/select/SelectSingleTexts.js"
 import { ButtonIcon } from "#ui/interactive/button/ButtonIcon.jsx"
 import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
+import { Input } from "#ui/input/input/Input.jsx"
 import type { CorvuPopoverProps } from "#ui/interactive/popover/CorvuPopover.jsx"
 import { CorvuPopover } from "#ui/interactive/popover/CorvuPopover.jsx"
 import { classesGridCols3xl } from "#ui/static/grid/classesGridCols.js"
@@ -34,15 +35,18 @@ export interface SelectSingleProps
   noItemsClass?: string
   listOptionClass?: string
   texts?: SelectSingleTexts
+  searchPlaceholder?: string
 }
 
 /** Popover select choosing one value, with optional inline group headings. */
 export function SelectSingle(p: SelectSingleProps) {
   const texts = p.texts ?? selectSingleTextDefault
   const open = createSignalObject(p.buttonProps.open ?? false)
+  const query = createSignalObject("")
 
   function handleOpenChange(nextOpen: boolean): void {
     open.set(nextOpen)
+    if (!nextOpen) query.set("")
     p.buttonProps.onOpenChange?.(nextOpen)
   }
 
@@ -70,6 +74,8 @@ export function SelectSingle(p: SelectSingleProps) {
           disabled={p.disabled}
           closePopover={() => handleOpenChange(false)}
           texts={texts}
+          searchPlaceholder={p.searchPlaceholder}
+          query={query}
         />
       </CorvuPopover>
     </div>
@@ -98,24 +104,53 @@ interface OptionListProps extends MayHaveInnerClass, MayHaveDisabled, MayHaveVal
   listOptionClass?: string
   texts: SelectSingleTexts
   closePopover: () => void
+  searchPlaceholder?: string
+  query: SignalObject<string>
 }
 
 function OptionList(p: OptionListProps) {
+  const options = () => {
+    const query = p.query.get().trim().toLocaleLowerCase("de-DE")
+    if (!p.searchPlaceholder || !query) return p.getOptions()
+    return p
+      .getOptions()
+      .filter(
+        (entry) =>
+          entry.type === "item" && getDisplayValue(entry.value, p.valueText).toLocaleLowerCase("de-DE").includes(query),
+      )
+  }
   return (
-    <div role="listbox" class={getInnerClass(p.getOptions().length, p.innerClass)}>
-      <For each={p.getOptions()} fallback={<NoItems class={p.noItemsClass} texts={p.texts} />}>
-        {(entry) => (
-          <Entry
-            entry={entry}
-            valueSignal={p.valueSignal}
-            valueText={p.valueText}
-            renderItem={p.renderItem}
-            listOptionClass={p.listOptionClass}
-            disabled={p.disabled}
-            closePopover={p.closePopover}
-          />
+    <div>
+      <Show when={p.searchPlaceholder}>
+        <Input
+          aria-label={p.searchPlaceholder}
+          placeholder={p.searchPlaceholder}
+          value={p.query.get()}
+          onInput={(event) => p.query.set(event.currentTarget.value)}
+          class="mb-2"
+        />
+      </Show>
+      <div
+        role="listbox"
+        class={classMerge(
+          getInnerClass(options().length, p.innerClass),
+          p.searchPlaceholder && "max-h-64 overflow-y-auto",
         )}
-      </For>
+      >
+        <For each={options()} fallback={<NoItems class={p.noItemsClass} texts={p.texts} />}>
+          {(entry) => (
+            <Entry
+              entry={entry}
+              valueSignal={p.valueSignal}
+              valueText={p.valueText}
+              renderItem={p.renderItem}
+              listOptionClass={p.listOptionClass}
+              disabled={p.disabled}
+              closePopover={p.closePopover}
+            />
+          )}
+        </For>
+      </div>
     </div>
   )
 }

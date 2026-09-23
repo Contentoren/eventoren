@@ -1,4 +1,5 @@
 import { createMemo, onMount } from "solid-js"
+import * as v from "valibot"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { AdminMemberManagementState } from "./AdminMemberManagementState.ts"
 import type { AdminZitadelMember } from "./AdminZitadelMember.ts"
@@ -12,7 +13,7 @@ export function adminMemberManagementStateCreate(
 ): AdminMemberManagementState {
   const list = inputs.list
   const members = createSignalObject<readonly AdminZitadelMember[]>([])
-  const total = createSignalObject(0)
+  const roleFilter = createSignalObject<Role[]>(rolesFromUrl())
   const search = createSignalObject(searchFromUrl())
   const hasLoaded = createSignalObject(false)
   const isLoading = createSignalObject(true)
@@ -33,7 +34,6 @@ export function adminMemberManagementStateCreate(
     isLoading.set(false)
     if (!result.success) return errorMessage.set(text().loadError)
     members.set(result.data.members)
-    total.set(result.data.total)
     hasLoaded.set(true)
   }
 
@@ -45,6 +45,24 @@ export function adminMemberManagementStateCreate(
     searchWriteToUrl(search.get())
     await reload()
   }
+
+  const roleFilterToggle = (role: Role) => {
+    const selected = roleFilter.get()
+    const next = selected.includes(role) ? selected.filter((value) => value !== role) : [...selected, role]
+    roleFilter.set(next)
+    rolesWriteToUrl(next)
+  }
+
+  const filteredMembers = createMemo(() => {
+    const selected = roleFilter.get()
+    return members
+      .get()
+      .filter(
+        (member) =>
+          member.zitadelRoles.length > 0 &&
+          (selected.length === 0 || selected.some((role) => member.zitadelRoles.includes(role))),
+      )
+  })
 
   const roleChange = async (member: AdminZitadelMember) => {
     const operation = member.organizerGranted ? "revoke" : "grant"
@@ -87,15 +105,17 @@ export function adminMemberManagementStateCreate(
     invitationFormat: adminMemberManagementInvitationFormat,
     isLoading: isLoading.get,
     isUpdating: (zitadelUserId) => updatingMemberIds.get().includes(zitadelUserId),
-    members: members.get,
+    members: filteredMembers,
     reload,
     roleChange,
+    roleFilter: roleFilter.get,
+    roleFilterToggle,
     search: search.get,
     searchChange,
     searchSubmit,
     successMessage: successMessage.get,
     text,
-    total: total.get,
+    total: () => filteredMembers().length,
   }
 }
 
@@ -106,6 +126,24 @@ type AdminMemberRoleChange = (input: {
 
 type AdminMemberRoleChangeResult = Awaited<ReturnType<typeof adminZitadelOrganizerGrant>>
 type AdminMemberList = (input: { readonly search?: string }) => ReturnType<typeof adminZitadelMembersList>
+type Role = "admin" | "organizer"
+const roleSchema = v.picklist(["admin", "organizer"] as const)
+
+function rolesFromUrl(): Role[] {
+  if (typeof window === "undefined") return []
+  return new URL(window.location.href).searchParams.getAll("memberRole").flatMap((value) => {
+    const parsed = v.safeParse(roleSchema, value)
+    return parsed.success ? [parsed.output] : []
+  })
+}
+
+function rolesWriteToUrl(roles: readonly Role[]): void {
+  if (typeof window === "undefined") return
+  const url = new URL(window.location.href)
+  url.searchParams.delete("memberRole")
+  for (const role of roles) url.searchParams.append("memberRole", role)
+  window.history.replaceState(window.history.state, "", url)
+}
 
 function searchFromUrl(): string {
   if (typeof window === "undefined") return ""

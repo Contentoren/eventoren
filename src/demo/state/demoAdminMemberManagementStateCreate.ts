@@ -22,6 +22,7 @@ export function demoAdminMemberManagementStateCreate(
 
   const baseMembers = createSignalObject<readonly AdminZitadelMember[]>(scenario === "empty" ? [] : demoAdminMembers)
   const search = createSignalObject("")
+  const roleFilter = createSignalObject<readonly ("admin" | "organizer")[]>([])
   const updatingMemberIds = createSignalObject<readonly string[]>([])
   const baseErrorMessage = createSignalObject(
     scenario === "error" ? "Die Mitglieder konnten nicht geladen werden." : "",
@@ -37,7 +38,9 @@ export function demoAdminMemberManagementStateCreate(
 
   const members = () => {
     if (isLoading() || isError() || isEmpty()) return []
-    return baseMembers.get()
+    const selected = roleFilter.get()
+    if (selected.length === 0) return baseMembers.get()
+    return baseMembers.get().filter((member) => selected.some((role) => member.zitadelRoles.includes(role)))
   }
 
   const total = () => members().length
@@ -122,6 +125,13 @@ export function demoAdminMemberManagementStateCreate(
     members,
     reload,
     roleChange,
+    roleFilter: roleFilter.get,
+    roleFilterToggle: (role) =>
+      roleFilter.set(
+        roleFilter.get().includes(role)
+          ? roleFilter.get().filter((value) => value !== role)
+          : [...roleFilter.get(), role],
+      ),
     search: search.get,
     searchChange,
     searchSubmit,
