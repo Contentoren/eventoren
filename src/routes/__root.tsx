@@ -12,11 +12,9 @@ import { seo } from "../lib/seo.js"
 import { NotFoundPage } from "../marketing/NotFoundPage.js"
 import { RootFooter } from "../marketing/RootFooter.js"
 import appCss from "../tailwind.css?url"
+import { speculationRules } from "./speculationRules.ts"
 
 const siteName = "eventoren"
-const speculationRules = JSON.stringify({
-  prerender: [{ where: { href_matches: "/*" }, eagerness: "moderate" }],
-})
 
 export const Route = createRootRoute({
   loader: async ({ location }) => {
