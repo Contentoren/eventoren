@@ -38,6 +38,7 @@ async function tokenFor(userId: string) {
 function billingMock(
   payment: "pending" | "paid" | "failed" = "pending",
   expirationPayment: "pending" | "paid" | "failed" | "expired" = "expired",
+  rejectFirstCheckout = false,
 ) {
   let checkoutCalls = 0
   let fulfillmentCalls = 0
@@ -67,6 +68,13 @@ function billingMock(
       )
     if (url.endsWith("/ticket-checkout")) {
       checkoutCalls += 1
+      if (rejectFirstCheckout && checkoutCalls === 1)
+        return new Response(
+          JSON.stringify({ success: false, error: { code: "checkout.event-stale", message: "stale" } }),
+          {
+            status: 409,
+          },
+        )
       return new Response(
         JSON.stringify({
           success: true,
@@ -193,6 +201,7 @@ function checkoutArgs(
   checkoutKey: string,
   options: {
     eventKey?: string
+    eventRevision?: number
     tickets?: { tierKey: string; quantity: number; participantNames?: string[] }[]
     customer?: { email?: string; givenName?: string; familyName?: string; phone?: string }
   } = {},
@@ -202,6 +211,7 @@ function checkoutArgs(
     checkoutKey,
     eventKey: options.eventKey ?? "ticket-event",
     catalogVersion,
+    eventRevision: options.eventRevision ?? 3,
     tickets: options.tickets ?? [{ tierKey: "standard", quantity: 1, participantNames: ["Ada Lovelace"] }],
     successUrl: "https://eventoren.test/checkout/success",
     cancelUrl: "https://eventoren.test/checkout/cancel",
@@ -210,6 +220,7 @@ function checkoutArgs(
       email: options.customer?.email ?? "buyer@example.com",
       givenName: options.customer?.givenName ?? "Ada",
       familyName: options.customer?.familyName ?? "Lovelace",
+      address: "Example Street 1",
       phone: options.customer?.phone ?? "",
     },
     legalContext: {
@@ -335,14 +346,145 @@ test("reserves atomically and replays the same checkout without a second Billing
   expect(billing.checkoutCallsGet()).toBe(1)
   const inventory = await t.run(async (ctx) => {
     const tier = await ctx.db.query("catalogTicketTiers").collect()
+    const event = await ctx.db.query("catalogEvents").collect()
+    const sync = await ctx.db.query("catalogSyncStates").collect()
     const orders = await ctx.db.query("ticketOrders").collect()
     const reservations = await ctx.db.query("ticketReservations").collect()
-    return { tier, orders, reservations }
+    return { tier, event, sync, orders, reservations }
   })
   expect(inventory.tier[0]?.reserved).toBe(1)
+  expect(inventory.event[0]?.eventRevision).toBe(args.eventRevision)
+  expect(inventory.sync[0]?.version).toBe(catalogVersion)
   expect(inventory.orders).toHaveLength(1)
   expect(inventory.reservations).toHaveLength(1)
   expect(billing.fetchMock).toHaveBeenCalled()
+})
+
+test("replays persisted checkout after an event edit and rejects a new checkout on its stale revision", async () => {
+  environmentSet()
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const adminToken = await tokenFor(adminId)
+  const userToken = await tokenFor(userId)
+  const catalogVersion = await seedCatalog(t, adminToken)
+  const args = checkoutArgs(userToken, catalogVersion, "revisioncheckoutkey223456789012345678901234")
+  const unrelated = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    eventKey: "unrelated-event",
+    title: "Unrelated event",
+    subtitle: "",
+    description: "",
+    category: "konzerte",
+    startsAt: "2026-11-01T18:00:00.000Z",
+    endsAt: "2026-11-01T22:00:00.000Z",
+    doorsAt: "2026-11-01T17:00:00.000Z",
+    venue: "Other hall",
+    city: "Berlin",
+    address: "Other Street 1",
+    organizer: "Eventoren",
+    imageUrl: "/images/test.webp",
+    imageAlt: "Other event",
+    tags: [],
+    status: "draft",
+    token: adminToken,
+  })
+  expect(unrelated.success).toBe(true)
+  const first = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(first.success).toBe(true)
+
+  const edit = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    eventKey: "ticket-event",
+    title: "Ticket event edited",
+    subtitle: "A ticketing test event",
+    description: "Description-only update",
+    category: "konzerte",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    venue: "Test hall",
+    city: "Berlin",
+    address: "Teststraße 1",
+    organizer: "Eventoren",
+    imageUrl: "/images/test.webp",
+    imageAlt: "Test event",
+    tags: ["test"],
+    status: "published",
+    token: adminToken,
+  })
+  expect(edit).toMatchObject({ success: true, data: { eventRevision: 4 } })
+
+  const replay = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(replay).toMatchObject({ success: true, data: { replayed: true } })
+  const stale = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...checkoutArgs(userToken, catalogVersion, "revisioncheckoutkey323456789012345678901234"),
+  })
+  expect(stale).toMatchObject({ success: false, errorMessage: "The event revision is stale" })
+  expect(billing.checkoutCallsGet()).toBe(1)
+})
+
+test("retries a selected-Event freshness rejection with the same reservation and payment reference", async () => {
+  environmentSet()
+  const billing = billingMock("pending", "expired", true)
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "revisionretrykey123456789012345678901234")
+
+  const staleResponse = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(staleResponse.success).toBe(false)
+  const retry = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(retry).toMatchObject({ success: true, data: { status: "checkout_created" } })
+  expect(billing.checkoutCallsGet()).toBe(2)
+  const inventory = await t.run(async (ctx) => ({
+    orders: await ctx.db.query("ticketOrders").collect(),
+    reservations: await ctx.db.query("ticketReservations").collect(),
+    tiers: await ctx.db.query("catalogTicketTiers").collect(),
+  }))
+  expect(inventory.orders).toHaveLength(1)
+  expect(inventory.reservations).toHaveLength(1)
+  expect(inventory.tiers[0]?.reserved).toBe(1)
+})
+
+test("releases a reservation after Billing rejects a stale revision and confirms no checkout exists", async () => {
+  environmentSet()
+  const billing = billingMock("pending", "expired", true)
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "revisionreleasekey123456789012345678901234")
+
+  const staleResponse = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(staleResponse.success).toBe(false)
+  const reserved = await t.run(async (ctx) => ({
+    orders: await ctx.db.query("ticketOrders").collect(),
+    reservations: await ctx.db.query("ticketReservations").collect(),
+    tiers: await ctx.db.query("catalogTicketTiers").collect(),
+  }))
+  expect(reserved.orders).toHaveLength(1)
+  expect(reserved.reservations).toMatchObject([{ status: "active", quantity: 1 }])
+  expect(reserved.tiers[0]?.reserved).toBe(1)
+  await t.run(async (ctx) => ctx.db.patch(reserved.orders[0]!._id, { checkoutAttemptLeaseUntil: Date.now() - 1 }))
+
+  vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+    if (String(input).includes("/expire")) return new Response(null, { status: 404 })
+    return billing.fetchMock(input, init)
+  })
+  const expired = await t.action(internal.ticketing.ticketReservationExpireAction, {
+    orderId: reserved.orders[0]!._id,
+  })
+  expect(expired).toMatchObject({ success: true, data: { released: true } })
+
+  const released = await t.run(async (ctx) => ({
+    order: await ctx.db.get(reserved.orders[0]!._id),
+    reservations: await ctx.db.query("ticketReservations").collect(),
+    tiers: await ctx.db.query("catalogTicketTiers").collect(),
+  }))
+  expect(released.order?.status).toBe("released")
+  expect(released.reservations).toMatchObject([{ status: "released", quantity: 1 }])
+  expect(released.tiers[0]?.reserved).toBe(0)
 })
 
 test("persists enabled fulfillment eligibility once and replays it after the allowlist changes", async () => {
@@ -500,7 +642,9 @@ test("rejects checkout orders whose total ticket quantity exceeds the order maxi
   if (!addedTier.success) return
 
   const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
-    ...checkoutArgs(await tokenFor(userId), addedTier.data.catalogVersion, "checkoutkey923456789012345678901234"),
+    ...checkoutArgs(await tokenFor(userId), addedTier.data.catalogVersion, "checkoutkey923456789012345678901234", {
+      eventRevision: addedTier.data.eventRevision,
+    }),
     tickets: [
       { tierKey: "standard", quantity: 2, participantNames: ["Ada", "Grace"] },
       {
@@ -621,9 +765,13 @@ test("does not release a still-payable pending session, then issues exactly once
   const finalInventory = await t.run(async (ctx) => {
     const tier = await ctx.db.query("catalogTicketTiers").collect()
     const tickets = await ctx.db.query("ticketIssued").collect()
-    return { tier, tickets }
+    const event = await ctx.db.query("catalogEvents").collect()
+    const sync = await ctx.db.query("catalogSyncStates").collect()
+    return { tier, tickets, event, sync }
   })
   expect(finalInventory.tier[0]).toMatchObject({ reserved: 0, sold: 1 })
+  expect(finalInventory.event[0]?.eventRevision).toBe(args.eventRevision)
+  expect(finalInventory.sync[0]?.version).toBe(catalogVersion)
   expect(finalInventory.tickets).toHaveLength(1)
 })
 
@@ -653,6 +801,7 @@ test("keeps participant names through paid retries and serves order QR codes thr
 
   const checkoutKey = "checkoutkey423456789012345678901234"
   const args = checkoutArgs(await tokenFor(userId), addedTier.data.catalogVersion, checkoutKey, {
+    eventRevision: addedTier.data.eventRevision,
     tickets: [
       { tierKey: "standard", quantity: 2, participantNames: ["Ada", "Grace"] },
       { tierKey: "vip", quantity: 1, participantNames: ["Lin"] },

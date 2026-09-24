@@ -14,7 +14,7 @@ export const catalogEventDeleteMutation = mutation({
 async function catalogEventDeleteAuthorizedFn(
   ctx: MutationCtx,
   args: { eventKey: string; userId: IdUser },
-): PromiseResult<{ eventKey: string; catalogVersion: number }> {
+): PromiseResult<{ eventKey: string; catalogVersion: number; eventRevision: number }> {
   const authorization = await catalogAdminAuthorizeFn(ctx, args.userId)
   if (!authorization.success) return authorization
   const op = "catalogEventDeleteMutation"
@@ -32,7 +32,12 @@ async function catalogEventDeleteAuthorizedFn(
     status: "archived",
     deletedAt: now,
     catalogVersion: version.data,
+    eventRevision: (event.eventRevision ?? 1) + 1,
     updatedAt: now,
   })
-  return createResult({ eventKey: event.eventKey, catalogVersion: version.data })
+  return createResult({
+    eventKey: event.eventKey,
+    catalogVersion: version.data,
+    eventRevision: (event.eventRevision ?? 1) + 1,
+  })
 }

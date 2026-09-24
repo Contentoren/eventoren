@@ -2,6 +2,7 @@ export function ticketCheckoutContextCanonicalize(input: {
   checkoutKey: string
   eventKey: string
   catalogVersion: number
+  eventRevision?: number
   tickets: readonly {
     tierKey: string
     quantity: number
@@ -29,6 +30,7 @@ export function ticketCheckoutContextCanonicalize(input: {
 }): string {
   return JSON.stringify({
     ...input,
+    ...(input.eventRevision !== undefined ? { eventRevision: input.eventRevision } : {}),
     legalContext: {
       cta: input.legalContext.cta,
       documentSetRevision: input.legalContext.documentSetRevision,

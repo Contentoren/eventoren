@@ -30,7 +30,7 @@ export const catalogTicketTierUpsertMutation = mutation({
 async function catalogTicketTierUpsertAuthorizedFn(
   ctx: MutationCtx,
   args: Omit<typeof catalogTicketTierArgsValidator.type, "token"> & { userId: IdUser },
-): PromiseResult<{ tierKey: string; catalogVersion: number }> {
+): PromiseResult<{ tierKey: string; catalogVersion: number; eventRevision: number }> {
   const adminResult = await catalogAdminAuthorizeFn(ctx, args.userId)
   if (!adminResult.success) return adminResult
 
@@ -73,9 +73,6 @@ async function catalogTicketTierUpsertAuthorizedFn(
   }
 
   const now = new Date().toISOString()
-  const versionResult = await catalogSyncAdvanceFn(ctx, args.userId, now)
-  if (!versionResult.success) return versionResult
-  const catalogVersion = versionResult.data
   const tierData = {
     eventId: event._id,
     tierKey: args.tierKey,
@@ -91,18 +88,47 @@ async function catalogTicketTierUpsertAuthorizedFn(
     reserved,
     sold,
     sortOrder: args.sortOrder ?? existing?.sortOrder ?? 0,
-    catalogVersion,
-    updatedAt: now,
   }
+
+  const configurationChanged =
+    !existing ||
+    JSON.stringify({
+      eventId: existing.eventId,
+      tierKey: existing.tierKey,
+      name: existing.name,
+      description: existing.description,
+      startsAt: existing.startsAt,
+      doorsAt: existing.doorsAt,
+      additionalDoorsAt: existing.additionalDoorsAt ?? [],
+      endsAt: existing.endsAt,
+      priceCents: existing.priceCents,
+      feeCents: existing.feeCents,
+      capacity: existing.capacity,
+      reserved: existing.reserved,
+      sold: existing.sold,
+      sortOrder: existing.sortOrder,
+    }) !== JSON.stringify(tierData)
+
+  if (existing && !configurationChanged) {
+    const eventRevision = event.eventRevision ?? 1
+    if (event.eventRevision === undefined) await ctx.db.patch("catalogEvents", event._id, { eventRevision })
+    return createResult({ tierKey: args.tierKey, catalogVersion: existing.catalogVersion, eventRevision })
+  }
+
+  const versionResult = await catalogSyncAdvanceFn(ctx, args.userId, now)
+  if (!versionResult.success) return versionResult
+  const catalogVersion = versionResult.data
+  const eventRevision = (event.eventRevision ?? 1) + 1
+  const persistedTierData = { ...tierData, catalogVersion, updatedAt: now }
 
   if (existing) {
-    await ctx.db.patch("catalogTicketTiers", existing._id, tierData)
+    await ctx.db.patch("catalogTicketTiers", existing._id, persistedTierData)
   } else {
-    await ctx.db.insert("catalogTicketTiers", { ...tierData, createdAt: now })
+    await ctx.db.insert("catalogTicketTiers", { ...persistedTierData, createdAt: now })
   }
-  await ctx.db.patch("catalogEvents", event._id, { catalogVersion, updatedAt: now })
+  await ctx.db.patch("catalogEvents", event._id, { catalogVersion, eventRevision, updatedAt: now })
 
-  return createResult({ tierKey: args.tierKey, catalogVersion })
+  return createResult({ tierKey: args.tierKey, catalogVersion, eventRevision })
 }
 
 function isValidIsoDateTime(value: string) {

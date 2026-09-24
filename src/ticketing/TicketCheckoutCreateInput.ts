@@ -4,6 +4,7 @@ export type TicketCheckoutCreateInput = {
   readonly checkoutKey: string
   readonly eventKey: string
   readonly catalogVersion: number
+  readonly eventRevision: number
   readonly tickets: {
     readonly tierKey: string
     readonly quantity: number

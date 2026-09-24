@@ -260,6 +260,57 @@ test("admin writes are versioned and published reads match EventItem", async () 
   expect(syncState).toMatchObject([{ version: published.data.catalogVersion, status: "pending", attempts: 0 }])
 })
 
+test("event and tier configuration changes advance one event revision while no-op edits preserve sequencing", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const token = await tokenFor(adminId)
+  const first = await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
+  expect(first).toMatchObject({ success: true, data: { eventRevision: 1 } })
+  if (!first.success) return
+
+  const unchangedEvent = await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
+  expect(unchangedEvent).toMatchObject({
+    success: true,
+    data: { catalogVersion: first.data.catalogVersion, eventRevision: 1 },
+  })
+  const changedEvent = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    ...eventArgs(token, "draft"),
+    description: "Description-only change",
+  })
+  expect(changedEvent).toMatchObject({ success: true, data: { eventRevision: 2 } })
+  if (!changedEvent.success) return
+
+  const tierArgs = {
+    eventKey: "catalog-event",
+    tierKey: "standard",
+    name: "Standard",
+    description: "Freie Platzwahl",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
+    priceCents: 2500,
+    feeCents: 250,
+    capacity: 10,
+    token,
+  }
+  const tier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, tierArgs)
+  expect(tier).toMatchObject({ success: true, data: { eventRevision: 3 } })
+  if (!tier.success) return
+  const unchangedTier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, tierArgs)
+  expect(unchangedTier).toMatchObject({
+    success: true,
+    data: { catalogVersion: tier.data.catalogVersion, eventRevision: 3 },
+  })
+  const changedTier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...tierArgs,
+    description: "Descriptive tier edit",
+  })
+  expect(changedTier).toMatchObject({ success: true, data: { eventRevision: 4 } })
+  const sync = await t.run(async (ctx) => ctx.db.query("catalogSyncStates").collect())
+  expect(sync[0]?.version).toBe(changedTier.success ? changedTier.data.catalogVersion : -1)
+  expect(sync[0]?.version).toBe(tier.data.catalogVersion + 1)
+})
+
 test("event inclusions and exclusions preserve omitted values and explicitly saved empty arrays", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")

@@ -35,6 +35,7 @@ export const catalogTables = {
     status: catalogEventStatusValidator,
     deletedAt: v.optional(v.string()),
     catalogVersion: v.number(),
+    eventRevision: v.optional(v.number()),
     createdAt: v.string(),
     updatedAt: v.string(),
   })

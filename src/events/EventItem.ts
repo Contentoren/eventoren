@@ -6,6 +6,7 @@ import type { EventHighlight } from "./EventHighlight.ts"
 export type EventItem = {
   id: string
   catalogVersion: number
+  eventRevision?: number
   title: string
   subtitle: string
   description: string

@@ -123,6 +123,12 @@ test("builds a stable indexed snapshot in bounded batches and pages", async () =
   expect(built.chunkCount).toBe(33)
 
   const events = await readSnapshotEvents(t, 1)
+  expect(events.map((event) => event.eventRevision)).toEqual(Array.from({ length: 33 }, () => 1))
+  expect(
+    await t.run(async (ctx) =>
+      (await ctx.db.query("catalogEvents").collect()).every((event) => event.eventRevision === 1),
+    ),
+  ).toBe(true)
   expect(events.map((event) => event.eventKey)).toEqual(
     Array.from({ length: 33 }, (_, index) => `event-${index.toString().padStart(3, "0")}`),
   )

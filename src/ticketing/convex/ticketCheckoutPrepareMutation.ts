@@ -27,6 +27,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     customerPhone: v.string(),
     eventKey: v.string(),
     catalogVersion: v.number(),
+    eventRevision: v.optional(v.number()),
     tickets: v.array(ticketSelectionValidator),
     stripeMode: v.union(v.literal("live"), v.literal("test")),
     successUrl: v.string(),
@@ -66,6 +67,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       checkoutKey: args.checkoutKey,
       eventKey: args.eventKey,
       catalogVersion: args.catalogVersion,
+      ...(args.eventRevision !== undefined ? { eventRevision: args.eventRevision } : {}),
       tickets: args.tickets,
       stripeMode: args.stripeMode,
       successUrl: args.successUrl,
@@ -103,12 +105,38 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         documentSetRevision: args.legalContext.documentSetRevision,
       },
     })
+    const legacyRevisionContextJson = ticketCheckoutContextCanonicalize({
+      checkoutKey: args.checkoutKey,
+      eventKey: args.eventKey,
+      catalogVersion: args.catalogVersion,
+      ...(args.eventRevision !== undefined ? { eventRevision: args.eventRevision } : {}),
+      tickets: args.tickets,
+      stripeMode: args.stripeMode,
+      successUrl: args.successUrl,
+      cancelUrl: args.cancelUrl,
+      locale: args.locale,
+      customer: {
+        email: args.customerEmail,
+        givenName: args.customerGivenName,
+        familyName: args.customerFamilyName,
+        address: args.customerAddress,
+        phone: args.customerPhone,
+      },
+      legalContext: {
+        cta: args.legalContext.cta,
+        termsAccepted: args.legalContext.termsAccepted,
+        privacyAcknowledged: args.legalContext.privacyAcknowledged,
+        documentSetRevision: args.legalContext.documentSetRevision,
+      },
+    })
 
     if (existing) {
       const sameOwner = existing.ownerUserId === args.ownerUserId
       const sameGuest = !args.guestAccessDigest || existing.guestAccessDigest === args.guestAccessDigest
       const sameCheckoutEvidence =
-        existing.checkoutContextJson === contextJson || existing.checkoutContextJson === legacyContextJson
+        existing.checkoutContextJson === contextJson ||
+        existing.checkoutContextJson === legacyContextJson ||
+        existing.checkoutContextJson === legacyRevisionContextJson
       if (!sameOwner || !sameGuest || !sameCheckoutEvidence)
         return createResultError(op, "The checkout key was reused with different ownership or checkout evidence")
       if (
@@ -151,6 +179,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       checkoutKey: args.checkoutKey,
       eventKey: args.eventKey,
       catalogVersion: args.catalogVersion,
+      ...(args.eventRevision !== undefined ? { eventRevision: args.eventRevision } : {}),
       tickets: args.tickets,
       stripeMode: args.stripeMode,
       successUrl: args.successUrl,
@@ -171,14 +200,14 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       .withIndex("key", (q) => q.eq("key", "catalog"))
       .unique()
     if (!syncState) return createResultError(op, "The catalog is not available")
-    if (args.catalogVersion !== syncState.version) return createResultError(op, "The catalog version is stale")
-
     const event = await ctx.db
       .query("catalogEvents")
       .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
       .unique()
     if (!event) return createResultError(op, "The event was not found")
     if (event.status !== "published") return createResultError(op, "The event is not available for checkout")
+    if (args.eventRevision === undefined) return createResultError(op, "The event revision is required")
+    if (args.eventRevision !== (event.eventRevision ?? 1)) return createResultError(op, "The event revision is stale")
 
     const requestedSelections = [...args.tickets].sort((left, right) => left.tierKey.localeCompare(right.tierKey))
     const seenTierKeys = new Set<string>()
@@ -260,7 +289,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       organizer: event.organizer,
       imageUrl: event.imageUrl,
       imageAlt: event.imageAlt,
-      catalogVersion: syncState.version,
+      catalogVersion: args.catalogVersion,
       subtotalCents,
       feeCents,
       totalCents: subtotalCents + feeCents,

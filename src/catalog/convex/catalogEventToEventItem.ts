@@ -25,6 +25,7 @@ export function catalogEventToEventItem(
   return {
     id: event.eventKey,
     catalogVersion: Math.max(event.catalogVersion, syncedCatalogVersion ?? 0),
+    eventRevision: event.eventRevision ?? 1,
     title: event.title,
     subtitle: event.subtitle,
     description: event.description,

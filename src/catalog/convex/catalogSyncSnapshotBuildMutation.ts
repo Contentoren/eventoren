@@ -62,6 +62,7 @@ export const catalogSyncSnapshotBuildMutation = internalMutation({
       return createResultError(op, `Catalog exceeds Billing's ${catalogSyncLimits.billingMaxEvents}-event limit`)
 
     for (const event of eventPage.page) {
+      if (event.eventRevision === undefined) await ctx.db.patch("catalogEvents", event._id, { eventRevision: 1 })
       if (event.catalogVersion > args.requestedVersion)
         return createResultError(op, `Catalog event ${event.eventKey} is newer than requestedVersion`)
       const tierPage = await ctx.db
@@ -96,6 +97,7 @@ export const catalogSyncSnapshotBuildMutation = internalMutation({
         tags: event.tags,
         status: event.status,
         catalogVersion: args.requestedVersion,
+        eventRevision: event.eventRevision ?? 1,
         tiers: tierPage.map((tier) => ({
           tierKey: tier.tierKey,
           name: tier.name,

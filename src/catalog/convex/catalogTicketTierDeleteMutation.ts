@@ -20,7 +20,7 @@ export const catalogTicketTierDeleteMutation = mutation({
 async function catalogTicketTierDeleteAuthorizedFn(
   ctx: MutationCtx,
   args: Omit<typeof catalogTicketTierDeleteArgsValidator.type, "token"> & { userId: IdUser },
-): PromiseResult<{ tierKey: string; catalogVersion: number }> {
+): PromiseResult<{ tierKey: string; catalogVersion: number; eventRevision: number }> {
   const adminResult = await catalogAdminAuthorizeFn(ctx, args.userId)
   if (!adminResult.success) return adminResult
 
@@ -51,7 +51,8 @@ async function catalogTicketTierDeleteAuthorizedFn(
   } else {
     await ctx.db.delete(tier._id)
   }
-  await ctx.db.patch("catalogEvents", event._id, { catalogVersion, updatedAt: now })
+  const eventRevision = (event.eventRevision ?? 1) + 1
+  await ctx.db.patch("catalogEvents", event._id, { catalogVersion, eventRevision, updatedAt: now })
 
-  return createResult({ tierKey: args.tierKey, catalogVersion })
+  return createResult({ tierKey: args.tierKey, catalogVersion, eventRevision })
 }

@@ -252,6 +252,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
           checkoutKey,
           eventKey: item.event.id,
           catalogVersion: item.event.catalogVersion,
+          eventRevision: item.event.eventRevision ?? 1,
           tickets: item.cart.lines
             .filter((line) => line.quantity > 0)
             .map((line) => ({
@@ -282,7 +283,10 @@ export function ticketCheckoutFormStateCreate(inputs: {
           ? await (await ticketingServerRead()).checkoutCreate({ data: checkoutInput })
           : await ticketCheckoutCreate({ ...checkoutInput, guestAccessToken })
         if (!created.success) {
-          if (created.errorMessage === "The catalog version is stale") {
+          if (
+            created.errorMessage === "The event revision is stale" ||
+            created.errorMessage === "The event revision is required"
+          ) {
             await router.invalidate()
             errorMessage.set(ticketCheckoutText().catalogChanged)
           } else {

@@ -40,7 +40,7 @@ export const catalogEventUpsertMutation = mutation({
 async function catalogEventUpsertAuthorizedFn(
   ctx: MutationCtx,
   args: Omit<typeof catalogEventArgsValidator.type, "token"> & { userId: IdUser },
-): PromiseResult<{ eventKey: string; catalogVersion: number }> {
+): PromiseResult<{ eventKey: string; catalogVersion: number; eventRevision: number }> {
   const adminResult = await catalogAdminAuthorizeFn(ctx, args.userId)
   if (!adminResult.success) return adminResult
 
@@ -71,9 +71,6 @@ async function catalogEventUpsertAuthorizedFn(
   }
 
   const now = new Date().toISOString()
-  const versionResult = await catalogSyncAdvanceFn(ctx, args.userId, now)
-  if (!versionResult.success) return versionResult
-  const catalogVersion = versionResult.data
   const eventData = {
     eventKey: args.eventKey,
     title: args.title,
@@ -95,15 +92,50 @@ async function catalogEventUpsertAuthorizedFn(
     inclusions: args.inclusions ?? existing?.inclusions,
     exclusions: args.exclusions ?? existing?.exclusions,
     status,
-    catalogVersion,
-    updatedAt: now,
   }
+
+  const configurationChanged =
+    !existing ||
+    JSON.stringify({
+      eventKey: existing.eventKey,
+      title: existing.title,
+      subtitle: existing.subtitle,
+      description: existing.description,
+      category: existing.category,
+      startsAt: existing.startsAt,
+      endsAt: existing.endsAt,
+      doorsAt: existing.doorsAt,
+      venue: existing.venue,
+      city: existing.city,
+      address: existing.address,
+      organizer: existing.organizer,
+      imageUrl: existing.imageUrl,
+      imageVariants: existing.imageVariants,
+      imageAlt: existing.imageAlt,
+      tags: existing.tags,
+      highlights: existing.highlights,
+      inclusions: existing.inclusions,
+      exclusions: existing.exclusions,
+      status: existing.status,
+    }) !== JSON.stringify(eventData)
+
+  if (existing && !configurationChanged) {
+    const eventRevision = existing.eventRevision ?? 1
+    if (existing.eventRevision === undefined) await ctx.db.patch("catalogEvents", existing._id, { eventRevision })
+    return createResult({ eventKey: args.eventKey, catalogVersion: existing.catalogVersion, eventRevision })
+  }
+
+  const versionResult = await catalogSyncAdvanceFn(ctx, args.userId, now)
+  if (!versionResult.success) return versionResult
+  const catalogVersion = versionResult.data
+  const eventRevision = existing ? (existing.eventRevision ?? 1) + 1 : 1
+  const persistedEventData = { ...eventData, catalogVersion, eventRevision, updatedAt: now }
 
   if (existing) {
-    await ctx.db.patch("catalogEvents", existing._id, eventData)
+    await ctx.db.patch("catalogEvents", existing._id, persistedEventData)
   } else {
-    await ctx.db.insert("catalogEvents", { ...eventData, createdAt: now })
+    await ctx.db.insert("catalogEvents", { ...persistedEventData, createdAt: now })
   }
 
-  return createResult({ eventKey: args.eventKey, catalogVersion })
+  return createResult({ eventKey: args.eventKey, catalogVersion, eventRevision })
 }
