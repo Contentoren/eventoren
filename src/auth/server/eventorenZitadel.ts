@@ -80,6 +80,10 @@ export const eventorenZitadel = {
     } catch (error) {
       console.error("Zitadel sign-in: Convex action failed", {
         errorName: error instanceof Error ? error.name : "unknown",
+        errorMessage:
+          error instanceof Error
+            ? error.message.replaceAll(/(?:[\w-]+\.){2,}[\w-]+|[\w-]{32,}/gu, "[redacted]").slice(0, 400)
+            : "unknown",
       })
       return loginErrorResponse(request, "Die Eventoren-Sitzung konnte nicht erstellt werden.", 502)
     }
