@@ -1,6 +1,7 @@
 import { getRouteApi } from "@tanstack/solid-router"
-import { createMemo, onCleanup, onMount } from "solid-js"
+import { createEffect, createMemo, on, onCleanup, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
+import type { ApiClientResult } from "../client/apiClient.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import type { TicketCart } from "./TicketCart.ts"
 import type { TicketCartDraft } from "./TicketCartDraft.ts"
@@ -17,15 +18,39 @@ type CheckoutItem = {
   readonly cart: TicketCart
 }
 
-export function checkoutPageStateCreate() {
+export function checkoutPageStateCreate(input: {
+  getCatalogEvents: (eventKeys: string[]) => Promise<ApiClientResult<readonly EventItem[]>>
+}) {
   const search = routeApi.useSearch()
-  const loaderData = routeApi.useLoaderData()
-  const catalog = createMemo(() => loaderData().catalog)
+  const catalog = createSignalObject<ApiClientResult<readonly EventItem[]>>({ success: true, data: [] })
+  const catalogLoaded = createSignalObject(false)
   const cart = createSignalObject<TicketCartDraft>([])
   const cartLoaded = createSignalObject(false)
+  let requestId = 0
+  let requestedKeys = ""
 
   const syncCart = () => {
-    cart.set(ticketCartDraftLoad())
+    const next = ticketCartDraftLoad()
+    cart.set(next)
+    const eventKey = search().event?.trim()
+    const eventKeys = eventKey ? [eventKey] : next.map((entry) => entry.eventId)
+    const keys = JSON.stringify(eventKeys)
+    if (keys === requestedKeys && catalogLoaded.get() && catalog.get().success) return
+    requestedKeys = keys
+    const currentRequest = ++requestId
+    catalogLoaded.set(false)
+    void input.getCatalogEvents(eventKeys).then(
+      (result) => {
+        if (currentRequest !== requestId) return
+        catalog.set(result)
+        catalogLoaded.set(true)
+      },
+      () => {
+        if (currentRequest !== requestId) return
+        catalog.set({ success: false, error: { status: 503, message: "Catalog request failed" } })
+        catalogLoaded.set(true)
+      },
+    )
   }
 
   onMount(() => {
@@ -38,13 +63,24 @@ export function checkoutPageStateCreate() {
     window.addEventListener("storage", syncCart)
 
     onCleanup(() => {
+      requestId++
       window.removeEventListener(ticketCartDraftEventName, syncCart)
       window.removeEventListener("storage", syncCart)
     })
   })
 
+  createEffect(
+    on(
+      () => search().event,
+      () => {
+        if (cartLoaded.get()) syncCart()
+      },
+      { defer: true },
+    ),
+  )
+
   const items = createMemo<readonly CheckoutItem[]>(() => {
-    const catalogResult = catalog()
+    const catalogResult = catalog.get()
     if (!catalogResult.success) return []
     const events: readonly EventItem[] = catalogResult.data
     const eventId = search().event?.trim() ?? ""
@@ -70,11 +106,11 @@ export function checkoutPageStateCreate() {
   })
 
   const groups = createMemo(() => items())
-  const isReady = createMemo(() => Boolean(search().event?.trim()) || cartLoaded.get())
+  const isReady = createMemo(() => cartLoaded.get() && catalogLoaded.get())
   const hasItems = createMemo(() => items().length > 0)
   const errorMessage = createMemo(() => {
     const text = ticketCheckoutText()
-    const catalogResult = catalog()
+    const catalogResult = catalog.get()
     const eventId = search().event?.trim() ?? ""
     if (eventId.length > 0) {
       if (catalogResult.success && catalogResult.data.some((event: EventItem) => event.id === eventId)) return ""

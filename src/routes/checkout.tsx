@@ -8,7 +8,7 @@ import { envCheckoutFormBypassEnabled } from "#src/app/env/public/envCheckoutFor
 import { SiteFrame } from "../components/SiteFrame.tsx"
 import { DemoCheckout } from "../demo/ui/DemoCheckout.tsx"
 import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
-import { catalogEventsPublicGet } from "../server/catalogEventsPublicGet.js"
+import { catalogEventsForCartGet } from "../server/catalogEventsForCartGet.ts"
 import { checkoutPageStateCreate } from "../ticketing/checkoutPageStateCreate.ts"
 import { TicketCheckoutEmptyState } from "../ticketing/TicketCheckoutEmptyState.tsx"
 import { TicketCheckoutForm } from "../ticketing/TicketCheckoutForm.tsx"
@@ -21,7 +21,14 @@ import { ticketCheckoutText } from "../ticketing/ticketCheckoutText.ts"
 import { ticketOrderEmailAccessPageStateCreate } from "../ticketing/ticketOrderEmailAccessPageStateCreate.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 
-const getCatalogEvents = createServerFn({ method: "GET" }).handler(catalogEventsPublicGet)
+const getCatalogEvents = createServerFn({ method: "POST" })
+  .validator((eventKeys: unknown) => {
+    if (!Array.isArray(eventKeys) || eventKeys.length > 20 || !eventKeys.every((key) => typeof key === "string")) {
+      throw new Error("Invalid cart event keys")
+    }
+    return eventKeys as string[]
+  })
+  .handler(({ data }) => catalogEventsForCartGet({ eventKeys: data }))
 const getAppOrigin = createServerFn({ method: "GET" }).handler(() => envBaseUrlAppResult())
 
 export const Route = createFileRoute("/checkout")({
@@ -35,11 +42,10 @@ export const Route = createFileRoute("/checkout")({
       return {
         bypassBilling: true as const,
         skipCheckoutForm: envCheckoutFormBypassEnabled(),
-        catalog: { success: true as const, data: [] as const },
         appOrigin: createResult(""),
       }
-    const [catalog, appOrigin] = await Promise.all([getCatalogEvents(), getAppOrigin()])
-    return { bypassBilling: false as const, skipCheckoutForm: false as const, catalog, appOrigin }
+    const appOrigin = await getAppOrigin()
+    return { bypassBilling: false as const, skipCheckoutForm: false as const, appOrigin }
   },
   component: CheckoutPage,
 })
@@ -63,17 +69,21 @@ function CheckoutPage() {
             </Show>
           }
         >
-          <TicketOrderStatusPage orderIds={orderIds()} checkoutKey={search().checkout} />
+          <SiteFrame>
+            <TicketOrderStatusPage orderIds={orderIds()} checkoutKey={search().checkout} />
+          </SiteFrame>
         </Show>
       }
     >
-      <TicketOrderEmailAccessPage state={emailAccessState} />
+      <SiteFrame>
+        <TicketOrderEmailAccessPage state={emailAccessState} />
+      </SiteFrame>
     </Show>
   )
 }
 
 function CheckoutFormPage(props: { appOrigin: ReturnType<typeof envBaseUrlAppResult> }) {
-  const state = checkoutPageStateCreate()
+  const state = checkoutPageStateCreate({ getCatalogEvents: (eventKeys) => getCatalogEvents({ data: eventKeys }) })
   const formState = ticketCheckoutFormStateCreate({ items: state.items, appOrigin: () => props.appOrigin })
   const text = ticketCheckoutText
   return (

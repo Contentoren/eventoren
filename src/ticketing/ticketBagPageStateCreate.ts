@@ -1,5 +1,7 @@
-import { getRouteApi, useNavigate } from "@tanstack/solid-router"
-import { createMemo, createSignal, onCleanup, onMount } from "solid-js"
+import { useNavigate } from "@tanstack/solid-router"
+import { createMemo, onCleanup, onMount } from "solid-js"
+import { createSignalObject } from "#ui/utils/createSignalObject.ts"
+import type { ApiClientResult } from "../client/apiClient.ts"
 import { eventDateFormat } from "../events/eventDateFormat.ts"
 import { eventTimeFormat } from "../events/eventTimeFormat.ts"
 import type { EventItem } from "../events/EventItem.ts"
@@ -14,14 +16,37 @@ import { ticketCartDraftTotalQuantity } from "./ticketCartDraftTotalQuantity.ts"
 import { ticketMaxPerOrder } from "./ticketMaxPerOrder.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 
-export function ticketBagPageStateCreate() {
+export function ticketBagPageStateCreate(input: {
+  getCatalogEvents: (eventKeys: string[]) => Promise<ApiClientResult<readonly EventItem[]>>
+}) {
   const navigate = useNavigate()
-  const routeApi = getRouteApi("/warenkorb")
-  const catalog = routeApi.useLoaderData()
-  const [cart, setCart] = createSignal<TicketCartDraft>([])
+  const catalog = createSignalObject<ApiClientResult<readonly EventItem[]>>({ success: true, data: [] })
+  const catalogLoaded = createSignalObject(false)
+  const cart = createSignalObject<TicketCartDraft>([])
+  let requestId = 0
+  let requestedKeys = ""
 
   const syncCart = () => {
-    setCart(ticketCartDraftLoad())
+    const next = ticketCartDraftLoad()
+    cart.set(next)
+    const eventKeys = next.map((entry) => entry.eventId)
+    const keys = JSON.stringify(eventKeys)
+    if (keys === requestedKeys && catalogLoaded.get() && catalog.get().success) return
+    requestedKeys = keys
+    const currentRequest = ++requestId
+    catalogLoaded.set(false)
+    void input.getCatalogEvents(eventKeys).then(
+      (result) => {
+        if (currentRequest !== requestId) return
+        catalog.set(result)
+        catalogLoaded.set(true)
+      },
+      () => {
+        if (currentRequest !== requestId) return
+        catalog.set({ success: false, error: { status: 503, message: "Catalog request failed" } })
+        catalogLoaded.set(true)
+      },
+    )
   }
 
   onMount(() => {
@@ -33,6 +58,7 @@ export function ticketBagPageStateCreate() {
     window.addEventListener("storage", syncCart)
 
     onCleanup(() => {
+      requestId++
       window.removeEventListener(ticketCartDraftEventName, syncCart)
       window.removeEventListener("storage", syncCart)
     })
@@ -40,11 +66,11 @@ export function ticketBagPageStateCreate() {
 
   const groups = createMemo<readonly TicketBagGroup[]>(() => {
     const result: TicketBagGroup[] = []
-    const catalogResult = catalog()
+    const catalogResult = catalog.get()
 
     if (!catalogResult.success) return result
 
-    for (const currentCart of cart()) {
+    for (const currentCart of cart.get()) {
       const currentEvent = (catalogResult.data as readonly EventItem[]).find(
         (event: EventItem) => event.id === currentCart.eventId,
       )
@@ -112,14 +138,14 @@ export function ticketBagPageStateCreate() {
     }
   })
 
-  const totalQuantity = createMemo(() => ticketCartDraftTotalQuantity(cart()))
+  const totalQuantity = createMemo(() => ticketCartDraftTotalQuantity(cart.get()))
 
   const isEmpty = createMemo(() => groups().length === 0 || totalQuantity() === 0)
-  const catalogError = createMemo(() => (catalog().success ? "" : "Der Eventkatalog ist gerade nicht verfügbar."))
+  const catalogError = createMemo(() => (catalog.get().success ? "" : "Der Eventkatalog ist gerade nicht verfügbar."))
 
   const updateQuantity = (eventId: string, tierId: string, quantity: number) => {
-    const updated = ticketCartDraftQuantitySet(cart(), eventId, tierId, quantity)
-    setCart(updated)
+    const updated = ticketCartDraftQuantitySet(cart.get(), eventId, tierId, quantity)
+    cart.set(updated)
     ticketCartDraftSave(updated)
   }
 
@@ -128,7 +154,7 @@ export function ticketBagPageStateCreate() {
   }
 
   const clearBag = () => {
-    setCart([])
+    cart.set([])
     ticketCartDraftSave([])
   }
 
@@ -138,6 +164,7 @@ export function ticketBagPageStateCreate() {
   }
 
   return {
+    isReady: catalogLoaded.get,
     groups,
     totals,
     totalQuantity,
