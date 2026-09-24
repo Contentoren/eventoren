@@ -15,6 +15,7 @@ export function SidebarMobileDrawer(p: SidebarMobileDrawerProps) {
       {...rest}
       open={s.open.get()}
       onOpenChange={(open) => s.open.set(open)}
+      closeOnOverlayClick
       class={classMerge("hidden", s.class)}
     />
   )

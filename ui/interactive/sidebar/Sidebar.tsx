@@ -4,8 +4,9 @@ import type { CorcuDialogTexts } from "#ui/interactive/dialog/CorcuDialogTexts.j
 import { SidebarMobileDrawer } from "#ui/interactive/sidebar/SidebarMobileDrawer.jsx"
 import type { SidebarState } from "#ui/interactive/sidebar/SidebarState.jsx"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
+import type { MayHaveInnerClass } from "#ui/utils/MayHaveInnerClass.js"
 
-export interface SidebarProps extends MayHaveClass {
+export interface SidebarProps extends MayHaveClass, MayHaveInnerClass {
   state: SidebarState
   defaultWidth?: number
   debounceMs?: number

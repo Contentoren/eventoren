@@ -42,10 +42,6 @@ export function adminShellStateCreate(area: "admin" | "organizer" = "admin") {
 
   return {
     areaLabel: area === "organizer" ? "Veranstalter" : "Admin",
-    activeNavigationItem: () =>
-      area === "organizer" && location().pathname.startsWith("/organizer/event/")
-        ? { href: "/organizer", icon: mdiBarcodeScan, label: "Ticket-Scanner" }
-        : activeNavigationItem(),
     activeNavigationHref: () => activeNavigationItem().href,
     logout: authState.logout,
     listViewPreference,

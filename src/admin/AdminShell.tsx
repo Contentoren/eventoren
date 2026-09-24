@@ -23,33 +23,21 @@ export function AdminShell(props: { readonly children: JSX.Element; readonly are
         <Sidebar
           state={state.sidebarState}
           title={props.area === "organizer" ? "Veranstalter-Navigation" : "Admin-Navigation"}
-          description={
-            props.area === "organizer" ? "Navigation für Veranstalter" : "Navigation für die Eventoren-Verwaltung"
-          }
+          titleClass="sr-only"
+          innerClass="w-[min(22rem,calc(100vw-2rem))] border-border bg-surface-base p-5 text-content"
           desktopChildren={
             <aside class="sticky top-0 self-start flex h-dvh w-64 shrink-0 flex-col overflow-y-auto border-r border-border bg-surface-base p-4">
-              <AdminSidebarContent state={state} />
+              <AdminSidebarContent state={state} showListViewControl={props.area !== "organizer"} />
             </aside>
           }
-          mobileChildren={<AdminSidebarContent state={state} />}
+          mobileChildren={<AdminSidebarContent state={state} showListViewControl={props.area !== "organizer"} />}
         />
         <div class="flex min-w-0 flex-1 flex-col">
-          <Show
-            when={props.area === "organizer"}
-            fallback={
-              <SidebarToggle
-                {...state.sidebarState}
-                variant="outline"
-                class="fixed bottom-4 right-4 z-20 bg-surface-base shadow-md"
-              />
-            }
-          >
-            <header class="sticky top-0 z-20 flex min-h-14 items-center gap-3 border-b border-border bg-surface-base/90 px-4 py-2 backdrop-blur-xl">
-              <SidebarToggle {...state.sidebarState} variant="ghost" />
-              <Icon path={state.activeNavigationItem().icon} class="size-5 shrink-0 text-content-muted" />
-              <h1 class="truncate text-base font-semibold">{state.activeNavigationItem().label}</h1>
-            </header>
-          </Show>
+          <SidebarToggle
+            {...state.sidebarState}
+            variant="outline"
+            class="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20 min-h-12 min-w-12 rounded-xl border-white/70 bg-white/65 text-content shadow-xl shadow-black/15 backdrop-blur-xl hover:bg-white/80 dark:border-white/20 dark:bg-slate-900/60 dark:hover:bg-slate-800/75"
+          />
           <div class="min-w-0 flex-1">{props.children}</div>
         </div>
       </div>
@@ -57,15 +45,21 @@ export function AdminShell(props: { readonly children: JSX.Element; readonly are
   )
 }
 
-function AdminSidebarContent(props: { readonly state: AdminShellState }) {
+function AdminSidebarContent(props: { readonly state: AdminShellState; readonly showListViewControl?: boolean }) {
   return (
     <div class="flex min-h-full flex-1 flex-col gap-6">
-      <Link to={props.state.navigation[0].href} class="px-2 text-lg font-semibold tracking-tight text-content">
+      <Link
+        to={props.state.navigation[0].href}
+        class="flex items-center gap-2 px-2 text-lg font-semibold tracking-tight text-content"
+      >
         eventoren
-        <span class="ml-2 text-sm font-medium text-content-muted">{props.state.areaLabel}</span>
       </Link>
 
-      <nav aria-label={props.state.areaLabel === "Admin" ? "Admin-Navigation" : "Veranstalter-Navigation"}>
+      <nav
+        aria-label={props.state.areaLabel === "Admin" ? "Admin-Navigation" : "Veranstalter-Navigation"}
+        class="border-t border-border pt-5"
+      >
+        <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-content-muted">Navigation</p>
         <ul class="flex flex-col gap-1">
           <For each={props.state.navigation}>
             {(item) => (
@@ -73,7 +67,7 @@ function AdminSidebarContent(props: { readonly state: AdminShellState }) {
                 <Link
                   to={item.href}
                   aria-current={props.state.activeNavigationHref() === item.href ? "page" : undefined}
-                  class={`focus-ring flex items-center gap-3 rounded-control px-3 py-2 text-sm font-medium transition-colors ${
+                  class={`focus-ring flex min-h-11 items-center gap-3 rounded-control px-3 py-2 text-sm font-medium transition-colors ${
                     props.state.activeNavigationHref() === item.href
                       ? "bg-brand-soft text-brand-accent"
                       : "text-content-muted hover:bg-surface-muted hover:text-content"
@@ -88,32 +82,36 @@ function AdminSidebarContent(props: { readonly state: AdminShellState }) {
         </ul>
       </nav>
 
-      <footer class="mt-auto flex flex-col gap-2 border-t border-border pt-4">
+      <footer class="mt-auto border-t border-border pt-5">
         <Show when={props.state.user()}>
           {(user) => (
-            <details class="group relative">
-              <summary
-                class="focus-ring flex w-full cursor-pointer list-none items-center justify-center gap-2 rounded-control px-3 py-2 text-sm font-medium hover:bg-surface-muted"
-                aria-label="Benutzermenü"
-              >
-                <Icon path={mdiAccountOutline} class="size-5 shrink-0" />
-                <span class="min-w-0 truncate">{user().name}</span>
-              </summary>
-              <div class="absolute bottom-full left-0 z-30 mb-2 flex min-w-56 flex-col gap-3 rounded-control border border-border bg-surface-base p-4 shadow-lg">
-                <div class="min-w-0">
-                  <p class="m-0 truncate font-medium">{user().name}</p>
-                  <p class="m-0 truncate text-sm text-content-muted">{user().email ?? "—"}</p>
+            <div class="flex flex-col gap-4">
+              <div>
+                <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-content-muted">Konto</p>
+                <div class="flex min-w-0 items-center gap-3 rounded-control bg-surface-muted p-3">
+                  <Icon path={mdiAccountOutline} class="size-5 shrink-0 text-content-muted" />
+                  <div class="min-w-0">
+                    <p class="m-0 truncate text-sm font-semibold">{user().name}</p>
+                    <p class="m-0 truncate text-xs text-content-muted">{user().email ?? "—"}</p>
+                    <span class="mt-1 inline-block rounded-full bg-surface-base px-2 py-0.5 text-xs font-medium text-content-muted">
+                      {props.state.areaLabel}
+                    </span>
+                  </div>
                 </div>
-                <ThemeButton showText class="w-full justify-center rounded-control px-2.5" />
-                <AdminListViewControl preference={props.state.listViewPreference} />
+              </div>
+              <div class="flex flex-col gap-2">
+                <ThemeButton showText class="min-h-11 w-full justify-center rounded-control bg-surface-muted px-2.5" />
+                {props.showListViewControl !== false && (
+                  <AdminListViewControl preference={props.state.listViewPreference} />
+                )}
                 <form onSubmit={props.state.logout}>
-                  <Button type="submit" variant="outline" size="sm" class="w-full justify-center gap-2">
+                  <Button type="submit" variant="outline" size="sm" class="min-h-11 w-full justify-center gap-2">
                     <Icon path={mdiLogout} class="size-5" />
                     Abmelden
                   </Button>
                 </form>
               </div>
-            </details>
+            </div>
           )}
         </Show>
       </footer>

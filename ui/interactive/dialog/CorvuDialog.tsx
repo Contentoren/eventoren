@@ -33,6 +33,7 @@ export interface CorvuDialogProps
 
   open?: boolean
   onOpenChange?: (open: boolean) => void
+  closeOnOverlayClick?: boolean
 }
 
 /** Modal dialog with titled header and trigger button. */
@@ -40,7 +41,11 @@ export function CorvuDialog(p: CorvuDialogProps) {
   const texts = p.texts ?? corvuDialogTextDefault
 
   return (
-    <Dialog open={p.open} onOpenChange={p.onOpenChange}>
+    <Dialog
+      open={p.open}
+      onOpenChange={p.onOpenChange}
+      closeOnOutsidePointer={p.closeOnOverlayClick ? false : undefined}
+    >
       <Dialog.Trigger
         class={buttonCva2(
           p.variant,
@@ -57,10 +62,13 @@ export function CorvuDialog(p: CorvuDialogProps) {
         )}
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay class={classesDialogOverlayMerge()} />
+        <Dialog.Overlay
+          class={classesDialogOverlayMerge()}
+          onClick={p.closeOnOverlayClick ? () => p.onOpenChange?.(false) : undefined}
+        />
         <Dialog.Content class={classesDialogContentMerge(p.innerClass)}>
-          <header class="flex items-center justify-between gap-2 mb-4">
-            <div>
+          <header class="mb-4 flex items-start justify-between gap-2">
+            <div class="min-w-0">
               <Dialog.Label class={classMerge("text-lg font-semibold", p.titleClass)}>{p.title}</Dialog.Label>
               {p.description && (
                 <Dialog.Description class={classMerge("text-muted-foreground", p.descriptionClass)}>
@@ -68,7 +76,10 @@ export function CorvuDialog(p: CorvuDialogProps) {
                 </Dialog.Description>
               )}
             </div>
-            <Dialog.Close class={buttonCvaIconOnly(buttonVariant.outline, false, false)} title={texts.closeDialog}>
+            <Dialog.Close
+              class={classMerge(buttonCvaIconOnly(buttonVariant.outline, false, false), "shrink-0")}
+              title={texts.closeDialog}
+            >
               <Icon path={mdiClose} class={buttonIconCva(buttonVariant.outline, "")} />
             </Dialog.Close>
           </header>
