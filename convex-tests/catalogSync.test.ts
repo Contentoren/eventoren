@@ -12,6 +12,7 @@ const modules = import.meta.glob("../convex/**/*.ts")
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.useRealTimers()
   delete process.env.EVENTOREN_BILLING_BASE_URL
   delete process.env.EVENTOREN_BILLING_ORGANIZATION_ID
   delete process.env.EVENTOREN_BILLING_API_CREDENTIAL
@@ -113,6 +114,79 @@ async function readSnapshotEvents(t: ReturnType<typeof convexTest>, version: num
     cursor = page.continueCursor
   }
 }
+
+test("requests a full snapshot refresh without editing catalog events", async () => {
+  vi.useFakeTimers()
+  const t = convexTest(schema, modules)
+  const userId = await seedCatalog(t, 1, 3)
+  process.env.EVENTOREN_BILLING_BASE_URL = "https://billing.test"
+  process.env.EVENTOREN_BILLING_ORGANIZATION_ID = "eventoren"
+  process.env.EVENTOREN_BILLING_API_CREDENTIAL = "credential"
+  process.env.EVENTOREN_BILLING_STRIPE_MODE = "test"
+  process.env.EVENTOREN_PUBLIC_BASE_URL = "https://eventoren.test"
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const payload = JSON.parse(typeof init?.body === "string" ? init.body : "{}") as {
+        catalogVersion: number
+        events: unknown[]
+      }
+      const digest = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(JSON.stringify({ catalogVersion: payload.catalogVersion, events: payload.events })),
+      )
+      const catalogDigest = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("")
+      return new Response(
+        JSON.stringify({
+          success: true,
+          data: {
+            catalogVersion: payload.catalogVersion,
+            catalogDigest,
+            eventCount: payload.events.length,
+            replayed: false,
+          },
+        }),
+        { status: 200 },
+      )
+    }),
+  )
+
+  const request = await t.mutation(internal.catalog.catalogSyncRefreshRequestMutation, { expectedVersion: 3 })
+
+  expect(request).toEqual({ requested: true, requestedVersion: 4 })
+  expect(
+    await t.run(async (ctx) => {
+      const state = await ctx.db
+        .query("catalogSyncStates")
+        .withIndex("key", (q) => q.eq("key", "catalog"))
+        .unique()
+      const events = await ctx.db.query("catalogEvents").collect()
+      const snapshot = await ctx.db
+        .query("catalogSyncSnapshots")
+        .withIndex("version", (q) => q.eq("version", 4))
+        .unique()
+      return {
+        state: state && {
+          version: state.version,
+          status: state.status,
+          lastChangedByUserId: state.lastChangedByUserId,
+        },
+        events: events.map(({ catalogVersion, eventRevision }) => ({ catalogVersion, eventRevision })),
+        snapshot: snapshot && { version: snapshot.version, status: snapshot.status },
+      }
+    }),
+  ).toEqual({
+    state: { version: 4, status: "pending", lastChangedByUserId: userId },
+    events: [{ catalogVersion: 3, eventRevision: undefined }],
+    snapshot: { version: 4, status: "building" },
+  })
+
+  expect(await t.mutation(internal.catalog.catalogSyncRefreshRequestMutation, { expectedVersion: 3 })).toEqual({
+    requested: false,
+    currentVersion: 4,
+  })
+  await t.finishAllScheduledFunctions(vi.runAllTimers)
+})
 
 test("builds a stable indexed snapshot in bounded batches and pages", async () => {
   const t = convexTest(schema, modules)

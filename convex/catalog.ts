@@ -14,6 +14,7 @@ export { catalogSyncMarkFailedMutation } from "#src/catalog/convex/catalogSyncMa
 export { catalogSyncMarkSyncedMutation } from "#src/catalog/convex/catalogSyncMarkSyncedMutation.ts"
 export { catalogSyncPushAction } from "#src/catalog/convex/catalogSyncPushAction.ts"
 export { catalogSyncRescheduleMutation } from "#src/catalog/convex/catalogSyncRescheduleMutation.ts"
+export { catalogSyncRefreshRequestMutation } from "#src/catalog/convex/catalogSyncRefreshRequestMutation.ts"
 export { catalogSyncSnapshotBuildMutation } from "#src/catalog/convex/catalogSyncSnapshotBuildMutation.ts"
 export { catalogSyncSnapshotQuery } from "#src/catalog/convex/catalogSyncSnapshotQuery.ts"
 export { catalogTicketTierUpsertMutation } from "#src/catalog/convex/catalogTicketTierUpsertMutation.ts"
