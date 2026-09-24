@@ -12,7 +12,7 @@ export async function ticketE2eAdminSignIn(page: Page, baseUrl: string): Promise
   )
   const navigation = page.getByRole("navigation", { name: "Admin-Navigation" })
   await expect(navigation.getByRole("link", { name: "Events", exact: true })).toBeVisible({ timeout: 30_000 })
-  await expect(page.locator('summary[aria-label="Benutzermenü"]')).toBeVisible()
+  await expect(page.getByRole("button", { name: "Abmelden", exact: true })).toBeVisible()
   await expect(page.locator("main#content h1")).toHaveText(
     new URL(page.url()).pathname === "/admin/bestellungen" ? "Bestellungen" : "Events",
   )
