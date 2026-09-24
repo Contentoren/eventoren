@@ -38,7 +38,14 @@ export async function adminImageUploadFromSession(data: FormData): PromiseResult
       body: file,
     })
     if (!response.headers.get("content-type")?.includes("application/json")) {
-      console.error("Event image HTTP endpoint returned a non-JSON response", { status: response.status })
+      // Cloudflare returns a 1xxx code inside a 530 HTML response when its
+      // origin DNS cannot be resolved. Only log that numeric code, never HTML.
+      const errorCode = response.status === 530 ? (await response.text()).match(/Error\s+(1\d{3})/i)?.[1] : undefined
+      console.error("Event image HTTP endpoint returned a non-JSON response", {
+        host: new URL(siteUrl).hostname,
+        status: response.status,
+        errorCode,
+      })
       return createResultError(op, "Image upload failed; please try again")
     }
     const result = (await response.json()) as Result<EventImageVariants>
