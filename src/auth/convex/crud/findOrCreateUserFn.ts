@@ -42,7 +42,7 @@ export async function findOrCreateUserFn(
             authData.providerId,
             authData.zitadelRoles,
             undefined,
-            authData.zitadelRoleSyncEnabled,
+            authData.zitadelRoleSyncEnabled === true,
           )
         : createResult(user)
     if (!synchronized.success) return createResultError(op, synchronized.errorMessage)
@@ -74,7 +74,7 @@ export async function findOrCreateUserFn(
               authData.providerId,
               authData.zitadelRoles,
               undefined,
-              authData.zitadelRoleSyncEnabled,
+              authData.zitadelRoleSyncEnabled === true,
             )
           : createResult(existingUser)
       if (!synchronized.success) return createResultError(op, synchronized.errorMessage)

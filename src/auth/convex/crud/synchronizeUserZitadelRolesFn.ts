@@ -12,15 +12,17 @@ export async function synchronizeUserZitadelRolesFn(
   providerId: string,
   roles: readonly ZitadelRole[] | undefined,
   organizerInvitedAt?: string,
-  roleSyncEnabled = false,
+  roleSyncEnabled?: boolean,
 ): PromiseResult<DocUser> {
   const op = "synchronizeUserZitadelRolesFn"
   const user = await ctx.db.get("users", userId)
   if (!user) return createResultError(op, "User not found by userId", userId)
+  // Only a sign-in carrying the verified ID-token roles may replace a token-managed global role.
+  if (user.zitadelRolesFromIdToken && roleSyncEnabled === undefined) return createResult(user)
 
   const normalizedRoles = roles === undefined ? undefined : [...new Set(roles)]
   const isLegacyAdminOverride =
-    !roleSyncEnabled && user.role === userRole.admin && user.roleSource !== userRoleSource.zitadel
+    roleSyncEnabled !== true && user.role === userRole.admin && user.roleSource !== userRoleSource.zitadel
   const isProviderManaged = !isLegacyAdminOverride
   const hasOrganizerRole = normalizedRoles?.includes(zitadelRole.organizer) === true
   const hadOrganizerRole = user.zitadelRoles?.includes(zitadelRole.organizer) === true
@@ -32,6 +34,7 @@ export async function synchronizeUserZitadelRolesFn(
 
   await ctx.db.patch(userId, {
     zitadelUserId: providerId,
+    ...(roleSyncEnabled !== undefined ? { zitadelRolesFromIdToken: roleSyncEnabled || undefined } : {}),
     ...(isProviderManaged ? { roleSource: userRoleSource.zitadel } : { roleSource: undefined }),
     ...(normalizedRoles
       ? {

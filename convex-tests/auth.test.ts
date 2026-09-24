@@ -192,25 +192,33 @@ test("preserves legacy admin access when organization role sync is disabled", as
   expect(adminSync.success && adminSync.data.role).toBe("admin")
 })
 
-test("enabled Zitadel role sync replaces legacy admin overrides", async () => {
+test("verified sign-in replaces a linked legacy admin override and marks token role provenance", async () => {
   const t = convexTest(schema, modules)
   const now = new Date().toISOString()
   const adminId = await t.run(async (ctx) =>
     ctx.db.insert("users", {
       name: "Legacy Admin",
+      email: "legacy-admin@example.test",
       role: "admin",
       createdAt: now,
       updatedAt: now,
     }),
   )
 
-  const adminSync = await t.mutation(internal.auth.authUserZitadelRolesSynchronizeInternalMutation, {
-    userId: adminId,
-    zitadelUserId: "legacy-admin-zitadel",
-    roles: ["organizer"],
-    roleSyncEnabled: true,
-  })
-  expect(adminSync.success && adminSync.data.role).toBe("organizer")
+  const signedIn = await signIn(
+    t,
+    {
+      provider: "zitadel",
+      providerId: "legacy-admin-zitadel",
+      username: "legacy-admin",
+      email: "legacy-admin@example.test",
+      zitadelRoles: ["organizer"],
+      zitadelRoleSyncEnabled: true,
+    },
+    "eventoren-org",
+  )
+  expect(signedIn.success && signedIn.data.profile.role).toBe("organizer")
+  expect((await t.run((ctx) => ctx.db.get("users", adminId)))?.zitadelRolesFromIdToken).toBe(true)
 })
 
 test("rejects caller-supplied enabled role sync without a signed server proof", async () => {
@@ -335,6 +343,29 @@ test("verified empty roles downgrade existing Zitadel accounts and matching-emai
   )
   expect(linked.success && linked.data.profile.role).toBe("customer")
   expect(linked.success && linked.data.profile.userId).toBe(linkedId)
+})
+
+test("a legacy sign-in after removing the configured gate restores management role sync", async () => {
+  const t = convexTest(schema, modules)
+  const provider = { provider: "zitadel" as const, providerId: "gate-removed-id", username: "gate-removed" }
+  const configured = await signIn(
+    t,
+    { ...provider, zitadelRoles: ["admin"], zitadelRoleSyncEnabled: true },
+    "eventoren-org",
+  )
+  expect(configured.success && configured.data.profile.role).toBe("admin")
+  const legacy = await signIn(t, { ...provider, zitadelRoles: ["customer"] })
+  expect(legacy.success && legacy.data.profile.role).toBe("customer")
+  if (!legacy.success) return
+  const userId = legacy.data.profile.userId as Id<"users">
+  expect((await t.run((ctx) => ctx.db.get("users", userId)))?.zitadelRolesFromIdToken).toBeUndefined()
+
+  const management = await t.mutation(internal.auth.authUserZitadelRolesSynchronizeInternalMutation, {
+    userId,
+    zitadelUserId: provider.providerId,
+    roles: ["organizer"],
+  })
+  expect(management.success && management.data.role).toBe("organizer")
 })
 
 async function signIn(t: ReturnType<typeof convexTest>, provider: CommonAuthProvider, organizationId?: string) {

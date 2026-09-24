@@ -54,6 +54,7 @@ export async function createUserFromAuthProviderFn(
       ? {
           roleSource: userRoleSource.zitadel,
           zitadelUserId: authProvider.providerId,
+          ...(authProvider.zitadelRoleSyncEnabled === true ? { zitadelRolesFromIdToken: true } : {}),
           ...(zitadelRoles
             ? {
                 zitadelRoles,

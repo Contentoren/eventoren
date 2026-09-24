@@ -23,6 +23,7 @@ export const authTables = {
     roleSource: v.optional(userRoleSourceValidator),
     zitadelUserId: v.optional(v.string()),
     zitadelRoles: v.optional(v.array(zitadelRoleValidator)),
+    zitadelRolesFromIdToken: v.optional(v.boolean()),
     zitadelRolesSynchronizedAt: v.optional(v.string()),
     organizerInvitedAt: v.optional(v.string()),
     ...fieldsConvexCreatedAtUpdatedAtDeletedAt,

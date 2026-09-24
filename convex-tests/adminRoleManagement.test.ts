@@ -287,6 +287,146 @@ test("scheduled sync applies external organizer revocations to existing user rec
   })
 })
 
+test("verified customer downgrade survives cron and member reads, while verified admin survives access reads", async () => {
+  await withEnvironment(async () => {
+    const t = convexTest(schema, modules)
+    const customerProvider = {
+      provider: "zitadel" as const,
+      providerId: "token-customer-id",
+      username: "token-customer",
+      zitadelRoleSyncEnabled: true,
+    }
+    const adminProvider = {
+      provider: "zitadel" as const,
+      providerId: "token-admin-id",
+      username: "token-admin",
+      zitadelRoleSyncEnabled: true,
+      zitadelRoles: ["admin" as const],
+    }
+    const first = await t.action(api.auth.authSignInUsingZitadelAction, {
+      ...customerProvider,
+      zitadelRoles: ["admin"],
+      zitadelRoleSyncProof: await zitadelRoleSyncProofCreate(
+        { ...customerProvider, zitadelRoles: ["admin"] },
+        "organization-id",
+      ),
+    })
+    expect(first.success && first.data.profile.role).toBe("admin")
+    const downgradedProvider = { ...customerProvider, zitadelRoles: [] }
+    const downgraded = await t.action(api.auth.authSignInUsingZitadelAction, {
+      ...downgradedProvider,
+      zitadelRoleSyncProof: await zitadelRoleSyncProofCreate(downgradedProvider, "organization-id"),
+    })
+    expect(downgraded.success && downgraded.data.profile.role).toBe("customer")
+    const admin = await t.action(api.auth.authSignInUsingZitadelAction, {
+      ...adminProvider,
+      zitadelRoleSyncProof: await zitadelRoleSyncProofCreate(adminProvider, "organization-id"),
+    })
+    expect(admin.success && admin.data.profile.role).toBe("admin")
+    if (!downgraded.success || !admin.success) return
+
+    const managementAdminGrant = {
+      id: "grant-id",
+      orgId: "organization-id",
+      projectId: "project-id",
+      roleKeys: ["admin"],
+      state: "USER_GRANT_STATE_ACTIVE",
+      userId: "token-customer-id",
+    }
+    await withFetch(
+      async () => Response.json({ details: { totalResult: 1 }, result: [managementAdminGrant] }),
+      async () => {
+        const result = await t.action(internal.auth.authZitadelRolesSynchronizeScheduledAction, {})
+        expect(result.success).toBe(true)
+      },
+    )
+    const customerId = downgraded.data.profile.userId
+    expect(await t.run((ctx) => ctx.db.get("users", customerId))).toMatchObject({
+      role: "customer",
+      roleSource: "zitadel",
+      zitadelRoles: [],
+      zitadelRolesFromIdToken: true,
+    })
+
+    const responses = [
+      Response.json({ details: { totalResult: 0 }, result: [] }), // admin access: no management grant
+      Response.json({
+        details: { totalResult: 1 },
+        result: [{ id: "token-customer-id", userName: "token-customer", preferredLoginName: "token-customer" }],
+      }),
+      Response.json({ details: { totalResult: 1 }, result: [managementAdminGrant] }),
+    ]
+    await withFetch(
+      async () => responses.shift() ?? Response.json({}),
+      async () => {
+        const result = await t.action(api.auth.authAdminZitadelMembersListAction, { token: admin.data.token })
+        expect(result.success).toBe(true)
+        if (result.success) {
+          expect(result.data.members[0]).toMatchObject({
+            eventorenRole: "customer",
+            zitadelRoles: ["admin"],
+          })
+        }
+      },
+    )
+    expect(await t.run((ctx) => ctx.db.get("users", admin.data.profile.userId))).toMatchObject({
+      role: "admin",
+      zitadelRoles: ["admin"],
+      zitadelRolesFromIdToken: true,
+    })
+    expect(await t.run((ctx) => ctx.db.get("users", customerId))).toMatchObject({
+      role: "customer",
+      zitadelRoles: [],
+      zitadelRolesFromIdToken: true,
+    })
+  })
+})
+
+test("without verified ID-token sync, member reads still update local roles from grants", async () => {
+  await withEnvironment(async () => {
+    const t = convexTest(schema, modules)
+    const token = await legacyAdminSession(t)
+    const provider = {
+      provider: "zitadel" as const,
+      providerId: "legacy-member-id",
+      username: "legacy-member",
+      zitadelRoles: [],
+    }
+    const signedIn = await t.action(api.auth.authSignInUsingZitadelAction, {
+      ...provider,
+      zitadelRoleSyncProof: await zitadelRoleSyncProofCreate(provider),
+    })
+    expect(signedIn.success && signedIn.data.profile.role).toBe("customer")
+    const responses = [
+      Response.json({
+        details: { totalResult: 1 },
+        result: [{ id: "legacy-member-id", userName: "legacy-member", preferredLoginName: "legacy-member" }],
+      }),
+      Response.json({
+        details: { totalResult: 1 },
+        result: [
+          {
+            id: "grant-id",
+            orgId: "organization-id",
+            projectId: "project-id",
+            roleKeys: ["organizer"],
+            state: "USER_GRANT_STATE_ACTIVE",
+            userId: "legacy-member-id",
+          },
+        ],
+      }),
+    ]
+    await withFetch(
+      async () => responses.shift() ?? Response.json({}),
+      async () => {
+        const result = await t.action(api.auth.authAdminZitadelMembersListAction, { token })
+        expect(result.success).toBe(true)
+        if (result.success) expect(result.data.members[0]?.eventorenRole).toBe("organizer")
+      },
+    )
+  })
+})
+
 async function legacyAdminSession(t: ReturnType<typeof convexTest>): Promise<string> {
   const signedIn = await t.mutation(internal.auth.signInUsingSocialAuth3InternalMutation, {
     email: "admin@example.test",
