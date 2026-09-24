@@ -66,7 +66,6 @@ test("decorates a supplied demo order state with reactive confirmation methods",
   expect(state.isPaid()).toBe(true)
   expect(state.confirmationSymbol()).toBe("✓")
   expect(state.confirmationTitle()).toBe("Vielen Dank – dein Kauf war erfolgreich!")
-  expect(state.confirmationClass()).toBe("border-success/50 bg-success-soft")
 
   orders.set([pendingOrder])
 

@@ -52,15 +52,13 @@ export function ticketOrderStatusPageViewStateCreate(inputs: {
   }
 
   const confirmationClass = () => {
-    if (isPaid()) return "border-success/50 bg-success-soft"
-    if (hasFailedOrder()) return "border-danger/50 bg-danger-soft"
-    return "border-warning/50 bg-warning-soft"
+    return "border-border-subtle bg-surface"
   }
 
   const confirmationSymbolClass = () => {
     if (isPaid()) return "bg-success text-surface-base"
     if (hasFailedOrder()) return "bg-danger text-surface-base"
-    return "bg-warning text-surface-base"
+    return "bg-brand text-brand-content"
   }
 
   return {

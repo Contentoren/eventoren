@@ -1,6 +1,6 @@
 import { For, Show } from "solid-js"
-import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
+import { UiBadge } from "../ui/UiBadge.tsx"
 import type { TicketOrderProjection } from "./TicketOrderProjection.ts"
 import { TicketQrCode } from "./TicketQrCode.tsx"
 import { ticketOrderWalletPassStateCreate } from "./ticketOrderWalletPassStateCreate.ts"
@@ -9,20 +9,15 @@ export function TicketOrderWalletPass(props: { order: TicketOrderProjection }) {
   const state = ticketOrderWalletPassStateCreate({ order: () => props.order })
 
   return (
-    <CardWrapper class="overflow-hidden border-border-strong bg-surface p-0 text-content">
+    <CardWrapper class="overflow-hidden rounded-card border-border-subtle bg-surface p-0 text-content shadow-none">
       <header class="flex items-start justify-between gap-space-4 border-b border-border-subtle px-space-5 py-space-4 sm:px-space-6">
-        <div class="flex min-w-0 items-center gap-space-3">
-          <div class="size-16 shrink-0 overflow-hidden rounded-control bg-surface-muted">
-            <img src={state.order().imageUrl} alt={state.order().imageAlt} class="size-full object-cover" />
-          </div>
-          <div class="min-w-0">
-            <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Kaufübersicht</p>
-            <h2 class="mt-space-1 text-xl font-semibold leading-snug text-content">{state.order().eventTitle}</h2>
-          </div>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Kaufübersicht</p>
+          <h2 class="mt-space-1 text-xl font-semibold leading-snug text-content">{state.order().eventTitle}</h2>
         </div>
-        <Badge variant={state.statusVariant()} class="shrink-0">
+        <UiBadge tone={state.statusTone()} class="shrink-0">
           {state.statusLabel()}
-        </Badge>
+        </UiBadge>
       </header>
 
       <div class="flex flex-col gap-space-5 p-space-5 sm:p-space-6">
@@ -58,7 +53,7 @@ export function TicketOrderWalletPass(props: { order: TicketOrderProjection }) {
           <div class="flex flex-col gap-space-3 border-t border-border-subtle pt-space-5">
             <div class="flex items-center justify-between gap-space-3">
               <h3 class="text-base font-semibold text-content">Deine Tickets</h3>
-              <Badge variant="subtle">{state.ticketCountLabel()}</Badge>
+              <UiBadge>{state.ticketCountLabel()}</UiBadge>
             </div>
             <p class="text-sm text-content-muted">Zeige den QR-Code für den Einlass vor.</p>
             <For each={state.order().tickets}>

@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
-import { Button } from "#ui/interactive/button/Button.jsx"
 import { LinkButtonExternal, LinkButtonInternal } from "#ui/interactive/link/LinkButton.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
+import { UiButton } from "../ui/UiButton.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import type { TicketOrderStatusPageState } from "./TicketOrderStatusPageState.ts"
 import { TicketOrderWalletPass } from "./TicketOrderWalletPass.tsx"
@@ -28,7 +28,7 @@ export function TicketOrderStatusPage(props: {
         <Show
           when={!state.isLoading()}
           fallback={
-            <CardWrapper class="border-border-strong bg-surface text-content">
+            <CardWrapper class="rounded-card border-border-subtle bg-surface text-content shadow-none">
               <p class="text-sm text-content-muted" aria-live="polite">
                 Bestellung wird geladen …
               </p>
@@ -37,39 +37,45 @@ export function TicketOrderStatusPage(props: {
         >
           <Show when={state.hasOrders()}>
             <CardWrapper
-              class={`relative overflow-visible p-0 text-content ${state.confirmationClass()}`}
+              class={`rounded-card p-0 text-content shadow-none ${state.confirmationClass()}`}
               aria-live="polite"
             >
-              <div class="flex flex-col gap-space-5 p-space-5 sm:p-space-6">
-                <span
-                  aria-hidden="true"
-                  class={`absolute top-0 left-0 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-xl font-bold ${state.confirmationSymbolClass()}`}
-                >
-                  {state.confirmationSymbol()}
-                </span>
-                <div class="min-w-0">
-                  <p class="text-sm font-semibold uppercase tracking-widest text-content-muted">Deine Bestellung</p>
-                  <h1 class="mt-space-1 text-2xl font-semibold tracking-tight text-content sm:text-3xl">
-                    {state.confirmationTitle()}
-                  </h1>
-                  <p class="mt-space-2 text-sm leading-relaxed text-content-muted sm:text-base">
-                    {state.confirmationMessage()}
-                  </p>
+              <div class="flex flex-col gap-space-4 p-space-5 sm:p-space-6">
+                <div class="flex items-start gap-space-4">
+                  <span
+                    aria-hidden="true"
+                    class={`flex size-10 shrink-0 items-center justify-center rounded-full text-lg font-bold ${state.confirmationSymbolClass()}`}
+                  >
+                    {state.confirmationSymbol()}
+                  </span>
+                  <div class="min-w-0">
+                    <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Deine Bestellung</p>
+                    <h1 class="mt-space-1 text-2xl font-semibold tracking-tight text-content sm:text-3xl">
+                      {state.confirmationTitle()}
+                    </h1>
+                    <p class="mt-space-2 text-sm leading-relaxed text-content-muted sm:text-base">
+                      {state.confirmationMessage()}
+                    </p>
+                  </div>
                 </div>
                 <Show
                   when={state.hasTickets()}
                   fallback={
-                    <Button
-                      variant="outline"
-                      class="w-full border-border-strong bg-surface sm:w-fit"
+                    <UiButton
+                      variant="secondary"
+                      class="w-full sm:w-fit"
                       disabled={state.isRefreshing()}
                       onClick={state.refresh}
                     >
                       {state.refreshLabel()}
-                    </Button>
+                    </UiButton>
                   }
                 >
-                  <LinkButtonExternal href="#deine-tickets" variant="contrast" size="lg" class="w-full sm:w-fit">
+                  <LinkButtonExternal
+                    href="#deine-tickets"
+                    variant="none"
+                    class="focus-ring h-11 w-full rounded-control bg-brand px-space-6 font-semibold text-brand-content hover:bg-brand-strong sm:w-fit"
+                  >
                     Tickets öffnen
                   </LinkButtonExternal>
                 </Show>
@@ -86,7 +92,7 @@ export function TicketOrderStatusPage(props: {
             </p>
           </Show>
           <Show when={!state.hasOrders() && !state.errorMessage()}>
-            <CardWrapper class="border-border-strong bg-surface text-content">
+            <CardWrapper class="rounded-card border-border-subtle bg-surface text-content shadow-none">
               <p class="text-sm text-content-muted">Keine Bestelldaten gefunden.</p>
             </CardWrapper>
           </Show>
@@ -104,31 +110,43 @@ export function TicketOrderStatusPage(props: {
           <LinkButtonInternal
             to={props.eventsHref ?? "/"}
             variant="none"
-            class="w-full bg-brand text-brand-content hover:bg-brand-strong sm:w-auto"
+            class="focus-ring h-11 w-full rounded-control bg-brand px-space-6 font-semibold text-brand-content hover:bg-brand-strong sm:w-auto"
           >
             Weitere Events entdecken
           </LinkButtonInternal>
-          <Button
-            variant="outline"
-            class="w-full border-border-strong bg-surface sm:w-auto"
+          <UiButton
+            variant="secondary"
+            class="w-full sm:w-auto"
             disabled={state.isRefreshing()}
             onClick={state.refresh}
           >
             Status aktualisieren
-          </Button>
+          </UiButton>
           <Show when={props.ordersHref}>
             {(ordersHref) => (
-              <LinkButtonInternal to={ordersHref()} variant="link" class="w-full sm:w-auto">
+              <LinkButtonInternal
+                to={ordersHref()}
+                variant="none"
+                class="focus-ring h-11 w-full rounded-control px-space-4 font-semibold text-brand-accent hover:underline sm:w-auto"
+              >
                 Meine Bestellungen
               </LinkButtonInternal>
             )}
           </Show>
           {props.cartHref ? (
-            <LinkButtonExternal href={props.cartHref} variant="link" class="w-full sm:w-auto">
+            <LinkButtonExternal
+              href={props.cartHref}
+              variant="none"
+              class="focus-ring h-11 w-full rounded-control px-space-4 font-semibold text-brand-accent hover:underline sm:w-auto"
+            >
               Zum Warenkorb
             </LinkButtonExternal>
           ) : (
-            <LinkButtonInternal to="/warenkorb" variant="link" class="w-full sm:w-auto">
+            <LinkButtonInternal
+              to="/warenkorb"
+              variant="none"
+              class="focus-ring h-11 w-full rounded-control px-space-4 font-semibold text-brand-accent hover:underline sm:w-auto"
+            >
               Zum Warenkorb
             </LinkButtonInternal>
           )}

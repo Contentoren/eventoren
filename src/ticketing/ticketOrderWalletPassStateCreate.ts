@@ -1,6 +1,6 @@
-import type { BadgeVariant } from "#ui/static/badge/badgeCva.jsx"
 import { eventDateFormat } from "../events/eventDateFormat.ts"
 import { eventTimeFormat } from "../events/eventTimeFormat.ts"
+import type { UiBadge } from "../ui/UiBadge.tsx"
 import type { TicketOrderProjection } from "./TicketOrderProjection.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 
@@ -13,11 +13,11 @@ export function ticketOrderWalletPassStateCreate(inputs: { order: () => TicketOr
     return "Fehlgeschlagen"
   }
 
-  const statusVariant = (): BadgeVariant => {
-    if (inputs.order().status === "paid_inventory_conflict") return "filledYellow"
-    if (inputs.order().paymentStatus === "paid") return "filledGreen"
-    if (inputs.order().paymentStatus === "pending") return "filledYellow"
-    return "filledRed"
+  const statusTone = (): Parameters<typeof UiBadge>[0]["tone"] => {
+    if (inputs.order().status === "paid_inventory_conflict") return "warning"
+    if (inputs.order().paymentStatus === "paid") return "success"
+    if (inputs.order().paymentStatus === "pending") return "brand"
+    return "danger"
   }
 
   const participantName = (ticket: TicketOrderProjection["tickets"][number]) =>
@@ -41,7 +41,7 @@ export function ticketOrderWalletPassStateCreate(inputs: { order: () => TicketOr
     ticketTitle: (ticket: TicketOrderProjection["tickets"][number]) => `Ticket ${ticket.sequence} · ${ticket.tierName}`,
     ticketQrLabel: (ticket: TicketOrderProjection["tickets"][number]) => `QR-Code für Ticket ${ticket.sequence}`,
     statusLabel,
-    statusVariant,
+    statusTone,
     participantName,
     ticketsUnavailableMessage,
   }
