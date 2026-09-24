@@ -165,21 +165,32 @@ test("accepts Zitadel login start behind reverse proxy forwarding headers", asyn
 test("requests the Zitadel project-role scope and stores a nonce only when organization sync is enabled", async () => {
   await withEnvironment(async () => {
     process.env.OIDC_ZITADEL_ORG_ID = "eventoren-org"
+    process.env.ZITADEL_PROJECT_ID = "eventoren-project"
 
     const response = await eventorenZitadel.loginStart(new Request("https://eventoren.example.test/login/zitadel"))
     const location = new URL(response.headers.get("location") ?? "")
     const cookie = response.headers.get("set-cookie") ?? ""
 
     expect(location.searchParams.get("scope")).toContain("urn:zitadel:iam:user:resourceowner")
-    expect(location.searchParams.get("scope")).toContain("urn:zitadel:iam:org:project:roles")
+    expect(location.searchParams.get("scope")).toContain("urn:zitadel:iam:org:project:id:eventoren-project:aud")
+    expect(location.searchParams.get("scope")).toContain("urn:zitadel:iam:org:projects:roles")
     expect(location.searchParams.get("nonce")).toBeTruthy()
     expect(cookie).toContain("HttpOnly")
   })
 })
 
-test("configured callback passes only verified organization roles to the signed Convex action", async () => {
+test("does not start organization role sync without the configured project ID", async () => {
   await withEnvironment(async () => {
     process.env.OIDC_ZITADEL_ORG_ID = "eventoren-org"
+    const response = await eventorenZitadel.loginStart(new Request("https://eventoren.example.test/login/zitadel"))
+    expect(response.status).toBe(503)
+  })
+})
+
+test("configured callback passes only verified project and organization admin roles to the signed Convex action", async () => {
+  await withEnvironment(async () => {
+    process.env.OIDC_ZITADEL_ORG_ID = "eventoren-org"
+    process.env.ZITADEL_PROJECT_ID = "eventoren-project"
     const { privateKey, publicKey } = await generateKeyPair("RS256")
     const jwk = await exportJWK(publicKey)
     let submitted: Record<string, unknown> | undefined
@@ -194,7 +205,7 @@ test("configured callback passes only verified organization roles to the signed 
         if (request.url.endsWith("/oidc/v1/userinfo"))
           return Response.json({
             sub: "subject-1",
-            "urn:zitadel:iam:org:project:roles": { admin: { "eventoren-org": "Untrusted userinfo" } },
+            "urn:zitadel:iam:org:project:eventoren-project:roles": { admin: { "eventoren-org": "Untrusted userinfo" } },
           })
         submitted = (await request.json()) as Record<string, unknown>
         return Response.json({ status: "success", value: { success: false, errorMessage: "Test action stopped" } })
@@ -204,9 +215,9 @@ test("configured callback passes only verified organization roles to the signed 
         const authorize = new URL(start.headers.get("location") ?? "")
         idToken = await new SignJWT({
           nonce: authorize.searchParams.get("nonce"),
-          "urn:zitadel:iam:org:project:roles": {
-            admin: { "other-org": "Other" },
-            organizer: { "eventoren-org": "Eventoren" },
+          "urn:zitadel:iam:org:project:eventoren-project:roles": {
+            admin: { "eventoren-org": "Eventoren" },
+            organizer: { "other-org": "Other" },
           },
         })
           .setProtectedHeader({ alg: "RS256", kid: "key-1" })
@@ -225,7 +236,7 @@ test("configured callback passes only verified organization roles to the signed 
         const args = (submitted?.args as Array<Record<string, unknown>> | undefined)?.[0]
         expect(args).toMatchObject({
           providerId: "subject-1",
-          zitadelRoles: ["organizer"],
+          zitadelRoles: ["admin"],
           zitadelRoleSyncEnabled: true,
         })
         expect(args?.zitadelRoleSyncProof).toBeString()
@@ -255,12 +266,14 @@ async function withEnvironment(callback: () => Promise<void>) {
     redirectUri: process.env.ZITADEL_REDIRECT_URI,
     authSecret: process.env.AUTH_SECRET,
     organizationId: process.env.OIDC_ZITADEL_ORG_ID,
+    projectId: process.env.ZITADEL_PROJECT_ID,
   }
   process.env.PUBLIC_BASE_URL_APP = "https://eventoren.example.test"
   process.env.ZITADEL_CLIENT_ID = "client-id"
   process.env.ZITADEL_CLIENT_SECRET = "client-secret"
   process.env.ZITADEL_REDIRECT_URI = "https://eventoren.example.test/login/zitadel/callback"
   process.env.AUTH_SECRET = "eventoren-test-auth-secret"
+  delete process.env.ZITADEL_PROJECT_ID
   try {
     await callback()
   } finally {
@@ -270,6 +283,7 @@ async function withEnvironment(callback: () => Promise<void>) {
     restore("ZITADEL_REDIRECT_URI", previous.redirectUri)
     restore("AUTH_SECRET", previous.authSecret)
     restore("OIDC_ZITADEL_ORG_ID", previous.organizationId)
+    restore("ZITADEL_PROJECT_ID", previous.projectId)
   }
 }
 

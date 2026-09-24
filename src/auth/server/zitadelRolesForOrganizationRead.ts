@@ -3,8 +3,9 @@ import { type ZitadelRole, zitadelRole } from "#src/auth/model_field/zitadelRole
 export function zitadelRolesForOrganizationRead(
   claims: Record<string, unknown>,
   organizationId: string,
+  projectId: string,
 ): ZitadelRole[] {
-  const rolesClaim = claims["urn:zitadel:iam:org:project:roles"]
+  const rolesClaim = claims[`urn:zitadel:iam:org:project:${projectId}:roles`]
   if (!rolesClaim || typeof rolesClaim !== "object" || Array.isArray(rolesClaim)) return []
 
   return Object.entries(rolesClaim).flatMap(([role, organizations]) => {

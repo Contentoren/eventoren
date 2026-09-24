@@ -17,6 +17,7 @@ env -u CONVEX_SITE_URL -u VITE_CONVEX_SITE_URL -u PUBLIC_BASE_URL_API -u PUBLIC_
     "VITE_CONVEX_URL",
     "AUTH_SECRET",
     "OIDC_ZITADEL_ORG_ID",
+    "ZITADEL_PROJECT_ID",
   ]) {
     const value = process.env[key]
     if (!value) throw new Error(`Production ${key} is required`)

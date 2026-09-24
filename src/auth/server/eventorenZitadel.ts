@@ -20,6 +20,7 @@ type ZitadelConfiguration = {
   readonly redirectUri: string
   readonly appOrigin: string
   readonly organizationId?: string
+  readonly projectId?: string
 }
 
 type UserInfo = Record<string, unknown>
@@ -41,7 +42,9 @@ export const eventorenZitadel = {
     authorizeUrl.searchParams.set("client_id", config.clientId)
     authorizeUrl.searchParams.set("response_type", "code")
     authorizeUrl.searchParams.set("redirect_uri", config.redirectUri)
-    const orgScope = config.organizationId ? " urn:zitadel:iam:org:project:roles" : ""
+    const orgScope = config.organizationId
+      ? ` urn:zitadel:iam:org:project:id:${config.projectId}:aud urn:zitadel:iam:org:projects:roles`
+      : ""
     authorizeUrl.searchParams.set("scope", `openid profile email ${resourceOwnerScope}${orgScope}`)
     if (config.organizationId) authorizeUrl.searchParams.set("nonce", nonce)
     authorizeUrl.searchParams.set("state", state)
@@ -99,7 +102,11 @@ export const eventorenZitadel = {
 
     let provider: CommonAuthProvider
     if (config.organizationId) {
-      const roles = zitadelRolesForOrganizationRead(verifiedRoles as Record<string, unknown>, config.organizationId)
+      const roles = zitadelRolesForOrganizationRead(
+        verifiedRoles as Record<string, unknown>,
+        config.organizationId,
+        config.projectId as string,
+      )
       provider = eventorenZitadelProviderCreate(userInfo, {
         enabled: true,
         roles,
@@ -156,13 +163,16 @@ function configuration(): ZitadelConfiguration | undefined {
   const issuer = (process.env.ZITADEL_ISSUER?.trim() || defaultIssuer).replace(/\/$/u, "")
   const redirectUri = redirectUriRead(process.env.ZITADEL_REDIRECT_URI?.trim(), appOrigin)
   if (!redirectUri) return undefined
+  const organizationId = process.env.OIDC_ZITADEL_ORG_ID?.trim()
+  const projectId = process.env.ZITADEL_PROJECT_ID?.trim()
+  if (organizationId && !projectId) return undefined
   return {
     issuer,
     clientId,
     clientSecret,
     appOrigin,
     redirectUri,
-    ...(process.env.OIDC_ZITADEL_ORG_ID?.trim() ? { organizationId: process.env.OIDC_ZITADEL_ORG_ID.trim() } : {}),
+    ...(organizationId ? { organizationId, projectId } : {}),
   }
 }
 
