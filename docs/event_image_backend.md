@@ -4,6 +4,8 @@
 
 Set these **on the intended Convex deployment** through its private deployment environment (each deployment separately). Do not put them in `VITE_*`, client bundles, source files, or checked-in `.env` files. An explicitly approved existing CLI credential may be reused server-side; never copy it to a frontend setting or document its value.
 
+Production provisioning runs `bun run convex:env:upload:production`, which reads the existing private assets CLI configuration (`ASSETS_CLI_ENV_FILE`, defaulting to `~/.config/project-creator/assets/eventoren/assets-cli.env`), resolves the service project UUID with that credential, and synchronizes the four `ASSETS_SERVICE_*` variables to the production Convex deployment. Keep that CLI configuration available to the provisioning host; the token is not copied into `.env.production` or source control. This mapping is needed because the assets CLI's `ASSETS_*` names are not the `ASSETS_SERVICE_*` names read by the Convex image action.
+
 | Variable | Required value |
 | --- | --- |
 | `ASSETS_SERVICE_API_URL` | assets-service HTTP API origin, e.g. `https://assets-service.contentoren.de` (the 0.6.5 SDK appends `/api/v1`) |
