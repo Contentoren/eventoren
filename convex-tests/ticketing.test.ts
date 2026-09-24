@@ -360,7 +360,7 @@ test("reserves atomically and replays the same checkout without a second Billing
   expect(billing.fetchMock).toHaveBeenCalled()
 })
 
-test("replays persisted checkout after an event edit and rejects a new checkout on its stale revision", async () => {
+test("prepares Event A during unrelated Event B sync, then replays after A edit and rejects its stale revision", async () => {
   environmentSet()
   const billing = billingMock()
   const t = convexTest(schema, modules)
@@ -390,6 +390,8 @@ test("replays persisted checkout after an event edit and rejects a new checkout 
     token: adminToken,
   })
   expect(unrelated.success).toBe(true)
+  const pendingSync = await t.run(async (ctx) => ctx.db.query("catalogSyncStates").collect())
+  expect(pendingSync).toMatchObject([{ status: "pending" }])
   const first = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(first.success).toBe(true)
 

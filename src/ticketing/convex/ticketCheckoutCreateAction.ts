@@ -132,6 +132,7 @@ export const ticketCheckoutCreateAction = action({
         fulfillmentEligible: prepared.data.fulfillmentEligible,
         replayed: true,
       })
+    if (args.eventRevision === undefined) return createResultError(op, "The event revision is required")
 
     const claimed = await ctx.runMutation(internal.ticketing.ticketCheckoutClaimBillingMutation, {
       orderId: prepared.data.orderId,
@@ -144,7 +145,7 @@ export const ticketCheckoutCreateAction = action({
       paymentReference,
       eventKey: args.eventKey,
       catalogVersion: args.catalogVersion,
-      ...(args.eventRevision !== undefined ? { eventRevision: args.eventRevision } : {}),
+      eventRevision: args.eventRevision,
       tickets: tickets.map(({ tierKey, quantity }) => ({ tierKey, quantity })),
       stripeMode: config.data.stripeMode,
       successUrl,
