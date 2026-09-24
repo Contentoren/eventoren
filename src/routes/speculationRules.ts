@@ -6,7 +6,18 @@ export const speculationRules = JSON.stringify({
           { href_matches: "/*" },
           {
             not: {
-              or: [{ href_matches: "/admin" }, { href_matches: "/admin/*" }],
+              or: [
+                { href_matches: "/admin" },
+                { href_matches: "/admin/*" },
+                { href_matches: "/organizer" },
+                { href_matches: "/organizer/*" },
+                { href_matches: "/bestellungen" },
+                { href_matches: "/checkout" },
+                { href_matches: "/warenkorb" },
+                { href_matches: "/sign-in" },
+                { href_matches: "/sso" },
+                { href_matches: "/logout" },
+              ],
             },
           },
         ],
