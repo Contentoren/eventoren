@@ -10,7 +10,7 @@ function absoluteUrl(path: string) {
 export function seoHeadCreate(path: string) {
   const page = seoPages.find((candidate) => candidate.path === path) ?? seoPages[0]!
   const canonical = absoluteUrl(page.path)
-  const ogImage = imageList.eventoren_og
+  const ogImage = imageList.i1200x630_webp_eventoren_og
   const ogImageUrl = urlImage(ogImage)
   const pageSchema = {
     "@context": "https://schema.org",
@@ -45,9 +45,9 @@ export function seoHeadCreate(path: string) {
       { property: "og:description", content: page.description },
       { property: "og:url", content: canonical },
       { property: "og:image", content: ogImageUrl },
-      { property: "og:image:width", content: String(ogImage.width) },
-      { property: "og:image:height", content: String(ogImage.height) },
-      { property: "og:image:alt", content: ogImage.alt },
+      { property: "og:image:width", content: String(ogImage.metadata.width) },
+      { property: "og:image:height", content: String(ogImage.metadata.height) },
+      { property: "og:image:alt", content: ogImage.metadata.alt ?? "Eventoren Veranstaltungen und Erlebnisse" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: page.title },
       { name: "twitter:description", content: page.description },
