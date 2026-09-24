@@ -21,7 +21,7 @@ export function OrganizerEventDetailPage(props: {
   return (
     <Dynamic component={props.frame ?? SiteFrame}>
       <main id="content" tabindex="-1" class="flex-1">
-        <UiContainer width="wide" class="flex flex-col gap-space-6 py-space-8 sm:py-space-10">
+        <UiContainer width="wide" class="flex flex-col gap-space-6 py-space-7 sm:py-10">
           <header class="flex flex-col gap-space-3">
             <div class="flex flex-wrap items-center gap-space-3">
               <Show
@@ -77,6 +77,24 @@ export function OrganizerEventDetailPage(props: {
               class="aspect-video w-full rounded-control bg-surface-muted object-cover"
               aria-label={state.text().scannerTitle}
             />
+            <div class="flex flex-wrap items-center justify-end gap-space-3">
+              <Show when={state.scannerActive()}>
+                <p role="status" class="text-sm text-content-muted">
+                  {state.scannerCheckingIn() ? state.text().scannerCheckingIn : state.text().scannerActive}
+                </p>
+              </Show>
+              <Button
+                variant={state.scannerActive() ? "outline" : undefined}
+                disabled={state.scannerStarting()}
+                onClick={() => (state.scannerActive() ? state.scannerStop() : void state.scannerStart())}
+              >
+                {state.scannerStarting()
+                  ? state.text().scannerStarting
+                  : state.scannerActive()
+                    ? state.text().scannerStop
+                    : state.text().scannerStart}
+              </Button>
+            </div>
             <Show when={state.scannerErrorMessage()}>
               <p
                 role="alert"
@@ -117,24 +135,6 @@ export function OrganizerEventDetailPage(props: {
                 )}
               </Show>
             </Show>
-            <div class="flex flex-wrap items-center gap-space-3">
-              <Button
-                variant={state.scannerActive() ? "outline" : undefined}
-                disabled={state.scannerStarting()}
-                onClick={() => (state.scannerActive() ? state.scannerStop() : void state.scannerStart())}
-              >
-                {state.scannerStarting()
-                  ? state.text().scannerStarting
-                  : state.scannerActive()
-                    ? state.text().scannerStop
-                    : state.text().scannerStart}
-              </Button>
-              <Show when={state.scannerActive()}>
-                <p role="status" class="text-sm text-content-muted">
-                  {state.scannerCheckingIn() ? state.text().scannerCheckingIn : state.text().scannerActive}
-                </p>
-              </Show>
-            </div>
             <form
               aria-label="Ticket-Code manuell prüfen"
               class="flex flex-wrap items-end gap-space-3"

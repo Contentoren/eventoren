@@ -35,6 +35,7 @@ export const Route = createFileRoute("/organizer_/event/$eventId")({
           params: { eventId: params().eventId },
           search: { ...(q ? { q } : {}), ...(ticket ? { ticket } : {}) },
           replace: true,
+          resetScroll: false,
         }),
     })
     return <OrganizerEventDetailPage state={state} frame={OrganizerShell} />

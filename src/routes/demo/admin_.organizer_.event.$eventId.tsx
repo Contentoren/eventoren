@@ -34,6 +34,7 @@ function DemoOrganizerEventRoute() {
           params: { eventId: params().eventId },
           search: { ...(q ? { q } : {}), ...(ticket ? { ticket } : {}) },
           replace: true,
+          resetScroll: false,
         })
       }
     />

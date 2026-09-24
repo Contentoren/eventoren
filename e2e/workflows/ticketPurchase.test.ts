@@ -205,7 +205,9 @@ test("creates, sells, delivers, opens, checks in, and rejects a duplicate paid t
     await expect(page.getByText("Eingecheckt", { exact: true })).toHaveCount(0)
     await page.locator("#organizer-ticket-code").fill(ticketCode)
     await page.getByRole("button", { name: "Ticket-Code prüfen" }).click()
-    await expect(page.getByRole("status").getByText(/eingecheckt/i)).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole("status").getByText("Ticket wurde eingecheckt.", { exact: true })).toBeVisible({
+      timeout: 30_000,
+    })
     await page.locator("#organizer-ticket-search").fill(participantName)
     const ticketRow = page.getByRole("button", { name: new RegExp(participantName) })
     await expect(ticketRow).toBeVisible({ timeout: 30_000 })
