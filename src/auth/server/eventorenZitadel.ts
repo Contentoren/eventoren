@@ -73,12 +73,14 @@ export const eventorenZitadel = {
       return loginErrorResponse(request, "Die Eventoren-Benutzerinformationen konnten nicht geladen werden.", 502)
 
     const provider = eventorenZitadelProviderCreate(userInfo)
-    const client = new ConvexHttpClient(convexUrlGet())
+    const convexUrl = convexUrlGet()
+    const client = new ConvexHttpClient(convexUrl)
     let sessionResult
     try {
       sessionResult = await client.action(api.auth.authSignInUsingZitadelAction, provider)
     } catch (error) {
       console.error("Zitadel sign-in: Convex action failed", {
+        convexHost: new URL(convexUrl).hostname,
         errorName: error instanceof Error ? error.name : "unknown",
         errorMessage:
           error instanceof Error
