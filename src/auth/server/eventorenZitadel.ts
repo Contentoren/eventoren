@@ -77,7 +77,10 @@ export const eventorenZitadel = {
     let sessionResult
     try {
       sessionResult = await client.action(api.auth.authSignInUsingZitadelAction, provider)
-    } catch {
+    } catch (error) {
+      console.error("Zitadel sign-in: Convex action failed", {
+        errorName: error instanceof Error ? error.name : "unknown",
+      })
       return loginErrorResponse(request, "Die Eventoren-Sitzung konnte nicht erstellt werden.", 502)
     }
     if (!sessionResult.success)
@@ -180,9 +183,19 @@ async function tokenExchange(
       }),
     })
     const body = (await response.json().catch(() => null)) as { access_token?: unknown } | null
-    if (!response.ok || typeof body?.access_token !== "string") return undefined
+    if (!response.ok || typeof body?.access_token !== "string") {
+      console.error("Zitadel sign-in: token exchange failed", {
+        status: response.status,
+        contentType: response.headers.get("content-type"),
+        cfRay: response.headers.get("cf-ray"),
+      })
+      return undefined
+    }
     return body.access_token
-  } catch {
+  } catch (error) {
+    console.error("Zitadel sign-in: token exchange fetch failed", {
+      errorName: error instanceof Error ? error.name : "unknown",
+    })
     return undefined
   }
 }
@@ -193,9 +206,19 @@ async function userInfoRead(issuer: string, accessToken: string): Promise<UserIn
       headers: { authorization: `Bearer ${accessToken}` },
     })
     const body = (await response.json().catch(() => null)) as UserInfo | null
-    if (!response.ok || !body || typeof body.sub !== "string" || body.sub.length === 0) return undefined
+    if (!response.ok || !body || typeof body.sub !== "string" || body.sub.length === 0) {
+      console.error("Zitadel sign-in: userinfo failed", {
+        status: response.status,
+        contentType: response.headers.get("content-type"),
+        cfRay: response.headers.get("cf-ray"),
+      })
+      return undefined
+    }
     return body
-  } catch {
+  } catch (error) {
+    console.error("Zitadel sign-in: userinfo fetch failed", {
+      errorName: error instanceof Error ? error.name : "unknown",
+    })
     return undefined
   }
 }
