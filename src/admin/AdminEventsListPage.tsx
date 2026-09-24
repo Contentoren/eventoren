@@ -23,26 +23,43 @@ const statusLabels: Record<string, string> = {
 export function AdminEventsListPage(props: { state: ReturnType<typeof adminEventsListRouteStateCreate> }) {
   const viewPreference = adminListViewPreferenceContextUse()
 
-  const eventDetails = (event: ReturnType<typeof props.state.filteredEvents>[number]) => (
+  const eventDetails = (event: ReturnType<typeof props.state.filteredEvents>[number], tile: boolean) => (
     <>
       <div class="min-w-0">
-        <p class="truncate font-semibold text-content">{event.title}</p>
-        <p class="mt-1 truncate text-xs text-content-muted">Veranstalter: {event.organizer || "Nicht angegeben"}</p>
-        <p class="truncate text-xs text-content-muted">Kategorie: {event.category || "Nicht angegeben"}</p>
+        <p class={`truncate font-semibold text-content ${tile ? "pr-24" : ""}`}>{event.title}</p>
+        <Show when={tile}>
+          <p class="mt-1 truncate text-xs text-content-muted">Veranstalter: {event.organizer || "Nicht angegeben"}</p>
+          <p class="truncate text-xs text-content-muted">Kategorie: {event.category || "Nicht angegeben"}</p>
+        </Show>
       </div>
-      <p class="text-sm text-content">
-        <span class="text-content-muted">Datum: </span>
+      <Show when={!tile}>
+        <p class="min-w-0 truncate text-sm text-content-muted">
+          <span class="xl:hidden">Veranstalter: </span>
+          {event.organizer || "Nicht angegeben"}
+        </p>
+        <p class="min-w-0 truncate text-sm text-content-muted">
+          <span class="xl:hidden">Kategorie: </span>
+          {event.category || "Nicht angegeben"}
+        </p>
+      </Show>
+      <p class="min-w-0 text-sm text-content">
+        <span class={tile ? "text-content-muted" : "text-content-muted xl:hidden"}>Datum: </span>
         {event.startsAt
           ? new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" }).format(
               new Date(event.startsAt),
             )
           : "Termin offen"}
       </p>
-      <p class="truncate text-sm text-content-muted">
-        Ort: {[event.venue, event.city].filter(Boolean).join(", ") || "Ort offen"}
+      <p class="min-w-0 truncate text-sm text-content-muted">
+        <span class={tile ? "" : "xl:hidden"}>Ort: </span>
+        {[event.venue, event.city].filter(Boolean).join(", ") || "Ort offen"}
       </p>
-      <div class="flex flex-wrap items-center gap-1">
-        <span class="text-sm text-content-muted">Status:</span>
+      <div
+        class={tile ? "absolute right-3 top-3 flex flex-wrap items-center gap-1" : "flex flex-wrap items-center gap-1"}
+      >
+        <Show when={!tile}>
+          <span class="text-sm text-content-muted xl:hidden">Status:</span>
+        </Show>
         <Badge variant="subtle" class="w-fit">
           {adminEventStatusLabel("status" in event ? event.status : "published")}
         </Badge>
@@ -98,6 +115,19 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
             when={props.state.filteredEvents().length > 0}
             fallback={<p class="p-8 text-center text-sm text-content-muted">Keine passenden Events gefunden.</p>}
           >
+            <Show when={viewPreference?.view() !== "tiles"}>
+              <div class="hidden items-center gap-2 border-b border-border pr-4 text-xs font-semibold text-content-muted xl:flex">
+                <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,8rem)_minmax(0,11rem)_minmax(0,10rem)_7rem] gap-2 px-4 py-3">
+                  <span>Event</span>
+                  <span>Veranstalter</span>
+                  <span>Kategorie</span>
+                  <span>Datum</span>
+                  <span>Ort</span>
+                  <span>Status</span>
+                </div>
+                <span class="w-10" aria-hidden="true" />
+              </div>
+            </Show>
             <ul
               class={
                 viewPreference?.view() === "tiles"
@@ -116,9 +146,9 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                             to="/admin/events/$eventKey"
                             params={{ eventKey: event.id }}
                             search={{}}
-                            class="grid min-w-0 flex-1 gap-2 p-4 transition-colors sm:grid-cols-[minmax(0,1fr)_14rem_10rem_7rem] sm:items-center"
+                            class="grid min-w-0 flex-1 gap-2 p-4 transition-colors xl:grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,8rem)_minmax(0,11rem)_minmax(0,10rem)_7rem] xl:items-center"
                           >
-                            {eventDetails(event)}
+                            {eventDetails(event, false)}
                           </Link>
                           <ButtonIconOnly
                             type="button"
@@ -134,14 +164,14 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                         </div>
                       }
                     >
-                      <CardWrapper class="relative h-full p-0">
+                      <CardWrapper class="relative h-full p-0 lg:p-0">
                         <Link
                           to="/admin/events/$eventKey"
                           params={{ eventKey: event.id }}
                           search={{}}
                           class="grid h-full gap-3 p-4 pr-14 transition-colors hover:bg-surface-muted"
                         >
-                          {eventDetails(event)}
+                          {eventDetails(event, true)}
                         </Link>
                         <ButtonIconOnly
                           type="button"
@@ -149,7 +179,7 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                           icon={mdiDelete}
                           iconClass="group-hover:text-red-400"
                           title={`Event ${event.title} löschen`}
-                          class="absolute right-3 top-3 text-content-muted"
+                          class="absolute bottom-3 right-3 text-content-muted"
                           disabled={props.state.catalog.isSaving()}
                           onClick={() => props.state.deleteEvent(event.id, event.title)}
                           aria-label={`Event ${event.title} löschen`}
