@@ -31,6 +31,7 @@ test("creates, sells, delivers, opens, checks in, and rejects a duplicate paid t
   const end = new Date(start.getTime() + 3 * 60 * 60_000)
   const mailSince = new Date()
   let stage = "event-creation"
+  let checkoutPage: Page = page
 
   try {
     await ticketE2eAdminSignIn(page, environment.baseUrl)
@@ -79,68 +80,80 @@ test("creates, sells, delivers, opens, checks in, and rejects a duplicate paid t
     await expect(page.getByRole("status")).toContainText("Event veröffentlicht", { timeout: 30_000 })
 
     stage = "checkout"
-    await page.goto(`${environment.baseUrl}/events/${encodeURIComponent(eventKey)}`)
-    await expect(page.getByRole("heading", { name: eventTitle, level: 1 })).toBeVisible({ timeout: 30_000 })
-    await expect(page.locator('main[data-hydrated="true"]')).toBeVisible({ timeout: 30_000 })
+    const guestContext = await browser.newContext()
+    checkoutPage = await guestContext.newPage()
+    await checkoutPage.goto(`${environment.baseUrl}/events/${encodeURIComponent(eventKey)}`)
+    await expect(checkoutPage.getByRole("heading", { name: eventTitle, level: 1 })).toBeVisible({ timeout: 30_000 })
+    await expect(checkoutPage.locator('main[data-hydrated="true"]')).toBeVisible({ timeout: 30_000 })
     await expect(
-      page
+      checkoutPage
         .getByRole("region", { name: "Tickets auswählen" })
         .getByRole("status", { name: /1 Tickets für Paid ticket/u }),
     ).toBeVisible({ timeout: 30_000 })
-    const addToCart = page.getByRole("button", { name: "In den Warenkorb" }).first()
+    const addToCart = checkoutPage.getByRole("button", { name: "In den Warenkorb" }).first()
     await expect(addToCart).toBeEnabled()
-    await Promise.all([page.waitForURL((url) => url.pathname === "/warenkorb", { timeout: 30_000 }), addToCart.click()])
-    await page
+    await Promise.all([
+      checkoutPage.waitForURL((url) => url.pathname === "/warenkorb", { timeout: 30_000 }),
+      addToCart.click(),
+    ])
+    await checkoutPage
       .getByRole("complementary", { name: "Warenkorb-Zusammenfassung" })
       .getByRole("button", { name: "Zur Kasse", exact: true })
       .click()
-    await expect(page.locator("#checkout-first-name")).toBeVisible()
-    await expect(page.locator("form:has(#checkout-first-name)")).toHaveAttribute("data-hydrated", "true", {
+    await expect(checkoutPage.locator("#checkout-first-name")).toBeVisible()
+    await expect(checkoutPage.locator("form:has(#checkout-first-name)")).toHaveAttribute("data-hydrated", "true", {
       timeout: 30_000,
     })
-    await page.locator("#checkout-first-name").fill("E2E")
-    await page.locator("#checkout-last-name").fill(runToken)
-    await page.locator("#checkout-email").fill(mail.user)
-    await page.locator("#checkout-address").fill("Teststraße 1, 10115 Berlin")
-    await page.locator('input[name^="participant-"]').fill(participantName)
-    await page.locator("#checkout-legal-acceptance").check()
-    await page.getByRole("button", { name: "Weiter zur sicheren Zahlung" }).click()
+    await checkoutPage.locator("#checkout-first-name").fill("E2E")
+    await checkoutPage.locator("#checkout-last-name").fill(runToken)
+    await checkoutPage.locator("#checkout-email").fill(mail.user)
+    await checkoutPage.locator("#checkout-address").fill("Teststraße 1, 10115 Berlin")
+    await checkoutPage.locator('input[name^="participant-"]').fill(participantName)
+    await checkoutPage.locator("#checkout-legal-acceptance").check()
+    await checkoutPage.getByRole("button", { name: "Weiter zur sicheren Zahlung" }).click()
 
-    stage = "stripe-session-navigation"
+    stage = "checkout-creation"
     // Stripe Checkout uses the same hostname in both modes: only submit a card on a test-session URL.
-    await expect(page).toHaveURL(/checkout\.stripe\.com/u, { timeout: 60_000 })
-    const stripeUrl = page.url()
+    try {
+      await expect(checkoutPage).toHaveURL(/checkout\.stripe\.com/u, { timeout: 30_000 })
+    } catch (error) {
+      const alert = await checkoutPage.getByRole("alert").allTextContents()
+      throw new Error(`Guest checkout creation failed: ${alert.join("; ") || "no checkout error shown"}`, {
+        cause: error,
+      })
+    }
+    const stripeUrl = checkoutPage.url()
     if (!/\bcs_test_[A-Za-z0-9]+/u.test(stripeUrl)) {
       throw new Error(`Refusing to enter a payment card on a non-test Stripe session: ${new URL(stripeUrl).origin}`)
     }
     stage = "stripe-payment-method-select"
-    await page.getByRole("radio", { name: /karte/i }).check({ force: true })
+    await checkoutPage.getByRole("radio", { name: /karte/i }).check({ force: true })
     stage = "stripe-card-number-fill"
-    await expect(page.getByLabel(/card number|kartennummer/i)).toBeVisible()
-    await page.getByLabel(/card number|kartennummer/i).fill("4242424242424242")
+    await expect(checkoutPage.getByLabel(/card number|kartennummer/i)).toBeVisible()
+    await checkoutPage.getByLabel(/card number|kartennummer/i).fill("4242424242424242")
     stage = "stripe-expiration-fill"
-    await page.getByLabel(/expiration date|expiry|gültig bis/i).fill("1234")
+    await checkoutPage.getByLabel(/expiration date|expiry|gültig bis/i).fill("1234")
     stage = "stripe-security-code-fill"
-    await page.getByRole("textbox", { name: /cvc\/cvv/i }).fill("123")
+    await checkoutPage.getByRole("textbox", { name: /cvc\/cvv/i }).fill("123")
     stage = "stripe-cardholder-fill"
-    await page.getByLabel(/cardholder|karteninhaber/i).fill("E2E Ticket Test")
+    await checkoutPage.getByLabel(/cardholder|karteninhaber/i).fill("E2E Ticket Test")
     stage = "stripe-billing-address"
-    await page.getByText("Adresse manuell eingeben", { exact: true }).click()
-    await page.locator('input[name="billingAddressLine1"]').fill("Teststraße 1")
-    await page.locator('input[name="billingLocality"]').fill("Berlin")
-    await page.locator('input[name="billingPostalCode"]').fill("10115")
+    await checkoutPage.getByText("Adresse manuell eingeben", { exact: true }).click()
+    await checkoutPage.locator('input[name="billingAddressLine1"]').fill("Teststraße 1")
+    await checkoutPage.locator('input[name="billingLocality"]').fill("Berlin")
+    await checkoutPage.locator('input[name="billingPostalCode"]').fill("10115")
     stage = "stripe-postal-code-check"
-    const postalCode = page.getByLabel(/zip|postal code/i)
+    const postalCode = checkoutPage.getByLabel(/zip|postal code/i)
     if ((await postalCode.count()) > 0 && (await postalCode.isVisible())) {
       stage = "stripe-postal-code-fill"
       await postalCode.fill("10115")
     }
     stage = "stripe-submit"
-    await page.getByTestId("hosted-payment-submit-button").click()
+    await checkoutPage.getByTestId("hosted-payment-submit-button").click()
 
-    await expect(page).toHaveURL(/\/checkout(?:\?|#)/u, { timeout: 90_000 })
+    await expect(checkoutPage).toHaveURL(/\/checkout(?:\?|#)/u, { timeout: 90_000 })
     stage = "paid-order-confirmation"
-    await expect(page.getByText("Bezahlt", { exact: true }).first()).toBeVisible({ timeout: 180_000 })
+    await expect(checkoutPage.getByText("Bezahlt", { exact: true }).first()).toBeVisible({ timeout: 180_000 })
 
     stage = "ticket-email-and-pdf"
     const email = await ticketE2eImapMessageWait({
@@ -213,20 +226,28 @@ test("creates, sells, delivers, opens, checks in, and rejects a duplicate paid t
     await page.getByRole("button", { name: "Ticket-Code prüfen" }).click()
     await expect(page.getByText("Dieses Ticket wurde bereits eingecheckt.").first()).toBeVisible({ timeout: 30_000 })
   } catch (error) {
-    await ticketE2eFailureScreenshot(page, environment.baseUrl, stage, runToken)
+    await ticketE2eFailureScreenshot(
+      stage === "checkout-creation" ? checkoutPage : page,
+      environment.baseUrl,
+      stage,
+      runToken,
+    )
     if (stage.startsWith("stripe-")) {
       try {
         console.error(
           `Ticket workflow failed during ${stage}; Stripe diagnostics:`,
-          await ticketE2eStripeDiagnostics(page),
+          await ticketE2eStripeDiagnostics(checkoutPage),
         )
-        if (page.url().startsWith("https://checkout.stripe.com/") && /\bcs_test_[A-Za-z0-9]+/u.test(page.url())) {
+        if (
+          checkoutPage.url().startsWith("https://checkout.stripe.com/") &&
+          /\bcs_test_[A-Za-z0-9]+/u.test(checkoutPage.url())
+        ) {
           const screenshotPath = `data/e2e/${stage}-failure-${runToken}.png`
           await mkdir("data/e2e", { recursive: true })
-          await page.screenshot({
+          await checkoutPage.screenshot({
             path: screenshotPath,
             fullPage: true,
-            mask: [page.locator("input"), page.getByText(mail.user, { exact: true })],
+            mask: [checkoutPage.locator("input"), checkoutPage.getByText(mail.user, { exact: true })],
           })
           console.error(`Stripe failure screenshot: ${screenshotPath}`)
         }
@@ -299,7 +320,7 @@ async function ticketE2eFailureScreenshot(page: Page, baseUrl: string, stage: st
   try {
     const currentUrl = new URL(page.url())
     const baseOrigin = new URL(baseUrl).origin
-    const safePath = ["/admin/", "/events/", "/warenkorb", "/organizer/"].some((prefix) =>
+    const safePath = ["/admin/", "/events/", "/warenkorb", "/checkout", "/organizer/"].some((prefix) =>
       currentUrl.pathname.startsWith(prefix),
     )
     if (currentUrl.origin !== baseOrigin || !safePath) return
