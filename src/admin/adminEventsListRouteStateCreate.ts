@@ -11,6 +11,7 @@ export function adminEventsListRouteStateCreate() {
   const filteredEvents = createMemo(() => {
     const query = (search().q ?? "").trim().toLocaleLowerCase("de-DE")
     return catalog.events().filter((event) => {
+      if (!search().showArchived && "status" in event && event.status === "archived") return false
       if (search().event && event.id !== search().event) return false
       if (search().status && (!("status" in event) || event.status !== search().status)) return false
       if (!query) return true
@@ -32,10 +33,19 @@ export function adminEventsListRouteStateCreate() {
     })
   const eventChange = (event: string) =>
     void navigate({ to: "/admin/events", search: { ...search(), event: event || undefined }, replace: true })
-  const deleteEvent = (eventKey: string, title: string) => {
-    if (!window.confirm(`Event „${title}“ wirklich löschen? Bestehende Bestellungen bleiben erhalten.`)) return
-    if (search().event === eventKey) eventChange("")
-    void catalog.deleteEvent(eventKey)
+  const showArchivedChange = (showArchived: boolean) => {
+    const selectedArchived = catalog
+      .events()
+      .some((event) => event.id === search().event && "status" in event && event.status === "archived")
+    void navigate({
+      to: "/admin/events",
+      search: {
+        ...search(),
+        event: !showArchived && selectedArchived ? undefined : search().event,
+        showArchived: showArchived || undefined,
+      },
+      replace: true,
+    })
   }
   return {
     catalog,
@@ -44,12 +54,16 @@ export function adminEventsListRouteStateCreate() {
     status: () => search().status ?? "all",
     statusSignal: { get: () => search().status ?? "all", set: statusChange },
     eventSignal: { get: () => search().event ?? "", set: eventChange },
+    showArchived: () => search().showArchived ?? false,
+    showArchivedChange,
     eventOptions: () => [
       { type: "item" as const, value: "" },
-      ...catalog.events().map((event) => ({ type: "item" as const, value: event.id })),
+      ...catalog
+        .events()
+        .filter((event) => search().showArchived || !("status" in event && event.status === "archived"))
+        .map((event) => ({ type: "item" as const, value: event.id })),
     ],
     eventText: (id: string) => catalog.events().find((event) => event.id === id)?.title ?? "Alle Events",
     searchChange,
-    deleteEvent,
   }
 }

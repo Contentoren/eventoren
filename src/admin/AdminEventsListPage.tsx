@@ -1,10 +1,9 @@
-import { mdiDelete } from "@adaptive-ds/mdi/mdiDelete.js"
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
+import { Checkbox } from "#ui/input/check/Checkbox.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { SelectSingle } from "#ui/input/select/SelectSingle.jsx"
 import { SelectSingleNative } from "#ui/input/select/SelectSingleNative.jsx"
-import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
@@ -84,39 +83,68 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
         </header>
         <AdminEventFeedback state={props.state.catalog} />
         <div>
-          <div class="grid gap-3 border-b border-border p-4 sm:grid-cols-[minmax(0,1fr)_14rem_12rem]">
+          <div class="grid gap-3 border-b border-border p-4 lg:grid-cols-[minmax(0,1fr)_auto_12rem]">
             <Input
               aria-label="Events suchen"
               placeholder="Events suchen …"
               value={props.state.query()}
               onInput={(event) => props.state.searchChange(event.currentTarget.value)}
             />
-            <SelectSingle
-              class="min-w-0"
-              buttonProps={{ class: "w-full min-w-0 justify-start truncate", innerClass: "min-w-64", type: "button" }}
-              valueSignal={props.state.eventSignal}
-              getOptions={props.state.eventOptions}
-              valueText={props.state.eventText}
-              renderItem={props.state.eventText}
-              searchPlaceholder="Event suchen …"
-              texts={{ selectEntry: "Alle Events", noEntries: "Keine Events gefunden" }}
-              innerClass="flex flex-col"
-              listOptionClass="w-full"
-            />
-            <SelectSingleNative
-              id="admin-events-status-filter"
-              class="text-sm"
-              valueSignal={props.state.statusSignal}
-              getOptions={() => ["all", "draft", "published", "archived"]}
-              valueText={(value) => statusLabels[value] ?? value}
-            />
+            <div class="flex flex-wrap items-center gap-3">
+              <SelectSingle
+                class="min-w-0 max-w-40"
+                buttonProps={{
+                  variant: "none",
+                  size: "none",
+                  class:
+                    "max-w-40 min-w-0 justify-start truncate rounded-lg border border-input bg-surface-muted px-2.5 py-2 text-sm text-content focus:border-ring focus:ring-ring",
+                  innerClass: "min-w-64",
+                  type: "button",
+                }}
+                valueSignal={props.state.eventSignal}
+                getOptions={props.state.eventOptions}
+                valueText={props.state.eventText}
+                renderItem={props.state.eventText}
+                searchPlaceholder="Event suchen …"
+                texts={{ selectEntry: "Alle Events", noEntries: "Keine Events gefunden" }}
+                innerClass="flex flex-col"
+                listOptionClass="w-full"
+              />
+              <Checkbox
+                id="admin-events-show-archived"
+                class="items-center whitespace-nowrap text-sm text-content"
+                checked={props.state.showArchived()}
+                onChange={props.state.showArchivedChange}
+              >
+                Archiviert
+              </Checkbox>
+            </div>
+            <div class="relative">
+              <SelectSingleNative
+                id="admin-events-status-filter"
+                class="appearance-none pr-10 text-sm"
+                valueSignal={props.state.statusSignal}
+                getOptions={() => ["all", "draft", "published", "archived"]}
+                valueText={(value) => statusLabels[value] ?? value}
+              />
+              <svg
+                class="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-content-muted"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+                aria-hidden="true"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
           <Show
             when={props.state.filteredEvents().length > 0}
             fallback={<p class="p-8 text-center text-sm text-content-muted">Keine passenden Events gefunden.</p>}
           >
             <Show when={viewPreference?.view() !== "tiles"}>
-              <div class="hidden items-center gap-2 border-b border-border pr-4 text-xs font-semibold text-content-muted xl:flex">
+              <div class="hidden items-center border-b border-border text-xs font-semibold text-content-muted xl:flex">
                 <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,8rem)_minmax(0,11rem)_minmax(0,10rem)_7rem] gap-2 px-4 py-3">
                   <span>Event</span>
                   <span>Veranstalter</span>
@@ -125,7 +153,6 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                   <span>Ort</span>
                   <span>Status</span>
                 </div>
-                <span class="w-10" aria-hidden="true" />
               </div>
             </Show>
             <ul
@@ -141,7 +168,7 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                     <Show
                       when={viewPreference?.view() === "tiles"}
                       fallback={
-                        <div class="flex items-center gap-2 pr-4 hover:bg-surface-muted">
+                        <div class="flex items-center hover:bg-surface-muted">
                           <Link
                             to="/admin/events/$eventKey"
                             params={{ eventKey: event.id }}
@@ -150,17 +177,6 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                           >
                             {eventDetails(event, false)}
                           </Link>
-                          <ButtonIconOnly
-                            type="button"
-                            variant="none"
-                            icon={mdiDelete}
-                            iconClass="group-hover:text-red-400"
-                            title={`Event ${event.title} löschen`}
-                            class="text-content-muted"
-                            disabled={props.state.catalog.isSaving()}
-                            onClick={() => props.state.deleteEvent(event.id, event.title)}
-                            aria-label={`Event ${event.title} löschen`}
-                          />
                         </div>
                       }
                     >
@@ -169,21 +185,10 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                           to="/admin/events/$eventKey"
                           params={{ eventKey: event.id }}
                           search={{}}
-                          class="grid h-full gap-3 p-4 pr-14 transition-colors hover:bg-surface-muted"
+                          class="grid h-full gap-3 p-4 transition-colors hover:bg-surface-muted"
                         >
                           {eventDetails(event, true)}
                         </Link>
-                        <ButtonIconOnly
-                          type="button"
-                          variant="none"
-                          icon={mdiDelete}
-                          iconClass="group-hover:text-red-400"
-                          title={`Event ${event.title} löschen`}
-                          class="absolute bottom-3 right-3 text-content-muted"
-                          disabled={props.state.catalog.isSaving()}
-                          onClick={() => props.state.deleteEvent(event.id, event.title)}
-                          aria-label={`Event ${event.title} löschen`}
-                        />
                       </CardWrapper>
                     </Show>
                   </li>
