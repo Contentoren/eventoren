@@ -72,7 +72,7 @@
     "frontend:build:production": "env -u PUBLIC_BASE_URL_SITE -u PUBLIC_BASE_URL_APP -u PUBLIC_BASE_URL_API -u PUBLIC_BASE_URL_CONVEX -u VITE_CONVEX_URL -u VITE_CONVEX_SITE_URL -u CONVEX_SITE_URL -u CONVEX_URL -u CONVEX_SELF_HOSTED_URL bun --env-file=.env.production run build",
     "frontend:build": "bun run frontend:build:production",
     "frontend:upload:preview": "bunx wrangler pages deploy ./dist/client --project-name=eventoren --branch preview --commit-dirty=true",
-    "frontend:upload:production": "bunx wrangler pages deploy ./dist/client --project-name=eventoren --branch main --commit-dirty=true",
+    "frontend:upload:production": "bash ops/convex/pages_origin_sync.bash && bunx wrangler pages deploy ./dist/client --project-name=eventoren --branch main --commit-dirty=true",
     "frontend:upload": "bun run frontend:upload:production",
     "frontend:deploy:preview": "bun run frontend:build:development && bun run frontend:upload:preview",
     "frontend:deploy:production": "bun run frontend:build:production && bun run frontend:upload:production",
