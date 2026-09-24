@@ -90,14 +90,19 @@ export function EventCardTicket(props: { event: EventItem; href?: string }) {
 function EventCardLink(props: { event: EventItem; href?: string; children: JSX.Element }) {
   if (props.href) {
     return (
-      <Link to={props.href} class="focus-ring flex h-full flex-col">
+      <Link to={props.href} preload={false} class="focus-ring flex h-full flex-col">
         {props.children}
       </Link>
     )
   }
 
   return (
-    <Link to="/events/$eventId" params={{ eventId: props.event.id }} class="focus-ring flex h-full flex-col">
+    <Link
+      to="/events/$eventId"
+      params={{ eventId: props.event.id }}
+      preload={false}
+      class="focus-ring flex h-full flex-col"
+    >
       {props.children}
     </Link>
   )
