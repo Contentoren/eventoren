@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import { query } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
-import { userRoleIsDevOrAdmin } from "#src/auth/model_field/userRole.ts"
+import { userRoleIsAdmin } from "#src/auth/model_field/userRoleIsAdmin.ts"
 import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryTokenToUserId.ts"
 
 export const ticketOrderGetAdminQuery = query({
@@ -10,7 +10,7 @@ export const ticketOrderGetAdminQuery = query({
     authQueryTokenToUserId(ctx, args, async (authorizedCtx, authorizedArgs) => {
       const op = "ticketOrderGetAdminQuery"
       const user = await authorizedCtx.db.get("users", authorizedArgs.userId)
-      if (!user || !userRoleIsDevOrAdmin(user.role)) return createResultError(op, "Admin role required")
+      if (!user || !userRoleIsAdmin(user.role)) return createResultError(op, "Admin role required")
       const order = await authorizedCtx.db.get(args.orderId)
       if (!order) return createResultError(op, "Bestellung nicht gefunden")
       const lines = await authorizedCtx.db

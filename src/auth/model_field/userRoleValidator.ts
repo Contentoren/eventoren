@@ -6,7 +6,6 @@ export const userRoleValidator = v.union(
   v.literal(userRole.customer),
   v.literal(userRole.organizer),
   v.literal(userRole.admin),
-  v.literal(userRole.dev),
 )
 
 function types1(a: typeof userRoleValidator.type): UserRole {

@@ -114,29 +114,6 @@ describe("admin route authorization", () => {
     expect(catalogFetched).toBe(true)
   })
 
-  test("fetches catalog events and returns authorized payload for dev role", async () => {
-    let catalogFetched = false
-    const mockEvents = { success: true as const, data: [] }
-
-    const result = await adminRouteLoaderResolve({
-      getAdminAccess: async () => createResult(sampleUserProfile("dev")),
-      getCatalogEvents: async () => {
-        catalogFetched = true
-        return mockEvents
-      },
-      redirect: () => {
-        throw new Error("unexpected redirect")
-      },
-    })
-
-    expect(result).toEqual({
-      authorized: true,
-      eventsResult: mockEvents,
-      isServerAuthorized: true,
-    })
-    expect(catalogFetched).toBe(true)
-  })
-
   test("keeps an authorized catalog load failure in the loader payload", async () => {
     const catalogFailure = {
       success: false as const,

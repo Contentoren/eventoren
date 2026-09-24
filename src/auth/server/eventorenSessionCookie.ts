@@ -6,13 +6,22 @@ const sessionCookieMaxAgeSeconds = 60 * 60 * 24 * 30
 type LoginState = {
   readonly state: string
   readonly verifier: string
+  readonly nonce?: string
   readonly returnTo: string
   readonly expiresAt: number
 }
 
 export const eventorenSessionCookie = {
-  async loginCreate(state: string, verifier: string, returnTo: string, secure: boolean): Promise<string> {
-    const payload = base64urlEncodeText(JSON.stringify({ state, verifier, returnTo, expiresAt: Date.now() + 600_000 }))
+  async loginCreate(
+    state: string,
+    verifier: string,
+    returnTo: string,
+    secure: boolean,
+    nonce?: string,
+  ): Promise<string> {
+    const payload = base64urlEncodeText(
+      JSON.stringify({ state, verifier, returnTo, nonce, expiresAt: Date.now() + 600_000 }),
+    )
     const signed = `${payload}.${await sign(payload)}`
     return cookieCreate(loginCookieName, signed, loginCookieMaxAgeSeconds, secure)
   },
@@ -28,6 +37,7 @@ export const eventorenSessionCookie = {
         typeof state.state !== "string" ||
         typeof state.verifier !== "string" ||
         typeof state.returnTo !== "string" ||
+        (state.nonce !== undefined && typeof state.nonce !== "string") ||
         typeof state.expiresAt !== "number" ||
         state.expiresAt <= Date.now()
       )

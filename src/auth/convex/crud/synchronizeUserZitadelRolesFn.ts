@@ -12,15 +12,16 @@ export async function synchronizeUserZitadelRolesFn(
   providerId: string,
   roles: readonly ZitadelRole[] | undefined,
   organizerInvitedAt?: string,
+  roleSyncEnabled = false,
 ): PromiseResult<DocUser> {
   const op = "synchronizeUserZitadelRolesFn"
   const user = await ctx.db.get("users", userId)
   if (!user) return createResultError(op, "User not found by userId", userId)
 
   const normalizedRoles = roles === undefined ? undefined : [...new Set(roles)]
-  const isDevOverride = user.role === userRole.dev
-  const isLegacyAdminOverride = user.role === userRole.admin && user.roleSource !== userRoleSource.zitadel
-  const isProviderManaged = !isDevOverride && !isLegacyAdminOverride
+  const isLegacyAdminOverride =
+    !roleSyncEnabled && user.role === userRole.admin && user.roleSource !== userRoleSource.zitadel
+  const isProviderManaged = !isLegacyAdminOverride
   const hasOrganizerRole = normalizedRoles?.includes(zitadelRole.organizer) === true
   const hadOrganizerRole = user.zitadelRoles?.includes(zitadelRole.organizer) === true
   const nextOrganizerInvitedAt = hasOrganizerRole

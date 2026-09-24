@@ -39,17 +39,14 @@ test("allows organizers from the exact invitation timestamp and rejects earlier 
   expect(after.success).toBe(true)
 })
 
-test("allows admins and dev users for events on every date", async () => {
+test("allows admins for events on every date", async () => {
   const t = convexTest(schema, modules)
   const adminId = await organizerUserInsert(t, "admin")
-  const devId = await organizerUserInsert(t, "dev")
   const dates = ["1970-01-01T00:00:00.000Z", "2099-12-31T23:59:59.999Z"]
 
-  for (const userId of [adminId, devId]) {
-    for (const startsAt of dates) {
-      const result = await t.run(async (ctx) => organizerAuthorizeFn(ctx, userId, startsAt))
-      expect(result.success).toBe(true)
-    }
+  for (const startsAt of dates) {
+    const result = await t.run(async (ctx) => organizerAuthorizeFn(ctx, adminId, startsAt))
+    expect(result.success).toBe(true)
   }
 })
 

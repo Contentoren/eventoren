@@ -2,24 +2,28 @@ import { loginProvider } from "#src/auth/model_field/socialLoginProvider.ts"
 import { type ZitadelRole, zitadelRole } from "#src/auth/model_field/zitadelRole.ts"
 import type { CommonAuthProvider } from "#src/auth/server/social_identity_providers/CommonAuthProvider.ts"
 
-export function eventorenZitadelProviderCreate(userInfo: Record<string, unknown>): CommonAuthProvider {
+export function eventorenZitadelProviderCreate(
+  userInfo: Record<string, unknown>,
+  roleSync?: { readonly enabled: true; readonly roles: readonly ZitadelRole[] },
+): CommonAuthProvider {
   const name = claimString(userInfo, "name")
   const givenName = claimString(userInfo, "given_name") || name
   const familyName = claimString(userInfo, "family_name")
   const username =
     claimString(userInfo, "preferred_username") || claimString(userInfo, "nickname") || claimString(userInfo, "sub")
   const email = userInfo.email_verified === true ? claimString(userInfo, "email") : ""
-  const zitadelRoles = claimZitadelRoles(userInfo)
+  const zitadelRoles = roleSync?.enabled ? [...roleSync.roles] : claimZitadelRoles(userInfo)
 
   return {
     provider: loginProvider.zitadel,
     providerId: claimString(userInfo, "sub"),
-    givenName,
-    familyName,
-    image: claimString(userInfo, "picture"),
+    ...(givenName ? { givenName } : {}),
+    ...(familyName ? { familyName } : {}),
+    ...(claimString(userInfo, "picture") ? { image: claimString(userInfo, "picture") } : {}),
     username,
     ...(email ? { email } : {}),
     ...(zitadelRoles ? { zitadelRoles } : {}),
+    ...(roleSync?.enabled ? { zitadelRoleSyncEnabled: true } : {}),
   }
 }
 

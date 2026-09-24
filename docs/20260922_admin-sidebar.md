@@ -5,7 +5,7 @@ Replace the public navigation on `/admin` with a responsive CRM-inspired adminis
 
 ## Decisions
 - User confirmed real overview pages: Bestellungen lists all orders; Veranstalter lists members with the organizer role.
-- Preserve existing event and member administration behavior and existing admin/dev authorization.
+- Preserve existing event and member administration behavior and admin authorization (historical plan; the dev user role has since been removed).
 - Use `/admin/bestellungen`, `/admin/events`, `/admin/veranstalter`, `/admin/mitglieder`. `/admin` redirects to `/admin/bestellungen`.
 - No public shopping-cart navbar in the admin area. Public pages remain unchanged.
 - Reuse existing `#ui/...` components, installed dependencies, authentication, theme, and logout mechanisms. Reference `../crm` shell styling and responsive behavior without copying CRM-specific business logic.
@@ -22,4 +22,4 @@ Replace the public navigation on `/admin` with a responsive CRM-inspired adminis
 - Task 3: Review and verify changes, fix confirmed defects — completed.
 
 ## Current context
-The protected `/admin` parent renders a responsive sidebar and child outlet. Events and Mitglieder are separate pages. Bestellungen uses a paginated admin/dev-only all-orders query; Veranstalter filters the protected member directory for active organizer grants. The query is available on the existing development backend. Public routes retain their existing behavior. User-menu rendering is mount-aware for consistent SSR hydration, and Corvu dependencies are transformed for SSR. CRM reference components are under `../crm/src/shell/shell_ui/`; Eventoren reusable sidebar/theme components are under `ui/interactive/`.
+The protected `/admin` parent renders a responsive sidebar and child outlet. Events and Mitglieder are separate pages. Bestellungen uses a paginated admin-only all-orders query; Veranstalter filters the protected member directory for active organizer grants. The query is available on the existing development backend. Public routes retain their existing behavior. User-menu rendering is mount-aware for consistent SSR hydration, and Corvu dependencies are transformed for SSR. CRM reference components are under `../crm/src/shell/shell_ui/`; Eventoren reusable sidebar/theme components are under `ui/interactive/`.

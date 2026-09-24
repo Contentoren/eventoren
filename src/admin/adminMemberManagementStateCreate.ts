@@ -53,7 +53,7 @@ export function adminMemberManagementStateCreate(
     rolesWriteToUrl(next)
   }
 
-  const filteredMembers = createMemo(() => {
+  const filteredMembers = () => {
     const selected = roleFilter.get()
     return members
       .get()
@@ -62,7 +62,7 @@ export function adminMemberManagementStateCreate(
           member.zitadelRoles.length > 0 &&
           (selected.length === 0 || selected.some((role) => member.zitadelRoles.includes(role))),
       )
-  })
+  }
 
   const roleChange = async (member: AdminZitadelMember) => {
     const operation = member.organizerGranted ? "revoke" : "grant"

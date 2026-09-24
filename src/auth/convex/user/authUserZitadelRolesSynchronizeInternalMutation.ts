@@ -12,9 +12,17 @@ export const authUserZitadelRolesSynchronizeInternalMutation = internalMutation(
     zitadelUserId: v.string(),
     roles: v.array(zitadelRoleValidator),
     organizerInvitedAt: v.optional(v.string()),
+    roleSyncEnabled: v.optional(v.boolean()),
   },
   handler: async (ctx, args): PromiseResult<DocUser> =>
-    authUserZitadelRolesSynchronizeFn(ctx, args.userId, args.zitadelUserId, args.roles, args.organizerInvitedAt),
+    authUserZitadelRolesSynchronizeFn(
+      ctx,
+      args.userId,
+      args.zitadelUserId,
+      args.roles,
+      args.organizerInvitedAt,
+      args.roleSyncEnabled,
+    ),
 })
 
 async function authUserZitadelRolesSynchronizeFn(
@@ -23,6 +31,7 @@ async function authUserZitadelRolesSynchronizeFn(
   zitadelUserId: string,
   roles: readonly (typeof zitadelRoleValidator.type)[],
   organizerInvitedAt?: string,
+  roleSyncEnabled?: boolean,
 ): PromiseResult<DocUser> {
-  return synchronizeUserZitadelRolesFn(ctx, userId, zitadelUserId, roles, organizerInvitedAt)
+  return synchronizeUserZitadelRolesFn(ctx, userId, zitadelUserId, roles, organizerInvitedAt, roleSyncEnabled)
 }

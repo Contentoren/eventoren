@@ -11,35 +11,32 @@ const modules = import.meta.glob("../convex/**/*.ts")
 const authSecret = "admin-order-listing-test-secret"
 process.env.AUTH_SECRET = authSecret
 
-test("lists orders from different customers newest first for admin and dev roles", async () => {
+test("lists orders from different customers newest first for an admin", async () => {
   const t = convexTest(schema, modules)
   const adminId = await userInsert(t, "admin")
-  const devId = await userInsert(t, "dev")
   const firstOwnerId = await userInsert(t, "user")
   const secondOwnerId = await userInsert(t, "user")
   await orderInsert(t, firstOwnerId, "first@example.test", "2026-09-20T10:00:00.000Z")
   await orderInsert(t, secondOwnerId, "second@example.test", "2026-09-21T10:00:00.000Z")
 
-  for (const userId of [adminId, devId]) {
-    const result = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
-      token: await createToken(userId, authSecret),
-      paginationOpts: { cursor: null, numItems: 50 },
-    })
+  const result = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
+    token: await createToken(adminId, authSecret),
+    paginationOpts: { cursor: null, numItems: 50 },
+  })
 
-    expect(result.success).toBe(true)
-    if (!result.success) continue
-    expect(result.data.page.map((order: { customerEmail: string }) => order.customerEmail)).toEqual([
-      "second@example.test",
-      "first@example.test",
-    ])
-    expect(result.data.page[0].eventKey).toBe("event")
-    expect(result.data.page[0]).toMatchObject({
-      customerGivenName: "Erika",
-      customerFamilyName: "Musterfrau",
-      customerAddress: "Musterstraße 12, 50667 Köln",
-      customerPhone: "+49 221 123456",
-    })
-  }
+  expect(result.success).toBe(true)
+  if (!result.success) return
+  expect(result.data.page.map((order: { customerEmail: string }) => order.customerEmail)).toEqual([
+    "second@example.test",
+    "first@example.test",
+  ])
+  expect(result.data.page[0].eventKey).toBe("event")
+  expect(result.data.page[0]).toMatchObject({
+    customerGivenName: "Erika",
+    customerFamilyName: "Musterfrau",
+    customerAddress: "Musterstraße 12, 50667 Köln",
+    customerPhone: "+49 221 123456",
+  })
 })
 
 test("rejects the all-orders query for an ordinary user", async () => {
@@ -110,7 +107,7 @@ test("allows admins to read local order detail and rejects ordinary users", asyn
   expect(rejected.success).toBe(false)
 })
 
-async function userInsert(t: ReturnType<typeof convexTest>, role: "admin" | "dev" | "user") {
+async function userInsert(t: ReturnType<typeof convexTest>, role: "admin" | "user") {
   const now = new Date().toISOString()
   return await t.run(async (ctx) => ctx.db.insert("users", { name: role, role, createdAt: now, updatedAt: now }))
 }

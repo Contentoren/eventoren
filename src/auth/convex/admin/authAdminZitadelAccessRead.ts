@@ -4,7 +4,7 @@ import { createResult, createResultError, type PromiseResult } from "#result"
 import { authZitadelRolesFromUserGrants } from "#src/auth/convex/admin/authZitadelRolesFromUserGrants.ts"
 import { authZitadelUserGrantsRead } from "#src/auth/convex/admin/authZitadelUserGrantsRead.ts"
 import type { DocUser } from "#src/auth/convex/IdUser.ts"
-import { userRoleIsDevOrAdmin } from "#src/auth/model_field/userRole.ts"
+import { userRoleIsAdmin } from "#src/auth/model_field/userRoleIsAdmin.ts"
 import { userRoleSource } from "#src/auth/model_field/userRoleSource.ts"
 
 export async function authAdminZitadelAccessReadFn(ctx: ActionCtx, token: string): PromiseResult<DocUser> {
@@ -28,6 +28,6 @@ export async function authAdminZitadelAccessReadFn(ctx: ActionCtx, token: string
     user = synchronizedResult.data
   }
 
-  if (!userRoleIsDevOrAdmin(user.role)) return createResultError("authAdminZitadelAccessReadFn", "Admin role required")
+  if (!userRoleIsAdmin(user.role)) return createResultError("authAdminZitadelAccessReadFn", "Admin role required")
   return createResult(user)
 }

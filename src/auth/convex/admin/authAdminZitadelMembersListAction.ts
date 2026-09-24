@@ -66,7 +66,7 @@ export const authAdminZitadelMembersListAction = action({
 type AdminZitadelMember = {
   displayName: string
   email?: string
-  eventorenRole?: "user" | "customer" | "organizer" | "admin" | "dev"
+  eventorenRole?: "user" | "customer" | "organizer" | "admin"
   eventorenUserId?: string
   organizerGranted: boolean
   organizerInvitedAt?: string

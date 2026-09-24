@@ -9,11 +9,13 @@ export const commonAuthProviderValidator = v.object({
   provider: loginProviderValidator,
   providerId: v.string(),
   // data
-  givenName: v.string(),
-  familyName: v.string(),
-  image: v.string(),
+  givenName: v.optional(v.string()),
+  familyName: v.optional(v.string()),
+  image: v.optional(v.string()),
   username: v.string(),
   zitadelRoles: v.optional(v.array(zitadelRoleValidator)),
+  zitadelRoleSyncEnabled: v.optional(v.boolean()),
+  zitadelRoleSyncProof: v.optional(v.string()),
   // email
   email: v.optional(v.string()),
 })

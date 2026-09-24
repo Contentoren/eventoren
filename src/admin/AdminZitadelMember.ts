@@ -1,7 +1,7 @@
 export type AdminZitadelMember = {
   readonly displayName: string
   readonly email?: string
-  readonly eventorenRole?: "user" | "customer" | "organizer" | "admin" | "dev"
+  readonly eventorenRole?: "user" | "customer" | "organizer" | "admin"
   readonly eventorenUserId?: string
   readonly organizerGranted: boolean
   readonly organizerInvitedAt?: string

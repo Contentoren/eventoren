@@ -4,6 +4,7 @@ import { convexTest } from "convex-test"
 import { expect, test } from "vitest"
 import { api, internal } from "../convex/_generated/api.js"
 import schema from "../convex/schema.js"
+import { zitadelRoleSyncProofCreate } from "../src/auth/server/zitadelRoleSyncProofCreate.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 
@@ -217,15 +218,19 @@ test("revokes only the organizer role and synchronizes the current provider role
 test("rejects a provider admin after the current Zitadel grant has been revoked", async () => {
   await withEnvironment(async () => {
     const t = convexTest(schema, modules)
-    const signedIn = await t.action(api.auth.authSignInUsingZitadelAction, {
+    const provider = {
       email: "admin@example.test",
       familyName: "Admin",
       givenName: "Provider",
       image: "",
-      provider: "zitadel",
+      provider: "zitadel" as const,
       providerId: "provider-admin-id",
       username: "provider-admin",
-      zitadelRoles: ["admin"],
+      zitadelRoles: ["admin" as const],
+    }
+    const signedIn = await t.action(api.auth.authSignInUsingZitadelAction, {
+      ...provider,
+      zitadelRoleSyncProof: await zitadelRoleSyncProofCreate(provider),
     })
     expect(signedIn.success).toBe(true)
     if (!signedIn.success) return
@@ -283,7 +288,7 @@ test("scheduled sync applies external organizer revocations to existing user rec
 })
 
 async function legacyAdminSession(t: ReturnType<typeof convexTest>): Promise<string> {
-  const signedIn = await t.action(api.auth.authSignInUsingZitadelAction, {
+  const signedIn = await t.mutation(internal.auth.signInUsingSocialAuth3InternalMutation, {
     email: "admin@example.test",
     familyName: "Admin",
     givenName: "Test",

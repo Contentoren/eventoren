@@ -47,7 +47,7 @@ export async function createUserFromAuthProviderFn(
   const zitadelRoles = isZitadel && authProvider.zitadelRoles ? [...authProvider.zitadelRoles] : undefined
   const toCreate = {
     name: userName,
-    image: authProvider.image,
+    ...(authProvider.image !== undefined ? { image: authProvider.image } : {}),
     ...(authProvider.email ? { email: authProvider.email } : {}),
     role: isZitadel ? zitadelRolesToUserRole(zitadelRoles ?? []) : userRole.customer,
     ...(isZitadel

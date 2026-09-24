@@ -84,7 +84,7 @@ export const authAdminZitadelOrganizerGrantAction = action({
 })
 
 type AdminZitadelOrganizerGrantResult = {
-  eventorenRole?: "user" | "customer" | "organizer" | "admin" | "dev"
+  eventorenRole?: "user" | "customer" | "organizer" | "admin"
   eventorenUserId?: string
   organizerGranted: boolean
   organizerInvitedAt?: string

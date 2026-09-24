@@ -3,7 +3,7 @@ import { v } from "convex/values"
 import { query } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import type { AdminTicketOrderSummary } from "#src/admin/AdminTicketOrderSummary.ts"
-import { userRoleIsDevOrAdmin } from "#src/auth/model_field/userRole.ts"
+import { userRoleIsAdmin } from "#src/auth/model_field/userRoleIsAdmin.ts"
 import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryTokenToUserId.ts"
 
 const maxPageSize = 50
@@ -19,7 +19,7 @@ export const ticketOrderListAdminPaginatedQuery = query({
     authQueryTokenToUserId(ctx, args, async (authorizedCtx, authorizedArgs) => {
       const op = "ticketOrderListAdminPaginatedQuery"
       const user = await authorizedCtx.db.get("users", authorizedArgs.userId)
-      if (!user || !userRoleIsDevOrAdmin(user.role)) return createResultError(op, "Admin role required")
+      if (!user || !userRoleIsAdmin(user.role)) return createResultError(op, "Admin role required")
       if (
         !Number.isInteger(authorizedArgs.paginationOpts.numItems) ||
         authorizedArgs.paginationOpts.numItems < 1 ||

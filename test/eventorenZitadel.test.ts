@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test"
+import { exportJWK, generateKeyPair, SignJWT } from "jose"
 import { eventorenZitadel } from "../src/auth/server/eventorenZitadel.ts"
 
 test("exchanges the Zitadel callback code with the configured client authentication", async () => {
@@ -161,6 +162,78 @@ test("accepts Zitadel login start behind reverse proxy forwarding headers", asyn
   })
 })
 
+test("requests the Zitadel project-role scope and stores a nonce only when organization sync is enabled", async () => {
+  await withEnvironment(async () => {
+    process.env.OIDC_ZITADEL_ORG_ID = "eventoren-org"
+
+    const response = await eventorenZitadel.loginStart(new Request("https://eventoren.example.test/login/zitadel"))
+    const location = new URL(response.headers.get("location") ?? "")
+    const cookie = response.headers.get("set-cookie") ?? ""
+
+    expect(location.searchParams.get("scope")).toContain("urn:zitadel:iam:user:resourceowner")
+    expect(location.searchParams.get("scope")).toContain("urn:zitadel:iam:org:project:roles")
+    expect(location.searchParams.get("nonce")).toBeTruthy()
+    expect(cookie).toContain("HttpOnly")
+  })
+})
+
+test("configured callback passes only verified organization roles to the signed Convex action", async () => {
+  await withEnvironment(async () => {
+    process.env.OIDC_ZITADEL_ORG_ID = "eventoren-org"
+    const { privateKey, publicKey } = await generateKeyPair("RS256")
+    const jwk = await exportJWK(publicKey)
+    let submitted: Record<string, unknown> | undefined
+    let idToken = ""
+    await withFetch(
+      async (input, init) => {
+        const request = new Request(input, init)
+        if (request.url.endsWith("/oauth/v2/keys"))
+          return Response.json({ keys: [{ ...jwk, kid: "key-1", alg: "RS256", use: "sig" }] })
+        if (request.url.endsWith("/oauth/v2/token"))
+          return Response.json({ access_token: "access-token", id_token: idToken })
+        if (request.url.endsWith("/oidc/v1/userinfo"))
+          return Response.json({
+            sub: "subject-1",
+            "urn:zitadel:iam:org:project:roles": { admin: { "eventoren-org": "Untrusted userinfo" } },
+          })
+        submitted = (await request.json()) as Record<string, unknown>
+        return Response.json({ status: "success", value: { success: false, errorMessage: "Test action stopped" } })
+      },
+      async () => {
+        const start = await eventorenZitadel.loginStart(new Request("https://eventoren.example.test/login/zitadel"))
+        const authorize = new URL(start.headers.get("location") ?? "")
+        idToken = await new SignJWT({
+          nonce: authorize.searchParams.get("nonce"),
+          "urn:zitadel:iam:org:project:roles": {
+            admin: { "other-org": "Other" },
+            organizer: { "eventoren-org": "Eventoren" },
+          },
+        })
+          .setProtectedHeader({ alg: "RS256", kid: "key-1" })
+          .setIssuer("https://auth.contentoren.de")
+          .setAudience("client-id")
+          .setSubject("subject-1")
+          .setExpirationTime("5m")
+          .sign(privateKey)
+        const callback = await eventorenZitadel.loginComplete(
+          new Request(
+            `https://eventoren.example.test/login/zitadel/callback?code=code&state=${authorize.searchParams.get("state")}`,
+            { headers: { cookie: start.headers.get("set-cookie")?.split(";", 1)[0] ?? "" } },
+          ),
+        )
+        expect(callback.status).toBe(403)
+        const args = (submitted?.args as Array<Record<string, unknown>> | undefined)?.[0]
+        expect(args).toMatchObject({
+          providerId: "subject-1",
+          zitadelRoles: ["organizer"],
+          zitadelRoleSyncEnabled: true,
+        })
+        expect(args?.zitadelRoleSyncProof).toBeString()
+      },
+    )
+  })
+})
+
 async function withFetch(
   implementation: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>,
   callback: () => Promise<void>,
@@ -181,6 +254,7 @@ async function withEnvironment(callback: () => Promise<void>) {
     clientSecret: process.env.ZITADEL_CLIENT_SECRET,
     redirectUri: process.env.ZITADEL_REDIRECT_URI,
     authSecret: process.env.AUTH_SECRET,
+    organizationId: process.env.OIDC_ZITADEL_ORG_ID,
   }
   process.env.PUBLIC_BASE_URL_APP = "https://eventoren.example.test"
   process.env.ZITADEL_CLIENT_ID = "client-id"
@@ -195,6 +269,7 @@ async function withEnvironment(callback: () => Promise<void>) {
     restore("ZITADEL_CLIENT_SECRET", previous.clientSecret)
     restore("ZITADEL_REDIRECT_URI", previous.redirectUri)
     restore("AUTH_SECRET", previous.authSecret)
+    restore("OIDC_ZITADEL_ORG_ID", previous.organizationId)
   }
 }
 

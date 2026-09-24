@@ -4,6 +4,7 @@ import { createUserFromAuthProviderFn } from "#src/auth/convex/crud/createUserFr
 import { findUserByEmailFn } from "#src/auth/convex/crud/findUserByEmailQuery.ts"
 import { linkAuthToExistingUserFn } from "#src/auth/convex/crud/linkAuthToExistingUserFn.ts"
 import { synchronizeUserZitadelRolesFn } from "#src/auth/convex/crud/synchronizeUserZitadelRolesFn.ts"
+import { updateUserFromAuthProviderFn } from "#src/auth/convex/crud/updateUserFromAuthProviderFn.ts"
 import type { DocAuthAccount } from "#src/auth/convex/IdUser.ts"
 import { docUserToUserProfile } from "#src/auth/convex/user/docUserToUserProfile.ts"
 import { createUserSessionTimes, type UserSession } from "#src/auth/model/UserSession.ts"
@@ -29,9 +30,20 @@ export async function findOrCreateUserFn(
     const user = await ctx.db.get("users", existingAuthAccount.userId)
     if (!user) return createResultError(op, "User not found by userId", existingAuthAccount.userId)
     if (user.deletedAt) return createResultError(op, "User account has been deleted")
+    if (authData.provider === "zitadel") {
+      const profileUpdated = await updateUserFromAuthProviderFn(ctx, user._id, authData)
+      if (!profileUpdated.success) return createResultError(op, profileUpdated.errorMessage)
+    }
     const synchronized =
       authData.provider === "zitadel"
-        ? await synchronizeUserZitadelRolesFn(ctx, user._id, authData.providerId, authData.zitadelRoles)
+        ? await synchronizeUserZitadelRolesFn(
+            ctx,
+            user._id,
+            authData.providerId,
+            authData.zitadelRoles,
+            undefined,
+            authData.zitadelRoleSyncEnabled,
+          )
         : createResult(user)
     if (!synchronized.success) return createResultError(op, synchronized.errorMessage)
     const { orgHandle, orgRole } = await orgMemberGetHandleAndRoleFn(ctx, synchronized.data._id)
@@ -50,9 +62,20 @@ export async function findOrCreateUserFn(
     if (existingUser) {
       if (existingUser.deletedAt) return createResultError(op, "User account has been deleted")
       await linkAuthToExistingUserFn(ctx, existingUser._id, authData.provider, authData.providerId)
+      if (authData.provider === "zitadel") {
+        const profileUpdated = await updateUserFromAuthProviderFn(ctx, existingUser._id, authData)
+        if (!profileUpdated.success) return createResultError(op, profileUpdated.errorMessage)
+      }
       const synchronized =
         authData.provider === "zitadel"
-          ? await synchronizeUserZitadelRolesFn(ctx, existingUser._id, authData.providerId, authData.zitadelRoles)
+          ? await synchronizeUserZitadelRolesFn(
+              ctx,
+              existingUser._id,
+              authData.providerId,
+              authData.zitadelRoles,
+              undefined,
+              authData.zitadelRoleSyncEnabled,
+            )
           : createResult(existingUser)
       if (!synchronized.success) return createResultError(op, synchronized.errorMessage)
       const { orgHandle, orgRole } = await orgMemberGetHandleAndRoleFn(ctx, synchronized.data._id)

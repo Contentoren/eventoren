@@ -1,6 +1,7 @@
 export { authAdminZitadelMembersListAction } from "#src/auth/convex/admin/authAdminZitadelMembersListAction.ts"
 export { authAdminZitadelOrganizerGrantAction } from "#src/auth/convex/admin/authAdminZitadelOrganizerGrantAction.ts"
 export { authCurrentUserByTokenInternalQuery } from "#src/auth/convex/admin/authCurrentUserByTokenInternalQuery.ts"
+export { authLegacyDevUsersMigrateInternalMutation } from "#src/auth/convex/admin/authLegacyDevUsersMigrateInternalMutation.ts"
 export { authZitadelMemberSynchronizeInternalMutation } from "#src/auth/convex/admin/authZitadelMemberSynchronizeInternalMutation.ts"
 export { authZitadelRolesSynchronizeScheduledAction } from "#src/auth/convex/admin/authZitadelRolesSynchronizeScheduledAction.ts"
 export { authZitadelSyncCandidatesInternalQuery } from "#src/auth/convex/admin/authZitadelSyncCandidatesInternalQuery.ts"

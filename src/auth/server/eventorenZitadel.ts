@@ -1,8 +1,14 @@
 import { ConvexHttpClient } from "convex/browser"
 import { api } from "#convex/_generated/api.js"
+import type { PromiseResult } from "#result"
+import type { UserSession } from "#src/auth/model/UserSession.ts"
 import { convexUrlGet } from "#src/server/convexUrlGet.ts"
 import { eventorenSessionCookie } from "./eventorenSessionCookie.ts"
 import { eventorenZitadelProviderCreate } from "./eventorenZitadelProviderCreate.ts"
+import type { CommonAuthProvider } from "./social_identity_providers/CommonAuthProvider.ts"
+import { zitadelIdTokenVerify } from "./zitadelIdTokenVerify.ts"
+import { zitadelRoleSyncProofCreate } from "./zitadelRoleSyncProofCreate.ts"
+import { zitadelRolesForOrganizationRead } from "./zitadelRolesForOrganizationRead.ts"
 
 const defaultIssuer = "https://auth.contentoren.de"
 const resourceOwnerScope = "urn:zitadel:iam:user:resourceowner"
@@ -13,9 +19,11 @@ type ZitadelConfiguration = {
   readonly clientSecret: string
   readonly redirectUri: string
   readonly appOrigin: string
+  readonly organizationId?: string
 }
 
 type UserInfo = Record<string, unknown>
+type TokenResponse = { readonly access_token?: unknown; readonly id_token?: unknown }
 
 export const eventorenZitadel = {
   async loginStart(request: Request): Promise<Response> {
@@ -26,13 +34,16 @@ export const eventorenZitadel = {
 
     const state = randomValue()
     const verifier = randomValue()
+    const nonce = randomValue()
     const returnTo = returnToRead(new URL(request.url).searchParams.get("returnTo"), config.appOrigin)
     const challenge = await sha256Base64url(verifier)
     const authorizeUrl = new URL(`${config.issuer}/oauth/v2/authorize`)
     authorizeUrl.searchParams.set("client_id", config.clientId)
     authorizeUrl.searchParams.set("response_type", "code")
     authorizeUrl.searchParams.set("redirect_uri", config.redirectUri)
-    authorizeUrl.searchParams.set("scope", `openid profile email ${resourceOwnerScope}`)
+    const orgScope = config.organizationId ? " urn:zitadel:iam:org:project:roles" : ""
+    authorizeUrl.searchParams.set("scope", `openid profile email ${resourceOwnerScope}${orgScope}`)
+    if (config.organizationId) authorizeUrl.searchParams.set("nonce", nonce)
     authorizeUrl.searchParams.set("state", state)
     authorizeUrl.searchParams.set("code_challenge", challenge)
     authorizeUrl.searchParams.set("code_challenge_method", "S256")
@@ -41,7 +52,13 @@ export const eventorenZitadel = {
       status: 302,
       headers: {
         location: authorizeUrl.toString(),
-        "set-cookie": await eventorenSessionCookie.loginCreate(state, verifier, returnTo, requestIsSecure(request)),
+        "set-cookie": await eventorenSessionCookie.loginCreate(
+          state,
+          verifier,
+          returnTo,
+          requestIsSecure(request),
+          config.organizationId ? nonce : undefined,
+        ),
       },
     })
   },
@@ -68,14 +85,34 @@ export const eventorenZitadel = {
     if (!tokenResponse)
       return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht abgeschlossen werden.", 502)
 
-    const userInfo = await userInfoRead(config.issuer, tokenResponse)
+    const verifiedRoles = config.organizationId
+      ? await zitadelIdTokenVerify(config.issuer, config.clientId, tokenResponse.id_token, login.nonce)
+      : undefined
+    if (config.organizationId && !verifiedRoles)
+      return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 401)
+
+    const userInfo = await userInfoRead(config.issuer, tokenResponse.access_token as string)
     if (!userInfo)
       return loginErrorResponse(request, "Die Eventoren-Benutzerinformationen konnten nicht geladen werden.", 502)
+    if (config.organizationId && verifiedRoles?.sub !== userInfo.sub)
+      return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 401)
 
-    const provider = eventorenZitadelProviderCreate(userInfo)
+    let provider: CommonAuthProvider
+    if (config.organizationId) {
+      const roles = zitadelRolesForOrganizationRead(verifiedRoles as Record<string, unknown>, config.organizationId)
+      provider = eventorenZitadelProviderCreate(userInfo, {
+        enabled: true,
+        roles,
+      })
+    } else {
+      provider = eventorenZitadelProviderCreate(userInfo)
+    }
+    const proof = await zitadelRoleSyncProofCreate(provider, config.organizationId)
+    if (!proof) return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht abgeschlossen werden.", 503)
+    provider = { ...provider, zitadelRoleSyncProof: proof }
     const convexUrl = convexUrlGet()
     const client = new ConvexHttpClient(convexUrl)
-    let sessionResult
+    let sessionResult: Awaited<PromiseResult<UserSession>>
     try {
       sessionResult = await client.action(api.auth.authSignInUsingZitadelAction, provider)
     } catch (error) {
@@ -125,6 +162,7 @@ function configuration(): ZitadelConfiguration | undefined {
     clientSecret,
     appOrigin,
     redirectUri,
+    ...(process.env.OIDC_ZITADEL_ORG_ID?.trim() ? { organizationId: process.env.OIDC_ZITADEL_ORG_ID.trim() } : {}),
   }
 }
 
@@ -170,7 +208,7 @@ async function tokenExchange(
   config: ZitadelConfiguration,
   code: string,
   verifier: string,
-): Promise<string | undefined> {
+): Promise<TokenResponse | undefined> {
   try {
     const response = await fetch(`${config.issuer}/oauth/v2/token`, {
       method: "POST",
@@ -185,7 +223,7 @@ async function tokenExchange(
         code_verifier: verifier,
       }),
     })
-    const body = (await response.json().catch(() => null)) as { access_token?: unknown } | null
+    const body = (await response.json().catch(() => null)) as TokenResponse | null
     if (!response.ok || typeof body?.access_token !== "string") {
       console.error("Zitadel sign-in: token exchange failed", {
         status: response.status,
@@ -194,7 +232,7 @@ async function tokenExchange(
       })
       return undefined
     }
-    return body.access_token
+    return body
   } catch (error) {
     console.error("Zitadel sign-in: token exchange fetch failed", {
       errorName: error instanceof Error ? error.name : "unknown",

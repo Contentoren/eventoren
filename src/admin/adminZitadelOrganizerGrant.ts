@@ -12,7 +12,7 @@ export async function adminZitadelOrganizerGrant(
   client?: ConvexHttpClient,
 ): Promise<
   Result<{
-    readonly eventorenRole?: "user" | "customer" | "organizer" | "admin" | "dev"
+    readonly eventorenRole?: "user" | "customer" | "organizer" | "admin"
     readonly eventorenUserId?: string
     readonly organizerGranted: boolean
     readonly organizerInvitedAt?: string

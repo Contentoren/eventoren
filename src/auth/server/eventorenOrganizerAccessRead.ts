@@ -7,8 +7,7 @@ export async function eventorenOrganizerAccessRead(): PromiseResult<UserProfile>
   const userResult = await eventorenCurrentUserRead()
   if (!userResult.success) return userResult
   if (!userResult.data) return createResultError(op, "Anmeldung erforderlich")
-  const role = userResult.data.role as string
-  if (role !== "organizer" && role !== "admin" && role !== "dev")
-    return createResultError(op, "Eventoren-Veranstalterrolle erforderlich")
+  const role = userResult.data.role
+  if (role !== "organizer" && role !== "admin") return createResultError(op, "Eventoren-Veranstalterrolle erforderlich")
   return createResult(userResult.data)
 }

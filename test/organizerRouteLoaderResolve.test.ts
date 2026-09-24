@@ -107,21 +107,6 @@ describe("organizer route authorization", () => {
     })
   })
 
-  test("returns authorized default payload for dev role", async () => {
-    const result = await organizerRouteLoaderResolve({
-      getOrganizerAccess: async () => createResult(sampleUserProfile("dev")),
-      returnTo: "/organizer",
-      redirect: () => {
-        throw new Error("unexpected redirect")
-      },
-    })
-
-    expect(result).toEqual({
-      authorized: true,
-      isServerAuthorized: true,
-    })
-  })
-
   test("includes custom payload when createPayload is provided", async () => {
     const result = await organizerRouteLoaderResolve({
       getOrganizerAccess: async () => createResult(sampleUserProfile("organizer")),

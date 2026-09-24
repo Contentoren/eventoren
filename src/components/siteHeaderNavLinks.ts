@@ -1,6 +1,7 @@
 import type { Language } from "../app/i18n/language.ts"
 import type { UserRole } from "../auth/model_field/userRole.ts"
-import { userRoleCanAccessOrganizer, userRoleIsDevOrAdmin } from "../auth/model_field/userRole.ts"
+import { userRoleCanAccessOrganizer } from "../auth/model_field/userRole.ts"
+import { userRoleIsAdmin } from "../auth/model_field/userRoleIsAdmin.ts"
 import type { SiteHeaderNavLink } from "./SiteHeaderNavLink.ts"
 
 export function siteHeaderNavLinks(
@@ -14,7 +15,7 @@ export function siteHeaderNavLinks(
     ...(activeRole && userRoleCanAccessOrganizer(activeRole)
       ? [{ to: "/organizer" as const, label: "Veranstalter", exact: false }]
       : []),
-    ...(activeRole && userRoleIsDevOrAdmin(activeRole)
+    ...(activeRole && userRoleIsAdmin(activeRole)
       ? [{ to: "/admin" as const, label: "Verwaltung", exact: false }]
       : []),
   ] satisfies readonly SiteHeaderNavLink[]
