@@ -16,7 +16,7 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-async function createUser(t: ReturnType<typeof convexTest>, role: "user" | "admin" | "dev") {
+async function createUser(t: ReturnType<typeof convexTest>, role: "user" | "admin") {
   const now = new Date().toISOString()
   return await t.run(async (ctx) =>
     ctx.db.insert("users", {
@@ -128,6 +128,27 @@ test("rejects catalog writes without an admin role", async () => {
 
   expect(missingToken.success).toBe(false)
   expect(regularUser.success).toBe(false)
+})
+
+test("persists an admin-created category without an event and restores a hidden category", async () => {
+  const t = convexTest(schema, modules)
+  const adminToken = await tokenFor(await createUser(t, "admin"))
+  const userToken = await tokenFor(await createUser(t, "user"))
+
+  expect(
+    (await t.mutation(api.catalog.catalogCategoryCreateMutation, { category: "Test", token: userToken })).success,
+  ).toBe(false)
+  expect(
+    (await t.mutation(api.catalog.catalogCategoryCreateMutation, { category: " Test ", token: adminToken })).success,
+  ).toBe(true)
+  expect((await t.query(api.catalog.catalogCategoryListQuery, { token: adminToken })).data).toEqual(["Test"])
+
+  await t.mutation(api.catalog.catalogCategoryHideMutation, { category: "Test", token: adminToken })
+  expect((await t.query(api.catalog.catalogCategoryHiddenListQuery, { token: adminToken })).data).toEqual(["Test"])
+  await t.mutation(api.catalog.catalogCategoryCreateMutation, { category: "Test", token: adminToken })
+
+  expect((await t.query(api.catalog.catalogCategoryListQuery, { token: adminToken })).data).toEqual(["Test"])
+  expect((await t.query(api.catalog.catalogCategoryHiddenListQuery, { token: adminToken })).data).toEqual([])
 })
 
 test("deleting an event hides it without removing its order or ticket tier", async () => {
@@ -732,7 +753,7 @@ test("published page rejects page sizes outside its bounded read tier", async ()
 
 test("tier capacity cannot undercut reserved and sold inventory", async () => {
   const t = convexTest(schema, modules)
-  const adminId = await createUser(t, "dev")
+  const adminId = await createUser(t, "admin")
   const token = await tokenFor(adminId)
 
   await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))

@@ -83,6 +83,10 @@ export const catalogTables = {
     hiddenByUserId: vIdUser,
   }).index("category", ["category"]),
 
+  catalogCategories: defineTable({
+    category: v.string(),
+  }).index("category", ["category"]),
+
   catalogSyncStates: defineTable({
     key: v.literal("catalog"),
     version: v.number(),

@@ -3,6 +3,8 @@ import { createServerFn } from "@tanstack/solid-start"
 import { adminImageUploadFromSession } from "#src/server/adminImageUploadFromSession.ts"
 import { catalogCategoryHiddenListFromSession } from "#src/server/catalogCategoryHiddenListFromSession.ts"
 import { catalogCategoryHideFromSession } from "#src/server/catalogCategoryHideFromSession.ts"
+import { catalogCategoryCreateFromSession } from "#src/server/catalogCategoryCreateFromSession.ts"
+import { catalogCategoryListFromSession } from "#src/server/catalogCategoryListFromSession.ts"
 import { catalogEventDeleteFromSession } from "#src/server/catalogEventDeleteFromSession.ts"
 import { catalogEventPublishFromSession } from "#src/server/catalogEventPublishFromSession.ts"
 import { catalogEventsAdminGet } from "#src/server/catalogEventsAdminGet.ts"
@@ -29,6 +31,10 @@ const deleteAdminEvent = createServerFn({ method: "POST" })
   .validator((input: Parameters<typeof catalogEventDeleteFromSession>[0]) => input)
   .handler(({ data }) => catalogEventDeleteFromSession(data))
 const getHiddenAdminCategories = createServerFn({ method: "GET" }).handler(catalogCategoryHiddenListFromSession)
+const getAdminCategories = createServerFn({ method: "GET" }).handler(catalogCategoryListFromSession)
+const createAdminCategory = createServerFn({ method: "POST" })
+  .validator((input: Parameters<typeof catalogCategoryCreateFromSession>[0]) => input)
+  .handler(({ data }) => catalogCategoryCreateFromSession(data))
 const hideAdminCategory = createServerFn({ method: "POST" })
   .validator((input: Parameters<typeof catalogCategoryHideFromSession>[0]) => input)
   .handler(({ data }) => catalogCategoryHideFromSession(data))
@@ -60,6 +66,8 @@ export function adminEventsRouteStateCreate() {
     eventPublish: (input) => publishAdminEvent({ data: input }),
     eventDelete: (input) => deleteAdminEvent({ data: input }),
     categoryHiddenList: () => getHiddenAdminCategories(),
+    categoryList: () => getAdminCategories(),
+    categoryCreate: (input) => createAdminCategory({ data: input }),
     categoryHide: (input) => hideAdminCategory({ data: input }),
     imageUpload: (file) => {
       const data = new FormData()

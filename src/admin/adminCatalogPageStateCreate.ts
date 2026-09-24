@@ -9,6 +9,7 @@ import type { EventImageVariants } from "../events/EventImageVariants.ts"
 import { eventHighlightsGet } from "../events/eventHighlightsGet.ts"
 import { eventInclusionsGet } from "../events/eventInclusionsGet.ts"
 import { eventExclusionsGet } from "../events/eventExclusionsGet.ts"
+import { eventCategoryLabels } from "../events/eventCategoryLabels.ts"
 import type { Result } from "../ui/Result.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import type { AdminEventDraft } from "./AdminEventDraft.ts"
@@ -74,6 +75,8 @@ export function adminCatalogPageStateCreate(inputs: {
     readonly eventKey: string
   }) => Promise<Result<{ readonly eventKey: string; readonly catalogVersion: number }>>
   categoryHiddenList?: () => Promise<Result<readonly string[]>>
+  categoryList?: () => Promise<Result<readonly string[]>>
+  categoryCreate?: (input: { readonly category: string }) => Promise<Result<void>>
   categoryHide?: (input: { readonly category: string }) => Promise<Result<void>>
   imageUpload?: (file: File) => Promise<Result<EventImageVariants>>
 }): AdminCatalogPageState {
@@ -86,8 +89,10 @@ export function adminCatalogPageStateCreate(inputs: {
   const successMessage = createSignalObject("")
   const isSaving = createSignalObject(false)
   const hiddenCategories = createSignalObject<readonly string[]>([])
+  const categories = createSignalObject<readonly string[]>([])
   onMount(() => {
     void hiddenCategoriesLoad()
+    void categoriesLoad()
   })
 
   const isAuthorized = () => inputs.isServerAuthorized()
@@ -193,17 +198,20 @@ export function adminCatalogPageStateCreate(inputs: {
         return
       }
 
+      successMessage.set("Event gespeichert. Änderungen werden an den Verkaufskatalog synchronisiert.")
+      errorMessage.set("")
       const refreshedEvents = await reloadEvents()
-      if (!refreshedEvents) return undefined
+      if (!refreshedEvents) {
+        successMessage.set("Event gespeichert, aber die Eventliste konnte nicht aktualisiert werden.")
+        return saved.data.eventKey
+      }
       const updated = refreshedEvents.find((event) => event.id === saved.data.eventKey)
       if (!updated) {
-        errorMessage.set("Das gespeicherte Event konnte nicht erneut geladen werden.")
-        return undefined
+        successMessage.set("Event gespeichert, aber es konnte nicht erneut geladen werden.")
+        return saved.data.eventKey
       }
       selectedEventKey.set(updated.id)
       eventDraft.set(eventToDraft(updated))
-      successMessage.set("Event gespeichert. Änderungen werden an den Verkaufskatalog synchronisiert.")
-      errorMessage.set("")
       return updated.id
     } catch (error) {
       errorMessage.set(
@@ -454,22 +462,65 @@ export function adminCatalogPageStateCreate(inputs: {
     hiddenCategories.set(result.data)
   }
 
+  const categoriesLoad = async () => {
+    if (!inputs.categoryList) return
+    const result = await inputs.categoryList()
+    if (!result.success) return errorMessage.set(result.errorMessage)
+    categories.set([...new Set([...categories.get(), ...result.data])])
+  }
+
+  const createCategory = async (category: string): Promise<boolean> => {
+    if (!inputs.categoryCreate) {
+      errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
+      return false
+    }
+    try {
+      const result = await inputs.categoryCreate({ category })
+      if (!result.success) {
+        errorMessage.set(result.errorMessage)
+        return false
+      }
+      categories.set([...new Set([...categories.get(), category])])
+      hiddenCategories.set(hiddenCategories.get().filter((hidden) => hidden !== category))
+      errorMessage.set("")
+      return true
+    } catch {
+      errorMessage.set("Kategorie konnte nicht hinzugefügt werden.")
+      return false
+    }
+  }
+
   const hideCategory = async (category: string) => {
     if (!inputs.categoryHide) {
       errorMessage.set("Für die Katalogverwaltung ist eine gültige Admin-Sitzung erforderlich.")
       return
     }
-    const result = await inputs.categoryHide({ category })
-    if (!result.success) {
-      errorMessage.set(result.errorMessage)
-      return
+    try {
+      const result = await inputs.categoryHide({ category })
+      if (!result.success) {
+        errorMessage.set(result.errorMessage)
+        return
+      }
+      const hidden = [...new Set([...hiddenCategories.get(), category])]
+      hiddenCategories.set(hidden)
+      if (eventDraft.get().category === category) {
+        const replacement = [
+          ...Object.keys(eventCategoryLabels),
+          ...categories.get(),
+          ...events.get().map((event) => event.category),
+        ].find((candidate) => !hidden.includes(candidate))
+        eventFieldChange("category", replacement ?? "")
+      }
+      errorMessage.set("")
+    } catch {
+      errorMessage.set("Kategorie konnte nicht entfernt werden.")
     }
-    hiddenCategories.set([...new Set([...hiddenCategories.get(), category])])
   }
 
   return {
     events: events.get,
     hiddenCategories: hiddenCategories.get,
+    categories: categories.get,
     selectedEvent: selectedEvent,
     selectedEventKey: selectedEventKey.get,
     eventDraft: eventDraft.get,
@@ -494,6 +545,7 @@ export function adminCatalogPageStateCreate(inputs: {
     publishEvent,
     deleteEvent,
     hideCategory,
+    createCategory,
     imageUpload: inputs.imageUpload,
   }
 }

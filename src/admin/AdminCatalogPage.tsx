@@ -259,7 +259,7 @@ export function AdminCatalogPage(props: {
                           class="flex flex-col gap-3 border-t border-border pt-4"
                           onSubmit={(event) => {
                             event.preventDefault()
-                            categoryPicker.categoryCreate()
+                            void categoryPicker.categoryCreate()
                           }}
                         >
                           <Label for="admin-new-event-category">Neue Kategorie</Label>

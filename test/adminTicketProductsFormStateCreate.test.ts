@@ -37,9 +37,12 @@ describe("admin ticket products form state", () => {
         })
         catalog.selectEvent(event)
         const form = adminTicketProductsFormStateCreate(catalog)
-        form.newTier()
+        expect(form.showNewTier()).toBe(false)
+        form.startNewTier()
+        expect(form.showNewTier()).toBe(true)
 
         expect(catalog.tierDraft()).toMatchObject({
+          tierKey: "ticket-1",
           startsAt: event.startsAt,
           doorsAt: event.doorsAt,
           endsAt: event.endsAt,
@@ -47,6 +50,17 @@ describe("admin ticket products form state", () => {
         expect(form.startsAt()).toBe("2026-10-01T18:00")
         form.startsAtChange("2026-10-03T19:30")
         expect(catalog.tierDraft().startsAt).toBe(adminDateTimeIsoFromLocal("2026-10-03T19:30") ?? "")
+        form.selectTier({
+          id: "saved-ticket",
+          name: "Saved ticket",
+          description: "",
+          priceCents: 500,
+          feeCents: 0,
+          capacity: 50,
+          available: 50,
+        })
+        expect(form.showNewTier()).toBe(false)
+        expect(catalog.tierDraft().tierKey).toBe("saved-ticket")
       } finally {
         dispose()
       }

@@ -1,5 +1,7 @@
 export { catalogCategoryHiddenListQuery } from "#src/catalog/convex/catalogCategoryHiddenListQuery.ts"
 export { catalogCategoryHideMutation } from "#src/catalog/convex/catalogCategoryHideMutation.ts"
+export { catalogCategoryCreateMutation } from "#src/catalog/convex/catalogCategoryCreateMutation.ts"
+export { catalogCategoryListQuery } from "#src/catalog/convex/catalogCategoryListQuery.ts"
 export { catalogEventGetPublishedQuery } from "#src/catalog/convex/catalogEventGetPublishedQuery.ts"
 export { catalogEventDeleteMutation } from "#src/catalog/convex/catalogEventDeleteMutation.ts"
 export { catalogEventListAdminPageQuery } from "#src/catalog/convex/catalogEventListAdminPageQuery.ts"

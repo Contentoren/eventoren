@@ -18,10 +18,21 @@ export function AdminTicketProductsForm(props: {
 
   return (
     <div class="grid items-start gap-5 lg:grid-cols-[minmax(15rem,0.8fr)_minmax(0,1.4fr)]">
-      <CardWrapper>
-        <h2 class="text-lg font-semibold text-content">Ticketprodukte</h2>
+      <div>
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-lg font-semibold text-content">Ticketprodukte</h2>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={props.state.isSaving()}
+            onClick={state.startNewTier}
+          >
+            Neue Ticket
+          </Button>
+        </div>
         <Show
-          when={(props.state.selectedEvent()?.tiers.length ?? 0) > 0}
+          when={(props.state.selectedEvent()?.tiers.length ?? 0) > 0 || state.showNewTier()}
           fallback={<p class="mt-4 text-sm text-content-muted">Noch keine Ticketprodukte vorhanden.</p>}
         >
           <ul class="mt-4 flex flex-col gap-2" aria-label="Vorhandene Ticketprodukte">
@@ -55,11 +66,27 @@ export function AdminTicketProductsForm(props: {
                 </li>
               )}
             </For>
+            <Show when={state.showNewTier()}>
+              <li>
+                <Button
+                  type="button"
+                  variant="none"
+                  size="none"
+                  class="flex w-full flex-col items-stretch justify-start rounded-lg border border-brand bg-brand/10 p-3 text-left font-normal"
+                  aria-pressed="true"
+                >
+                  <span class="block text-xs font-medium text-content-muted">Neu · Noch nicht gespeichert</span>
+                  <span class="mt-1 block font-semibold text-content">
+                    {props.state.tierDraft().name || "Neues Ticket"}
+                  </span>
+                </Button>
+              </li>
+            </Show>
           </ul>
         </Show>
-      </CardWrapper>
+      </div>
 
-      <CardWrapper>
+      <CardWrapper class="lg:mt-13">
         <form
           class="flex flex-col gap-5"
           data-hydrated={state.hydrated() ? "true" : "false"}

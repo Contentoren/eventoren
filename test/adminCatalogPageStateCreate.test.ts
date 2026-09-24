@@ -345,23 +345,51 @@ describe("admin catalog page state", () => {
     expect(state.selectedEvent()?.id).toBe("draft-event")
   })
 
-  test("turns a rejected event reload into feedback and always ends the saving state", async () => {
+  test("reports a saved existing event even when refreshing the event list fails", async () => {
     await createRoot(async (dispose) => {
       try {
+        const event: AdminEventItem = {
+          id: "existing-event",
+          status: "draft",
+          catalogVersion: 1,
+          title: "Original title",
+          subtitle: "",
+          description: "",
+          category: "konzerte",
+          startsAt: "",
+          endsAt: "",
+          doorsAt: "",
+          venue: "",
+          city: "",
+          address: "",
+          organizer: "",
+          imageUrl: "",
+          imageAlt: "",
+          tags: [],
+          soldOut: false,
+          tiers: [],
+        }
+        let savedTitle = ""
         const state = adminCatalogPageStateCreate({
-          events: () => [],
+          events: () => [event],
           isServerAuthorized: () => true,
           reloadEvents: async () => {
             throw new Error("route invalidation failed")
           },
-          eventUpsert: async () => createResult({ eventKey: "new-event", catalogVersion: 1 }),
+          eventUpsert: async (input) => {
+            savedTitle = input.title
+            return createResult({ eventKey: input.eventKey, catalogVersion: 2 })
+          },
         })
-        state.eventFieldChange("eventKey", "new-event")
-        state.eventFieldChange("title", "New event")
+        state.selectEvent(event)
+        state.eventFieldChange("title", "Updated title")
 
-        await expect(state.saveEvent()).resolves.toBeUndefined()
+        await expect(state.saveEvent()).resolves.toBe("existing-event")
+        expect(savedTitle).toBe("Updated title")
+        expect(state.eventDraft().title).toBe("Updated title")
         expect(state.isSaving()).toBe(false)
         expect(state.errorMessage()).toBe("Admin-Veranstaltungen konnten nicht geladen werden.")
+        expect(state.successMessage()).toBe("Event gespeichert, aber die Eventliste konnte nicht aktualisiert werden.")
       } finally {
         dispose()
       }
@@ -440,6 +468,58 @@ describe("admin catalog page state", () => {
         expect(state.tierDraft().tierKey).toBe("")
         expect(state.successMessage()).toBe("Ticketprodukt gelöscht.")
         expect(state.isSaving()).toBe(false)
+      } finally {
+        dispose()
+      }
+    })
+  })
+
+  test("removes a selected category from the picker and switches the draft to an available category", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        const state = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+          categoryHide: async () => createResult(undefined),
+        })
+        const picker = adminEventDetailsFormStateCreate({ catalog: state }).categoryPicker
+        picker.categorySelect("Test")
+
+        await picker.categoryRemove("Test")
+
+        expect(state.hiddenCategories()).toContain("Test")
+        expect(picker.categoryOptions()).not.toContain("Test")
+        expect(state.eventDraft().category).toBe("konzerte")
+      } finally {
+        dispose()
+      }
+    })
+  })
+
+  test("adds a category independently of saving an event and keeps it in the picker", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        const created: string[] = []
+        const state = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+          categoryCreate: async ({ category }) => {
+            created.push(category)
+            return createResult(undefined)
+          },
+        })
+        const picker = adminEventDetailsFormStateCreate({ catalog: state }).categoryPicker
+        picker.newCategory.set(" Test ")
+
+        await picker.categoryCreate()
+        state.startNewEvent()
+
+        expect(created).toEqual(["Test"])
+        expect(state.categories()).toContain("Test")
+        expect(adminEventDetailsFormStateCreate({ catalog: state }).categoryPicker.categoryOptions()).toContain("Test")
+        expect(picker.newCategory.get()).toBe("")
       } finally {
         dispose()
       }

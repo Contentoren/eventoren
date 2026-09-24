@@ -90,7 +90,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
                     value={state.categoryPicker.newCategory.get()}
                     onInput={(event) => state.categoryPicker.newCategory.set(event.currentTarget.value)}
                   />
-                  <Button type="button" onClick={state.categoryPicker.categoryCreate}>
+                  <Button type="button" onClick={() => void state.categoryPicker.categoryCreate()}>
                     Kategorie hinzufügen
                   </Button>
                 </div>

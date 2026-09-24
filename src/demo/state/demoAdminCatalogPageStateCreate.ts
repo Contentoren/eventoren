@@ -63,6 +63,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
   const successMessage = createSignalObject("")
   const isSaving = createSignalObject(false)
   const hiddenCategories = createSignalObject<readonly string[]>([])
+  const categories = createSignalObject<readonly string[]>([])
 
   const hasFlow = () => flow.hasFlowStates()
   const isLoading = () => (hasFlow() ? flow.isLoading() : false)
@@ -277,9 +278,16 @@ export function demoAdminCatalogPageStateCreate(inputs: {
     hiddenCategories.set([...new Set([...hiddenCategories.get(), category])])
   }
 
+  const createCategory = async (category: string) => {
+    categories.set([...new Set([...categories.get(), category])])
+    hiddenCategories.set(hiddenCategories.get().filter((hidden) => hidden !== category))
+    return true
+  }
+
   return {
     events,
     hiddenCategories: hiddenCategories.get,
+    categories: categories.get,
     selectedEvent,
     selectedEventKey: selectedEventKey.get,
     eventDraft: eventDraft.get,
@@ -306,6 +314,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
       successMessage.set("Event lokal gelöscht. Diese Änderung bleibt lokal in der Demo.")
     },
     hideCategory,
+    createCategory,
   }
 }
 

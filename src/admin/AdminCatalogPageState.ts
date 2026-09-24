@@ -9,6 +9,7 @@ import type { AdminTierDraft } from "./AdminTierDraft.ts"
 export type AdminCatalogPageState = {
   events: Accessor<readonly EventItem[]>
   hiddenCategories: Accessor<readonly string[]>
+  categories: Accessor<readonly string[]>
   selectedEvent: Accessor<EventItem | undefined>
   selectedEventKey: Accessor<string>
   eventDraft: Accessor<AdminEventDraft>
@@ -32,5 +33,6 @@ export type AdminCatalogPageState = {
   publishEvent: () => Promise<void>
   deleteEvent: (eventKey: string) => Promise<void>
   hideCategory: (category: string) => Promise<void>
+  createCategory: (category: string) => Promise<boolean>
   imageUpload?: (file: File) => Promise<Result<EventImageVariants>>
 }

@@ -12,10 +12,11 @@ export function adminCategoryPickerStateCreate(inputs: { catalog: AdminCatalogPa
     return [
       ...new Set([
         ...Object.keys(eventCategoryLabels),
+        ...inputs.catalog.categories(),
         ...inputs.catalog.events().map((event) => event.category),
         selectedCategory,
       ]),
-    ].filter((category) => category === selectedCategory || !hiddenCategories.includes(category))
+    ].filter((category) => category && !hiddenCategories.includes(category))
   })
   const categoryValue = {
     get: () => inputs.catalog.eventDraft().category,
@@ -29,9 +30,10 @@ export function adminCategoryPickerStateCreate(inputs: { catalog: AdminCatalogPa
     categoryValue.set(category)
     categoryPickerClose()
   }
-  const categoryCreate = () => {
+  const categoryCreate = async () => {
     const category = newCategory.get().trim()
     if (!category) return
+    if (!(await inputs.catalog.createCategory(category))) return
     categorySelect(category)
     newCategory.set("")
   }

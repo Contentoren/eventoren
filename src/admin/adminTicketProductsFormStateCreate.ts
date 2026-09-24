@@ -18,6 +18,7 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
   const hydrated = createSignalObject(false)
   const draggedTierKey = createSignalObject("")
   const dropTargetKey = createSignalObject("")
+  const showNewTier = createSignalObject(false)
 
   const dragStart = (event: DragEvent, tierKey: string) => {
     if (catalog.isSaving()) {
@@ -49,6 +50,7 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
   }
 
   const selectTier = (tier: EventTicketTier) => {
+    showNewTier.set(false)
     catalog.selectTier(tier)
     priceEuro.set(adminEuroFromCents(tier.priceCents))
     feeEuro.set(adminEuroFromCents(tier.feeCents))
@@ -112,6 +114,11 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
     validationMessage.set("")
   }
 
+  const startNewTier = () => {
+    newTier()
+    showNewTier.set(true)
+  }
+
   onMount(() => {
     if (!catalog.tierDraft().tierKey) newTier()
     hydrated.set(true)
@@ -144,7 +151,10 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
     catalog.tierFieldChange("priceCents", String(priceCents))
     catalog.tierFieldChange("feeCents", String(feeCents))
     await catalog.saveTier()
-    if (!catalog.errorMessage()) newTier()
+    if (!catalog.errorMessage()) {
+      showNewTier.set(false)
+      newTier()
+    }
   }
 
   return {
@@ -162,6 +172,7 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
     removeDoorsAt,
     endsAtChange: (value: string) => dateChange("endsAt", value),
     validationMessage: validationMessage.get,
+    showNewTier: showNewTier.get,
     dropTargetKey: dropTargetKey.get,
     dragStart,
     dragOver,
@@ -169,6 +180,7 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
     drop,
     selectTier,
     newTier,
+    startNewTier,
     submit,
   }
 }
