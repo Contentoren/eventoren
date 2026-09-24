@@ -7,9 +7,9 @@ cd "$REPO_DIR"
 
 # Pages runtime secrets survive deployments and can outlive an origin migration.
 # Match them to the same production file used by the frontend build.
-env -u CONVEX_SITE_URL -u VITE_CONVEX_SITE_URL -u PUBLIC_BASE_URL_API bun --env-file=.env.production -e '
+env -u CONVEX_SITE_URL -u VITE_CONVEX_SITE_URL -u PUBLIC_BASE_URL_API -u PUBLIC_BASE_URL_CONVEX -u VITE_CONVEX_URL bun --env-file=.env.production -e '
   import { spawnSync } from "node:child_process"
-  for (const key of ["CONVEX_SITE_URL", "VITE_CONVEX_SITE_URL", "PUBLIC_BASE_URL_API"]) {
+  for (const key of ["CONVEX_SITE_URL", "VITE_CONVEX_SITE_URL", "PUBLIC_BASE_URL_API", "PUBLIC_BASE_URL_CONVEX", "VITE_CONVEX_URL"]) {
     const value = process.env[key]
     if (!value) throw new Error(`Production ${key} is required`)
     const origin = new URL(value)
