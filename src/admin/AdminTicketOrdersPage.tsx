@@ -9,6 +9,7 @@ import { UiContainer } from "../ui/UiContainer.tsx"
 import { adminListViewPreferenceContextUse } from "../viewPreference/adminListViewPreferenceContextUse.ts"
 import { AdminTicketOrderDetailsPanel } from "./AdminTicketOrderDetailsPanel.tsx"
 import type { AdminTicketOrdersPageState } from "./AdminTicketOrdersPageState.ts"
+import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
 import { adminTicketOrdersPageStateCreate } from "./adminTicketOrdersPageStateCreate.ts"
 
 export function AdminTicketOrdersPage(props?: {
@@ -18,6 +19,73 @@ export function AdminTicketOrdersPage(props?: {
   const state = props?.state ?? adminTicketOrdersPageStateCreate()
   const viewPreference = adminListViewPreferenceContextUse()
 
+  const orderDetails = (order: AdminTicketOrderSummary, tile: boolean) => (
+    <>
+      <div class="min-w-0">
+        <h2 class="truncate font-semibold text-content">
+          <Link
+            to="/admin/events/$eventKey"
+            params={{ eventKey: order.eventKey }}
+            search={{}}
+            class="hover:underline focus-visible:underline"
+          >
+            {state.eventForOrder(order)?.title ?? order.eventTitle}
+          </Link>
+        </h2>
+        <Show when={tile}>
+          <p class="mt-1 truncate text-xs text-content-muted">
+            {[state.eventForOrder(order)?.venue, state.eventForOrder(order)?.city].filter(Boolean).join(", ") ||
+              "Ort offen"}
+          </p>
+        </Show>
+      </div>
+      <div class="min-w-0 text-sm text-content-muted">
+        <p class="truncate text-content">{state.customerName(order)}</p>
+        <p class="truncate text-xs" title={order.customerEmail}>
+          {order.customerEmail}
+        </p>
+        <Show when={tile}>
+          <Show when={order.customerPhone}>
+            <p class="truncate text-xs">Telefon: {order.customerPhone}</p>
+          </Show>
+          <Show when={order.customerAddress}>
+            <p class="truncate text-xs">Adresse: {order.customerAddress}</p>
+          </Show>
+        </Show>
+      </div>
+      <p class="min-w-0 text-sm text-content">
+        <span class={tile ? "text-content-muted" : "text-content-muted xl:hidden"}>Bestellt: </span>
+        {state.dateFormat(order.createdAt)}
+      </p>
+      <p class="min-w-0 text-sm text-content">
+        <span class={tile ? "text-content-muted" : "text-content-muted xl:hidden"}>Event: </span>
+        {state.dateFormat(state.eventForOrder(order)?.startsAt ?? order.eventStartsAt)}
+      </p>
+      <p class="min-w-0 truncate text-sm font-semibold text-content">
+        <span class={tile ? "font-normal text-content-muted" : "font-normal text-content-muted xl:hidden"}>
+          Betrag:{" "}
+        </span>
+        {state.priceFormat(order.totalCents)}
+      </p>
+      <div class={tile ? "absolute right-3 top-3" : "flex items-center gap-1"}>
+        <Show when={!tile}>
+          <span class="text-sm text-content-muted xl:hidden">Status:</span>
+        </Show>
+        <UiBadge tone={state.paymentTone(order.paymentStatus)}>{state.paymentLabel(order.paymentStatus)}</UiBadge>
+      </div>
+      <div class="min-w-0">
+        <Button size="sm" variant="outline" class="whitespace-nowrap" onClick={() => void state.orderOpen(order.id)}>
+          Details anzeigen
+        </Button>
+        <Show when={tile}>
+          <p class="mt-2 truncate text-xs text-content-muted" title={order.paymentReference}>
+            Referenz: {order.paymentReference}
+          </p>
+        </Show>
+      </div>
+    </>
+  )
+
   return (
     <main id="content" tabindex="-1">
       <UiContainer width="wide" class="flex flex-col gap-6 py-8">
@@ -25,18 +93,22 @@ export function AdminTicketOrdersPage(props?: {
         <header class="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 class="text-3xl font-semibold tracking-tight text-content">Bestellungen</h1>
-            <p class="mt-1 text-sm text-content-muted">
-              Alle Ticketbestellungen, unabhängig vom zugeordneten Kundenkonto.
-            </p>
+            <p class="mt-1 text-sm text-content-muted">{state.orders().length} Bestellungen geladen</p>
           </div>
         </header>
 
         <div>
-          <div class="grid gap-3 border-b border-border p-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
-            <div class="hidden sm:block" />
+          <div class="grid gap-3 border-b border-border p-4 sm:grid-cols-[minmax(0,1fr)_14rem_12rem]">
             <SelectSingle
-              class="min-w-0"
-              buttonProps={{ class: "w-full min-w-0 justify-start truncate", innerClass: "min-w-64", type: "button" }}
+              class="min-w-0 sm:col-start-3"
+              buttonProps={{
+                variant: "none",
+                size: "none",
+                class:
+                  "w-full min-w-0 justify-start truncate rounded-lg border border-input bg-surface-muted p-2.5 text-sm text-content focus:border-ring focus:ring-ring",
+                innerClass: "min-w-64",
+                type: "button",
+              }}
               valueSignal={state.eventSignal}
               getOptions={state.eventOptions}
               valueText={state.eventText}
@@ -82,6 +154,19 @@ export function AdminTicketOrdersPage(props?: {
                 </p>
               }
             >
+              <Show when={viewPreference?.view() !== "tiles"}>
+                <div class="hidden items-center border-b border-border text-xs font-semibold text-content-muted xl:flex">
+                  <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_9rem_9rem] gap-2 px-4 py-3">
+                    <span>Event</span>
+                    <span>Kunde</span>
+                    <span>Bestellt</span>
+                    <span>Eventdatum</span>
+                    <span>Betrag</span>
+                    <span>Status</span>
+                    <span>Aktion</span>
+                  </div>
+                </div>
+              </Show>
               <ul
                 class={
                   viewPreference?.view() === "tiles"
@@ -92,67 +177,22 @@ export function AdminTicketOrdersPage(props?: {
                 <For each={state.orders()}>
                   {(order) => (
                     <li class="min-w-0">
-                      <div class={viewPreference?.view() === "tiles" ? "h-full" : "hover:bg-surface-muted"}>
-                        <div
-                          class={
-                            viewPreference?.view() === "tiles"
-                              ? "grid h-full gap-3 rounded-md border border-border p-4"
-                              : "grid min-w-0 gap-2 p-4 transition-colors sm:grid-cols-[minmax(0,1fr)_14rem_10rem_9rem] sm:items-center"
-                          }
-                        >
-                          <div class="min-w-0">
-                            <h2 class="truncate font-semibold text-content">
-                              <Link
-                                to="/admin/events/$eventKey"
-                                params={{ eventKey: order.eventKey }}
-                                search={{}}
-                                class="hover:underline focus-visible:underline"
-                              >
-                                {order.eventTitle}
-                              </Link>
-                            </h2>
-                            <p class="mt-1 truncate text-xs text-content-muted">
-                              {state.customerName(order)} · {order.customerEmail}
-                            </p>
-                            <Show when={order.customerPhone}>
-                              <p class="truncate text-xs text-content-muted">Telefon: {order.customerPhone}</p>
-                            </Show>
-                            <Show when={order.customerAddress}>
-                              <p class="truncate text-xs text-content-muted">Adresse: {order.customerAddress}</p>
-                            </Show>
+                      <Show
+                        when={viewPreference?.view() === "tiles"}
+                        fallback={
+                          <div class="flex items-center hover:bg-surface-muted">
+                            <div class="grid min-w-0 flex-1 gap-2 p-4 transition-colors xl:grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_9rem_9rem] xl:items-center">
+                              {orderDetails(order, false)}
+                            </div>
                           </div>
-                          <div class="min-w-0 text-sm text-content">
-                            <p>
-                              <span class="text-content-muted">Bestellt: </span>
-                              {state.dateFormat(order.createdAt)}
-                            </p>
-                            <p class="mt-1">
-                              <span class="text-content-muted">Event: </span>
-                              {state.dateFormat(order.eventStartsAt)}
-                            </p>
+                        }
+                      >
+                        <CardWrapper class="relative p-0 lg:p-0">
+                          <div class="grid gap-3 p-4 pt-12 transition-colors hover:bg-surface-muted">
+                            {orderDetails(order, true)}
                           </div>
-                          <p
-                            class="min-w-0 break-all text-sm text-content-muted sm:truncate"
-                            title={order.paymentReference}
-                          >
-                            {order.paymentReference}
-                          </p>
-                          <div class="flex flex-wrap items-center gap-2 sm:flex-col sm:items-start">
-                            <UiBadge tone={state.paymentTone(order.paymentStatus)}>
-                              {state.paymentLabel(order.paymentStatus)}
-                            </UiBadge>
-                            <p class="text-sm font-semibold text-content">{state.priceFormat(order.totalCents)}</p>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              class="whitespace-nowrap"
-                              onClick={() => void state.orderOpen(order.id)}
-                            >
-                              Details anzeigen
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
+                        </CardWrapper>
+                      </Show>
                       <Show when={state.selectedOrderId() === order.id}>
                         <Show when={state.detailsLoading()}>
                           <CardWrapper>

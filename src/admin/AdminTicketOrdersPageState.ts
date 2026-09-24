@@ -1,6 +1,7 @@
 import type { Accessor } from "solid-js"
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
 import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
+import type { AdminEventItem } from "./AdminEventItem.ts"
 
 export type AdminTicketOrdersPageState = {
   readonly customerName: (order: AdminTicketOrderSummary) => string
@@ -13,6 +14,7 @@ export type AdminTicketOrdersPageState = {
   readonly eventSignal: { readonly get: () => string; readonly set: (event: string) => void }
   readonly eventOptions: () => { readonly type: "item"; readonly value: string }[]
   readonly eventText: (event: string) => string
+  readonly eventForOrder: (order: AdminTicketOrderSummary) => AdminEventItem | undefined
   readonly paymentLabel: (status: AdminTicketOrderSummary["paymentStatus"]) => string | undefined
   readonly paymentTone: (status: AdminTicketOrderSummary["paymentStatus"]) => "success" | "warning" | "danger"
   readonly priceFormat: (cents: number) => string

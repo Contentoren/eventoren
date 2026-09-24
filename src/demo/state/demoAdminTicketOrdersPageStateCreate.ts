@@ -68,6 +68,7 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
       ...Array.from(new Set(baseOrders.map((order) => order.eventKey)), (value) => ({ type: "item" as const, value })),
     ],
     eventText: (event) => baseOrders.find((order) => order.eventKey === event)?.eventTitle ?? "Alle Events",
+    eventForOrder: () => undefined,
     paymentLabel: (status: AdminTicketOrderSummary["paymentStatus"]) =>
       ({ pending: "Offen", paid: "Bezahlt", failed: "Fehlgeschlagen", expired: "Abgelaufen" })[status],
     paymentTone: (status: AdminTicketOrderSummary["paymentStatus"]) =>
