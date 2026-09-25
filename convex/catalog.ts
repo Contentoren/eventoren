@@ -3,6 +3,8 @@ export { catalogCategoryHideMutation } from "#src/catalog/convex/catalogCategory
 export { catalogCategoryCreateMutation } from "#src/catalog/convex/catalogCategoryCreateMutation.ts"
 export { catalogCategoryListQuery } from "#src/catalog/convex/catalogCategoryListQuery.ts"
 export { catalogEventGetPublishedQuery } from "#src/catalog/convex/catalogEventGetPublishedQuery.ts"
+export { catalogEventGetPublishedSummaryQuery } from "#src/catalog/convex/catalogEventGetPublishedSummaryQuery.ts"
+export { catalogEventTierListPublishedPageQuery } from "#src/catalog/convex/catalogEventTierListPublishedPageQuery.ts"
 export { catalogEventDeleteMutation } from "#src/catalog/convex/catalogEventDeleteMutation.ts"
 export { catalogEventListAdminPageQuery } from "#src/catalog/convex/catalogEventListAdminPageQuery.ts"
 export { catalogEventListPublishedPageQuery } from "#src/catalog/convex/catalogEventListPublishedPageQuery.ts"

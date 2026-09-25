@@ -1,5 +1,6 @@
-import { apiClientCatalogEventListPublishedPageGet } from "../client/apiClientCatalogEventListPublishedPageGet.ts"
 import { apiClientCreate } from "../client/apiClient.ts"
+import { apiClientCatalogEventListPublishedPageGet } from "../client/apiClientCatalogEventListPublishedPageGet.ts"
+import { catalogEventListPublishedPageFill } from "../events/catalogEventListPublishedPageFill.ts"
 import type { EventFilter } from "../events/EventFilter.ts"
 import { convexUrlGet } from "./convexUrlGet.ts"
 
@@ -11,8 +12,9 @@ type CatalogEventListPublishedPagePublicGetInput = {
 
 export function catalogEventListPublishedPagePublicGet(input: CatalogEventListPublishedPagePublicGetInput) {
   const convexUrl = input.context?.convexUrl ?? convexUrlGet()
-  return apiClientCatalogEventListPublishedPageGet(
+  const client = apiClientCreate(convexUrl)
+  return catalogEventListPublishedPageFill(
     { filter: input.filter, paginationOpts: input.paginationOpts },
-    apiClientCreate(convexUrl),
+    (pageInput) => apiClientCatalogEventListPublishedPageGet(pageInput, client),
   )
 }

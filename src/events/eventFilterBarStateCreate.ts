@@ -28,8 +28,11 @@ export function eventFilterBarStateCreate(inputs: {
   )
 
   const resultLabel = createMemo(() => {
+    if (!inputs.isDone() && inputs.resultCount() === 0) return "Events werden geladen"
     if (!inputs.isDone())
-      return inputs.resultCount() === 1 ? "1 Event geladen" : `${inputs.resultCount()} Events geladen`
+      return inputs.resultCount() === 1
+        ? "Mindestens 1 Event gefunden"
+        : `Mindestens ${inputs.resultCount()} Events gefunden`
     return inputs.resultCount() === 1 ? "1 Event gefunden" : `${inputs.resultCount()} Events gefunden`
   })
 

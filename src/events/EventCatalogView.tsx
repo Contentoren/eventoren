@@ -50,7 +50,7 @@ export function EventCatalogView(props: {
             onFilterChange={props.applyFilter}
           />
           <Show
-            when={props.events.length > 0 || !props.isLoading}
+            when={props.events.length > 0 || props.isDone}
             fallback={
               <div
                 class="rounded-card border border-border-subtle bg-surface-muted p-space-6 text-sm text-content-muted"

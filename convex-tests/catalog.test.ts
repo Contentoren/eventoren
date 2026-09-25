@@ -567,6 +567,33 @@ test("published events use the latest Billing-synced catalog version for checkou
   expect(page.page[0]?.catalogVersion).toBe(16)
 })
 
+test("legacy published list fails explicitly rather than truncating catalogs beyond its event limit", async () => {
+  const t = convexTest(schema, modules)
+  await t.run(async (ctx) => {
+    for (let index = 0; index < 51; index += 1) {
+      await ctx.db.insert("catalogEvents", catalogEventInsert({ eventKey: `event-${index}` }))
+    }
+  })
+
+  await expect(t.query(api.catalog.catalogEventListPublishedQuery, {})).rejects.toThrow(
+    "Published catalog exceeds the legacy list limit of 50; use cursor pagination",
+  )
+})
+
+test("legacy published list fails explicitly rather than truncating excessive event tiers", async () => {
+  const t = convexTest(schema, modules)
+  await t.run(async (ctx) => {
+    const eventId = await ctx.db.insert("catalogEvents", catalogEventInsert())
+    for (let index = 0; index < 51; index += 1) {
+      await ctx.db.insert("catalogTicketTiers", catalogTierInsert(eventId, { tierKey: `tier-${index}` }))
+    }
+  })
+
+  await expect(t.query(api.catalog.catalogEventListPublishedQuery, {})).rejects.toThrow(
+    "Published event catalog-event exceeds the legacy list limit of 50 active tiers",
+  )
+})
+
 test("published page is public and excludes draft and archived events", async () => {
   const t = convexTest(schema, modules)
   await t.run(async (ctx) => {
@@ -748,6 +775,91 @@ test("published page rejects page sizes outside its bounded read tier", async ()
     filter: { query: "", location: "", category: "alle", timeWindow: "alle" },
     paginationOpts: { numItems: 51, cursor: null },
   })
+  expect(result).toMatchObject({ success: false, errorMessage: "numItems must be an integer from 1 to 50" })
+})
+
+test("published page keeps oversized events visible without misrepresenting a tier prefix as complete", async () => {
+  const t = convexTest(schema, modules)
+  await t.run(async (ctx) => {
+    const eventId = await ctx.db.insert("catalogEvents", catalogEventInsert())
+    for (let index = 0; index < 51; index += 1) {
+      await ctx.db.insert(
+        "catalogTicketTiers",
+        catalogTierInsert(eventId, { tierKey: `tier-${index}`, priceCents: index === 50 ? 100 : 2500 }),
+      )
+    }
+    const nextEventId = await ctx.db.insert(
+      "catalogEvents",
+      catalogEventInsert({ eventKey: "next-event", startsAt: "2026-10-02T18:00:00.000Z" }),
+    )
+    await ctx.db.insert("catalogTicketTiers", catalogTierInsert(nextEventId))
+  })
+
+  const page = await catalogPublishedPageGet(t, { query: "", location: "", category: "alle", timeWindow: "alle" }, 10)
+  expect(page.page).toMatchObject([
+    { id: "catalog-event", tiersComplete: false, soldOut: false, tiers: [] },
+    { id: "next-event", tiers: [{ id: "standard" }] },
+  ])
+})
+
+test("published tier cursor pages return every active tier after 50 without exposing drafts or archived tiers", async () => {
+  const t = convexTest(schema, modules)
+  await t.run(async (ctx) => {
+    const eventId = await ctx.db.insert("catalogEvents", catalogEventInsert())
+    const draftId = await ctx.db.insert("catalogEvents", catalogEventInsert({ eventKey: "draft", status: "draft" }))
+    await ctx.db.insert("catalogTicketTiers", catalogTierInsert(draftId))
+    for (let index = 0; index < 121; index += 1) {
+      await ctx.db.insert(
+        "catalogTicketTiers",
+        catalogTierInsert(eventId, {
+          tierKey: `tier-${String(index).padStart(3, "0")}`,
+          sortOrder: 120 - index,
+        }),
+      )
+    }
+    await ctx.db.insert(
+      "catalogTicketTiers",
+      catalogTierInsert(eventId, { tierKey: "archived", archivedAt: "2026-09-02" }),
+    )
+  })
+
+  const summary = await t.query(api.catalog.catalogEventGetPublishedSummaryQuery, { eventKey: "catalog-event" })
+  expect(summary).toMatchObject({ id: "catalog-event", tiers: [], tiersComplete: false })
+  expect(await t.query(api.catalog.catalogEventGetPublishedSummaryQuery, { eventKey: "draft" })).toBeNull()
+  const ids: string[] = []
+  let cursor: string | null = null
+  const sizes: number[] = []
+  do {
+    const result = await t.query(api.catalog.catalogEventTierListPublishedPageQuery, {
+      eventKey: "catalog-event",
+      paginationOpts: { numItems: 50, cursor },
+    })
+    if (!result.success || !result.data) throw new Error("Expected a published tier page")
+    sizes.push(result.data.page.length)
+    ids.push(...result.data.page.map((tier) => tier.id))
+    cursor = result.data.isDone ? null : result.data.continueCursor
+  } while (cursor !== null)
+  expect(sizes).toEqual([50, 50, 21])
+  expect(ids.toSorted()).toEqual(Array.from({ length: 121 }, (_, index) => `tier-${String(index).padStart(3, "0")}`))
+  expect(new Set(ids).size).toBe(121)
+  expect(
+    await t.query(api.catalog.catalogEventTierListPublishedPageQuery, {
+      eventKey: "draft",
+      paginationOpts: { numItems: 50, cursor: null },
+    }),
+  ).toMatchObject({ success: true, data: null })
+  await expect(t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "catalog-event" })).rejects.toThrow(
+    "Published event catalog-event exceeds the legacy detail limit of 50 active tiers; use tier pages",
+  )
+})
+
+test("published tier page rejects requests exceeding its read limit", async () => {
+  const t = convexTest(schema, modules)
+  const result = await t.query(api.catalog.catalogEventTierListPublishedPageQuery, {
+    eventKey: "catalog-event",
+    paginationOpts: { numItems: 51, cursor: null },
+  })
+
   expect(result).toMatchObject({ success: false, errorMessage: "numItems must be an integer from 1 to 50" })
 })
 

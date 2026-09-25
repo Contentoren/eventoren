@@ -27,4 +27,6 @@ export type EventItem = {
   exclusions?: readonly string[]
   soldOut: boolean
   tiers: readonly EventTicketTier[]
+  /** False when this listing omits tiers; fetch the complete set on the event detail page. */
+  tiersComplete?: boolean
 }

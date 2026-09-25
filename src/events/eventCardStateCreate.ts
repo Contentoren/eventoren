@@ -13,8 +13,16 @@ export function eventCardStateCreate(inputs: { event: () => EventItem }) {
   const dateParts = createMemo(() => eventDateParts(inputs.event().startsAt))
   const timeLabel = createMemo(() => eventTimeFormat(inputs.event().startsAt))
   const locationLabel = createMemo(() => `${inputs.event().venue}, ${inputs.event().city}`)
-  const priceLabel = createMemo(() => `ab ${eventPriceFormat(eventPriceFrom(inputs.event()))}`)
-  const priceValueLabel = createMemo(() => eventPriceFormat(eventPriceFrom(inputs.event())))
+  const priceLabel = createMemo(() =>
+    inputs.event().tiersComplete === false
+      ? "Preise auf der Eventseite"
+      : `ab ${eventPriceFormat(eventPriceFrom(inputs.event()))}`,
+  )
+  const priceValueLabel = createMemo(() =>
+    inputs.event().tiersComplete === false
+      ? "Preise auf der Eventseite"
+      : eventPriceFormat(eventPriceFrom(inputs.event())),
+  )
   const availableCount = createMemo(() => inputs.event().tiers.reduce((sum, tier) => sum + tier.available, 0))
   const isScarce = createMemo(() => !inputs.event().soldOut && availableCount() > 0 && availableCount() <= 30)
   const topTags = createMemo(() => inputs.event().tags.slice(0, 3))

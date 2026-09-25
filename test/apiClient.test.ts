@@ -35,3 +35,26 @@ test("passes catalog filters and cursor pagination to the published page query",
   expect(calls).toEqual([input])
   expect(result).toEqual({ success: true, data: { page: [], isDone: true, continueCursor: "done" } })
 })
+
+test("maps an excessive-tier page error to a recoverable catalog failure", async () => {
+  const client = {
+    query: async () => ({
+      success: false,
+      op: "catalogEventListPublishedPageQuery",
+      errorMessage: "Published event exceeds the page limit of 50 active tiers",
+    }),
+  }
+
+  const result = await apiClientCatalogEventListPublishedPageGet(
+    {
+      filter: { query: "", location: "", category: "alle", timeWindow: "alle" },
+      paginationOpts: { numItems: 12, cursor: null },
+    },
+    client as never,
+  )
+
+  expect(result).toEqual({
+    success: false,
+    error: { status: 503, message: "Published event exceeds the page limit of 50 active tiers" },
+  })
+})

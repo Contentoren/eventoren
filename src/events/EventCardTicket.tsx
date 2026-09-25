@@ -79,7 +79,11 @@ export function EventCardTicket(props: { event: EventItem; href?: string }) {
                 : "bg-brand text-brand-content group-hover:bg-brand-strong",
             )}
           >
-            {props.event.soldOut ? "Ausverkauft" : "Tickets kaufen"}
+            {props.event.soldOut
+              ? "Ausverkauft"
+              : props.event.tiersComplete === false
+                ? "Tickets ansehen"
+                : "Tickets kaufen"}
           </span>
         </div>
       </EventCardLink>

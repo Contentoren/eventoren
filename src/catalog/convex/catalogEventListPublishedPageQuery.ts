@@ -9,6 +9,7 @@ import { catalogEventToEventItem } from "./catalogEventToEventItem.js"
 
 const maxPageSize = 50
 const maxPageBytes = 512 * 1024
+const maxActiveTiersPerEvent = 50
 const cursorVersion = 1
 
 const eventFilterValidator = v.object({
@@ -67,14 +68,21 @@ export const catalogEventListPublishedPageQuery = query({
 
     const now = new Date()
     const matchingEvents = sourcePage.page.filter((event) => catalogEventFilterMatches(event, filter, now))
-    const page = await Promise.all(
+    const eventItems = await Promise.all(
       matchingEvents.map(async (event) => {
         const tiers = await ctx.db
           .query("catalogTicketTiers")
           .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", event._id).eq("archivedAt", undefined))
-          .collect()
-        return catalogEventToEventItem(event, tiers, syncState?.syncedVersion)
+          .take(maxActiveTiersPerEvent + 1)
+        return { event, tiers }
       }),
+    )
+    // A catalog card cannot infer the cheapest price or availability from a prefix.
+    // Mark oversized tier lists as incomplete; the detail endpoint pages all tiers.
+    const page = eventItems.map(({ event, tiers }) =>
+      tiers.length > maxActiveTiersPerEvent
+        ? { ...catalogEventToEventItem(event, [], syncState?.syncedVersion), tiersComplete: false }
+        : catalogEventToEventItem(event, tiers, syncState?.syncedVersion),
     )
 
     return createResult({

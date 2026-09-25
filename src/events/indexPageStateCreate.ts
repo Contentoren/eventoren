@@ -2,8 +2,9 @@ import { getRouteApi } from "@tanstack/solid-router"
 import { createEffect, createMemo } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import type { CatalogEventListPublishedPage } from "../catalog/CatalogEventListPublishedPage.ts"
-import { apiClientCatalogEventListPublishedPageGet } from "../client/apiClientCatalogEventListPublishedPageGet.ts"
 import type { ApiClientResult } from "../client/apiClient.ts"
+import { apiClientCatalogEventListPublishedPageGet } from "../client/apiClientCatalogEventListPublishedPageGet.ts"
+import { catalogEventListPublishedPageFill } from "./catalogEventListPublishedPageFill.ts"
 import type { EventFilter } from "./EventFilter.ts"
 import type { EventItem } from "./EventItem.ts"
 
@@ -58,27 +59,19 @@ export function indexPageStateCreate(inputs: {
     if (isLoading.get()) return
     isLoading.set(true)
     error.set("")
-    let nextCursor = pageCursor
-
-    while (true) {
-      const result = await pageGet({
-        filter: requestFilter,
-        paginationOpts: { numItems: pageSize, cursor: nextCursor },
-      })
-      if (requestRevision !== revision) return
-      if (!result.success) {
-        error.set(result.error.message)
-        isLoading.set(false)
-        return
-      }
-
-      pageApply(result.data)
-      if (result.data.page.length > 0 || result.data.isDone) {
-        isLoading.set(false)
-        return
-      }
-      nextCursor = result.data.continueCursor
+    const result = await catalogEventListPublishedPageFill(
+      { filter: requestFilter, paginationOpts: { numItems: pageSize, cursor: pageCursor } },
+      pageGet,
+    )
+    if (requestRevision !== revision) return
+    if (!result.success) {
+      error.set(result.error.message)
+      isLoading.set(false)
+      return
     }
+
+    pageApply(result.data)
+    isLoading.set(false)
   }
 
   createEffect(() => {
@@ -151,6 +144,7 @@ export function indexPageStateCreate(inputs: {
   return {
     filter,
     events: events.get,
+    // Cursor pages expose no global total; the accumulated count is exact only after the cursor is exhausted.
     resultCount: () => events.get().length,
     isDone: isDone.get,
     isLoading: isLoading.get,
