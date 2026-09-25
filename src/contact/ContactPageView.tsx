@@ -1,12 +1,12 @@
 import type { ParentComponent } from "solid-js"
 import { Dynamic } from "solid-js/web"
-import type { contactPageStateCreate } from "./contactPageStateCreate.ts"
+import { SiteFrame } from "../components/SiteFrame.tsx"
+import { UiContainer } from "../ui/UiContainer.tsx"
 import { ContactDirectInfo } from "./ContactDirectInfo.tsx"
 import { ContactFaqList } from "./ContactFaqList.tsx"
 import { ContactHeader } from "./ContactHeader.tsx"
 import { ContactOrganizerForm } from "./ContactOrganizerForm.tsx"
-import { SiteFrame } from "../components/SiteFrame.tsx"
-import { UiContainer } from "../ui/UiContainer.tsx"
+import type { contactPageStateCreate } from "./contactPageStateCreate.ts"
 
 export function ContactPageView(props: {
   readonly state: ReturnType<typeof contactPageStateCreate>
@@ -24,26 +24,19 @@ export function ContactPageView(props: {
             <div class="flex flex-col gap-space-7">
               <ContactOrganizerForm
                 inquiryType={state.inquiryType}
-                setInquiryType={state.setInquiryType}
                 name={state.name}
-                setName={state.setName}
                 email={state.email}
-                setEmail={state.setEmail}
                 organization={state.organization}
-                setOrganization={state.setOrganization}
                 eventType={state.eventType}
-                setEventType={state.setEventType}
                 expectedTickets={state.expectedTickets}
-                setExpectedTickets={state.setExpectedTickets}
                 message={state.message}
-                setMessage={state.setMessage}
                 isSubmitting={state.isSubmitting}
                 isSubmitted={state.isSubmitted}
                 onSubmit={(event) => state.submitForm(event)}
                 onReset={() => state.resetForm()}
               />
 
-              <ContactFaqList expandedFaqId={state.expandedFaqId} onToggleFaq={(id) => state.toggleFaq(id)} />
+              <ContactFaqList expandedFaqId={state.expandedFaqId} onToggleFaq={state.toggleFaq} />
             </div>
 
             <div class="lg:sticky lg:top-24 lg:self-start">

@@ -1,8 +1,12 @@
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import type { SignalObject } from "#ui/utils/createSignalObject.js"
 import { classArr } from "../ui/classArr.ts"
 
-export function ContactFaqList(props: { expandedFaqId: () => string | null; onToggleFaq: (id: string) => void }) {
+export function ContactFaqList(props: {
+  expandedFaqId: SignalObject<string | null>
+  onToggleFaq: (id: string) => void
+}) {
   const faqs = [
     {
       id: "faq-1",
@@ -48,7 +52,7 @@ export function ContactFaqList(props: { expandedFaqId: () => string | null; onTo
       <ul class="flex flex-col gap-space-3">
         <For each={faqs}>
           {(faq) => {
-            const isExpanded = () => props.expandedFaqId() === faq.id
+            const isExpanded = () => props.expandedFaqId.get() === faq.id
 
             return (
               <li class="overflow-hidden rounded-xl border border-border-subtle bg-surface transition-colors dark:border-border-strong/30">
@@ -66,6 +70,7 @@ export function ContactFaqList(props: { expandedFaqId: () => string | null; onTo
                     aria-hidden="true"
                   >
                     <svg
+                      aria-hidden="true"
                       class={classArr(
                         "size-4 stroke-[2] transition-transform duration-200",
                         isExpanded() && "rotate-180",

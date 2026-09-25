@@ -1,27 +1,21 @@
 import { Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import type { SignalObject } from "#ui/utils/createSignalObject.js"
 import { classArr } from "../ui/classArr.ts"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
 import type { ContactInquiryType } from "./contactPageStateCreate.ts"
 
 export function ContactOrganizerForm(props: {
-  inquiryType: () => ContactInquiryType
-  setInquiryType: (type: ContactInquiryType) => void
-  name: () => string
-  setName: (val: string) => void
-  email: () => string
-  setEmail: (val: string) => void
-  organization: () => string
-  setOrganization: (val: string) => void
-  eventType: () => string
-  setEventType: (val: string) => void
-  expectedTickets: () => string
-  setExpectedTickets: (val: string) => void
-  message: () => string
-  setMessage: (val: string) => void
-  isSubmitting: () => boolean
-  isSubmitted: () => boolean
+  inquiryType: SignalObject<ContactInquiryType>
+  name: SignalObject<string>
+  email: SignalObject<string>
+  organization: SignalObject<string>
+  eventType: SignalObject<string>
+  expectedTickets: SignalObject<string>
+  message: SignalObject<string>
+  isSubmitting: SignalObject<boolean>
+  isSubmitted: SignalObject<boolean>
   onSubmit: (e: SubmitEvent) => void
   onReset: () => void
 }) {
@@ -42,11 +36,11 @@ export function ContactOrganizerForm(props: {
             size="none"
             type="button"
             role="tab"
-            aria-selected={props.inquiryType() === "veranstalter"}
-            onClick={() => props.setInquiryType("veranstalter")}
+            aria-selected={props.inquiryType.get() === "veranstalter"}
+            onClick={() => props.inquiryType.set("veranstalter")}
             class={classArr(
               "flex-1 rounded-lg py-2 text-center text-xs font-semibold transition-all sm:text-sm",
-              props.inquiryType() === "veranstalter"
+              props.inquiryType.get() === "veranstalter"
                 ? "bg-surface text-content shadow-xs"
                 : "text-content-muted hover:text-content",
             )}
@@ -58,11 +52,11 @@ export function ContactOrganizerForm(props: {
             size="none"
             type="button"
             role="tab"
-            aria-selected={props.inquiryType() === "support"}
-            onClick={() => props.setInquiryType("support")}
+            aria-selected={props.inquiryType.get() === "support"}
+            onClick={() => props.inquiryType.set("support")}
             class={classArr(
               "flex-1 rounded-lg py-2 text-center text-xs font-semibold transition-all sm:text-sm",
-              props.inquiryType() === "support"
+              props.inquiryType.get() === "support"
                 ? "bg-surface text-content shadow-xs"
                 : "text-content-muted hover:text-content",
             )}
@@ -71,13 +65,13 @@ export function ContactOrganizerForm(props: {
           </Button>
         </div>
 
-        <Show when={props.isSubmitted()}>
+        <Show when={props.isSubmitted.get()}>
           <div class="flex flex-col items-center gap-space-4 rounded-2xl border border-success/30 bg-success-soft/30 p-space-6 text-center">
             <span
               aria-hidden="true"
               class="flex size-12 items-center justify-center rounded-full bg-success text-white shadow-xs"
             >
-              <svg viewBox="0 0 20 20" fill="currentColor" class="size-6">
+              <svg viewBox="0 0 20 20" fill="currentColor" class="size-6" aria-hidden="true">
                 <path
                   fill-rule="evenodd"
                   d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z"
@@ -95,7 +89,7 @@ export function ContactOrganizerForm(props: {
           </div>
         </Show>
 
-        <Show when={!props.isSubmitted()}>
+        <Show when={!props.isSubmitted.get()}>
           <form class="flex flex-col gap-space-4" onSubmit={(e) => props.onSubmit(e)}>
             <div class="grid gap-space-4 sm:grid-cols-2">
               <div>
@@ -105,8 +99,8 @@ export function ContactOrganizerForm(props: {
                 <input
                   id="contact-name"
                   required
-                  value={props.name()}
-                  onInput={(e) => props.setName(e.currentTarget.value)}
+                  value={props.name.get()}
+                  onInput={(e) => props.name.set(e.currentTarget.value)}
                   placeholder="z. B. Max Mustermann"
                   class="focus-ring h-11 w-full rounded-control border border-border-strong bg-surface-muted px-space-4 text-sm text-content"
                 />
@@ -120,8 +114,8 @@ export function ContactOrganizerForm(props: {
                   id="contact-email"
                   type="email"
                   required
-                  value={props.email()}
-                  onInput={(e) => props.setEmail(e.currentTarget.value)}
+                  value={props.email.get()}
+                  onInput={(e) => props.email.set(e.currentTarget.value)}
                   placeholder="name@beispiel.de"
                   class="focus-ring h-11 w-full rounded-control border border-border-strong bg-surface-muted px-space-4 text-sm text-content"
                 />
@@ -129,7 +123,10 @@ export function ContactOrganizerForm(props: {
             </div>
 
             <div
-              class={classArr("grid gap-space-4 sm:grid-cols-2", props.inquiryType() !== "veranstalter" && "hidden")}
+              class={classArr(
+                "grid gap-space-4 sm:grid-cols-2",
+                props.inquiryType.get() !== "veranstalter" && "hidden",
+              )}
             >
               <div>
                 <label for="contact-org" class="mb-space-1.5 block text-sm font-medium text-content">
@@ -137,8 +134,8 @@ export function ContactOrganizerForm(props: {
                 </label>
                 <input
                   id="contact-org"
-                  value={props.organization()}
-                  onInput={(e) => props.setOrganization(e.currentTarget.value)}
+                  value={props.organization.get()}
+                  onInput={(e) => props.organization.set(e.currentTarget.value)}
                   placeholder="z. B. Konzertagentur Nord GmbH"
                   class="focus-ring h-11 w-full rounded-control border border-border-strong bg-surface-muted px-space-4 text-sm text-content"
                 />
@@ -150,8 +147,8 @@ export function ContactOrganizerForm(props: {
                 </label>
                 <select
                   id="contact-event-type"
-                  value={props.eventType()}
-                  onChange={(e) => props.setEventType(e.currentTarget.value)}
+                  value={props.eventType.get()}
+                  onChange={(e) => props.eventType.set(e.currentTarget.value)}
                   class="focus-ring h-11 w-full rounded-control border border-border-strong bg-surface-muted px-space-4 text-sm font-medium text-content"
                 >
                   <option value="Konzert / Festival">Konzert / Festival</option>
@@ -164,14 +161,14 @@ export function ContactOrganizerForm(props: {
               </div>
             </div>
 
-            <div class={classArr(props.inquiryType() !== "veranstalter" && "hidden")}>
+            <div class={classArr(props.inquiryType.get() !== "veranstalter" && "hidden")}>
               <label for="contact-capacity" class="mb-space-1.5 block text-sm font-medium text-content">
                 Erwartete Ticketanzahl pro Event
               </label>
               <select
                 id="contact-capacity"
-                value={props.expectedTickets()}
-                onChange={(e) => props.setExpectedTickets(e.currentTarget.value)}
+                value={props.expectedTickets.get()}
+                onChange={(e) => props.expectedTickets.set(e.currentTarget.value)}
                 class="focus-ring h-11 w-full rounded-control border border-border-strong bg-surface-muted px-space-4 text-sm font-medium text-content"
               >
                 <option value="Bis 250 Tickets">Bis 250 Tickets</option>
@@ -189,10 +186,10 @@ export function ContactOrganizerForm(props: {
                 id="contact-message"
                 required
                 rows={4}
-                value={props.message()}
-                onInput={(e) => props.setMessage(e.currentTarget.value)}
+                value={props.message.get()}
+                onInput={(e) => props.message.set(e.currentTarget.value)}
                 placeholder={
-                  props.inquiryType() === "veranstalter"
+                  props.inquiryType.get() === "veranstalter"
                     ? "Beschreibe kurz dein Event, geplante Termine oder gewünschte Ticketing-Features..."
                     : "Wie können wir dir bei deiner Buchung oder deinen Tickets weiterhelfen?"
                 }
@@ -200,8 +197,8 @@ export function ContactOrganizerForm(props: {
               />
             </div>
 
-            <UiButton type="submit" size="lg" block disabled={props.isSubmitting()}>
-              {props.isSubmitting() ? "Wird gesendet..." : "Anfrage absenden"}
+            <UiButton type="submit" size="lg" block disabled={props.isSubmitting.get()}>
+              {props.isSubmitting.get() ? "Wird gesendet..." : "Anfrage absenden"}
             </UiButton>
           </form>
         </Show>
