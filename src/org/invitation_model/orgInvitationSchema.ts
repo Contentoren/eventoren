@@ -6,7 +6,8 @@ import { orgRoleSchema } from "#src/org/org_model_field/orgRole.ts"
 import { fieldsSchemaCreatedAtUpdatedAt } from "#src/utils/data/fieldsSchemaCreatedAtUpdatedAt.ts"
 import { emailSchema } from "#src/utils/valibot/emailSchema.ts"
 import { handleSchema } from "#src/utils/valibot/handleSchema.ts"
-import { stringSchema0to100, stringSchemaId } from "#src/utils/valibot/stringSchema.ts"
+import { stringSchema0to100 } from "#src/utils/valibot/stringSchema0to100.ts"
+import { stringSchemaId } from "#src/utils/valibot/stringSchemaId.ts"
 import { dateTimeSchema } from "#utils/valibot/dateTimeSchema.js"
 
 export const orgInvitationDataSchemaFields = {

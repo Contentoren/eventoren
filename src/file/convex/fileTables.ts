@@ -4,7 +4,7 @@ import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 import { fileSchemaFields } from "#src/file/model/fileSchema.ts"
 import { valibotToConvex } from "#src/utils/convex/valibotToConvex.ts"
 import { fieldsSchemaCreatedAtUpdatedAtDeletedAt } from "#src/utils/data/fieldsSchemaCreatedAtUpdatedAtDeletedAt.ts"
-import { stringSchemaId } from "#src/utils/valibot/stringSchema.ts"
+import { stringSchemaId } from "#src/utils/valibot/stringSchemaId.ts"
 
 const fileMetaDataSchemaFields = {
   fileId: stringSchemaId,

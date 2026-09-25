@@ -9,7 +9,9 @@ import { fieldsSchemaCreatedAtUpdatedAtDeletedAt } from "#src/utils/data/fieldsS
 import type { HasCreatedAtUpdatedDeletedAt } from "#src/utils/data/HasCreatedAtUpdatedDeletedAt.ts"
 import { emailSchema } from "#src/utils/valibot/emailSchema.ts"
 import { handleSchema } from "#src/utils/valibot/handleSchema.ts"
-import { stringSchema0to500, stringSchemaId, stringSchemaName } from "#src/utils/valibot/stringSchema.ts"
+import { stringSchema0to500 } from "#src/utils/valibot/stringSchema0to500.ts"
+import { stringSchemaId } from "#src/utils/valibot/stringSchemaId.ts"
+import { stringSchemaName } from "#src/utils/valibot/stringSchemaName.ts"
 import { dateTimeSchema } from "#utils/valibot/dateTimeSchema.js"
 
 export interface UserProfile extends HasCreatedAtUpdatedDeletedAt {

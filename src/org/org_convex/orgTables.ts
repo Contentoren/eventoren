@@ -3,7 +3,7 @@ import { vIdOrg } from "#src/org/org_convex/vIdOrg.ts"
 import { orgDataSchemaFields } from "#src/org/org_model/orgSchema.ts"
 import { valibotToConvex } from "#src/utils/convex/valibotToConvex.ts"
 import { fieldsSchemaCreatedAtUpdatedAt } from "#src/utils/data/fieldsSchemaCreatedAtUpdatedAt.ts"
-import { stringSchemaId } from "#src/utils/valibot/stringSchema.ts"
+import { stringSchemaId } from "#src/utils/valibot/stringSchemaId.ts"
 import { dateTimeSchema } from "#utils/valibot/dateTimeSchema.js"
 
 const orgResourceDataSchemaFields = {

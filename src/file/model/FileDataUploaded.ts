@@ -1,7 +1,7 @@
 import { v } from "convex/values"
 import * as a from "valibot"
 import { fileIdSchema } from "#src/file/model_field/fileIdSchema.ts"
-import { stringSchemaUrl } from "#src/utils/valibot/stringSchema.ts"
+import { stringSchemaUrl } from "#src/utils/valibot/stringSchemaUrl.ts"
 
 export interface FileDataUploaded {
   fileId: string
