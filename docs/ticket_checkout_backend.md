@@ -5,7 +5,10 @@ Task 3 exposes these Convex functions for the future checkout UI:
 - `api.ticketing.ticketCheckoutCreateAction`: reserves the selected tiers in one Convex transaction, persists an immutable order/payment attempt, and calls Billing's authenticated Eventoren ticket-checkout route. The action accepts either the existing `token` or a high-entropy `guestAccessToken` (at least 32 alphanumeric/`_`/`-` characters). The guest token is hashed before persistence.
 - `api.ticketing.ticketPaymentReconcileAction`: polls Billing's organization-scoped dynamic status endpoint and applies only `pending`, `paid`, `failed`, or release-safe `expired` states. Browser redirects never mark an order paid.
 - `api.ticketing.ticketOrderGetQuery`: returns an order and issued tickets for its logged-in owner or guest capability.
-- `api.ticketing.ticketOrderListMineQuery`: returns the logged-in user's wallet orders.
+- `api.ticketing.ticketOrderListMinePaginatedQuery`: returns indexed, cursor-paginated wallet order summaries (up to 50 per page); use `ticketOrderGetQuery` for full order details.
+- `api.ticketing.ticketOrderListMineQuery` is deprecated for external clients: its original full-projection array shape is retained only for at most 50 orders. Above that, it returns a `ticketing.order-history.limit-exceeded` Result error with `statusCode: 400`, never a partial array. Migrate to `ticketOrderListMinePaginatedQuery` before relying on larger histories.
+
+`api.organizer.organizerTicketCheckInHistoryPaginatedQuery` returns check-in history in newest-first cursor pages of 20. The deprecated `organizerTicketCheckInHistoryQuery` retains its full-array shape through 50 entries; above that it returns `organizer.check-in.history-limit-exceeded` with `statusCode: 400`, not a truncated array. These are Convex Result errors (not HTTP responses); an HTTP adapter must translate `statusCode` to the response status.
 
 `ticketCheckoutCreateAction` uses `EVENTOREN_BILLING_STRIPE_MODE` rather than accepting a client-selected mode. It validates return URLs against `EVENTOREN_PUBLIC_BASE_URL`, and sends Billing only server-derived catalog pricing. Configure these private Convex environment values:
 

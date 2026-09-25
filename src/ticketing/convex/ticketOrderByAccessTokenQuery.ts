@@ -17,6 +17,7 @@ export const ticketOrderByAccessTokenQuery = query({
       .withIndex("emailAccessDigest", (q) => q.eq("emailAccessDigest", digest))
       .unique()
     if (!order || order.emailAccessRevokedAt !== undefined) return createResultError(op, "The order was not found")
-    return createResult(await ticketOrderProjectionCreate(ctx, order._id))
+    const projection = await ticketOrderProjectionCreate(ctx, order._id)
+    return projection ?? createResult(null)
   },
 })

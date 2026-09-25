@@ -1197,19 +1197,28 @@ test("paginates current-user order summaries by indexed creation order without l
   expect(detail.data.tickets[0]?.participantName).toBeUndefined()
 })
 
-test("legacy order history keeps every order and its full projection past one page", async () => {
+test("legacy order history rejects more than 50 orders without truncating its array contract", async () => {
   const t = convexTest(schema, modules)
   const userId = await createUser(t)
   const token = await tokenFor(userId)
-  for (let index = 0; index < 51; index += 1)
+  for (let index = 0; index < 50; index += 1)
     await insertOrderHistoryOrder(t, userId, index, `2026-11-01T00:${String(index).padStart(2, "0")}:00.000Z`)
 
+  const atLimit = await t.query(api.ticketing.ticketOrderListMineQuery, { token })
+  expect(atLimit).toMatchObject({ success: true, data: expect.any(Array) })
+  if (!atLimit.success) return
+  expect(atLimit.data).toHaveLength(50)
+  expect(atLimit.data[0]).toMatchObject({ eventDescription: "This description belongs to the detail endpoint." })
+  expect(atLimit.data[49]).toMatchObject({ contact: { familyName: "Order 0" }, lines: [], tickets: [] })
+
+  await insertOrderHistoryOrder(t, userId, 50, "2026-11-01T00:50:00.000Z")
+
   const legacy = await t.query(api.ticketing.ticketOrderListMineQuery, { token })
-  expect(legacy.success).toBe(true)
-  if (!legacy.success) return
-  expect(legacy.data).toHaveLength(51)
-  expect(legacy.data[0]).toMatchObject({ eventDescription: "This description belongs to the detail endpoint." })
-  expect(legacy.data[50]).toMatchObject({ contact: { familyName: "Order 0" }, lines: [], tickets: [] })
+  expect(legacy).toMatchObject({
+    success: false,
+    code: "ticketing.order-history.limit-exceeded",
+    statusCode: 400,
+  })
 
   const firstPage = await t.query(api.ticketing.ticketOrderListMinePaginatedQuery, {
     token,
@@ -1223,7 +1232,46 @@ test("legacy order history keeps every order and its full projection past one pa
     token,
     paginationOpts: { numItems: 50, cursor: firstPage.data.continueCursor },
   })
-  expect(secondPage).toMatchObject({ success: true, data: { page: [{ id: legacy.data[50]?.id }], isDone: true } })
+  expect(secondPage).toMatchObject({
+    success: true,
+    data: { page: [expect.objectContaining({ eventKey: expect.any(String) })], isDone: true },
+  })
+})
+
+test("legacy order history rejects an oversized order projection instead of returning partial details", async () => {
+  const t = convexTest(schema, modules)
+  const userId = await createUser(t)
+  const token = await tokenFor(userId)
+  const adminId = await createUser(t, "admin")
+  await seedCatalog(t, await tokenFor(adminId))
+  const tierId = await t.run(async (ctx) => (await ctx.db.query("catalogTicketTiers").first())?._id)
+  if (!tierId) throw new Error("Test tier was not found")
+  const createdAt = "2026-11-01T00:00:00.000Z"
+  const orderId = await insertOrderHistoryOrder(t, userId, 0, createdAt, tierId, true)
+  await t.run(async (ctx) => {
+    for (let index = 1; index < 11; index += 1)
+      await ctx.db.insert("ticketOrderLines", {
+        orderId,
+        tierId,
+        eventKey: "history-event-0",
+        tierKey: `standard-${index}`,
+        tierName: "Standard",
+        tierDescription: "Standard ticket",
+        quantity: 1,
+        priceCents: 2_500,
+        feeCents: 300,
+        createdAt,
+      })
+  })
+
+  const legacy = await t.query(api.ticketing.ticketOrderListMineQuery, { token })
+  expect(legacy).toMatchObject({
+    success: false,
+    code: "ticketing.order-details.limit-exceeded",
+    statusCode: 400,
+  })
+  const detail = await t.query(api.ticketing.ticketOrderGetQuery, { orderId, token })
+  expect(detail).toMatchObject({ success: false, code: "ticketing.order-details.limit-exceeded", statusCode: 400 })
 })
 
 test("scheduled expiry calls authenticated Billing expiration, releases once, and is idempotent", async () => {

@@ -341,24 +341,26 @@ test("completes the real purchase, wallet, QR check-in, duplicate, reset, and hi
   })
   expect(ticketAfterCheckIn?.checkedInAt).toBeTypeOf("string")
 
-  const historyAfterFirstCheckIn = await t.query(api.organizer.organizerTicketCheckInHistoryQuery, {
+  const historyAfterFirstCheckIn = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
     eventKey: walletData.eventKey,
     ticketId: walletTicket.id,
     token: organizerToken,
+    cursor: null,
   })
-  expect(historyAfterFirstCheckIn).toMatchObject({ success: true, data: [{ action: "check_in" }] })
+  expect(historyAfterFirstCheckIn).toMatchObject({ success: true, data: { page: [{ action: "check_in" }] } })
   if (!historyAfterFirstCheckIn.success) return
-  expect(historyAfterFirstCheckIn.data).toHaveLength(1)
+  expect(historyAfterFirstCheckIn.data.page).toHaveLength(1)
 
   const duplicate = await t.mutation(api.organizer.organizerTicketCheckInMutation, {
     eventKey: walletData.eventKey,
     ticketCode: walletTicket.code,
     token: organizerToken,
   })
-  const historyAfterDuplicate = await t.query(api.organizer.organizerTicketCheckInHistoryQuery, {
+  const historyAfterDuplicate = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
     eventKey: walletData.eventKey,
     ticketId: walletTicket.id,
     token: organizerToken,
+    cursor: null,
   })
   expect(historyAfterDuplicate).toMatchObject({ success: true })
   if (!historyAfterDuplicate.success) return
@@ -420,10 +422,11 @@ test("completes the real purchase, wallet, QR check-in, duplicate, reset, and hi
     ticketId: walletTicket.id,
     token: organizerToken,
   })
-  const history = await t.query(api.organizer.organizerTicketCheckInHistoryQuery, {
+  const history = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
     eventKey: walletData.eventKey,
     ticketId: walletTicket.id,
     token: organizerToken,
+    cursor: null,
   })
   expect(ticketDetail).toMatchObject({
     success: true,
@@ -438,10 +441,10 @@ test("completes the real purchase, wallet, QR check-in, duplicate, reset, and hi
   })
   expect(history).toMatchObject({ success: true })
   if (!history.success || !ticketDetail.success) return
-  expect(history.data).toHaveLength(3)
-  expect(history.data.map((entry) => entry.action).sort()).toEqual(["check_in", "check_in", "reset"])
-  expect(history.data.every((entry) => entry.ticketNumber === walletTicket.code)).toBe(true)
-  expect(history.data.every((entry) => entry.participantName === "Grace Hopper")).toBe(true)
-  expect(history.data.every((entry) => entry.buyerName === "Ada Lovelace")).toBe(true)
+  expect(history.data.page).toHaveLength(3)
+  expect(history.data.page.map((entry) => entry.action).sort()).toEqual(["check_in", "check_in", "reset"])
+  expect(history.data.page.every((entry) => entry.ticketNumber === walletTicket.code)).toBe(true)
+  expect(history.data.page.every((entry) => entry.participantName === "Grace Hopper")).toBe(true)
+  expect(history.data.page.every((entry) => entry.buyerName === "Ada Lovelace")).toBe(true)
   expect(ticketDetail.data.eventId).toBe(eventList.data.page[0]?.id)
 })

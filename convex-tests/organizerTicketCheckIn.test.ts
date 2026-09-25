@@ -242,12 +242,13 @@ test("rejects invalid, order, duplicate-code, wrong-event, unpaid, and cancelled
   expectErrorCode(cancelled)
   expect(cancelled.code).toBe("organizer.check-in.cancelled")
 
-  const history = await t.query(api.organizer.organizerTicketCheckInHistoryQuery, {
+  const history = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
     eventKey: "check-in-event",
     ticketId: ids.duplicateTicketId,
     token,
+    cursor: null,
   })
-  expect(history).toMatchObject({ success: true, data: [] })
+  expect(history).toMatchObject({ success: true, data: { page: [] } })
 })
 
 test("checks in atomically, reports the previous operator and exposes current projection", async () => {
@@ -329,15 +330,16 @@ test("allows only one concurrent check-in and writes one audit event", async () 
   expect(results.filter((result) => result.success)).toHaveLength(1)
   expect(results.filter((result) => !result.success && result.code === "organizer.check-in.duplicate")).toHaveLength(1)
 
-  const history = await t.query(api.organizer.organizerTicketCheckInHistoryQuery, {
+  const history = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
     eventKey: "check-in-event",
     ticketId: ids.raceTicketId,
     token: firstToken,
+    cursor: null,
   })
   expect(history).toMatchObject({ success: true })
   if (!history.success) return
-  expect(history.data).toHaveLength(1)
-  expect(history.data[0]).toMatchObject({ action: "check_in", ticketNumber: "TKT-RACE" })
+  expect(history.data.page).toHaveLength(1)
+  expect(history.data.page[0]).toMatchObject({ action: "check_in", ticketNumber: "TKT-RACE" })
 })
 
 test("requires organizer authorization for check-in and reset, then permits reset and recheck-in", async () => {
@@ -383,15 +385,16 @@ test("requires organizer authorization for check-in and reset, then permits rese
   })
   expect(recheckedIn).toMatchObject({ success: true, data: { status: "checked-in", ticket: { checkedIn: true } } })
 
-  const history = await t.query(api.organizer.organizerTicketCheckInHistoryQuery, {
+  const history = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
     eventKey: "check-in-event",
     ticketId: ids.paidTicketId,
     token: organizerToken,
+    cursor: null,
   })
   expect(history).toMatchObject({ success: true })
   if (!history.success) return
-  expect(history.data.map((entry) => entry.action)).toEqual(["check_in", "reset", "check_in"])
-  expect(history.data.every((entry) => entry.participantName === "Grace Hopper")).toBe(true)
+  expect(history.data.page.map((entry) => entry.action)).toEqual(["check_in", "reset", "check_in"])
+  expect(history.data.page.every((entry) => entry.participantName === "Grace Hopper")).toBe(true)
 })
 
 test("paginates check-in history by indexed cursor in newest-first order", async () => {
@@ -457,4 +460,44 @@ test("paginates check-in history by indexed cursor in newest-first order", async
   expect(secondPage.data.isDone).toBe(true)
   expect(secondPage.data.page[0]?.occurredAt).toBe("2026-09-15T12:04:00.000Z")
   expect(secondPage.data.page[4]?.occurredAt).toBe("2026-09-15T12:00:00.000Z")
+
+  await t.run(async (ctx) => {
+    const ticket = await ctx.db.get(ids.paidTicketId)
+    if (!ticket) throw new Error("Test ticket was not found")
+    for (let index = 25; index < 51; index += 1) {
+      const occurredAt = `2026-09-15T12:${String(index).padStart(2, "0")}:00.000Z`
+      await ctx.db.insert("ticketCheckInHistory", {
+        ticketId: ids.paidTicketId,
+        orderId: ticket.orderId,
+        eventKey: "check-in-event",
+        ticketNumber: "TKT-PAID",
+        action: "check_in",
+        occurredAt,
+        checkInAt: occurredAt,
+        operatorId: ids.organizerId,
+        operatorName: "Organizer Operator",
+        participantName: "Grace Hopper",
+        buyerName: "Ada Lovelace",
+        buyerEmail: "buyer@example.com",
+      })
+    }
+  })
+  const overflow = await t.query(api.organizer.organizerTicketCheckInHistoryQuery, {
+    eventKey: "check-in-event",
+    ticketId: ids.paidTicketId,
+    token,
+  })
+  expect(overflow).toMatchObject({
+    success: false,
+    code: "organizer.check-in.history-limit-exceeded",
+    statusCode: 400,
+  })
+  const overflowPage = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
+    eventKey: "check-in-event",
+    ticketId: ids.paidTicketId,
+    token,
+    cursor: null,
+  })
+  expect(overflowPage).toMatchObject({ success: true, data: { page: expect.any(Array), isDone: false } })
+  if (overflowPage.success) expect(overflowPage.data.page).toHaveLength(20)
 })

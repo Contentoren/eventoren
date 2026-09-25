@@ -1,12 +1,13 @@
 import { v } from "convex/values"
 import { query } from "#convex/_generated/server.js"
-import { createResult, createResultError, type PromiseResult } from "#result"
+import { createResult, createResultError, createResultErrorCode, type PromiseResult } from "#result"
 import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryTokenToUserId.ts"
 import { organizerTicketCheckInHistoryProjectionCreate } from "./organizerTicketCheckInHistoryProjectionCreate.js"
 import { organizerTicketCheckInTicketResolve } from "./organizerTicketCheckInTicketResolve.js"
 
-// Deprecated: retain the complete, unbounded array contract for existing clients.
-// New callers should use organizerTicketCheckInHistoryPaginatedQuery.
+// Deprecated compatibility endpoint. Never return a partial array; clients with
+// more history must switch to organizerTicketCheckInHistoryPaginatedQuery.
+const legacyHistoryLimit = 50
 export const organizerTicketCheckInHistoryQuery = query({
   args: {
     eventKey: v.string(),
@@ -27,8 +28,23 @@ export const organizerTicketCheckInHistoryQuery = query({
       const history = await queryCtx.db
         .query("ticketCheckInHistory")
         .withIndex("ticketIdAndOccurredAt", (q) => q.eq("ticketId", ticket._id))
-        .collect()
-      history.sort((left, right) => right.occurredAt.localeCompare(left.occurredAt))
+        .order("desc")
+        .take(legacyHistoryLimit + 1)
+      if (history.length > legacyHistoryLimit)
+        return {
+          ...createResultErrorCode(
+            op,
+            `Check-in history exceeds ${legacyHistoryLimit} entries. Use organizerTicketCheckInHistoryPaginatedQuery instead.`,
+            "organizer.check-in.history-limit-exceeded",
+          ),
+          statusCode: 400,
+        }
+      history.sort(
+        (left, right) =>
+          right.occurredAt.localeCompare(left.occurredAt) ||
+          left._creationTime - right._creationTime ||
+          left._id.localeCompare(right._id),
+      )
       return createResult(history.map(organizerTicketCheckInHistoryProjectionCreate))
     }),
 })
