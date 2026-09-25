@@ -9,7 +9,7 @@ export function ContentIndexPage(props: {
   readonly pathPrefix?: string
 }) {
   return (
-    <section class="mx-auto max-w-5xl px-6 py-16">
+    <main class="mx-auto max-w-5xl px-6 py-16">
       <h1 class="text-4xl font-bold">Ratgeber</h1>
       <p class="mt-4 text-muted-foreground">{props.description}</p>
       {props.posts.length === 0 ? (
@@ -30,6 +30,6 @@ export function ContentIndexPage(props: {
           ))}
         </div>
       )}
-    </section>
+    </main>
   )
 }
