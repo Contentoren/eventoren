@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/solid-router"
 import { LegalMarkdownPage } from "../components/LegalMarkdownPage.tsx"
 import { legalDocumentLoad } from "../legal/actions/legalDocumentLoad.ts"
+import { legalDocumentLoadResultToResponse } from "../legal/legalDocumentLoadResultToResponse.ts"
 import markdownCss from "../markdown.css?url"
 import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 
@@ -9,7 +10,11 @@ export const Route = createFileRoute("/agb")({
     const head = seoHeadCreate("/agb")
     return { ...head, links: [...head.links, { rel: "stylesheet", href: markdownCss }] }
   },
-  loader: () => legalDocumentLoad({ data: { name: "agb" } }),
+  loader: async () => {
+    const result = await legalDocumentLoad({ data: { name: "agb" } })
+    if (!result.success) throw legalDocumentLoadResultToResponse(result)
+    return result.data
+  },
   component: AgbPage,
 })
 
