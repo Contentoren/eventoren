@@ -393,3 +393,68 @@ test("requires organizer authorization for check-in and reset, then permits rese
   expect(history.data.map((entry) => entry.action)).toEqual(["check_in", "reset", "check_in"])
   expect(history.data.every((entry) => entry.participantName === "Grace Hopper")).toBe(true)
 })
+
+test("paginates check-in history by indexed cursor in newest-first order", async () => {
+  const t = convexTest(schema, modules)
+  const ids = await seed(t)
+  const token = await tokenFor(ids.organizerId)
+
+  await t.run(async (ctx) => {
+    const ticket = await ctx.db.get(ids.paidTicketId)
+    if (!ticket) throw new Error("Test ticket was not found")
+    for (let index = 0; index < 25; index += 1) {
+      const occurredAt = `2026-09-15T12:${String(index).padStart(2, "0")}:00.000Z`
+      await ctx.db.insert("ticketCheckInHistory", {
+        ticketId: ids.paidTicketId,
+        orderId: ticket.orderId,
+        eventKey: "check-in-event",
+        ticketNumber: "TKT-PAID",
+        action: "check_in",
+        occurredAt,
+        checkInAt: occurredAt,
+        operatorId: ids.organizerId,
+        operatorName: "Organizer Operator",
+        participantName: "Grace Hopper",
+        buyerName: index === 24 ? "x".repeat(5_000) : "Ada Lovelace",
+        buyerEmail: "buyer@example.com",
+      })
+    }
+  })
+
+  const legacy = await t.query(api.organizer.organizerTicketCheckInHistoryQuery, {
+    eventKey: "check-in-event",
+    ticketId: ids.paidTicketId,
+    token,
+  })
+  expect(legacy.success).toBe(true)
+  if (!legacy.success) return
+  expect(legacy.data).toHaveLength(25)
+  expect(legacy.data[0]?.buyerName).toBe("x".repeat(5_000))
+
+  const firstPage = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
+    eventKey: "check-in-event",
+    ticketId: ids.paidTicketId,
+    token,
+    cursor: null,
+  })
+  expect(firstPage).toMatchObject({ success: true })
+  if (!firstPage.success) return
+  expect(firstPage.data.page).toHaveLength(20)
+  expect(firstPage.data.isDone).toBe(false)
+  expect(firstPage.data.page[0]?.occurredAt).toBe("2026-09-15T12:24:00.000Z")
+  expect(firstPage.data.page[0]?.buyerName).toBe("x".repeat(5_000))
+  expect(firstPage.data.page[19]?.occurredAt).toBe("2026-09-15T12:05:00.000Z")
+
+  const secondPage = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
+    eventKey: "check-in-event",
+    ticketId: ids.paidTicketId,
+    token,
+    cursor: firstPage.data.continueCursor,
+  })
+  expect(secondPage).toMatchObject({ success: true })
+  if (!secondPage.success) return
+  expect(secondPage.data.page).toHaveLength(5)
+  expect(secondPage.data.isDone).toBe(true)
+  expect(secondPage.data.page[0]?.occurredAt).toBe("2026-09-15T12:04:00.000Z")
+  expect(secondPage.data.page[4]?.occurredAt).toBe("2026-09-15T12:00:00.000Z")
+})

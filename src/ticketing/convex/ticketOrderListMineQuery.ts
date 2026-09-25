@@ -1,9 +1,11 @@
-import { query } from "#convex/_generated/server.js"
 import { v } from "convex/values"
-import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryTokenToUserId.ts"
+import { query } from "#convex/_generated/server.js"
 import { createResult, type PromiseResult } from "#result"
+import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryTokenToUserId.ts"
 import { ticketOrderProjectionCreate } from "./ticketOrderProjectionCreate.js"
 
+// Deprecated: retain the complete, unbounded array contract for existing clients.
+// New callers should use ticketOrderListMinePaginatedQuery.
 export const ticketOrderListMineQuery = query({
   args: { token: v.string() },
   handler: async (ctx, args): PromiseResult<readonly unknown[]> =>

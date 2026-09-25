@@ -213,16 +213,6 @@ async function readCatalogSnapshot(t: ReturnType<typeof convexTest>, requestedVe
   }
 }
 
-function resultDataStringFields(value: unknown, field: string): string[] {
-  if (typeof value !== "object" || value === null || !("success" in value) || value.success !== true) return []
-  if (!("data" in value) || !Array.isArray(value.data)) return []
-  return value.data.map((item) => {
-    if (typeof item !== "object" || item === null || !(field in item)) return ""
-    const fieldValue = item[field as keyof typeof item]
-    return typeof fieldValue === "string" ? fieldValue : String(fieldValue)
-  })
-}
-
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
 }
@@ -543,16 +533,33 @@ async function verifyInvalidation(
     requestedVersion: previousSyncVersion,
   })
   const missingSnapshot = await t.query(internal.catalog.catalogSyncSnapshotQuery, { requestedVersion: 1_234 })
-  const orders = await t.query(api.ticketing.ticketOrderListMineQuery, { token })
+  const orderHistory: Awaited<
+    ReturnType<typeof t.query<typeof api.ticketing.ticketOrderListMinePaginatedQuery>>
+  >["data"]["page"] = []
+  let orderHistoryCursor: string | null = null
+  let orderHistorySucceeded = true
+  for (;;) {
+    const orders = await t.query(api.ticketing.ticketOrderListMinePaginatedQuery, {
+      token,
+      paginationOpts: { numItems: 50, cursor: orderHistoryCursor },
+    })
+    if (!orders.success) {
+      orderHistorySucceeded = false
+      break
+    }
+    orderHistory.push(...orders.data.page)
+    if (orders.data.isDone) break
+    orderHistoryCursor = orders.data.continueCursor
+  }
   const catalogListAfter = Array.isArray(listAfter) ? listAfter.length : 0
   const snapshotTitle = snapshot?.events.find((event) => event.eventKey === invalidatedEvent?.eventKey)?.title ?? ""
-  const orderTitle = orders.success
-    ? (orders.data.find((order) => order.id === fixture.targetOrderId)?.eventTitle ?? "")
+  const orderTitle = orderHistorySucceeded
+    ? (orderHistory.find((order) => order.id === fixture.targetOrderId)?.eventTitle ?? "")
     : ""
   const catalogEventIds = Array.isArray(listAfter) ? listAfter.map((event) => event.id) : []
   const catalogStartsAt = Array.isArray(listAfter) ? listAfter.map((event) => event.startsAt) : []
-  const orderCreatedTimes = resultDataStringFields(orders, "createdAt")
-  const orderIds = resultDataStringFields(orders, "id")
+  const orderCreatedTimes = orderHistory.map((order) => order.createdAt)
+  const orderIds = orderHistory.map((order) => order.id)
   const catalogOrderVerified = catalogStartsAt.every(
     (startsAt, index) =>
       index === 0 || (catalogStartsAt[index - 1] !== undefined && catalogStartsAt[index - 1] <= startsAt),
@@ -653,9 +660,22 @@ async function runScenario(spec: FixtureSpec): Promise<ScenarioResult> {
     await measureEndpoint("catalogSyncPushAction:boundedAtomicRequest", 1, () =>
       t.action(internal.catalog.catalogSyncPushAction, { requestedVersion: spec.recordCount }),
     ),
-    await measureEndpoint("ticketOrderListMineQuery", spec.targetOrderCount, () =>
-      t.query(api.ticketing.ticketOrderListMineQuery, { token }),
-    ),
+    await measureEndpoint("ticketOrderListMinePaginatedQuery:allPages", spec.targetOrderCount, async () => {
+      const page: Awaited<
+        ReturnType<typeof t.query<typeof api.ticketing.ticketOrderListMinePaginatedQuery>>
+      >["data"]["page"] = []
+      let cursor: string | null = null
+      for (;;) {
+        const orders = await t.query(api.ticketing.ticketOrderListMinePaginatedQuery, {
+          token,
+          paginationOpts: { numItems: 50, cursor },
+        })
+        if (!orders.success) throw new Error(orders.errorMessage)
+        page.push(...orders.data.page)
+        if (orders.data.isDone) return { page }
+        cursor = orders.data.continueCursor
+      }
+    }),
     await measureEndpoint("ticketOrderListMinePaginatedQuery", Math.min(50, spec.targetOrderCount), () =>
       t.query(api.ticketing.ticketOrderListMinePaginatedQuery, {
         token,

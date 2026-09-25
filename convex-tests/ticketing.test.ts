@@ -1133,6 +1133,20 @@ test("paginates current-user order summaries by indexed creation order without l
     orderIds.push(await insertOrderHistoryOrder(t, userId, index, timestamp, detailTierId, index === 0))
   const otherOrderId = await insertOrderHistoryOrder(t, otherUserId, 99, "2026-11-04T00:00:00.000Z", undefined)
 
+  const legacyResponse = await t.query(api.ticketing.ticketOrderListMineQuery, { token })
+  expect(legacyResponse).toMatchObject({ success: true, data: expect.any(Array) })
+  if (!legacyResponse.success) return
+  expect(legacyResponse.data).toHaveLength(orderIds.length)
+  expect(legacyResponse.data[0]).toMatchObject({
+    id: orderIds[0],
+    eventDescription: "This description belongs to the detail endpoint.",
+    paymentReference: "history-payment-0",
+    contact: { givenName: "History", familyName: "Order 0" },
+    lines: [{ tierKey: "standard" }],
+    tickets: [{ sequence: 1 }],
+  })
+  expect(legacyResponse.data.every((order) => order.id !== otherOrderId)).toBe(true)
+
   const pages = []
   let cursor: string | null = null
   while (true) {
@@ -1181,6 +1195,35 @@ test("paginates current-user order summaries by indexed creation order without l
   if (!detail.success) return
   expect(detail.data.contact).toMatchObject({ givenName: "History", familyName: "Order 0" })
   expect(detail.data.tickets[0]?.participantName).toBeUndefined()
+})
+
+test("legacy order history keeps every order and its full projection past one page", async () => {
+  const t = convexTest(schema, modules)
+  const userId = await createUser(t)
+  const token = await tokenFor(userId)
+  for (let index = 0; index < 51; index += 1)
+    await insertOrderHistoryOrder(t, userId, index, `2026-11-01T00:${String(index).padStart(2, "0")}:00.000Z`)
+
+  const legacy = await t.query(api.ticketing.ticketOrderListMineQuery, { token })
+  expect(legacy.success).toBe(true)
+  if (!legacy.success) return
+  expect(legacy.data).toHaveLength(51)
+  expect(legacy.data[0]).toMatchObject({ eventDescription: "This description belongs to the detail endpoint." })
+  expect(legacy.data[50]).toMatchObject({ contact: { familyName: "Order 0" }, lines: [], tickets: [] })
+
+  const firstPage = await t.query(api.ticketing.ticketOrderListMinePaginatedQuery, {
+    token,
+    paginationOpts: { numItems: 50, cursor: null },
+  })
+  expect(firstPage.success).toBe(true)
+  if (!firstPage.success) return
+  expect(firstPage.data.page).toHaveLength(50)
+  expect(firstPage.data.isDone).toBe(false)
+  const secondPage = await t.query(api.ticketing.ticketOrderListMinePaginatedQuery, {
+    token,
+    paginationOpts: { numItems: 50, cursor: firstPage.data.continueCursor },
+  })
+  expect(secondPage).toMatchObject({ success: true, data: { page: [{ id: legacy.data[50]?.id }], isDone: true } })
 })
 
 test("scheduled expiry calls authenticated Billing expiration, releases once, and is idempotent", async () => {

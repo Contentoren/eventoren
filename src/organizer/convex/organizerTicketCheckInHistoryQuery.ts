@@ -5,6 +5,8 @@ import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryToken
 import { organizerTicketCheckInHistoryProjectionCreate } from "./organizerTicketCheckInHistoryProjectionCreate.js"
 import { organizerTicketCheckInTicketResolve } from "./organizerTicketCheckInTicketResolve.js"
 
+// Deprecated: retain the complete, unbounded array contract for existing clients.
+// New callers should use organizerTicketCheckInHistoryPaginatedQuery.
 export const organizerTicketCheckInHistoryQuery = query({
   args: {
     eventKey: v.string(),
