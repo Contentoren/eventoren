@@ -1,4 +1,5 @@
 import { ImapFlow } from "imapflow"
+import { ticketE2eImapTimeoutDiagnostic } from "./ticketE2eImapTimeoutDiagnostic.ts"
 import { ticketE2eMessageParse } from "./ticketE2eMessageParse.ts"
 
 const imapClockSkewMs = 5 * 60_000
@@ -21,21 +22,35 @@ export async function ticketE2eImapMessageWait(input: {
 }> {
   const deadline = Date.now() + input.timeoutMs
   const expectedOrigin = new URL(input.linkOrigin).origin
+  let failedAttempts = 0
+  let successfulPolls = 0
+  let lastFailureCode = "unknown"
 
   while (Date.now() < deadline) {
     const remainingMs = deadline - Date.now()
     try {
       const message = await ticketE2eImapMessageFindOnce(input, expectedOrigin, remainingMs)
       if (message) return message
-    } catch {
-      // Retry without exposing mailbox details; the deadline bounds failures too.
+      successfulPolls += 1
+    } catch (error) {
+      // Never include the IMAP error message: it can contain server replies or credentials.
+      failedAttempts += 1
+      const code = error instanceof Error && "code" in error ? error.code : undefined
+      lastFailureCode =
+        typeof code === "string" &&
+        ["ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "ENOTFOUND", "EAI_AGAIN", "EAUTH", "AUTHENTICATIONFAILED"].includes(
+          code,
+        )
+          ? code
+          : "unknown"
     }
     const delayMs = Math.min(input.pollMs, Math.max(0, deadline - Date.now()))
     if (delayMs <= 0) break
     await new Promise((resolve) => setTimeout(resolve, delayMs))
   }
 
-  throw new Error("Timed out waiting for the ticket email matching the purchase marker")
+  const diagnostic = ticketE2eImapTimeoutDiagnostic({ successfulPolls, failedPolls: failedAttempts, lastFailureCode })
+  throw new Error(`Timed out waiting for the ticket email matching the purchase marker${diagnostic}`)
 }
 
 async function ticketE2eImapMessageFindOnce(
