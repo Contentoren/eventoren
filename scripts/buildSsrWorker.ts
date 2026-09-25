@@ -45,6 +45,10 @@ export default {
       return new Response(null, { status: 301, headers: { location: requestUrl.toString() } })
     }
 
+    if (requestUrl.pathname === "/.well-known/ai-catalog.json") {
+      return env.ASSETS.fetch(request)
+    }
+
     const response = await server.fetch(request, { context: { convexUrl: convexUrlResolve(env) } })
     if (response.status !== 404) return response
     return env.ASSETS.fetch(request)
