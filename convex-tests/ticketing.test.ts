@@ -789,6 +789,88 @@ test("does not release a still-payable pending session, then issues exactly once
   expect(finalInventory.tickets).toHaveLength(1)
 })
 
+test("accepts and pays exactly ten tickets across two tiers idempotently", async () => {
+  environmentSet()
+  billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const adminToken = await tokenFor(adminId)
+  await seedCatalog(t, adminToken)
+  const addedTier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    eventKey: "ticket-event",
+    tierKey: "vip",
+    name: "VIP",
+    description: "VIP ticket",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
+    priceCents: 4_000,
+    feeCents: 500,
+    capacity: 10,
+    token: adminToken,
+  })
+  expect(addedTier.success).toBe(true)
+  if (!addedTier.success) return
+
+  const checkoutKey = "checkoutkey1023456789012345678901234"
+  const checkout = await t.action(
+    api.ticketing.ticketCheckoutCreateAction,
+    checkoutArgs(await tokenFor(userId), addedTier.data.catalogVersion, checkoutKey, {
+      eventRevision: addedTier.data.eventRevision,
+      tickets: [
+        { tierKey: "standard", quantity: 2, participantNames: ["Ada", "Grace"] },
+        {
+          tierKey: "vip",
+          quantity: 8,
+          participantNames: ["Lin", "Max", "Noah", "Oskar", "Pia", "Quinn", "Ruth", "Sven"],
+        },
+      ],
+    }),
+  )
+  expect(checkout).toMatchObject({ success: true, data: { status: "checkout_created" } })
+  if (!checkout.success) return
+
+  const applyPaid = () =>
+    t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+      orderId: checkout.data.orderId as never,
+      paymentReference: checkout.data.paymentReference,
+      billingOrderReference: "order_billing1",
+      stripeMode: "test",
+      payment: "paid",
+    })
+  const paid = await applyPaid()
+  expect(paid).toMatchObject({ success: true, data: { status: "paid", ticketCount: 10 } })
+  const ticketsAfterFirstApply = await t.run(async (ctx) =>
+    (await ctx.db.query("ticketIssued").collect()).sort((left, right) => left.sequence - right.sequence),
+  )
+  expect(ticketsAfterFirstApply).toHaveLength(10)
+  const ticketIds = ticketsAfterFirstApply.map((ticket) => ticket._id)
+  const ticketCodes = ticketsAfterFirstApply.map((ticket) => ticket.code)
+  expect(new Set(ticketIds).size).toBe(10)
+  expect(new Set(ticketCodes).size).toBe(10)
+
+  const paidRetry = await applyPaid()
+  expect(paidRetry).toMatchObject({ success: true, data: { status: "paid", ticketCount: 10 } })
+  const finalState = await t.run(async (ctx) => ({
+    tickets: (await ctx.db.query("ticketIssued").collect()).sort((left, right) => left.sequence - right.sequence),
+    tiers: (await ctx.db.query("catalogTicketTiers").collect()).sort((left, right) =>
+      left.tierKey.localeCompare(right.tierKey),
+    ),
+    reservations: await ctx.db.query("ticketReservations").collect(),
+  }))
+  expect(finalState.tickets).toHaveLength(10)
+  expect(finalState.tickets.map((ticket) => ticket._id)).toEqual(ticketIds)
+  expect(finalState.tickets.map((ticket) => ticket.code)).toEqual(ticketCodes)
+  expect(finalState.tiers).toHaveLength(2)
+  expect(finalState.tiers.map(({ tierKey, sold, reserved }) => ({ tierKey, sold, reserved }))).toEqual([
+    { tierKey: "standard", sold: 2, reserved: 0 },
+    { tierKey: "vip", sold: 8, reserved: 0 },
+  ])
+  expect(finalState.reservations).toHaveLength(2)
+  expect(finalState.reservations.every((reservation) => reservation.status === "consumed")).toBe(true)
+})
+
 test("keeps participant names through paid retries and serves order QR codes through revocable guest access", async () => {
   environmentSet()
   billingMock()
