@@ -26,7 +26,7 @@ Für den Ticketkauf ist kein Nutzerkonto erforderlich. Soweit du ein Konto anleg
 
 Vor dem Absenden der Bestellung werden die ausgewählten Tickets, Preise, Gebühren und die Gesamtsumme angezeigt. Für den Checkout sind Vorname, Nachname und eine gültige E-Mail-Adresse erforderlich; eine Telefonnummer kann freiwillig angegeben werden. Für jedes ausgewählte Ticket ist der Name der teilnehmenden Person anzugeben.
 
-Die Bestellung wird elektronisch verarbeitet. Der verbindliche Zahlungsstatus wird nach der Weiterleitung an den Zahlungsdienst und der Rückmeldung des Servers angezeigt. Tickets werden digital an die angegebene E-Mail-Adresse versendet. Soweit für eine Veranstaltung angeboten, kann das Ticket zusätzlich als Apple- oder Google-Wallet-Pass gespeichert werden.
+Die Bestellung wird elektronisch verarbeitet. Der verbindliche Zahlungsstatus wird nach der Weiterleitung an den Zahlungsdienst und der Rückmeldung des Servers angezeigt. Tickets werden digital an die angegebene E-Mail-Adresse versendet.
 
 ## 5. Preise und Zahlung
 

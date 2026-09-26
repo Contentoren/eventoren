@@ -29,8 +29,7 @@ export function ContactFaqList(props: {
     {
       id: "faq-4",
       question: "Wo finden Besucher ihre gekauften Tickets?",
-      answer:
-        "Gekaufte Tickets werden direkt per E-Mail versendet und sind als Apple- und Google-Wallet-Pass offline auf dem Smartphone verfügbar.",
+      answer: "Gekaufte Tickets werden per E-Mail versendet und stehen mit QR-Code in deinem Eventoren-Konto bereit.",
     },
     {
       id: "faq-5",

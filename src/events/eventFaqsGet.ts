@@ -20,7 +20,7 @@ const mockFaqsById: Record<string, readonly EventFaqItem[]> = {
       id: "ticket-vorlage",
       question: "Wie weise ich mein Ticket am Einlass vor?",
       answer:
-        "Das Ticket kann direkt digital auf dem Smartphone im Eventoren-Konto oder über die Apple/Google Wallet vorgezeigt werden.",
+        "Das digitale Ticket mit QR-Code findest du in deinem Eventoren-Konto und kannst es am Einlass auf dem Smartphone vorzeigen.",
     },
     {
       id: "kategorien",

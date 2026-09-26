@@ -5,7 +5,7 @@ const mockInclusionsById: Record<string, readonly string[]> = {
     "Offizielles Eintrittsticket für Kraftklub — Karges Land Tour in der Uber Arena Berlin",
     "Zugang zum gebuchten Bereich (Innenraum Stehplatz, nummerierter Oberrang Sitzplatz oder Early Entry Paket)",
     "Live-Konzert von Kraftklub inklusive Support-Auftritt von Blond",
-    "Digitales Wallet-Ticket für den kontaktlosen Einlass-Scan",
+    "Digitales Ticket mit QR-Code für den Einlass-Scan",
   ],
   "philharmonie-mahler-5": [
     "Eintrittskarte für Gustav Mahlers 5. Sinfonie im Großen Saal der Elbphilharmonie Hamburg",
@@ -162,7 +162,7 @@ const mockInclusionsById: Record<string, readonly string[]> = {
     "Offizielles Ticket für das AnnenMayKantereit Konzert in der Lanxess Arena Köln",
     "Zweistündiges Live-Konzert mit vierköpfigem Streicherensemble",
     "Platz im gebuchten Bereich (Innenraum Stehplatz, Unterrang oder Oberrang Sitzplatz)",
-    "Digitales Wallet-Ticket für den kontaktlosen Einlass",
+    "Digitales Ticket mit QR-Code für den Einlass",
   ],
   "basketball-euroleague-bayern": [
     "Offizielle Eintrittskarte für das EuroLeague-Hauptrundenspiel FC Bayern Basketball gegen Real Madrid",

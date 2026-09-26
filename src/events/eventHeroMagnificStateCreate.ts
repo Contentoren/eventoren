@@ -6,7 +6,7 @@ const tickerItems = [
   "Kultur & Theater",
   "Stadion- & Sportevents",
   "VIP & Backstage Access",
-  "Mobile Wallet-Tickets",
+  "Digitale Tickets",
   "Exklusive Presales",
   "Aftershow-Partys",
 ] as const

@@ -60,7 +60,7 @@ Ein Ticketkauf ist als Gast möglich. Für einen Checkout verarbeitet die Anwend
 - den Namen der teilnehmenden Person für jedes Ticket sowie
 - die ausgewählten Veranstaltungen, Ticketstufen, Mengen und Bestellinformationen.
 
-Die Daten werden zur Reservierung und Abwicklung der Bestellung, zur Zahlungszuordnung, zur Bereitstellung des digitalen Tickets und zur Beantwortung von Bestellfragen verarbeitet. Die Ticketbestätigung wird an die angegebene E-Mail-Adresse versendet. Für angebotene Veranstaltungen kann ein Eventoren-Ticket außerdem als Apple- oder Google-Wallet-Pass bereitgestellt werden.
+Die Daten werden zur Reservierung und Abwicklung der Bestellung, zur Zahlungszuordnung, zur Bereitstellung des digitalen Tickets und zur Beantwortung von Bestellfragen verarbeitet. Die Ticketbestätigung wird an die angegebene E-Mail-Adresse versendet.
 
 Die Verarbeitung erfolgt zur Durchführung vorvertraglicher Maßnahmen und des Ticketkaufvertrags (Art. 6 Abs. 1 lit. b DSGVO). Die Aufbewahrung kann außerdem erforderlich sein, um gesetzliche Pflichten zu erfüllen oder Ansprüche zu prüfen.
 
