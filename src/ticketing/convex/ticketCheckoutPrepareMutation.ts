@@ -237,7 +237,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", selection.tierKey))
         .unique()
       if (!tier || tier.archivedAt) return createResultError(op, "The ticket tier was not found")
-      const available = tier.capacity - tier.reserved - tier.sold
+      const available = tier.capacity - tier.sold
       if (selection.quantity > available) return createResultError(op, "The requested ticket quantity is unavailable")
       subtotalCents += tier.priceCents * selection.quantity
       feeCents += tier.feeCents * selection.quantity

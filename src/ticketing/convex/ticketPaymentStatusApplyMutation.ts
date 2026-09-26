@@ -197,12 +197,55 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       activeReservations.map((reservation) => [reservation.tierId, reservation.participantNamesJson]),
     )
 
+    let hasCapacityConflict = false
+    for (const reservation of activeReservations) {
+      const tier = await ctx.db.get(reservation.tierId)
+      if (!tier || tier.sold + reservation.quantity > tier.capacity) {
+        hasCapacityConflict = true
+        break
+      }
+    }
+    if (hasCapacityConflict) {
+      for (const reservation of activeReservations) {
+        const tier = await ctx.db.get(reservation.tierId)
+        if (tier) {
+          await ctx.db.patch("catalogTicketTiers", tier._id, {
+            reserved: Math.max(0, tier.reserved - reservation.quantity),
+          })
+        }
+        await ctx.db.patch("ticketReservations", reservation._id, {
+          status: "released",
+          releasedAt: now,
+        })
+      }
+      await ctx.db.patch("ticketOrders", order._id, {
+        status: "paid_inventory_conflict",
+        paymentStatus: "paid",
+        billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
+        lastPaymentCheckAt: now,
+        checkoutAttemptLeaseUntil: undefined,
+        updatedAt: now,
+      })
+      await ctx.db.patch("ticketPaymentAttempts", attempt._id, {
+        billingOrderReference: args.billingOrderReference,
+        status: "paid",
+        lastCheckedAt: now,
+        updatedAt: now,
+      })
+      return createResult({
+        orderId: order._id,
+        status: "paid_inventory_conflict",
+        paymentStatus: "paid",
+        ticketCount: await ticketCountGet(ctx, order._id),
+      })
+    }
+
     for (const reservation of activeReservations) {
       const tier = await ctx.db.get(reservation.tierId)
       if (!tier || tier.reserved < reservation.quantity)
         return createResultError(op, "Paid inventory reservation is corrupt")
       await ctx.db.patch("catalogTicketTiers", tier._id, {
-        reserved: tier.reserved - reservation.quantity,
+        reserved: Math.max(0, tier.reserved - reservation.quantity),
         sold: tier.sold + reservation.quantity,
       })
       await ctx.db.patch("ticketReservations", reservation._id, { status: "consumed" })

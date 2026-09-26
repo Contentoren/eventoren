@@ -338,12 +338,24 @@ test("reserves atomically and replays the same checkout without a second Billing
     checkoutKey: "checkoutkey223456789012345678901234",
     tickets: [{ tierKey: "standard", quantity: 2, participantNames: ["Ada Lovelace", "Grace Hopper"] }],
   })
+  const oversized = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...args,
+    checkoutKey: "checkoutkey323456789012345678901234",
+    tickets: [
+      {
+        tierKey: "standard",
+        quantity: 3,
+        participantNames: ["Ada Lovelace", "Grace Hopper", "Margaret Hamilton"],
+      },
+    ],
+  })
 
   expect(first.success).toBe(true)
   expect(first).toMatchObject({ success: true, data: { fulfillmentEligible: false } })
   expect(replay).toMatchObject({ success: true, data: { replayed: true, status: "checkout_created" } })
-  expect(competing.success).toBe(false)
-  expect(billing.checkoutCallsGet()).toBe(1)
+  expect(competing.success).toBe(true)
+  expect(oversized.success).toBe(false)
+  expect(billing.checkoutCallsGet()).toBe(2)
   const inventory = await t.run(async (ctx) => {
     const tier = await ctx.db.query("catalogTicketTiers").collect()
     const event = await ctx.db.query("catalogEvents").collect()
@@ -352,11 +364,11 @@ test("reserves atomically and replays the same checkout without a second Billing
     const reservations = await ctx.db.query("ticketReservations").collect()
     return { tier, event, sync, orders, reservations }
   })
-  expect(inventory.tier[0]?.reserved).toBe(1)
+  expect(inventory.tier[0]?.reserved).toBe(3)
   expect(inventory.event[0]?.eventRevision).toBe(args.eventRevision)
   expect(inventory.sync[0]?.version).toBe(catalogVersion)
-  expect(inventory.orders).toHaveLength(1)
-  expect(inventory.reservations).toHaveLength(1)
+  expect(inventory.orders).toHaveLength(2)
+  expect(inventory.reservations).toHaveLength(2)
   expect(billing.fetchMock).toHaveBeenCalled()
 })
 
@@ -1409,4 +1421,66 @@ test("paid expiration result issues once and late paid truth after release canno
     paymentStatus: "pending",
   })
   expect(await t.run(async (ctx) => ctx.db.query("ticketFulfillmentWork").collect())).toHaveLength(0)
+})
+
+test("unpaid order does not reduce available bestand and only paid order reduces bestand", async () => {
+  environmentSet()
+  billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const adminToken = await tokenFor(adminId)
+  const userToken = await tokenFor(userId)
+  const catalogVersion = await seedCatalog(t, adminToken)
+
+  const initialEvent = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "ticket-event" })
+  expect(initialEvent?.tiers[0]?.available).toBe(2)
+
+  const orderA = await t.action(
+    api.ticketing.ticketCheckoutCreateAction,
+    checkoutArgs(userToken, catalogVersion, "unpaidordera123456789012345678901234", {
+      tickets: [{ tierKey: "standard", quantity: 1, participantNames: ["Alice"] }],
+    }),
+  )
+  expect(orderA.success).toBe(true)
+  if (!orderA.success) return
+
+  const eventAfterUnpaidOrderA = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "ticket-event" })
+  expect(eventAfterUnpaidOrderA?.tiers[0]?.available).toBe(2)
+
+  const orderB = await t.action(
+    api.ticketing.ticketCheckoutCreateAction,
+    checkoutArgs(userToken, catalogVersion, "unpaidorderb123456789012345678901234", {
+      tickets: [{ tierKey: "standard", quantity: 2, participantNames: ["Bob 1", "Bob 2"] }],
+    }),
+  )
+  expect(orderB.success).toBe(true)
+  if (!orderB.success) return
+
+  const eventAfterUnpaidOrderB = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "ticket-event" })
+  expect(eventAfterUnpaidOrderB?.tiers[0]?.available).toBe(2)
+
+  const paidA = await t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+    orderId: orderA.data.orderId as never,
+    paymentReference: "payment_unpaidordera123456789012345678901234",
+    billingOrderReference: orderA.data.orderReference ?? "order_billing1",
+    stripeMode: "test",
+    payment: "paid",
+  })
+  expect(paidA).toMatchObject({ success: true, data: { status: "paid", ticketCount: 1 } })
+
+  const eventAfterPaidA = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "ticket-event" })
+  expect(eventAfterPaidA?.tiers[0]?.available).toBe(1)
+
+  const paidB = await t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+    orderId: orderB.data.orderId as never,
+    paymentReference: "payment_unpaidorderb123456789012345678901234",
+    billingOrderReference: orderB.data.orderReference ?? "order_billing1",
+    stripeMode: "test",
+    payment: "paid",
+  })
+  expect(paidB).toMatchObject({ success: true, data: { status: "paid_inventory_conflict", ticketCount: 0 } })
+
+  const eventAfterConflictB = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "ticket-event" })
+  expect(eventAfterConflictB?.tiers[0]?.available).toBe(1)
 })

@@ -99,7 +99,7 @@ test("authorized admin event loading includes every status and ticket data neede
       priceCents: 2500,
       feeCents: 250,
       capacity: 10,
-      available: 5,
+      available: 7,
       sold: 3,
       sortOrder: 0,
     },

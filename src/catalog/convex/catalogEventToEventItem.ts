@@ -18,7 +18,7 @@ export function catalogEventToEventItem(
     priceCents: tier.priceCents,
     feeCents: tier.feeCents,
     capacity: tier.capacity,
-    available: tier.capacity - tier.reserved - tier.sold,
+    available: Math.max(0, tier.capacity - tier.sold),
     sortOrder: tier.sortOrder,
   }))
 
