@@ -139,57 +139,141 @@ export function TicketCheckoutForm(props: {
                 />
               </div>
 
-              <section
-                class="flex flex-col gap-space-4 border-t border-border-subtle pt-space-4"
-                aria-labelledby="checkout-participants"
-              >
-                <div>
-                  <h2 id="checkout-participants" class="text-lg font-semibold text-content">
-                    {text().participantTitle}
-                  </h2>
-                </div>
-                <div class="grid gap-space-4 sm:grid-cols-2">
-                  <Index each={state.participantFields()}>
-                    {(field) => {
-                      const currentField = field()
-                      const inputId = `checkout-participant-${currentField.eventId}-${currentField.tierId}-${currentField.ticketIndex}`
-                      const fieldKey = ticketParticipantFieldKeyCreate(
-                        currentField.eventId,
-                        currentField.tierId,
-                        currentField.ticketIndex,
-                      )
-                      return (
+              <For each={props.items}>
+                {(item) => {
+                  const eventParticipantFields = () =>
+                    state.participantFields().filter((field) => field.eventId === item.event.id)
+                  const headingId = `checkout-participants-${item.event.id}`
+
+                  return (
+                    <Show when={eventParticipantFields().length > 0}>
+                      <section
+                        class="flex flex-col gap-space-4 border-t border-border-subtle pt-space-4"
+                        aria-labelledby={headingId}
+                      >
                         <div>
-                          <label for={inputId} class="mb-space-2 block text-sm font-medium text-content">
-                            {currentField.tierName}
-                          </label>
-                          <Input
-                            id={inputId}
-                            name={`participant-${currentField.eventId}-${currentField.tierId}-${currentField.ticketIndex}`}
-                            autocomplete="name"
-                            required
-                            aria-invalid={state.isFieldInvalid(fieldKey) ? "true" : undefined}
-                            value={currentField.value}
-                            onInput={(event) =>
-                              state.participantNameChange(
-                                currentField.eventId,
-                                currentField.tierId,
-                                currentField.ticketIndex,
-                                event.currentTarget.value,
-                              )
-                            }
-                            class="focus-ring h-11 rounded-control border px-space-4 text-sm"
-                            classList={{
-                              "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid(fieldKey),
-                              "!border-danger/50 !bg-danger-soft text-content": state.isFieldInvalid(fieldKey),
-                            }}
-                          />
+                          <h2 id={headingId} class="text-lg font-semibold text-content">
+                            {item.event.title}
+                          </h2>
                         </div>
-                      )
-                    }}
-                  </Index>
-                </div>
-              </section>
+                        <div class="grid gap-space-4 sm:grid-cols-2">
+                          <Index each={eventParticipantFields()}>
+                            {(field) => {
+                              const inputId = () =>
+                                `checkout-participant-${field().eventId}-${field().tierId}-${field().ticketIndex}`
+                              const fieldKey = () =>
+                                ticketParticipantFieldKeyCreate(field().eventId, field().tierId, field().ticketIndex)
+                              const labelText = () =>
+                                field().totalForTier !== undefined && field().totalForTier! > 1
+                                  ? `${text().participantTitle} - ${field().tierName} (${field().ticketIndex + 1})`
+                                  : `${text().participantTitle} - ${field().tierName}`
+
+                              return (
+                                <div>
+                                  <label for={inputId()} class="mb-space-2 block text-sm font-medium text-content">
+                                    {labelText()}
+                                  </label>
+                                  <Input
+                                    id={inputId()}
+                                    name={`participant-${field().eventId}-${field().tierId}-${field().ticketIndex}`}
+                                    autocomplete="name"
+                                    required
+                                    aria-invalid={state.isFieldInvalid(fieldKey()) ? "true" : undefined}
+                                    value={field().value}
+                                    onInput={(event) =>
+                                      state.participantNameChange(
+                                        field().eventId,
+                                        field().tierId,
+                                        field().ticketIndex,
+                                        event.currentTarget.value,
+                                      )
+                                    }
+                                    class="focus-ring h-11 rounded-control border px-space-4 text-sm"
+                                    classList={{
+                                      "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid(
+                                        fieldKey(),
+                                      ),
+                                      "!border-danger/50 !bg-danger-soft text-content": state.isFieldInvalid(
+                                        fieldKey(),
+                                      ),
+                                    }}
+                                  />
+                                </div>
+                              )
+                            }}
+                          </Index>
+                        </div>
+                      </section>
+                    </Show>
+                  )
+                }}
+              </For>
+
+              <Show
+                when={
+                  state
+                    .participantFields()
+                    .filter((field) => !props.items.some((item) => item.event.id === field.eventId)).length > 0
+                }
+              >
+                <section
+                  class="flex flex-col gap-space-4 border-t border-border-subtle pt-space-4"
+                  aria-labelledby="checkout-participants-other"
+                >
+                  <div>
+                    <h2 id="checkout-participants-other" class="text-lg font-semibold text-content">
+                      {text().participantTitle}
+                    </h2>
+                  </div>
+                  <div class="grid gap-space-4 sm:grid-cols-2">
+                    <Index
+                      each={state
+                        .participantFields()
+                        .filter((field) => !props.items.some((item) => item.event.id === field.eventId))}
+                    >
+                      {(field) => {
+                        const inputId = () =>
+                          `checkout-participant-${field().eventId}-${field().tierId}-${field().ticketIndex}`
+                        const fieldKey = () =>
+                          ticketParticipantFieldKeyCreate(field().eventId, field().tierId, field().ticketIndex)
+                        const labelText = () =>
+                          field().totalForTier !== undefined && field().totalForTier! > 1
+                            ? `${text().participantTitle} - ${field().tierName} (${field().ticketIndex + 1})`
+                            : `${text().participantTitle} - ${field().tierName}`
+
+                        return (
+                          <div>
+                            <label for={inputId()} class="mb-space-2 block text-sm font-medium text-content">
+                              {labelText()}
+                            </label>
+                            <Input
+                              id={inputId()}
+                              name={`participant-${field().eventId}-${field().tierId}-${field().ticketIndex}`}
+                              autocomplete="name"
+                              required
+                              aria-invalid={state.isFieldInvalid(fieldKey()) ? "true" : undefined}
+                              value={field().value}
+                              onInput={(event) =>
+                                state.participantNameChange(
+                                  field().eventId,
+                                  field().tierId,
+                                  field().ticketIndex,
+                                  event.currentTarget.value,
+                                )
+                              }
+                              class="focus-ring h-11 rounded-control border px-space-4 text-sm"
+                              classList={{
+                                "border-border-strong bg-surface-muted text-content": !state.isFieldInvalid(fieldKey()),
+                                "!border-danger/50 !bg-danger-soft text-content": state.isFieldInvalid(fieldKey()),
+                              }}
+                            />
+                          </div>
+                        )
+                      }}
+                    </Index>
+                  </div>
+                </section>
+              </Show>
 
               <section class="flex flex-col gap-space-4 border-t border-border-subtle pt-space-4">
                 <label

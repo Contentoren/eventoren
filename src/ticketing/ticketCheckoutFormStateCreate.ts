@@ -1,5 +1,5 @@
 import { useNavigate, useRouter } from "@tanstack/solid-router"
-import { createEffect, createMemo, on, onMount } from "solid-js"
+import { createEffect, createMemo, on, onCleanup, onMount } from "solid-js"
 import type { Result } from "#result"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import { eventorenAuthContextUse } from "../auth/ui/eventorenAuthContextUse.ts"
@@ -36,6 +36,11 @@ import { ticketingServerRead } from "./ticketingServerRead.ts"
 
 type CheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
+type WindowWithIdleCallback = Window & {
+  requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => number
+  cancelIdleCallback?: (handle: number) => void
+}
+
 const ticketContactRequiredFields = ["firstName", "lastName", "email", "address"] as const
 
 function ticketContactFieldInvalid(field: (typeof ticketContactRequiredFields)[number], value: string) {
@@ -61,7 +66,47 @@ export function ticketCheckoutFormStateCreate(inputs: {
   const legalAccepted = createSignalObject(false)
   const participantNames = createSignalObject<TicketParticipantNames>(ticketParticipantNamesAlign({}, inputs.items()))
 
-  const persistDraft = () => ticketContactDraftSave(contact.get())
+  let debounceTimer: number | undefined
+  let cancelIdleSave: (() => void) | undefined
+
+  const cancelScheduledSave = () => {
+    if (typeof window === "undefined") return
+    if (debounceTimer !== undefined) {
+      window.clearTimeout(debounceTimer)
+      debounceTimer = undefined
+    }
+    cancelIdleSave?.()
+    cancelIdleSave = undefined
+  }
+
+  const persistDraft = (immediate = false) => {
+    if (typeof window === "undefined") return
+    cancelScheduledSave()
+    const snapshot = contact.get()
+    if (immediate) {
+      ticketContactDraftSave(snapshot)
+      return
+    }
+    debounceTimer = window.setTimeout(() => {
+      debounceTimer = undefined
+      const idleWindow = window as WindowWithIdleCallback
+      const save = () => {
+        cancelIdleSave = undefined
+        ticketContactDraftSave(snapshot)
+      }
+      if (typeof idleWindow.requestIdleCallback === "function") {
+        const idleId = idleWindow.requestIdleCallback(save, { timeout: 1000 })
+        cancelIdleSave = () => idleWindow.cancelIdleCallback?.(idleId)
+        return
+      }
+      const fallbackTimer = window.setTimeout(save, 0)
+      cancelIdleSave = () => window.clearTimeout(fallbackTimer)
+    }, 250)
+  }
+
+  onCleanup(() => {
+    cancelScheduledSave()
+  })
 
   onMount(() => {
     const draft = ticketContactDraftLoad()
@@ -92,13 +137,17 @@ export function ticketCheckoutFormStateCreate(inputs: {
       item.cart.lines.flatMap((line) => {
         if (line.quantity <= 0) return []
         const tierName = item.event.tiers.find((tier) => tier.id === line.tierId)?.name ?? line.tierId
+        const totalForTier = line.quantity
         return Array.from({ length: line.quantity }, (_, ticketIndex) => ({
           eventId: item.event.id,
           eventTitle: item.event.title,
           tierId: line.tierId,
           tierName,
           ticketIndex,
-          value: participantNames.get()[item.event.id]?.[line.tierId]?.[ticketIndex] ?? "",
+          totalForTier,
+          get value() {
+            return participantNames.get()[item.event.id]?.[line.tierId]?.[ticketIndex] ?? ""
+          },
         }))
       }),
     ),
@@ -164,6 +213,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
     }
 
     submitAttempted.set(true)
+    persistDraft(true)
     const invalidContactFields = ticketContactRequiredFields.filter((field) =>
       ticketContactFieldInvalid(field, contact.get()[field]),
     )
@@ -316,6 +366,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
       return
     }
 
+    cancelScheduledSave()
     ticketCartDraftSave([])
     ticketContactDraftSave(null)
     isSubmitting.set(false)

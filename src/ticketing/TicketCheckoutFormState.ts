@@ -25,6 +25,7 @@ export type TicketCheckoutFormState = {
       readonly tierId: string
       readonly tierName: string
       readonly ticketIndex: number
+      readonly totalForTier?: number
       readonly value: string
     }[]
   >

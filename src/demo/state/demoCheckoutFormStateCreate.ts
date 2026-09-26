@@ -107,13 +107,17 @@ export function demoCheckoutFormStateCreate(inputs: {
       item.cart.lines.flatMap((line) => {
         if (line.quantity <= 0) return []
         const tierName = item.event.tiers.find((tier) => tier.id === line.tierId)?.name ?? line.tierId
+        const totalForTier = line.quantity
         return Array.from({ length: line.quantity }, (_, ticketIndex) => ({
           eventId: item.event.id,
           eventTitle: item.event.title,
           tierId: line.tierId,
           tierName,
           ticketIndex,
-          value: participantNames.get()[item.event.id]?.[line.tierId]?.[ticketIndex] ?? "",
+          totalForTier,
+          get value() {
+            return participantNames.get()[item.event.id]?.[line.tierId]?.[ticketIndex] ?? ""
+          },
         }))
       }),
     ),
