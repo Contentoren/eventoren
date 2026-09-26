@@ -1,6 +1,8 @@
 import type { CatalogImage } from "@adaptive-ds/assets-service"
 
-const publicBaseUrl = import.meta.env.VITE_ASSETS_PUBLIC_BASE_URL?.trim() ?? ""
+const publicBaseUrl =
+  import.meta.env.VITE_ASSETS_PUBLIC_BASE_URL?.trim() ||
+  (import.meta.env.PROD ? "https://assets-service-public.contentoren.de/eventoren/public" : "")
 
 type ManagedImagePath = Pick<CatalogImage, "path"> | string
 

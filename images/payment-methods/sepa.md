@@ -1,0 +1,1 @@
+SEPA payment method logo.

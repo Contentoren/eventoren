@@ -1,0 +1,1 @@
+Mastercard payment method logo.

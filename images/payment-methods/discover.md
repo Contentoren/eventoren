@@ -1,0 +1,1 @@
+Discover payment method logo.
