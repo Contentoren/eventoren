@@ -12,5 +12,11 @@ export function adminTicketOrderDetailsMap(
 ): AdminTicketOrderDetails {
   if (!billing) return { ...local, stripeDetails: null, stripeError: null }
   if (!billing.success) return { ...local, stripeDetails: null, stripeError: billing.errorMessage }
-  return { ...local, stripeDetails: billing.data, stripeError: null }
+  return {
+    ...local,
+    bookingNumber: local.bookingNumber ?? billing.data.bookingNumber ?? null,
+    bookingReference: local.bookingReference ?? billing.data.bookingReference ?? null,
+    stripeDetails: billing.data,
+    stripeError: null,
+  }
 }

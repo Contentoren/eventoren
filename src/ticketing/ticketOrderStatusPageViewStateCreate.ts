@@ -28,6 +28,15 @@ export function ticketOrderStatusPageViewStateCreate(inputs: {
     hasOrders() &&
     orderState.orders().every((order) => order.paymentStatus === "paid" && order.status !== "paid_inventory_conflict")
   const emailAddress = () => orderState.orders()[0]?.contact.email ?? ""
+  const paidOrderReferences = () =>
+    orderState
+      .orders()
+      .filter((order) => order.paymentStatus === "paid" && order.status === "paid")
+      .map((order) => {
+        if (order.bookingReference) return { label: "Bestellnummer", value: order.bookingReference }
+        if (order.billingOrderReference) return { label: "Zahlungsreferenz", value: order.billingOrderReference }
+        return { label: "Interne Bestell-ID", value: order.id }
+      })
 
   const confirmationTitle = () => {
     if (isPaid()) return "Vielen Dank – dein Kauf war erfolgreich!"
@@ -67,6 +76,7 @@ export function ticketOrderStatusPageViewStateCreate(inputs: {
     hasTickets,
     hasFailedOrder,
     isPaid,
+    paidOrderReferences,
     confirmationTitle,
     confirmationMessage,
     confirmationSymbol,

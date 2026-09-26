@@ -57,6 +57,8 @@ export const ticketOrderListMinePaginatedQuery = query({
             subtotalCents: order.subtotalCents,
             feeCents: order.feeCents,
             totalCents: order.totalCents,
+            bookingNumber: order.bookingNumber,
+            bookingReference: order.bookingReference,
             status: order.status,
             paymentStatus: order.paymentStatus,
             createdAt: order.createdAt,

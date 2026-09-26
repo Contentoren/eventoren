@@ -48,6 +48,8 @@ export const ticketPaymentReconcileAction = action({
       billingOrderReference: statusResult.data.data.orderReference,
       stripeMode: statusResult.data.data.stripeMode,
       payment: statusResult.data.data.payment,
+      bookingNumber: statusResult.data.data.bookingNumber ?? undefined,
+      bookingReference: statusResult.data.data.bookingReference ?? undefined,
     })
     if (!applied.success) return applied
     return createResult(applied.data)

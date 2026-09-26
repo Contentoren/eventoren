@@ -16,6 +16,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
     billingOrderReference: v.string(),
     stripeMode: v.union(v.literal("live"), v.literal("test")),
     payment: paymentStatusValidator,
+    bookingNumber: v.optional(v.number()),
+    bookingReference: v.optional(v.string()),
   },
   handler: async (
     ctx,
@@ -44,6 +46,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       return createResultError(op, "The payment attempt does not belong to the order")
 
     const now = new Date().toISOString()
+    const bookingNumber = Number.isSafeInteger(args.bookingNumber) ? args.bookingNumber : undefined
+    const bookingReference = args.bookingReference?.trim() ? args.bookingReference : undefined
     if (args.payment === "pending") {
       if (
         order.status === "failed" ||
@@ -139,6 +143,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
     }
 
     if (order.status === "paid") {
+      await ticketOrderBookingDetailsBackfill(ctx, order._id, order, { bookingNumber, bookingReference }, now)
       const capability = await ticketOrderAccessCapabilityEnsure(ctx, order._id)
       if (!capability.success) return capability
       await ticketFulfillmentWorkScheduleIfEligible(
@@ -164,6 +169,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         status: "paid_inventory_conflict",
         paymentStatus: "paid",
         billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
+        bookingNumber: order.bookingNumber ?? bookingNumber,
+        bookingReference: order.bookingReference ?? bookingReference,
         lastPaymentCheckAt: now,
         checkoutAttemptLeaseUntil: undefined,
         updatedAt: now,
@@ -222,6 +229,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         status: "paid_inventory_conflict",
         paymentStatus: "paid",
         billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
+        bookingNumber: order.bookingNumber ?? bookingNumber,
+        bookingReference: order.bookingReference ?? bookingReference,
         lastPaymentCheckAt: now,
         checkoutAttemptLeaseUntil: undefined,
         updatedAt: now,
@@ -290,6 +299,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       status: "paid",
       paymentStatus: "paid",
       billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
+      bookingNumber: order.bookingNumber ?? bookingNumber,
+      bookingReference: order.bookingReference ?? bookingReference,
       paidAt: now,
       lastPaymentCheckAt: now,
       checkoutAttemptLeaseUntil: undefined,
@@ -331,6 +342,19 @@ async function ticketFulfillmentWorkScheduleIfEligible(
   const work = await ticketFulfillmentWorkEnsure(ctx, orderId, billingOrderReference)
   if (!work.success || !work.data.created) return
   await ctx.scheduler.runAfter(0, internal.ticketing.ticketFulfillmentPrepareAction, { workId: work.data.workId })
+}
+
+async function ticketOrderBookingDetailsBackfill(
+  ctx: MutationCtx,
+  orderId: Id<"ticketOrders">,
+  order: { bookingNumber?: number; bookingReference?: string },
+  args: { bookingNumber?: number; bookingReference?: string },
+  now: string,
+) {
+  const bookingNumber = order.bookingNumber ?? args.bookingNumber
+  const bookingReference = order.bookingReference ?? args.bookingReference
+  if (bookingNumber === order.bookingNumber && bookingReference === order.bookingReference) return
+  await ctx.db.patch("ticketOrders", orderId, { bookingNumber, bookingReference, updatedAt: now })
 }
 
 async function ticketCountGet(ctx: MutationCtx, orderId: Id<"ticketOrders">) {

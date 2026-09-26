@@ -22,7 +22,7 @@ export function TicketBagSummary(props: {
           </div>
 
           <div class="flex items-baseline justify-between text-content-muted">
-            <dt>Digitale Bereitstellung & Wallet-Pass</dt>
+            <dt>Digitale Bereitstellung</dt>
             <dd class="font-medium text-success">Kostenlos</dd>
           </div>
 

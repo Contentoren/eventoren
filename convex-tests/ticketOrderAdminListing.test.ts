@@ -36,6 +36,8 @@ test("lists orders from different customers newest first for an admin", async ()
     customerFamilyName: "Musterfrau",
     customerAddress: "Musterstraße 12, 50667 Köln",
     customerPhone: "+49 221 123456",
+    bookingNumber: 812,
+    bookingReference: "EVT-812",
   })
 })
 
@@ -46,6 +48,7 @@ test("rejects the all-orders query for an ordinary user", async () => {
 
   const result = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
     token: await createToken(userId, authSecret),
+    search: "private@example.test",
     paginationOpts: { cursor: null, numItems: 50 },
   })
 
@@ -80,6 +83,111 @@ test("filters orders by event across paginated results", async () => {
   ])
 })
 
+test("searches past the first page for a booking number, customer email and name within an event", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await userInsert(t, "admin")
+  const ownerId = await userInsert(t, "user")
+  const targetId = await orderInsert(t, ownerId, "target@example.test", "2026-09-20T10:00:00.000Z", "selected")
+  await t.run(async (ctx) => ctx.db.patch(targetId, { bookingNumber: 1, bookingReference: "TEST-00001" }))
+  for (let day = 21; day <= 25; day++)
+    await orderInsert(t, ownerId, `other${day}@example.test`, `2026-09-${day}T10:00:00.000Z`, "selected")
+  await orderInsert(t, ownerId, "target@example.test", "2026-09-26T10:00:00.000Z", "other")
+  const token = await createToken(adminId, authSecret)
+  for (const search of ["00001", "TEST-00001", "TARGET@EXAMPLE"]) {
+    let cursor: string | null = null
+    let found = false
+    for (let page = 0; page < 4; page++) {
+      const result = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
+        token,
+        eventKey: "selected",
+        search,
+        paginationOpts: { cursor, numItems: 2 },
+      })
+      expect(result.success).toBe(true)
+      if (!result.success) break
+      if (result.data.page.length) {
+        expect(result.data.page.map((order: { id: string }) => order.id)).toEqual([targetId])
+        expect(result.data.page[0].bookingReference).toBe("TEST-00001")
+        found = true
+      }
+      if (result.data.isDone) break
+      cursor = result.data.continueCursor
+    }
+    expect(found, `search: ${search}`).toBe(true)
+  }
+  const name = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
+    token,
+    eventKey: "selected",
+    search: "erika musterfrau",
+    paginationOpts: { cursor: null, numItems: 2 },
+  })
+  expect(name.success).toBe(true)
+  if (!name.success) return
+  expect(name.data.page).toHaveLength(2)
+  const next = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
+    token,
+    eventKey: "selected",
+    search: "erika musterfrau",
+    paginationOpts: { cursor: name.data.continueCursor, numItems: 2 },
+  })
+  expect(next.success).toBe(true)
+  if (next.success) expect(next.data.page).toHaveLength(2)
+})
+
+test("finds an order older than 500 newer orders by reference, email and name on the first search page", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await userInsert(t, "admin")
+  const ownerId = await userInsert(t, "user")
+  const targetId = await orderInsert(t, ownerId, "rare@example.test", "2026-09-01T10:00:00.000Z", "selected")
+  await t.run(async (ctx) =>
+    ctx.db.patch(targetId, {
+      bookingNumber: 1,
+      bookingReference: "TEST-00001",
+      customerGivenName: "Rare",
+      customerFamilyName: "Finder",
+      contactSnapshotJson: JSON.stringify({
+        email: "rare@example.test",
+        givenName: "Rare",
+        familyName: "Finder",
+        searchTerms: " rare@example.test Rare Finder",
+      }),
+    }),
+  )
+  for (let i = 0; i < 510; i++)
+    await orderInsert(
+      t,
+      ownerId,
+      `noise${i}@example.test`,
+      new Date(Date.parse("2026-09-02") + i * 1000).toISOString(),
+      "selected",
+    )
+  await orderInsert(t, ownerId, "rare@example.test", "2026-09-30T10:00:00.000Z", "other")
+
+  const token = await createToken(adminId, authSecret)
+  for (const search of ["00001", "TEST-00001", "RARE@EXAMPLE", "rare finder"]) {
+    const result = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
+      token,
+      eventKey: "selected",
+      search,
+      paginationOpts: { cursor: null, numItems: 2 },
+    })
+    expect(result.success, search).toBe(true)
+    if (!result.success) continue
+    expect(
+      result.data.page.map((order: { id: string }) => order.id),
+      search,
+    ).toEqual([targetId])
+    expect(result.data.isDone, search).toBe(true)
+  }
+  const acrossEvents = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
+    token,
+    search: "TEST-00001",
+    paginationOpts: { cursor: null, numItems: 2 },
+  })
+  expect(acrossEvents.success).toBe(true)
+  if (acrossEvents.success) expect(acrossEvents.data.page.map((order: { id: string }) => order.id)).toEqual([targetId])
+})
+
 test("allows admins to read local order detail and rejects ordinary users", async () => {
   const t = convexTest(schema, modules)
   const adminId = await userInsert(t, "admin")
@@ -98,6 +206,8 @@ test("allows admins to read local order detail and rejects ordinary users", asyn
       customerFamilyName: "Musterfrau",
       customerAddress: "Musterstraße 12, 50667 Köln",
       customerPhone: "+49 221 123456",
+      bookingNumber: 812,
+      bookingReference: "EVT-812",
     })
 
   const rejected = await t.query(api.ticketing.ticketOrderGetAdminQuery, {
@@ -128,7 +238,13 @@ async function orderInsert(
       customerFamilyName: "Musterfrau",
       customerAddress: "Musterstraße 12, 50667 Köln",
       customerPhone: "+49 221 123456",
-      contactSnapshotJson: "{}",
+      // convex-test splits search fields on whitespace only; Convex also splits JSON punctuation.
+      contactSnapshotJson: JSON.stringify({
+        email: customerEmail,
+        givenName: "Erika",
+        familyName: "Musterfrau",
+        searchTerms: ` ${customerEmail} Erika Musterfrau`,
+      }),
       eventKey,
       eventTitle: "Testveranstaltung",
       eventSubtitle: "",
@@ -151,6 +267,8 @@ async function orderInsert(
       stripeMode: "test",
       status: "paid",
       paymentStatus: "paid",
+      bookingNumber: 812,
+      bookingReference: "EVT-812",
       reservationExpiresAt: Date.parse(createdAt) + 900_000,
       createdAt,
       updatedAt: createdAt,

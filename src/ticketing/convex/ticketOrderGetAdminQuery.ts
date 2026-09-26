@@ -38,6 +38,8 @@ export const ticketOrderGetAdminQuery = query({
         feeCents: order.feeCents,
         totalCents: order.totalCents,
         paymentReference: order.paymentReference,
+        bookingNumber: order.bookingNumber ?? null,
+        bookingReference: order.bookingReference ?? null,
         billingOrderReference: order.billingOrderReference ?? null,
         stripeMode: order.stripeMode,
         orderStatus: order.status,

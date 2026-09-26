@@ -745,11 +745,16 @@ test("does not release a still-payable pending session, then issues exactly once
   })
   expect(pending).toMatchObject({ success: true, data: { paymentStatus: "pending" } })
   const pendingInventory = await t.run(async (ctx) => ctx.db.query("catalogTicketTiers").collect())
+  const pendingOrder = await t.run(async (ctx) => ctx.db.get(checkout.data.orderId as never))
   expect(pendingInventory[0]?.reserved).toBe(1)
+  expect(pendingOrder).not.toHaveProperty("bookingNumber")
+  expect(pendingOrder).not.toHaveProperty("bookingReference")
 
+  let paidStatusCalls = 0
   vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
     const url = String(input)
-    if (url.includes("/status"))
+    if (url.includes("/status")) {
+      paidStatusCalls += 1
       return new Response(
         JSON.stringify({
           success: true,
@@ -760,10 +765,16 @@ test("does not release a still-payable pending session, then issues exactly once
             status: "failed",
             payment: "paid",
             expiresAt: null,
+            ...(paidStatusCalls === 1
+              ? { bookingNumber: null, bookingReference: null }
+              : paidStatusCalls === 2
+                ? { bookingNumber: 4821, bookingReference: "EVT-2026-04821" }
+                : { bookingNumber: 9999.5, bookingReference: "   " }),
           },
         }),
         { status: 200 },
       )
+    }
     return billing.fetchMock(input)
   })
   const paid = await t.action(api.ticketing.ticketPaymentReconcileAction, {
@@ -774,19 +785,38 @@ test("does not release a still-payable pending session, then issues exactly once
     orderId: checkout.data.orderId as never,
     token: args.token,
   })
+  const replayedWithInvalidBooking = await t.action(api.ticketing.ticketPaymentReconcileAction, {
+    orderId: checkout.data.orderId as never,
+    token: args.token,
+  })
   expect(paid).toMatchObject({ success: true, data: { status: "paid", ticketCount: 1 } })
   expect(replayedPaid).toMatchObject({ success: true, data: { status: "paid", ticketCount: 1 } })
+  expect(replayedWithInvalidBooking).toMatchObject({ success: true, data: { status: "paid", ticketCount: 1 } })
   const finalInventory = await t.run(async (ctx) => {
     const tier = await ctx.db.query("catalogTicketTiers").collect()
     const tickets = await ctx.db.query("ticketIssued").collect()
     const event = await ctx.db.query("catalogEvents").collect()
     const sync = await ctx.db.query("catalogSyncStates").collect()
-    return { tier, tickets, event, sync }
+    const orders = await ctx.db.query("ticketOrders").collect()
+    return { tier, tickets, event, sync, orders }
   })
   expect(finalInventory.tier[0]).toMatchObject({ reserved: 0, sold: 1 })
   expect(finalInventory.event[0]?.eventRevision).toBe(args.eventRevision)
   expect(finalInventory.sync[0]?.version).toBe(catalogVersion)
   expect(finalInventory.tickets).toHaveLength(1)
+  expect(finalInventory.orders[0]).toMatchObject({
+    bookingNumber: 4821,
+    bookingReference: "EVT-2026-04821",
+    stripeMode: "test",
+  })
+  const buyerOrder = await t.query(api.ticketing.ticketOrderGetQuery, {
+    orderId: checkout.data.orderId as never,
+    token: args.token,
+  })
+  expect(buyerOrder).toMatchObject({
+    success: true,
+    data: { bookingNumber: 4821, bookingReference: "EVT-2026-04821" },
+  })
 })
 
 test("accepts and pays exactly ten tickets across two tiers idempotently", async () => {

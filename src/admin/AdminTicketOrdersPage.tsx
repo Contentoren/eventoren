@@ -2,6 +2,7 @@ import { Link } from "@tanstack/solid-router"
 import type { JSX } from "solid-js"
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import { Input } from "#ui/input/input/Input.jsx"
 import { SelectSingle } from "#ui/input/select/SelectSingle.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { UiBadge } from "../ui/UiBadge.tsx"
@@ -57,6 +58,11 @@ export function AdminTicketOrdersPage(props?: {
           </Show>
         </Show>
       </div>
+      <Show when={!tile || state.bookingReference(order)}>
+        <p class="min-w-0 truncate text-sm font-semibold text-content" title={state.bookingReference(order)}>
+          <Show when={state.bookingReference(order)}>{(reference) => <>Bestellnummer: {reference()}</>}</Show>
+        </p>
+      </Show>
       <p class="min-w-0 text-sm text-content">
         <span class={tile ? "text-content-muted" : "text-content-muted xl:hidden"}>Bestellt: </span>
         {state.dateFormat(order.createdAt)}
@@ -109,9 +115,22 @@ export function AdminTicketOrdersPage(props?: {
         </header>
 
         <div>
-          <div class="grid gap-3 border-b border-border p-4 sm:grid-cols-[minmax(0,1fr)_14rem_12rem]">
+          <div class="grid gap-3 border-b border-border p-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
+            <form class="flex min-w-0 gap-2" onSubmit={state.searchSubmit} role="search">
+              <Input
+                type="search"
+                aria-label="Bestellungen suchen"
+                placeholder="Bestellnummer, E-Mail oder Name suchen …"
+                class="min-w-0 flex-1"
+                value={state.searchInput.get()}
+                onInput={(event) => state.searchInput.set(event.currentTarget.value)}
+              />
+              <Button type="submit" variant="outline">
+                Suchen
+              </Button>
+            </form>
             <SelectSingle
-              class="min-w-0 sm:col-start-3"
+              class="min-w-0"
               buttonProps={{
                 variant: "none",
                 size: "none",
@@ -159,17 +178,22 @@ export function AdminTicketOrdersPage(props?: {
               when={state.orders().length > 0}
               fallback={
                 <p class="p-8 text-center text-sm text-content-muted">
-                  {state.eventSignal.get()
-                    ? "Keine Bestellungen für dieses Event gefunden."
-                    : "Es sind noch keine Bestellungen vorhanden."}
+                  {!state.isDone()
+                    ? "In den bisher durchsuchten Bestellungen kein Treffer. Weitere Bestellungen durchsuchen."
+                    : state.searchQuery()
+                      ? "Keine Bestellungen für diese Suche gefunden."
+                      : state.eventSignal.get()
+                        ? "Keine Bestellungen für dieses Event gefunden."
+                        : "Es sind noch keine Bestellungen vorhanden."}
                 </p>
               }
             >
               <Show when={viewPreference?.view() !== "tiles"}>
                 <div class="hidden items-center border-b border-border text-xs font-semibold text-content-muted xl:flex">
-                  <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,11rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_8rem] gap-2 px-4 py-3">
+                  <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,11rem)_minmax(0,10rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_8rem] gap-2 px-4 py-3">
                     <span>Event</span>
                     <span>Kunde</span>
+                    <span>Bestellnummer</span>
                     <span>Bestellt</span>
                     <span>Eventdatum</span>
                     <span>Betrag</span>
@@ -196,7 +220,7 @@ export function AdminTicketOrdersPage(props?: {
                               tabindex="0"
                               aria-expanded={state.selectedOrderId() === order.id}
                               aria-label={`Bestellung ${order.id} Details ${state.selectedOrderId() === order.id ? "schließen" : "anzeigen"}`}
-                              class="grid min-w-0 flex-1 cursor-pointer gap-2 p-4 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring xl:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_8rem] xl:items-center"
+                              class="grid min-w-0 flex-1 cursor-pointer gap-2 p-4 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring xl:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_minmax(0,10rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_8rem] xl:items-center"
                               onClick={() => state.orderToggle(order.id)}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" || e.key === " ") {
@@ -264,10 +288,12 @@ export function AdminTicketOrdersPage(props?: {
           </Show>
         </div>
 
-        <Show when={state.orders().length > 0 && !state.isDone()}>
+        <Show when={!state.isDone() && !state.isLoading() && !state.errorMessage()}>
           <div class="flex justify-center">
             <Button variant="outline" disabled={state.isLoading()} onClick={() => void state.loadMore()}>
-              {state.isLoading() ? "Weitere Bestellungen werden geladen …" : "Weitere Bestellungen laden"}
+              {state.searchQuery() && !state.orders().length
+                ? "Weitere Bestellungen durchsuchen"
+                : "Weitere Bestellungen laden"}
             </Button>
           </div>
         </Show>

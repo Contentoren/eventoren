@@ -32,6 +32,9 @@ export function AdminTicketOrderDetailsPanel(props: {
         <div class="grid gap-6 md:grid-cols-2">
           <div class="flex min-w-0 flex-col gap-2 break-words text-sm">
             <h4 class="font-semibold text-content">Bestellung und Zahlung</h4>
+            <Show when={state.bookingReference()}>
+              {(reference) => <p class="text-base font-semibold text-content">Bestellnummer: {reference()}</p>}
+            </Show>
             <p>Bestellstatus: {state.localStatusLabel(props.order.orderStatus)}</p>
             <p>Zahlungsstatus: {state.localStatusLabel(props.order.paymentStatus)}</p>
             <p>

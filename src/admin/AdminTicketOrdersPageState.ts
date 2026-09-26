@@ -12,6 +12,10 @@ export type AdminTicketOrdersPageState = {
   readonly loadMore: () => Promise<void>
   readonly orders: Accessor<readonly AdminTicketOrderSummary[]>
   readonly eventSignal: { readonly get: () => string; readonly set: (event: string) => void }
+  readonly searchInput: { readonly get: () => string; readonly set: (value: string) => void }
+  readonly searchQuery: Accessor<string>
+  readonly searchSubmit: (event?: Event) => void
+  readonly bookingReference: (order: AdminTicketOrderSummary) => string | undefined
   readonly eventOptions: () => { readonly type: "item"; readonly value: string }[]
   readonly eventText: (event: string) => string
   readonly eventForOrder: (order: AdminTicketOrderSummary) => AdminEventItem | undefined

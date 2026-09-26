@@ -53,6 +53,8 @@ export const ticketPaymentReconcileScheduledAction = internalAction({
         billingOrderReference: payment.orderReference,
         stripeMode: payment.stripeMode,
         payment: payment.payment,
+        bookingNumber: payment.bookingNumber ?? undefined,
+        bookingReference: payment.bookingReference ?? undefined,
       })
       if (!applied.success) {
         const recorded = await ctx.runMutation(internal.ticketing.ticketPaymentReconcileFailureMutation, {

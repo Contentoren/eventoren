@@ -21,6 +21,8 @@ export type AdminTicketOrderDetails = {
   readonly feeCents: number
   readonly totalCents: number
   readonly paymentReference: string
+  readonly bookingNumber?: number | null
+  readonly bookingReference?: string | null
   readonly billingOrderReference: string | null
   readonly stripeMode: "live" | "test"
   readonly orderStatus: string

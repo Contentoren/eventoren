@@ -53,9 +53,7 @@ export function TicketBagPageView(props: {
               <h1 class="text-3xl font-bold tracking-tight text-content sm:text-4xl lg:text-5xl">
                 Dein Warenkorb – Gesamtsumme: {props.state.totals().totalLabel}
               </h1>
-              <p class="text-sm text-content-muted sm:text-base">
-                Kostenlose digitale Bereitstellung und sofortiger Download in Apple & Google Wallet.
-              </p>
+              <p class="text-sm text-content-muted sm:text-base">Kostenlose digitale Bereitstellung deiner Tickets.</p>
             </div>
 
             <div class="grid gap-space-7 lg:grid-cols-[minmax(0,1fr)_22rem] xl:grid-cols-[minmax(0,1fr)_24rem]">

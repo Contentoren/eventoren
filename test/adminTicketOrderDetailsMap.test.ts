@@ -50,6 +50,8 @@ test("maps packaged Stripe details alongside independent local order data", () =
     paymentReference: "payment-ref",
     orderReference: "billing-order",
     stripeMode: "test" as const,
+    bookingNumber: 4821,
+    bookingReference: "EVT-2026-04821",
     session: null,
     charge: {
       billingDetails: { name: "Ada Lovelace", email: "stripe@example.test", phone: null, address: null },
@@ -62,6 +64,26 @@ test("maps packaged Stripe details alongside independent local order data", () =
   }
   expect(adminTicketOrderDetailsMap(local, { success: true, data: stripeDetails })).toMatchObject({
     customerEmail: "buyer@example.test",
+    bookingNumber: 4821,
+    bookingReference: "EVT-2026-04821",
     stripeDetails: { charge: { paymentMethod: { card: { last4: "4242" } } } },
   })
+})
+
+test("keeps persisted booking identifiers ahead of billing payment-details replay data", () => {
+  const billing = {
+    success: true as const,
+    data: {
+      paymentReference: "payment-ref",
+      orderReference: "billing-order",
+      stripeMode: "test" as const,
+      bookingNumber: 9999,
+      bookingReference: "LATE-OVERWRITE",
+      session: null,
+      charge: null,
+    },
+  }
+  expect(
+    adminTicketOrderDetailsMap({ ...local, bookingNumber: 4821, bookingReference: "EVT-2026-04821" }, billing),
+  ).toMatchObject({ bookingNumber: 4821, bookingReference: "EVT-2026-04821" })
 })

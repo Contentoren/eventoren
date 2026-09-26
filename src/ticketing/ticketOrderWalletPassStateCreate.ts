@@ -30,9 +30,17 @@ export function ticketOrderWalletPassStateCreate(inputs: { order: () => TicketOr
     return "Für diese Bestellung sind aktuell keine Tickets verfügbar."
   }
 
+  const orderReferenceDisplay = () => {
+    const order = inputs.order()
+    if (order.paymentStatus !== "paid" || order.status !== "paid") return undefined
+    if (order.bookingReference) return { label: "Bestellnummer", value: order.bookingReference }
+    if (order.billingOrderReference) return { label: "Zahlungsreferenz", value: order.billingOrderReference }
+    return { label: "Interne Bestell-ID", value: order.id }
+  }
+
   return {
     order: inputs.order,
-    orderReference: () => inputs.order().billingOrderReference ?? inputs.order().paymentReference ?? inputs.order().id,
+    orderReferenceDisplay,
     dateTime: () =>
       `${eventDateFormat(inputs.order().eventStartsAt)} · ${eventTimeFormat(inputs.order().eventStartsAt)}`,
     total: () => ticketPriceFormat(inputs.order().totalCents),

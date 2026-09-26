@@ -9,6 +9,8 @@ export type AdminTicketOrderSummary = {
   readonly eventStartsAt: string
   readonly eventTitle: string
   readonly paymentReference: string
+  readonly bookingNumber?: number
+  readonly bookingReference?: string
   readonly paymentStatus: "pending" | "paid" | "failed" | "expired"
   readonly status:
     | "reserved"

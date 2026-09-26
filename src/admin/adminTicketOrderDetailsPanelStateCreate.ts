@@ -1,4 +1,5 @@
 import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
+import { adminTicketOrderBookingReference } from "./adminTicketOrderBookingReference.ts"
 
 export function adminTicketOrderDetailsPanelStateCreate(inputs: { readonly order: () => AdminTicketOrderDetails }) {
   const stripe = () => inputs.order().stripeDetails
@@ -9,6 +10,7 @@ export function adminTicketOrderDetailsPanelStateCreate(inputs: { readonly order
   const address = () => billingContact()?.address ?? stripeContact()?.address ?? null
 
   return {
+    bookingReference: () => adminTicketOrderBookingReference(inputs.order()),
     address,
     billingContact,
     charge,

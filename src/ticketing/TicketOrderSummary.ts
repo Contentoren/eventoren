@@ -17,6 +17,8 @@ export type TicketOrderSummary = {
   readonly subtotalCents: number
   readonly feeCents: number
   readonly totalCents: number
+  readonly bookingNumber?: number
+  readonly bookingReference?: string
   readonly status:
     | "reserved"
     | "checkout_created"

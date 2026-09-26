@@ -8,6 +8,7 @@ import type { AdminEventItem } from "./AdminEventItem.ts"
 import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
 import type { adminTicketOrdersList } from "./adminTicketOrdersList.ts"
+import { adminTicketOrderBookingReference } from "./adminTicketOrderBookingReference.ts"
 
 const pageSize = 50
 const dateFormatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" })
@@ -18,11 +19,15 @@ export function adminTicketOrdersPageStateCreate(
     readonly getDetails?: AdminTicketOrderDetailsGet
     readonly events?: () => readonly AdminEventItem[]
     readonly eventSignal?: { readonly get: () => string; readonly set: (event: string) => void }
+    readonly searchSignal?: { readonly get: () => string; readonly set: (search: string) => void }
   } = {},
 ) {
   const list = inputs.list
   const defaultEvent = createSignalObject("")
   const eventSignal = inputs.eventSignal ?? defaultEvent
+  const defaultSearch = createSignalObject("")
+  const searchSignal = inputs.searchSignal ?? defaultSearch
+  const searchInput = createSignalObject(searchSignal.get())
   const orders = createSignalObject<readonly AdminTicketOrderSummary[]>([])
   const cursor = createSignalObject<string | null>(null)
   const isDone = createSignalObject(false)
@@ -41,21 +46,31 @@ export function adminTicketOrdersPageStateCreate(
     const request = listRequest
     isLoading.set(true)
     errorMessage.set("")
-    const result = await list({
-      eventKey: eventSignal.get() || undefined,
-      paginationOpts: { cursor: cursor.get(), numItems: pageSize },
-    })
-    if (request !== listRequest) return
+    // Convex permits one paginated read per query. Follow empty matching pages with
+    // separate bounded requests, so a search does not stop at the first 50 orders.
+    for (let scannedPages = 0; scannedPages < 10; scannedPages++) {
+      const result = await list({
+        eventKey: eventSignal.get() || undefined,
+        search: searchSignal.get().trim() || undefined,
+        paginationOpts: { cursor: cursor.get(), numItems: pageSize },
+      })
+      if (request !== listRequest) return
+      if (!result.success) {
+        isLoading.set(false)
+        return errorMessage.set(result.errorMessage)
+      }
+      const knownIds = new Set(orders.get().map((order) => order.id))
+      orders.set([...orders.get(), ...result.data.page.filter((order) => !knownIds.has(order.id))])
+      cursor.set(result.data.continueCursor)
+      isDone.set(result.data.isDone)
+      if (result.data.page.length || result.data.isDone || !searchSignal.get().trim()) break
+    }
     isLoading.set(false)
-    if (!result.success) return errorMessage.set(result.errorMessage)
-    const knownIds = new Set(orders.get().map((order) => order.id))
-    orders.set([...orders.get(), ...result.data.page.filter((order) => !knownIds.has(order.id))])
-    cursor.set(result.data.continueCursor)
-    isDone.set(result.data.isDone)
   }
 
   const reload = () => {
     listRequest++
+    orderClose()
     orders.set([])
     cursor.set(null)
     isDone.set(false)
@@ -120,7 +135,16 @@ export function adminTicketOrdersPageStateCreate(
     return `${ticketCountFormat(count)} ${count === 1 ? "Ticket" : "Tickets"} zum Kauf verfügbar`
   }
 
-  if (inputs.eventSignal) createEffect(on(eventSignal.get, reload))
+  if (inputs.eventSignal || inputs.searchSignal)
+    createEffect(
+      on(
+        () => [eventSignal.get(), searchSignal.get()],
+        () => {
+          searchInput.set(searchSignal.get())
+          reload()
+        },
+      ),
+    )
   else onMount(reload)
 
   return {
@@ -133,6 +157,16 @@ export function adminTicketOrdersPageStateCreate(
     loadMore: pageLoad,
     orders: orders.get,
     eventSignal,
+    searchInput,
+    searchQuery: searchSignal.get,
+    searchSubmit: (event?: Event) => {
+      event?.preventDefault()
+      const query = searchInput.get().trim().slice(0, 100)
+      if (query === searchSignal.get()) return reload()
+      searchSignal.set(query)
+      if (!inputs.searchSignal) reload()
+    },
+    bookingReference: adminTicketOrderBookingReference,
     eventOptions: () => [
       { type: "item" as const, value: "" },
       ...(inputs.events?.() ?? []).map((event) => ({ type: "item" as const, value: event.id })),
@@ -163,6 +197,7 @@ export function adminTicketOrdersPageStateCreate(
 
 type AdminTicketOrdersList = (input: {
   readonly eventKey?: string
+  readonly search?: string
   readonly paginationOpts: Parameters<typeof adminTicketOrdersList>[0]["paginationOpts"]
 }) => ReturnType<typeof adminTicketOrdersList>
 

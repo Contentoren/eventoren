@@ -47,8 +47,9 @@ const orderCreate = (paymentStatus: TicketOrderProjection["paymentStatus"], stat
 
 test("decorates a supplied demo order state with reactive confirmation methods", () => {
   const paidOrder = orderCreate("paid", "paid")
+  const paidOrderWithReference = { ...paidOrder, bookingReference: "BOOK-2026-001" }
   const pendingOrder = orderCreate("pending", "checkout_created")
-  const orders = createSignalObject<readonly TicketOrderProjection[]>([paidOrder])
+  const orders = createSignalObject<readonly TicketOrderProjection[]>([paidOrderWithReference])
   const suppliedState: TicketOrderStatusPageState = {
     orders: orders.get,
     isLoading: () => false,
@@ -66,10 +67,34 @@ test("decorates a supplied demo order state with reactive confirmation methods",
   expect(state.isPaid()).toBe(true)
   expect(state.confirmationSymbol()).toBe("✓")
   expect(state.confirmationTitle()).toBe("Vielen Dank – dein Kauf war erfolgreich!")
+  expect(state.paidOrderReferences()).toEqual([{ label: "Bestellnummer", value: "BOOK-2026-001" }])
 
   orders.set([pendingOrder])
 
   expect(state.isPaid()).toBe(false)
   expect(state.confirmationSymbol()).toBe("…")
   expect(state.confirmationTitle()).toBe("Deine Bestellung ist eingegangen")
+  expect(state.paidOrderReferences()).toEqual([])
+})
+
+test("labels paid legacy references and internal IDs accurately", () => {
+  const paidOrder = orderCreate("paid", "paid")
+  const legacyOrder = { ...paidOrder, billingOrderReference: "BILL-LEGACY" }
+  const state = ticketOrderStatusPageViewStateCreate({
+    orderIds: () => [],
+    checkoutKey: () => undefined,
+    state: () => ({
+      orders: () => [legacyOrder, paidOrder],
+      isLoading: () => false,
+      isRefreshing: () => false,
+      errorMessage: () => "",
+      refresh: async () => {},
+      goToEvents: async () => {},
+    }),
+  })
+
+  expect(state.paidOrderReferences()).toEqual([
+    { label: "Zahlungsreferenz", value: "BILL-LEGACY" },
+    { label: "Interne Bestell-ID", value: paidOrder.id },
+  ])
 })

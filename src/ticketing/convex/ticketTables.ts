@@ -65,6 +65,8 @@ export const ticketTables = {
     legalTermsMarkdown: v.optional(v.string()),
     legalPrivacyMarkdown: v.optional(v.string()),
     billingOrderReference: v.optional(v.string()),
+    bookingNumber: v.optional(v.number()),
+    bookingReference: v.optional(v.string()),
     checkoutUrl: v.optional(v.string()),
     status: ticketOrderStatusValidator,
     paymentStatus: ticketPaymentStatusValidator,
@@ -83,6 +85,9 @@ export const ticketTables = {
     .index("statusAndUpdatedAt", ["status", "updatedAt"])
     .index("createdAt", ["createdAt"])
     .index("eventKeyAndCreatedAt", ["eventKey", "createdAt"])
+    .index("bookingNumber", ["bookingNumber"])
+    .index("eventKeyAndBookingNumber", ["eventKey", "bookingNumber"])
+    .searchIndex("contactSnapshotJson", { searchField: "contactSnapshotJson", filterFields: ["eventKey"] })
     .index("emailAccessDigest", ["emailAccessDigest"])
     .index("ownerUserId", ["ownerUserId"])
     .index("ownerUserIdAndCreatedAt", ["ownerUserId", "createdAt"]),

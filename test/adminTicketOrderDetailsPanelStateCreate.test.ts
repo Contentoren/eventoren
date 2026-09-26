@@ -39,3 +39,17 @@ test("missing charge, session address, and partial card data render without inve
   }
   expect(state.cardLabel()).toBe("visa")
 })
+
+test("order and payment details show the booking number only for paid orders", () => {
+  let order = {
+    bookingNumber: 1,
+    bookingReference: "TEST-00001",
+    stripeMode: "test",
+    paymentStatus: "paid",
+    stripeDetails: null,
+  } as AdminTicketOrderDetails
+  const state = adminTicketOrderDetailsPanelStateCreate({ order: () => order })
+  expect(state.bookingReference()).toBe("TEST-00001")
+  order = { ...order, paymentStatus: "pending" }
+  expect(state.bookingReference()).toBeUndefined()
+})

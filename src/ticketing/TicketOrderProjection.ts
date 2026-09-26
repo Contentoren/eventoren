@@ -25,6 +25,8 @@ export type TicketOrderProjection = {
   readonly feeCents: number
   readonly totalCents: number
   readonly paymentReference: string
+  readonly bookingNumber?: number
+  readonly bookingReference?: string
   readonly billingOrderReference?: string
   readonly stripeMode: "live" | "test"
   readonly status:

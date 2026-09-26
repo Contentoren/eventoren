@@ -64,6 +64,44 @@ test("a late page response cannot replace orders after changing the event", asyn
   })
 })
 
+test("submitting search restarts pagination while preserving the event and ignores an earlier response", async () => {
+  await createRoot(async (dispose) => {
+    const pending: ((value: { success: true; data: AdminTicketOrderListPage }) => void)[] = []
+    const calls: { eventKey?: string; search?: string; paginationOpts: { cursor: string | null } }[] = []
+    const state = adminTicketOrdersPageStateCreate({
+      list: (input) => {
+        calls.push(input)
+        return new Promise((resolve) => pending.push(resolve))
+      },
+    })
+    state.eventSignal.set("selected")
+    const first = state.loadMore()
+    state.searchInput.set("  TEST-00001  ")
+    state.searchSubmit()
+    expect(calls[1]).toMatchObject({ eventKey: "selected", search: "TEST-00001", paginationOpts: { cursor: null } })
+    pending[0]?.({
+      success: true,
+      data: { page: [{ id: "old" } as AdminTicketOrderListPage["page"][number]], continueCursor: "old", isDone: false },
+    })
+    await first
+    expect(state.orders()).toEqual([])
+    pending[1]?.({ success: true, data: { page: [], continueCursor: "next", isDone: false } })
+    await Promise.resolve()
+    expect(calls[2]).toMatchObject({ eventKey: "selected", search: "TEST-00001", paginationOpts: { cursor: "next" } })
+    pending[2]?.({
+      success: true,
+      data: {
+        page: [{ id: "match" } as AdminTicketOrderListPage["page"][number]],
+        continueCursor: "end",
+        isDone: true,
+      },
+    })
+    await Promise.resolve()
+    expect(state.orders().map((order) => order.id)).toEqual(["match"])
+    dispose()
+  })
+})
+
 test("calculates available tickets count and labels for all and filtered events", () => {
   createRoot((dispose) => {
     const mockEvents = [

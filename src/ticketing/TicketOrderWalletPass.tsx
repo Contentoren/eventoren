@@ -33,10 +33,16 @@ export function TicketOrderWalletPass(props: { order: TicketOrderProjection }) {
               {state.order().venue}, {state.order().city}
             </dd>
           </div>
-          <div>
-            <dt class="text-xs font-medium uppercase tracking-wide text-content-muted">Bestellnummer</dt>
-            <dd class="mt-space-1 break-all font-mono text-xs font-medium text-content">{state.orderReference()}</dd>
-          </div>
+          <Show when={state.orderReferenceDisplay()}>
+            {(orderReference) => (
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide text-content-muted">{orderReference().label}</dt>
+                <dd class="mt-space-1 break-all font-mono text-xs font-medium text-content">
+                  {orderReference().value}
+                </dd>
+              </div>
+            )}
+          </Show>
           <div>
             <dt class="text-xs font-medium uppercase tracking-wide text-content-muted">Betrag</dt>
             <dd class="mt-space-1 text-sm font-semibold text-content">{state.total()}</dd>

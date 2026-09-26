@@ -34,7 +34,20 @@ function AdminTicketOrdersRoute() {
     eventSignal: {
       get: () => search().event ?? "",
       set: (event) =>
-        void navigate({ to: "/admin/bestellungen", search: { event: event || undefined }, replace: true }),
+        void navigate({
+          to: "/admin/bestellungen",
+          search: { event: event || undefined, q: search().q },
+          replace: true,
+        }),
+    },
+    searchSignal: {
+      get: () => search().q ?? "",
+      set: (q) =>
+        void navigate({
+          to: "/admin/bestellungen",
+          search: { event: search().event, q: q || undefined },
+          replace: true,
+        }),
     },
   })
   return <AdminTicketOrdersPage state={state} />

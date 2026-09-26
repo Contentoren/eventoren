@@ -52,6 +52,8 @@ export async function ticketOrderProjectionCreate(ctx: QueryCtx, orderId: Id<"ti
     totalCents: order.totalCents,
     paymentReference: order.paymentReference,
     billingOrderReference: order.billingOrderReference,
+    bookingNumber: order.bookingNumber,
+    bookingReference: order.bookingReference,
     stripeMode: order.stripeMode,
     status: order.status,
     paymentStatus: order.paymentStatus,

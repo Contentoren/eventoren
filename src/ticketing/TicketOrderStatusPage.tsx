@@ -68,6 +68,22 @@ export function TicketOrderStatusPage(props: {
                     {state.refreshLabel()}
                   </UiButton>
                 </Show>
+                <Show when={state.paidOrderReferences().length > 0}>
+                  <dl class="border-t border-border-subtle pt-space-4">
+                    <For each={state.paidOrderReferences()}>
+                      {(orderReference) => (
+                        <div>
+                          <dt class="text-xs font-medium uppercase tracking-wide text-content-muted">
+                            {orderReference.label}
+                          </dt>
+                          <dd class="mt-space-1 break-all font-mono text-sm font-semibold text-content">
+                            {orderReference.value}
+                          </dd>
+                        </div>
+                      )}
+                    </For>
+                  </dl>
+                </Show>
               </div>
             </CardWrapper>
           </Show>

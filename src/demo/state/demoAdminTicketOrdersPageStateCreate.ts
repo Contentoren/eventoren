@@ -2,6 +2,8 @@ import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { AdminEventItem } from "../../admin/AdminEventItem.ts"
 import type { AdminTicketOrderSummary } from "../../admin/AdminTicketOrderSummary.ts"
 import type { AdminTicketOrdersPageState } from "../../admin/AdminTicketOrdersPageState.ts"
+import { adminTicketOrderBookingReference } from "../../admin/adminTicketOrderBookingReference.ts"
+import { adminTicketOrderSearchMatches } from "../../admin/adminTicketOrderSearchMatches.ts"
 import { eventAvailableTicketsCount } from "../../events/eventAvailableTicketsCount.ts"
 import { eventListAvailableTicketsCount } from "../../events/eventListAvailableTicketsCount.ts"
 import { ticketCountFormat } from "../../ticketing/ticketCountFormat.ts"
@@ -24,6 +26,8 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
 
   const ordersSignal = createSignalObject<readonly AdminTicketOrderSummary[]>(baseOrders)
   const selectedEvent = createSignalObject("")
+  const searchInput = createSignalObject("")
+  const searchQuery = createSignalObject("")
   const selectedOrderId = createSignalObject<string | null>(null)
   const isDone = createSignalObject(false)
   const isMoreLoading = createSignalObject(false)
@@ -36,7 +40,13 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
 
   const orders = () => {
     if (isLoading() || isError() || isEmpty()) return []
-    return ordersSignal.get().filter((order) => !selectedEvent.get() || order.eventKey === selectedEvent.get())
+    return ordersSignal
+      .get()
+      .filter(
+        (order) =>
+          (!selectedEvent.get() || order.eventKey === selectedEvent.get()) &&
+          adminTicketOrderSearchMatches(order, searchQuery.get()),
+      )
   }
 
   const errorMessage = () => {
@@ -71,6 +81,13 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
     loadMore,
     orders,
     eventSignal: selectedEvent,
+    searchInput,
+    searchQuery: searchQuery.get,
+    searchSubmit: (event?: Event) => {
+      event?.preventDefault()
+      searchQuery.set(searchInput.get().trim())
+    },
+    bookingReference: adminTicketOrderBookingReference,
     eventOptions: () => [
       { type: "item" as const, value: "" },
       ...Array.from(new Set(baseOrders.map((order) => order.eventKey)), (value) => ({ type: "item" as const, value })),
