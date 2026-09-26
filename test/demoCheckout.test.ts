@@ -26,6 +26,12 @@ test("numbers demo tickets uniquely across ticket tiers", async () => {
 
   try {
     if (!state) throw new Error("demo checkout state was not created")
+    expect(state.participantFields().map((f) => ({ tierName: f.tierName, totalForTier: f.totalForTier }))).toEqual([
+      { tierName: "Innenraum Stehplatz", totalForTier: 2 },
+      { tierName: "Innenraum Stehplatz", totalForTier: 2 },
+      { tierName: "Early Entry Paket", totalForTier: 1 },
+    ])
+
     for (const field of state.participantFields()) {
       state.participantNameChange(
         field.eventId,
@@ -34,6 +40,12 @@ test("numbers demo tickets uniquely across ticket tiers", async () => {
         `${field.tierName} ${field.ticketIndex + 1}`,
       )
     }
+
+    expect(state.participantFields().map((f) => f.value)).toEqual([
+      "Innenraum Stehplatz 1",
+      "Innenraum Stehplatz 2",
+      "Early Entry Paket 1",
+    ])
     state.legalAcceptanceChange(true)
     await state.confirmPayment()
 
