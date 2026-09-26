@@ -12,7 +12,7 @@ On `/admin/mitglieder`, replace the two role-filter checkboxes with a single-cho
 ## Tasks
 1. [completed] Replace checkbox filter with `CheckSingle` and adapt state/URL mapping as needed.
 2. [completed] Use contrast icon buttons for organizer grant (+) and revoke (-).
-3. [pending] Verify focused checks and UI behavior on `/admin/mitglieder` in browser.
+3. [completed] Verify focused checks and shared UI behavior on the backend-free demo route; live `/admin/mitglieder` remains unavailable locally due to SSO configuration.
 
 ## Current context
-The selector maps Alle to no role URL parameter, one valid role to that role, and both legacy role values to Alle. Production and demo filtering now restrict Alle to admin or organizer members; a focused test covers this and the other options. Organizer actions use `ButtonIcon` contrast with plus/minus icons. Focused tests and Biome pass; global typecheck reports unrelated admission-range errors. Actual `/admin/mitglieder` is blocked locally by SSO origin/callback configuration; the backend-free `/demo/admin/members` route can verify the shared controls.
+The selector maps Alle to no role URL parameter, one valid role to that role, and both legacy role values to Alle. Production and demo filtering restrict Alle to admin or organizer members; focused tests cover the options. Organizer actions use `ButtonIcon` contrast with plus/minus icons. Focused tests and Biome passed; global typecheck has unrelated admission-range errors. Browser checks on `https://eventoren.contentoren.de/demo/admin/members` verified selection, list updates, deselection prevention, and contrast +/- actions; local `/admin/mitglieder` cannot be verified without valid SSO origin/callback configuration. The demo preview is a deployment, not direct evidence of the current workspace revision.
