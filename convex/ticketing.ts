@@ -30,3 +30,4 @@ export { ticketReservationExpirationContextQuery } from "#src/ticketing/convex/t
 export { ticketReservationExpireAction } from "#src/ticketing/convex/ticketReservationExpireAction.ts"
 export { ticketReservationExpireMutation } from "#src/ticketing/convex/ticketReservationExpireMutation.ts"
 export { ticketReservationReleaseMutation } from "#src/ticketing/convex/ticketReservationReleaseMutation.ts"
+export { ticketE2eOrderProofQuery } from "#src/ticketing/convex/ticketE2eOrderProofQuery.ts"
