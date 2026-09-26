@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { describe, expect, it } from "@rstest/core"
 import { e2eInvocationRun } from "./e2eInvocationRun.ts"
 import { e2eCheckpointSave } from "../checkpoint/e2eCheckpointSave.ts"
+import type { e2eStripeTicketReconcile } from "../stripe/e2eStripeTicketReconcile.ts"
 
 describe("Eventoren E2E runner", () => {
   it("blocks production before any SSO or paid fixture is started", async () => {
@@ -264,6 +265,63 @@ describe("Eventoren E2E runner", () => {
         }),
       ).toBe(1)
       expect(called).toEqual(["order-1"])
+      expect(await readFile(join(directory, "checkpoint.json"), "utf8")).toBe(before)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("sweeps an exact stale Stripe test checkout even when the browser is blocked", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-stripe-invocation-"))
+    try {
+      const runId = "abc-12345678-1234-1234-1234-123456789abc"
+      const createdAt = Date.now() - 25 * 60 * 60_000
+      expect(
+        (
+          await e2eCheckpointSave(directory, {
+            version: 1,
+            target: "development",
+            baseUrl: "https://eventoren.leonardomora.de",
+            runId,
+            createdAt,
+            phase: "ticket-unreconciled",
+            ticket: {
+              step: "payment",
+              status: "started",
+              eventKey: `ticket-e2e-${runId}`,
+              eventTitle: `Ticket E2E ${runId}`,
+              participantName: `E2E Participant ${runId}`,
+              mailSince: createdAt,
+              orderId: "order-1",
+              stripeSession: "cs_test_123456789",
+            },
+          })
+        ).success,
+      ).toBe(true)
+      const before = await readFile(join(directory, "checkpoint.json"), "utf8")
+      let swept = 0
+      expect(
+        await e2eInvocationRun({
+          target: "development",
+          checkpointDirectory: directory,
+          environment: {
+            E2E_STRIPE_TEST_SECRET_KEY: "sk_test_mock",
+            E2E_STRIPE_TEST_ACCOUNT_ID: "acct_mock",
+            E2E_BILLING_ORGANIZATION_ID: "org_mock",
+          },
+          commandRun: async () => {
+            throw new Error("browser must not run")
+          },
+          stripeReconcile: (async ({ checkpoint, key, organizationId }) => {
+            swept++
+            expect(checkpoint.runId).toBe(runId)
+            expect(key).toBe("sk_test_mock")
+            expect(organizationId).toBe("org_mock")
+            return { success: true, data: { status: "stripe-reconciled-checkpoint-retained" as const } }
+          }) as typeof e2eStripeTicketReconcile,
+        }),
+      ).toBe(1)
+      expect(swept).toBe(1)
       expect(await readFile(join(directory, "checkpoint.json"), "utf8")).toBe(before)
     } finally {
       await rm(directory, { recursive: true, force: true })

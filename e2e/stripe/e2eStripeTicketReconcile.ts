@@ -14,6 +14,7 @@ export async function e2eStripeTicketReconcile(input: {
     orderId: string,
     eventKey: string,
     runId: string,
+    runCreatedAt: number,
   ) => Promise<{ success: boolean; data?: Proof; errorMessage?: string }>
   /** Independently verify Billing's email/provider mapping was retired before customer deletion. */
   customerExclusive?: (customerId: string) => Promise<boolean>
@@ -39,7 +40,12 @@ export async function e2eStripeTicketReconcile(input: {
   )
     return createResultError(op, "Exact test checkout, run, target or credentials missing; checkpoint retained")
 
-  const proof = await input.orderProof(ticket.orderId, ticket.eventKey, checkpoint.runId)
+  let proof: Awaited<ReturnType<typeof input.orderProof>>
+  try {
+    proof = await input.orderProof(ticket.orderId, ticket.eventKey, checkpoint.runId, checkpoint.createdAt)
+  } catch {
+    return createResultError(op, "App order proof unavailable; checkpoint retained")
+  }
   if (!proof.success || !proof.data?.paymentReference || !proof.data.orderReference)
     return createResultError(op, "App order correlation could not be verified; checkpoint retained")
   const stripe = input.stripe ?? e2eStripeTestClientCreate(input.key)
@@ -89,8 +95,10 @@ export async function e2eStripeTicketReconcile(input: {
     !charges.success ||
     subscriptions.data.some((entry) => entry.customer !== customerId || !owned(entry.metadata)) ||
     intents.data.some((entry) => entry.customer !== customerId || !owned(entry.metadata)) ||
-    invoices.data.some((entry) => entry.customer !== customerId) ||
-    charges.data.some((entry) => entry.customer !== customerId) ||
+    invoices.data.some((entry) => entry.customer !== customerId || !owned(entry.metadata)) ||
+    charges.data.some(
+      (entry) => entry.customer !== customerId || !intents.data.some((intent) => intent.id === entry.payment_intent),
+    ) ||
     (session.data.subscription && !subscriptions.data.some((entry) => entry.id === session.data.subscription)) ||
     (!session.data.subscription && subscriptions.data.length > 0)
   )
@@ -104,6 +112,7 @@ export async function e2eStripeTicketReconcile(input: {
     return createResultError(op, "Paid checkout and app payment state disagree")
   if (session.data.status === "expired" && session.data.payment_status === "paid")
     return createResultError(op, "Expired checkout reports a paid payment")
+  if (intents.data.length > 1) return createResultError(op, "Multiple payment intents require manual reconciliation")
 
   // Preflight all provider objects before any mutation. A failed verification keeps the checkpoint.
   for (const entry of subscriptions.data) {
@@ -136,6 +145,11 @@ export async function e2eStripeTicketReconcile(input: {
     !owned(refreshed.data.metadata)
   )
     return createResultError(op, "Checkout changed before expiration")
+  if (
+    refreshed.data.status === "complete" &&
+    (refreshed.data.payment_status !== "paid" || proof.data.paymentStatus !== "paid")
+  )
+    return createResultError(op, "Checkout became paid during cleanup; app reconciliation required")
   if (refreshed.data.status === "open" && refreshed.data.payment_status === "unpaid") {
     const expired = await stripe.expire(sessionId)
     if (!expired.success) return createResultError(op, "Checkout expiration unverified")
@@ -147,7 +161,9 @@ export async function e2eStripeTicketReconcile(input: {
     verified.data.id !== sessionId ||
     !owned(verified.data.metadata) ||
     verified.data.status === "open" ||
-    verified.data.customer !== customerId
+    verified.data.customer !== customerId ||
+    (verified.data.status === "complete" &&
+      (verified.data.payment_status !== "paid" || proof.data.paymentStatus !== "paid"))
   )
     return createResultError(op, "Checkout expiration could not be verified")
 
@@ -159,14 +175,21 @@ export async function e2eStripeTicketReconcile(input: {
     charges.data.length === 0 &&
     intents.data.length === 0 &&
     subscriptions.data.length === 0 &&
-    input.customerExclusive &&
-    (await input.customerExclusive(customerId))
+    input.customerExclusive
   ) {
-    const deleted = await stripe.deleteCustomer(customerId)
-    if (!deleted.success) return createResultError(op, "Exclusive test customer deletion unverified")
-    const confirmed = await stripe.customerDeleted(customerId)
-    if (!confirmed.success) return createResultError(op, "Exclusive test customer deletion unverified")
-    customerDisposition = "verified-deleted"
+    let exclusive: boolean
+    try {
+      exclusive = await input.customerExclusive(customerId)
+    } catch {
+      return createResultError(op, "Billing customer mapping proof unavailable; checkpoint retained")
+    }
+    if (exclusive) {
+      const deleted = await stripe.deleteCustomer(customerId)
+      if (!deleted.success) return createResultError(op, "Exclusive test customer deletion unverified")
+      const confirmed = await stripe.customerDeleted(customerId)
+      if (!confirmed.success) return createResultError(op, "Exclusive test customer deletion unverified")
+      customerDisposition = "verified-deleted"
+    }
   }
   return createResult({
     status: "stripe-reconciled-checkpoint-retained" as const,

@@ -39,19 +39,27 @@ const checkpoint: E2eCheckpoint = {
 }
 
 function fixture(
-  options: { paid?: boolean; foreign?: boolean; account?: string; intents?: boolean; invoice?: boolean } = {},
+  options: {
+    paid?: boolean
+    foreign?: boolean
+    account?: string
+    intents?: boolean
+    invoice?: boolean
+    subscription?: boolean
+  } = {},
 ) {
   const calls: string[] = []
   let status = options.paid ? "complete" : "open"
   let deleted = false
+  let subscriptionStatus = "active"
   const session = () => ({
     id: "cs_test_123",
     livemode: false,
-    mode: "payment",
+    mode: options.subscription ? "subscription" : "payment",
     status,
     payment_status: options.paid ? "paid" : "unpaid",
     customer: "cus_123",
-    subscription: null,
+    subscription: options.subscription ? "sub_123" : null,
     metadata,
   })
   const fetcher = (async (url: string | URL | Request, init?: RequestInit) => {
@@ -77,16 +85,32 @@ function fixture(
         data: [session(), ...(options.foreign ? [{ ...session(), id: "cs_test_foreign" }] : [])],
         has_more: false,
       }
-    if (path === "subscriptions") body = { data: [], has_more: false }
+    if (path === "subscriptions")
+      body = {
+        data: options.subscription
+          ? [{ id: "sub_123", livemode: false, customer: "cus_123", status: subscriptionStatus, metadata }]
+          : [],
+        has_more: false,
+      }
+    if (path === "subscriptions/sub_123") {
+      if (init?.method === "DELETE") subscriptionStatus = "canceled"
+      body = { id: "sub_123", livemode: false, customer: "cus_123", status: subscriptionStatus, metadata }
+    }
     if (path === "payment_intents")
       body = {
         data: options.intents ? [{ id: "pi_123", livemode: false, customer: "cus_123", metadata }] : [],
         has_more: false,
       }
     if (path === "invoices")
-      body = { data: options.invoice ? [{ id: "in_123", livemode: false, customer: "cus_123" }] : [], has_more: false }
+      body = {
+        data: options.invoice ? [{ id: "in_123", livemode: false, customer: "cus_123", metadata }] : [],
+        has_more: false,
+      }
     if (path === "charges")
-      body = { data: options.paid ? [{ id: "ch_123", livemode: false, customer: "cus_123" }] : [], has_more: false }
+      body = {
+        data: options.paid ? [{ id: "ch_123", livemode: false, customer: "cus_123", payment_intent: "pi_123" }] : [],
+        has_more: false,
+      }
     return Response.json(body ?? {}, { status: body ? 200 : 404 })
   }) as typeof fetch
   return { calls, stripe: e2eStripeTestClientCreate("sk_test_dummy", fetcher) }
@@ -153,6 +177,14 @@ test("reports paid charges and invoices as retained without deleting customer", 
     data: { chargesRetained: 1, invoicesRetained: 1, customer: "retained" },
   })
   expect(calls.every((call) => call.startsWith("GET"))).toBe(true)
+})
+
+test("cancels only a matching test subscription and verifies its terminal state", async () => {
+  const { calls, stripe } = fixture({ subscription: true })
+  const result = await e2eStripeTicketReconcile(config(stripe))
+  expect(result).toMatchObject({ success: true, data: { subscriptionsCanceled: 1, customer: "retained" } })
+  expect(calls).toContain("DELETE subscriptions/sub_123")
+  expect(calls).toContain("POST checkout/sessions/cs_test_123/expire")
 })
 
 test("fails closed for mismatched app order, foreign metadata and live credentials", async () => {

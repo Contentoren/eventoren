@@ -26,8 +26,13 @@ const paymentIntent = v.object({
   customer: v.nullable(v.string()),
   metadata,
 })
-const invoice = v.object({ id: v.string(), livemode: v.literal(false), customer: v.nullable(v.string()) })
-const charge = v.object({ id: v.string(), livemode: v.literal(false), customer: v.nullable(v.string()) })
+const invoice = v.object({ id: v.string(), livemode: v.literal(false), customer: v.nullable(v.string()), metadata })
+const charge = v.object({
+  id: v.string(),
+  livemode: v.literal(false),
+  customer: v.nullable(v.string()),
+  payment_intent: v.nullable(v.string()),
+})
 
 const schemas = { session, customer, subscription, paymentIntent, invoice, charge } as const
 type Kind = keyof typeof schemas
