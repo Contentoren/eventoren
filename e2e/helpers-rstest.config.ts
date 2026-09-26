@@ -7,6 +7,7 @@ export default defineConfig({
     "e2e/config/*.test.ts",
     "e2e/checkpoint/*.test.ts",
     "e2e/catalog/*.test.ts",
+    "e2e/stripe/*.test.ts",
     "e2e/workflows/ticketPurchase/ticketPurchaseStepRun.test.ts",
   ],
   testEnvironment: "node",

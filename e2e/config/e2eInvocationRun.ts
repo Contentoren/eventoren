@@ -9,6 +9,10 @@ import type { E2eCheckpoint } from "../checkpoint/e2eCheckpointSchema.ts"
 import { e2eCatalogCleanupScan } from "../catalog/e2eCatalogCleanupScan.ts"
 import { e2eCatalogCleanupRun } from "../catalog/e2eCatalogCleanupRun.ts"
 import { ticketE2eImapCleanupScan } from "../mail/ticketE2eImapCleanupScan.ts"
+import { e2eStripeCleanupScan } from "../stripe/e2eStripeCleanupScan.ts"
+import { e2eStripeTicketReconcile } from "../stripe/e2eStripeTicketReconcile.ts"
+import { ConvexHttpClient } from "convex/browser"
+import { api } from "../../convex/_generated/api.js"
 import { e2eEnvironmentLoad } from "./e2eEnvironmentLoad.ts"
 import { e2eEnvironmentRead } from "./e2eEnvironmentRead.ts"
 import { e2eInvocationLockAcquire } from "./e2eInvocationLockAcquire.ts"
@@ -27,6 +31,9 @@ export async function e2eInvocationRun(
     commandRun?: (workflow: Workflow, environment: Record<string, string>) => Promise<number>
     catalogCleanup?: Parameters<typeof e2eCatalogCleanupScan>[0]["cleanup"]
     mailCleanup?: Parameters<typeof ticketE2eImapCleanupScan>[0]["remove"]
+    stripeReconcile?: typeof e2eStripeTicketReconcile
+    stripeOrderProof?: Parameters<typeof e2eStripeTicketReconcile>[0]["orderProof"]
+    stripeClient?: Parameters<typeof e2eStripeTicketReconcile>[0]["stripe"]
   } = {},
 ): Promise<number> {
   if (!input.environment) e2eEnvironmentLoad()
@@ -156,6 +163,44 @@ export async function e2eInvocationRun(
     )
     return 1
   } finally {
+    try {
+      const convexUrl = environment.E2E_CLEANUP_CONVEX_URL
+      const adminToken = environment.E2E_CLEANUP_ADMIN_TOKEN
+      const orderProof: Parameters<typeof e2eStripeTicketReconcile>[0]["orderProof"] =
+        input.stripeOrderProof ??
+        (async (orderId, eventKey, runId) => {
+          if (!convexUrl || !adminToken)
+            return { success: false, errorMessage: "Missing app order verification credentials" }
+          const client = new ConvexHttpClient(convexUrl)
+          return client.query(api.ticketing.ticketE2eOrderProofQuery, { token: adminToken, orderId, eventKey, runId })
+        })
+      const stripe = await e2eStripeCleanupScan({
+        directory: root.data.directory,
+        target: target.data,
+        reconcile: input.stripeReconcile ?? e2eStripeTicketReconcile,
+        config:
+          environment.E2E_STRIPE_TEST_SECRET_KEY &&
+          environment.E2E_STRIPE_TEST_ACCOUNT_ID &&
+          environment.E2E_BILLING_ORGANIZATION_ID
+            ? {
+                key: environment.E2E_STRIPE_TEST_SECRET_KEY,
+                accountId: environment.E2E_STRIPE_TEST_ACCOUNT_ID,
+                organizationId: environment.E2E_BILLING_ORGANIZATION_ID,
+                orderProof,
+                stripe: input.stripeClient,
+              }
+            : undefined,
+      })
+      if (!stripe.success)
+        console.error(`Owned Stripe TEST cleanup unresolved: ${stripe.errorMessage}; checkpoint retained`)
+      else if (stripe.data.status === "stripe-reconciled-checkpoint-retained")
+        console.log(
+          "Exact Stripe TEST checkout reconciled; charges/invoices retained; checkpoint retained",
+          stripe.data,
+        )
+    } catch {
+      console.error("Owned Stripe TEST cleanup failed; checkpoint retained")
+    }
     try {
       const host = environment.TEST_CUSTOMER_MAILCOW_HOST?.trim()
       const user = environment.TEST_CUSTOMER_MAILCOW_USER?.trim()
