@@ -6,6 +6,9 @@ import { e2eCheckpointRootResolve } from "../checkpoint/e2eCheckpointRootResolve
 import { e2eCheckpointSave } from "../checkpoint/e2eCheckpointSave.ts"
 import { e2eCheckpointSsoClear } from "../checkpoint/e2eCheckpointSsoClear.ts"
 import type { E2eCheckpoint } from "../checkpoint/e2eCheckpointSchema.ts"
+import { e2eCatalogCleanupScan } from "../catalog/e2eCatalogCleanupScan.ts"
+import { e2eCatalogCleanupRun } from "../catalog/e2eCatalogCleanupRun.ts"
+import { ticketE2eImapCleanupScan } from "../mail/ticketE2eImapCleanupScan.ts"
 import { e2eEnvironmentLoad } from "./e2eEnvironmentLoad.ts"
 import { e2eEnvironmentRead } from "./e2eEnvironmentRead.ts"
 import { e2eInvocationLockAcquire } from "./e2eInvocationLockAcquire.ts"
@@ -22,6 +25,8 @@ export async function e2eInvocationRun(
     environment?: Record<string, string | undefined>
     checkpointDirectory?: string
     commandRun?: (workflow: Workflow, environment: Record<string, string>) => Promise<number>
+    catalogCleanup?: Parameters<typeof e2eCatalogCleanupScan>[0]["cleanup"]
+    mailCleanup?: Parameters<typeof ticketE2eImapCleanupScan>[0]["remove"]
   } = {},
 ): Promise<number> {
   if (!input.environment) e2eEnvironmentLoad()
@@ -31,12 +36,6 @@ export async function e2eInvocationRun(
     console.error(target.errorMessage)
     return 1
   }
-  const ticketSafety = e2eTicketTargetCheck(target.data.target)
-  if (!ticketSafety.success) {
-    console.error(ticketSafety.errorMessage)
-    return 1
-  }
-
   const root = input.checkpointDirectory
     ? { success: true as const, data: { directory: input.checkpointDirectory, fallback: false } }
     : await e2eCheckpointRootResolve()
@@ -62,6 +61,13 @@ export async function e2eInvocationRun(
         console.error("Cannot safely inspect legacy ticket lock; reconcile it manually")
         return 1
       }
+    }
+    // Keep production purchase blocked, but still allow an authorized stale-fixture
+    // scan in finally for an existing production-bound checkpoint.
+    const ticketSafety = e2eTicketTargetCheck(target.data.target)
+    if (!ticketSafety.success) {
+      console.error(ticketSafety.errorMessage)
+      return 1
     }
     const stored = await e2eCheckpointLoad(root.data.directory, target.data)
     if (!stored.success) {
@@ -150,6 +156,58 @@ export async function e2eInvocationRun(
     )
     return 1
   } finally {
+    try {
+      const host = environment.TEST_CUSTOMER_MAILCOW_HOST?.trim()
+      const user = environment.TEST_CUSTOMER_MAILCOW_USER?.trim()
+      const password = environment.TEST_CUSTOMER_MAILCOW_PASS
+      const port = Number(environment.TEST_CUSTOMER_MAILCOW_IMAP_PORT?.trim() || "993")
+      const mail = host && user && password ? { host, user, password, port } : undefined
+      const result = await ticketE2eImapCleanupScan({
+        directory: root.data.directory,
+        target: target.data,
+        mail,
+        remove: input.mailCleanup,
+      })
+      if (!result.success) console.error(`Owned IMAP cleanup unresolved: ${result.errorMessage}; checkpoint retained`)
+      else if (result.data.status === "verified-deleted" || result.data.status === "verified-absent")
+        console.log(`Exact IMAP confirmation ${result.data.status}; Resend's immutable copy retained`)
+    } catch {
+      console.error("Owned IMAP cleanup failed; checkpoint retained")
+    }
+    // Scan under the same lock on *every* exit, including interrupted/failed workflows.
+    // No credentials means no mutation; never confuse archival with provider cleanup.
+    try {
+      const cleanup = input.catalogCleanup
+        ? await e2eCatalogCleanupScan({
+            directory: root.data.directory,
+            target: target.data,
+            cleanup: input.catalogCleanup,
+          })
+        : environment.E2E_CLEANUP_ADMIN_TOKEN && environment.E2E_CLEANUP_CONVEX_URL
+          ? await e2eCatalogCleanupRun({
+              directory: root.data.directory,
+              target: target.data,
+              convexUrl: environment.E2E_CLEANUP_CONVEX_URL,
+              adminToken: environment.E2E_CLEANUP_ADMIN_TOKEN,
+            })
+          : await e2eCatalogCleanupScan({
+              directory: root.data.directory,
+              target: target.data,
+              cleanup: async () => ({
+                success: false,
+                errorMessage: "Missing explicit E2E cleanup admin token/Convex URL",
+              }),
+            })
+      if (!cleanup.success)
+        console.error(`Owned catalog cleanup unresolved: ${cleanup.errorMessage}; checkpoint retained`)
+      else if (cleanup.data.status === "catalog-archived-checkpoint-retained")
+        console.log(
+          "Exact run catalog archived; paid history and external provider artifacts remain retained",
+          cleanup.data.verification,
+        )
+    } catch (error) {
+      console.error("Owned catalog cleanup failed; checkpoint retained", error)
+    }
     try {
       await unlink(join(root.data.directory, "invocation.lock"))
     } catch {

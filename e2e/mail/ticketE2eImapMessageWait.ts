@@ -17,6 +17,7 @@ export async function ticketE2eImapMessageWait(input: {
   linkOrigin: string
 }): Promise<{
   uid: number
+  uidValidity: string
   subject: string
   link: URL
   attachments: { filename: string; contentType: string; content: Buffer }[]
@@ -67,6 +68,7 @@ async function ticketE2eImapMessageFindOnce(
   timeoutMs: number,
 ): Promise<{
   uid: number
+  uidValidity: string
   subject: string
   link: URL
   attachments: { filename: string; contentType: string; content: Buffer }[]
@@ -129,6 +131,7 @@ async function ticketE2eImapMessageRead(
   expectedOrigin: string,
 ): Promise<{
   uid: number
+  uidValidity: string
   subject: string
   link: URL
   attachments: { filename: string; contentType: string; content: Buffer }[]
@@ -137,7 +140,7 @@ async function ticketE2eImapMessageRead(
   const lock = await client.getMailboxLock("INBOX")
   try {
     const mailbox = client.mailbox
-    if (mailbox === false) return null
+    if (mailbox === false || !mailbox.uidValidity) return null
     const newestUid = Math.max(1, mailbox.uidNext - 1)
     const oldestUid = Math.max(1, newestUid - 99)
     const since = new Date(input.since.getTime() - imapClockSkewMs)
@@ -162,7 +165,7 @@ async function ticketE2eImapMessageRead(
         purchaseMarker: input.purchaseMarker,
         linkOrigin: expectedOrigin,
       })
-      if (parsed) return { ...parsed, uid: message.uid }
+      if (parsed) return { ...parsed, uid: message.uid, uidValidity: mailbox.uidValidity.toString() }
     }
     return null
   } finally {

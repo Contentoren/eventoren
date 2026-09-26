@@ -101,3 +101,40 @@ test("scans a successful owned current run but retains its checkpoint for provid
     }),
   ])
 })
+
+test("refuses a stale marker with a foreign participant before invoking cleanup", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "eventoren-cleanup-scan-"))
+  directories.push(directory)
+  const runId = "mtest-12345678-1234-1234-1234-123456789abc"
+  const checkpoint: E2eCheckpoint = {
+    version: 1,
+    target: "development",
+    baseUrl: "https://eventoren.leonardomora.de",
+    runId,
+    createdAt: Date.now() - 25 * 60 * 60_000,
+    phase: "ticket-unreconciled",
+    ticket: {
+      step: "payment",
+      status: "started",
+      eventKey: `ticket-e2e-${runId}`,
+      eventTitle: `Ticket E2E ${runId}`,
+      participantName: "E2E Participant other-12345678-1234-1234-1234-123456789abc",
+      mailSince: Date.now() - 25 * 60 * 60_000,
+    },
+  }
+  expect((await e2eCheckpointSave(directory, checkpoint)).success).toBe(true)
+  let invoked = false
+  expect(
+    (
+      await e2eCatalogCleanupScan({
+        directory,
+        target: checkpoint,
+        cleanup: async () => {
+          invoked = true
+          return { success: true }
+        },
+      })
+    ).success,
+  ).toBe(false)
+  expect(invoked).toBe(false)
+})

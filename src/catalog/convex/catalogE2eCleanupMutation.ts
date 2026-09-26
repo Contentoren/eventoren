@@ -15,6 +15,9 @@ const argsValidator = v.object({
   organizer: v.string(),
   eventId: v.optional(v.string()),
   productId: v.optional(v.string()),
+  orderId: v.optional(v.string()),
+  ticketId: v.optional(v.string()),
+  participantName: v.string(),
   runCreatedAt: v.number(),
   successfulOwnedCurrentRun: v.boolean(),
 })
@@ -34,6 +37,8 @@ async function catalogE2eCleanupAuthorized(
   product: "absent" | "deleted" | "archived"
   retainedOrders: number
   retainedTickets: number
+  paidHistory: "retained" | "none"
+  pdfStorage: "external-not-deleted"
 }> {
   const op = "catalogE2eCleanupMutation"
   const admin = await catalogAdminAuthorizeFn(ctx, args.userId)
@@ -89,9 +94,47 @@ async function catalogE2eCleanupAuthorized(
     .take(101)
   if (orders.length > 100 || tickets.length > 100)
     return createResultError(op, "Fixture exceeds bounded verification limit")
+  if (tier && tier.sold > 0 && orders.length === 0)
+    return createResultError(op, "Sold tier has no proven run order; retain for reconciliation")
+  // A run owns at most one checkout and one issued ticket. Event-key coincidence alone
+  // cannot prove ownership of a customer's paid order or its legal/audit history.
+  if (
+    orders.length > 1 ||
+    tickets.length > 1 ||
+    (orders.length > 0 && (!args.orderId || orders[0]?._id !== args.orderId)) ||
+    (tickets.length > 0 && (!args.ticketId || tickets[0]?._id !== args.ticketId)) ||
+    (args.orderId && orders.length === 0) ||
+    (args.ticketId && tickets.length === 0)
+  )
+    return createResultError(
+      op,
+      "Order/ticket identities cannot be proven from this run; retain for manual reconciliation",
+    )
   if (orders.some((order) => order.stripeMode !== "test"))
     return createResultError(op, "Live Stripe order detected; no cleanup performed")
   for (const order of orders) {
+    if (
+      order.eventTitle !== args.eventTitle ||
+      order.organizer !== args.organizer ||
+      order.customerFamilyName !== args.runId ||
+      order.customerGivenName !== "E2E" ||
+      order._creationTime < args.runCreatedAt ||
+      order.status === "paid_inventory_conflict"
+    )
+      return createResultError(op, "Order is not a proven run-owned checkout; retain history")
+    const lines = await ctx.db
+      .query("ticketOrderLines")
+      .withIndex("orderId", (q) => q.eq("orderId", order._id))
+      .take(2)
+    if (
+      lines.length !== 1 ||
+      !tier ||
+      lines[0]?.tierId !== tier._id ||
+      lines[0].tierKey !== tier.tierKey ||
+      lines[0].quantity !== 1 ||
+      lines[0].participantNamesJson !== JSON.stringify([args.participantName])
+    )
+      return createResultError(op, "Order lines do not prove the exact run product and participant")
     const attempt = await ctx.db
       .query("ticketPaymentAttempts")
       .withIndex("orderId", (q) => q.eq("orderId", order._id))
@@ -101,6 +144,18 @@ async function catalogE2eCleanupAuthorized(
   }
   if (tickets.some((ticket) => !orders.some((order) => order._id === ticket.orderId)))
     return createResultError(op, "Unmatched issued ticket; reconcile manually")
+  if (
+    tickets.some(
+      (issued) =>
+        issued.eventTitle !== args.eventTitle ||
+        issued.tierKey !== tier?.tierKey ||
+        issued.participantName !== args.participantName ||
+        issued._creationTime < args.runCreatedAt,
+    )
+  )
+    return createResultError(op, "Issued ticket does not match the exact run")
+  if (orders.some((order) => order.status === "paid" && tickets.length !== 1))
+    return createResultError(op, "Paid order has no single proven issued ticket; retain for fulfillment reconciliation")
 
   const now = new Date().toISOString()
   if (!event.deletedAt || (tier && !tier.archivedAt && tier.sold === 0)) {
@@ -132,6 +187,10 @@ async function catalogE2eCleanupAuthorized(
     eventKey: event.eventKey,
     retainedOrders: orders.length,
     retainedTickets: tickets.length,
+    paidHistory: orders.some((order) => order.status === "paid" || order.paymentStatus === "paid")
+      ? "retained"
+      : "none",
+    pdfStorage: "external-not-deleted",
   })
   return createResult({
     eventKey: event.eventKey,
@@ -139,5 +198,9 @@ async function catalogE2eCleanupAuthorized(
     product: !tier ? (args.productId ? "deleted" : "absent") : verifiedTier ? "archived" : "deleted",
     retainedOrders: orders.length,
     retainedTickets: tickets.length,
+    paidHistory: orders.some((order) => order.status === "paid" || order.paymentStatus === "paid")
+      ? ("retained" as const)
+      : ("none" as const),
+    pdfStorage: "external-not-deleted" as const,
   })
 }

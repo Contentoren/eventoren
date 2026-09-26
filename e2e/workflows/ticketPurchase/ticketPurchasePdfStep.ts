@@ -17,7 +17,10 @@ export async function ticketPurchasePdfStep(context: TicketPurchaseContext): Pro
       pollMs: 5_000,
       linkOrigin: context.baseUrl,
     })
-    if (email.uid !== context.checkpoint.ticket.mailUid)
+    if (
+      email.uid !== context.checkpoint.ticket.mailUid ||
+      email.uidValidity !== context.checkpoint.ticket.mailUidValidity
+    )
       throw new Error("PDF message does not match checkpointed IMAP UID")
     const attachment = email.attachments.find(
       (item) => item.contentType === "application/pdf" || item.filename.toLowerCase().endsWith(".pdf"),

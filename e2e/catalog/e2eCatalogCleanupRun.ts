@@ -3,7 +3,7 @@ import { api } from "../../convex/_generated/api.js"
 import type { E2eCheckpoint } from "../checkpoint/e2eCheckpointSchema.ts"
 import { e2eCatalogCleanupScan } from "./e2eCatalogCleanupScan.ts"
 
-/** Explicit admin-token invocation only; not wired to the ticket runner until full provider reconciliation exists. */
+/** Explicit admin-token invocation; catalog archival does not complete provider reconciliation. */
 export async function e2eCatalogCleanupRun(input: {
   directory: string
   target: Pick<E2eCheckpoint, "target" | "baseUrl">

@@ -9,6 +9,9 @@ type CleanupInput = {
   organizer: string
   eventId?: string
   productId?: string
+  orderId?: string
+  ticketId?: string
+  participantName: string
   runCreatedAt: number
   successfulOwnedCurrentRun: boolean
 }
@@ -30,6 +33,7 @@ export async function e2eCatalogCleanupScan(input: {
   if (
     ticket.eventKey !== `ticket-e2e-${checkpoint.runId}` ||
     ticket.eventTitle !== `Ticket E2E ${checkpoint.runId}` ||
+    ticket.participantName !== `E2E Participant ${checkpoint.runId}` ||
     (ticket.eventId && ticket.eventId !== ticket.eventKey)
   )
     return createResultError(op, "Checkpoint does not identify one exact owned event")
@@ -45,6 +49,9 @@ export async function e2eCatalogCleanupScan(input: {
     organizer: `Eventoren Ticket E2E ${checkpoint.runId}`,
     eventId: ticket.eventId,
     productId: ticket.productId,
+    orderId: ticket.orderId,
+    ticketId: ticket.ticketId,
+    participantName: ticket.participantName,
     runCreatedAt: checkpoint.createdAt,
     successfulOwnedCurrentRun: successful,
   })

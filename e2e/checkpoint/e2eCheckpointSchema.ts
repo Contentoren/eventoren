@@ -35,6 +35,7 @@ export const e2eCheckpointSchema = v.strictObject({
       ticketId: v.optional(v.string()),
       stripeSession: v.optional(v.pipe(v.string(), v.regex(/^cs_test_[A-Za-z0-9]+$/u))),
       mailUid: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
+      mailUidValidity: v.optional(v.pipe(v.string(), v.regex(/^[1-9][0-9]*$/u))),
       pdfFilename: v.optional(v.string()),
       pdfSha256: v.optional(v.pipe(v.string(), v.regex(/^[a-f0-9]{64}$/u))),
     }),

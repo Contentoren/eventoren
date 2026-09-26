@@ -219,6 +219,57 @@ describe("Eventoren E2E runner", () => {
     }
   })
 
+  it("scans an exact stale ticket marker after a blocked retry and preserves unresolved checkpoint", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
+    try {
+      const runId = "abc-12345678-1234-1234-1234-123456789abc"
+      const createdAt = Date.now() - 25 * 60 * 60_000
+      expect(
+        (
+          await e2eCheckpointSave(directory, {
+            version: 1,
+            target: "development",
+            baseUrl: "https://eventoren.leonardomora.de",
+            runId,
+            createdAt,
+            phase: "ticket-unreconciled",
+            ticket: {
+              step: "payment",
+              status: "started",
+              eventKey: `ticket-e2e-${runId}`,
+              eventTitle: `Ticket E2E ${runId}`,
+              participantName: `E2E Participant ${runId}`,
+              mailSince: createdAt,
+              eventId: `ticket-e2e-${runId}`,
+              productId: "paid-ticket",
+              orderId: "order-1",
+            },
+          })
+        ).success,
+      ).toBe(true)
+      const before = await readFile(join(directory, "checkpoint.json"), "utf8")
+      const called: string[] = []
+      expect(
+        await e2eInvocationRun({
+          target: "development",
+          environment: {},
+          checkpointDirectory: directory,
+          commandRun: async () => {
+            throw new Error("must not run browser")
+          },
+          catalogCleanup: async (fixture) => {
+            called.push(fixture.orderId ?? "missing")
+            return { success: false, errorMessage: "PDF/provider reconciliation pending" }
+          },
+        }),
+      ).toBe(1)
+      expect(called).toEqual(["order-1"])
+      expect(await readFile(join(directory, "checkpoint.json"), "utf8")).toBe(before)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
   it("does not silently redirect a production run with a preview env file", async () => {
     expect(
       await e2eInvocationRun({
@@ -226,5 +277,63 @@ describe("Eventoren E2E runner", () => {
         commandRun: async () => 0,
       }),
     ).toBe(1)
+  })
+
+  it("runs exact stale IMAP cleanup after a blocked retry, without clearing uncertain effects", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-imap-test-"))
+    try {
+      const runId = "abc-12345678-1234-1234-1234-123456789abc"
+      const createdAt = Date.now() - 25 * 60 * 60_000
+      expect(
+        (
+          await e2eCheckpointSave(directory, {
+            version: 1,
+            target: "development",
+            baseUrl: "https://eventoren.leonardomora.de",
+            runId,
+            createdAt,
+            phase: "ticket-unreconciled",
+            ticket: {
+              step: "payment",
+              status: "started",
+              eventKey: `ticket-e2e-${runId}`,
+              eventTitle: `Ticket E2E ${runId}`,
+              participantName: `E2E Participant ${runId}`,
+              mailSince: createdAt,
+              mailUid: 501,
+              mailUidValidity: "42",
+              stripeSession: "cs_test_123456789",
+            },
+          })
+        ).success,
+      ).toBe(true)
+      const previous = await readFile(join(directory, "checkpoint.json"), "utf8")
+      let scanned = false
+      expect(
+        await e2eInvocationRun({
+          target: "development",
+          checkpointDirectory: directory,
+          environment: {
+            TEST_CUSTOMER_MAILCOW_HOST: "localhost",
+            TEST_CUSTOMER_MAILCOW_USER: "buyer@example.test",
+            TEST_CUSTOMER_MAILCOW_PASS: "unused",
+          },
+          commandRun: async () => {
+            throw new Error("browser must not start")
+          },
+          mailCleanup: async (input) => {
+            scanned = true
+            expect(input.uid).toBe(501)
+            expect(input.uidValidity).toBe("42")
+            expect(input.eventTitle).toBe(`Ticket E2E ${runId}`)
+            return { success: true, data: { status: "verified-deleted" } }
+          },
+        }),
+      ).toBe(1)
+      expect(scanned).toBe(true)
+      expect(await readFile(join(directory, "checkpoint.json"), "utf8")).toBe(previous)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
   })
 })

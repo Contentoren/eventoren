@@ -12,9 +12,12 @@ export async function ticketPurchaseDeliveryStep(context: TicketPurchaseContext)
       pollMs: 5_000,
       linkOrigin: context.baseUrl,
     })
-    if (context.checkpoint.ticket.mailUid && context.checkpoint.ticket.mailUid !== email.uid) {
+    if (
+      (context.checkpoint.ticket.mailUid && context.checkpoint.ticket.mailUid !== email.uid) ||
+      (context.checkpoint.ticket.mailUidValidity && context.checkpoint.ticket.mailUidValidity !== email.uidValidity)
+    ) {
       throw new Error("Matching mail UID changed; reconcile before continuing")
     }
-    await record({ mailUid: email.uid })
+    await record({ mailUid: email.uid, mailUidValidity: email.uidValidity })
   })
 }

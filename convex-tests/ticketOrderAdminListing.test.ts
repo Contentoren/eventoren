@@ -93,7 +93,7 @@ test("searches past the first page for a booking number, customer email and name
     await orderInsert(t, ownerId, `other${day}@example.test`, `2026-09-${day}T10:00:00.000Z`, "selected")
   await orderInsert(t, ownerId, "target@example.test", "2026-09-26T10:00:00.000Z", "other")
   const token = await createToken(adminId, authSecret)
-  for (const search of ["00001", "TEST-00001", "TARGET@EXAMPLE"]) {
+  for (const search of ["00001", "TEST-00001", "TARGET@EXAMPLE", "target@example.test"]) {
     let cursor: string | null = null
     let found = false
     for (let page = 0; page < 4; page++) {
@@ -164,7 +164,7 @@ test("finds an order older than 500 newer orders by reference, email and name on
   await orderInsert(t, ownerId, "rare@example.test", "2026-09-30T10:00:00.000Z", "other")
 
   const token = await createToken(adminId, authSecret)
-  for (const search of ["00001", "TEST-00001", "RARE@EXAMPLE", "rare finder"]) {
+  for (const search of ["00001", "TEST-00001", "RARE@EXAMPLE", "rare@example.test", "RARE FINDER"]) {
     const result = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
       token,
       eventKey: "selected",

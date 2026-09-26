@@ -13,7 +13,10 @@ export async function ticketPurchaseAccessStep(context: TicketPurchaseContext): 
       pollMs: 5_000,
       linkOrigin: context.baseUrl,
     })
-    if (email.uid !== context.checkpoint.ticket.mailUid)
+    if (
+      email.uid !== context.checkpoint.ticket.mailUid ||
+      email.uidValidity !== context.checkpoint.ticket.mailUidValidity
+    )
       throw new Error("Capability email UID differs from the checkpoint")
     const cleanContext = await context.browser.newContext()
     try {

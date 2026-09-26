@@ -51,6 +51,7 @@ export async function e2eCheckpointSave(directory: string, checkpoint: E2eCheckp
               "ticketId",
               "stripeSession",
               "mailUid",
+              "mailUidValidity",
               "pdfFilename",
               "pdfSha256",
             ] as const
