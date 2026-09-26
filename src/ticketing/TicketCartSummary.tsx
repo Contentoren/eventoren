@@ -14,8 +14,10 @@ export function TicketCartSummary(props: {
   cart: TicketCart
   minimumQuantity?: number
   checkoutLabel?: string
+  addToCartLabel?: string
   onCheckout?: () => void
   onDirectCheckout?: () => void
+  onAddToCart?: () => void
   onCartChange?: (cart: TicketCart) => void
 }) {
   const state = ticketCartSummaryStateCreate({
@@ -135,21 +137,21 @@ export function TicketCartSummary(props: {
           <Show when={props.onCheckout}>
             {(onCheckout) => (
               <UiButton size="lg" block disabled={state.isCheckoutDisabled()} onClick={() => onCheckout()()}>
-                {props.checkoutLabel ?? text().addToCart}
+                {props.checkoutLabel ?? text().directCheckout}
               </UiButton>
             )}
           </Show>
 
-          <Show when={props.onDirectCheckout}>
-            {(onDirectCheckout) => (
+          <Show when={props.onAddToCart ?? props.onDirectCheckout}>
+            {(secondaryAction) => (
               <UiButton
                 variant="secondary"
                 size="lg"
                 block
                 disabled={state.isCheckoutDisabled()}
-                onClick={() => onDirectCheckout()()}
+                onClick={() => secondaryAction()()}
               >
-                {text().directCheckout}
+                {props.addToCartLabel ?? text().addToCart}
               </UiButton>
             )}
           </Show>

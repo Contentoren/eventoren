@@ -1,16 +1,16 @@
 import { Link } from "@tanstack/solid-router"
 import type { JSX } from "solid-js"
 import { For, Show } from "solid-js"
-import { Button } from "#ui/interactive/button/Button.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { SelectSingle } from "#ui/input/select/SelectSingle.jsx"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { UiBadge } from "../ui/UiBadge.tsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { adminListViewPreferenceContextUse } from "../viewPreference/adminListViewPreferenceContextUse.ts"
 import { AdminTicketOrderDetailsPanel } from "./AdminTicketOrderDetailsPanel.tsx"
-import type { AdminTicketOrdersPageState } from "./AdminTicketOrdersPageState.ts"
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
+import type { AdminTicketOrdersPageState } from "./AdminTicketOrdersPageState.ts"
 import { adminTicketOrdersPageStateCreate } from "./adminTicketOrdersPageStateCreate.ts"
 
 export function AdminTicketOrdersPage(props?: {
@@ -25,15 +25,24 @@ export function AdminTicketOrdersPage(props?: {
       <div class="min-w-0">
         <h2 class="truncate font-semibold text-content">
           <Link
-            to="/admin/events/$eventKey"
-            params={{ eventKey: order.eventKey }}
-            search={{}}
+            to="/events/$eventId"
+            params={{ eventId: order.eventKey }}
             onClick={(event) => event.stopPropagation()}
             class="hover:underline focus-visible:underline"
           >
             {state.eventForOrder(order)?.title ?? order.eventTitle}
           </Link>
         </h2>
+        <p class="truncate text-xs text-content-muted">
+          <Link
+            to="/events/$eventId"
+            params={{ eventId: order.eventKey }}
+            onClick={(event) => event.stopPropagation()}
+            class="font-mono hover:underline focus-visible:underline"
+          >
+            {order.eventKey}
+          </Link>
+        </p>
         <Show when={tile}>
           <p class="mt-1 truncate text-xs text-content-muted">
             {[state.eventForOrder(order)?.venue, state.eventForOrder(order)?.city].filter(Boolean).join(", ") ||
@@ -210,7 +219,13 @@ export function AdminTicketOrdersPage(props?: {
               >
                 <For each={state.orders()}>
                   {(order) => (
-                    <li class="min-w-0">
+                    <li
+                      class={
+                        viewPreference?.view() === "tiles" && state.selectedOrderId() === order.id
+                          ? "contents"
+                          : "min-w-0"
+                      }
+                    >
                       <Show
                         when={viewPreference?.view() === "tiles"}
                         fallback={
@@ -254,31 +269,33 @@ export function AdminTicketOrdersPage(props?: {
                         </CardWrapper>
                       </Show>
                       <Show when={state.selectedOrderId() === order.id}>
-                        <Show when={state.detailsLoading()}>
-                          <CardWrapper>
-                            <p role="status" class="text-sm text-content-muted">
-                              Bestelldetails werden geladen …
+                        <div class={viewPreference?.view() === "tiles" ? "col-span-full" : undefined}>
+                          <Show when={state.detailsLoading()}>
+                            <CardWrapper>
+                              <p role="status" class="text-sm text-content-muted">
+                                Bestelldetails werden geladen …
+                              </p>
+                            </CardWrapper>
+                          </Show>
+                          <Show when={state.detailsError()}>
+                            <p
+                              role="alert"
+                              class="rounded-md border border-danger/50 bg-danger-soft px-4 py-3 text-sm text-danger"
+                            >
+                              {state.detailsError()}
                             </p>
-                          </CardWrapper>
-                        </Show>
-                        <Show when={state.detailsError()}>
-                          <p
-                            role="alert"
-                            class="rounded-md border border-danger/50 bg-danger-soft px-4 py-3 text-sm text-danger"
-                          >
-                            {state.detailsError()}
-                          </p>
-                        </Show>
-                        <Show when={state.details()?.id === order.id && state.details()}>
-                          {(details) => (
-                            <AdminTicketOrderDetailsPanel
-                              order={details()}
-                              close={state.orderClose}
-                              dateFormat={state.dateFormat}
-                              priceFormat={state.priceFormat}
-                            />
-                          )}
-                        </Show>
+                          </Show>
+                          <Show when={state.details()?.id === order.id && state.details()}>
+                            {(details) => (
+                              <AdminTicketOrderDetailsPanel
+                                order={details()}
+                                close={state.orderClose}
+                                dateFormat={state.dateFormat}
+                                priceFormat={state.priceFormat}
+                              />
+                            )}
+                          </Show>
+                        </div>
                       </Show>
                     </li>
                   )}

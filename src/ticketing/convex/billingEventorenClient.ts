@@ -56,6 +56,8 @@ export const billingEventorenClient = {
     } catch {
       return createResultError(op, "Billing and public base URLs must be valid URLs")
     }
+    if (new URL(publicBaseUrl).origin === "https://eventoren.de" && stripeMode !== "live")
+      return createResultError(op, "Production Billing checkout must use live Stripe mode")
 
     const fetcher = options.fetcher ?? globalThis.fetch
     const clientResult = billingClientCreate({

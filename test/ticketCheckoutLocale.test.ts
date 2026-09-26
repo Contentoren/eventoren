@@ -10,7 +10,8 @@ test("keeps checkout and order wallet copy German-only", () => {
   expect(ticketCheckoutText()).toMatchObject({
     title: "Kasse",
     orderSummary: "Bestellübersicht",
-    directCheckout: "Direkt zur Kasse",
+    directCheckout: "Jetzt kaufen",
+    buyNow: "Jetzt kaufen",
     perTicket: "pro Ticket",
     checkoutUnavailable: "Checkout nicht möglich",
     ticketAccessInvalid: "Dieser Ticket-Link ist ungültig.",

@@ -64,57 +64,44 @@ export function OrganizerEventListPage(props: {
                   >
                     <For each={group.events}>
                       {(event) => (
-                        <CardWrapper
-                          class={
-                            viewPreference?.view() === "tiles"
-                              ? "overflow-hidden p-0"
-                              : "flex items-center gap-space-3 overflow-hidden p-space-2 sm:gap-space-4 sm:p-space-3"
-                          }
-                        >
-                          <img
-                            src={eventImageUrlGet(event.imageVariants?.organizer ?? event.imageUrl)}
-                            alt={event.imageAlt}
-                            loading="lazy"
-                            decoding="async"
+                        <CardWrapper class="group overflow-hidden p-0 transition-colors duration-200 hover:border-brand-accent hover:bg-surface-muted/40">
+                          <OrganizerEventCardLink
+                            eventKey={event.eventKey}
+                            eventHref={props.eventHref}
                             class={
                               viewPreference?.view() === "tiles"
-                                ? "aspect-[16/9] w-full object-cover"
-                                : "aspect-square w-16 shrink-0 rounded-control object-cover sm:w-20"
-                            }
-                          />
-                          <div
-                            class={
-                              viewPreference?.view() === "tiles"
-                                ? "flex flex-col gap-space-3 p-space-4"
-                                : "flex min-w-0 flex-1 flex-col gap-space-2 sm:flex-row sm:items-center sm:justify-between"
+                                ? "focus-ring flex h-full flex-col"
+                                : "focus-ring flex items-center gap-space-3 p-space-2 sm:gap-space-4 sm:p-space-3"
                             }
                           >
-                            <div>
-                              <p class="text-sm font-semibold text-brand-accent">{state.eventTime(event.startsAt)}</p>
-                              <h3 class="mt-space-1 text-lg font-semibold text-content">{event.title}</h3>
-                            </div>
-                            <Show
-                              when={props.eventHref}
-                              fallback={
-                                <Link
-                                  to="/organizer/event/$eventId"
-                                  params={{ eventId: event.eventKey }}
-                                  class="focus-ring inline-flex min-h-10 items-center justify-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong"
-                                >
-                                  {state.text().eventOpen}
-                                </Link>
+                            <img
+                              src={eventImageUrlGet(event.imageVariants?.organizer ?? event.imageUrl)}
+                              alt={event.imageAlt}
+                              loading="lazy"
+                              decoding="async"
+                              class={
+                                viewPreference?.view() === "tiles"
+                                  ? "aspect-[16/9] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                                  : "aspect-square w-16 shrink-0 rounded-control object-cover sm:w-20"
+                              }
+                            />
+                            <div
+                              class={
+                                viewPreference?.view() === "tiles"
+                                  ? "flex flex-1 flex-col gap-space-1 p-space-4"
+                                  : "flex min-w-0 flex-1 flex-col gap-space-1"
                               }
                             >
-                              {(eventHref) => (
-                                <Link
-                                  to={eventHref()(event.eventKey)}
-                                  class="focus-ring inline-flex min-h-10 items-center justify-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong"
-                                >
-                                  {state.text().eventOpen}
-                                </Link>
-                              )}
-                            </Show>
-                          </div>
+                              <p class="text-sm font-semibold text-brand-accent">{state.eventTime(event.startsAt)}</p>
+                              <h3
+                                class={`text-lg font-semibold text-content transition-colors group-hover:text-brand-accent ${
+                                  viewPreference?.view() === "tiles" ? "mt-space-1" : "truncate"
+                                }`}
+                              >
+                                {event.title}
+                              </h3>
+                            </div>
+                          </OrganizerEventCardLink>
                         </CardWrapper>
                       )}
                     </For>
@@ -126,5 +113,29 @@ export function OrganizerEventListPage(props: {
         </UiContainer>
       </main>
     </Dynamic>
+  )
+}
+
+function OrganizerEventCardLink(props: {
+  readonly eventKey: string
+  readonly eventHref?: (eventKey: string) => string
+  readonly class?: string
+  readonly children: JSX.Element
+}) {
+  return (
+    <Show
+      when={props.eventHref}
+      fallback={
+        <Link to="/organizer/event/$eventId" params={{ eventId: props.eventKey }} class={props.class}>
+          {props.children}
+        </Link>
+      }
+    >
+      {(eventHref) => (
+        <Link to={eventHref()(props.eventKey)} class={props.class}>
+          {props.children}
+        </Link>
+      )}
+    </Show>
   )
 }

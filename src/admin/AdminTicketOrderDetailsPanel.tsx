@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
@@ -17,7 +18,15 @@ export function AdminTicketOrderDetailsPanel(props: {
       <header class="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p class="text-xs font-semibold uppercase tracking-wide text-content-muted">Bestelldetails</p>
-          <h2 class="mt-1 text-xl font-semibold text-content">{props.order.eventTitle}</h2>
+          <h2 class="mt-1 text-xl font-semibold text-content">
+            <Link
+              to="/events/$eventId"
+              params={{ eventId: props.order.eventKey }}
+              class="hover:underline focus-visible:underline"
+            >
+              {props.order.eventTitle}
+            </Link>
+          </h2>
           <p class="text-sm text-content-muted">Bestellt am {props.dateFormat(props.order.createdAt)}</p>
         </div>
         <Button variant="outline" size="sm" onClick={props.close}>
@@ -61,8 +70,24 @@ export function AdminTicketOrderDetailsPanel(props: {
           <div class="flex min-w-0 flex-col gap-2 break-words text-sm">
             <h4 class="font-semibold text-content">Veranstaltung</h4>
             <p>
-              {props.order.eventTitle}
+              <Link
+                to="/events/$eventId"
+                params={{ eventId: props.order.eventKey }}
+                class="font-medium text-brand-accent hover:underline"
+              >
+                {props.order.eventTitle}
+              </Link>
               {props.order.eventSubtitle ? ` · ${props.order.eventSubtitle}` : ""}
+            </p>
+            <p class="text-xs text-content-muted">
+              Event-ID:{" "}
+              <Link
+                to="/events/$eventId"
+                params={{ eventId: props.order.eventKey }}
+                class="font-mono underline hover:text-content"
+              >
+                {props.order.eventKey}
+              </Link>
             </p>
             <p>
               {props.dateFormat(props.order.eventStartsAt)} – {props.dateFormat(props.order.eventEndsAt)} · Einlass{" "}

@@ -50,10 +50,11 @@ export function EventDetailPageView(props: {
             <TicketCartSummary
               event={props.event}
               cart={props.state.cart()}
-              checkoutLabel="In den Warenkorb"
+              checkoutLabel="Jetzt kaufen"
+              addToCartLabel="In den Warenkorb"
               onCartChange={props.state.applyCart}
-              onCheckout={props.state.goToCart}
-              onDirectCheckout={props.state.goToCheckout}
+              onCheckout={props.state.goToCheckout}
+              onAddToCart={props.state.goToCart}
             />
           </div>
         </div>
@@ -62,8 +63,8 @@ export function EventDetailPageView(props: {
       <TicketStickyCta
         event={props.event}
         cart={props.state.cart()}
-        label="In den Warenkorb"
-        onContinue={props.state.goToCart}
+        label="Jetzt kaufen"
+        onContinue={props.state.goToCheckout}
       />
     </main>
   )

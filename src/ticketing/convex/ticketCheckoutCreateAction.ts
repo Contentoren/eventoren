@@ -3,6 +3,7 @@ import { internal } from "#convex/_generated/api.js"
 import { action } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
 import { billingEventorenClient } from "./billingEventorenClient.js"
+import { ticketCheckoutE2eRouteCheck } from "./ticketCheckoutE2eRouteCheck.js"
 import { ticketOrderAccessResolve } from "./ticketOrderAccessResolve.js"
 
 const checkoutKeyValidator = v.string()
@@ -64,6 +65,8 @@ export const ticketCheckoutCreateAction = action({
     if (!accessResult.success) return accessResult
     const config = billingEventorenClient.configRead()
     if (!config.success) return config
+    const e2eRoute = ticketCheckoutE2eRouteCheck(args.eventKey, config.data.publicBaseUrl, config.data.stripeMode)
+    if (!e2eRoute.success) return e2eRoute
     const locale = args.locale ?? "de"
     const urlResult = checkoutUrlsCanonicalize(config.data.publicBaseUrl, args.successUrl, args.cancelUrl)
     if (!urlResult.success) return urlResult

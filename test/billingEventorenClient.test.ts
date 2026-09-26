@@ -18,6 +18,16 @@ function environmentSet() {
   process.env.EVENTOREN_PUBLIC_BASE_URL = "https://eventoren.test"
 }
 
+test("production Billing configuration refuses deployment-wide test Stripe mode", () => {
+  environmentSet()
+  process.env.EVENTOREN_PUBLIC_BASE_URL = "https://eventoren.de"
+  expect(billingEventorenClient.configRead().success).toBe(false)
+  process.env.EVENTOREN_BILLING_STRIPE_MODE = "live"
+  const live = billingEventorenClient.configRead()
+  expect(live.success).toBe(true)
+  if (live.success) expect(live.data.stripeMode).toBe("live")
+})
+
 function catalogResponse() {
   return new Response(
     JSON.stringify({

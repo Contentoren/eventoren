@@ -19,8 +19,8 @@ test("paid orders show their formatted booking reference but unpaid orders do no
   expect(adminTicketOrderBookingReference({ ...order, paymentStatus: "pending" })).toBeUndefined()
 })
 
-test("search matches number with or without test prefix, email and full customer name", () => {
-  for (const term of ["00001", "test-00001", "ERIKA@EXAMPLE", "erika muster", "MUSTERFRAU"])
+test("search matches number with or without test prefix, full email and full customer name", () => {
+  for (const term of ["00001", "test-00001", "ERIKA@EXAMPLE.TEST", "ERIKA MUSTERFRAU", "erika muster", "MUSTERFRAU"])
     expect(adminTicketOrderSearchMatches(order, term)).toBe(true)
   expect(adminTicketOrderSearchMatches(order, "00002")).toBe(false)
   expect(adminTicketOrderSearchMatches({ ...order, paymentStatus: "pending" }, "00001")).toBe(false)
