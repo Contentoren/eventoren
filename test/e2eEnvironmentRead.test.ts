@@ -51,5 +51,8 @@ describe("E2E environment configuration", () => {
     expect(e2eEnvironmentRead({ E2E_BASE_URL: "https://eventoren.leonardomora.de" }).success).toBe(false)
     expect(e2eEnvironmentRead({ E2E_TARGET: "development", E2E_BASE_URL: "https://eventoren.de" }).success).toBe(false)
     expect(e2eEnvironmentRead({ E2E_TARGET: "preview" }).success).toBe(false)
+    expect(e2eEnvironmentRead({ E2E_TARGET: "development", E2E_BASE_URL: "http://localhost:4173/" }).success).toBe(
+      false,
+    )
   })
 })

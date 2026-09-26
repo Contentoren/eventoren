@@ -1,8 +1,9 @@
-import { mkdtemp, readFile, rm } from "node:fs/promises"
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { describe, expect, it } from "@rstest/core"
 import { e2eInvocationRun } from "./e2eInvocationRun.ts"
+import { e2eCheckpointSave } from "../checkpoint/e2eCheckpointSave.ts"
 
 describe("Eventoren E2E runner", () => {
   it("blocks production before any SSO or paid fixture is started", async () => {
@@ -50,7 +51,7 @@ describe("Eventoren E2E runner", () => {
           },
         }),
       ).toBe(1)
-      expect(started).toEqual([])
+      expect(started).toEqual(["SSO", "ticket purchase"])
     } finally {
       await rm(directory, { recursive: true, force: true })
     }
@@ -76,6 +77,143 @@ describe("Eventoren E2E runner", () => {
       }
       expect(runIds).toHaveLength(2)
       expect(runIds[0]).toBe(runIds[1]!)
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("locks checkpoint loading and both workflows against a second invocation", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
+    try {
+      let entered!: () => void
+      const started = new Promise<void>((resolve) => {
+        entered = resolve
+      })
+      let release!: () => void
+      const held = new Promise<void>((resolve) => {
+        release = resolve
+      })
+      const first = e2eInvocationRun({
+        target: "development",
+        environment: {},
+        checkpointDirectory: directory,
+        commandRun: async () => {
+          entered()
+          await held
+          return 1
+        },
+      })
+      await started
+      const before = await readFile(join(directory, "checkpoint.json"), "utf8")
+      let secondStarted = false
+      expect(
+        await e2eInvocationRun({
+          target: "development",
+          environment: {},
+          checkpointDirectory: directory,
+          commandRun: async () => {
+            secondStarted = true
+            return 0
+          },
+        }),
+      ).toBe(1)
+      expect(secondStarted).toBe(false)
+      expect(await readFile(join(directory, "checkpoint.json"), "utf8")).toBe(before)
+      release()
+      expect(await first).toBe(1)
+      expect(await readFile(join(directory, "checkpoint.json"), "utf8")).toBe(before)
+      await expect(readFile(join(directory, "invocation.lock"), "utf8")).rejects.toMatchObject({ code: "ENOENT" })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("keeps an interrupted invocation lock and refuses to overwrite its state", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
+    try {
+      await writeFile(join(directory, "invocation.lock"), "interrupted", { mode: 0o600 })
+      let started = false
+      expect(
+        await e2eInvocationRun({
+          target: "development",
+          environment: {},
+          checkpointDirectory: directory,
+          commandRun: async () => {
+            started = true
+            return 0
+          },
+        }),
+      ).toBe(1)
+      expect(started).toBe(false)
+      expect(await readFile(join(directory, "invocation.lock"), "utf8")).toBe("interrupted")
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("refuses to bypass a surviving legacy ticket lock", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
+    try {
+      await writeFile(join(directory, "ticket.lock"), "previous attempt", { mode: 0o600 })
+      let started = false
+      expect(
+        await e2eInvocationRun({
+          target: "development",
+          environment: {},
+          checkpointDirectory: directory,
+          commandRun: async () => {
+            started = true
+            return 0
+          },
+        }),
+      ).toBe(1)
+      expect(started).toBe(false)
+      expect(await readFile(join(directory, "ticket.lock"), "utf8")).toBe("previous attempt")
+      await expect(readFile(join(directory, "checkpoint.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("refuses an uncertain payment before rerunning even read-only SSO", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
+    try {
+      const runId = "abc-12345678-1234-1234-1234-123456789abc"
+      expect(
+        (
+          await e2eCheckpointSave(directory, {
+            version: 1,
+            target: "development",
+            baseUrl: "https://eventoren.leonardomora.de",
+            runId,
+            createdAt: 1_000_000,
+            phase: "ticket-unreconciled",
+            ticket: {
+              step: "payment",
+              status: "started",
+              eventKey: `ticket-e2e-${runId}`,
+              eventTitle: `Ticket E2E ${runId}`,
+              participantName: `E2E Participant ${runId}`,
+              mailSince: 1_000_000,
+              orderId: "order-1",
+              stripeSession: "cs_test_123456789",
+            },
+          })
+        ).success,
+      ).toBe(true)
+      const started: string[] = []
+      expect(
+        await e2eInvocationRun({
+          target: "development",
+          environment: {},
+          checkpointDirectory: directory,
+          commandRun: async (workflow) => {
+            started.push(workflow.name)
+            return 0
+          },
+        }),
+      ).toBe(1)
+      expect(started).toEqual([])
     } finally {
       await rm(directory, { recursive: true, force: true })
     }

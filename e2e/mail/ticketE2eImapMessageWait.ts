@@ -16,6 +16,7 @@ export async function ticketE2eImapMessageWait(input: {
   pollMs: number
   linkOrigin: string
 }): Promise<{
+  uid: number
   subject: string
   link: URL
   attachments: { filename: string; contentType: string; content: Buffer }[]
@@ -65,6 +66,7 @@ async function ticketE2eImapMessageFindOnce(
   expectedOrigin: string,
   timeoutMs: number,
 ): Promise<{
+  uid: number
   subject: string
   link: URL
   attachments: { filename: string; contentType: string; content: Buffer }[]
@@ -126,6 +128,7 @@ async function ticketE2eImapMessageRead(
   input: { host: string; port: number; user: string; password: string; purchaseMarker: string; since: Date },
   expectedOrigin: string,
 ): Promise<{
+  uid: number
   subject: string
   link: URL
   attachments: { filename: string; contentType: string; content: Buffer }[]
@@ -159,7 +162,7 @@ async function ticketE2eImapMessageRead(
         purchaseMarker: input.purchaseMarker,
         linkOrigin: expectedOrigin,
       })
-      if (parsed) return parsed
+      if (parsed) return { ...parsed, uid: message.uid }
     }
     return null
   } finally {

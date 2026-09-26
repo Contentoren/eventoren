@@ -6,6 +6,7 @@ export { catalogEventGetPublishedQuery } from "#src/catalog/convex/catalogEventG
 export { catalogEventGetPublishedSummaryQuery } from "#src/catalog/convex/catalogEventGetPublishedSummaryQuery.ts"
 export { catalogEventTierListPublishedPageQuery } from "#src/catalog/convex/catalogEventTierListPublishedPageQuery.ts"
 export { catalogEventDeleteMutation } from "#src/catalog/convex/catalogEventDeleteMutation.ts"
+export { catalogE2eCleanupMutation } from "#src/catalog/convex/catalogE2eCleanupMutation.ts"
 export { catalogEventListAdminPageQuery } from "#src/catalog/convex/catalogEventListAdminPageQuery.ts"
 export { catalogEventListPublishedPageQuery } from "#src/catalog/convex/catalogEventListPublishedPageQuery.ts"
 export { catalogEventListPublishedQuery } from "#src/catalog/convex/catalogEventListPublishedQuery.ts"

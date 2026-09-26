@@ -1,7 +1,20 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["**", "!dist/**", "!convex/_generated/**", "!src/routeTree.gen.ts"]
+    "includes": [
+      "**",
+      "!dist/**",
+      "!convex/_generated/**",
+      "!src/routeTree.gen.ts",
+      "!src/app/assets/documentList.ts",
+      "!src/app/assets/fontList.ts",
+      "!src/app/assets/imageList.ts",
+      "!src/app/assets/videoList.ts",
+      "!src/app/assets/service/documentList.ts",
+      "!src/app/assets/service/fontList.ts",
+      "!src/app/assets/service/imageList.ts",
+      "!src/app/assets/service/videoList.ts"
+    ]
   },
   "assist": {
     "actions": {
