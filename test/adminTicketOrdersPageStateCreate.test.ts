@@ -111,6 +111,12 @@ test("calculates available tickets count and labels for all and filtered events"
     expect(state.availableTicketsForOrder(orderUnknown)).toBeUndefined()
     expect(state.availableTicketsLabelForOrder(orderUnknown)).toBeUndefined()
 
+    // orderToggle opens and closes
+    state.orderToggle("ord-1")
+    expect(state.selectedOrderId()).toBe("ord-1")
+    state.orderToggle("ord-1")
+    expect(state.selectedOrderId()).toBeNull()
+
     dispose()
   })
 })
