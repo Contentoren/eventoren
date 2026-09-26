@@ -88,6 +88,16 @@ describe("demoAdminTicketOrdersPageStateCreate", () => {
       expect(state.availableTicketsForOrder(firstOrder)).toBeDefined()
       expect(state.availableTicketsLabelForOrder(firstOrder)).toContain("Tickets zum Kauf verfügbar")
 
+      // orderToggle in demo opens details and toggles closed
+      expect(state.selectedOrderId()).toBeNull()
+      expect(state.details()).toBeNull()
+      state.orderToggle(firstOrder.id)
+      expect(state.selectedOrderId()).toBe(firstOrder.id)
+      expect(state.details()?.id).toBe(firstOrder.id)
+      state.orderToggle(firstOrder.id)
+      expect(state.selectedOrderId()).toBeNull()
+      expect(state.details()).toBeNull()
+
       dispose()
     })
   })
