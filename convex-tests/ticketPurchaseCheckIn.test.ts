@@ -168,6 +168,16 @@ function checkoutArgs(token: string, catalogVersion: number) {
       familyName: "Lovelace",
       address: "Example Street 1",
       phone: "",
+      billingDetails: {
+        givenName: "Ada",
+        familyName: "Lovelace",
+        address: {
+          line1: "Example Street 1",
+          postalCode: "10115",
+          city: "Berlin",
+          country: "DE",
+        },
+      },
     },
     legalContext: {
       cta: "Pay now",

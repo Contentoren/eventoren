@@ -19,6 +19,20 @@ export type TicketCheckoutCreateInput = {
     readonly familyName: string
     readonly address: string
     readonly phone: string
+    readonly billingDetails: {
+      readonly givenName: string
+      readonly familyName: string
+      readonly company?: string
+      readonly companyExtra?: string
+      readonly address: {
+        readonly line1: string
+        readonly line2?: string
+        readonly postalCode: string
+        readonly city: string
+        readonly country: string
+      }
+      readonly taxId?: { readonly type: "eu_vat"; readonly value: string }
+    }
   }
   readonly legalContext: {
     readonly cta: string

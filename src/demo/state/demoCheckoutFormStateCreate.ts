@@ -23,11 +23,21 @@ import { demoFlowContextUse } from "./demoFlowContextUse.ts"
 
 type DemoCheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
-const demoContactRequiredFields = ["firstName", "lastName", "email", "address"] as const
+const demoContactRequiredFields = [
+  "firstName",
+  "lastName",
+  "email",
+  "address",
+  "postalCode",
+  "city",
+  "country",
+] as const
 
 function demoContactFieldInvalid(field: (typeof demoContactRequiredFields)[number], value: string) {
   if (field === "firstName" || field === "lastName") return value.trim().length < 2
   if (field === "address") return value.trim().length < 3
+  if (field === "country") return !/^[A-Z]{2}$/.test(value.trim().toUpperCase())
+  if (field === "postalCode" || field === "city") return !value.trim()
   return !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim())
 }
 
@@ -49,7 +59,15 @@ export function demoCheckoutFormStateCreate(inputs: {
     firstName: "Alex",
     lastName: "Demo",
     email: "alex@example.test",
+    billingKind: "person",
+    companyName: "",
+    companyExtra: "",
+    taxId: "",
     address: "Musterstraße 1",
+    addressLine2: "",
+    postalCode: "10115",
+    city: "Berlin",
+    country: "DE",
     phone: "",
   })
   const step = createSignalObject<TicketCheckoutStep>("kontakt")
@@ -60,7 +78,8 @@ export function demoCheckoutFormStateCreate(inputs: {
   const hydrated = createSignalObject(false)
   const submitAttempted = createSignalObject(false)
   const invalidRequiredFields = createSignalObject<readonly TicketRequiredFieldKey[]>([])
-  const legalAccepted = createSignalObject(false)
+  const termsAccepted = createSignalObject(false)
+  const privacyAcknowledged = createSignalObject(false)
   const completedOrders = createSignalObject<readonly TicketOrderProjection[]>([])
   onMount(() => hydrated.set(true))
   const items = createMemo<readonly DemoCheckoutItem[]>(() =>
@@ -92,14 +111,28 @@ export function demoCheckoutFormStateCreate(inputs: {
     const requiredField = field === "phone" ? undefined : field
     if (submitAttempted.get() && !inputs.relaxedValidation && requiredField) {
       const current = invalidRequiredFields.get().filter((key) => key !== requiredField)
-      invalidRequiredFields.set(demoContactFieldInvalid(requiredField, value) ? [...current, requiredField] : current)
+      invalidRequiredFields.set(
+        demoContactFieldInvalid(requiredField as (typeof demoContactRequiredFields)[number], value)
+          ? [...current, requiredField as TicketRequiredFieldKey]
+          : current,
+      )
     }
     errorMessage.set("")
   }
 
-  const legalAcceptanceChange = (accepted: boolean) => {
-    legalAccepted.set(accepted)
+  const termsAcceptanceChange = (accepted: boolean) => {
+    termsAccepted.set(accepted)
     errorMessage.set("")
+  }
+
+  const privacyAcknowledgementChange = (accepted: boolean) => {
+    privacyAcknowledged.set(accepted)
+    errorMessage.set("")
+  }
+
+  const legalAcceptanceChange = (accepted: boolean) => {
+    termsAcceptanceChange(accepted)
+    privacyAcknowledgementChange(accepted)
   }
 
   const participantFields = createMemo(() =>
@@ -158,7 +191,7 @@ export function demoCheckoutFormStateCreate(inputs: {
       errorMessage.set(demoText("checkoutEmptyCart"))
       return
     }
-    if (!inputs.skipForm && !legalAccepted.get()) {
+    if (!inputs.skipForm && (!termsAccepted.get() || !privacyAcknowledged.get())) {
       errorMessage.set(demoText("checkoutLegalRequired"))
       return
     }
@@ -310,10 +343,14 @@ export function demoCheckoutFormStateCreate(inputs: {
     submitAttempted: submitAttempted.get,
     isCartEmpty: () => total().quantity === 0,
     totalLabel: () => ticketPriceFormat(total().totalCents),
-    legalAccepted: legalAccepted.get,
+    termsAccepted: termsAccepted.get,
+    privacyAcknowledged: privacyAcknowledged.get,
+    legalAccepted: () => termsAccepted.get() && privacyAcknowledged.get(),
     participantNames: participantNames.get,
     participantFields,
     isFieldInvalid: (key: TicketRequiredFieldKey) => invalidRequiredFields.get().includes(key),
+    termsAcceptanceChange,
+    privacyAcknowledgementChange,
     legalAcceptanceChange,
     contactFieldChange,
     participantNameChange,

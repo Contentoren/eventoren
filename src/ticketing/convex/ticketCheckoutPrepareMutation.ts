@@ -25,6 +25,22 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     customerFamilyName: v.string(),
     customerAddress: v.string(),
     customerPhone: v.string(),
+    billingDetails: v.optional(
+      v.object({
+        givenName: v.string(),
+        familyName: v.string(),
+        company: v.optional(v.string()),
+        companyExtra: v.optional(v.string()),
+        address: v.object({
+          line1: v.string(),
+          line2: v.optional(v.string()),
+          postalCode: v.string(),
+          city: v.string(),
+          country: v.string(),
+        }),
+        taxId: v.optional(v.object({ type: v.literal("eu_vat"), value: v.string() })),
+      }),
+    ),
     eventKey: v.string(),
     catalogVersion: v.number(),
     eventRevision: v.optional(v.number()),
@@ -79,6 +95,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         familyName: args.customerFamilyName,
         address: args.customerAddress,
         phone: args.customerPhone,
+        ...(args.billingDetails !== undefined ? { billingDetails: args.billingDetails } : {}),
       },
       legalContext: args.legalContext,
     })
@@ -129,6 +146,31 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         documentSetRevision: args.legalContext.documentSetRevision,
       },
     })
+    const billingDetailsLegacyRevisionContextJson = ticketCheckoutContextCanonicalize({
+      checkoutKey: args.checkoutKey,
+      eventKey: args.eventKey,
+      catalogVersion: args.catalogVersion,
+      ...(args.eventRevision !== undefined ? { eventRevision: args.eventRevision } : {}),
+      tickets: args.tickets,
+      stripeMode: args.stripeMode,
+      successUrl: args.successUrl,
+      cancelUrl: args.cancelUrl,
+      locale: args.locale,
+      customer: {
+        email: args.customerEmail,
+        givenName: args.customerGivenName,
+        familyName: args.customerFamilyName,
+        address: args.customerAddress,
+        phone: args.customerPhone,
+        ...(args.billingDetails !== undefined ? { billingDetails: args.billingDetails } : {}),
+      },
+      legalContext: {
+        cta: args.legalContext.cta,
+        termsAccepted: args.legalContext.termsAccepted,
+        privacyAcknowledged: args.legalContext.privacyAcknowledged,
+        documentSetRevision: args.legalContext.documentSetRevision,
+      },
+    })
 
     if (existing) {
       const sameOwner = existing.ownerUserId === args.ownerUserId
@@ -136,7 +178,8 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       const sameCheckoutEvidence =
         existing.checkoutContextJson === contextJson ||
         existing.checkoutContextJson === legacyContextJson ||
-        existing.checkoutContextJson === legacyRevisionContextJson
+        existing.checkoutContextJson === legacyRevisionContextJson ||
+        existing.checkoutContextJson === billingDetailsLegacyRevisionContextJson
       if (!sameOwner || !sameGuest || !sameCheckoutEvidence)
         return createResultError(op, "The checkout key was reused with different ownership or checkout evidence")
       if (
@@ -191,6 +234,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         familyName: args.customerFamilyName,
         address: args.customerAddress,
         phone: args.customerPhone,
+        ...(args.billingDetails !== undefined ? { billingDetails: args.billingDetails } : {}),
       },
       legalContext: acceptedLegalContext,
     })
@@ -276,6 +320,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         address: args.customerAddress,
         phone: args.customerPhone,
       }),
+      ...(args.billingDetails !== undefined ? { billingDetailsJson: JSON.stringify(args.billingDetails) } : {}),
       eventKey: event.eventKey,
       eventTitle: event.title,
       eventSubtitle: event.subtitle,

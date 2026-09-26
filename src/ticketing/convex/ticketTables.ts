@@ -40,6 +40,7 @@ export const ticketTables = {
     customerAddress: v.optional(v.string()),
     customerPhone: v.optional(v.string()),
     contactSnapshotJson: v.string(),
+    billingDetailsJson: v.optional(v.string()),
     eventKey: v.string(),
     eventTitle: v.string(),
     eventSubtitle: v.string(),

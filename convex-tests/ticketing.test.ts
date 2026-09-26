@@ -222,6 +222,16 @@ function checkoutArgs(
       familyName: options.customer?.familyName ?? "Lovelace",
       address: "Example Street 1",
       phone: options.customer?.phone ?? "",
+      billingDetails: {
+        givenName: options.customer?.givenName ?? "Ada",
+        familyName: options.customer?.familyName ?? "Lovelace",
+        address: {
+          line1: "Example Street 1",
+          postalCode: "10115",
+          city: "Berlin",
+          country: "DE",
+        },
+      },
     },
     legalContext: {
       cta: "Kostenpflichtig buchen",
@@ -370,6 +380,90 @@ test("reserves atomically and replays the same checkout without a second Billing
   expect(inventory.orders).toHaveLength(2)
   expect(inventory.reservations).toHaveLength(2)
   expect(billing.fetchMock).toHaveBeenCalled()
+})
+
+test("persists structured invoice billing details and forwards them to Billing without replacing the contact name with the company", async () => {
+  environmentSet()
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "billingdetailscheckoutkey12345678901")
+  args.customer.billingDetails = {
+    givenName: "Ada",
+    familyName: "Lovelace",
+    company: "Analytical Engines GmbH",
+    companyExtra: "Finance department",
+    address: {
+      line1: "Example Street 1",
+      line2: "Floor 2",
+      postalCode: "10115",
+      city: "Berlin",
+      country: "de",
+    },
+    taxId: { type: "eu_vat", value: "de123456789" },
+  }
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(result.success).toBe(true)
+  if (!result.success) return
+
+  const order = await t.run(async (ctx) => ctx.db.get(result.data.orderId as Id<"ticketOrders">))
+  expect(JSON.parse(order?.billingDetailsJson ?? "null")).toEqual({
+    givenName: "Ada",
+    familyName: "Lovelace",
+    company: "Analytical Engines GmbH",
+    companyExtra: "Finance department",
+    address: {
+      line1: "Example Street 1",
+      line2: "Floor 2",
+      postalCode: "10115",
+      city: "Berlin",
+      country: "DE",
+    },
+    taxId: { type: "eu_vat", value: "DE123456789" },
+  })
+  const checkoutCall = billing.fetchMock.mock.calls.find(([input]) => String(input).endsWith("/ticket-checkout"))
+  expect(JSON.parse(String(checkoutCall?.[1]?.body))).toMatchObject({
+    customer: {
+      email: "buyer@example.com",
+      billingDetails: {
+        givenName: "Ada",
+        familyName: "Lovelace",
+        company: "Analytical Engines GmbH",
+        address: { line1: "Example Street 1", country: "DE" },
+        taxId: { type: "eu_vat", value: "DE123456789" },
+      },
+    },
+  })
+  expect(order?.customerAddress).toBe("Example Street 1")
+
+  const changedReplay = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...args,
+    customer: {
+      ...args.customer,
+      billingDetails: { ...args.customer.billingDetails, company: "Different company" },
+    },
+  })
+  expect(changedReplay.success).toBe(false)
+})
+
+test("rejects incomplete structured billing details in the server action", async () => {
+  environmentSet()
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "invalidbillingcheckoutkey123456789")
+  args.customer.billingDetails.address.country = "not-a-country"
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+
+  expect(result).toMatchObject({ success: false, errorMessage: "Billing details are invalid" })
+  expect(billing.checkoutCallsGet()).toBe(0)
+  expect(await t.run(async (ctx) => ctx.db.query("ticketOrders").collect())).toHaveLength(0)
 })
 
 test("prepares Event A during unrelated Event B sync, then replays after A edit and rejects its stale revision", async () => {

@@ -3,4 +3,9 @@ export type TicketRequiredFieldKey =
   | "lastName"
   | "email"
   | "address"
+  | "postalCode"
+  | "city"
+  | "country"
+  | "companyName"
+  | "taxId"
   | `participant:${string}:${string}:${number}`

@@ -18,6 +18,20 @@ export function ticketCheckoutContextCanonicalize(input: {
     familyName: string
     address: string
     phone: string
+    billingDetails?: {
+      givenName: string
+      familyName: string
+      company?: string
+      companyExtra?: string
+      address: {
+        line1: string
+        line2?: string
+        postalCode: string
+        city: string
+        country: string
+      }
+      taxId?: { type: "eu_vat"; value: string }
+    }
   }
   legalContext: {
     cta: string

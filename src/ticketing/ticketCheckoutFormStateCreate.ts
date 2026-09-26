@@ -27,12 +27,12 @@ import { ticketContactDraftSave } from "./ticketContactDraftSave.ts"
 import { ticketContactEmpty } from "./ticketContactEmpty.ts"
 import { ticketContactValidate } from "./ticketContactValidate.ts"
 import { ticketGuestAccessTokenCreate } from "./ticketGuestAccessTokenCreate.ts"
+import { ticketingServerRead } from "./ticketingServerRead.ts"
 import { ticketOrderAccessStorageUpsert } from "./ticketOrderAccessStorageUpsert.ts"
 import { ticketParticipantFieldKeyCreate } from "./ticketParticipantFieldKeyCreate.ts"
 import { ticketParticipantNamesAlign } from "./ticketParticipantNamesAlign.ts"
 import { ticketParticipantNamesValidate } from "./ticketParticipantNamesValidate.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
-import { ticketingServerRead } from "./ticketingServerRead.ts"
 
 type CheckoutItem = { readonly event: EventItem; readonly cart: TicketCart }
 
@@ -41,11 +41,21 @@ type WindowWithIdleCallback = Window & {
   cancelIdleCallback?: (handle: number) => void
 }
 
-const ticketContactRequiredFields = ["firstName", "lastName", "email", "address"] as const
+const ticketContactRequiredFields = [
+  "firstName",
+  "lastName",
+  "email",
+  "address",
+  "postalCode",
+  "city",
+  "country",
+] as const
 
 function ticketContactFieldInvalid(field: (typeof ticketContactRequiredFields)[number], value: string) {
   if (field === "firstName" || field === "lastName") return value.trim().length < 2
   if (field === "address") return value.trim().length < 3
+  if (field === "postalCode" || field === "city") return value.trim().length === 0
+  if (field === "country") return !/^[A-Z]{2}$/.test(value.trim().toUpperCase())
   return !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim())
 }
 
@@ -63,13 +73,17 @@ export function ticketCheckoutFormStateCreate(inputs: {
   const hydrated = createSignalObject(false)
   const submitAttempted = createSignalObject(false)
   const invalidRequiredFields = createSignalObject<readonly TicketRequiredFieldKey[]>([])
-  const legalAccepted = createSignalObject(false)
+  const termsAccepted = createSignalObject(false)
+  const privacyAcknowledged = createSignalObject(false)
   const participantNames = createSignalObject<TicketParticipantNames>(ticketParticipantNamesAlign({}, inputs.items()))
 
   let debounceTimer: number | undefined
   let cancelIdleSave: (() => void) | undefined
+  let saveGeneration = 0
+  let draftChanged = false
 
   const cancelScheduledSave = () => {
+    saveGeneration += 1
     if (typeof window === "undefined") return
     if (debounceTimer !== undefined) {
       window.clearTimeout(debounceTimer)
@@ -79,18 +93,30 @@ export function ticketCheckoutFormStateCreate(inputs: {
     cancelIdleSave = undefined
   }
 
+  const draftSnapshot = () => ({
+    contact: contact.get(),
+    participantNames: ticketParticipantNamesAlign(participantNames.get(), inputs.items()),
+    documentSetRevision: ticketCheckoutLegalDocumentRevision,
+    termsAccepted: termsAccepted.get(),
+    privacyAcknowledged: privacyAcknowledged.get(),
+  })
+
   const persistDraft = (immediate = false) => {
     if (typeof window === "undefined") return
+    if (!hydrated.get() && !draftChanged) return
     cancelScheduledSave()
-    const snapshot = contact.get()
+    const snapshot = draftSnapshot()
     if (immediate) {
       ticketContactDraftSave(snapshot)
       return
     }
+    const generation = saveGeneration
     debounceTimer = window.setTimeout(() => {
+      if (generation !== saveGeneration) return
       debounceTimer = undefined
       const idleWindow = window as WindowWithIdleCallback
       const save = () => {
+        if (generation !== saveGeneration) return
         cancelIdleSave = undefined
         ticketContactDraftSave(snapshot)
       }
@@ -105,13 +131,26 @@ export function ticketCheckoutFormStateCreate(inputs: {
   }
 
   onCleanup(() => {
-    cancelScheduledSave()
+    if (typeof window !== "undefined") window.removeEventListener("pagehide", flushDraft)
+    if (hydrated.get()) flushDraft()
   })
+
+  const flushDraft = () => {
+    if (typeof window === "undefined") return
+    cancelScheduledSave()
+    ticketContactDraftSave(draftSnapshot())
+  }
 
   onMount(() => {
     const draft = ticketContactDraftLoad()
-    if (draft.success) contact.set(draft.data)
+    if (draft.success) {
+      contact.set(draft.data.contact)
+      participantNames.set(ticketParticipantNamesAlign(draft.data.participantNames, inputs.items()))
+      termsAccepted.set(draft.data.termsAccepted)
+      privacyAcknowledged.set(draft.data.privacyAcknowledged)
+    }
     hydrated.set(true)
+    window.addEventListener("pagehide", flushDraft)
   })
 
   const stepLabels = createMemo(() => ticketCheckoutStepOrder.map((entry) => ticketCheckoutStepLabels()[entry]))
@@ -156,6 +195,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
   createEffect(
     on(inputs.items, (items) => {
       participantNames.set(ticketParticipantNamesAlign(participantNames.get(), items))
+      persistDraft()
       if (!submitAttempted.get()) return
       const activeParticipantFields = participantFields().map((field) =>
         ticketParticipantFieldKeyCreate(field.eventId, field.tierId, field.ticketIndex),
@@ -169,22 +209,51 @@ export function ticketCheckoutFormStateCreate(inputs: {
   )
 
   const contactFieldChange = (field: keyof TicketContact, value: string) => {
-    contact.set({ ...contact.get(), [field]: value })
-    if (submitAttempted.get() && field !== "phone") {
-      const invalid = ticketContactFieldInvalid(field, value)
+    draftChanged = true
+    const nextValue = field === "country" ? value.toUpperCase().replace(/[^A-Z]/g, "") : value
+    contact.set({ ...contact.get(), [field]: nextValue })
+    if (
+      submitAttempted.get() &&
+      ticketContactRequiredFields.includes(field as (typeof ticketContactRequiredFields)[number])
+    ) {
+      const invalid = ticketContactFieldInvalid(field as (typeof ticketContactRequiredFields)[number], nextValue)
       const current = invalidRequiredFields.get().filter((key) => key !== field)
-      invalidRequiredFields.set(invalid ? [...current, field] : current)
+      invalidRequiredFields.set(invalid ? [...current, field as TicketRequiredFieldKey] : current)
+    }
+    if (field === "billingKind" || field === "companyName") {
+      const current = invalidRequiredFields.get().filter((key) => key !== "companyName")
+      if (submitAttempted.get() && contact.get().billingKind === "company" && !contact.get().companyName.trim())
+        invalidRequiredFields.set([...current, "companyName"])
+      else invalidRequiredFields.set(current)
+    }
+    if (field === "taxId") {
+      const current = invalidRequiredFields.get().filter((key) => key !== "taxId")
+      const taxId = nextValue.trim().toUpperCase()
+      const invalid =
+        taxId.length > 0 &&
+        (!/^[A-Z]{2}[A-Z0-9]{2,14}$/.test(taxId) || (taxId.startsWith("DE") && !/^DE[0-9]{9}$/.test(taxId)))
+      invalidRequiredFields.set(submitAttempted.get() && invalid ? [...current, "taxId"] : current)
     }
     errorMessage.set("")
     persistDraft()
   }
 
-  const legalAcceptanceChange = (accepted: boolean) => {
-    legalAccepted.set(accepted)
+  const termsAcceptanceChange = (accepted: boolean) => {
+    draftChanged = true
+    termsAccepted.set(accepted)
     errorMessage.set("")
+    persistDraft()
+  }
+
+  const privacyAcknowledgementChange = (accepted: boolean) => {
+    draftChanged = true
+    privacyAcknowledged.set(accepted)
+    errorMessage.set("")
+    persistDraft()
   }
 
   const participantNameChange = (eventId: string, tierId: string, ticketIndex: number, value: string) => {
+    draftChanged = true
     const aligned = ticketParticipantNamesAlign(participantNames.get(), inputs.items())
     const lineNames = [...(aligned[eventId]?.[tierId] ?? [])]
     lineNames[ticketIndex] = value
@@ -198,25 +267,35 @@ export function ticketCheckoutFormStateCreate(inputs: {
       invalidRequiredFields.set(value.trim().length === 0 ? [...current, key] : current)
     }
     errorMessage.set("")
+    persistDraft()
   }
 
   const confirmPayment = async () => {
     const text = ticketCheckoutText()
     if (isSubmitting.get()) return
+    if (hydrated.get() || draftChanged) flushDraft()
     if (isCartEmpty()) {
       errorMessage.set(text.emptyCart)
       return
     }
-    if (!legalAccepted.get()) {
+    if (!termsAccepted.get() || !privacyAcknowledged.get()) {
       errorMessage.set(text.legalRequired)
       return
     }
 
     submitAttempted.set(true)
-    persistDraft(true)
-    const invalidContactFields = ticketContactRequiredFields.filter((field) =>
+    const invalidContactFields: TicketRequiredFieldKey[] = ticketContactRequiredFields.filter((field) =>
       ticketContactFieldInvalid(field, contact.get()[field]),
     )
+    if (contact.get().billingKind === "company" && !contact.get().companyName.trim())
+      invalidContactFields.push("companyName")
+    const taxId = contact.get().taxId.trim().toUpperCase()
+    if (
+      contact.get().billingKind === "company" &&
+      taxId &&
+      (!/^[A-Z]{2}[A-Z0-9]{2,14}$/.test(taxId) || (taxId.startsWith("DE") && !/^DE[0-9]{9}$/.test(taxId)))
+    )
+      invalidContactFields.push("taxId")
     const alignedParticipantNames = ticketParticipantNamesAlign(participantNames.get(), inputs.items())
     const invalidParticipantFields = inputs.items().flatMap((item) =>
       item.cart.lines.flatMap((line) => {
@@ -319,6 +398,26 @@ export function ticketCheckoutFormStateCreate(inputs: {
             familyName: validated.data.lastName,
             address: validated.data.address,
             phone: validated.data.phone,
+            billingDetails: {
+              givenName: validated.data.firstName,
+              familyName: validated.data.lastName,
+              ...(validated.data.billingKind === "company"
+                ? {
+                    company: validated.data.companyName,
+                    ...(validated.data.companyExtra ? { companyExtra: validated.data.companyExtra } : {}),
+                  }
+                : {}),
+              address: {
+                line1: validated.data.address,
+                ...(validated.data.addressLine2 ? { line2: validated.data.addressLine2 } : {}),
+                postalCode: validated.data.postalCode,
+                city: validated.data.city,
+                country: validated.data.country,
+              },
+              ...(validated.data.billingKind === "company" && validated.data.taxId
+                ? { taxId: { type: "eu_vat" as const, value: validated.data.taxId } }
+                : {}),
+            },
           },
           legalContext: {
             cta: text.legalCta,
@@ -366,9 +465,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
       return
     }
 
-    cancelScheduledSave()
     ticketCartDraftSave([])
-    ticketContactDraftSave(null)
     isSubmitting.set(false)
     if (redirectUrl) {
       window.location.assign(redirectUrl)
@@ -391,11 +488,13 @@ export function ticketCheckoutFormStateCreate(inputs: {
     submitAttempted: submitAttempted.get,
     isCartEmpty,
     totalLabel,
-    legalAccepted: legalAccepted.get,
+    termsAccepted: termsAccepted.get,
+    privacyAcknowledged: privacyAcknowledged.get,
     participantNames: participantNames.get,
     participantFields,
     isFieldInvalid: (key) => invalidRequiredFields.get().includes(key),
-    legalAcceptanceChange,
+    termsAcceptanceChange,
+    privacyAcknowledgementChange,
     contactFieldChange,
     participantNameChange,
     confirmPayment,

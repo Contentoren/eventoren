@@ -12,6 +12,20 @@ const ticketSelectionValidator = v.object({
   quantity: v.number(),
   participantNames: v.optional(v.array(v.string())),
 })
+const billingDetailsValidator = v.object({
+  givenName: v.string(),
+  familyName: v.string(),
+  company: v.optional(v.string()),
+  companyExtra: v.optional(v.string()),
+  address: v.object({
+    line1: v.string(),
+    line2: v.optional(v.string()),
+    postalCode: v.string(),
+    city: v.string(),
+    country: v.string(),
+  }),
+  taxId: v.optional(v.object({ type: v.literal("eu_vat"), value: v.string() })),
+})
 
 export const ticketCheckoutCreateAction = action({
   args: {
@@ -31,6 +45,7 @@ export const ticketCheckoutCreateAction = action({
       familyName: v.string(),
       address: v.string(),
       phone: v.string(),
+      billingDetails: billingDetailsValidator,
     }),
     legalContext: v.object({
       cta: v.string(),
@@ -77,6 +92,55 @@ export const ticketCheckoutCreateAction = action({
     const address = args.customer.address.trim()
     if (!email || !givenName || !familyName || !address) return createResultError(op, "Customer contact is incomplete")
     if (!/^\S+@\S+\.\S+$/u.test(email)) return createResultError(op, "Customer email is invalid")
+    const billingDetails = {
+      givenName: args.customer.billingDetails.givenName.trim(),
+      familyName: args.customer.billingDetails.familyName.trim(),
+      ...(args.customer.billingDetails.company !== undefined
+        ? { company: args.customer.billingDetails.company.trim() }
+        : {}),
+      ...(args.customer.billingDetails.companyExtra !== undefined
+        ? { companyExtra: args.customer.billingDetails.companyExtra.trim() }
+        : {}),
+      address: {
+        line1: args.customer.billingDetails.address.line1.trim(),
+        ...(args.customer.billingDetails.address.line2 !== undefined
+          ? { line2: args.customer.billingDetails.address.line2.trim() }
+          : {}),
+        postalCode: args.customer.billingDetails.address.postalCode.trim(),
+        city: args.customer.billingDetails.address.city.trim(),
+        country: args.customer.billingDetails.address.country.trim().toUpperCase(),
+      },
+      ...(args.customer.billingDetails.taxId !== undefined
+        ? { taxId: { type: "eu_vat" as const, value: args.customer.billingDetails.taxId.value.trim().toUpperCase() } }
+        : {}),
+    }
+    if (
+      billingDetails.givenName.length < 1 ||
+      billingDetails.givenName.length > 100 ||
+      billingDetails.familyName.length < 1 ||
+      billingDetails.familyName.length > 100 ||
+      billingDetails.address.line1.length < 1 ||
+      billingDetails.address.line1.length > 200 ||
+      (billingDetails.address.line2 !== undefined && billingDetails.address.line2.length > 200) ||
+      billingDetails.address.postalCode.length < 1 ||
+      billingDetails.address.postalCode.length > 40 ||
+      billingDetails.address.city.length < 1 ||
+      billingDetails.address.city.length > 100 ||
+      !/^[A-Z]{2}$/u.test(billingDetails.address.country) ||
+      (billingDetails.company !== undefined && billingDetails.company.length > 200) ||
+      (billingDetails.companyExtra !== undefined && billingDetails.companyExtra.length > 200) ||
+      (billingDetails.company !== undefined && billingDetails.company.length === 0) ||
+      billingDetails.givenName !== givenName ||
+      billingDetails.familyName !== familyName ||
+      billingDetails.address.line1 !== address ||
+      (billingDetails.taxId !== undefined &&
+        (billingDetails.company === undefined ||
+          billingDetails.taxId.value.length < 1 ||
+          billingDetails.taxId.value.length > 50 ||
+          !/^[A-Z]{2}[A-Z0-9]{2,14}$/u.test(billingDetails.taxId.value) ||
+          (billingDetails.taxId.value.startsWith("DE") && !/^DE[0-9]{9}$/u.test(billingDetails.taxId.value))))
+    )
+      return createResultError(op, "Billing details are invalid")
 
     const tickets = args.tickets.map((ticket) => ({
       tierKey: ticket.tierKey,
@@ -100,6 +164,7 @@ export const ticketCheckoutCreateAction = action({
       customerFamilyName: familyName,
       customerAddress: address,
       customerPhone: args.customer.phone.trim(),
+      billingDetails,
       eventKey: args.eventKey,
       catalogVersion: args.catalogVersion,
       eventRevision: args.eventRevision,
@@ -154,7 +219,7 @@ export const ticketCheckoutCreateAction = action({
       successUrl,
       cancelUrl,
       locale,
-      customer: { email },
+      customer: { email, billingDetails },
       legalContext: {
         cta: args.legalContext.cta,
         termsAccepted: args.legalContext.termsAccepted,
