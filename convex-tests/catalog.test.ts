@@ -368,6 +368,81 @@ test("event inclusions and exclusions preserve omitted values and explicitly sav
   expect(adminPage.success && adminPage.data.page[0]).toMatchObject({ inclusions: [], exclusions: [] })
 })
 
+test("tier upsert preserves omitted additional admissions and clears them only when explicitly empty", async () => {
+  const t = convexTest(schema, modules)
+  const token = await tokenFor(await createUser(t, "admin"))
+  await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
+
+  const tierArgs = {
+    eventKey: "catalog-event",
+    tierKey: "standard",
+    name: "Standard",
+    description: "Freie Platzwahl",
+    startsAt: "2026-10-01T18:00:00.000Z",
+    doorsAt: "2026-10-01T17:00:00.000Z",
+    endsAt: "2026-10-01T22:00:00.000Z",
+    priceCents: 2500,
+    feeCents: 250,
+    capacity: 10,
+    token,
+  }
+  const additionalAdmissions = [{ startsAt: "2026-10-01T16:00:00.000Z", endsAt: "2026-10-01T17:00:00.000Z" }]
+  const created = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...tierArgs,
+    additionalDoorsAt: additionalAdmissions,
+  })
+  expect(created.success).toBe(true)
+
+  const omittedUpdate = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...tierArgs,
+    description: "Updated description",
+  })
+  expect(omittedUpdate.success).toBe(true)
+  const preserved = await t.run(async (ctx) => ctx.db.query("catalogTicketTiers").first())
+  expect(preserved?.additionalDoorsAt).toEqual(additionalAdmissions)
+
+  const cleared = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...tierArgs,
+    description: "Updated description",
+    additionalDoorsAt: [],
+  })
+  expect(cleared.success).toBe(true)
+  const clearedTier = await t.run(async (ctx) => ctx.db.query("catalogTicketTiers").first())
+  expect(clearedTier?.additionalDoorsAt).toEqual([])
+
+  const legacy = await t.run(async (ctx) => {
+    const event = await ctx.db.query("catalogEvents").first()
+    if (!event) return null
+    return await ctx.db.insert(
+      "catalogTicketTiers",
+      catalogTierInsert(event._id, {
+        tierKey: "legacy",
+        additionalDoorsAt: ["2026-10-01T16:00:00.000Z"],
+      }),
+    )
+  })
+  expect(legacy).not.toBeNull()
+
+  const legacyUpdate = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...tierArgs,
+    tierKey: "legacy",
+    description: "Legacy update",
+  })
+  expect(legacyUpdate.success).toBe(true)
+  const preservedLegacy = await t.run(async (ctx) => {
+    const event = await ctx.db
+      .query("catalogEvents")
+      .withIndex("eventKey", (q) => q.eq("eventKey", "catalog-event"))
+      .unique()
+    if (!event) return null
+    return await ctx.db
+      .query("catalogTicketTiers")
+      .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", "legacy"))
+      .unique()
+  })
+  expect(preservedLegacy?.additionalDoorsAt).toEqual(["2026-10-01T16:00:00.000Z"])
+})
+
 test("tier upsert requires start and end times and defaults empty doors time to start", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")

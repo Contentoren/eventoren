@@ -87,7 +87,7 @@ async function catalogTicketTierUpsertAuthorizedFn(
     description: args.description,
     startsAt: args.startsAt,
     doorsAt: args.doorsAt.trim().length === 0 ? args.startsAt : args.doorsAt,
-    additionalDoorsAt: args.additionalDoorsAt ?? [],
+    additionalDoorsAt: args.additionalDoorsAt ?? existing?.additionalDoorsAt ?? [],
     endsAt: args.endsAt,
     priceCents: args.priceCents,
     feeCents: args.feeCents,
@@ -106,9 +106,7 @@ async function catalogTicketTierUpsertAuthorizedFn(
       description: existing.description,
       startsAt: existing.startsAt,
       doorsAt: existing.doorsAt,
-      additionalDoorsAt: (existing.additionalDoorsAt ?? []).map((range) =>
-        typeof range === "string" ? { startsAt: range, endsAt: "" } : range,
-      ),
+      additionalDoorsAt: normalizeAdditionalDoorsAt(existing.additionalDoorsAt),
       endsAt: existing.endsAt,
       priceCents: existing.priceCents,
       feeCents: existing.feeCents,
@@ -116,7 +114,11 @@ async function catalogTicketTierUpsertAuthorizedFn(
       reserved: existing.reserved,
       sold: existing.sold,
       sortOrder: existing.sortOrder,
-    }) !== JSON.stringify(tierData)
+    }) !==
+      JSON.stringify({
+        ...tierData,
+        additionalDoorsAt: normalizeAdditionalDoorsAt(tierData.additionalDoorsAt),
+      })
 
   if (existing && !configurationChanged) {
     const eventRevision = event.eventRevision ?? 1
@@ -153,4 +155,8 @@ function isValidIsoDateTime(value: string) {
   const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
   const daysInMonth = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
   return month >= 1 && month <= 12 && day >= 1 && day <= (daysInMonth[month - 1] ?? 0)
+}
+
+function normalizeAdditionalDoorsAt(additionalDoorsAt: (string | { startsAt: string; endsAt: string })[] | undefined) {
+  return (additionalDoorsAt ?? []).map((range) => (typeof range === "string" ? { startsAt: range, endsAt: "" } : range))
 }
