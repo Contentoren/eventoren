@@ -151,7 +151,7 @@ describe("admin ticket products form state", () => {
     })
   })
 
-  test("clearing or invalidating an additional range field never keeps its earlier timestamp", async () => {
+  test("clearing or invalidating an additional range field clears only that endpoint", async () => {
     await createRoot(async (dispose) => {
       try {
         const catalog = adminCatalogPageStateCreate({
@@ -168,9 +168,26 @@ describe("admin ticket products form state", () => {
         form.additionalDoorsAtChange(0, "2026-10-01T17:00")
         form.additionalDoorsAtEndChange(0, "2026-10-01T18:00")
         form.additionalDoorsAtEndChange(0, "")
-        expect(catalog.tierDraft().additionalDoorsAt[0]?.endsAt).toBe("")
+        expect(catalog.tierDraft().additionalDoorsAt[0]).toEqual({
+          startsAt: "2026-10-01T17:00:00.000Z",
+          endsAt: "",
+        })
         form.additionalDoorsAtEndChange(0, "2026-02-30T18:00")
-        expect(catalog.tierDraft().additionalDoorsAt[0]?.endsAt).toBe("")
+        expect(catalog.tierDraft().additionalDoorsAt[0]).toEqual({
+          startsAt: "2026-10-01T17:00:00.000Z",
+          endsAt: "",
+        })
+        form.additionalDoorsAtEndChange(0, "2026-10-01T18:00")
+        form.additionalDoorsAtChange(0, "")
+        expect(catalog.tierDraft().additionalDoorsAt[0]).toEqual({
+          startsAt: "",
+          endsAt: "2026-10-01T18:00:00.000Z",
+        })
+        form.additionalDoorsAtChange(0, "2026-02-30T17:00")
+        expect(catalog.tierDraft().additionalDoorsAt[0]).toEqual({
+          startsAt: "",
+          endsAt: "2026-10-01T18:00:00.000Z",
+        })
         expect(form.validationMessage()).toBe("Bitte gib ein gültiges Datum mit Uhrzeit ein.")
       } finally {
         dispose()

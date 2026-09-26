@@ -140,3 +140,65 @@ test("reordering legacy tiers with missing dates does not partially save", async
     }
   })
 })
+
+test("reordering legacy tiers with an additional admission missing its end does not write any tiers", async () => {
+  await createRoot(async (dispose) => {
+    try {
+      const event: AdminEventItem = {
+        id: "concert",
+        status: "draft",
+        catalogVersion: 1,
+        title: "Concert",
+        subtitle: "",
+        description: "",
+        category: "konzerte",
+        startsAt: "",
+        doorsAt: "",
+        endsAt: "",
+        venue: "",
+        city: "",
+        address: "",
+        organizer: "",
+        imageUrl: "",
+        imageAlt: "",
+        tags: [],
+        soldOut: false,
+        tiers: ["first", "second", "third"].map((id, index) => ({
+          id,
+          name: id,
+          description: "",
+          startsAt: "2026-10-01T18:00:00.000Z",
+          doorsAt: "",
+          additionalDoorsAt: id === "first" ? [{ startsAt: "2026-10-01T17:00:00.000Z", endsAt: "" }] : [],
+          endsAt: "2026-10-01T22:00:00.000Z",
+          priceCents: 100,
+          feeCents: 0,
+          capacity: 10,
+          available: 10,
+          sortOrder: index + 1,
+        })),
+      }
+      let saveCalls = 0
+      const state = adminCatalogPageStateCreate({
+        events: () => [event],
+        isServerAuthorized: () => true,
+        reloadEvents: async () => ({ success: true, data: [event] }),
+        ticketTierUpsert: async () => {
+          saveCalls += 1
+          return createResult({ tierKey: "unexpected", catalogVersion: 2 })
+        },
+      })
+      state.selectEvent(event)
+
+      await state.reorderTier("first", "third")
+
+      expect(saveCalls).toBe(0)
+      expect(state.selectedEvent()?.tiers.map((tier) => tier.id)).toEqual(["first", "second", "third"])
+      expect(state.errorMessage()).toBe(
+        "Jeder zusätzliche Einlass benötigt einen gültigen Beginn und ein späteres Ende.",
+      )
+    } finally {
+      dispose()
+    }
+  })
+})

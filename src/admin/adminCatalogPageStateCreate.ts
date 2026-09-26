@@ -326,6 +326,21 @@ export function adminCatalogPageStateCreate(inputs: {
       errorMessage.set("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
       return
     }
+    if (
+      tiersWithEventTimes.some((tier) =>
+        tier.additionalDoorsAt?.some(
+          (range) =>
+            !range.startsAt.trim() ||
+            !range.endsAt.trim() ||
+            Number.isNaN(Date.parse(range.startsAt)) ||
+            Number.isNaN(Date.parse(range.endsAt)) ||
+            Date.parse(range.endsAt) <= Date.parse(range.startsAt),
+        ),
+      )
+    ) {
+      errorMessage.set("Jeder zusätzliche Einlass benötigt einen gültigen Beginn und ein späteres Ende.")
+      return
+    }
     isSaving.set(true)
     errorMessage.set("")
     successMessage.set("")

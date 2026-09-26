@@ -83,7 +83,7 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
       validationMessage.set("Bitte gib ein gültiges Datum mit Uhrzeit ein.")
       catalog.tierFieldChange(
         "additionalDoorsAt",
-        ranges.map((entry, entryIndex) => (entryIndex === index ? { ...entry, startsAt: "", endsAt: "" } : entry)),
+        ranges.map((entry, entryIndex) => (entryIndex === index ? { ...entry, startsAt: "" } : entry)),
       )
       return
     }
