@@ -15,6 +15,8 @@ export async function e2eStripeTicketReconcile(input: {
     eventKey: string,
     runId: string,
   ) => Promise<{ success: boolean; data?: Proof; errorMessage?: string }>
+  /** Independently verify Billing's email/provider mapping was retired before customer deletion. */
+  customerExclusive?: (customerId: string) => Promise<boolean>
   stripe?: ReturnType<typeof e2eStripeTestClientCreate>
 }) {
   const op = "e2eStripeTicketReconcile"
@@ -150,13 +152,15 @@ export async function e2eStripeTicketReconcile(input: {
     return createResultError(op, "Checkout expiration could not be verified")
 
   // Provider invoices/charges remain immutable. Keep their customer attached; only an
-  // invoice/charge-free exclusive test customer may be deleted (Billing mapping remains!).
+  // invoice/charge-free exclusive test customer may be deleted only after Billing mapping proof.
   let customerDisposition = "retained"
   if (
     invoices.data.length === 0 &&
     charges.data.length === 0 &&
     intents.data.length === 0 &&
-    subscriptions.data.length === 0
+    subscriptions.data.length === 0 &&
+    input.customerExclusive &&
+    (await input.customerExclusive(customerId))
   ) {
     const deleted = await stripe.deleteCustomer(customerId)
     if (!deleted.success) return createResultError(op, "Exclusive test customer deletion unverified")
