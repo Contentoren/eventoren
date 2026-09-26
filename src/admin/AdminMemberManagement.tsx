@@ -2,7 +2,7 @@ import { For, Show } from "solid-js"
 import { Dynamic } from "solid-js/web"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
-import { Checkbox } from "#ui/input/check/Checkbox.jsx"
+import { CheckSingle } from "#ui/input/check/CheckSingle.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
@@ -76,19 +76,16 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
             <Button type="submit" disabled={state.isLoading()}>
               {state.text().searchSubmit}
             </Button>
-            <div class="flex flex-wrap items-center gap-3 sm:pb-2" role="group" aria-label={state.text().roleFilter}>
-              <For each={["admin", "organizer"] as const}>
-                {(role) => (
-                  <Checkbox
-                    id={`admin-member-role-${role}`}
-                    checked={state.roleFilter().includes(role)}
-                    onChange={() => state.roleFilterToggle(role)}
-                  >
-                    {state.text().roleName(role)}
-                  </Checkbox>
-                )}
-              </For>
-            </div>
+            <CheckSingle
+              id="admin-member-role-filter"
+              class="sm:pb-2"
+              valueSignal={state.roleFilter}
+              getOptions={() => ["all", "admin", "organizer"]}
+              valueText={(role) =>
+                role === "all" ? "Alle" : role === "organizer" ? "Veranstalter" : state.text().roleName(role)
+              }
+              disallowDeselection
+            />
           </form>
 
           <Show when={state.errorMessage()}>

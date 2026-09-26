@@ -22,15 +22,17 @@ export function AdminShell(props: { readonly children: JSX.Element; readonly are
       <div class="flex min-h-dvh bg-surface-base text-content">
         <Sidebar
           state={state.sidebarState}
-          title={props.area === "organizer" ? "Veranstalter-Navigation" : "Admin-Navigation"}
+          title={props.area === "organizer" && !state.isAdmin() ? "Veranstalter-Navigation" : "Admin-Navigation"}
           titleClass="sr-only"
           innerClass="w-[min(22rem,calc(100vw-2rem))] border-border bg-surface-base p-5 text-content"
           desktopChildren={
             <aside class="sticky top-0 self-start flex h-dvh w-64 shrink-0 flex-col overflow-y-auto border-r border-border bg-surface-base p-4">
-              <AdminSidebarContent state={state} showListViewControl={props.area !== "organizer"} />
+              <AdminSidebarContent state={state} showListViewControl={props.area !== "organizer" || state.isAdmin()} />
             </aside>
           }
-          mobileChildren={<AdminSidebarContent state={state} showListViewControl={props.area !== "organizer"} />}
+          mobileChildren={
+            <AdminSidebarContent state={state} showListViewControl={props.area !== "organizer" || state.isAdmin()} />
+          }
         />
         <div class="flex min-w-0 flex-1 flex-col">
           <SidebarToggle
@@ -49,19 +51,19 @@ function AdminSidebarContent(props: { readonly state: AdminShellState; readonly 
   return (
     <div class="flex min-h-full flex-1 flex-col gap-6">
       <Link
-        to={props.state.navigation[0].href}
+        to={props.state.navigation()[0].href}
         class="flex items-center gap-2 px-2 text-lg font-semibold tracking-tight text-content"
       >
         eventoren
       </Link>
 
       <nav
-        aria-label={props.state.areaLabel === "Admin" ? "Admin-Navigation" : "Veranstalter-Navigation"}
+        aria-label={props.state.areaLabel() === "Admin" ? "Admin-Navigation" : "Veranstalter-Navigation"}
         class="border-t border-border pt-5"
       >
         <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-content-muted">Navigation</p>
         <ul class="flex flex-col gap-1">
-          <For each={props.state.navigation}>
+          <For each={props.state.navigation()}>
             {(item) => (
               <li>
                 <Link
@@ -94,7 +96,7 @@ function AdminSidebarContent(props: { readonly state: AdminShellState; readonly 
                     <p class="m-0 truncate text-sm font-semibold">{user().name}</p>
                     <p class="m-0 truncate text-xs text-content-muted">{user().email ?? "—"}</p>
                     <span class="mt-1 inline-block rounded-full bg-surface-base px-2 py-0.5 text-xs font-medium text-content-muted">
-                      {props.state.areaLabel}
+                      {props.state.areaLabel()}
                     </span>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 import type { Accessor } from "solid-js"
 import type { AdminZitadelMember } from "./AdminZitadelMember.ts"
 import type { adminMemberManagementText } from "./adminMemberManagementText.ts"
+import type { SignalObject } from "#ui/utils/createSignalObject.js"
 
 export type AdminMemberManagementState = {
   readonly errorMessage: Accessor<string>
@@ -9,8 +10,7 @@ export type AdminMemberManagementState = {
   readonly isLoading: Accessor<boolean>
   readonly isUpdating: (zitadelUserId: string) => boolean
   readonly members: Accessor<readonly AdminZitadelMember[]>
-  readonly roleFilter: Accessor<readonly ("admin" | "organizer")[]>
-  readonly roleFilterToggle: (role: "admin" | "organizer") => void
+  readonly roleFilter: SignalObject<"all" | "admin" | "organizer">
   readonly reload: () => Promise<void>
   readonly roleChange: (member: AdminZitadelMember) => Promise<void>
   readonly search: Accessor<string>

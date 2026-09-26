@@ -13,7 +13,14 @@ export function adminMemberManagementStateCreate(
 ): AdminMemberManagementState {
   const list = inputs.list
   const members = createSignalObject<readonly AdminZitadelMember[]>([])
-  const roleFilter = createSignalObject<Role[]>(rolesFromUrl())
+  const roleFilter = createSignalObject<RoleFilter>(roleFilterFromUrl())
+  const roleFilterSignal = {
+    get: roleFilter.get,
+    set: (value: RoleFilter) => {
+      roleFilter.set(value)
+      roleFilterWriteToUrl(value)
+    },
+  }
   const search = createSignalObject(searchFromUrl())
   const hasLoaded = createSignalObject(false)
   const isLoading = createSignalObject(true)
@@ -46,21 +53,12 @@ export function adminMemberManagementStateCreate(
     await reload()
   }
 
-  const roleFilterToggle = (role: Role) => {
-    const selected = roleFilter.get()
-    const next = selected.includes(role) ? selected.filter((value) => value !== role) : [...selected, role]
-    roleFilter.set(next)
-    rolesWriteToUrl(next)
-  }
-
   const filteredMembers = () => {
     const selected = roleFilter.get()
     return members
       .get()
       .filter(
-        (member) =>
-          member.zitadelRoles.length > 0 &&
-          (selected.length === 0 || selected.some((role) => member.zitadelRoles.includes(role))),
+          (member) => member.zitadelRoles.length > 0 && (selected === "all" || member.zitadelRoles.includes(selected)),
       )
   }
 
@@ -108,8 +106,7 @@ export function adminMemberManagementStateCreate(
     members: filteredMembers,
     reload,
     roleChange,
-    roleFilter: roleFilter.get,
-    roleFilterToggle,
+    roleFilter: roleFilterSignal,
     search: search.get,
     searchChange,
     searchSubmit,
@@ -127,21 +124,25 @@ type AdminMemberRoleChange = (input: {
 type AdminMemberRoleChangeResult = Awaited<ReturnType<typeof adminZitadelOrganizerGrant>>
 type AdminMemberList = (input: { readonly search?: string }) => ReturnType<typeof adminZitadelMembersList>
 type Role = "admin" | "organizer"
+type RoleFilter = Role | "all"
 const roleSchema = v.picklist(["admin", "organizer"] as const)
 
-function rolesFromUrl(): Role[] {
-  if (typeof window === "undefined") return []
-  return new URL(window.location.href).searchParams.getAll("memberRole").flatMap((value) => {
+function roleFilterFromUrl(): RoleFilter {
+  if (typeof window === "undefined") return "all"
+  const roles = new URL(window.location.href).searchParams.getAll("memberRole").flatMap((value) => {
     const parsed = v.safeParse(roleSchema, value)
     return parsed.success ? [parsed.output] : []
   })
+  const uniqueRoles = [...new Set(roles)]
+  if (uniqueRoles.length !== 1) return "all"
+  return uniqueRoles[0] ?? "all"
 }
 
-function rolesWriteToUrl(roles: readonly Role[]): void {
+function roleFilterWriteToUrl(role: RoleFilter): void {
   if (typeof window === "undefined") return
   const url = new URL(window.location.href)
   url.searchParams.delete("memberRole")
-  for (const role of roles) url.searchParams.append("memberRole", role)
+  if (role !== "all") url.searchParams.set("memberRole", role)
   window.history.replaceState(window.history.state, "", url)
 }
 
