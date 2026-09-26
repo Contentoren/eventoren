@@ -1,9 +1,12 @@
 import { createEffect, on, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
-import type { AdminEventItem } from "./AdminEventItem.ts"
+import { eventAvailableTicketsCount } from "../events/eventAvailableTicketsCount.ts"
+import { eventListAvailableTicketsCount } from "../events/eventListAvailableTicketsCount.ts"
+import { ticketCountFormat } from "../ticketing/ticketCountFormat.ts"
 import { ticketPriceFormat } from "../ticketing/ticketPriceFormat.ts"
-import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
+import type { AdminEventItem } from "./AdminEventItem.ts"
 import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
+import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
 import type { adminTicketOrdersList } from "./adminTicketOrdersList.ts"
 
 const pageSize = 50
@@ -83,6 +86,40 @@ export function adminTicketOrdersPageStateCreate(
     detailsLoading.set(false)
   }
 
+  const orderToggle = (orderId: string) => {
+    if (selectedOrderId.get() === orderId) {
+      orderClose()
+      return
+    }
+    void orderOpen(orderId)
+  }
+
+  const availableTicketsCount = () => {
+    const allEvents = inputs.events?.() ?? []
+    const selected = eventSignal.get()
+    if (selected) {
+      const event = allEvents.find((item) => item.id === selected)
+      return event ? eventAvailableTicketsCount(event) : 0
+    }
+    return eventListAvailableTicketsCount(allEvents)
+  }
+
+  const availableTicketsForOrder = (order: AdminTicketOrderSummary) => {
+    const event = (inputs.events?.() ?? []).find((item) => item.id === order.eventKey)
+    return event ? eventAvailableTicketsCount(event) : undefined
+  }
+
+  const availableTicketsLabel = () => {
+    const count = availableTicketsCount()
+    return `${ticketCountFormat(count)} ${count === 1 ? "Ticket" : "Tickets"} zum Kauf verfügbar`
+  }
+
+  const availableTicketsLabelForOrder = (order: AdminTicketOrderSummary) => {
+    const count = availableTicketsForOrder(order)
+    if (count === undefined) return undefined
+    return `${ticketCountFormat(count)} ${count === 1 ? "Ticket" : "Tickets"} zum Kauf verfügbar`
+  }
+
   if (inputs.eventSignal) createEffect(on(eventSignal.get, reload))
   else onMount(reload)
 
@@ -103,6 +140,11 @@ export function adminTicketOrdersPageStateCreate(
     eventText: (event: string) => (inputs.events?.() ?? []).find((item) => item.id === event)?.title ?? "Alle Events",
     eventForOrder: (order: AdminTicketOrderSummary) =>
       (inputs.events?.() ?? []).find((event) => event.id === order.eventKey),
+    availableTicketsCount,
+    availableTicketsLabel,
+    availableTicketsForOrder,
+    availableTicketsLabelForOrder,
+    ticketCountFormat,
     paymentLabel: (status: AdminTicketOrderSummary["paymentStatus"]) =>
       ({ pending: "Offen", paid: "Bezahlt", failed: "Fehlgeschlagen", expired: "Abgelaufen" })[status],
     paymentTone: (status: AdminTicketOrderSummary["paymentStatus"]) =>
@@ -115,6 +157,7 @@ export function adminTicketOrdersPageStateCreate(
     detailsLoading: detailsLoading.get,
     orderOpen,
     orderClose,
+    orderToggle,
   }
 }
 

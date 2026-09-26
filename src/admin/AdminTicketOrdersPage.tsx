@@ -27,6 +27,7 @@ export function AdminTicketOrdersPage(props?: {
             to="/admin/events/$eventKey"
             params={{ eventKey: order.eventKey }}
             search={{}}
+            onClick={(event) => event.stopPropagation()}
             class="hover:underline focus-visible:underline"
           >
             {state.eventForOrder(order)?.title ?? order.eventTitle}
@@ -37,6 +38,9 @@ export function AdminTicketOrdersPage(props?: {
             {[state.eventForOrder(order)?.venue, state.eventForOrder(order)?.city].filter(Boolean).join(", ") ||
               "Ort offen"}
           </p>
+        </Show>
+        <Show when={state.availableTicketsLabelForOrder(order)}>
+          {(label) => <p class="mt-0.5 truncate text-xs text-content-muted">{label()}</p>}
         </Show>
       </div>
       <div class="min-w-0 text-sm text-content-muted">
@@ -73,16 +77,13 @@ export function AdminTicketOrdersPage(props?: {
         </Show>
         <UiBadge tone={state.paymentTone(order.paymentStatus)}>{state.paymentLabel(order.paymentStatus)}</UiBadge>
       </div>
-      <div class="min-w-0">
-        <Button size="sm" variant="outline" class="whitespace-nowrap" onClick={() => void state.orderOpen(order.id)}>
-          Details anzeigen
-        </Button>
-        <Show when={tile}>
-          <p class="mt-2 truncate text-xs text-content-muted" title={order.paymentReference}>
+      <Show when={tile}>
+        <div class="min-w-0">
+          <p class="truncate text-xs text-content-muted" title={order.paymentReference}>
             Referenz: {order.paymentReference}
           </p>
-        </Show>
-      </div>
+        </div>
+      </Show>
     </>
   )
 
@@ -93,7 +94,17 @@ export function AdminTicketOrdersPage(props?: {
         <header class="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 class="text-3xl font-semibold tracking-tight text-content">Bestellungen</h1>
-            <p class="mt-1 text-sm text-content-muted">{state.orders().length} Bestellungen geladen</p>
+            <p class="mt-1 text-sm text-content-muted">
+              {state.orders().length} {state.orders().length === 1 ? "Bestellung" : "Bestellungen"} geladen ·{" "}
+              {state.availableTicketsLabel()}
+            </p>
+          </div>
+          <div class="flex items-center gap-2 rounded-lg border border-border bg-surface-muted px-3.5 py-2 text-sm">
+            <span class="text-content-muted">Zum Kauf verfügbar:</span>
+            <span class="font-semibold text-content">
+              {state.ticketCountFormat(state.availableTicketsCount())}{" "}
+              {state.availableTicketsCount() === 1 ? "Ticket" : "Tickets"}
+            </span>
           </div>
         </header>
 
@@ -156,14 +167,13 @@ export function AdminTicketOrdersPage(props?: {
             >
               <Show when={viewPreference?.view() !== "tiles"}>
                 <div class="hidden items-center border-b border-border text-xs font-semibold text-content-muted xl:flex">
-                  <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_9rem_9rem] gap-2 px-4 py-3">
+                  <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,11rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_8rem] gap-2 px-4 py-3">
                     <span>Event</span>
                     <span>Kunde</span>
                     <span>Bestellt</span>
                     <span>Eventdatum</span>
                     <span>Betrag</span>
                     <span>Status</span>
-                    <span>Aktion</span>
                   </div>
                 </div>
               </Show>
@@ -181,14 +191,40 @@ export function AdminTicketOrdersPage(props?: {
                         when={viewPreference?.view() === "tiles"}
                         fallback={
                           <div class="flex items-center hover:bg-surface-muted">
-                            <div class="grid min-w-0 flex-1 gap-2 p-4 transition-colors xl:grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_9rem_9rem] xl:items-center">
+                            <div
+                              role="button"
+                              tabindex="0"
+                              aria-expanded={state.selectedOrderId() === order.id}
+                              aria-label={`Bestellung ${order.id} Details ${state.selectedOrderId() === order.id ? "schließen" : "anzeigen"}`}
+                              class="grid min-w-0 flex-1 cursor-pointer gap-2 p-4 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring xl:grid-cols-[minmax(0,1fr)_minmax(0,11rem)_minmax(0,9rem)_minmax(0,9rem)_6rem_8rem] xl:items-center"
+                              onClick={() => state.orderToggle(order.id)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault()
+                                  state.orderToggle(order.id)
+                                }
+                              }}
+                            >
                               {orderDetails(order, false)}
                             </div>
                           </div>
                         }
                       >
                         <CardWrapper class="relative p-0 lg:p-0">
-                          <div class="grid gap-3 p-4 pt-12 transition-colors hover:bg-surface-muted">
+                          <div
+                            role="button"
+                            tabindex="0"
+                            aria-expanded={state.selectedOrderId() === order.id}
+                            aria-label={`Bestellung ${order.id} Details ${state.selectedOrderId() === order.id ? "schließen" : "anzeigen"}`}
+                            class="grid cursor-pointer gap-3 rounded-lg p-4 pt-12 transition-colors hover:bg-surface-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                            onClick={() => state.orderToggle(order.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.preventDefault()
+                                state.orderToggle(order.id)
+                              }
+                            }}
+                          >
                             {orderDetails(order, true)}
                           </div>
                         </CardWrapper>

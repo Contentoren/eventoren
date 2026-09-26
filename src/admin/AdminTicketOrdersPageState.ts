@@ -25,4 +25,10 @@ export type AdminTicketOrdersPageState = {
   readonly detailsLoading: Accessor<boolean>
   readonly orderOpen: (orderId: string) => Promise<void>
   readonly orderClose: () => void
+  readonly orderToggle: (orderId: string) => void
+  readonly availableTicketsCount: Accessor<number>
+  readonly availableTicketsLabel: Accessor<string>
+  readonly availableTicketsForOrder: (order: AdminTicketOrderSummary) => number | undefined
+  readonly availableTicketsLabelForOrder: (order: AdminTicketOrderSummary) => string | undefined
+  readonly ticketCountFormat: (count: number) => string
 }

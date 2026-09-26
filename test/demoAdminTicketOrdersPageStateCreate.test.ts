@@ -82,6 +82,12 @@ describe("demoAdminTicketOrdersPageStateCreate", () => {
       await state.loadMore()
       expect(state.isDone()).toBe(true)
 
+      // Available tickets calculation in demo
+      expect(state.availableTicketsCount()).toBeGreaterThan(0)
+      expect(state.availableTicketsLabel()).toContain("Tickets zum Kauf verfügbar")
+      expect(state.availableTicketsForOrder(firstOrder)).toBeDefined()
+      expect(state.availableTicketsLabelForOrder(firstOrder)).toContain("Tickets zum Kauf verfügbar")
+
       dispose()
     })
   })
