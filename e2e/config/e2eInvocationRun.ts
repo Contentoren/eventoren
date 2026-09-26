@@ -168,11 +168,17 @@ export async function e2eInvocationRun(
       const adminToken = environment.E2E_CLEANUP_ADMIN_TOKEN
       const orderProof: Parameters<typeof e2eStripeTicketReconcile>[0]["orderProof"] =
         input.stripeOrderProof ??
-        (async (orderId, eventKey, runId) => {
+        (async (orderId, eventKey, runId, runCreatedAt) => {
           if (!convexUrl || !adminToken)
             return { success: false, errorMessage: "Missing app order verification credentials" }
           const client = new ConvexHttpClient(convexUrl)
-          return client.query(api.ticketing.ticketE2eOrderProofQuery, { token: adminToken, orderId, eventKey, runId })
+          return client.query(api.ticketing.ticketE2eOrderProofQuery, {
+            token: adminToken,
+            orderId,
+            eventKey,
+            runId,
+            runCreatedAt,
+          })
         })
       const stripe = await e2eStripeCleanupScan({
         directory: root.data.directory,

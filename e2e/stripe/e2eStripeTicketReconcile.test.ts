@@ -46,6 +46,8 @@ function fixture(
     intents?: boolean
     invoice?: boolean
     subscription?: boolean
+    live?: boolean
+    foreignInvoice?: boolean
   } = {},
 ) {
   const calls: string[] = []
@@ -54,7 +56,7 @@ function fixture(
   let subscriptionStatus = "active"
   const session = () => ({
     id: "cs_test_123",
-    livemode: false,
+    livemode: options.live ?? false,
     mode: options.subscription ? "subscription" : "payment",
     status,
     payment_status: options.paid ? "paid" : "unpaid",
@@ -103,7 +105,16 @@ function fixture(
       }
     if (path === "invoices")
       body = {
-        data: options.invoice ? [{ id: "in_123", livemode: false, customer: "cus_123", metadata }] : [],
+        data: options.invoice
+          ? [
+              {
+                id: "in_123",
+                livemode: false,
+                customer: "cus_123",
+                metadata: options.foreignInvoice ? { ...metadata, event_key: "foreign" } : metadata,
+              },
+            ]
+          : [],
         has_more: false,
       }
     if (path === "charges")
@@ -154,8 +165,13 @@ test("deletes an unpaid customer only with independent Billing exclusivity proof
   expect(calls).toContain("DELETE customers/cus_123")
 })
 
-test("rejects another Stripe test account and shared customer before any mutation", async () => {
-  for (const options of [{ account: "acct_other" }, { foreign: true }]) {
+test("rejects another account, live session, shared customer and foreign invoice before mutation", async () => {
+  for (const options of [
+    { account: "acct_other" },
+    { foreign: true },
+    { live: true },
+    { invoice: true, foreignInvoice: true },
+  ]) {
     const { calls, stripe } = fixture(options)
     expect((await e2eStripeTicketReconcile(config(stripe))).success).toBe(false)
     expect(calls.every((call) => call.startsWith("GET"))).toBe(true)
@@ -230,6 +246,36 @@ test("sweeps a stale failed run and successful current run, preserving checkpoin
     } finally {
       await rm(another, { recursive: true, force: true })
     }
+  } finally {
+    await rm(directory, { recursive: true, force: true })
+  }
+})
+
+test("does not infer an orphan checkout from an order without a saved Stripe session", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "eventoren-stripe-orphan-"))
+  try {
+    expect(
+      (
+        await e2eCheckpointSave(directory, {
+          ...checkpoint,
+          ticket: { ...checkpoint.ticket!, stripeSession: undefined },
+        })
+      ).success,
+    ).toBe(true)
+    const before = await readFile(join(directory, "checkpoint.json"), "utf8")
+    let called = false
+    const result = await e2eStripeCleanupScan({
+      directory,
+      target: checkpoint,
+      reconcile: (async () => {
+        called = true
+        return { success: true, data: {} }
+      }) as typeof e2eStripeTicketReconcile,
+      config: config(fixture().stripe),
+    })
+    expect(result.success).toBe(false)
+    expect(called).toBe(false)
+    expect(await readFile(join(directory, "checkpoint.json"), "utf8")).toBe(before)
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
