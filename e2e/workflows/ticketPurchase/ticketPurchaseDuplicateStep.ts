@@ -2,11 +2,11 @@ import { expect } from "@rstest/playwright"
 import type { TicketPurchaseContext } from "./TicketPurchaseContext.ts"
 import { ticketPurchaseStepRun } from "./ticketPurchaseStepRun.ts"
 
-export async function ticketPurchaseDuplicateStep(context: TicketPurchaseContext, code: string): Promise<void> {
+export async function ticketPurchaseDuplicateStep(context: TicketPurchaseContext): Promise<void> {
   await ticketPurchaseStepRun(context, "duplicate", true, async () => {
     const { page } = context
-    await page.locator("#organizer-ticket-code").fill(code)
-    await page.getByRole("button", { name: "Ticket-Code prüfen" }).click()
-    await expect(page.getByText("Dieses Ticket wurde bereits eingecheckt.").first()).toBeVisible({ timeout: 30_000 })
+    await page.getByRole("button", { name: new RegExp(context.checkpoint.ticket.participantName) }).click()
+    await expect(page.getByRole("button", { name: "Auschecken" }).first()).toBeEnabled()
+    await expect(page.getByRole("button", { name: "Einchecken" }).first()).toBeDisabled()
   })
 }

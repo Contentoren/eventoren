@@ -25,7 +25,7 @@ test("testadmin can reach the real admin event catalog", { timeout: 90_000 }, as
   await expect(page.getByRole("link", { name: /event erstellen|neues event/i })).toBeVisible()
 })
 
-test("creates, sells, delivers, opens, checks in, and rejects a duplicate paid ticket", { timeout: 600_000 }, async ({
+test("creates, sells, delivers, opens, and checks in a paid ticket once", { timeout: 600_000 }, async ({
   page,
   browser,
 }) => {
@@ -37,10 +37,10 @@ test("creates, sells, delivers, opens, checks in, and rejects a duplicate paid t
     await ticketPurchaseCheckoutStep(context)
     await ticketPurchasePaymentStep(context)
     await ticketPurchaseDeliveryStep(context)
-    const code = await ticketPurchasePdfStep(context)
+    await ticketPurchasePdfStep(context)
     await ticketPurchaseAccessStep(context)
-    await ticketPurchaseCheckinStep(context, code)
-    await ticketPurchaseDuplicateStep(context, code)
+    await ticketPurchaseCheckinStep(context)
+    await ticketPurchaseDuplicateStep(context)
   } finally {
     await context.guestContext?.close()
   }
