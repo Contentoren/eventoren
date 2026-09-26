@@ -87,38 +87,42 @@ export function SiteHeader(
           </nav>
 
           <div class="flex items-center gap-2 max-md:gap-0">
-            <SiteHeaderCartButton
-              quantity={state.cartQuantity()}
-              label={state.cartLabel()}
-              hasItems={state.cartHasItems()}
-              href={props.cartHref}
-              active={props.cartHref ? state.pathIsActive(props.cartHref) : undefined}
-              class="max-md:px-space-2"
-            />
+            <Show when={state.cartHasItems()}>
+              <SiteHeaderCartButton
+                quantity={state.cartQuantity()}
+                label={state.cartLabel()}
+                hasItems={state.cartHasItems()}
+                href={props.cartHref}
+                active={props.cartHref ? state.pathIsActive(props.cartHref) : undefined}
+                class="max-md:px-space-2"
+              />
+            </Show>
 
-            <Show
-              when={props.checkoutHref}
-              fallback={
-                <UiButton
-                  size="sm"
-                  class="max-sm:hidden sm:inline-flex"
-                  disabled={!state.cartHasItems()}
-                  onClick={() => navigate({ to: "/checkout" })}
-                >
-                  Zur Kasse
-                </UiButton>
-              }
-            >
-              {(checkoutHref) => (
-                <Link
-                  to={checkoutHref()}
-                  aria-disabled={!state.cartHasItems()}
-                  class="focus-ring inline-flex h-9 items-center justify-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong max-sm:hidden sm:inline-flex"
-                  classList={{ "pointer-events-none opacity-70": !state.cartHasItems() }}
-                >
-                  Zur Kasse
-                </Link>
-              )}
+            <Show when={state.cartHasItems()}>
+              <Show
+                when={props.checkoutHref}
+                fallback={
+                  <UiButton
+                    size="sm"
+                    class="max-sm:hidden sm:inline-flex"
+                    disabled={!state.cartHasItems()}
+                    onClick={() => navigate({ to: "/checkout" })}
+                  >
+                    Zur Kasse
+                  </UiButton>
+                }
+              >
+                {(checkoutHref) => (
+                  <Link
+                    to={checkoutHref()}
+                    aria-disabled={!state.cartHasItems()}
+                    class="focus-ring inline-flex h-9 items-center justify-center rounded-control bg-brand px-space-4 text-sm font-semibold text-brand-content transition-colors hover:bg-brand-strong max-sm:hidden sm:inline-flex"
+                    classList={{ "pointer-events-none opacity-70": !state.cartHasItems() }}
+                  >
+                    Zur Kasse
+                  </Link>
+                )}
+              </Show>
             </Show>
 
             <Button
