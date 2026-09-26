@@ -3,9 +3,34 @@ import { createResult, createResultError } from "#result"
 import type { AdminZitadelMember } from "../src/admin/AdminZitadelMember.ts"
 import { adminMemberManagementStateCreate } from "../src/admin/adminMemberManagementStateCreate.ts"
 import { adminOrganizerMembersPageStateCreate } from "../src/admin/adminOrganizerMembersPageStateCreate.ts"
+import { demoAdminMemberManagementStateCreate } from "../src/demo/state/demoAdminMemberManagementStateCreate.ts"
+
+test("shows only admin or organizer members for all and honors each role filter", async () => {
+  const admin = memberCreate("admin-1", false, ["admin"])
+  const organizer = memberCreate("organizer-1", true)
+  const customer = memberCreate("customer-1", false)
+  const empty = memberCreate("empty-1", false, [])
+  const state = adminMemberManagementStateCreate({
+    list: async () => createResult({ members: [admin, organizer, customer, empty], total: 4 }),
+  })
+
+  await state.reload()
+
+  expect(state.members()).toEqual([admin, organizer])
+  state.roleFilter.set("admin")
+  expect(state.members()).toEqual([admin])
+  state.roleFilter.set("organizer")
+  expect(state.members()).toEqual([organizer])
+})
+
+test("demo all filter excludes customer-only members", () => {
+  const state = demoAdminMemberManagementStateCreate()
+
+  expect(state.members().map((member) => member.zitadelUserId)).toEqual(["demo-zitadel-mara", "demo-zitadel-support"])
+})
 
 test("loads the member directory through the server session when the browser token is unavailable", async () => {
-  const member = memberCreate("member-1", false)
+  const member = memberCreate("member-1", false, ["admin"])
   let called = false
   const state = adminMemberManagementStateCreate({
     list: async () => {
@@ -22,7 +47,7 @@ test("loads the member directory through the server session when the browser tok
 })
 
 test("changes member roles through the injected server action without a browser token", async () => {
-  const member = memberCreate("member-1", false)
+  const member = memberCreate("member-1", false, ["admin"])
   const operations: { operation: "grant" | "revoke"; zitadelUserId: string }[] = []
   const state = adminMemberManagementStateCreate({
     list: async () => createResult({ members: [member], total: 1 }),
@@ -32,7 +57,7 @@ test("changes member roles through the injected server action without a browser 
       return createResult({
         organizerGranted,
         operation: input.operation,
-        zitadelRoles: organizerGranted ? ["organizer"] : ["customer"],
+        zitadelRoles: organizerGranted ? ["admin", "organizer"] : ["admin"],
         zitadelUserId: input.zitadelUserId,
       })
     },
@@ -50,7 +75,7 @@ test("changes member roles through the injected server action without a browser 
 })
 
 test("tracks initial loading and preserves member directory state on refresh", async () => {
-  const initialMember = memberCreate("member-1", false)
+  const initialMember = memberCreate("member-1", true)
   const updatedMember = memberCreate("member-2", true)
   let callCount = 0
 
@@ -170,12 +195,16 @@ test("keeps hasLoaded false when initial organizer request fails", async () => {
   expect(state.members()).toEqual([])
 })
 
-function memberCreate(zitadelUserId: string, organizerGranted: boolean): AdminZitadelMember {
+function memberCreate(
+  zitadelUserId: string,
+  organizerGranted: boolean,
+  zitadelRoles: AdminZitadelMember["zitadelRoles"] = organizerGranted ? ["organizer"] : ["customer"],
+): AdminZitadelMember {
   return {
     displayName: zitadelUserId,
     organizerGranted,
     userName: zitadelUserId,
-    zitadelRoles: organizerGranted ? ["organizer"] : ["customer"],
+    zitadelRoles,
     zitadelUserId,
   }
 }

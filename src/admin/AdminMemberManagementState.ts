@@ -1,7 +1,7 @@
 import type { Accessor } from "solid-js"
+import type { SignalObject } from "#ui/utils/createSignalObject.js"
 import type { AdminZitadelMember } from "./AdminZitadelMember.ts"
 import type { adminMemberManagementText } from "./adminMemberManagementText.ts"
-import type { SignalObject } from "#ui/utils/createSignalObject.js"
 
 export type AdminMemberManagementState = {
   readonly errorMessage: Accessor<string>

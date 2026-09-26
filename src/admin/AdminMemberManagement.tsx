@@ -1,9 +1,12 @@
+import { mdiMinus } from "@adaptive-ds/mdi/mdiMinus.js"
+import { mdiPlus } from "@adaptive-ds/mdi/mdiPlus.js"
 import { For, Show } from "solid-js"
 import { Dynamic } from "solid-js/web"
+import { CheckSingle } from "#ui/input/check/CheckSingle.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
-import { CheckSingle } from "#ui/input/check/CheckSingle.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import { ButtonIcon } from "#ui/interactive/button/ButtonIcon.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { adminListViewPreferenceContextUse } from "../viewPreference/adminListViewPreferenceContextUse.ts"
@@ -29,9 +32,10 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
           </For>
         </div>
       </div>
-      <Button
+      <ButtonIcon
         class="w-full lg:w-auto"
-        variant={member.organizerGranted ? "outline" : undefined}
+        variant="contrast"
+        icon={member.organizerGranted ? mdiMinus : mdiPlus}
         disabled={state.isUpdating(member.zitadelUserId)}
         aria-label={`${member.organizerGranted ? state.text().revoke : state.text().grant}: ${member.displayName || member.userName}`}
         onClick={() => void state.roleChange(member)}
@@ -41,7 +45,7 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
           : member.organizerGranted
             ? state.text().revoke
             : state.text().grant}
-      </Button>
+      </ButtonIcon>
     </>
   )
 
@@ -76,16 +80,19 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
             <Button type="submit" disabled={state.isLoading()}>
               {state.text().searchSubmit}
             </Button>
-            <CheckSingle
-              id="admin-member-role-filter"
-              class="sm:pb-2"
-              valueSignal={state.roleFilter}
-              getOptions={() => ["all", "admin", "organizer"]}
-              valueText={(role) =>
-                role === "all" ? "Alle" : role === "organizer" ? "Veranstalter" : state.text().roleName(role)
-              }
-              disallowDeselection
-            />
+            <fieldset>
+              <legend class="sr-only">Rollen filtern</legend>
+              <CheckSingle
+                id="admin-member-role-filter"
+                class="sm:pb-2"
+                valueSignal={state.roleFilter}
+                getOptions={() => ["all", "admin", "organizer"]}
+                valueText={(role) =>
+                  role === "all" ? "Alle" : role === "organizer" ? "Veranstalter" : state.text().roleName(role)
+                }
+                disallowDeselection
+              />
+            </fieldset>
           </form>
 
           <Show when={state.errorMessage()}>

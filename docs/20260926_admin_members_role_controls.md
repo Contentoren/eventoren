@@ -10,9 +10,9 @@ On `/admin/mitglieder`, replace the two role-filter checkboxes with a single-cho
 - Run focused type/style checks after implementation; delay browser verification until both UI changes are complete.
 
 ## Tasks
-1. [pending] Replace checkbox filter with `CheckSingle` and adapt state/URL mapping as needed.
-2. [pending] Use contrast icon buttons for organizer grant (+) and revoke (-).
+1. [completed] Replace checkbox filter with `CheckSingle` and adapt state/URL mapping as needed.
+2. [completed] Use contrast icon buttons for organizer grant (+) and revoke (-).
 3. [pending] Verify focused checks and UI behavior on `/admin/mitglieder` in browser.
 
 ## Current context
-Current role filters are two independent checkboxes; empty URL filter means all members with at least one role, and matching is OR-based. `CheckSingle` is a single-value signal-backed selector. Existing query params may contain one or both role values.
+The selector maps Alle to no role URL parameter, one valid role to that role, and both legacy role values to Alle. Production and demo filtering now restrict Alle to admin or organizer members; a focused test covers this and the other options. Organizer actions use `ButtonIcon` contrast with plus/minus icons. Focused tests and Biome pass; global typecheck reports unrelated admission-range errors. Actual `/admin/mitglieder` is blocked locally by SSO origin/callback configuration; the backend-free `/demo/admin/members` route can verify the shared controls.

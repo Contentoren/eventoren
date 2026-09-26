@@ -58,7 +58,11 @@ export function adminMemberManagementStateCreate(
     return members
       .get()
       .filter(
-          (member) => member.zitadelRoles.length > 0 && (selected === "all" || member.zitadelRoles.includes(selected)),
+        (member) =>
+          member.zitadelRoles.length > 0 &&
+          (selected === "all"
+            ? member.zitadelRoles.includes("admin") || member.zitadelRoles.includes("organizer")
+            : member.zitadelRoles.includes(selected)),
       )
   }
 
