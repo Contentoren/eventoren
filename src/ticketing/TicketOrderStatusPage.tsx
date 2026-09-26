@@ -58,26 +58,15 @@ export function TicketOrderStatusPage(props: {
                     </p>
                   </div>
                 </div>
-                <Show
-                  when={state.hasTickets()}
-                  fallback={
-                    <UiButton
-                      variant="secondary"
-                      class="w-full sm:w-fit"
-                      disabled={state.isRefreshing()}
-                      onClick={state.refresh}
-                    >
-                      {state.refreshLabel()}
-                    </UiButton>
-                  }
-                >
-                  <LinkButtonExternal
-                    href="#deine-tickets"
-                    variant="none"
-                    class="focus-ring h-11 w-full rounded-control bg-brand px-space-6 font-semibold text-brand-content hover:bg-brand-strong sm:w-fit"
+                <Show when={!state.hasTickets()}>
+                  <UiButton
+                    variant="secondary"
+                    class="w-full sm:w-fit"
+                    disabled={state.isRefreshing()}
+                    onClick={state.refresh}
                   >
-                    Tickets öffnen
-                  </LinkButtonExternal>
+                    {state.refreshLabel()}
+                  </UiButton>
                 </Show>
               </div>
             </CardWrapper>
