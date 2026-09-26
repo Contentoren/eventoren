@@ -1,15 +1,18 @@
 import { mkdir } from "node:fs/promises"
 import { expect, test } from "@rstest/playwright"
 import type { Page } from "playwright"
-import { e2eEnvironmentRead } from "../config/e2eEnvironmentRead.ts"
-import { ticketE2eImapMessageWait } from "../mail/ticketE2eImapMessageWait.ts"
-import { ticketE2ePdfInspect } from "../pdf/ticketE2ePdfInspect.ts"
-import { ticketE2ePdfTextNormalize } from "../pdf/ticketE2ePdfTextNormalize.ts"
-import { ticketE2eAdminSignIn } from "./ticketE2eAdminSignIn.ts"
+import { e2eEnvironmentRead } from "../../config/e2eEnvironmentRead.ts"
+import { e2eTicketTargetCheck } from "../../config/e2eTicketTargetCheck.ts"
+import { ticketE2eImapMessageWait } from "../../mail/ticketE2eImapMessageWait.ts"
+import { ticketE2ePdfInspect } from "../../pdf/ticketE2ePdfInspect.ts"
+import { ticketE2ePdfTextNormalize } from "../../pdf/ticketE2ePdfTextNormalize.ts"
+import { ticketE2eAdminSignIn } from "../ticketE2eAdminSignIn.ts"
 
 const environmentResult = e2eEnvironmentRead(process.env)
 if (!environmentResult.success) throw new Error(environmentResult.errorMessage)
 const environment = environmentResult.data
+const targetCheck = e2eTicketTargetCheck(environment.target)
+if (!targetCheck.success) throw new Error(targetCheck.errorMessage)
 
 test("testadmin can reach the real admin event catalog", { timeout: 90_000 }, async ({ page }) => {
   await ticketE2eAdminSignIn(page, environment.baseUrl)
@@ -22,7 +25,8 @@ test("creates, sells, delivers, opens, checks in, and rejects a duplicate paid t
   browser,
 }) => {
   const mail = ticketE2eMailboxRead(environment.mailcow)
-  const runToken = `${Date.now().toString(36)}-${crypto.randomUUID()}`
+  const runToken = process.env.E2E_RUN_ID ?? `${Date.now().toString(36)}-${crypto.randomUUID()}`
+  if (!/^[0-9a-z]+-[0-9a-f-]{36}$/u.test(runToken)) throw new Error("Invalid E2E run identifier")
   const eventTitle = `Ticket E2E ${runToken}`
   const eventKey = `ticket-e2e-${runToken}`
   const participantName = `E2E Participant ${runToken}`

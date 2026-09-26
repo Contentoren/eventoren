@@ -6,7 +6,7 @@ e2eEnvironmentLoad()
 
 export default defineConfig({
   extends: definePlaywrightConfig({}),
-  include: ["e2e/workflows/ticketPurchase.test.ts"],
+  include: ["e2e/workflows/ticketPurchase/ticketPurchase.test.ts"],
   testEnvironment: "node",
   isolate: false,
 })
