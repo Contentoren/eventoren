@@ -308,6 +308,7 @@ test("event and tier configuration changes advance one event revision while no-o
     description: "Freie Platzwahl",
     startsAt: "2026-10-01T18:00:00.000Z",
     doorsAt: "2026-10-01T17:00:00.000Z",
+    additionalDoorsAt: [{ startsAt: "2026-10-01T16:00:00.000Z", endsAt: "2026-10-01T17:00:00.000Z" }],
     endsAt: "2026-10-01T22:00:00.000Z",
     priceCents: 2500,
     feeCents: 250,
@@ -463,6 +464,24 @@ test("tier upsert rejects malformed ISO start, admission, and end times", async 
     ...validTimes,
     endsAt: "not-a-date",
   })
+  const missingAdmissionEnd = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...baseArgs,
+    tierKey: "missing-admission-end",
+    ...validTimes,
+    additionalDoorsAt: [{ startsAt: "2026-10-01T16:00:00.000Z", endsAt: "" }],
+  })
+  const reversedAdmission = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...baseArgs,
+    tierKey: "reversed-admission",
+    ...validTimes,
+    additionalDoorsAt: [{ startsAt: "2026-10-01T18:00:00.000Z", endsAt: "2026-10-01T17:00:00.000Z" }],
+  })
+  const validAdmission = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    ...baseArgs,
+    tierKey: "valid-admission",
+    ...validTimes,
+    additionalDoorsAt: [{ startsAt: "2026-10-01T16:00:00.000Z", endsAt: "2026-10-01T17:00:00.000Z" }],
+  })
 
   expect(invalidStart).toMatchObject({ success: false, errorMessage: "Start time must be a valid ISO date and time" })
   expect(invalidDoors).toMatchObject({
@@ -470,6 +489,23 @@ test("tier upsert rejects malformed ISO start, admission, and end times", async 
     errorMessage: "Admission time must be a valid ISO date and time",
   })
   expect(invalidEnd).toMatchObject({ success: false, errorMessage: "End time must be a valid ISO date and time" })
+  expect(missingAdmissionEnd).toMatchObject({ success: false })
+  expect(reversedAdmission).toMatchObject({ success: false })
+  expect(validAdmission.success).toBe(true)
+})
+
+test("legacy additional admission timestamps remain readable without an invented end time", async () => {
+  const t = convexTest(schema, modules)
+  await t.run(async (ctx) => {
+    const eventId = await ctx.db.insert("catalogEvents", catalogEventInsert())
+    await ctx.db.insert(
+      "catalogTicketTiers",
+      catalogTierInsert(eventId, { additionalDoorsAt: ["2026-10-01T16:00:00.000Z"] }),
+    )
+  })
+
+  const projected = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "catalog-event" })
+  expect(projected?.tiers[0]?.additionalDoorsAt).toEqual([{ startsAt: "2026-10-01T16:00:00.000Z", endsAt: "" }])
 })
 
 test("admins delete unused tiers and hide sold tiers while retaining historical inventory", async () => {

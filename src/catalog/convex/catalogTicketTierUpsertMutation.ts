@@ -13,7 +13,7 @@ const catalogTicketTierArgsValidator = v.object({
   description: v.string(),
   startsAt: v.string(),
   doorsAt: v.string(),
-  additionalDoorsAt: v.optional(v.array(v.string())),
+  additionalDoorsAt: v.optional(v.array(v.object({ startsAt: v.string(), endsAt: v.string() }))),
   endsAt: v.string(),
   priceCents: v.number(),
   feeCents: v.number(),
@@ -44,8 +44,15 @@ async function catalogTicketTierUpsertAuthorizedFn(
   if (!isValidIsoDateTime(args.endsAt)) return createResultError(op, "End time must be a valid ISO date and time")
   if (args.doorsAt.trim().length > 0 && !isValidIsoDateTime(args.doorsAt))
     return createResultError(op, "Admission time must be a valid ISO date and time")
-  if (args.additionalDoorsAt?.some((value) => !value.trim() || Number.isNaN(Date.parse(value))))
-    return createResultError(op, "Additional admission times must be valid dates")
+  if (
+    args.additionalDoorsAt?.some(
+      (range) =>
+        !isValidIsoDateTime(range.startsAt) ||
+        !isValidIsoDateTime(range.endsAt) ||
+        Date.parse(range.endsAt) <= Date.parse(range.startsAt),
+    )
+  )
+    return createResultError(op, "Additional admissions must have valid start and end times in chronological order")
   if (!Number.isInteger(args.priceCents) || args.priceCents < 0)
     return createResultError(op, "Price must be a non-negative integer")
   if (!Number.isInteger(args.feeCents) || args.feeCents < 0)
@@ -99,7 +106,9 @@ async function catalogTicketTierUpsertAuthorizedFn(
       description: existing.description,
       startsAt: existing.startsAt,
       doorsAt: existing.doorsAt,
-      additionalDoorsAt: existing.additionalDoorsAt ?? [],
+      additionalDoorsAt: (existing.additionalDoorsAt ?? []).map((range) =>
+        typeof range === "string" ? { startsAt: range, endsAt: "" } : range,
+      ),
       endsAt: existing.endsAt,
       priceCents: existing.priceCents,
       feeCents: existing.feeCents,

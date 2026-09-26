@@ -13,7 +13,9 @@ export function catalogEventToEventItem(
     description: tier.description,
     startsAt: tier.startsAt ?? event.startsAt,
     doorsAt: tier.doorsAt ?? event.doorsAt,
-    additionalDoorsAt: tier.additionalDoorsAt ?? [],
+    additionalDoorsAt: (tier.additionalDoorsAt ?? []).map((range) =>
+      typeof range === "string" ? { startsAt: range, endsAt: "" } : range,
+    ),
     endsAt: tier.endsAt ?? event.endsAt,
     priceCents: tier.priceCents,
     feeCents: tier.feeCents,

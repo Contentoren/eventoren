@@ -1,3 +1,5 @@
+import type { EventAdmissionRange } from "../../events/EventAdmissionRange.ts"
+
 export type CatalogTicketTierUpsertInput = {
   readonly eventKey: string
   readonly tierKey: string
@@ -5,7 +7,7 @@ export type CatalogTicketTierUpsertInput = {
   readonly description: string
   readonly startsAt: string
   readonly doorsAt: string
-  readonly additionalDoorsAt?: string[]
+  readonly additionalDoorsAt?: EventAdmissionRange[]
   readonly endsAt: string
   readonly priceCents: number
   readonly feeCents: number

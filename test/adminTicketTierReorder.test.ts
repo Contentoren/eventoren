@@ -32,7 +32,7 @@ test("dragging a ticket product saves sequential positions and keeps the selecte
           description: "",
           startsAt: "2026-10-01T18:00:00.000Z",
           doorsAt: "",
-          additionalDoorsAt: ["2026-10-01T17:00:00.000Z"],
+          additionalDoorsAt: [{ startsAt: "2026-10-01T17:00:00.000Z", endsAt: "2026-10-01T18:00:00.000Z" }],
           endsAt: "2026-10-01T22:00:00.000Z",
           priceCents: 100,
           feeCents: 0,
@@ -43,7 +43,7 @@ test("dragging a ticket product saves sequential positions and keeps the selecte
       }
       let stored = event
       const saved: string[] = []
-      const savedAdmissions: string[][] = []
+      const savedAdmissions: { startsAt: string; endsAt: string }[][] = []
       const savedDoorsAt: string[] = []
       const state = adminCatalogPageStateCreate({
         events: () => [event],
@@ -68,7 +68,9 @@ test("dragging a ticket product saves sequential positions and keeps the selecte
       await state.reorderTier("first", "third")
 
       expect(saved).toEqual(["second:1", "third:2", "first:3"])
-      expect(savedAdmissions).toEqual(Array.from({ length: 3 }, () => ["2026-10-01T17:00:00.000Z"]))
+      expect(savedAdmissions).toEqual(
+        Array.from({ length: 3 }, () => [{ startsAt: "2026-10-01T17:00:00.000Z", endsAt: "2026-10-01T18:00:00.000Z" }]),
+      )
       expect(savedDoorsAt).toEqual(Array.from({ length: 3 }, () => "2026-10-01T18:00:00.000Z"))
       expect(state.selectedEvent()?.tiers.map((tier) => tier.id)).toEqual(["second", "third", "first"])
       expect(state.tierDraft().tierKey).toBe("first")

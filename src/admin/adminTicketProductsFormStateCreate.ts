@@ -9,10 +9,10 @@ import { adminDateTimeLocalFromIso } from "./adminDateTimeLocalFromIso.ts"
 
 export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageState) {
   const priceEuro = createSignalObject(
-    catalog.tierDraft().priceCents ? adminEuroFromCents(Number(catalog.tierDraft().priceCents)) : "",
+    catalog.tierDraft().priceCents !== "" ? adminEuroFromCents(Number(catalog.tierDraft().priceCents)) : "",
   )
   const feeEuro = createSignalObject(
-    catalog.tierDraft().feeCents ? adminEuroFromCents(Number(catalog.tierDraft().feeCents)) : "",
+    catalog.tierDraft().feeCents !== "" ? adminEuroFromCents(Number(catalog.tierDraft().feeCents)) : "",
   )
   const validationMessage = createSignalObject("")
   const hydrated = createSignalObject(false)
@@ -63,24 +63,52 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
     const isoValue = adminDateTimeIsoFromLocal(value)
     if (isoValue === null) {
       validationMessage.set("Bitte gib ein gültiges Datum mit Uhrzeit ein.")
+      catalog.tierFieldChange(field, "")
       return
     }
     validationMessage.set("")
     catalog.tierFieldChange(field, isoValue)
   }
 
-  const addDoorsAt = () => catalog.tierFieldChange("additionalDoorsAt", [...catalog.tierDraft().additionalDoorsAt, ""])
+  const addDoorsAt = () =>
+    catalog.tierFieldChange("additionalDoorsAt", [
+      ...catalog.tierDraft().additionalDoorsAt,
+      { startsAt: "", endsAt: "" },
+    ])
 
   const additionalDoorsAtChange = (index: number, value: string) => {
     const isoValue = adminDateTimeIsoFromLocal(value)
+    const ranges = catalog.tierDraft().additionalDoorsAt
     if (isoValue === null) {
       validationMessage.set("Bitte gib ein gültiges Datum mit Uhrzeit ein.")
+      catalog.tierFieldChange(
+        "additionalDoorsAt",
+        ranges.map((entry, entryIndex) => (entryIndex === index ? { ...entry, startsAt: "", endsAt: "" } : entry)),
+      )
       return
     }
     validationMessage.set("")
     catalog.tierFieldChange(
       "additionalDoorsAt",
-      catalog.tierDraft().additionalDoorsAt.map((entry, entryIndex) => (entryIndex === index ? isoValue : entry)),
+      ranges.map((entry, entryIndex) => (entryIndex === index ? { ...entry, startsAt: isoValue } : entry)),
+    )
+  }
+
+  const additionalDoorsAtEndChange = (index: number, value: string) => {
+    const isoValue = adminDateTimeIsoFromLocal(value)
+    const ranges = catalog.tierDraft().additionalDoorsAt
+    if (isoValue === null) {
+      validationMessage.set("Bitte gib ein gültiges Datum mit Uhrzeit ein.")
+      catalog.tierFieldChange(
+        "additionalDoorsAt",
+        ranges.map((entry, entryIndex) => (entryIndex === index ? { ...entry, endsAt: "" } : entry)),
+      )
+      return
+    }
+    validationMessage.set("")
+    catalog.tierFieldChange(
+      "additionalDoorsAt",
+      ranges.map((entry, entryIndex) => (entryIndex === index ? { ...entry, endsAt: isoValue } : entry)),
     )
   }
 
@@ -142,8 +170,27 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
       validationMessage.set("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
       return
     }
-    if (draft.additionalDoorsAt.some((value) => !value.trim())) {
-      validationMessage.set("Bitte gib für jeden Einlass ein Datum mit Uhrzeit ein oder entferne den leeren Einlass.")
+    if ([draft.startsAt, draft.endsAt].some((value) => Number.isNaN(Date.parse(value)))) {
+      validationMessage.set("Beginn und Ende müssen gültige Datums- und Uhrzeitangaben sein.")
+      return
+    }
+    if (draft.additionalDoorsAt.some((range) => !range.startsAt.trim() || !range.endsAt.trim())) {
+      validationMessage.set(
+        "Jeder zusätzliche Einlass benötigt Beginn und Ende. Bitte ergänze beide Zeitpunkte oder entferne den Einlass.",
+      )
+      return
+    }
+    if (
+      draft.additionalDoorsAt.some(
+        (range) =>
+          Number.isNaN(Date.parse(range.startsAt)) ||
+          Number.isNaN(Date.parse(range.endsAt)) ||
+          Date.parse(range.endsAt) <= Date.parse(range.startsAt),
+      )
+    ) {
+      validationMessage.set(
+        "Jeder zusätzliche Einlass benötigt gültige Zeitpunkte; das Ende muss nach dem Beginn liegen.",
+      )
       return
     }
 
@@ -151,6 +198,10 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
     catalog.tierFieldChange("priceCents", String(priceCents))
     catalog.tierFieldChange("feeCents", String(feeCents))
     await catalog.saveTier()
+    if (catalog.errorMessage()) {
+      validationMessage.set(catalog.errorMessage())
+      return
+    }
     if (!catalog.errorMessage()) {
       showNewTier.set(false)
       newTier()
@@ -166,8 +217,13 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
     endsAt: () => dateValue("endsAt"),
     startsAtChange: (value: string) => dateChange("startsAt", value),
     doorsAtChange: (value: string) => dateChange("doorsAt", value),
-    additionalDoorsAt: () => catalog.tierDraft().additionalDoorsAt.map(adminDateTimeLocalFromIso),
+    additionalDoorsAt: () =>
+      catalog.tierDraft().additionalDoorsAt.map((range) => ({
+        startsAt: adminDateTimeLocalFromIso(range.startsAt),
+        endsAt: adminDateTimeLocalFromIso(range.endsAt),
+      })),
     additionalDoorsAtChange,
+    additionalDoorsAtEndChange,
     addDoorsAt,
     removeDoorsAt,
     endsAtChange: (value: string) => dateChange("endsAt", value),

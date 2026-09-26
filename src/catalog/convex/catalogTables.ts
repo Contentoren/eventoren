@@ -60,7 +60,7 @@ export const catalogTables = {
     description: v.string(),
     startsAt: v.optional(v.string()),
     doorsAt: v.optional(v.string()),
-    additionalDoorsAt: v.optional(v.array(v.string())),
+    additionalDoorsAt: v.optional(v.array(v.union(v.string(), v.object({ startsAt: v.string(), endsAt: v.string() })))),
     endsAt: v.optional(v.string()),
     priceCents: v.number(),
     feeCents: v.number(),

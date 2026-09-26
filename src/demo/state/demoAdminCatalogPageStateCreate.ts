@@ -172,10 +172,16 @@ export function demoAdminCatalogPageStateCreate(inputs: {
       return
     }
     if (
-      (draft.additionalDoorsAt.length && !draft.doorsAt.trim()) ||
-      draft.additionalDoorsAt.some((value) => !value.trim() || Number.isNaN(Date.parse(value)))
+      draft.additionalDoorsAt.some(
+        (range) =>
+          !range.startsAt.trim() ||
+          !range.endsAt.trim() ||
+          Number.isNaN(Date.parse(range.startsAt)) ||
+          Number.isNaN(Date.parse(range.endsAt)) ||
+          Date.parse(range.endsAt) <= Date.parse(range.startsAt),
+      )
     ) {
-      baseErrorMessage.set("Bitte gib für jeden Einlass ein gültiges Datum mit Uhrzeit ein.")
+      baseErrorMessage.set("Jeder zusätzliche Einlass benötigt einen gültigen Beginn und ein späteres Ende.")
       return
     }
     const priceCents = nonNegativeIntegerParse(draft.priceCents)

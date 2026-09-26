@@ -157,13 +157,22 @@ export function AdminTicketProductsForm(props: {
               <Index each={state.additionalDoorsAt()}>
                 {(value, index) => (
                   <div class="mt-3 flex items-end gap-2">
-                    <div class="min-w-0 flex-1">
+                    <div class="grid min-w-0 flex-1 gap-3 sm:grid-cols-2">
                       <Field
-                        id={`admin-tier-doors-${index + 2}`}
-                        label={`Einlass ${index + 2}`}
+                        id={`admin-tier-doors-${index + 2}-starts`}
+                        label={`Einlass ${index + 2} – Beginn`}
                         type="datetime-local"
-                        value={value()}
+                        required
+                        value={value().startsAt}
                         onInput={(next) => state.additionalDoorsAtChange(index, next)}
+                      />
+                      <Field
+                        id={`admin-tier-doors-${index + 2}-ends`}
+                        label={`Einlass ${index + 2} – Ende`}
+                        type="datetime-local"
+                        required
+                        value={value().endsAt}
+                        onInput={(next) => state.additionalDoorsAtEndChange(index, next)}
                       />
                     </div>
                     <ButtonIconOnly
@@ -215,7 +224,7 @@ export function AdminTicketProductsForm(props: {
           </Show>
           <div class="border-t border-border pt-5">
             <div class="flex flex-wrap gap-3">
-              <Button type="submit" disabled={props.state.isSaving()}>
+              <Button type="submit" variant="contrast" disabled={props.state.isSaving()}>
                 {props.state.isSaving() ? "Speichert …" : "Ticketprodukt speichern"}
               </Button>
               <Show

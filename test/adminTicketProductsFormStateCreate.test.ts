@@ -99,10 +99,10 @@ describe("admin ticket products form state", () => {
     })
   })
 
-  test("additional admission times can be added, edited, removed and saved", async () => {
+  test("additional admission ranges require valid ordered start and end times before saving", async () => {
     await createRoot(async (dispose) => {
       try {
-        const saved: { additionalDoorsAt: string[]; doorsAt: string }[] = []
+        const saved: { additionalDoorsAt: { startsAt: string; endsAt: string }[]; doorsAt: string }[] = []
         const catalog = adminCatalogPageStateCreate({
           events: () => [],
           isServerAuthorized: () => true,
@@ -126,14 +126,80 @@ describe("admin ticket products form state", () => {
         await form.submit({ preventDefault() {} } as SubmitEvent)
         expect(saved).toEqual([])
         form.additionalDoorsAtChange(0, "2026-10-01T17:00")
-        expect(form.additionalDoorsAt()).toEqual(["2026-10-01T17:00"])
+        expect(form.additionalDoorsAt()).toEqual([{ startsAt: "2026-10-01T17:00", endsAt: "" }])
+        await form.submit({ preventDefault() {} } as SubmitEvent)
+        expect(form.validationMessage()).toContain("Beginn und Ende")
+        form.additionalDoorsAtEndChange(0, "2026-10-01T16:00")
+        await form.submit({ preventDefault() {} } as SubmitEvent)
+        expect(form.validationMessage()).toContain("Ende muss nach dem Beginn")
+        form.additionalDoorsAtEndChange(0, "2026-10-01T18:00")
         await form.submit({ preventDefault() {} } as SubmitEvent)
         expect(saved).toEqual([
           {
-            additionalDoorsAt: [adminDateTimeIsoFromLocal("2026-10-01T17:00")!],
+            additionalDoorsAt: [
+              {
+                startsAt: adminDateTimeIsoFromLocal("2026-10-01T17:00")!,
+                endsAt: adminDateTimeIsoFromLocal("2026-10-01T18:00")!,
+              },
+            ],
             doorsAt: adminDateTimeIsoFromLocal("2026-10-01T18:00")!,
           },
         ])
+      } finally {
+        dispose()
+      }
+    })
+  })
+
+  test("clearing or invalidating an additional range field never keeps its earlier timestamp", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        const catalog = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+        })
+        const form = adminTicketProductsFormStateCreate(catalog)
+        form.newTier()
+        form.startsAtChange("2026-10-01T17:00")
+        form.startsAtChange("2026-02-30T17:00")
+        expect(catalog.tierDraft().startsAt).toBe("")
+        form.addDoorsAt()
+        form.additionalDoorsAtChange(0, "2026-10-01T17:00")
+        form.additionalDoorsAtEndChange(0, "2026-10-01T18:00")
+        form.additionalDoorsAtEndChange(0, "")
+        expect(catalog.tierDraft().additionalDoorsAt[0]?.endsAt).toBe("")
+        form.additionalDoorsAtEndChange(0, "2026-02-30T18:00")
+        expect(catalog.tierDraft().additionalDoorsAt[0]?.endsAt).toBe("")
+        expect(form.validationMessage()).toBe("Bitte gib ein gültiges Datum mit Uhrzeit ein.")
+      } finally {
+        dispose()
+      }
+    })
+  })
+
+  test("editing a legacy admission keeps its start and prompts for an end; zero prices remain visible", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        const catalog = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+        })
+        const form = adminTicketProductsFormStateCreate(catalog)
+        form.selectTier({
+          id: "legacy-ticket",
+          name: "Legacy",
+          description: "",
+          priceCents: 0,
+          feeCents: 0,
+          capacity: 0,
+          available: 0,
+          additionalDoorsAt: [{ startsAt: "2026-10-01T17:00:00.000Z", endsAt: "" }],
+        })
+        expect(form.additionalDoorsAt()).toEqual([{ startsAt: "2026-10-01T17:00", endsAt: "" }])
+        expect(form.priceEuro.get()).toBe("0,00")
+        expect(form.feeEuro.get()).toBe("0,00")
       } finally {
         dispose()
       }

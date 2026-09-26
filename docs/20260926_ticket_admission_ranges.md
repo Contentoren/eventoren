@@ -11,10 +11,11 @@
 - Use existing UI components via `#ui/...` and the existing `contrast` variant. No new dependencies. Limit changes to admin catalog/form, relevant model/storage/mapping and focused tests; ticket/order rendering is outside scope because it does not currently consume additional admissions.
 
 ## Tasks
-1. Update tier/draft/client/storage contracts and mapping for additional admission ranges with legacy timestamp compatibility. Validate complete chronological ranges at the save boundary. Add focused catalog/mutation tests. Status: in progress.
-2. Update admin create/edit form state and UI to edit start/end per additional admission, handle clearing/replacing dates correctly, present precise validation, and use `contrast` for save. Add focused form state tests. Status: pending.
-3. Verify focused tests and, if local authentication permits, browser-check the products tab create/edit/save flow. Status: pending.
+1. Update tier/draft/client/storage contracts and mapping for additional admission ranges with legacy timestamp compatibility. Validate complete chronological ranges at the save boundary. Add focused catalog/mutation tests. Status: completed.
+2. Update admin create/edit form state and UI to edit start/end per additional admission, handle clearing/replacing dates correctly, present precise validation, and use `contrast` for save. Add focused form state tests. Status: completed.
+3. Verify focused tests and, if local authentication permits, browser-check the products tab create/edit/save flow. Status: in progress.
 
 ## Current context
 - User confirmed each additional admission is a start/end range, not missing product-level dates. Exact intermittent validation error is unknown.
 - Existing `additionalDoorsAt` is an array of single ISO timestamps; current form has one datetime input per additional admission, and an empty new entry blocks save.
+- Contracts, storage mapping, and form now support ranges, including legacy entries with an unset end; validation feedback and the contrast save button are implemented. Focused backend/form tests and typecheck pass.

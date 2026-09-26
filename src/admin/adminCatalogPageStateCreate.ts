@@ -239,8 +239,17 @@ export function adminCatalogPageStateCreate(inputs: {
       errorMessage.set("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
       return
     }
-    if (draft.additionalDoorsAt.some((value) => !value.trim() || Number.isNaN(Date.parse(value)))) {
-      errorMessage.set("Bitte gib für jeden Einlass ein gültiges Datum mit Uhrzeit ein.")
+    if (
+      draft.additionalDoorsAt.some(
+        (range) =>
+          !range.startsAt.trim() ||
+          !range.endsAt.trim() ||
+          Number.isNaN(Date.parse(range.startsAt)) ||
+          Number.isNaN(Date.parse(range.endsAt)) ||
+          Date.parse(range.endsAt) <= Date.parse(range.startsAt),
+      )
+    ) {
+      errorMessage.set("Jeder zusätzliche Einlass benötigt einen gültigen Beginn und ein späteres Ende.")
       return
     }
     const priceCents = nonNegativeIntegerParse(draft.priceCents)
