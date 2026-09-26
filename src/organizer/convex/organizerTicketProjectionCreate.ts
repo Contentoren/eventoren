@@ -46,10 +46,16 @@ export function organizerTicketProjectionCreate(
     cancelled: ticket.cancelled ?? false,
     checkedIn: ticket.checkedInAt !== undefined,
     checkedInAt: ticket.checkedInAt ?? null,
+    checkedOutAt: ticket.checkedOutAt ?? null,
     checkedInBy: ticket.checkedInBy ?? null,
     checkedInByName: ticket.checkedInByName ?? null,
     checkIn: {
-      status: ticket.checkedInAt !== undefined ? ("checked-in" as const) : ("not-checked-in" as const),
+      status:
+        ticket.checkedInAt !== undefined
+          ? ("checked-in" as const)
+          : ticket.checkedOutAt !== undefined
+            ? ("checked-out" as const)
+            : ("not-checked-in" as const),
       at: ticket.checkedInAt ?? null,
       operatorId: ticket.checkedInBy ?? null,
       operatorName: ticket.checkedInByName ?? null,

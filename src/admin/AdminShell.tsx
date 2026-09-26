@@ -10,6 +10,7 @@ import { Sidebar } from "#ui/interactive/sidebar/Sidebar.jsx"
 import { SidebarToggle } from "#ui/interactive/sidebar/SidebarToggle.jsx"
 import { ThemeButton } from "#ui/interactive/theme/ThemeButton.jsx"
 import { Icon } from "#ui/static/icon/Icon.jsx"
+import { adminSidebarContext } from "./adminSidebarContext.ts"
 import { adminShellStateCreate } from "./adminShellStateCreate.ts"
 
 type AdminShellState = ReturnType<typeof adminShellStateCreate>
@@ -19,30 +20,35 @@ export function AdminShell(props: { readonly children: JSX.Element; readonly are
 
   return (
     <adminListViewPreferenceContext.Provider value={state.listViewPreference}>
-      <div class="flex min-h-dvh bg-surface-base text-content">
-        <Sidebar
-          state={state.sidebarState}
-          title={props.area === "organizer" && !state.isAdmin() ? "Veranstalter-Navigation" : "Admin-Navigation"}
-          titleClass="sr-only"
-          innerClass="w-[min(22rem,calc(100vw-2rem))] border-border bg-surface-base p-5 text-content"
-          desktopChildren={
-            <aside class="sticky top-0 self-start flex h-dvh w-64 shrink-0 flex-col overflow-y-auto border-r border-border bg-surface-base p-4">
+      <adminSidebarContext.Provider value={state.sidebarOpen}>
+        <div class="flex min-h-dvh bg-surface-base text-content">
+          <Sidebar
+            state={state.sidebarState}
+            title={props.area === "organizer" && !state.isAdmin() ? "Veranstalter-Navigation" : "Admin-Navigation"}
+            titleClass="sr-only"
+            innerClass="w-[min(22rem,calc(100vw-2rem))] border-border bg-surface-base p-5 text-content"
+            desktopChildren={
+              <aside class="sticky top-0 self-start flex h-dvh w-64 shrink-0 flex-col overflow-y-auto border-r border-border bg-surface-base p-4">
+                <AdminSidebarContent
+                  state={state}
+                  showListViewControl={props.area !== "organizer" || state.isAdmin()}
+                />
+              </aside>
+            }
+            mobileChildren={
               <AdminSidebarContent state={state} showListViewControl={props.area !== "organizer" || state.isAdmin()} />
-            </aside>
-          }
-          mobileChildren={
-            <AdminSidebarContent state={state} showListViewControl={props.area !== "organizer" || state.isAdmin()} />
-          }
-        />
-        <div class="flex min-w-0 flex-1 flex-col">
-          <SidebarToggle
-            {...state.sidebarState}
-            variant="outline"
-            class="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20 min-h-12 min-w-12 rounded-xl border-white/70 bg-white/65 text-content shadow-xl shadow-black/15 backdrop-blur-xl hover:bg-white/80 dark:border-white/20 dark:bg-slate-900/60 dark:hover:bg-slate-800/75"
+            }
           />
-          <div class="min-w-0 flex-1">{props.children}</div>
+          <div class="flex min-w-0 flex-1 flex-col">
+            <SidebarToggle
+              {...state.sidebarState}
+              variant="outline"
+              class={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-20 min-h-12 min-w-12 rounded-xl border-white/70 bg-white/65 text-content shadow-xl shadow-black/15 backdrop-blur-xl hover:bg-white/80 dark:border-white/20 dark:bg-slate-900/60 dark:hover:bg-slate-800/75 ${state.isOrganizerEventDetail() ? "max-md:hidden" : ""}`}
+            />
+            <div class="min-w-0 flex-1">{props.children}</div>
+          </div>
         </div>
-      </div>
+      </adminSidebarContext.Provider>
     </adminListViewPreferenceContext.Provider>
   )
 }

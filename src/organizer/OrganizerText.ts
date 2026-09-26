@@ -5,7 +5,6 @@ export type OrganizerText = {
   readonly noEvents: string
   readonly eventOpen: string
   readonly tickets: string
-  readonly ticketsDescription: string
   readonly back: string
   readonly searchLabel: string
   readonly searchPlaceholder: string
@@ -22,6 +21,7 @@ export type OrganizerText = {
   readonly cancelled: string
   readonly valid: string
   readonly checkedIn: string
+  readonly checkedOut: string
   readonly notCheckedIn: string
   readonly checkedInAt: string
   readonly operator: string
@@ -41,7 +41,6 @@ export type OrganizerText = {
   readonly elapsed: string
   readonly unknown: string
   readonly scannerTitle: string
-  readonly scannerDescription: string
   readonly scannerStart: string
   readonly scannerStop: string
   readonly scannerStarting: string

@@ -29,10 +29,11 @@ export type OrganizerTicket = {
   readonly cancelled: boolean
   readonly checkedIn: boolean
   readonly checkedInAt: string | null
+  readonly checkedOutAt?: string | null
   readonly checkedInBy: string | null
   readonly checkedInByName: string | null
   readonly checkIn: {
-    readonly status: "checked-in" | "not-checked-in"
+    readonly status: "checked-in" | "checked-out" | "not-checked-in"
     readonly at: string | null
     readonly operatorId: string | null
     readonly operatorName: string | null

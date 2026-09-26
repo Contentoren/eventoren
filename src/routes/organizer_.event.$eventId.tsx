@@ -38,6 +38,6 @@ export const Route = createFileRoute("/organizer_/event/$eventId")({
           resetScroll: false,
         }),
     })
-    return <OrganizerEventDetailPage state={state} frame={OrganizerShell} />
+    return <OrganizerEventDetailPage state={state} frame={OrganizerShell} mobileNavigation />
   },
 })

@@ -39,11 +39,13 @@ export function adminShellStateCreate(area: "admin" | "organizer" = "admin") {
   return {
     areaLabel: () => (area === "organizer" && !isAdmin() ? "Veranstalter" : "Admin"),
     activeNavigationHref: () => activeNavigationItem().href,
+    isOrganizerEventDetail: () => area === "organizer" && location().pathname.startsWith("/organizer/event/"),
     isAdmin,
     logout: authState.logout,
     listViewPreference,
     navigation,
     sidebarState,
+    sidebarOpen: () => sidebarState.openMobile.set(true),
     user: () => auth.identity() ?? undefined,
   }
 }

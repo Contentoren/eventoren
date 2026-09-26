@@ -44,6 +44,7 @@ export const organizerTicketCheckInResetMutation = mutation({
       const ticketProjection = organizerTicketProjectionCreate(ticket, order, event)
       await mutationCtx.db.patch("ticketIssued", ticket._id, {
         checkedInAt: undefined,
+        checkedOutAt: now,
         checkedInBy: undefined,
         checkedInByName: undefined,
       })

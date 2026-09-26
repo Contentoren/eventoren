@@ -7,6 +7,7 @@ import { mdiTicketConfirmationOutline } from "@adaptive-ds/mdi/mdiTicketConfirma
 const adminNavigation = [
   { href: "/admin/bestellungen", icon: mdiTicketConfirmationOutline, label: "Bestellungen" },
   { href: "/organizer", icon: mdiBarcodeScan, label: "Ticket-Scanner" },
+  { href: "/admin/scanner-links", icon: mdiBarcodeScan, label: "Scanner-Freigabelinks" },
   { href: "/admin/events", icon: mdiCalendarOutline, label: "Events" },
   { href: "/admin/veranstalter", icon: mdiDomain, label: "Veranstalter" },
   { href: "/admin/mitglieder", icon: mdiAccountGroupOutline, label: "Mitglieder" },

@@ -11,6 +11,7 @@ import { organizerDataSourceLiveCreate } from "./organizerDataSourceLiveCreate.t
 import { organizerDuplicateInfoRead } from "./organizerDuplicateInfoRead.ts"
 import { organizerTextGet } from "./organizerTextGet.ts"
 import { organizerTicketScannerStateCreate } from "./organizerTicketScannerStateCreate.ts"
+import { scannerLinkErrorMessageGet } from "./scannerLinkErrorMessageGet.ts"
 
 const pageSize = 50
 
@@ -20,6 +21,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
   readonly initialTicketId: () => string
   readonly searchReplace: (search: string, ticketId: string) => void
   readonly dataSource?: OrganizerDataSource
+  readonly linkAccess?: boolean
 }): OrganizerEventDetailPageState {
   const dataSource = inputs.dataSource ?? organizerDataSourceLiveCreate()
   const event = createSignalObject<OrganizerEvent | undefined>(undefined)
@@ -30,7 +32,6 @@ export function organizerEventDetailPageStateCreate(inputs: {
   const selectedTicketId = createSignalObject(inputs.initialTicketId())
   const search = createSignalObject(inputs.initialSearch())
   const loading = createSignalObject(true)
-  const hydrated = createSignalObject(false)
   const actionPending = createSignalObject(false)
   const actionError = createSignalObject<DetailActionError | null>(null)
   const actionSuccess = createSignalObject<DetailActionSuccess | null>(null)
@@ -44,6 +45,8 @@ export function organizerEventDetailPageStateCreate(inputs: {
   const errorMessage = () => {
     const message = actionError.get()
     if (!message) return ""
+    if (inputs.linkAccess && (message.code === "load" || message.code === "action-failed"))
+      return scannerLinkErrorMessageGet(message.message ?? "")
     if (message.code === "load") return text().loadError
     return errorText(message.code, text())
   }
@@ -64,7 +67,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
       if (revision !== ticketListRevision || searchValue !== search.get()) return
       if (!result.success) {
         actionSuccess.set(null)
-        actionError.set({ code: "load" })
+        actionError.set({ code: "load", message: result.errorMessage })
         loading.set(false)
         return
       }
@@ -118,7 +121,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
       if (!result.success) {
         selectedTicket.set(undefined)
         actionSuccess.set(null)
-        actionError.set({ code: "load" })
+        actionError.set({ code: "load", message: result.errorMessage })
         return
       }
       selectedTicket.set(result.data)
@@ -136,13 +139,14 @@ export function organizerEventDetailPageStateCreate(inputs: {
       const eventResult = await dataSource.eventGet(eventKey)
       if (inputs.eventKey() !== eventKey) return
       if (eventResult.success) event.set(eventResult.data)
+      if (!eventResult.success && inputs.linkAccess)
+        actionError.set({ code: "load", message: eventResult.errorMessage })
     } catch {
       // The ticket list still loads independently when the event detail is unavailable.
     }
   }
 
   onMount(() => {
-    hydrated.set(true)
     void eventLoad()
     void ticketLoad(search.get(), ticketListRevision)
   })
@@ -211,13 +215,14 @@ export function organizerEventDetailPageStateCreate(inputs: {
   }
 
   const ticketSelect = (ticket: OrganizerTicket) => {
-    selectedTicketId.set(ticket.id)
-    selectedTicket.set(ticket)
+    const nextTicketId = selectedTicketId.get() === ticket.id ? "" : ticket.id
+    selectedTicketId.set(nextTicketId)
+    selectedTicket.set(nextTicketId ? ticket : undefined)
     actionError.set(null)
     actionSuccess.set(null)
     duplicateInfo.set(null)
     scannerFeedbackClear()
-    inputs.searchReplace(search.get(), ticket.id)
+    inputs.searchReplace(search.get(), nextTicketId)
   }
 
   const resultApply = (result: OrganizerDataResult<OrganizerTicket>, successCode: DetailActionSuccess["code"]) => {
@@ -227,7 +232,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
       duplicateInfo.set(
         result.errorCode === "organizer.check-in.duplicate" ? organizerDuplicateInfoRead(result.errorData) : null,
       )
-      actionError.set({ code: actionErrorCodeRead(result.errorCode) })
+      actionError.set({ code: actionErrorCodeRead(result.errorCode), message: result.errorMessage })
       scannerFeedbackClear()
       return
     }
@@ -311,6 +316,11 @@ export function organizerEventDetailPageStateCreate(inputs: {
 
   const scanner = organizerTicketScannerStateCreate({ text, scanCode: ticketCheckInCode })
   scannerFeedbackClear = scanner.scannerFeedbackClear
+  const scannerCodeSubmit = (event: SubmitEvent & { currentTarget: HTMLFormElement }) => {
+    event.preventDefault()
+    const code = new FormData(event.currentTarget).get("ticket-code")
+    if (typeof code === "string" && code.trim()) void scanner.scannerCodeSimulate(code)
+  }
 
   return {
     event: event.get,
@@ -320,7 +330,6 @@ export function organizerEventDetailPageStateCreate(inputs: {
     search: search.get,
     text,
     loading: loading.get,
-    hydrated: hydrated.get,
     isDone: isDone.get,
     actionPending: actionPending.get,
     errorMessage,
@@ -334,6 +343,8 @@ export function organizerEventDetailPageStateCreate(inputs: {
     currency,
     dateTime,
     elapsed,
+    scannerOpen: scanner.scannerOpen,
+    scannerToggle: scanner.scannerToggle,
     scannerActive: scanner.scannerActive,
     scannerStarting: scanner.scannerStarting,
     scannerCheckingIn: scanner.scannerCheckingIn,
@@ -343,12 +354,13 @@ export function organizerEventDetailPageStateCreate(inputs: {
     scannerStart: scanner.scannerStart,
     scannerStop: scanner.scannerStop,
     scannerCodeSimulate: scanner.scannerCodeSimulate,
+    scannerCodeSubmit,
     scannerPermissionDeniedSimulate: scanner.scannerPermissionDeniedSimulate,
   }
 }
 
 type DetailActionSuccess = { readonly code: "check-in" | "reset" }
-type DetailActionError = { readonly code: DetailActionErrorCode }
+type DetailActionError = { readonly code: DetailActionErrorCode; readonly message?: string }
 type DetailActionErrorCode =
   | "load"
   | "action-failed"

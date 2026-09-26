@@ -339,7 +339,13 @@ test("allows only one concurrent check-in and writes one audit event", async () 
   expect(history).toMatchObject({ success: true })
   if (!history.success) return
   expect(history.data.page).toHaveLength(1)
-  expect(history.data.page[0]).toMatchObject({ action: "check_in", ticketNumber: "TKT-RACE" })
+  expect(history.data.page[0]).toMatchObject({
+    action: "check_in",
+    ticketNumber: "TKT-RACE",
+    linkId: null,
+    linkName: null,
+  })
+  expect([ids.organizerId, ids.secondOrganizerId]).toContain(history.data.page[0]?.operatorId)
 })
 
 test("requires organizer authorization for check-in and reset, then permits reset and recheck-in", async () => {
@@ -376,14 +382,21 @@ test("requires organizer authorization for check-in and reset, then permits rese
     ticketCode: "TKT-PAID",
     token: organizerToken,
   })
-  expect(reset).toMatchObject({ success: true, data: { status: "reset", ticket: { checkedIn: false } } })
+  expect(reset).toMatchObject({
+    success: true,
+    data: { status: "reset", ticket: { checkedIn: false, checkIn: { status: "checked-out" } } },
+  })
+  if (reset.success) expect(reset.data.ticket.checkedOutAt).toBeTruthy()
 
   const recheckedIn = await t.mutation(api.organizer.organizerTicketCheckInMutation, {
     eventKey: "check-in-event",
     ticketCode: "TKT-PAID",
     token: organizerToken,
   })
-  expect(recheckedIn).toMatchObject({ success: true, data: { status: "checked-in", ticket: { checkedIn: true } } })
+  expect(recheckedIn).toMatchObject({
+    success: true,
+    data: { status: "checked-in", ticket: { checkedIn: true, checkedOutAt: null, checkIn: { status: "checked-in" } } },
+  })
 
   const history = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
     eventKey: "check-in-event",

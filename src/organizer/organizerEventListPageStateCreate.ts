@@ -7,10 +7,12 @@ import type { OrganizerEventListPageState } from "./OrganizerEventListPageState.
 import { organizerDataSourceLiveCreate } from "./organizerDataSourceLiveCreate.ts"
 import { organizerEventsGroup } from "./organizerEventsGroup.ts"
 import { organizerTextGet } from "./organizerTextGet.ts"
+import { scannerLinkErrorMessageGet } from "./scannerLinkErrorMessageGet.ts"
 
 export function organizerEventListPageStateCreate(inputs?: {
   readonly dataSource?: OrganizerDataSource
-}): OrganizerEventListPageState {
+  readonly linkAccess?: boolean
+}): OrganizerEventListPageState & { readonly reload: () => Promise<void> } {
   const dataSource = inputs?.dataSource ?? organizerDataSourceLiveCreate()
   const events = createSignalObject<readonly OrganizerEvent[]>([])
   const loading = createSignalObject(true)
@@ -18,12 +20,15 @@ export function organizerEventListPageStateCreate(inputs?: {
   const text = createMemo(organizerTextGet)
 
   const eventListLoad = async () => {
+    loading.set(true)
+    errorMessage.set("")
     try {
       const result = await dataSource.eventList()
-      if (!result.success) return errorMessage.set(text().loadError)
+      if (!result.success)
+        return errorMessage.set(inputs?.linkAccess ? scannerLinkErrorMessageGet(result.errorMessage) : text().loadError)
       events.set(result.data)
     } catch {
-      errorMessage.set(text().loadError)
+      errorMessage.set(inputs?.linkAccess ? scannerLinkErrorMessageGet("") : text().loadError)
     } finally {
       loading.set(false)
     }
@@ -43,5 +48,5 @@ export function organizerEventListPageStateCreate(inputs?: {
     }).format(date)
   }
 
-  return { groups, text, loading: loading.get, errorMessage: errorMessage.get, eventTime }
+  return { groups, text, loading: loading.get, errorMessage: errorMessage.get, eventTime, reload: eventListLoad }
 }

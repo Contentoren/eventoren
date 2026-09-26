@@ -48,6 +48,7 @@ export function demoOrganizerDataSourceCreate(inputs?: { readonly emptyEvents?: 
       ...ticket,
       checkedIn: true,
       checkedInAt,
+      checkedOutAt: null,
       checkedInBy: "demo-organizer",
       checkedInByName: "Mara Demo",
       checkIn: {
@@ -112,9 +113,10 @@ export function demoOrganizerDataSourceCreate(inputs?: { readonly emptyEvents?: 
         ...ticket,
         checkedIn: false,
         checkedInAt: null,
+        checkedOutAt: new Date().toISOString(),
         checkedInBy: null,
         checkedInByName: null,
-        checkIn: { status: "not-checked-in", at: null, operatorId: null, operatorName: null },
+        checkIn: { status: "checked-out", at: null, operatorId: null, operatorName: null },
       }
       tickets = tickets.map((candidate) => (candidate.id === updated.id ? updated : candidate))
       return { success: true, data: updated }

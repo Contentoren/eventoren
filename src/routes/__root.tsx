@@ -8,6 +8,7 @@ import { EventorenAuthProvider } from "#src/auth/ui/EventorenAuthProvider.tsx"
 import { ErrorPage } from "#ui/static/pages/ErrorPage.jsx"
 import { rootDocumentStateCreate } from "../app/i18n/rootDocumentStateCreate.ts"
 import { ErrorPageActions } from "../components/ErrorPageActions.tsx"
+import { scannerLinkPathIsPublic } from "../organizer/scannerLinkPathIsPublic.ts"
 import { seo } from "../lib/seo.js"
 import { NotFoundPage } from "../marketing/NotFoundPage.js"
 import { RootFooter } from "../marketing/RootFooter.js"
@@ -18,7 +19,7 @@ const siteName = "eventoren"
 
 export const Route = createRootRoute({
   loader: async ({ location }) => {
-    if (isDemoPath(location.pathname)) return createResult(null)
+    if (isDemoPath(location.pathname) || scannerLinkPathIsPublic(location.pathname)) return createResult(null)
     return eventorenCurrentUserServerFn()
   },
   head: () => ({
@@ -47,7 +48,7 @@ export const Route = createRootRoute({
 function PublicRootContent() {
   const initialIdentityResult = Route.useLoaderData()
   const location = useLocation()
-  const isDemo = () => isDemoPath(location().pathname)
+  const isDemo = () => isDemoPath(location().pathname) || scannerLinkPathIsPublic(location().pathname)
 
   return (
     <EventorenAuthProvider initialIdentityResult={initialIdentityResult} isDemo={isDemo}>

@@ -9,6 +9,34 @@ import { organizerTicketScannerStateCreate } from "../src/organizer/organizerTic
 import { ticketQrMatrixCreate } from "../src/ticketing/ticketQrMatrixCreate.ts"
 
 describe("organizer ticket scanner QR compatibility", () => {
+  test("opens the camera panel, starts the camera automatically, and closes it again", async () => {
+    let dispose: (() => void) | undefined
+    let state: ReturnType<typeof organizerTicketScannerStateCreate> | undefined
+
+    createRoot((rootDispose) => {
+      dispose = rootDispose
+      state = organizerTicketScannerStateCreate({
+        text: () => organizerTextGet(),
+        scanCode: async () => ({ success: true, data: {} as OrganizerTicket }),
+      })
+    })
+
+    try {
+      if (!state) throw new Error("scanner state was not created")
+      expect(state.scannerOpen()).toBe(false)
+      state.scannerVideoSet({} as HTMLVideoElement)
+      state.scannerToggle()
+      expect(state.scannerOpen()).toBe(true)
+      await new Promise<void>((resolve) => queueMicrotask(resolve))
+      expect(state.scannerErrorMessage()).toBe(organizerTextGet().scannerSecureContext)
+      state.scannerToggle()
+      expect(state.scannerOpen()).toBe(false)
+      expect(state.scannerActive()).toBe(false)
+    } finally {
+      dispose?.()
+    }
+  })
+
   test("decodes the issued ticket code generated for a wallet pass", () => {
     const code = "TKT-0123456789ABCDEF0123"
     const generated = ticketQrMatrixCreate(code)

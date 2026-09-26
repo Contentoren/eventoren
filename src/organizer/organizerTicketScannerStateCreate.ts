@@ -35,6 +35,7 @@ export function organizerTicketScannerStateCreate(inputs: {
 }) {
   const videoElement = createSignalObject<HTMLVideoElement | undefined>(undefined)
   const active = createSignalObject(false)
+  const open = createSignalObject(false)
   const starting = createSignalObject(false)
   const checkingIn = createSignalObject(false)
   const errorCode = createSignalObject<ScannerMessageCode | null>(null)
@@ -188,6 +189,18 @@ export function organizerTicketScannerStateCreate(inputs: {
     }
   }
 
+  const scannerToggle = () => {
+    if (open.get()) {
+      scannerStop()
+      open.set(false)
+      return
+    }
+    open.set(true)
+    queueMicrotask(() => {
+      if (open.get()) void scannerStart()
+    })
+  }
+
   onCleanup(scannerStop)
 
   const scannerPermissionDeniedSimulate = () => {
@@ -217,6 +230,8 @@ export function organizerTicketScannerStateCreate(inputs: {
   }
 
   return {
+    scannerOpen: open.get,
+    scannerToggle,
     scannerActive: active.get,
     scannerStarting: starting.get,
     scannerCheckingIn: checkingIn.get,

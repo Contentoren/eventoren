@@ -12,6 +12,7 @@ describe("adminShellNavigationResolve", () => {
     expect(items.map((i) => i.href)).toEqual([
       "/admin/bestellungen",
       "/organizer",
+      "/admin/scanner-links",
       "/admin/events",
       "/admin/veranstalter",
       "/admin/mitglieder",
@@ -19,6 +20,7 @@ describe("adminShellNavigationResolve", () => {
     expect(items.map((i) => i.label)).toEqual([
       "Bestellungen",
       "Ticket-Scanner",
+      "Scanner-Freigabelinks",
       "Events",
       "Veranstalter",
       "Mitglieder",
@@ -30,6 +32,7 @@ describe("adminShellNavigationResolve", () => {
     expect(itemsAdmin.map((i) => i.href)).toEqual([
       "/admin/bestellungen",
       "/organizer",
+      "/admin/scanner-links",
       "/admin/events",
       "/admin/veranstalter",
       "/admin/mitglieder",

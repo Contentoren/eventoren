@@ -5,7 +5,6 @@ import type { OrganizerText } from "./OrganizerText.ts"
 import type { OrganizerTicket } from "./OrganizerTicket.ts"
 
 export type OrganizerEventDetailPageState = {
-  readonly hydrated: () => boolean
   readonly event: () => OrganizerEvent | undefined
   readonly tickets: () => readonly OrganizerTicket[]
   readonly selectedTicket: () => OrganizerTicket | undefined
@@ -26,6 +25,8 @@ export type OrganizerEventDetailPageState = {
   readonly currency: (priceCents: number) => string
   readonly dateTime: (value: string | null) => string
   readonly elapsed: (milliseconds: number | null) => string
+  readonly scannerOpen: () => boolean
+  readonly scannerToggle: () => void
   readonly scannerActive: () => boolean
   readonly scannerStarting: () => boolean
   readonly scannerCheckingIn: () => boolean
@@ -35,5 +36,6 @@ export type OrganizerEventDetailPageState = {
   readonly scannerStart: () => Promise<void>
   readonly scannerStop: () => void
   readonly scannerCodeSimulate: (code: string) => Promise<void>
+  readonly scannerCodeSubmit: (event: SubmitEvent & { currentTarget: HTMLFormElement }) => void
   readonly scannerPermissionDeniedSimulate: () => void
 }
