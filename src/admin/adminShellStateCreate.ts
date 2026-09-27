@@ -5,6 +5,7 @@ import { eventorenAuthContextUse } from "#src/auth/ui/eventorenAuthContextUse.ts
 import { eventorenAuthControlStateCreate } from "#src/auth/ui/eventorenAuthControlStateCreate.ts"
 import { adminListViewPreferenceStateCreate } from "#src/viewPreference/adminListViewPreferenceStateCreate.ts"
 import { createSidebarState } from "#ui/interactive/sidebar/createSidebarState.jsx"
+import { adminShellMobileProfileStateCreate } from "./adminShellMobileProfileStateCreate.ts"
 import { adminShellNavigationResolve } from "./adminShellNavigationResolve.ts"
 
 export function adminShellStateCreate(area: "admin" | "organizer" = "admin") {
@@ -13,6 +14,7 @@ export function adminShellStateCreate(area: "admin" | "organizer" = "admin") {
   const listViewPreference = adminListViewPreferenceStateCreate()
   const auth = eventorenAuthContextUse()
   const location = useLocation()
+  const mobileProfile = adminShellMobileProfileStateCreate(area, () => location().pathname)
 
   const isAdmin = () => {
     const user = auth.identity()
@@ -39,13 +41,12 @@ export function adminShellStateCreate(area: "admin" | "organizer" = "admin") {
   return {
     areaLabel: () => (area === "organizer" && !isAdmin() ? "Veranstalter" : "Admin"),
     activeNavigationHref: () => activeNavigationItem().href,
-    isOrganizerEventDetail: () => area === "organizer" && location().pathname.startsWith("/organizer/event/"),
+    ...mobileProfile,
     isAdmin,
     logout: authState.logout,
     listViewPreference,
     navigation,
     sidebarState,
-    sidebarOpen: () => sidebarState.openMobile.set(true),
     user: () => auth.identity() ?? undefined,
   }
 }
