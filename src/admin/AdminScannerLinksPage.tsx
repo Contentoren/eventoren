@@ -29,7 +29,7 @@ export function AdminScannerLinksPage(props: {
         <Show when={state.error()}>
           <p role="alert">{state.error()}</p>
         </Show>
-        <CardWrapper class="flex flex-col gap-4">
+        <CardWrapper class="flex flex-col gap-4 rounded-xl border-0 shadow-md shadow-slate-900/10 dark:shadow-black/25">
           <h2 class="text-xl font-semibold">Veranstalterlink erstellen</h2>
           <form
             class="flex flex-col gap-4"
@@ -41,6 +41,7 @@ export function AdminScannerLinksPage(props: {
             <label class="flex flex-col gap-1">
               Name
               <Input
+                class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
                 required
                 maxLength={120}
                 value={state.organizerName.get()}
@@ -52,10 +53,12 @@ export function AdminScannerLinksPage(props: {
               <span id="admin-organizer-events-label">Events (1–50, nur veröffentlichte)</span>
               <SelectMultiple
                 id="admin-organizer-events"
+                class="min-h-11 border-0 bg-surface-muted/60 dark:bg-slate-800/60"
                 valueSignal={state.organizerEvents}
                 getOptions={() => state.publishedEvents().map((event) => event.id)}
                 valueText={(key) => state.publishedEvents().find((event) => event.id === key)?.title ?? key}
-                buttonProps={{ "aria-labelledby": "admin-organizer-events-label" }}
+                buttonProps={{ "aria-labelledby": "admin-organizer-events-label", class: "border-0" }}
+                noItemsClass="rounded-lg border-0 bg-surface-base/80 dark:bg-slate-700/60 dark:hover:bg-slate-700/60"
                 textAddEntry="Event auswählen"
                 disabled={state.pending()}
               />
@@ -63,6 +66,7 @@ export function AdminScannerLinksPage(props: {
             <label class="flex flex-col gap-1">
               Ablaufdatum und Uhrzeit
               <Input
+                class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
                 type="datetime-local"
                 required
                 max={state.maxExpiry()}
@@ -89,7 +93,7 @@ export function AdminScannerLinksPage(props: {
           }
         >
           {(link) => (
-            <CardWrapper class="flex flex-col gap-3">
+            <CardWrapper class="flex flex-col gap-3 rounded-xl border-0 shadow-md shadow-slate-900/10 dark:shadow-black/25 [&_input[readonly]]:border-0 [&_input[readonly]]:bg-surface-muted/60 dark:[&_input[readonly]]:bg-slate-800/60">
               <h3 class="font-semibold">{link.name}</h3>
               <p>
                 Events:{" "}
@@ -111,6 +115,7 @@ export function AdminScannerLinksPage(props: {
               </Show>
               <Button
                 variant="outline"
+                class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
                 onClick={() => state.selectParent(link._id)}
                 aria-expanded={state.selectedParent() === link._id}
               >
@@ -129,7 +134,7 @@ export function AdminScannerLinksPage(props: {
             <section class="flex flex-col gap-4" aria-label={`Helferlinks für ${parent.name}`}>
               <h2 class="text-xl font-semibold">Helferlinks für {parent.name}</h2>
               <Show when={!parent.revokedAt && parent.expiresAt > Date.now()}>
-                <CardWrapper>
+                <CardWrapper class="rounded-xl border-0 shadow-md shadow-slate-900/10 dark:shadow-black/25">
                   <form
                     class="flex flex-col gap-4"
                     onSubmit={(event) => {
@@ -140,6 +145,7 @@ export function AdminScannerLinksPage(props: {
                     <label class="flex flex-col gap-1">
                       Name
                       <Input
+                        class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
                         required
                         maxLength={120}
                         value={state.helperName.get()}
@@ -151,10 +157,12 @@ export function AdminScannerLinksPage(props: {
                       <span id="admin-helper-events-label">Events (aus dem Veranstalterlink)</span>
                       <SelectMultiple
                         id="admin-helper-events"
+                        class="min-h-11 border-0 bg-surface-muted/60 dark:bg-slate-800/60"
                         valueSignal={state.helperEvents}
                         getOptions={() => state.availableEvents().map((event) => event.id)}
                         valueText={(key) => state.availableEvents().find((event) => event.id === key)?.title ?? key}
-                        buttonProps={{ "aria-labelledby": "admin-helper-events-label" }}
+                        buttonProps={{ "aria-labelledby": "admin-helper-events-label", class: "border-0" }}
+                        noItemsClass="rounded-lg border-0 bg-surface-base/80 dark:bg-slate-700/60 dark:hover:bg-slate-700/60"
                         textAddEntry="Event auswählen"
                         disabled={state.pending()}
                       />
@@ -162,6 +170,7 @@ export function AdminScannerLinksPage(props: {
                     <label class="flex flex-col gap-1">
                       Ablaufdatum und Uhrzeit
                       <Input
+                        class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
                         type="datetime-local"
                         required
                         max={state.maxExpiry(parent.expiresAt)}
@@ -185,7 +194,7 @@ export function AdminScannerLinksPage(props: {
                 }
               >
                 {(helper) => (
-                  <CardWrapper class="flex flex-col gap-3">
+                  <CardWrapper class="flex flex-col gap-3 rounded-xl border-0 shadow-md shadow-slate-900/10 dark:shadow-black/25 [&_input[readonly]]:border-0 [&_input[readonly]]:bg-surface-muted/60 dark:[&_input[readonly]]:bg-slate-800/60">
                     <h3 class="font-semibold">{helper.name}</h3>
                     <p>
                       Events:{" "}

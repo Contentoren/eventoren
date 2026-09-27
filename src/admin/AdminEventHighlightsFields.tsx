@@ -14,17 +14,22 @@ export function AdminEventHighlightsFields(props: { state: AdminCatalogPageState
       <div class="mt-3 flex flex-col gap-4">
         <Index each={state.highlights()}>
           {(highlight, index) => (
-            <div class="rounded-lg border border-border p-4">
+            <div class="rounded-lg border border-border p-4 [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/60 dark:[.admin-workspace_&]:bg-slate-800/60">
               <div class="flex items-center justify-between gap-3">
                 <span class="text-sm font-medium text-content">Highlight {index + 1}</span>
-                <Button type="button" variant="outline" onClick={() => state.remove(index)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  class="[.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface dark:[.admin-workspace_&]:bg-slate-700"
+                  onClick={() => state.remove(index)}
+                >
                   Entfernen
                 </Button>
               </div>
               <Label for={`admin-event-highlight-title-${index}`}>Titel</Label>
               <Input
                 id={`admin-event-highlight-title-${index}`}
-                class="mt-2"
+                class="mt-2 [.admin-workspace_&]:border-0"
                 value={highlight().title}
                 required
                 onInput={(event) => state.change(index, "title", event.currentTarget.value)}
@@ -34,7 +39,7 @@ export function AdminEventHighlightsFields(props: { state: AdminCatalogPageState
               </Label>
               <Textarea
                 id={`admin-event-highlight-description-${index}`}
-                class="mt-2"
+                class="mt-2 [.admin-workspace_&]:border-0"
                 value={highlight().description}
                 onInput={(event) => state.change(index, "description", event.currentTarget.value)}
               />
@@ -42,7 +47,12 @@ export function AdminEventHighlightsFields(props: { state: AdminCatalogPageState
           )}
         </Index>
       </div>
-      <Button type="button" variant="outline" class="mt-3" onClick={state.add}>
+      <Button
+        type="button"
+        variant="outline"
+        class="mt-3 [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70"
+        onClick={state.add}
+      >
         Highlight hinzufügen
       </Button>
     </div>

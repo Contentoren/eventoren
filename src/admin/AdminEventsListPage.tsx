@@ -59,7 +59,7 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
         <Show when={!tile}>
           <span class="text-sm text-content-muted xl:hidden">Status:</span>
         </Show>
-        <Badge variant="subtle" class="w-fit">
+        <Badge variant="subtle" class="w-fit border-0">
           {adminEventStatusLabel("status" in event ? event.status : "published")}
         </Badge>
       </div>
@@ -68,7 +68,7 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
 
   return (
     <main id="content" tabindex="-1">
-      <UiContainer width="wide" class="flex flex-col gap-6 py-8">
+      <UiContainer width="wide" class="flex flex-col gap-6 py-6 sm:py-8">
         <header class="flex flex-wrap items-end justify-between gap-4">
           <div>
             <h1 class="text-3xl font-semibold tracking-tight text-content">Events</h1>
@@ -82,11 +82,12 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
           </Link>
         </header>
         <AdminEventFeedback state={props.state.catalog} />
-        <div>
-          <div class="grid gap-3 border-b border-border p-4 lg:grid-cols-[minmax(0,1fr)_auto_12rem]">
+        <div class="min-w-0 overflow-hidden rounded-xl bg-surface shadow-lg shadow-slate-900/10 dark:shadow-black/30">
+          <div class="grid gap-3 bg-surface-muted/60 p-4 dark:bg-slate-800/60 lg:grid-cols-[minmax(0,1fr)_auto_12rem]">
             <Input
               aria-label="Events suchen"
               placeholder="Events suchen …"
+              class="min-h-11 rounded-lg border-0 bg-surface shadow-sm shadow-slate-900/5 dark:bg-slate-900/80 dark:shadow-black/20"
               value={props.state.query()}
               onInput={(event) => props.state.searchChange(event.currentTarget.value)}
             />
@@ -97,7 +98,7 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                   variant: "none",
                   size: "none",
                   class:
-                    "max-w-40 min-w-0 justify-start truncate rounded-lg border border-input bg-surface-muted px-2.5 py-2 text-sm text-content focus:border-ring focus:ring-ring",
+                    "min-h-11 max-w-40 min-w-0 justify-start truncate rounded-lg border-0 bg-surface px-2.5 py-2 text-sm text-content shadow-sm shadow-slate-900/5 dark:bg-slate-900/80 dark:shadow-black/20 focus-visible:ring-2 focus-visible:ring-ring",
                   innerClass: "min-w-64",
                   type: "button",
                 }}
@@ -122,7 +123,7 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
             <div class="relative">
               <SelectSingleNative
                 id="admin-events-status-filter"
-                class="appearance-none pr-10 text-sm"
+                class="min-h-11 appearance-none border-0! bg-surface pr-10 text-sm shadow-sm shadow-slate-900/5 focus-visible:ring-2 focus-visible:ring-ring dark:bg-slate-900/80 dark:shadow-black/20"
                 valueSignal={props.state.statusSignal}
                 getOptions={() => ["all", "draft", "published", "archived"]}
                 valueText={(value) => statusLabels[value] ?? value}
@@ -144,7 +145,7 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
             fallback={<p class="p-8 text-center text-sm text-content-muted">Keine passenden Events gefunden.</p>}
           >
             <Show when={viewPreference?.view() !== "tiles"}>
-              <div class="hidden items-center border-b border-border text-xs font-semibold text-content-muted xl:flex">
+              <div class="hidden items-center bg-surface-muted/40 text-xs font-semibold text-content-muted dark:bg-slate-800/40 xl:flex">
                 <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,8rem)_minmax(0,11rem)_minmax(0,10rem)_7rem] gap-2 px-4 py-3">
                   <span>Event</span>
                   <span>Veranstalter</span>
@@ -155,20 +156,20 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                 </div>
               </div>
             </Show>
-            <ul
-              class={
-                viewPreference?.view() === "tiles"
-                  ? "grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3"
-                  : "divide-y divide-border"
-              }
-            >
+            <ul class={viewPreference?.view() === "tiles" ? "grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3" : ""}>
               <For each={props.state.filteredEvents()}>
                 {(event) => (
-                  <li>
+                  <li
+                    class={
+                      viewPreference?.view() === "tiles"
+                        ? "min-w-0"
+                        : "min-w-0 even:bg-surface-muted/35 dark:even:bg-slate-800/30"
+                    }
+                  >
                     <Show
                       when={viewPreference?.view() === "tiles"}
                       fallback={
-                        <div class="flex items-center hover:bg-surface-muted">
+                        <div class="flex items-center hover:bg-surface-muted/60">
                           <Link
                             to="/admin/events/$eventKey"
                             params={{ eventKey: event.id }}
@@ -180,12 +181,12 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                         </div>
                       }
                     >
-                      <CardWrapper class="relative h-full p-0 lg:p-0">
+                      <CardWrapper class="relative h-full overflow-hidden rounded-xl border-0 p-0 shadow-md shadow-slate-900/10 dark:shadow-black/25 lg:p-0">
                         <Link
                           to="/admin/events/$eventKey"
                           params={{ eventKey: event.id }}
                           search={{}}
-                          class="grid h-full gap-3 p-4 transition-colors hover:bg-surface-muted"
+                          class="grid h-full gap-3 p-4 transition-colors hover:bg-surface-muted/60"
                         >
                           {eventDetails(event, true)}
                         </Link>

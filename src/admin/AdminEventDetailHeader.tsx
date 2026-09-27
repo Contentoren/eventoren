@@ -5,7 +5,7 @@ import type { EventItem } from "../events/EventItem.ts"
 
 export function AdminEventDetailHeader(props: { event?: EventItem; isNew?: boolean }) {
   return (
-    <header class="flex flex-col gap-4 border-b border-border pb-5">
+    <header class="flex flex-col gap-4 pb-2">
       <Link to="/admin/events" class="w-fit text-sm font-medium text-content-muted hover:text-content">
         ← Zurück zu Events
       </Link>
@@ -15,7 +15,7 @@ export function AdminEventDetailHeader(props: { event?: EventItem; isNew?: boole
             {props.isNew ? "Neues Event" : (props.event?.title ?? "Event")}
           </h1>
         </div>
-        <Badge variant="subtle">
+        <Badge variant="subtle" class="border-0">
           {props.isNew
             ? "Entwurf"
             : adminEventStatusLabel(props.event && "status" in props.event ? props.event.status : "published")}

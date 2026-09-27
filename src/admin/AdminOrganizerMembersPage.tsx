@@ -29,11 +29,16 @@ export function AdminOrganizerMembersPage(props?: {
           <div class="flex flex-wrap items-center gap-3">
             <p
               role="alert"
-              class="flex-1 rounded-md border border-danger/50 bg-danger-soft px-4 py-3 text-sm text-danger"
+              class="flex-1 rounded-md border border-danger/50 bg-danger-soft px-4 py-3 text-sm text-danger [.admin-workspace_&]:border-0"
             >
               {state.errorMessage()}
             </p>
-            <Button size="sm" variant="outline" onClick={() => void state.reload()}>
+            <Button
+              size="sm"
+              variant="outline"
+              class="[.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/60 dark:[.admin-workspace_&]:bg-slate-800/60"
+              onClick={() => void state.reload()}
+            >
               Erneut versuchen
             </Button>
           </div>
@@ -43,7 +48,7 @@ export function AdminOrganizerMembersPage(props?: {
           when={state.hasLoaded()}
           fallback={
             <Show when={!state.errorMessage()}>
-              <CardWrapper>
+              <CardWrapper class="[.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:shadow-md [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/25">
                 <p role="status" class="text-sm text-content-muted">
                   Veranstalter werden geladen …
                 </p>
@@ -54,7 +59,7 @@ export function AdminOrganizerMembersPage(props?: {
           <Show
             when={state.members().length > 0}
             fallback={
-              <CardWrapper>
+              <CardWrapper class="[.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:shadow-md [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/25">
                 <div class="flex items-center justify-between gap-3 text-sm text-content-muted">
                   <p>Es wurden keine Mitglieder mit aktiver Veranstalterrolle gefunden.</p>
                   <Show when={state.isLoading()}>
@@ -64,17 +69,20 @@ export function AdminOrganizerMembersPage(props?: {
               </CardWrapper>
             }
           >
-            <CardWrapper class="flex flex-col gap-2">
+            <CardWrapper class="flex flex-col gap-2 [.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:shadow-md [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/25">
               <div class="flex items-center justify-between gap-3 text-sm text-content-muted">
                 <p>{state.members().length} Veranstalter</p>
                 <Show when={state.isLoading()}>
                   <span class="text-xs">Veranstalter werden geladen …</span>
                 </Show>
               </div>
-              <ul class="flex flex-col divide-y divide-border" aria-label="Veranstalter">
+              <ul
+                class="flex flex-col divide-y divide-border [.admin-workspace_&]:divide-y-0"
+                aria-label="Veranstalter"
+              >
                 <For each={state.members()}>
                   {(member) => (
-                    <li class="grid gap-4 py-5 sm:grid-cols-[minmax(0,1.4fr)_minmax(10rem,0.8fr)_auto] sm:items-center">
+                    <li class="grid gap-4 py-5 [.admin-workspace_&]:rounded-lg [.admin-workspace_&]:px-4 [.admin-workspace_&]:even:bg-surface-muted/50 dark:[.admin-workspace_&]:even:bg-slate-800/40 sm:grid-cols-[minmax(0,1.4fr)_minmax(10rem,0.8fr)_auto] sm:items-center">
                       <div class="min-w-0">
                         <p class="truncate font-semibold text-content">{member.displayName || member.userName}</p>
                         <p class="truncate text-sm text-content-muted">{state.contact(member)}</p>

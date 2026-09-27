@@ -25,6 +25,7 @@ export function AdminTicketProductsForm(props: {
             type="button"
             size="sm"
             variant="outline"
+            class="[.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70"
             disabled={props.state.isSaving()}
             onClick={state.startNewTier}
           >
@@ -50,7 +51,7 @@ export function AdminTicketProductsForm(props: {
                     type="button"
                     variant="none"
                     size="none"
-                    class={`flex w-full cursor-grab flex-col items-stretch justify-start rounded-lg border p-3 text-left font-normal transition-colors active:cursor-grabbing ${props.state.tierDraft().tierKey === tier.id ? "border-brand bg-brand/10" : "border-border bg-surface hover:bg-surface-muted"}`}
+                    class={`flex w-full cursor-grab flex-col items-stretch justify-start rounded-lg border p-3 text-left font-normal transition-colors active:cursor-grabbing [.admin-workspace_&]:border-0 ${props.state.tierDraft().tierKey === tier.id ? "border-brand bg-brand/10" : "border-border bg-surface hover:bg-surface-muted [.admin-workspace_&]:bg-surface-muted/65 dark:[.admin-workspace_&]:bg-slate-800/65"}`}
                     aria-pressed={props.state.tierDraft().tierKey === tier.id}
                     onClick={() => state.selectTier(tier)}
                   >
@@ -72,7 +73,7 @@ export function AdminTicketProductsForm(props: {
                   type="button"
                   variant="none"
                   size="none"
-                  class="flex w-full flex-col items-stretch justify-start rounded-lg border border-brand bg-brand/10 p-3 text-left font-normal"
+                  class="flex w-full flex-col items-stretch justify-start rounded-lg border border-brand bg-brand/10 p-3 text-left font-normal [.admin-workspace_&]:border-0"
                   aria-pressed="true"
                 >
                   <span class="block text-xs font-medium text-content-muted">Neu · Noch nicht gespeichert</span>
@@ -86,7 +87,7 @@ export function AdminTicketProductsForm(props: {
         </Show>
       </div>
 
-      <CardWrapper class="lg:mt-13">
+      <CardWrapper class="lg:mt-13 [.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:shadow-lg [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/30">
         <form
           class="flex flex-col gap-5"
           data-hydrated={state.hydrated() ? "true" : "false"}
@@ -191,7 +192,7 @@ export function AdminTicketProductsForm(props: {
               <Button
                 type="button"
                 variant="outline"
-                class="mt-3"
+                class="mt-3 [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70"
                 disabled={props.state.isSaving()}
                 onClick={state.addDoorsAt}
               >
@@ -211,7 +212,7 @@ export function AdminTicketProductsForm(props: {
             <Label for="admin-tier-description">Beschreibung</Label>
             <Textarea
               id="admin-tier-description"
-              class="mt-2"
+              class="mt-2 [.admin-workspace_&]:border-0"
               value={props.state.tierDraft().description}
               onInput={(event) => props.state.tierFieldChange("description", event.currentTarget.value)}
             />
@@ -222,7 +223,7 @@ export function AdminTicketProductsForm(props: {
               {state.validationMessage()}
             </p>
           </Show>
-          <div class="border-t border-border pt-5">
+          <div class="border-t border-border pt-5 [.admin-workspace_&]:border-t-0">
             <div class="flex flex-wrap gap-3">
               <Button type="submit" variant="contrast" disabled={props.state.isSaving()}>
                 {props.state.isSaving() ? "Speichert …" : "Ticketprodukt speichern"}
@@ -233,6 +234,7 @@ export function AdminTicketProductsForm(props: {
                 <Button
                   type="button"
                   variant="outline"
+                  class="[.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70"
                   disabled={props.state.isSaving()}
                   onClick={props.state.deleteTier}
                 >
@@ -269,7 +271,7 @@ function Field(props: {
         step={props.step}
         required={props.required}
         value={props.value}
-        class="mt-2"
+        class="mt-2 [.admin-workspace_&]:border-0"
         onInput={(event) => props.onInput(event.currentTarget.value)}
       />
     </div>

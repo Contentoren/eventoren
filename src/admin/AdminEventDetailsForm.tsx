@@ -52,11 +52,11 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
               open={state.categoryPicker.categoryPickerOpen()}
               onOpenChange={state.categoryPicker.categoryPickerOpenChange}
               variant="outline"
-              class="mt-2 w-full justify-start"
+              class="mt-2 w-full justify-start [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70"
               buttonChildren={
                 eventCategoryLabels[props.state.eventDraft().category] ?? props.state.eventDraft().category
               }
-              innerClass="w-[min(24rem,calc(100vw-2rem))]"
+              innerClass="admin-workspace w-[min(24rem,calc(100vw-2rem))] border-0 shadow-lg shadow-slate-900/10 dark:border-0 dark:shadow-black/30"
             >
               <div class="flex max-h-96 flex-col gap-4 overflow-y-auto p-1">
                 <div class="flex flex-col gap-2">
@@ -67,7 +67,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
                         <Button
                           type="button"
                           variant="outline"
-                          class="flex-1"
+                          class="flex-1 [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70"
                           onClick={() => state.categoryPicker.categorySelect(category)}
                         >
                           {eventCategoryLabels[category] ?? category}
@@ -76,6 +76,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
                           type="button"
                           variant="outline"
                           icon={mdiClose}
+                          class="[.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70"
                           aria-label={`Kategorie ${eventCategoryLabels[category] ?? category} entfernen`}
                           onClick={() => void state.categoryPicker.categoryRemove(category)}
                         />
@@ -83,10 +84,11 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
                     )}
                   </For>
                 </div>
-                <div class="order-first flex flex-col gap-3 border-t border-border pt-4">
+                <div class="order-first flex flex-col gap-3 border-t border-border pt-4 [.admin-workspace_&]:border-t-0">
                   <Label for="admin-new-event-category">Neue Kategorie</Label>
                   <Input
                     id="admin-new-event-category"
+                    class="[.admin-workspace_&]:border-0"
                     value={state.categoryPicker.newCategory.get()}
                     onInput={(event) => state.categoryPicker.newCategory.set(event.currentTarget.value)}
                   />
@@ -102,7 +104,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
           <Label for="admin-event-description">Beschreibung</Label>
           <Textarea
             id="admin-event-description"
-            class="mt-2 min-h-32"
+            class="mt-2 min-h-32 [.admin-workspace_&]:border-0"
             value={props.state.eventDraft().description}
             onInput={(event) => props.state.eventFieldChange("description", event.currentTarget.value)}
           />
@@ -172,7 +174,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
             onInput={(value) => props.state.eventFieldChange("imageAlt", value)}
           />
           <fieldset
-            class={`sm:col-span-2 rounded-lg border border-dashed p-4 ${state.imageDragActive() ? "border-brand bg-brand/5" : "border-border"}`}
+            class={`sm:col-span-2 rounded-lg border border-dashed p-4 [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/60 dark:[.admin-workspace_&]:bg-slate-800/60 ${state.imageDragActive() ? "border-brand bg-brand/5 [.admin-workspace_&]:bg-brand/10 dark:[.admin-workspace_&]:bg-brand/15" : "border-border"}`}
             onDragOver={(event) => {
               event.preventDefault()
               state.imageDragStart()
@@ -233,7 +235,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
             <Label for="admin-event-inclusions">Inklusive</Label>
             <Textarea
               id="admin-event-inclusions"
-              class="mt-2 min-h-32"
+              class="mt-2 min-h-32 [.admin-workspace_&]:border-0"
               value={props.state.eventDraft().inclusions.join("\n")}
               onInput={(event) => props.state.eventFieldChange("inclusions", event.currentTarget.value.split("\n"))}
             />
@@ -243,7 +245,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
             <Label for="admin-event-exclusions">Nicht enthalten</Label>
             <Textarea
               id="admin-event-exclusions"
-              class="mt-2 min-h-32"
+              class="mt-2 min-h-32 [.admin-workspace_&]:border-0"
               value={props.state.eventDraft().exclusions.join("\n")}
               onInput={(event) => props.state.eventFieldChange("exclusions", event.currentTarget.value.split("\n"))}
             />
@@ -256,7 +258,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
         <Label for="admin-event-status">Katalogstatus</Label>
         <SelectSingleNative
           id="admin-event-status"
-          class="mt-2"
+          class="mt-2 [.admin-workspace_&]:border-0 [.admin-workspace_&]:focus-visible:ring-2"
           valueSignal={state.statusSignal}
           getOptions={state.statusOptions}
           valueText={state.statusLabel}
@@ -268,7 +270,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
         </Show>
       </FormSection>
 
-      <details class="rounded-lg border border-border bg-surface-muted p-4 text-content">
+      <details class="rounded-lg border border-border bg-surface-muted p-4 text-content [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70">
         <summary class="cursor-pointer font-semibold">Erweitert</summary>
         <div class="mt-4">
           <Field
@@ -287,7 +289,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
         </p>
       </Show>
       <AdminEventFeedback state={props.state} />
-      <div class="flex flex-wrap items-center gap-3 border-t border-border pt-5">
+      <div class="flex flex-wrap items-center gap-3 border-t border-border pt-5 [.admin-workspace_&]:border-t-0">
         <Button type="submit" disabled={props.state.isSaving() || state.imageUploading() || !!state.pendingAction()}>
           {state.pendingAction() === "save" ? "Speichert …" : "Änderungen speichern"}
         </Button>
@@ -306,7 +308,7 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
 
 function FormSection(props: { title: string; children: JSXElement }) {
   return (
-    <section class="rounded-lg border border-border bg-surface p-4">
+    <section class="rounded-lg border border-border bg-surface p-4 [.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:shadow-md [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/25">
       <h3 class="mb-4 font-semibold text-content">{props.title}</h3>
       {props.children}
     </section>
@@ -330,7 +332,7 @@ function Field(props: {
         type={props.type ?? "text"}
         value={props.value}
         required={props.required}
-        class="mt-2"
+        class="mt-2 [.admin-workspace_&]:border-0"
         onInput={(event) => props.onInput(event.currentTarget.value)}
       />
     </div>

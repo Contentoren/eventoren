@@ -32,7 +32,7 @@ export function OrganizerEventListPage(props: {
           <Show when={state.errorMessage()}>
             <p
               role="alert"
-              class="rounded-control border border-danger/50 bg-danger-soft p-space-4 text-sm text-danger"
+              class="rounded-control border border-danger/50 bg-danger-soft p-space-4 text-sm text-danger [.admin-workspace_&]:border-0"
             >
               {state.errorMessage()}
             </p>
@@ -43,7 +43,7 @@ export function OrganizerEventListPage(props: {
             </p>
           </Show>
           <Show when={!state.loading() && state.groups().length === 0 && !state.errorMessage()}>
-            <CardWrapper>
+            <CardWrapper class="[.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:shadow-lg [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/30">
               <p class="text-content-muted">{state.text().noEvents}</p>
             </CardWrapper>
           </Show>
@@ -64,7 +64,7 @@ export function OrganizerEventListPage(props: {
                   >
                     <For each={group.events}>
                       {(event) => (
-                        <CardWrapper class="group overflow-hidden p-0 transition-colors duration-200 hover:border-brand-accent hover:bg-surface-muted/40">
+                        <CardWrapper class="group overflow-hidden p-0 transition-colors duration-200 hover:border-brand-accent hover:bg-surface-muted/40 [.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:shadow-md [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/25">
                           <OrganizerEventCardLink
                             eventKey={event.eventKey}
                             eventHref={props.eventHref}

@@ -12,11 +12,11 @@ import type { adminEventDetailRouteStateCreate } from "./adminEventDetailRouteSt
 export function AdminEventDetailPage(props: { state: ReturnType<typeof adminEventDetailRouteStateCreate> }) {
   return (
     <main id="content" tabindex="-1">
-      <UiContainer width="wide" class="flex flex-col gap-6 py-8">
+      <UiContainer width="wide" class="flex flex-col gap-6 py-6 sm:py-8">
         <Show
           when={props.state.event()}
           fallback={
-            <CardWrapper>
+            <CardWrapper class="rounded-xl border-0 shadow-lg shadow-slate-900/10 dark:shadow-black/30">
               <h1 class="text-xl font-semibold text-content">Event nicht gefunden</h1>
               <p class="mt-2 text-sm text-content-muted">Dieses Event ist nicht vorhanden oder nicht mehr verfügbar.</p>
               <Link

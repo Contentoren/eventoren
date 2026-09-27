@@ -51,7 +51,10 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
 
   return (
     <section aria-labelledby="admin-member-management-title" class="flex flex-col gap-5">
-      <Dynamic component={viewPreference?.view() === "tiles" ? CardWrapper : "div"}>
+      <Dynamic
+        component={viewPreference?.view() === "tiles" ? CardWrapper : "div"}
+        class="[.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface [.admin-workspace_&]:p-5 [.admin-workspace_&]:shadow-md [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/25"
+      >
         <div class="flex flex-col gap-5">
           <div>
             <h2 id="admin-member-management-title" class="text-xl font-semibold text-content">
@@ -71,7 +74,7 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
               <Label for="admin-member-search">{state.text().search}</Label>
               <Input
                 id="admin-member-search"
-                class="mt-2"
+                class="mt-2 [.admin-workspace_&]:min-h-11 [.admin-workspace_&]:rounded-lg [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/60 dark:[.admin-workspace_&]:bg-slate-800/60"
                 placeholder={state.text().searchHint}
                 value={state.search()}
                 onInput={(event) => state.searchChange(event.currentTarget.value)}
@@ -84,7 +87,7 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
               <legend class="sr-only">Rollen filtern</legend>
               <CheckSingle
                 id="admin-member-role-filter"
-                class="sm:pb-2"
+                class="sm:pb-2 [.admin-workspace_&]:rounded-lg [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/60 dark:[.admin-workspace_&]:bg-slate-800/60"
                 valueSignal={state.roleFilter}
                 getOptions={() => ["all", "admin", "organizer"]}
                 valueText={(role) =>
@@ -99,11 +102,16 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
             <div class="flex flex-wrap items-center gap-3">
               <p
                 role="alert"
-                class="flex-1 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-950/40 dark:text-red-200"
+                class="flex-1 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-700 dark:bg-red-950/40 dark:text-red-200 [.admin-workspace_&]:border-0"
               >
                 {state.errorMessage()}
               </p>
-              <Button size="sm" variant="outline" onClick={() => void state.reload()}>
+              <Button
+                size="sm"
+                variant="outline"
+                class="[.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/60 dark:[.admin-workspace_&]:bg-slate-800/60"
+                onClick={() => void state.reload()}
+              >
                 {state.text().reload}
               </Button>
             </div>
@@ -111,7 +119,7 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
           <Show when={state.successMessage()}>
             <p
               role="status"
-              class="rounded-md border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-700 dark:bg-green-950/40 dark:text-green-200"
+              class="rounded-md border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700 dark:border-green-700 dark:bg-green-950/40 dark:text-green-200 [.admin-workspace_&]:border-0"
             >
               {state.successMessage()}
             </p>
@@ -141,22 +149,28 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
                 class={
                   viewPreference?.view() === "tiles"
                     ? "grid gap-5 sm:grid-cols-2 xl:grid-cols-3"
-                    : "flex flex-col divide-y divide-border"
+                    : "flex flex-col divide-y divide-border [.admin-workspace_&]:divide-y-0"
                 }
                 aria-label={state.text().title}
               >
                 <For each={state.members()}>
                   {(member) => (
-                    <li>
+                    <li
+                      class={
+                        viewPreference?.view() === "tiles"
+                          ? ""
+                          : "[.admin-workspace_&]:even:bg-surface-muted/50 dark:[.admin-workspace_&]:even:bg-slate-800/40"
+                      }
+                    >
                       <Show
                         when={viewPreference?.view() === "tiles"}
                         fallback={
-                          <div class="grid gap-4 py-4 sm:py-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(10rem,0.8fr)_auto] lg:items-center">
+                          <div class="grid gap-4 py-4 [.admin-workspace_&]:rounded-lg [.admin-workspace_&]:px-4 sm:py-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(10rem,0.8fr)_auto] lg:items-center">
                             {memberDetails(member)}
                           </div>
                         }
                       >
-                        <CardWrapper class="flex h-full flex-col justify-between gap-5 border-2 border-border-strong bg-surface shadow-sm">
+                        <CardWrapper class="flex h-full flex-col justify-between gap-5 border-2 border-border-strong bg-surface shadow-sm [.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:shadow-md [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/25">
                           {memberDetails(member)}
                         </CardWrapper>
                       </Show>
