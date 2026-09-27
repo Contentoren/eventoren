@@ -29,11 +29,12 @@ export const Route = createFileRoute("/organizer_/event/$eventId")({
       eventKey: () => params().eventId,
       initialSearch: () => routeSearch().q ?? "",
       initialTicketId: () => routeSearch().ticket ?? "",
-      searchReplace: (q, ticket) =>
+      initialMobileView: () => routeSearch().view,
+      searchReplace: (q, ticket, view) =>
         void navigate({
           to: "/organizer/event/$eventId",
           params: { eventId: params().eventId },
-          search: { ...(q ? { q } : {}), ...(ticket ? { ticket } : {}) },
+          search: { ...(q ? { q } : {}), ...(ticket ? { ticket } : {}), ...(view ? { view } : {}) },
           replace: true,
           resetScroll: false,
         }),

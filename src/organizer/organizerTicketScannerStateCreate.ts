@@ -42,6 +42,8 @@ export function organizerTicketScannerStateCreate(inputs: {
   const outcome = createSignalObject<ScannerOutcomeState | null>(null)
   let controls: IScannerControls | undefined
   let requestId = 0
+  let startInFlight = false
+  let cameraDesired = false
   let lastCode = ""
   let lastCodeResetTimer: ReturnType<typeof setTimeout> | undefined
   let audioContext: AudioContext | undefined
@@ -57,8 +59,6 @@ export function organizerTicketScannerStateCreate(inputs: {
       for (const track of video.srcObject.getTracks()) track.stop()
       video.srcObject = null
     }
-
-    BrowserQRCodeReader.releaseAllStreams()
   }
 
   const scannerAudioContextStart = () => {
@@ -78,6 +78,7 @@ export function organizerTicketScannerStateCreate(inputs: {
   }
 
   const scannerStop = () => {
+    cameraDesired = false
     requestId += 1
     starting.set(false)
     active.set(false)
@@ -136,7 +137,8 @@ export function organizerTicketScannerStateCreate(inputs: {
   }
 
   const scannerStart = async () => {
-    if (active.get() || starting.get()) return
+    cameraDesired = true
+    if (active.get() || startInFlight) return
 
     const video = videoElement.get()
     if (!video) {
@@ -154,6 +156,7 @@ export function organizerTicketScannerStateCreate(inputs: {
 
     const currentRequestId = requestId + 1
     requestId = currentRequestId
+    startInFlight = true
     starting.set(true)
     errorCode.set(null)
     outcome.set(null)
@@ -174,18 +177,24 @@ export function organizerTicketScannerStateCreate(inputs: {
       )
       if (currentRequestId !== requestId) {
         nextControls.stop()
+        scannerTracksStop()
         return
       }
       controls = nextControls
       active.set(true)
     } catch (error) {
-      if (currentRequestId !== requestId) return
+      if (currentRequestId !== requestId) {
+        scannerTracksStop()
+        return
+      }
       active.set(false)
       scannerAudioContextStop()
       scannerTracksStop()
       errorCode.set(cameraErrorCode(error))
     } finally {
+      startInFlight = false
       if (currentRequestId === requestId) starting.set(false)
+      if (cameraDesired && currentRequestId !== requestId) void scannerStart()
     }
   }
 
@@ -214,9 +223,13 @@ export function organizerTicketScannerStateCreate(inputs: {
     outcome.set(null)
   }
 
-  const scannerErrorMessage = () => {
+  const scannerOutcomeClear = () => outcome.set(null)
+
+  const scannerErrorMessage = (mobile = false) => {
     const code = errorCode.get()
-    return code ? scannerMessageText(code, inputs.text()) : ""
+    if (!code) return ""
+    if (mobile) return scannerMobileErrorMessage(code, inputs.text())
+    return scannerMessageText(code, inputs.text())
   }
 
   const scannerOutcome = (): OrganizerScannerOutcome | null => {
@@ -243,6 +256,7 @@ export function organizerTicketScannerStateCreate(inputs: {
     scannerCodeSimulate: scannerResultHandle,
     scannerPermissionDeniedSimulate,
     scannerFeedbackClear,
+    scannerOutcomeClear,
   }
 }
 
@@ -282,4 +296,16 @@ function scannerMessageText(code: ScannerMessageCode, text: OrganizerText): stri
   if (code === "organizer.check-in.wrong-event") return text.wrongEvent
   if (code === "organizer.check-in.unknown-ticket") return text.unknownTicket
   return text.actionFailed
+}
+
+function scannerMobileErrorMessage(code: ScannerMessageCode, text: OrganizerText): string {
+  if (code === "scanner.permission-denied") {
+    return "Kamerazugriff verweigert. Erlaube ihn in den Browsereinstellungen und öffne Scanner erneut."
+  }
+  if (code === "scanner.unavailable") return "Keine passende Kamera gefunden."
+  if (code === "scanner.in-use") return "Die Kamera wird bereits von einer anderen Anwendung verwendet."
+  if (code === "scanner.secure-context") return text.scannerSecureContext
+  if (code === "scanner.error")
+    return "Kamera konnte nicht gestartet werden. Öffne Scanner erneut, um es noch einmal zu versuchen."
+  return scannerMessageText(code, text)
 }

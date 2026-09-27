@@ -5,6 +5,8 @@ import type { OrganizerText } from "./OrganizerText.ts"
 import type { OrganizerTicket } from "./OrganizerTicket.ts"
 
 export type OrganizerEventDetailPageState = {
+  readonly mobileView: () => "profile" | "scanner" | "tickets"
+  readonly mobileViewSelect: (view: "profile" | "scanner" | "tickets") => void
   readonly event: () => OrganizerEvent | undefined
   readonly tickets: () => readonly OrganizerTicket[]
   readonly selectedTicket: () => OrganizerTicket | undefined
@@ -30,7 +32,7 @@ export type OrganizerEventDetailPageState = {
   readonly scannerActive: () => boolean
   readonly scannerStarting: () => boolean
   readonly scannerCheckingIn: () => boolean
-  readonly scannerErrorMessage: () => string
+  readonly scannerErrorMessage: (mobile?: boolean) => string
   readonly scannerOutcome: () => OrganizerScannerOutcome | null
   readonly scannerVideoSet: (element: HTMLVideoElement) => void
   readonly scannerStart: () => Promise<void>
@@ -38,4 +40,5 @@ export type OrganizerEventDetailPageState = {
   readonly scannerCodeSimulate: (code: string) => Promise<void>
   readonly scannerCodeSubmit: (event: SubmitEvent & { currentTarget: HTMLFormElement }) => void
   readonly scannerPermissionDeniedSimulate: () => void
+  readonly scannerOutcomeClear: () => void
 }

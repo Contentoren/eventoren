@@ -19,7 +19,8 @@ export function organizerEventDetailPageStateCreate(inputs: {
   readonly eventKey: () => string
   readonly initialSearch: () => string
   readonly initialTicketId: () => string
-  readonly searchReplace: (search: string, ticketId: string) => void
+  readonly initialMobileView?: () => "profile" | "scanner" | "tickets" | undefined
+  readonly searchReplace: (search: string, ticketId: string, view?: "profile" | "scanner" | "tickets") => void
   readonly dataSource?: OrganizerDataSource
   readonly linkAccess?: boolean
 }): OrganizerEventDetailPageState {
@@ -31,6 +32,13 @@ export function organizerEventDetailPageStateCreate(inputs: {
   const selectedTicket = createSignalObject<OrganizerTicket | undefined>(undefined)
   const selectedTicketId = createSignalObject(inputs.initialTicketId())
   const search = createSignalObject(inputs.initialSearch())
+  const mobileView = createSignalObject(inputs.initialMobileView?.() ?? "tickets")
+  const searchReplace = (value: string, ticketId: string) => inputs.searchReplace(value, ticketId, mobileView.get())
+  const mobileViewSelect = (view: "profile" | "scanner" | "tickets") => {
+    mobileView.set(view)
+    searchReplace(search.get(), selectedTicketId.get())
+  }
+  createEffect(() => mobileView.set(inputs.initialMobileView?.() ?? "tickets"))
   const loading = createSignalObject(true)
   const actionPending = createSignalObject(false)
   const actionError = createSignalObject<DetailActionError | null>(null)
@@ -192,7 +200,8 @@ export function organizerEventDetailPageStateCreate(inputs: {
     if (searchTimer) clearTimeout(searchTimer)
     searchTimer = setTimeout(() => {
       const update = () => {
-        inputs.searchReplace(value, "")
+        if (revision !== ticketListRevision) return
+        searchReplace(value, selectedTicketId.get())
         void ticketLoad(value, revision)
       }
       if (typeof requestIdleCallback === "function") {
@@ -222,7 +231,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     actionSuccess.set(null)
     duplicateInfo.set(null)
     scannerFeedbackClear()
-    inputs.searchReplace(search.get(), nextTicketId)
+    searchReplace(search.get(), nextTicketId)
   }
 
   const resultApply = (result: OrganizerDataResult<OrganizerTicket>, successCode: DetailActionSuccess["code"]) => {
@@ -245,7 +254,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
         .map((ticket) => (ticket.id === updated.id ? updated : ticket))
         .sort(organizerTicketOrderCompare),
     )
-    inputs.searchReplace(search.get(), updated.id)
+    searchReplace(search.get(), updated.id)
     duplicateInfo.set(null)
     actionError.set(null)
     actionSuccess.set({ code: successCode })
@@ -323,6 +332,8 @@ export function organizerEventDetailPageStateCreate(inputs: {
   }
 
   return {
+    mobileView: mobileView.get,
+    mobileViewSelect,
     event: event.get,
     tickets: tickets.get,
     selectedTicket: selectedTicket.get,
@@ -356,6 +367,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
     scannerCodeSimulate: scanner.scannerCodeSimulate,
     scannerCodeSubmit,
     scannerPermissionDeniedSimulate: scanner.scannerPermissionDeniedSimulate,
+    scannerOutcomeClear: scanner.scannerOutcomeClear,
   }
 }
 

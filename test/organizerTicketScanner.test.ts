@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test"
+import { describe, expect, spyOn, test } from "bun:test"
+import { BrowserQRCodeReader, type IScannerControls } from "@zxing/browser"
 import { BinaryBitmap, HybridBinarizer, QRCodeReader, RGBLuminanceSource } from "@zxing/library"
 import { createRoot } from "solid-js"
 import { language } from "../src/app/i18n/language.ts"
@@ -9,6 +10,52 @@ import { organizerTicketScannerStateCreate } from "../src/organizer/organizerTic
 import { ticketQrMatrixCreate } from "../src/ticketing/ticketQrMatrixCreate.ts"
 
 describe("organizer ticket scanner QR compatibility", () => {
+  test("stops a camera session that resolves after the scanner has exited", async () => {
+    const previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window")
+    const previousNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator")
+    Object.defineProperty(globalThis, "window", { configurable: true, value: { isSecureContext: true } })
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: { mediaDevices: { getUserMedia: () => Promise.resolve({}) } },
+    })
+
+    let resolveStart: ((controls: IScannerControls) => void) | undefined
+    const decode = spyOn(BrowserQRCodeReader.prototype, "decodeFromConstraints").mockImplementation(
+      () => new Promise((resolve) => (resolveStart = resolve)),
+    )
+    let dispose: (() => void) | undefined
+    let state: ReturnType<typeof organizerTicketScannerStateCreate> | undefined
+    createRoot((rootDispose) => {
+      dispose = rootDispose
+      state = organizerTicketScannerStateCreate({
+        text: () => organizerTextGet(),
+        scanCode: async () => ({ success: true, data: {} as OrganizerTicket }),
+      })
+    })
+
+    let stopped = false
+    try {
+      if (!state) throw new Error("scanner state was not created")
+      const scannerState = state
+      scannerState.scannerVideoSet({ srcObject: null } as HTMLVideoElement)
+      const pendingStart = scannerState.scannerStart()
+      expect(scannerState.scannerStarting()).toBe(true)
+      scannerState.scannerStop()
+      resolveStart?.({ stop: () => (stopped = true) } as IScannerControls)
+      await pendingStart
+      expect(stopped).toBe(true)
+      expect(scannerState.scannerActive()).toBe(false)
+      expect(scannerState.scannerStarting()).toBe(false)
+    } finally {
+      dispose?.()
+      decode.mockRestore()
+      if (previousWindow) Object.defineProperty(globalThis, "window", previousWindow)
+      else Reflect.deleteProperty(globalThis, "window")
+      if (previousNavigator) Object.defineProperty(globalThis, "navigator", previousNavigator)
+      else Reflect.deleteProperty(globalThis, "navigator")
+    }
+  })
+
   test("opens the camera panel, starts the camera automatically, and closes it again", async () => {
     let dispose: (() => void) | undefined
     let state: ReturnType<typeof organizerTicketScannerStateCreate> | undefined
@@ -70,6 +117,8 @@ describe("organizer ticket scanner QR compatibility", () => {
   })
 
   test("keeps simulated camera errors and scan outcomes in German", async () => {
+    const previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window")
+    const previousNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator")
     languageSignal.set(language.de)
     let dispose: (() => void) | undefined
     let state: ReturnType<typeof organizerTicketScannerStateCreate> | undefined
@@ -94,8 +143,38 @@ describe("organizer ticket scanner QR compatibility", () => {
       if (!state) throw new Error("scanner state was not created")
       state.scannerPermissionDeniedSimulate()
       expect(state.scannerErrorMessage()).toBe(organizerTextGet().scannerPermissionDenied)
+      expect(state.scannerErrorMessage(true)).toBe(
+        "Kamerazugriff verweigert. Erlaube ihn in den Browsereinstellungen und öffne Scanner erneut.",
+      )
+
+      const unavailableNavigator = Object.getOwnPropertyDescriptor(globalThis, "navigator")
+      Object.defineProperty(globalThis, "window", { configurable: true, value: { isSecureContext: true } })
+      Object.defineProperty(globalThis, "navigator", { configurable: true, value: { mediaDevices: {} } })
+      state.scannerVideoSet({} as HTMLVideoElement)
+      state.scannerFeedbackClear()
+      await state.scannerStart()
+      expect(state.scannerErrorMessage(true)).toBe("Keine passende Kamera gefunden.")
+      expect(state.scannerErrorMessage()).toBe(organizerTextGet().scannerUnavailable)
+      if (unavailableNavigator) Object.defineProperty(globalThis, "navigator", unavailableNavigator)
+      else Reflect.deleteProperty(globalThis, "navigator")
+
+      const decode = spyOn(BrowserQRCodeReader.prototype, "decodeFromConstraints").mockRejectedValue(
+        new Error("camera startup failed"),
+      )
+      Object.defineProperty(globalThis, "navigator", {
+        configurable: true,
+        value: { mediaDevices: { getUserMedia: () => Promise.resolve({}) } },
+      })
+      state.scannerVideoSet({} as HTMLVideoElement)
+      await state.scannerStart()
+      expect(state.scannerErrorMessage(true)).toBe(
+        "Kamera konnte nicht gestartet werden. Öffne Scanner erneut, um es noch einmal zu versuchen.",
+      )
+      expect(state.scannerErrorMessage()).toBe(organizerTextGet().scannerError)
+      decode.mockRestore()
 
       languageSignal.set(language.en)
+      state.scannerPermissionDeniedSimulate()
       expect(state.scannerErrorMessage()).toBe(organizerTextGet().scannerPermissionDenied)
 
       await state.scannerCodeSimulate("TKT-demo")
@@ -114,6 +193,10 @@ describe("organizer ticket scanner QR compatibility", () => {
     } finally {
       dispose?.()
       languageSignal.set(language.en)
+      if (previousWindow) Object.defineProperty(globalThis, "window", previousWindow)
+      else Reflect.deleteProperty(globalThis, "window")
+      if (previousNavigator) Object.defineProperty(globalThis, "navigator", previousNavigator)
+      else Reflect.deleteProperty(globalThis, "navigator")
     }
   })
 
