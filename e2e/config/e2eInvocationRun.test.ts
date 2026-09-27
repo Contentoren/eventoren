@@ -7,18 +7,71 @@ import { e2eCheckpointSave } from "../checkpoint/e2eCheckpointSave.ts"
 import type { e2eStripeTicketReconcile } from "../stripe/e2eStripeTicketReconcile.ts"
 
 describe("Eventoren E2E runner", () => {
-  it("blocks production before any SSO or paid fixture is started", async () => {
+  it("runs production SSO only without marking a ticket attempt or running ticket cleanup", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
     const started: string[] = []
-    expect(
-      await e2eInvocationRun({
-        environment: {},
-        commandRun: async (workflow) => {
-          started.push(workflow.name)
-          return 0
-        },
-      }),
-    ).toBe(1)
-    expect(started).toEqual([])
+    let cleanups = 0
+    try {
+      expect(
+        await e2eInvocationRun({
+          environment: {
+            TEST_CUSTOMER_MAILCOW_HOST: "localhost",
+            TEST_CUSTOMER_MAILCOW_USER: "buyer@example.test",
+            TEST_CUSTOMER_MAILCOW_PASS: "unused",
+            E2E_STRIPE_TEST_SECRET_KEY: "sk_test_mock",
+            E2E_STRIPE_TEST_ACCOUNT_ID: "acct_mock",
+            E2E_BILLING_ORGANIZATION_ID: "org_mock",
+          },
+          checkpointDirectory: directory,
+          commandRun: async (workflow) => {
+            started.push(workflow.name)
+            return 0
+          },
+          catalogCleanup: async () => {
+            cleanups++
+            return { success: true }
+          },
+          mailCleanup: async () => {
+            cleanups++
+            return { success: true, data: { status: "verified-deleted" } }
+          },
+          stripeReconcile: (async () => {
+            cleanups++
+            return { success: true, data: { status: "stripe-reconciled-checkpoint-retained" as const } }
+          }) as typeof e2eStripeTicketReconcile,
+        }),
+      ).toBe(0)
+      expect(started).toEqual(["SSO"])
+      expect(cleanups).toBe(0)
+      const checkpoint = JSON.parse(await readFile(join(directory, "checkpoint.json"), "utf8"))
+      expect(checkpoint.phase).toBe("sso")
+      expect(checkpoint.ticket).toBeUndefined()
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("returns failure for a failed production SSO smoke without starting ticket purchase", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
+    const started: string[] = []
+    try {
+      expect(
+        await e2eInvocationRun({
+          environment: {},
+          checkpointDirectory: directory,
+          commandRun: async (workflow) => {
+            started.push(workflow.name)
+            return 1
+          },
+        }),
+      ).toBe(1)
+      expect(started).toEqual(["SSO"])
+      const checkpoint = JSON.parse(await readFile(join(directory, "checkpoint.json"), "utf8"))
+      expect(checkpoint.phase).toBe("sso")
+      expect(checkpoint.ticket).toBeUndefined()
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
   })
 
   it("runs preview SSO then ticket, retaining unreconciled effects even after browser success", async () => {
