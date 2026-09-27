@@ -303,37 +303,40 @@ export function OrganizerEventDetailPage(props: {
                                   id={`organizer-ticket-actions-${ticket.id}`}
                                   class="flex flex-col gap-space-3 rounded-lg rounded-t-none bg-brand-soft p-space-4"
                                 >
-                                  <div class="flex flex-wrap gap-space-2">
-                                    <Button
-                                      variant="filledGreen"
-                                      class="min-h-11 min-w-0 flex-1 rounded-lg [.admin-workspace_&]:disabled:bg-slate-200 [.admin-workspace_&]:disabled:text-slate-700 dark:[.admin-workspace_&]:disabled:bg-slate-700 dark:[.admin-workspace_&]:disabled:text-slate-200"
-                                      disabled={
-                                        state.actionPending() ||
-                                        ticket.checkedIn ||
-                                        ticket.cancelled ||
-                                        ticket.paymentStatus !== "paid" ||
-                                        ticket.orderStatus !== "paid"
-                                      }
-                                      onClick={() => void state.ticketCheckIn()}
-                                    >
-                                      {state.actionPending() ? state.text().working : state.text().checkIn}
-                                    </Button>
-                                    <Show when={!state.mobile() && props.allowReset !== false}>
+                                  <Show
+                                    when={ticket.checkedIn}
+                                    fallback={
+                                      <Button
+                                        variant="filledGreen"
+                                        class="min-h-11 w-full rounded-lg [.admin-workspace_&]:disabled:bg-slate-200 [.admin-workspace_&]:disabled:text-slate-700 dark:[.admin-workspace_&]:disabled:bg-slate-700 dark:[.admin-workspace_&]:disabled:text-slate-200"
+                                        disabled={
+                                          state.actionPending() ||
+                                          ticket.cancelled ||
+                                          ticket.paymentStatus !== "paid" ||
+                                          ticket.orderStatus !== "paid"
+                                        }
+                                        onClick={() => void state.ticketCheckIn()}
+                                      >
+                                        {state.actionPending() ? state.text().working : state.text().checkIn}
+                                      </Button>
+                                    }
+                                  >
+                                    <Show when={props.allowReset !== false}>
                                       <Button
                                         variant="contrast"
-                                        class="min-h-11 min-w-0 flex-1 rounded-lg"
-                                        disabled={state.actionPending() || !ticket.checkedIn}
+                                        class="min-h-11 w-full rounded-lg"
+                                        disabled={state.actionPending()}
                                         onClick={() => void state.ticketReset()}
                                       >
                                         {state.actionPending() ? state.text().working : state.text().reset}
                                       </Button>
                                     </Show>
-                                  </div>
+                                  </Show>
                                   <Show when={state.mobile()}>
                                     <Details
                                       title="Weitere Informationen"
                                       class="min-w-0 border-0 bg-surface shadow-none dark:bg-slate-800"
-                                      summaryClass="min-h-11 flex-row p-space-3 text-content"
+                                      summaryClass="min-h-11 flex-row p-space-3 text-content [&_h3]:text-base"
                                     >
                                       <div class="flex min-w-0 flex-col gap-space-4 p-space-4 pt-0 text-sm text-content">
                                         <Show when={ticket.participantNameSource === "buyer"}>
@@ -414,16 +417,6 @@ export function OrganizerEventDetailPage(props: {
                                               </dl>
                                             </div>
                                           )}
-                                        </Show>
-                                        <Show when={props.allowReset !== false && ticket.checkedIn}>
-                                          <Button
-                                            variant="contrast"
-                                            class="min-h-11 rounded-lg"
-                                            disabled={state.actionPending()}
-                                            onClick={() => void state.ticketReset()}
-                                          >
-                                            {state.actionPending() ? state.text().working : state.text().reset}
-                                          </Button>
                                         </Show>
                                       </div>
                                     </Details>

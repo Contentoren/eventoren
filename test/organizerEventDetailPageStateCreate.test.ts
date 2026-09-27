@@ -43,6 +43,12 @@ describe("organizer event detail state", () => {
       expect(state.currency(123_456)).toContain("1.234,56")
       expect(state.currency(123_456)).toContain("€")
       expect(state.dateTime("2026-09-18T14:05:00.000Z")).toContain("18.09.2026")
+      const checkedInAt = state.selectedTicket()?.checkedInAt
+      if (!checkedInAt) throw new Error("successful check-in must provide a timestamp")
+      expect(state.dateTime(checkedInAt)).toBe(
+        new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" }).format(new Date(checkedInAt)),
+      )
+      expect(state.dateTime(checkedInAt)).toMatch(/\d{1,2}:\d{2}/)
       expect(state.elapsed(125_000)).toBe("2 Min. 5 Sek.")
     } finally {
       dispose?.()
@@ -113,6 +119,54 @@ describe("organizer event detail state", () => {
       await state.ticketCheckIn()
       expect(state.actionPending()).toBe(false)
       expect(state.errorMessage()).toBe(organizerTextGet().actionFailed)
+    } finally {
+      dispose?.()
+    }
+  })
+
+  test("keeps checkout pending until reset succeeds, then exposes the unchecked ticket state", async () => {
+    const baseDataSource = demoOrganizerDataSourceCreate()
+    let releaseReset: (() => void) | undefined
+    const resetGate = new Promise<void>((resolve) => {
+      releaseReset = resolve
+    })
+    const dataSource: OrganizerDataSource = {
+      ...baseDataSource,
+      ticketReset: async (eventKey, ticketId) => {
+        await resetGate
+        return baseDataSource.ticketReset(eventKey, ticketId)
+      },
+    }
+    let dispose: (() => void) | undefined
+    let state: ReturnType<typeof organizerEventDetailPageStateCreate> | undefined
+
+    createRoot((rootDispose) => {
+      dispose = rootDispose
+      state = organizerEventDetailPageStateCreate({
+        eventKey: () => "xyz",
+        initialSearch: () => "",
+        initialTicketId: () => "",
+        searchReplace: () => {},
+        dataSource,
+      })
+    })
+
+    try {
+      if (!state) throw new Error("detail state was not created")
+      const ticket = demoOrganizerTickets[0]
+      if (!ticket) throw new Error("demo ticket was not created")
+      state.ticketSelect(ticket)
+      await state.ticketCheckIn()
+      expect(state.selectedTicket()?.checkedIn).toBe(true)
+
+      const reset = state.ticketReset()
+      expect(state.actionPending()).toBe(true)
+      releaseReset?.()
+      await reset
+
+      expect(state.actionPending()).toBe(false)
+      expect(state.selectedTicket()?.checkedIn).toBe(false)
+      expect(state.successMessage()).toBe(organizerTextGet().resetSuccess)
     } finally {
       dispose?.()
     }
