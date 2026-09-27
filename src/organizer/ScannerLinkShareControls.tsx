@@ -4,9 +4,11 @@ import { Input } from "#ui/input/input/Input.jsx"
 import { scannerLinkShareControlsStateCreate } from "./scannerLinkShareControlsStateCreate.ts"
 
 export function ScannerLinkShareControls(props: { readonly href: string; readonly name: string }) {
+  let urlInput: HTMLInputElement | undefined
   const state = scannerLinkShareControlsStateCreate(
     () => props.href,
     () => props.name,
+    () => urlInput?.select(),
   )
   return (
     <div class="flex flex-col gap-space-2">
@@ -14,6 +16,7 @@ export function ScannerLinkShareControls(props: { readonly href: string; readonl
         aria-label={`Freigabelink für ${props.name}`}
         value={props.href}
         readOnly
+        ref={urlInput}
         onFocus={(event) => event.currentTarget.select()}
       />
       <div class="flex flex-wrap gap-space-2">

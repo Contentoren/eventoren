@@ -26,4 +26,6 @@ Administratoren erstellen personenbezogen benannte Veranstalterlinks ohne Zitade
 - [x] 2. Öffentliche Ticketfunktionen
 - [x] 3. Client-Anbindung
 - [x] 4. Linkverwaltung und Teilen
-- [ ] 5. Abschlussprüfung
+- [x] 5. Abschlussprüfung
+
+Die Scannerlink-Funktionen sind in der Entwicklungsinstanz bereitgestellt. Admin- und öffentliche Veranstalter-/Helferstrecken einschließlich Check-in, Audit-Zuordnung, Widerruf und Teilen sind geprüft. Ein QR-Scan mit einer echten Gerätekamera bleibt geräteabhängig; manueller Ticketcode und die Scannerlogik sind abgedeckt.
