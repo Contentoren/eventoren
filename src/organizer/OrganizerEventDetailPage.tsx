@@ -50,7 +50,7 @@ export function OrganizerEventDetailPage(props: {
               </Show>
             </div>
             <p class="text-sm font-semibold uppercase tracking-widest text-brand-accent">Veranstaltung</p>
-            <CardWrapper class="min-w-0 rounded-xl shadow-sm">
+            <CardWrapper class="min-w-0 rounded-xl border-0 shadow-lg shadow-slate-900/10 dark:shadow-black/30">
               <h1 class="text-2xl font-semibold tracking-tight text-content sm:text-4xl">
                 {state.event()?.title ?? state.text().tickets}
               </h1>
@@ -58,27 +58,24 @@ export function OrganizerEventDetailPage(props: {
           </header>
 
           <Show when={state.errorMessage()}>
-            <p
-              role="alert"
-              class="rounded-control border border-danger/50 bg-danger-soft p-space-4 text-sm text-danger"
-            >
+            <p role="alert" class="rounded-control bg-danger-soft p-space-4 text-sm text-danger">
               {state.errorMessage()}
             </p>
           </Show>
           <Show when={state.successMessage()}>
-            <p
-              role="status"
-              class="rounded-control border border-success/50 bg-success-soft p-space-4 text-sm text-success"
-            >
+            <p role="status" class="rounded-control bg-success-soft p-space-4 text-sm text-success">
               {state.successMessage()}
             </p>
           </Show>
 
-          <CardWrapper id="organizer-scanner-card" class="flex min-w-0 flex-col gap-space-4 rounded-xl shadow-sm">
+          <CardWrapper
+            id="organizer-scanner-card"
+            class="flex min-w-0 flex-col gap-space-4 rounded-xl border-0 shadow-lg shadow-slate-900/10 dark:shadow-black/30"
+          >
             <div class="flex min-w-0 items-center gap-space-3">
               <Button
                 variant="outline"
-                class="size-11 shrink-0 rounded-lg bg-surface-muted p-0"
+                class="size-11 shrink-0 rounded-lg border-0 bg-surface-muted p-0 shadow-sm shadow-slate-900/5 dark:bg-slate-700 dark:shadow-black/20"
                 aria-label={state.text().scannerTitle}
                 aria-expanded={state.scannerOpen()}
                 aria-controls="organizer-scanner-panel"
@@ -95,13 +92,13 @@ export function OrganizerEventDetailPage(props: {
                 value={state.search()}
                 placeholder={state.text().searchPlaceholder}
                 onInput={(event) => state.searchChange(event.currentTarget.value)}
-                class="min-h-11 min-w-0 flex-1 rounded-lg bg-surface"
+                class="min-h-11 min-w-0 flex-1 rounded-lg border-0 bg-surface-muted/70 shadow-sm shadow-slate-900/5 dark:bg-slate-800/80 dark:shadow-black/20"
               />
             </div>
             <Show when={state.scannerOpen()}>
               <div
                 id="organizer-scanner-panel"
-                class="flex min-w-0 flex-col gap-space-4 border-t border-border pt-space-4"
+                class="flex min-w-0 flex-col gap-space-4 rounded-xl bg-surface-muted/50 p-space-4 dark:bg-slate-800/50"
               >
                 {props.scannerSimulation}
                 <video
@@ -109,7 +106,7 @@ export function OrganizerEventDetailPage(props: {
                   autoplay
                   muted
                   playsinline
-                  class="mx-auto aspect-video w-full max-w-[26rem] rounded-xl border border-border bg-slate-100 object-cover shadow-sm dark:bg-slate-900"
+                  class="mx-auto aspect-video w-full max-w-[26rem] rounded-xl bg-slate-100 object-cover shadow-md shadow-slate-900/10 dark:bg-slate-900 dark:shadow-black/30"
                   aria-label={state.text().scannerTitle}
                 />
                 <div class="flex flex-wrap items-center justify-end gap-space-3">
@@ -120,7 +117,7 @@ export function OrganizerEventDetailPage(props: {
                   </Show>
                   <Button
                     variant={state.scannerActive() ? "outline" : undefined}
-                    class="min-h-11 w-full rounded-lg sm:w-auto"
+                    class="min-h-11 w-full rounded-lg border-0 shadow-sm shadow-slate-900/5 dark:shadow-black/20 sm:w-auto"
                     disabled={state.scannerStarting()}
                     onClick={() => (state.scannerActive() ? state.scannerStop() : void state.scannerStart())}
                   >
@@ -132,10 +129,7 @@ export function OrganizerEventDetailPage(props: {
                   </Button>
                 </div>
                 <Show when={state.scannerErrorMessage()}>
-                  <p
-                    role="alert"
-                    class="rounded-xl border border-danger/40 bg-danger-soft p-space-4 text-sm text-danger"
-                  >
+                  <p role="alert" class="rounded-xl bg-danger-soft p-space-4 text-sm text-danger">
                     {state.scannerErrorMessage()}
                   </p>
                 </Show>
@@ -145,8 +139,8 @@ export function OrganizerEventDetailPage(props: {
                       role={outcome().kind === "success" ? "status" : "alert"}
                       class={
                         outcome().kind === "success"
-                          ? "rounded-xl border border-success/40 bg-success-soft p-space-4 text-sm text-success"
-                          : "rounded-xl border border-danger/40 bg-danger-soft p-space-4 text-sm text-danger"
+                          ? "rounded-xl bg-success-soft p-space-4 text-sm text-success"
+                          : "rounded-xl bg-danger-soft p-space-4 text-sm text-danger"
                       }
                     >
                       <p class="font-semibold">{outcome().message}</p>
@@ -157,7 +151,7 @@ export function OrganizerEventDetailPage(props: {
                 <Show when={state.scannerOutcome()?.kind === "denied"}>
                   <Show when={state.duplicateInfo()}>
                     {(duplicate) => (
-                      <div class="rounded-xl border border-warning/40 bg-warning-soft p-space-4 text-sm text-content">
+                      <div class="rounded-xl bg-warning-soft p-space-4 text-sm text-content">
                         <p class="font-semibold text-warning">{state.text().duplicateTitle}</p>
                         <p class="mt-1">
                           {state.text().checkedInAt}: {state.dateTime(duplicate().previousCheckedInAt)} ·{" "}
@@ -173,7 +167,7 @@ export function OrganizerEventDetailPage(props: {
                 </Show>
                 <form
                   aria-label="Ticket-Code manuell prüfen"
-                  class="flex flex-col gap-space-3 rounded-xl border border-border bg-surface-muted p-space-4 sm:flex-row sm:items-end"
+                  class="flex flex-col gap-space-3 rounded-xl bg-surface p-space-4 shadow-sm shadow-slate-900/5 dark:bg-slate-900/80 dark:shadow-black/20 sm:flex-row sm:items-end"
                   onSubmit={state.scannerCodeSubmit}
                 >
                   <div class="min-w-0 w-full flex-1">
@@ -184,7 +178,7 @@ export function OrganizerEventDetailPage(props: {
                       id="organizer-ticket-code"
                       name="ticket-code"
                       autocomplete="off"
-                      class="mt-space-2 min-h-11 w-full rounded-lg bg-surface font-mono"
+                      class="mt-space-2 min-h-11 w-full rounded-lg border-0 bg-surface-muted/70 font-mono shadow-sm shadow-slate-900/5 dark:bg-slate-800 dark:shadow-black/20"
                     />
                   </div>
                   <Button
@@ -202,7 +196,7 @@ export function OrganizerEventDetailPage(props: {
           <div class="grid min-w-0 grid-cols-[minmax(0,1fr)] items-start gap-space-5 sm:gap-space-6 lg:grid-cols-[minmax(18rem,0.85fr)_minmax(22rem,1.15fr)]">
             <div
               id="organizer-ticket-list"
-              class="flex min-h-0 min-w-0 flex-col gap-space-4 rounded-xl border border-border bg-surface p-space-3 shadow-sm sm:p-space-4"
+              class="flex min-h-0 min-w-0 flex-col gap-space-4 rounded-xl bg-surface p-space-3 shadow-lg shadow-slate-900/10 dark:shadow-black/30 sm:p-space-4"
             >
               <Show
                 when={state.tickets().length > 0 || !state.loading()}
@@ -226,10 +220,9 @@ export function OrganizerEventDetailPage(props: {
                         <li class="min-w-0">
                           <Button
                             variant={state.selectedTicketId() === ticket.id ? "none" : "outline"}
-                            class="h-auto min-h-16 w-full min-w-0 justify-between gap-space-3 rounded-lg px-space-3 py-space-3 text-left shadow-sm"
+                            class="h-auto min-h-16 w-full min-w-0 justify-between gap-space-3 rounded-lg border-0 px-space-3 py-space-3 text-left aria-[expanded=false]:bg-surface-muted/65 dark:aria-[expanded=false]:bg-slate-800/70"
                             classList={{
-                              "rounded-b-none border border-brand-accent bg-brand-soft":
-                                state.selectedTicketId() === ticket.id,
+                              "rounded-b-none bg-brand-soft": state.selectedTicketId() === ticket.id,
                             }}
                             aria-expanded={state.selectedTicketId() === ticket.id}
                             aria-controls={`organizer-ticket-actions-${ticket.id}`}
@@ -244,12 +237,12 @@ export function OrganizerEventDetailPage(props: {
                                     ? state.text().checkedOut
                                     : state.text().notCheckedIn
                               }
-                              class={`inline-flex size-9 shrink-0 items-center justify-center rounded-control border ${
+                              class={`inline-flex size-9 shrink-0 items-center justify-center rounded-control ${
                                 ticket.checkIn.status === "checked-in"
-                                  ? "border-green-700 bg-green-100 text-green-800 dark:border-green-500 dark:bg-green-950 dark:text-green-300"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300"
                                   : ticket.checkIn.status === "checked-out"
-                                    ? "border-slate-700 bg-slate-200 text-slate-900 dark:border-slate-400 dark:bg-slate-800 dark:text-slate-100"
-                                    : "border-amber-600 bg-amber-100 text-amber-900 dark:border-amber-500 dark:bg-amber-950 dark:text-amber-200"
+                                    ? "bg-slate-200 text-slate-900 dark:bg-slate-800 dark:text-slate-100"
+                                    : "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200"
                               }`}
                             >
                               <Icon path={ticket.checkIn.status === "checked-in" ? mdiCheck : mdiHelp} class="size-5" />
@@ -264,7 +257,7 @@ export function OrganizerEventDetailPage(props: {
                           <Show when={state.selectedTicketId() === ticket.id}>
                             <div
                               id={`organizer-ticket-actions-${ticket.id}`}
-                              class="flex flex-col gap-space-3 rounded-lg rounded-t-none border border-t-0 border-brand-accent bg-brand-soft p-space-4"
+                              class="flex flex-col gap-space-3 rounded-lg rounded-t-none bg-brand-soft p-space-4"
                             >
                               <div class="min-w-0">
                                 <p class="font-semibold text-content">{ticket.participantName}</p>
@@ -307,7 +300,7 @@ export function OrganizerEventDetailPage(props: {
                   <div class="flex justify-center">
                     <Button
                       variant="outline"
-                      class="min-h-11 rounded-lg"
+                      class="min-h-11 rounded-lg border-0 bg-surface-muted shadow-sm shadow-slate-900/5 dark:bg-slate-800 dark:shadow-black/20"
                       disabled={state.loading()}
                       onClick={state.loadMore}
                     >
@@ -318,7 +311,7 @@ export function OrganizerEventDetailPage(props: {
               </Show>
             </div>
 
-            <CardWrapper class="min-w-0 rounded-xl shadow-sm sm:min-h-[16rem]">
+            <CardWrapper class="min-w-0 rounded-xl border-0 shadow-lg shadow-slate-900/10 dark:shadow-black/30 sm:min-h-[16rem]">
               <Show
                 when={state.selectedTicket()}
                 fallback={
@@ -336,7 +329,14 @@ export function OrganizerEventDetailPage(props: {
                           {ticket().ticketNumber}
                         </h2>
                       </div>
-                      <Badge variant={ticket().checkedIn ? "filledGreen" : "outline"} class="text-base">
+                      <Badge
+                        variant={ticket().checkedIn ? "filledGreen" : "outline"}
+                        class={
+                          ticket().checkedIn
+                            ? "border-0 text-base"
+                            : "border-0 bg-surface-muted text-base dark:bg-slate-800"
+                        }
+                      >
                         {ticket().checkIn.status === "checked-in"
                           ? state.text().checkedIn
                           : ticket().checkIn.status === "checked-out"
@@ -382,18 +382,22 @@ export function OrganizerEventDetailPage(props: {
                             ? "filledGreen"
                             : "filledYellow"
                         }
+                        class="border-0"
                       >
                         {ticket().paymentStatus === "paid" && ticket().orderStatus === "paid"
                           ? state.text().paid
                           : state.text().unpaid}
                       </Badge>
-                      <Badge variant={ticket().cancelled ? "filledRed" : "outline"}>
+                      <Badge
+                        variant={ticket().cancelled ? "filledRed" : "outline"}
+                        class={ticket().cancelled ? "border-0" : "border-0 bg-surface-muted dark:bg-slate-800"}
+                      >
                         {ticket().cancelled ? state.text().cancelled : state.text().valid}
                       </Badge>
                     </div>
 
                     <Show when={ticket().checkedIn}>
-                      <div class="rounded-xl border border-success/40 bg-success-soft p-space-4">
+                      <div class="rounded-xl bg-success-soft p-space-4">
                         <p class="font-semibold text-success">{state.text().checkedIn}</p>
                         <p class="mt-space-2 text-sm text-content">
                           {state.text().checkedInAt}: {state.dateTime(ticket().checkedInAt)}
@@ -406,7 +410,7 @@ export function OrganizerEventDetailPage(props: {
 
                     <Show when={state.duplicateInfo()}>
                       {(duplicate) => (
-                        <div class="rounded-xl border border-warning/40 bg-warning-soft p-space-4 text-sm text-content">
+                        <div class="rounded-xl bg-warning-soft p-space-4 text-sm text-content">
                           <p class="font-semibold text-warning">{state.text().duplicateTitle}</p>
                           <dl class="mt-space-3 grid gap-space-2 sm:grid-cols-2">
                             <div>
@@ -446,7 +450,7 @@ export function OrganizerEventDetailPage(props: {
                         fallback={
                           <Button
                             size="lg"
-                            class="min-h-12 w-full rounded-lg"
+                            class="min-h-12 w-full rounded-lg border-0 bg-surface-muted shadow-sm shadow-slate-900/5 dark:bg-slate-800 dark:shadow-black/20"
                             disabled={
                               state.actionPending() ||
                               ticket().cancelled ||
@@ -463,7 +467,7 @@ export function OrganizerEventDetailPage(props: {
                           <Button
                             variant="outline"
                             size="lg"
-                            class="min-h-12 w-full rounded-lg"
+                            class="min-h-12 w-full rounded-lg border-0 bg-surface-muted shadow-sm shadow-slate-900/5 dark:bg-slate-800 dark:shadow-black/20"
                             disabled={state.actionPending()}
                             onClick={() => void state.ticketReset()}
                           >

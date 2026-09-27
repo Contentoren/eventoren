@@ -90,7 +90,9 @@ export function AdminTicketOrdersPage(props?: {
         <Show when={!tile}>
           <span class="text-sm text-content-muted xl:hidden">Status:</span>
         </Show>
-        <UiBadge tone={state.paymentTone(order.paymentStatus)}>{state.paymentLabel(order.paymentStatus)}</UiBadge>
+        <UiBadge tone={state.paymentTone(order.paymentStatus)} class="ring-0">
+          {state.paymentLabel(order.paymentStatus)}
+        </UiBadge>
       </div>
       <Show when={tile}>
         <div class="min-w-0">
@@ -114,7 +116,7 @@ export function AdminTicketOrdersPage(props?: {
               {state.availableTicketsLabel()}
             </p>
           </div>
-          <div class="flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm shadow-sm">
+          <div class="flex items-center gap-2 rounded-xl bg-surface-muted/70 px-4 py-2.5 text-sm shadow-sm shadow-slate-900/5 dark:bg-slate-800/70 dark:shadow-black/20">
             <span class="text-content-muted">Zum Kauf verfügbar:</span>
             <span class="font-semibold text-content">
               {state.ticketCountFormat(state.availableTicketsCount())}{" "}
@@ -123,18 +125,22 @@ export function AdminTicketOrdersPage(props?: {
           </div>
         </header>
 
-        <div class="min-w-0 overflow-hidden rounded-xl border border-border bg-surface shadow-sm">
-          <div class="grid gap-3 border-b border-border bg-surface-muted/50 p-4 sm:grid-cols-[minmax(0,1fr)_12rem] sm:items-center sm:p-5">
+        <div class="min-w-0 overflow-hidden rounded-xl bg-surface shadow-lg shadow-slate-900/10 dark:shadow-black/30">
+          <div class="grid gap-3 bg-surface-muted/60 p-4 dark:bg-slate-800/60 sm:grid-cols-[minmax(0,1fr)_12rem] sm:items-center sm:p-5">
             <form class="flex min-w-0 flex-col gap-2 sm:flex-row" onSubmit={state.searchSubmit} role="search">
               <Input
                 type="search"
                 aria-label="Bestellungen suchen"
                 placeholder="Bestellnummer, E-Mail oder Name suchen …"
-                class="min-h-11 min-w-0 w-full flex-1 rounded-lg bg-surface"
+                class="min-h-11 min-w-0 w-full flex-1 rounded-lg border-0 bg-surface shadow-sm shadow-slate-900/5 dark:bg-slate-900/80 dark:shadow-black/20"
                 value={state.searchInput.get()}
                 onInput={(event) => state.searchInput.set(event.currentTarget.value)}
               />
-              <Button type="submit" variant="outline" class="min-h-11 w-full rounded-lg bg-surface sm:w-auto">
+              <Button
+                type="submit"
+                variant="outline"
+                class="min-h-11 w-full rounded-lg border-0 bg-surface shadow-sm shadow-slate-900/5 dark:bg-slate-700 dark:shadow-black/20 sm:w-auto"
+              >
                 Suchen
               </Button>
             </form>
@@ -144,7 +150,7 @@ export function AdminTicketOrdersPage(props?: {
                 variant: "none",
                 size: "none",
                 class:
-                  "min-h-11 w-full min-w-0 justify-start truncate rounded-lg border border-input bg-surface p-2.5 text-sm text-content focus:border-ring focus:ring-ring",
+                  "min-h-11 w-full min-w-0 justify-start truncate rounded-lg border-0 bg-surface p-2.5 text-sm text-content shadow-sm shadow-slate-900/5 dark:bg-slate-900/80 dark:shadow-black/20 focus-visible:ring-2 focus-visible:ring-ring",
                 innerClass: "min-w-64",
                 type: "button",
               }}
@@ -160,14 +166,16 @@ export function AdminTicketOrdersPage(props?: {
           </div>
 
           <Show when={state.errorMessage()}>
-            <div class="flex flex-wrap items-center gap-3 border-b border-border p-4 sm:p-5">
-              <p
-                role="alert"
-                class="flex-1 rounded-md border border-danger/50 bg-danger-soft px-4 py-3 text-sm text-danger"
-              >
+            <div class="flex flex-wrap items-center gap-3 bg-surface-muted/30 p-4 sm:p-5">
+              <p role="alert" class="flex-1 rounded-md bg-danger-soft px-4 py-3 text-sm text-danger">
                 {state.errorMessage()}
               </p>
-              <Button size="sm" variant="outline" onClick={state.reload}>
+              <Button
+                size="sm"
+                variant="outline"
+                class="rounded-lg border-0 bg-surface shadow-sm shadow-slate-900/5 dark:bg-slate-700 dark:shadow-black/20"
+                onClick={state.reload}
+              >
                 Erneut versuchen
               </Button>
             </div>
@@ -198,7 +206,7 @@ export function AdminTicketOrdersPage(props?: {
               }
             >
               <Show when={viewPreference?.view() !== "tiles"}>
-                <div class="hidden items-center border-b border-border bg-surface-muted/40 text-xs font-semibold tracking-wide text-content-muted xl:flex">
+                <div class="hidden items-center bg-surface-muted/40 text-xs font-semibold tracking-wide text-content-muted dark:bg-slate-800/40 xl:flex">
                   <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,1fr)] gap-2 px-5 py-3.5">
                     <span>Event</span>
                     <span>Kunde</span>
@@ -211,11 +219,7 @@ export function AdminTicketOrdersPage(props?: {
                 </div>
               </Show>
               <ul
-                class={
-                  viewPreference?.view() === "tiles"
-                    ? "grid gap-4 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-3"
-                    : "divide-y divide-border"
-                }
+                class={viewPreference?.view() === "tiles" ? "grid gap-4 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-3" : ""}
               >
                 <For each={state.orders()}>
                   {(order) => (
@@ -223,7 +227,7 @@ export function AdminTicketOrdersPage(props?: {
                       class={
                         viewPreference?.view() === "tiles" && state.selectedOrderId() === order.id
                           ? "contents"
-                          : "min-w-0"
+                          : "min-w-0 even:bg-surface-muted/35 dark:even:bg-slate-800/30"
                       }
                     >
                       <Show
@@ -235,7 +239,7 @@ export function AdminTicketOrdersPage(props?: {
                               tabindex="0"
                               aria-expanded={state.selectedOrderId() === order.id}
                               aria-label={`Bestellung ${order.id} Details ${state.selectedOrderId() === order.id ? "schließen" : "anzeigen"}`}
-                              class="grid min-w-0 flex-1 cursor-pointer gap-2.5 px-4 py-5 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:px-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,1fr)] xl:items-center"
+                              class="grid min-w-0 flex-1 cursor-pointer gap-2.5 px-4 py-5 transition-colors aria-expanded:bg-brand-soft/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:px-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_minmax(0,1.4fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.8fr)_minmax(0,1fr)] xl:items-center"
                               onClick={() => state.orderToggle(order.id)}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" || e.key === " ") {
@@ -249,13 +253,13 @@ export function AdminTicketOrdersPage(props?: {
                           </div>
                         }
                       >
-                        <CardWrapper class="relative overflow-hidden rounded-xl p-0 shadow-sm lg:p-0">
+                        <CardWrapper class="relative overflow-hidden rounded-xl border-0 p-0 shadow-md shadow-slate-900/10 dark:shadow-black/25 lg:p-0">
                           <div
                             role="button"
                             tabindex="0"
                             aria-expanded={state.selectedOrderId() === order.id}
                             aria-label={`Bestellung ${order.id} Details ${state.selectedOrderId() === order.id ? "schließen" : "anzeigen"}`}
-                            class="grid cursor-pointer gap-3 rounded-xl p-4 pt-12 transition-colors hover:bg-surface-muted/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                            class="grid cursor-pointer gap-3 rounded-xl p-4 pt-12 transition-colors hover:bg-surface-muted/60 aria-expanded:bg-brand-soft/40 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                             onClick={() => state.orderToggle(order.id)}
                             onKeyDown={(e) => {
                               if (e.key === "Enter" || e.key === " ") {
@@ -272,22 +276,19 @@ export function AdminTicketOrdersPage(props?: {
                         <div
                           class={
                             viewPreference?.view() === "tiles"
-                              ? "col-span-full rounded-xl border border-border bg-surface-muted/50 p-3 shadow-sm sm:p-4"
-                              : "border-t border-border bg-surface-muted/50 px-3 py-4 sm:px-5"
+                              ? "col-span-full rounded-xl bg-surface-muted/70 p-3 shadow-sm shadow-slate-900/5 dark:bg-slate-800/60 dark:shadow-black/20 sm:p-4 [&_.border]:border-0 [&_.border-t]:border-t-0"
+                              : "bg-surface-muted/70 px-3 py-4 dark:bg-slate-800/60 sm:px-5 [&_.border]:border-0 [&_.border-t]:border-t-0"
                           }
                         >
                           <Show when={state.detailsLoading()}>
-                            <CardWrapper class="rounded-xl shadow-sm">
+                            <CardWrapper class="rounded-xl border-0 shadow-sm shadow-slate-900/5 dark:shadow-black/20">
                               <p role="status" class="text-sm text-content-muted">
                                 Bestelldetails werden geladen …
                               </p>
                             </CardWrapper>
                           </Show>
                           <Show when={state.detailsError()}>
-                            <p
-                              role="alert"
-                              class="rounded-xl border border-danger/50 bg-danger-soft px-4 py-3 text-sm text-danger"
-                            >
+                            <p role="alert" class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
                               {state.detailsError()}
                             </p>
                           </Show>
@@ -315,7 +316,7 @@ export function AdminTicketOrdersPage(props?: {
           <div class="flex justify-center">
             <Button
               variant="outline"
-              class="min-h-11 rounded-lg"
+              class="min-h-11 rounded-lg border-0 bg-surface shadow-sm shadow-slate-900/10 dark:bg-slate-800 dark:shadow-black/25"
               disabled={state.isLoading()}
               onClick={() => void state.loadMore()}
             >

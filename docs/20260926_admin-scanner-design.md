@@ -13,7 +13,7 @@ Modernize `/admin/bestellungen` and `/organizer/event/:eventId`, especially the 
 
 ## Design decisions
 - Retain existing mint as the selection/accent color, dark readable text, and the light neutral visual direction.
-- Use soft surface contrast, understated borders/shadows, consistent rounded corners, and deliberate spacing rather than strongly outlined nested boxes.
+- Use softly elevated boxes, subtle diffuse shadows, gentle surface contrast, consistent rounded corners, and deliberate spacing instead of visible frames throughout both pages, including fields, filters, outlined buttons, and nested sections. Remove or neutralize decorative borders locally, including inherited CardWrapper and control borders. Differentiate selected/status states through their existing semantic backgrounds and text colors rather than enclosing frames. Preserve clear keyboard-focus indicators and accessible control affordances; avoid replacing frames with inset shadow outlines or ring-based permanent outlines.
 - Establish hierarchy through typography, spacing, and surfaces without changing wording, icons, or information order.
 - Orders: cohesive filter toolbar, full-width mobile search field with remaining controls wrapping below, scannable order rows/tiles, and clearly nested expanded details.
 - Scanner: more balanced responsive preview size, compact but comfortably spaced panel, visually distinct existing feedback and manual-entry areas, and approximately 44–48 px primary mobile control heights. Do not change video mounting, camera dimensions requested by scanner code, or state-dependent rendering.
@@ -33,9 +33,10 @@ Modernize `/admin/bestellungen` and `/organizer/event/:eventId`, especially the 
 - Camera unavailable is an environment limitation, not permission to alter behavior. Review the existing fallback state without scanning or mutating data.
 
 ## Current context
-- User approved the design direction and explicitly reaffirmed functionality must not change.
+- User requests an elegant appearance using softly shadowed boxes rather than visible frames; functionality must not change.
 - Initial live review confirmed both routes on desktop and mobile; the scanner showed its existing no-camera fallback in the audit browser.
 - The working tree contains extensive existing changes. Page-local work is deliberately isolated from shared shells and behavior.
-- Both page-local styling tasks and the proportional desktop order-grid refinement are complete, including independent static and responsive browser review. Implementation remains limited to presentation in the two designated components.
+- Borderless surface refinement, independent regression review, and final browser review are complete. Scope remains presentation-only in the two designated page components.
 - Task-start snapshots: `/tmp/AdminTicketOrdersPage.task-start.20260926.tsx` and `/tmp/OrganizerEventDetailPage.task-start.20260926.tsx`.
+- Surface-refinement snapshots: `/tmp/AdminTicketOrdersPage.refinement-start.20260927.tsx` and `/tmp/OrganizerEventDetailPage.refinement-start.20260927.tsx`.
 - The existing `eventoren.service` serves this modified checkout through `https://eventoren.leonardomora.de` (registered preview proxy port 3057). Use this configured preview host and its existing auth callback for browser review; no additional server or deployment is needed.
