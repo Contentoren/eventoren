@@ -74,5 +74,6 @@ yarn-error.log*
 package-lock.json
 pnpm-lock.yaml
 .integration-secrets/
+/.rstest/playwright-traces/
 # npm publishing
 .npmrc

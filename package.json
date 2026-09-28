@@ -19,7 +19,7 @@
     "test:e2e": "bun e2e/config/e2eInvocationMain.ts production",
     "test:e2e:dev": "bun e2e/config/e2eInvocationMain.ts development",
     "test:e2e:ticket": "bun e2e/config/e2eInvocationMain.ts development",
-    "test:e2e:helpers": "rstest run --config e2e/helpers-rstest.config.ts",
+    "test:e2e:helpers": "bun e2e/config/e2eHelpersMain.ts",
     "test:convex": "bun run convex codegen --system-udfs --typecheck disable && bunx vitest run --config vitest.convex.config.ts",
     "benchmark:catalog-orders": "bunx vitest run --config vitest.benchmark.config.ts --reporter verbose",
     "convex:codegen": "bun --env-file=.env.development run convex codegen",

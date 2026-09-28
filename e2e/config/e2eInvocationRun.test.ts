@@ -55,6 +55,7 @@ describe("Eventoren E2E runner", () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
     const started: string[] = []
     try {
+      let tracesSwept = false
       expect(
         await e2eInvocationRun({
           environment: {},
@@ -63,8 +64,13 @@ describe("Eventoren E2E runner", () => {
             started.push(workflow.name)
             return 1
           },
+          traceCleanup: async () => {
+            tracesSwept = true
+            return { success: true, removed: [] }
+          },
         }),
       ).toBe(1)
+      expect(tracesSwept).toBe(true)
       expect(started).toEqual(["SSO"])
       const checkpoint = JSON.parse(await readFile(join(directory, "checkpoint.json"), "utf8"))
       expect(checkpoint.phase).toBe("sso")

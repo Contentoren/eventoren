@@ -17,6 +17,7 @@ import { e2eEnvironmentLoad } from "./e2eEnvironmentLoad.ts"
 import { e2eEnvironmentRead } from "./e2eEnvironmentRead.ts"
 import { e2eInvocationLockAcquire } from "./e2eInvocationLockAcquire.ts"
 import { e2eTicketTargetCheck } from "./e2eTicketTargetCheck.ts"
+import { e2eTraceCleanup } from "./e2eTraceCleanup.ts"
 
 type Workflow = { name: string; config: string }
 const sso: Workflow = { name: "SSO", config: "e2e/rstest.config.ts" }
@@ -34,6 +35,7 @@ export async function e2eInvocationRun(
     stripeReconcile?: typeof e2eStripeTicketReconcile
     stripeOrderProof?: Parameters<typeof e2eStripeTicketReconcile>[0]["orderProof"]
     stripeClient?: Parameters<typeof e2eStripeTicketReconcile>[0]["stripe"]
+    traceCleanup?: typeof e2eTraceCleanup
   } = {},
 ): Promise<number> {
   if (!input.environment) e2eEnvironmentLoad()
@@ -167,6 +169,14 @@ export async function e2eInvocationRun(
     )
     return 1
   } finally {
+    try {
+      const traces = await (input.traceCleanup ?? e2eTraceCleanup)()
+      if (!traces.success) console.error(`Playwright trace cleanup failed: ${traces.errorMessage}`)
+      else if (traces.removed?.length)
+        console.log(`Expired Playwright trace directories removed: ${traces.removed.join(", ")}`)
+    } catch (error) {
+      console.error("Playwright trace cleanup failed", error)
+    }
     if (target.data.target !== "production") {
       try {
         const convexUrl = environment.E2E_CLEANUP_CONVEX_URL
