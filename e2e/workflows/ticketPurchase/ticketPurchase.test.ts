@@ -1,4 +1,5 @@
-import { expect, test } from "@rstest/playwright"
+import { expect } from "@rstest/playwright"
+import { browserErrorsTest as test } from "../../config/browserErrorsTest.ts"
 import { e2eEnvironmentRead } from "../../config/e2eEnvironmentRead.ts"
 import { e2eTicketTargetCheck } from "../../config/e2eTicketTargetCheck.ts"
 import { ticketE2eAdminSignIn } from "../ticketE2eAdminSignIn.ts"
@@ -18,7 +19,6 @@ const environment = e2eEnvironmentRead(process.env)
 if (!environment.success) throw new Error(environment.errorMessage)
 const guard = e2eTicketTargetCheck(environment.data.target)
 if (!guard.success) throw new Error(guard.errorMessage)
-
 test("testadmin can reach the real admin event catalog", { timeout: 90_000 }, async ({ page }) => {
   await ticketE2eAdminSignIn(page, environment.data.baseUrl)
   await expect(page.getByRole("heading", { name: /events/i })).toBeVisible({ timeout: 30_000 })
@@ -28,8 +28,11 @@ test("testadmin can reach the real admin event catalog", { timeout: 90_000 }, as
 test("creates, sells, delivers, opens, and checks in a paid ticket once", { timeout: 600_000 }, async ({
   page,
   browser,
+  browserErrors,
 }) => {
-  const context = await ticketPurchaseContextCreate(page, browser)
+  const context = await ticketPurchaseContextCreate(page, browser, browserErrors)
+  let primaryError: unknown
+  let hasPrimaryError = false
   try {
     await ticketPurchaseEventStep(context)
     await ticketPurchaseProductStep(context)
@@ -41,7 +44,18 @@ test("creates, sells, delivers, opens, and checks in a paid ticket once", { time
     await ticketPurchaseAccessStep(context)
     await ticketPurchaseCheckinStep(context)
     await ticketPurchaseDuplicateStep(context)
-  } finally {
-    await context.guestContext?.close()
+  } catch (error) {
+    primaryError = error
+    hasPrimaryError = true
   }
+  if (context.guestContext) {
+    try {
+      await context.guestContext.close()
+    } catch (closeError) {
+      if (hasPrimaryError)
+        throw new AggregateError([primaryError, closeError], "Ticket workflow and guest context cleanup both failed")
+      throw closeError
+    }
+  }
+  if (hasPrimaryError) throw primaryError
 })

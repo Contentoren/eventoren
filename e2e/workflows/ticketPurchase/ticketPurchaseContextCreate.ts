@@ -4,11 +4,16 @@ import type { Browser, Page } from "playwright"
 import { e2eCheckpointLoad } from "../../checkpoint/e2eCheckpointLoad.ts"
 import { e2eCheckpointRootResolve } from "../../checkpoint/e2eCheckpointRootResolve.ts"
 import type { E2eCheckpoint } from "../../checkpoint/e2eCheckpointSchema.ts"
+import type { BrowserErrorsCollector } from "../../config/BrowserErrorsCollector.ts"
 import { e2eEnvironmentRead } from "../../config/e2eEnvironmentRead.ts"
 import { e2eTicketTargetCheck } from "../../config/e2eTicketTargetCheck.ts"
 import type { TicketPurchaseContext } from "./TicketPurchaseContext.ts"
 
-export async function ticketPurchaseContextCreate(page: Page, browser: Browser): Promise<TicketPurchaseContext> {
+export async function ticketPurchaseContextCreate(
+  page: Page,
+  browser: Browser,
+  browserErrors: BrowserErrorsCollector,
+): Promise<TicketPurchaseContext> {
   const environment = e2eEnvironmentRead(process.env)
   if (!environment.success) throw new Error(environment.errorMessage)
   const guard = e2eTicketTargetCheck(environment.data.target)
@@ -63,5 +68,6 @@ export async function ticketPurchaseContextCreate(page: Page, browser: Browser):
     directory: root.data.directory,
     checkpoint: loaded.data as E2eCheckpoint & { ticket: NonNullable<E2eCheckpoint["ticket"]> },
     mail: { host, user, password, port },
+    browserErrors,
   }
 }

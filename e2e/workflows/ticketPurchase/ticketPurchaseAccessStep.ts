@@ -19,6 +19,9 @@ export async function ticketPurchaseAccessStep(context: TicketPurchaseContext): 
     )
       throw new Error("Capability email UID differs from the checkpoint")
     const cleanContext = await context.browser.newContext()
+    context.browserErrors.observe(cleanContext)
+    let primaryError: unknown
+    let hasPrimaryError = false
     try {
       const page = await cleanContext.newPage()
       await page.goto(email.link.toString())
@@ -27,8 +30,17 @@ export async function ticketPurchaseAccessStep(context: TicketPurchaseContext): 
       ).toBeVisible({ timeout: 30_000 })
       await expect(page.getByText(context.checkpoint.ticket.participantName)).toBeVisible()
       await expect(page.getByText("Bezahlt", { exact: true }).first()).toBeVisible({ timeout: 30_000 })
-    } finally {
-      await cleanContext.close()
+    } catch (error) {
+      primaryError = error
+      hasPrimaryError = true
     }
+    try {
+      await cleanContext.close()
+    } catch (closeError) {
+      if (hasPrimaryError)
+        throw new AggregateError([primaryError, closeError], "Ticket access and guest context cleanup both failed")
+      throw closeError
+    }
+    if (hasPrimaryError) throw primaryError
   })
 }

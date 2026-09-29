@@ -16,6 +16,7 @@ export async function ticketPurchaseCheckoutStep(context: TicketPurchaseContext)
   const { eventKey, eventTitle, participantName } = context.checkpoint.ticket
   await ticketPurchaseStepRun(context, "checkout", false, async (_completed, record) => {
     const guestContext = await browser.newContext()
+    context.browserErrors.observe(guestContext)
     try {
       const page = await guestContext.newPage()
       context.guestContext = guestContext
@@ -69,7 +70,11 @@ export async function ticketPurchaseCheckoutStep(context: TicketPurchaseContext)
       }
       await record({ stripeSession: session, orderId: orders[0].orderId })
     } catch (error) {
-      await guestContext.close()
+      try {
+        await guestContext.close()
+      } catch (closeError) {
+        throw new AggregateError([error, closeError], "Ticket checkout and guest context cleanup both failed")
+      }
       throw error
     }
   })
