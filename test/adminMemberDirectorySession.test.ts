@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test"
+import { createRoot } from "solid-js"
 import { createResult, createResultError } from "#result"
 import type { AdminZitadelMember } from "../src/admin/AdminZitadelMember.ts"
 import { adminMemberManagementStateCreate } from "../src/admin/adminMemberManagementStateCreate.ts"
@@ -21,6 +22,25 @@ test("shows only admin or organizer members for all and honors each role filter"
   expect(state.members()).toEqual([admin])
   state.roleFilter.set("organizer")
   expect(state.members()).toEqual([organizer])
+})
+
+test("selects the organizer role filter from the memberRole URL parameter", () => {
+  const previousWindow = globalThis.window
+  Object.defineProperty(globalThis, "window", {
+    configurable: true,
+    value: { location: { href: "https://eventoren.test/admin/mitglieder?memberRole=organizer" } },
+  })
+
+  try {
+    createRoot((dispose) => {
+      const state = adminMemberManagementStateCreate()
+      expect(state.roleFilter.get()).toBe("organizer")
+      dispose()
+    })
+  } finally {
+    if (previousWindow) Object.defineProperty(globalThis, "window", { configurable: true, value: previousWindow })
+    else Reflect.deleteProperty(globalThis, "window")
+  }
 })
 
 test("demo all filter excludes customer-only members", () => {

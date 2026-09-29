@@ -31,6 +31,10 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
             {(role) => <Badge variant="subtle">{state.text().roleName(role)}</Badge>}
           </For>
         </div>
+        <Show when={member.organizerGranted}>
+          <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-content-muted">{state.text().invitation}</p>
+          <p class="mt-1 text-sm text-content">{state.invitationFormat(member.organizerInvitedAt)}</p>
+        </Show>
       </div>
       <ButtonIcon
         class="w-full lg:w-auto"

@@ -1,16 +1,9 @@
-import { createFileRoute } from "@tanstack/solid-router"
-import { createServerFn } from "@tanstack/solid-start"
-import { AdminOrganizerMembersPage } from "../admin/AdminOrganizerMembersPage.tsx"
-import { adminOrganizerMembersPageStateCreate } from "../admin/adminOrganizerMembersPageStateCreate.ts"
-import { adminZitadelOrganizerMembersGet } from "../server/adminZitadelOrganizerMembersGet.ts"
-
-const getAdminOrganizerMembers = createServerFn({ method: "GET" }).handler(adminZitadelOrganizerMembersGet)
+import { createFileRoute, redirect } from "@tanstack/solid-router"
+import { adminVeranstalterRedirectOptionsResolve } from "./-adminVeranstalterRedirectOptionsResolve.ts"
 
 export const Route = createFileRoute("/admin/veranstalter")({
-  component: AdminOrganizerMembersRoute,
+  beforeLoad: () => {
+    throw redirect(adminVeranstalterRedirectOptionsResolve())
+  },
+  component: () => null,
 })
-
-function AdminOrganizerMembersRoute() {
-  const state = adminOrganizerMembersPageStateCreate({ list: () => getAdminOrganizerMembers() })
-  return <AdminOrganizerMembersPage state={state} />
-}

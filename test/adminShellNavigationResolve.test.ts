@@ -14,7 +14,6 @@ describe("adminShellNavigationResolve", () => {
       "/organizer",
       "/admin/scanner-links",
       "/admin/events",
-      "/admin/veranstalter",
       "/admin/mitglieder",
     ])
     expect(items.map((i) => i.label)).toEqual([
@@ -22,7 +21,6 @@ describe("adminShellNavigationResolve", () => {
       "Ticket-Scanner",
       "Scanner-Freigabelinks",
       "Events",
-      "Veranstalter",
       "Mitglieder",
     ])
   })
@@ -34,7 +32,6 @@ describe("adminShellNavigationResolve", () => {
       "/organizer",
       "/admin/scanner-links",
       "/admin/events",
-      "/admin/veranstalter",
       "/admin/mitglieder",
     ])
   })

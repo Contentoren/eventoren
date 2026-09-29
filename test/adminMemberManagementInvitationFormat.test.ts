@@ -17,3 +17,11 @@ test("uses a dash for missing or invalid invitation timestamps", () => {
   expect(adminMemberManagementInvitationFormat(undefined)).toBe("—")
   expect(adminMemberManagementInvitationFormat("not-a-date")).toBe("—")
 })
+
+test("keeps the invitation date in the live member directory's organizer detail", async () => {
+  const source = await Bun.file(new URL("../src/admin/AdminMemberManagement.tsx", import.meta.url)).text()
+
+  expect(source).toContain("<Show when={member.organizerGranted}>")
+  expect(source).toContain("{state.text().invitation}")
+  expect(source).toContain("{state.invitationFormat(member.organizerInvitedAt)}")
+})
