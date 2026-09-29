@@ -17,10 +17,12 @@ export function AdminTicketProductsForm(props: {
   const state = props.formState ?? adminTicketProductsFormStateCreate(props.state)
 
   return (
-    <div class="grid items-start gap-5 lg:grid-cols-[minmax(15rem,0.8fr)_minmax(0,1.4fr)]">
-      <div>
+    <div class="flex min-w-0 flex-col gap-6">
+      <section aria-labelledby="admin-ticket-products-heading">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <h2 class="text-lg font-semibold text-content">Ticketprodukte</h2>
+          <h2 id="admin-ticket-products-heading" class="text-lg font-semibold text-content">
+            Ticketprodukte
+          </h2>
           <Button
             type="button"
             size="sm"
@@ -29,14 +31,14 @@ export function AdminTicketProductsForm(props: {
             disabled={props.state.isSaving()}
             onClick={state.startNewTier}
           >
-            Neue Ticket
+            Neues Ticket
           </Button>
         </div>
         <Show
           when={(props.state.selectedEvent()?.tiers.length ?? 0) > 0 || state.showNewTier()}
           fallback={<p class="mt-4 text-sm text-content-muted">Noch keine Ticketprodukte vorhanden.</p>}
         >
-          <ul class="mt-4 flex flex-col gap-2" aria-label="Vorhandene Ticketprodukte">
+          <ul class="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3" aria-label="Vorhandene Ticketprodukte">
             <For each={props.state.selectedEvent()?.tiers ?? []}>
               {(tier, index) => (
                 <li
@@ -45,49 +47,55 @@ export function AdminTicketProductsForm(props: {
                   onDragOver={(event) => state.dragOver(event, tier.id)}
                   onDragEnd={state.dragEnd}
                   onDrop={(event) => state.drop(event, tier.id)}
-                  class={state.dropTargetKey() === tier.id ? "rounded-lg ring-2 ring-brand" : ""}
+                  class={`min-w-0 ${state.dropTargetKey() === tier.id ? "rounded-lg ring-2 ring-brand" : ""}`}
                 >
                   <Button
                     type="button"
                     variant="none"
                     size="none"
-                    class={`flex w-full cursor-grab flex-col items-stretch justify-start rounded-lg border p-3 text-left font-normal transition-colors active:cursor-grabbing [.admin-workspace_&]:border-0 ${props.state.tierDraft().tierKey === tier.id ? "border-brand bg-brand/10" : "border-border bg-surface hover:bg-surface-muted [.admin-workspace_&]:bg-surface-muted/65 dark:[.admin-workspace_&]:bg-slate-800/65"}`}
+                    class={`flex h-full w-full min-w-0 cursor-grab flex-col items-stretch justify-start rounded-lg p-2 text-left font-normal transition-colors active:cursor-grabbing sm:p-3 ${props.state.tierDraft().tierKey === tier.id ? "bg-brand/10 ring-1 ring-inset ring-brand/50" : "bg-surface-muted/70 hover:bg-surface-muted dark:bg-slate-800/70 dark:hover:bg-slate-800"}`}
                     aria-pressed={props.state.tierDraft().tierKey === tier.id}
                     onClick={() => state.selectTier(tier)}
                   >
-                    <span class="block text-xs font-medium text-content-muted">
-                      Pos. {index() + 1} · Zum Sortieren ziehen
+                    <span class="flex flex-wrap items-center justify-between gap-x-2 text-xs font-medium text-content-muted">
+                      <span>
+                        Pos. {index() + 1} · <span class="sm:hidden">Ziehen</span>
+                        <span class="hidden sm:inline">Zum Sortieren ziehen</span>
+                      </span>
+                      <Show when={props.state.tierDraft().tierKey === tier.id}>
+                        <span class="text-brand-accent">Ausgewählt</span>
+                      </Show>
                     </span>
-                    <span class="mt-1 block font-semibold text-content">{tier.name}</span>
-                    <span class="mt-1 block text-sm text-content-muted">{eventPriceFormat(tier.priceCents)}</span>
-                    <span class="mt-1 block text-xs text-content-muted">
-                      {tier.sold ?? 0} verkauft · {tier.available} verfügbar · {tier.capacity} gesamt
+                    <span class="mt-0.5 flex min-w-0 items-baseline justify-between gap-2 sm:mt-1 sm:block">
+                      <span class="min-w-0 break-words font-semibold text-content">{tier.name}</span>
+                      <span class="shrink-0 whitespace-nowrap text-sm text-content-muted sm:mt-1 sm:block">
+                        {eventPriceFormat(tier.priceCents)}
+                      </span>
+                    </span>
+                    <span class="mt-0.5 flex flex-wrap gap-x-2 text-xs text-content-muted sm:mt-1">
+                      <span>{tier.sold ?? 0} verkauft</span>
+                      <span>{tier.available} verfügbar</span>
+                      <span>{tier.capacity} gesamt</span>
                     </span>
                   </Button>
                 </li>
               )}
             </For>
             <Show when={state.showNewTier()}>
-              <li>
-                <Button
-                  type="button"
-                  variant="none"
-                  size="none"
-                  class="flex w-full flex-col items-stretch justify-start rounded-lg border border-brand bg-brand/10 p-3 text-left font-normal [.admin-workspace_&]:border-0"
-                  aria-pressed="true"
-                >
+              <li class="min-w-0">
+                <div class="flex h-full w-full min-w-0 flex-col items-stretch justify-start rounded-lg bg-brand/10 p-2 text-left font-normal ring-1 ring-inset ring-brand/50 sm:p-3">
                   <span class="block text-xs font-medium text-content-muted">Neu · Noch nicht gespeichert</span>
-                  <span class="mt-1 block font-semibold text-content">
+                  <span class="mt-0.5 block break-words font-semibold text-content sm:mt-1">
                     {props.state.tierDraft().name || "Neues Ticket"}
                   </span>
-                </Button>
+                </div>
               </li>
             </Show>
           </ul>
         </Show>
-      </div>
+      </section>
 
-      <CardWrapper class="lg:mt-13 [.admin-workspace_&]:rounded-xl [.admin-workspace_&]:border-0 [.admin-workspace_&]:shadow-lg [.admin-workspace_&]:shadow-slate-900/10 dark:[.admin-workspace_&]:shadow-black/30">
+      <CardWrapper class="min-w-0 rounded-xl border-0 bg-surface/70 p-4 shadow-none sm:p-6 lg:p-8">
         <form
           class="flex flex-col gap-5"
           data-hydrated={state.hydrated() ? "true" : "false"}
@@ -138,7 +146,7 @@ export function AdminTicketProductsForm(props: {
               onInput={state.feeEuro.set}
             />
           </div>
-          <div class="grid gap-4 sm:grid-cols-3">
+          <div class="grid gap-4 md:grid-cols-2">
             <Field
               id="admin-tier-starts"
               label="Beginn *"
@@ -147,7 +155,15 @@ export function AdminTicketProductsForm(props: {
               value={state.startsAt()}
               onInput={state.startsAtChange}
             />
-            <div>
+            <Field
+              id="admin-tier-ends"
+              label="Ende *"
+              type="datetime-local"
+              required
+              value={state.endsAt()}
+              onInput={state.endsAtChange}
+            />
+            <div class="min-w-0 md:col-span-2">
               <Field
                 id="admin-tier-doors"
                 label="Einlass"
@@ -158,7 +174,7 @@ export function AdminTicketProductsForm(props: {
               <Index each={state.additionalDoorsAt()}>
                 {(value, index) => (
                   <div class="mt-3 flex items-end gap-2">
-                    <div class="grid min-w-0 flex-1 gap-3 sm:grid-cols-2">
+                    <div class="grid min-w-0 flex-1 gap-3 md:grid-cols-2">
                       <Field
                         id={`admin-tier-doors-${index + 2}-starts`}
                         label={`Einlass ${index + 2} – Beginn`}
@@ -199,14 +215,6 @@ export function AdminTicketProductsForm(props: {
                 Weiteren Einlass hinzufügen
               </Button>
             </div>
-            <Field
-              id="admin-tier-ends"
-              label="Ende *"
-              type="datetime-local"
-              required
-              value={state.endsAt()}
-              onInput={state.endsAtChange}
-            />
           </div>
           <div>
             <Label for="admin-tier-description">Beschreibung</Label>
@@ -223,7 +231,7 @@ export function AdminTicketProductsForm(props: {
               {state.validationMessage()}
             </p>
           </Show>
-          <div class="border-t border-border pt-5 [.admin-workspace_&]:border-t-0">
+          <div class="pt-2">
             <div class="flex flex-wrap gap-3">
               <Button type="submit" variant="contrast" disabled={props.state.isSaving()}>
                 {props.state.isSaving() ? "Speichert …" : "Ticketprodukt speichern"}
@@ -261,7 +269,7 @@ function Field(props: {
   onInput: (value: string) => void
 }) {
   return (
-    <div>
+    <div class="min-w-0">
       <Label for={props.id}>{props.label}</Label>
       <Input
         id={props.id}
@@ -271,7 +279,7 @@ function Field(props: {
         step={props.step}
         required={props.required}
         value={props.value}
-        class="mt-2 [.admin-workspace_&]:border-0"
+        class={`mt-2 min-w-0 max-w-full ${props.type === "datetime-local" ? "max-sm:px-1" : ""} [.admin-workspace_&]:border-0`}
         onInput={(event) => props.onInput(event.currentTarget.value)}
       />
     </div>
