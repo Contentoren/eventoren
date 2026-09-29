@@ -1,13 +1,14 @@
 import { For, Show } from "solid-js"
-import type { AdminEventItem } from "./AdminEventItem.ts"
-import { adminScannerLinksStateCreate } from "./adminScannerLinksStateCreate.ts"
 import { ScannerLinkShareControls } from "#src/organizer/ScannerLinkShareControls.tsx"
 import { scannerLinkListHrefCreate } from "#src/organizer/scannerLinkListHrefCreate.ts"
-import { Button } from "#ui/interactive/button/Button.jsx"
+import { UiContainer } from "#src/ui/UiContainer.tsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { SelectMultiple } from "#ui/input/select/SelectMultiple.jsx"
+import { Button } from "#ui/interactive/button/Button.jsx"
+import { Details } from "#ui/interactive/details/Details.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
-import { UiContainer } from "#src/ui/UiContainer.tsx"
+import type { AdminEventItem } from "./AdminEventItem.ts"
+import { adminScannerLinksStateCreate } from "./adminScannerLinksStateCreate.ts"
 
 export function AdminScannerLinksPage(props: {
   readonly eventsResult: () =>
@@ -29,57 +30,62 @@ export function AdminScannerLinksPage(props: {
         <Show when={state.error()}>
           <p role="alert">{state.error()}</p>
         </Show>
-        <CardWrapper class="flex flex-col gap-4 rounded-xl border-0 shadow-md shadow-slate-900/10 dark:shadow-black/25">
-          <h2 class="text-xl font-semibold">Veranstalterlink erstellen</h2>
-          <form
-            class="flex flex-col gap-4"
-            onSubmit={(event) => {
-              event.preventDefault()
-              void state.createOrganizer()
-            }}
-          >
-            <label class="flex flex-col gap-1">
-              Name
-              <Input
-                class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
-                required
-                maxLength={120}
-                value={state.organizerName.get()}
-                onInput={(event) => state.organizerName.set(event.currentTarget.value)}
-                disabled={state.pending()}
-              />
-            </label>
-            <div class="flex flex-col gap-1">
-              <span id="admin-organizer-events-label">Events (1–50, nur veröffentlichte)</span>
-              <SelectMultiple
-                id="admin-organizer-events"
-                class="min-h-11 border-0 bg-surface-muted/60 dark:bg-slate-800/60"
-                valueSignal={state.organizerEvents}
-                getOptions={() => state.publishedEvents().map((event) => event.id)}
-                valueText={(key) => state.publishedEvents().find((event) => event.id === key)?.title ?? key}
-                buttonProps={{ "aria-labelledby": "admin-organizer-events-label", class: "border-0" }}
-                noItemsClass="rounded-lg border-0 bg-surface-base/80 dark:bg-slate-700/60 dark:hover:bg-slate-700/60"
-                textAddEntry="Event auswählen"
-                disabled={state.pending()}
-              />
-            </div>
-            <label class="flex flex-col gap-1">
-              Ablaufdatum und Uhrzeit
-              <Input
-                class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
-                type="datetime-local"
-                required
-                max={state.maxExpiry()}
-                value={state.organizerExpiry.get()}
-                onInput={(event) => state.organizerExpiry.set(event.currentTarget.value)}
-                disabled={state.pending()}
-              />
-            </label>
-            <Button type="submit" disabled={state.pending() || !props.eventsResult().success}>
-              Veranstalterlink erstellen
-            </Button>
-          </form>
-        </CardWrapper>
+        <Details
+          class="rounded-xl border-0 bg-surface shadow-md shadow-slate-900/10 dark:bg-slate-800 dark:shadow-black/25"
+          summaryEl={<h2 class="text-xl font-semibold">Veranstalterlink erstellen</h2>}
+          summaryClass="flex-row p-4 text-content lg:p-8 [&_h2]:text-xl [&_h2]:font-semibold"
+        >
+          <div class="flex flex-col gap-4 px-4 pb-4 lg:px-8 lg:pb-8">
+            <form
+              class="flex flex-col gap-4"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void state.createOrganizer()
+              }}
+            >
+              <label class="flex flex-col gap-1">
+                Name
+                <Input
+                  class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
+                  required
+                  maxLength={120}
+                  value={state.organizerName.get()}
+                  onInput={(event) => state.organizerName.set(event.currentTarget.value)}
+                  disabled={state.pending()}
+                />
+              </label>
+              <div class="flex flex-col gap-1">
+                <span id="admin-organizer-events-label">Events (1–50, nur veröffentlichte)</span>
+                <SelectMultiple
+                  id="admin-organizer-events"
+                  class="min-h-11 border-0 bg-surface-muted/60 dark:bg-slate-800/60"
+                  valueSignal={state.organizerEvents}
+                  getOptions={() => state.publishedEvents().map((event) => event.id)}
+                  valueText={(key) => state.publishedEvents().find((event) => event.id === key)?.title ?? key}
+                  buttonProps={{ "aria-labelledby": "admin-organizer-events-label", class: "border-0" }}
+                  noItemsClass="rounded-lg border-0 bg-surface-base/80 dark:bg-slate-700/60 dark:hover:bg-slate-700/60"
+                  textAddEntry="Event auswählen"
+                  disabled={state.pending()}
+                />
+              </div>
+              <label class="flex flex-col gap-1">
+                Ablaufdatum und Uhrzeit
+                <Input
+                  class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
+                  type="datetime-local"
+                  required
+                  max={state.maxExpiry()}
+                  value={state.organizerExpiry.get()}
+                  onInput={(event) => state.organizerExpiry.set(event.currentTarget.value)}
+                  disabled={state.pending()}
+                />
+              </label>
+              <Button type="submit" disabled={state.pending() || !props.eventsResult().success}>
+                Veranstalterlink erstellen
+              </Button>
+            </form>
+          </div>
+        </Details>
         <h2 class="text-xl font-semibold">Veranstalterlinks</h2>
         <Show when={state.loading()}>
           <p role="status">Links werden geladen …</p>
