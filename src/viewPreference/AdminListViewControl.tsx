@@ -1,4 +1,7 @@
+import { mdiViewGrid } from "@adaptive-ds/mdi/mdiViewGrid.js"
+import { mdiViewList } from "@adaptive-ds/mdi/mdiViewList.js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 import type { AdminListViewPreference } from "./adminListViewPreferenceContext.ts"
 
 export function AdminListViewControl(props: { readonly preference: AdminListViewPreference }) {
@@ -12,6 +15,7 @@ export function AdminListViewControl(props: { readonly preference: AdminListView
         class="flex-1"
         onClick={() => props.preference.selectView("list")}
       >
+        <Icon path={mdiViewList} class="mr-2 size-5" />
         Liste
       </Button>
       <Button
@@ -21,6 +25,7 @@ export function AdminListViewControl(props: { readonly preference: AdminListView
         class="flex-1"
         onClick={() => props.preference.selectView("tiles")}
       >
+        <Icon path={mdiViewGrid} class="mr-2 size-5" />
         Kacheln
       </Button>
     </fieldset>
