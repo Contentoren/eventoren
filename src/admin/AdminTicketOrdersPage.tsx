@@ -69,7 +69,9 @@ export function AdminTicketOrdersPage(props?: {
       </div>
       <Show when={!tile || state.bookingReference(order)}>
         <p class="min-w-0 truncate text-sm font-medium text-content" title={state.bookingReference(order)}>
-          <Show when={state.bookingReference(order)}>{(reference) => <>Bestellnummer: {reference()}</>}</Show>
+          <Show when={state.bookingReference(order)}>
+            {(reference) => (tile ? <>Bestellnummer: {reference()}</> : reference())}
+          </Show>
         </p>
       </Show>
       <p class="min-w-0 text-sm text-content">
