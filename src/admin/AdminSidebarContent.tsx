@@ -19,9 +19,11 @@ export function AdminSidebarContent(props: {
       <Link
         to={props.state.navigation()[0].href}
         onClick={props.state.profileClose}
-        class="flex items-center gap-2 px-2 text-lg font-semibold tracking-tight text-content"
+        aria-label="Eventoren"
+        class="focus-ring flex items-center px-2"
       >
-        eventoren
+        <img src="/eventoren-logo-light.png" alt="" aria-hidden="true" class="h-8 w-auto max-w-full dark:hidden" />
+        <img src="/eventoren-logo.png" alt="" aria-hidden="true" class="hidden h-8 w-auto max-w-full dark:block" />
       </Link>
 
       <nav
