@@ -16,7 +16,10 @@ export function AdminEventNewPage(props: { state: ReturnType<typeof adminEventNe
           isNew={!props.state.catalog.selectedEventKey()}
         />
         <AdminEventTabs tab={props.state.tab()} />
-        <Show when={props.state.tab() === "products"} fallback={<AdminEventDetailsForm state={props.state.catalog} />}>
+        <Show
+          when={props.state.tab() === "products"}
+          fallback={<AdminEventDetailsForm state={props.state.catalog} onSaved={props.state.onSaved} />}
+        >
           <AdminEventFeedback state={props.state.catalog} />
           <Show when={!props.state.catalog.selectedEventKey()}>
             <p class="text-sm text-content-muted">

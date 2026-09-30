@@ -1,5 +1,6 @@
 import { createMemo, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
+import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import type { AdminEventDraft } from "./AdminEventDraft.ts"
 import { adminCategoryPickerStateCreate } from "./adminCategoryPickerStateCreate.ts"
@@ -8,7 +9,7 @@ import { adminDateTimeLocalFromIso } from "./adminDateTimeLocalFromIso.ts"
 
 export function adminEventDetailsFormStateCreate(inputs: {
   catalog: AdminCatalogPageState
-  onSaved?: (eventKey: string) => void
+  onSaved?: (eventKey: string) => void | Promise<void>
 }) {
   const validationMessage = createSignalObject("")
   const hydrated = createSignalObject(false)
@@ -24,6 +25,17 @@ export function adminEventDetailsFormStateCreate(inputs: {
   const imageUploading = createSignalObject(false)
   const imageUploadError = createSignalObject("")
   const imageDragActive = createSignalObject(false)
+  const imagePreviewSource = createMemo(() => {
+    const draft = inputs.catalog.eventDraft()
+    if (!draft.imageUrl) return ""
+    return eventImageUrlGet(draft.imageVariants?.detail ?? draft.imageUrl)
+  })
+  const imagePreview = createMemo(() => {
+    const src = imagePreviewSource()
+    if (!src) return undefined
+    const failed = createSignalObject(false)
+    return { src, failed: failed.get, onError: () => failed.set(true) }
+  })
   const pendingAction = createSignalObject<"save" | "publish" | null>(null)
   let imageRequestRevision = 0
 
@@ -84,7 +96,7 @@ export function adminEventDetailsFormStateCreate(inputs: {
     pendingAction.set("save")
     try {
       const eventKey = await inputs.catalog.saveEvent()
-      if (eventKey) inputs.onSaved?.(eventKey)
+      if (eventKey) await inputs.onSaved?.(eventKey)
     } finally {
       pendingAction.set(null)
     }
@@ -115,6 +127,7 @@ export function adminEventDetailsFormStateCreate(inputs: {
     doorsAtChange: (value: string) => dateChange("doorsAt", value),
     endsAtChange: (value: string) => dateChange("endsAt", value),
     imageUrlChange,
+    imagePreview,
     imageUpload,
     imageUploading: imageUploading.get,
     imageUploadError: imageUploadError.get,
