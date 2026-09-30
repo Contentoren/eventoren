@@ -13,7 +13,7 @@ export function adminMemberManagementStateCreate(
 ): AdminMemberManagementState {
   const list = inputs.list
   const members = createSignalObject<readonly AdminZitadelMember[]>([])
-  const roleFilter = createSignalObject<RoleFilter>(roleFilterFromUrl())
+  const roleFilter = createSignalObject<RoleFilter>("all")
   const roleFilterSignal = {
     get: roleFilter.get,
     set: (value: RoleFilter) => {
@@ -21,7 +21,7 @@ export function adminMemberManagementStateCreate(
       roleFilterWriteToUrl(value)
     },
   }
-  const search = createSignalObject(searchFromUrl())
+  const search = createSignalObject("")
   const hasLoaded = createSignalObject(false)
   const isLoading = createSignalObject(true)
   const updatingMemberIds = createSignalObject<readonly string[]>([])
@@ -98,6 +98,8 @@ export function adminMemberManagementStateCreate(
   }
 
   onMount(() => {
+    roleFilter.set(roleFilterFromUrl())
+    search.set(searchFromUrl())
     void reload()
   })
 

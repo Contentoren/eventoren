@@ -1,5 +1,5 @@
-import { expect, test } from "bun:test"
-import { createRoot } from "solid-js"
+import { expect, mock, spyOn, test } from "bun:test"
+import * as solid from "solid-js"
 import { createResult, createResultError } from "#result"
 import type { AdminZitadelMember } from "../src/admin/AdminZitadelMember.ts"
 import { adminMemberManagementStateCreate } from "../src/admin/adminMemberManagementStateCreate.ts"
@@ -24,24 +24,85 @@ test("shows only admin or organizer members for all and honors each role filter"
   expect(state.members()).toEqual([organizer])
 })
 
-test("selects the organizer role filter from the memberRole URL parameter", () => {
+test("initializes the role filter to all and search to empty before hydration despite URL parameters", () => {
   const previousWindow = globalThis.window
   Object.defineProperty(globalThis, "window", {
     configurable: true,
-    value: { location: { href: "https://eventoren.test/admin/mitglieder?memberRole=organizer" } },
+    value: {
+      location: { href: "https://eventoren.test/admin/mitglieder?memberRole=organizer&memberSearch=testadmin" },
+    },
   })
 
   try {
-    createRoot((dispose) => {
-      const state = adminMemberManagementStateCreate()
-      expect(state.roleFilter.get()).toBe("organizer")
-      dispose()
+    solid.createRoot((dispose) => {
+      try {
+        const state = adminMemberManagementStateCreate()
+        expect(state.roleFilter.get()).toBe("all")
+        expect(state.search()).toBe("")
+      } finally {
+        dispose()
+      }
     })
   } finally {
     if (previousWindow) Object.defineProperty(globalThis, "window", { configurable: true, value: previousWindow })
     else Reflect.deleteProperty(globalThis, "window")
   }
 })
+
+test.each(["admin", "organizer"] as const)(
+  "restores the %s URL role filter and search on mount before loading without rewriting history",
+  async (role) => {
+    const previousWindow = globalThis.window
+    const href = `https://eventoren.test/admin/mitglieder?memberRole=${role}&memberSearch=testadmin`
+    const replaceState = mock(() => {})
+    const admin = memberCreate("admin-1", false, ["admin"])
+    const organizer = memberCreate("organizer-1", true)
+    let mount: (() => void) | undefined
+    // Bun uses Solid's server runtime; capture the mount callback to run it explicitly.
+    const mountSpy = spyOn(solid, "onMount").mockImplementation((callback) => {
+      mount = callback
+    })
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: { location: { href }, history: { replaceState } },
+    })
+    let state!: ReturnType<typeof adminMemberManagementStateCreate>
+    let dispose = () => {}
+    const list = mock(async (input: { readonly search?: string }) => {
+      expect(state.roleFilter.get()).toBe(role)
+      expect(state.search()).toBe("testadmin")
+      expect(input).toEqual({ search: "testadmin" })
+      return createResult({ members: [admin, organizer], total: 2 })
+    })
+
+    try {
+      solid.createRoot((rootDispose) => {
+        dispose = rootDispose
+        state = adminMemberManagementStateCreate({ list })
+      })
+      expect(state.roleFilter.get()).toBe("all")
+      expect(state.search()).toBe("")
+      expect(list).not.toHaveBeenCalled()
+      expect(mount).toBeDefined()
+
+      mount?.()
+      expect(state.roleFilter.get()).toBe(role)
+      expect(state.search()).toBe("testadmin")
+      expect(list).toHaveBeenCalledTimes(1)
+      await Promise.resolve()
+
+      expect(state.hasLoaded()).toBe(true)
+      expect(state.members()).toEqual([role === "admin" ? admin : organizer])
+      expect(replaceState).not.toHaveBeenCalled()
+      expect(globalThis.window.location.href).toBe(href)
+    } finally {
+      dispose()
+      mountSpy.mockRestore()
+      if (previousWindow) Object.defineProperty(globalThis, "window", { configurable: true, value: previousWindow })
+      else Reflect.deleteProperty(globalThis, "window")
+    }
+  },
+)
 
 test("demo all filter excludes customer-only members", () => {
   const state = demoAdminMemberManagementStateCreate()
