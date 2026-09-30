@@ -3,6 +3,7 @@ import { type Component, type ComponentProps, splitProps } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import type { ButtonCvaProps, ButtonVariant } from "#ui/interactive/button/buttonCva.js"
 import { buttonIconCva } from "#ui/interactive/button/buttonIconCva.js"
+import { buttonIconStateCreate } from "#ui/interactive/button/buttonIconStateCreate.js"
 import { classesButtonClickAnimation } from "#ui/interactive/button/classesButtonClickAnimation.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
 import { classMerge } from "#ui/utils/classMerge.js"
@@ -41,6 +42,7 @@ export const ButtonIcon: Component<ButtonIconProps> = (p) => {
     "onClick",
     "children",
   ])
+  const state = buttonIconStateCreate({ children: () => s.children })
   const onClick2 = (e: any) => {
     if (s.disabled) return
     if (s.isLoading) return
@@ -68,19 +70,19 @@ export const ButtonIcon: Component<ButtonIconProps> = (p) => {
           path={(s.isLoading ? mdiLoading : s.validationMessage ? s.validationIcon : (s.icon ?? mdiLoading))!}
           class={buttonIconCva(
             s.validationMessage ? s.validationVariant : s.variant,
-            s.children && "mr-2",
+            state.children() && "mr-2",
             s.isLoading && "animate-spin",
             s.iconClass,
           )}
         />
       )}
-      {s.validationMessage ? s.validationMessage : s.children}
+      {s.validationMessage ? s.validationMessage : state.children()}
       {!s.isLoading && !s.validationMessage && s.iconRight && (
         <Icon
           path={s.iconRight}
           class={buttonIconCva(
             s.validationMessage ? s.validationVariant : s.variant,
-            s.children && "ml-2",
+            state.children() && "ml-2",
             s.isLoading && "animate-spin",
             s.iconClass,
           )}

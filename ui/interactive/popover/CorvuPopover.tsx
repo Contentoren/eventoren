@@ -5,6 +5,7 @@ import { type ButtonCvaProps, buttonCva2 } from "#ui/interactive/button/buttonCv
 import { buttonIconCva } from "#ui/interactive/button/buttonIconCva.js"
 import { classesButtonClickAnimation } from "#ui/interactive/button/classesButtonClickAnimation.js"
 import { classesPopoverContentMerge } from "#ui/interactive/popover/classesPopoverContent.js"
+import { corvuPopoverStateCreate } from "#ui/interactive/popover/corvuPopoverStateCreate.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
 import type { MayHaveChildren } from "#ui/utils/MayHaveChildren.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
@@ -28,7 +29,7 @@ export interface CorvuPopoverProps
 
 /** Popover anchored to a labeled trigger button. */
 export function CorvuPopover(p: CorvuPopoverProps) {
-  // const [a, buttonProps] = splitProps(p.buttonProps, ["onClick"])
+  const state = corvuPopoverStateCreate({ buttonChildren: () => p.buttonChildren })
   return (
     <Popover
       floatingOptions={{
@@ -50,10 +51,12 @@ export function CorvuPopover(p: CorvuPopoverProps) {
           p.class,
         )}
       >
-        {p.icon && <Icon path={p.icon} class={buttonIconCva(p.variant, p.buttonChildren && "mr-2", p.iconClass)} />}
-        {p.buttonChildren}
+        {p.icon && (
+          <Icon path={p.icon} class={buttonIconCva(p.variant, state.buttonChildren() && "mr-2", p.iconClass)} />
+        )}
+        {state.buttonChildren()}
         {p.iconRight && (
-          <Icon path={p.iconRight} class={buttonIconCva(p.variant, p.buttonChildren && "ml-2", p.iconClass)} />
+          <Icon path={p.iconRight} class={buttonIconCva(p.variant, state.buttonChildren() && "ml-2", p.iconClass)} />
         )}
       </Popover.Trigger>
       <Popover.Portal>
