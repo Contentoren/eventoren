@@ -42,6 +42,8 @@ async function catalogTicketTierUpsertAuthorizedFn(
   if (args.endsAt.trim().length === 0) return createResultError(op, "End time is required")
   if (!isValidIsoDateTime(args.startsAt)) return createResultError(op, "Start time must be a valid ISO date and time")
   if (!isValidIsoDateTime(args.endsAt)) return createResultError(op, "End time must be a valid ISO date and time")
+  if (Date.parse(args.endsAt) <= Date.parse(args.startsAt))
+    return createResultError(op, "End time must be after start time")
   if (args.doorsAt.trim().length > 0 && !isValidIsoDateTime(args.doorsAt))
     return createResultError(op, "Admission time must be a valid ISO date and time")
   if (

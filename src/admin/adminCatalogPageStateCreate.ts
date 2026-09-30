@@ -175,6 +175,16 @@ export function adminCatalogPageStateCreate(inputs: {
       errorMessage.set("Event-Key und Titel sind erforderlich.")
       return
     }
+    if (
+      [draft.startsAt, draft.endsAt, draft.doorsAt].some((value) => value.trim() && Number.isNaN(Date.parse(value)))
+    ) {
+      errorMessage.set("Event-Zeitpunkte müssen gültige Datums- und Uhrzeitangaben sein.")
+      return
+    }
+    if (draft.startsAt.trim() && draft.endsAt.trim() && Date.parse(draft.endsAt) <= Date.parse(draft.startsAt)) {
+      errorMessage.set("Das Ende muss nach dem Beginn liegen.")
+      return
+    }
     if (draft.highlights.some((highlight) => !highlight.title.trim())) {
       errorMessage.set("Jedes Highlight benötigt einen Titel.")
       return
@@ -237,6 +247,14 @@ export function adminCatalogPageStateCreate(inputs: {
     }
     if (!draft.startsAt.trim() || !draft.endsAt.trim()) {
       errorMessage.set("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
+      return
+    }
+    if ([draft.startsAt, draft.endsAt].some((value) => Number.isNaN(Date.parse(value)))) {
+      errorMessage.set("Beginn und Ende müssen gültige Datums- und Uhrzeitangaben sein.")
+      return
+    }
+    if (Date.parse(draft.endsAt) <= Date.parse(draft.startsAt)) {
+      errorMessage.set("Das Ende muss nach dem Beginn liegen.")
       return
     }
     if (
@@ -324,6 +342,16 @@ export function adminCatalogPageStateCreate(inputs: {
     }))
     if (tiersWithEventTimes.some((tier) => !tier.startsAt.trim() || !tier.endsAt.trim())) {
       errorMessage.set("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
+      return
+    }
+    if (
+      tiersWithEventTimes.some((tier) => [tier.startsAt, tier.endsAt].some((value) => Number.isNaN(Date.parse(value))))
+    ) {
+      errorMessage.set("Beginn und Ende müssen gültige Datums- und Uhrzeitangaben sein.")
+      return
+    }
+    if (tiersWithEventTimes.some((tier) => Date.parse(tier.endsAt) <= Date.parse(tier.startsAt))) {
+      errorMessage.set("Das Ende muss nach dem Beginn liegen.")
       return
     }
     if (

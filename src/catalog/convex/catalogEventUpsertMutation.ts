@@ -41,16 +41,25 @@ async function catalogEventUpsertAuthorizedFn(
   ctx: MutationCtx,
   args: Omit<typeof catalogEventArgsValidator.type, "token"> & { userId: IdUser },
 ): PromiseResult<{ eventKey: string; catalogVersion: number; eventRevision: number }> {
+  const op = "catalogEventUpsertMutation"
   const adminResult = await catalogAdminAuthorizeFn(ctx, args.userId)
   if (!adminResult.success) return adminResult
 
-  if (args.eventKey.length === 0) return createResultError("catalogEventUpsertMutation", "Event key is required")
+  if (args.eventKey.length === 0) return createResultError(op, "Event key is required")
+  if (args.startsAt.trim() && Number.isNaN(Date.parse(args.startsAt)))
+    return createResultError(op, "Start time must be a valid date and time")
+  if (args.endsAt.trim() && Number.isNaN(Date.parse(args.endsAt)))
+    return createResultError(op, "End time must be a valid date and time")
+  if (args.doorsAt.trim() && Number.isNaN(Date.parse(args.doorsAt)))
+    return createResultError(op, "Admission time must be a valid date and time")
+  if (args.startsAt.trim() && args.endsAt.trim() && Date.parse(args.endsAt) <= Date.parse(args.startsAt))
+    return createResultError(op, "End time must be after start time")
 
   const existing = await ctx.db
     .query("catalogEvents")
     .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
     .unique()
-  if (existing?.deletedAt) return createResultError("catalogEventUpsertMutation", "Deleted event keys cannot be reused")
+  if (existing?.deletedAt) return createResultError(op, "Deleted event keys cannot be reused")
   // An explicit manual URL change invalidates the previous uploaded image references.
   const imageVariants =
     args.imageVariants && args.imageUrl === args.imageVariants.detail
@@ -67,7 +76,7 @@ async function catalogEventUpsertAuthorizedFn(
           .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", existing._id).eq("archivedAt", undefined))
           .first()
       : null
-    if (!tier) return createResultError("catalogEventUpsertMutation", "Published events need a ticket tier")
+    if (!tier) return createResultError(op, "Published events need a ticket tier")
   }
 
   const now = new Date().toISOString()

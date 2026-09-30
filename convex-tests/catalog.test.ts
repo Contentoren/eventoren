@@ -1041,3 +1041,150 @@ test("tier capacity cannot undercut reserved and sold inventory", async () => {
   expect(rejected.success).toBe(false)
   expect(accepted.success).toBe(true)
 })
+
+const invalidDateOrderCases = [
+  { name: "reversed 19:00/18:00", startsAt: "2026-10-01T19:00:00Z", endsAt: "2026-10-01T18:00:00Z" },
+  { name: "equal", startsAt: "2026-10-01T19:00:00Z", endsAt: "2026-10-01T19:00:00Z" },
+  { name: "reversed offset instants", startsAt: "2026-10-01T18:00:00Z", endsAt: "2026-10-01T19:00:00+02:00" },
+  { name: "equal offset instants", startsAt: "2026-10-01T19:00:00+02:00", endsAt: "2026-10-01T17:00:00Z" },
+  { name: "invalid start", startsAt: "invalid", endsAt: "2026-10-01T19:00:00Z" },
+  { name: "invalid end", startsAt: "2026-10-01T19:00:00Z", endsAt: "invalid" },
+]
+
+async function catalogWriteStateGet(t: ReturnType<typeof convexTest>) {
+  return await t.run(async (ctx) => ({
+    events: await ctx.db.query("catalogEvents").collect(),
+    tiers: await ctx.db.query("catalogTicketTiers").collect(),
+    syncStates: await ctx.db.query("catalogSyncStates").collect(),
+    snapshots: await ctx.db.query("catalogSyncSnapshots").collect(),
+    scheduled: await ctx.db.system.query("_scheduled_functions").collect(),
+  }))
+}
+
+test.each(invalidDateOrderCases)(
+  "event and tier upserts reject $name without inserts, updates, revisions or sync writes",
+  async ({ startsAt, endsAt }) => {
+    vi.useFakeTimers()
+    const t = convexTest(schema, modules)
+    const token = await tokenFor(await createUser(t, "admin"))
+    expect((await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))).success).toBe(true)
+    const tierArgs = {
+      eventKey: "catalog-event",
+      tierKey: "standard",
+      name: "Standard",
+      description: "",
+      startsAt: "2026-10-01T18:00:00Z",
+      endsAt: "2026-10-01T22:00:00Z",
+      doorsAt: "",
+      priceCents: 100,
+      feeCents: 0,
+      capacity: 10,
+      token,
+    }
+    expect((await t.mutation(api.catalog.catalogTicketTierUpsertMutation, tierArgs)).success).toBe(true)
+    const before = await catalogWriteStateGet(t)
+    for (const tierKey of ["standard", "new-tier"]) {
+      const result = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+        ...tierArgs,
+        tierKey,
+        startsAt,
+        endsAt,
+      })
+      expect(result).toMatchObject({ success: false, op: "catalogTicketTierUpsertMutation" })
+      if (startsAt !== "invalid" && endsAt !== "invalid")
+        expect(result).toMatchObject({ errorMessage: "End time must be after start time" })
+      expect(await catalogWriteStateGet(t)).toEqual(before)
+    }
+    for (const eventKey of ["catalog-event", "new-event"]) {
+      const result = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+        ...eventArgs(token, "draft"),
+        eventKey,
+        startsAt,
+        endsAt,
+      })
+      expect(result).toMatchObject({ success: false, op: "catalogEventUpsertMutation" })
+      if (startsAt !== "invalid" && endsAt !== "invalid")
+        expect(result).toMatchObject({ errorMessage: "End time must be after start time" })
+      expect(await catalogWriteStateGet(t)).toEqual(before)
+    }
+  },
+)
+
+test.each([
+  { name: "valid offset instants", startsAt: "2026-10-01T19:00:00+02:00", endsAt: "2026-10-01T18:00:00Z" },
+  { name: "valid overnight", startsAt: "2026-10-01T22:00:00Z", endsAt: "2026-10-02T01:00:00Z" },
+])("event and tier upserts accept $name with independent product and doors times", async ({ startsAt, endsAt }) => {
+  const t = convexTest(schema, modules)
+  const token = await tokenFor(await createUser(t, "admin"))
+  expect(
+    (
+      await t.mutation(api.catalog.catalogEventUpsertMutation, {
+        ...eventArgs(token, "draft"),
+        startsAt: "2026-10-03T18:00:00Z",
+        endsAt: "2026-10-03T22:00:00Z",
+      })
+    ).success,
+  ).toBe(true)
+  const doorsAt = "2027-10-01T18:00:00Z"
+  const tier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
+    eventKey: "catalog-event",
+    tierKey: "standard",
+    name: "Standard",
+    description: "",
+    startsAt,
+    endsAt,
+    doorsAt,
+    priceCents: 100,
+    feeCents: 0,
+    capacity: 10,
+    token,
+  })
+  expect(tier).toMatchObject({ success: true, data: { eventRevision: 2 } })
+  const event = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    ...eventArgs(token, "draft"),
+    startsAt,
+    endsAt,
+    doorsAt,
+  })
+  expect(event).toMatchObject({ success: true, data: { eventRevision: 3 } })
+  const stored = await catalogWriteStateGet(t)
+  expect(stored.events[0]).toMatchObject({ startsAt, endsAt, doorsAt })
+  expect(stored.tiers[0]).toMatchObject({ startsAt, endsAt, doorsAt })
+})
+
+test.each([
+  { name: "empty", startsAt: "", endsAt: "", doorsAt: "" },
+  { name: "whitespace-only", startsAt: " ", endsAt: " ", doorsAt: " " },
+  { name: "start-only", startsAt: "2026-10-01T19:00:00Z", endsAt: "", doorsAt: "" },
+  { name: "end-only", startsAt: "", endsAt: "2026-10-01T19:00:00Z", doorsAt: "" },
+  { name: "doors-only", startsAt: "", endsAt: "", doorsAt: "2026-10-01T19:00:00Z" },
+])("event upsert preserves $name date drafts", async ({ startsAt, endsAt, doorsAt }) => {
+  const t = convexTest(schema, modules)
+  const token = await tokenFor(await createUser(t, "admin"))
+  const result = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    ...eventArgs(token, "draft"),
+    startsAt,
+    endsAt,
+    doorsAt,
+  })
+  expect(result.success).toBe(true)
+  expect(await t.run(async (ctx) => ctx.db.query("catalogEvents").first())).toMatchObject({ startsAt, endsAt, doorsAt })
+})
+
+test("invalid optional event doors time rejects an empty draft without writes or sync changes", async () => {
+  const t = convexTest(schema, modules)
+  const token = await tokenFor(await createUser(t, "admin"))
+  const before = await catalogWriteStateGet(t)
+  const result = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    ...eventArgs(token, "draft"),
+    startsAt: "",
+    endsAt: "",
+    doorsAt: "invalid",
+  })
+  expect(result).toMatchObject({
+    success: false,
+    op: "catalogEventUpsertMutation",
+    errorMessage: "Admission time must be a valid date and time",
+  })
+  expect(await catalogWriteStateGet(t)).toEqual(before)
+})

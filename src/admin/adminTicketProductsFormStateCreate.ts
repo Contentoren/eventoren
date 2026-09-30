@@ -174,6 +174,10 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
       validationMessage.set("Beginn und Ende müssen gültige Datums- und Uhrzeitangaben sein.")
       return
     }
+    if (Date.parse(draft.endsAt) <= Date.parse(draft.startsAt)) {
+      validationMessage.set("Das Ende muss nach dem Beginn liegen.")
+      return
+    }
     if (draft.additionalDoorsAt.some((range) => !range.startsAt.trim() || !range.endsAt.trim())) {
       validationMessage.set(
         "Jeder zusätzliche Einlass benötigt Beginn und Ende. Bitte ergänze beide Zeitpunkte oder entferne den Einlass.",
