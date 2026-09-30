@@ -8,13 +8,15 @@ import { Button } from "#ui/interactive/button/Button.jsx"
 import { ButtonIcon } from "#ui/interactive/button/ButtonIcon.jsx"
 import { CorvuPopover } from "#ui/interactive/popover/CorvuPopover.jsx"
 import { eventCategoryLabels } from "../events/eventCategoryLabels.ts"
-import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import { AdminEventFeedback } from "./AdminEventFeedback.tsx"
 import { AdminEventHighlightsFields } from "./AdminEventHighlightsFields.tsx"
 import { adminEventDetailsFormStateCreate } from "./adminEventDetailsFormStateCreate.ts"
 
-export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onSaved?: (eventKey: string) => void }) {
+export function AdminEventDetailsForm(props: {
+  state: AdminCatalogPageState
+  onSaved?: (eventKey: string) => void | Promise<void>
+}) {
   const state = adminEventDetailsFormStateCreate({ catalog: props.state, onSaved: props.onSaved })
 
   return (
@@ -212,14 +214,24 @@ export function AdminEventDetailsForm(props: { state: AdminCatalogPageState; onS
                 {state.imageUploadError()}
               </p>
             </Show>
-            <Show when={props.state.eventDraft().imageUrl}>
-              <img
-                class="mt-3 max-h-48 rounded-control object-cover"
-                src={eventImageUrlGet(
-                  props.state.eventDraft().imageVariants?.detail ?? props.state.eventDraft().imageUrl,
-                )}
-                alt="Vorschau des Eventbilds"
-              />
+            <Show when={state.imagePreview()} keyed>
+              {(preview) => (
+                <Show
+                  when={!preview.failed()}
+                  fallback={
+                    <p role="status" class="mt-3 text-sm text-content-muted">
+                      Bildvorschau nicht verfügbar.
+                    </p>
+                  }
+                >
+                  <img
+                    class="mt-3 max-h-48 rounded-control object-cover"
+                    src={preview.src}
+                    alt="Vorschau des Eventbilds"
+                    onError={preview.onError}
+                  />
+                </Show>
+              )}
             </Show>
           </fieldset>
         </div>
