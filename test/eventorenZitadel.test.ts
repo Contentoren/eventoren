@@ -41,51 +41,54 @@ test("exchanges the Zitadel callback code with the configured client authenticat
   })
 })
 
-test("redirects cookie-authenticated Zitadel callbacks without a session token in the URL", async () => {
-  await withEnvironment(async () => {
-    await withFetch(
-      async (input, init) => {
-        const request = new Request(input, init)
-        if (request.url.endsWith("/oauth/v2/token")) return Response.json({ access_token: "access-token" })
-        if (request.url.endsWith("/oidc/v1/userinfo")) return Response.json({ sub: "zitadel-user" })
-        return Response.json({
-          status: "success",
-          value: {
-            success: true,
-            data: {
-              token: "session-token",
-              profile: { userId: "user-1", name: "Ada", role: "user" },
-              hasPw: false,
-              signedInMethod: "zitadel",
-              signedInAt: "2026-09-22T00:00:00.000Z",
-              expiresAt: "2026-09-23T00:00:00.000Z",
+test.each(["/admin", "/admin/bestellungen?event=event-1&q=Ada%20Lovelace#orders"])(
+  "preserves returnTo=%s in cookie-authenticated Zitadel callbacks without a session token in the URL",
+  async (returnTo) => {
+    await withEnvironment(async () => {
+      await withFetch(
+        async (input, init) => {
+          const request = new Request(input, init)
+          if (request.url.endsWith("/oauth/v2/token")) return Response.json({ access_token: "access-token" })
+          if (request.url.endsWith("/oidc/v1/userinfo")) return Response.json({ sub: "zitadel-user" })
+          return Response.json({
+            status: "success",
+            value: {
+              success: true,
+              data: {
+                token: "session-token",
+                profile: { userId: "user-1", name: "Ada", role: "user" },
+                hasPw: false,
+                signedInMethod: "zitadel",
+                signedInAt: "2026-09-22T00:00:00.000Z",
+                expiresAt: "2026-09-23T00:00:00.000Z",
+              },
             },
-          },
-        })
-      },
-      async () => {
-        const startResponse = await eventorenZitadel.loginStart(
-          new Request("https://eventoren.example.test/login/zitadel?returnTo=%2Fadmin"),
-        )
-        const cookie = startResponse.headers.get("set-cookie")
-        const location = new URL(startResponse.headers.get("location") ?? "")
-        const callbackResponse = await eventorenZitadel.loginComplete(
-          new Request(
-            `https://eventoren.example.test/login/zitadel/callback?code=authorization-code&state=${location.searchParams.get("state")}`,
-            { headers: { cookie: cookie?.split(";", 1)[0] ?? "" } },
-          ),
-        )
+          })
+        },
+        async () => {
+          const startResponse = await eventorenZitadel.loginStart(
+            new Request(`https://eventoren.example.test/login/zitadel?${new URLSearchParams({ returnTo })}`),
+          )
+          const cookie = startResponse.headers.get("set-cookie")
+          const location = new URL(startResponse.headers.get("location") ?? "")
+          const callbackResponse = await eventorenZitadel.loginComplete(
+            new Request(
+              `https://eventoren.example.test/login/zitadel/callback?code=authorization-code&state=${location.searchParams.get("state")}`,
+              { headers: { cookie: cookie?.split(";", 1)[0] ?? "" } },
+            ),
+          )
 
-        const redirectUrl = new URL(callbackResponse.headers.get("location") ?? "")
-        expect(callbackResponse.status).toBe(302)
-        expect(redirectUrl.pathname).toBe("/sign-in")
-        expect(redirectUrl.searchParams.get("returnTo")).toBe("/admin")
-        expect(redirectUrl.searchParams.has("userSession")).toBe(false)
-        expect(callbackResponse.headers.get("set-cookie")).toContain("eventoren-session=session-token")
-      },
-    )
-  })
-})
+          const redirectUrl = new URL(callbackResponse.headers.get("location") ?? "")
+          expect(callbackResponse.status).toBe(302)
+          expect(redirectUrl.pathname).toBe("/sign-in")
+          expect(redirectUrl.searchParams.get("returnTo")).toBe(returnTo)
+          expect(redirectUrl.searchParams.has("userSession")).toBe(false)
+          expect(callbackResponse.headers.get("set-cookie")).toContain("eventoren-session=session-token")
+        },
+      )
+    })
+  },
+)
 
 test("does not start Zitadel login without an application signing secret", async () => {
   await withEnvironment(async () => {

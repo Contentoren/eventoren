@@ -18,8 +18,9 @@ export const Route = createFileRoute("/admin")({
     ...seoHeadCreate("/"),
     meta: [...seoHeadCreate("/").meta, { name: "robots", content: "noindex, nofollow" }],
   }),
-  loader: () =>
+  loader: ({ location }) =>
     adminRouteLoaderResolve({
+      returnTo: location.href,
       getAdminAccess,
       getCatalogEvents,
       redirect,

@@ -12,6 +12,7 @@ export type AdminRouteLoaderData<TEventsResult = unknown> =
     }
 
 export async function adminRouteLoaderResolve<TEventsResult>(inputs: {
+  readonly returnTo: string
   readonly getAdminAccess: () => Promise<Result<UserProfile>>
   readonly getCatalogEvents: () => Promise<TEventsResult>
   readonly redirect: (opts: { to: string; search?: Record<string, string> }) => unknown
@@ -21,7 +22,7 @@ export async function adminRouteLoaderResolve<TEventsResult>(inputs: {
     if (accessResult.errorMessage === "Eventoren-Adminrolle erforderlich") {
       return { authorized: false }
     }
-    throw inputs.redirect({ to: "/sign-in", search: { returnTo: "/admin" } })
+    throw inputs.redirect({ to: "/sign-in", search: { returnTo: inputs.returnTo } })
   }
   const eventsResult = await inputs.getCatalogEvents()
   return {

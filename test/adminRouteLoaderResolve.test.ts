@@ -5,6 +5,13 @@ import { adminRouteText } from "../src/admin/adminRouteText.ts"
 import type { UserProfile } from "../src/auth/model/UserProfile.ts"
 
 describe("admin route authorization", () => {
+  const returnToDestinations = [
+    "/admin",
+    "/admin/scanner-links",
+    "/admin/bestellungen?event=event-1&q=Ada%20Lovelace#orders",
+    "/admin/events/event-1?tab=products#tickets",
+  ]
+
   const sampleUserProfile = (role: UserProfile["role"]): UserProfile => ({
     userId: "test-user-1",
     name: "Test User",
@@ -19,6 +26,7 @@ describe("admin route authorization", () => {
     let redirectCalled = false
 
     const result = await adminRouteLoaderResolve({
+      returnTo: "/admin",
       getAdminAccess: async () => createResultError("eventorenAdminAccessRead", "Eventoren-Adminrolle erforderlich"),
       getCatalogEvents: async () => {
         catalogFetched = true
@@ -35,40 +43,45 @@ describe("admin route authorization", () => {
     expect(redirectCalled).toBe(false)
   })
 
-  test("redirects unauthenticated users to /sign-in with returnTo=/admin without fetching catalog events", async () => {
-    let catalogFetched = false
-    let redirectTarget: { to: string; search?: Record<string, string> } | undefined
+  test.each(returnToDestinations)(
+    "redirects unauthenticated users to /sign-in with returnTo=%s without fetching catalog events",
+    async (returnTo) => {
+      let catalogFetched = false
+      let redirectTarget: { to: string; search?: Record<string, string> } | undefined
 
-    try {
-      await adminRouteLoaderResolve({
-        getAdminAccess: async () => createResultError("eventorenAdminAccessRead", "Anmeldung erforderlich"),
-        getCatalogEvents: async () => {
-          catalogFetched = true
-          return { success: true as const, data: [] }
-        },
-        redirect: (opts) => {
-          redirectTarget = opts
-          throw new Error("REDIRECT_TRIGGERED")
-        },
+      try {
+        await adminRouteLoaderResolve({
+          returnTo,
+          getAdminAccess: async () => createResultError("eventorenAdminAccessRead", "Anmeldung erforderlich"),
+          getCatalogEvents: async () => {
+            catalogFetched = true
+            return { success: true as const, data: [] }
+          },
+          redirect: (opts) => {
+            redirectTarget = opts
+            throw new Error("REDIRECT_TRIGGERED")
+          },
+        })
+        expect().fail("expected redirect to be thrown")
+      } catch (error) {
+        expect((error as Error).message).toBe("REDIRECT_TRIGGERED")
+      }
+
+      expect(redirectTarget).toEqual({
+        to: "/sign-in",
+        search: { returnTo },
       })
-      expect().fail("expected redirect to be thrown")
-    } catch (error) {
-      expect((error as Error).message).toBe("REDIRECT_TRIGGERED")
-    }
+      expect(catalogFetched).toBe(false)
+    },
+  )
 
-    expect(redirectTarget).toEqual({
-      to: "/sign-in",
-      search: { returnTo: "/admin" },
-    })
-    expect(catalogFetched).toBe(false)
-  })
-
-  test("redirects any other failed access check to /sign-in with returnTo=/admin", async () => {
+  test.each(returnToDestinations)("redirects invalid sessions to /sign-in with returnTo=%s", async (returnTo) => {
     let catalogFetched = false
     let redirectTarget: { to: string; search?: Record<string, string> } | undefined
 
     try {
       await adminRouteLoaderResolve({
+        returnTo,
         getAdminAccess: async () => createResultError("eventorenAdminAccessRead", "Sitzung ungültig"),
         getCatalogEvents: async () => {
           catalogFetched = true
@@ -86,7 +99,7 @@ describe("admin route authorization", () => {
 
     expect(redirectTarget).toEqual({
       to: "/sign-in",
-      search: { returnTo: "/admin" },
+      search: { returnTo },
     })
     expect(catalogFetched).toBe(false)
   })
@@ -96,6 +109,7 @@ describe("admin route authorization", () => {
     const mockEvents = { success: true as const, data: [] }
 
     const result = await adminRouteLoaderResolve({
+      returnTo: "/admin",
       getAdminAccess: async () => createResult(sampleUserProfile("admin")),
       getCatalogEvents: async () => {
         catalogFetched = true
@@ -121,6 +135,7 @@ describe("admin route authorization", () => {
     }
 
     const result = await adminRouteLoaderResolve({
+      returnTo: "/admin",
       getAdminAccess: async () => createResult(sampleUserProfile("admin")),
       getCatalogEvents: async () => catalogFailure,
       redirect: () => {
