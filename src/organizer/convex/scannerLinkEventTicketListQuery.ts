@@ -42,7 +42,7 @@ export const scannerLinkEventTicketListQuery = query({
       .order("asc")
       .paginate({ cursor: cursor.data, numItems: pageSize, maximumRowsRead: pageSize, maximumBytesRead: 512 * 1024 })
     const orderIds = [...new Set(sourcePage.page.map((ticket) => ticket.orderId))]
-    const orders = await Promise.all(orderIds.map((id) => ctx.db.get(id)))
+    const orders = await Promise.all(orderIds.map((id) => ctx.db.get("ticketOrders", id)))
     const ordersById = new Map<string, Doc<"ticketOrders"> | null>()
     for (const [index, id] of orderIds.entries()) ordersById.set(id, orders[index] ?? null)
     const page: TicketItem[] = []

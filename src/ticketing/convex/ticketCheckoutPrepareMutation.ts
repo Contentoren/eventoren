@@ -370,7 +370,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         feeCents: line.feeCents,
         createdAt: now,
       })
-      const tier = await ctx.db.get(line.tierId)
+      const tier = await ctx.db.get("catalogTicketTiers", line.tierId)
       if (!tier) return createResultError(op, "The ticket tier disappeared during reservation")
       await ctx.db.patch("catalogTicketTiers", line.tierId, {
         reserved: tier.reserved + line.quantity,

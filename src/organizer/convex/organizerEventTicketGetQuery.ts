@@ -27,10 +27,10 @@ export const organizerEventTicketGetQuery = query({
       const eventAuthorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt)
       if (!eventAuthorization.success) return eventAuthorization
 
-      const ticket = await queryCtx.db.get(args.ticketId)
+      const ticket = await queryCtx.db.get("ticketIssued", args.ticketId)
       if (!ticket || ticket.eventKey !== event.eventKey)
         return createResultError("organizerEventTicketGetQuery", "The ticket was not found")
-      const order = await queryCtx.db.get(ticket.orderId)
+      const order = await queryCtx.db.get("ticketOrders", ticket.orderId)
       if (!order || order.eventKey !== event.eventKey)
         return createResultError("organizerEventTicketGetQuery", "The ticket was not found")
 

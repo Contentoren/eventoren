@@ -13,7 +13,7 @@ export const ticketOrderGetQuery = query({
   handler: async (ctx, args): PromiseResult<unknown> => {
     const accessResult = await ticketOrderAccessResolve(args)
     if (!accessResult.success) return accessResult
-    const order = await ctx.db.get(args.orderId)
+    const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError("ticketOrderGetQuery", "The order was not found")
     const authorized =
       (accessResult.data.userId !== undefined && order.ownerUserId === accessResult.data.userId) ||

@@ -29,7 +29,7 @@ export const catalogCategoryCreateMutation = mutation({
         .query("catalogHiddenCategories")
         .withIndex("category", (query) => query.eq("category", category))
         .unique()
-      if (hidden) await authorizedCtx.db.delete(hidden._id)
+      if (hidden) await authorizedCtx.db.delete("catalogHiddenCategories", hidden._id)
       return createResult(undefined)
     }),
 })

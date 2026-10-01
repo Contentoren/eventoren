@@ -90,7 +90,6 @@ export const ticketTables = {
     .index("eventKeyAndBookingNumber", ["eventKey", "bookingNumber"])
     .searchIndex("contactSnapshotJson", { searchField: "contactSnapshotJson", filterFields: ["eventKey"] })
     .index("emailAccessDigest", ["emailAccessDigest"])
-    .index("ownerUserId", ["ownerUserId"])
     .index("ownerUserIdAndCreatedAt", ["ownerUserId", "createdAt"]),
 
   ticketOrderDeliveries: defineTable({

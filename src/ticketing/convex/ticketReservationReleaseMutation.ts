@@ -9,7 +9,7 @@ export const ticketReservationReleaseMutation = internalMutation({
     reason: v.string(),
   },
   handler: async (ctx, args): PromiseResult<{ orderId: string; released: boolean }> => {
-    const order = await ctx.db.get(args.orderId)
+    const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError("ticketReservationReleaseMutation", "The order was not found")
     if (order.status === "paid" || order.paymentStatus === "paid")
       return createResultError("ticketReservationReleaseMutation", "Paid inventory cannot be released")

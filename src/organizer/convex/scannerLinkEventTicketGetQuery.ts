@@ -9,10 +9,10 @@ export const scannerLinkEventTicketGetQuery = query({
   handler: async (ctx, { code, eventKey, ticketId }) => {
     const allowed = await scannerLinkEventAuthorizeFn(ctx, code, eventKey)
     if (!allowed.success) return allowed
-    const ticket = await ctx.db.get(ticketId)
+    const ticket = await ctx.db.get("ticketIssued", ticketId)
     if (!ticket || ticket.eventKey !== eventKey)
       return createResultError("scannerLinkEventTicketGetQuery", "Ticket unavailable")
-    const order = await ctx.db.get(ticket.orderId)
+    const order = await ctx.db.get("ticketOrders", ticket.orderId)
     if (!order || order.eventKey !== eventKey)
       return createResultError("scannerLinkEventTicketGetQuery", "Ticket unavailable")
     const event = await ctx.db

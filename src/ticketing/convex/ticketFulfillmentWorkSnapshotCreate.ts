@@ -12,7 +12,7 @@ export async function ticketFulfillmentWorkSnapshotCreate(
   billingOrderReference: string,
 ): PromiseResult<TicketFulfillmentWorkSnapshot> {
   const op = "ticketFulfillmentWorkSnapshotCreate"
-  const order = await ctx.db.get(orderId)
+  const order = await ctx.db.get("ticketOrders", orderId)
   if (!order) return createResultError(op, "The order was not found")
   const tickets = await ctx.db
     .query("ticketIssued")

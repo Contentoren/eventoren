@@ -6,7 +6,7 @@ import { createResult, createResultError, type PromiseResult } from "#result"
 export const ticketReservationDeferMutation = internalMutation({
   args: { orderId: v.id("ticketOrders"), reason: v.string() },
   handler: async (ctx, args): PromiseResult<{ deferred: boolean }> => {
-    const order = await ctx.db.get(args.orderId)
+    const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError("ticketReservationDeferMutation", "The order was not found")
     if (
       order.status === "paid" ||

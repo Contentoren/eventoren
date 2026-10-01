@@ -6,7 +6,7 @@ export const ticketFulfillmentWorkOnlineUrlEnsureMutation = internalMutation({
   args: { workId: v.id("ticketFulfillmentWork"), onlineTicketUrl: v.string() },
   handler: async (ctx, args): PromiseResult<{ onlineTicketUrl: string; replayed: boolean }> => {
     const op = "ticketFulfillmentWorkOnlineUrlEnsureMutation"
-    const work = await ctx.db.get(args.workId)
+    const work = await ctx.db.get("ticketFulfillmentWork", args.workId)
     if (!work) return createResultError(op, "The fulfillment work was not found")
     if (work.onlineTicketUrl !== undefined)
       return createResult({ onlineTicketUrl: work.onlineTicketUrl, replayed: true })

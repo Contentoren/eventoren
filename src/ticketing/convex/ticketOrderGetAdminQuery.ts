@@ -11,7 +11,7 @@ export const ticketOrderGetAdminQuery = query({
       const op = "ticketOrderGetAdminQuery"
       const user = await authorizedCtx.db.get("users", authorizedArgs.userId)
       if (!user || !userRoleIsAdmin(user.role)) return createResultError(op, "Admin role required")
-      const order = await authorizedCtx.db.get(args.orderId)
+      const order = await authorizedCtx.db.get("ticketOrders", args.orderId)
       if (!order) return createResultError(op, "Bestellung nicht gefunden")
       const lines = await authorizedCtx.db
         .query("ticketOrderLines")

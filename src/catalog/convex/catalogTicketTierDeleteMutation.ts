@@ -49,7 +49,7 @@ async function catalogTicketTierDeleteAuthorizedFn(
   if (tier.sold > 0) {
     await ctx.db.patch("catalogTicketTiers", tier._id, { archivedAt: now, catalogVersion, updatedAt: now })
   } else {
-    await ctx.db.delete(tier._id)
+    await ctx.db.delete("catalogTicketTiers", tier._id)
   }
   const eventRevision = (event.eventRevision ?? 1) + 1
   await ctx.db.patch("catalogEvents", event._id, { catalogVersion, eventRevision, updatedAt: now })

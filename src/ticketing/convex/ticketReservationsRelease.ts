@@ -13,7 +13,7 @@ export async function ticketReservationsRelease(
     .collect()
   for (const reservation of reservations) {
     if (reservation.status !== "active") continue
-    const tier = await ctx.db.get(reservation.tierId)
+    const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
     if (!tier || tier.reserved < reservation.quantity)
       return createResultError("ticketReservationsRelease", "Reserved inventory is corrupt")
     await ctx.db.patch("catalogTicketTiers", tier._id, { reserved: tier.reserved - reservation.quantity })

@@ -32,7 +32,7 @@ export async function synchronizeUserZitadelRolesFn(
       : (organizerInvitedAt ?? new Date().toISOString())
     : undefined
 
-  await ctx.db.patch(userId, {
+  await ctx.db.patch("users", userId, {
     zitadelUserId: providerId,
     ...(roleSyncEnabled !== undefined ? { zitadelRolesFromIdToken: roleSyncEnabled || undefined } : {}),
     ...(isProviderManaged ? { roleSource: userRoleSource.zitadel } : { roleSource: undefined }),

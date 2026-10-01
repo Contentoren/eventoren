@@ -65,7 +65,7 @@ export const organizerEventTicketListQuery = query({
         })
 
       const orderIds = [...new Set(sourcePage.page.map((ticket) => ticket.orderId))]
-      const orders = await Promise.all(orderIds.map((orderId) => queryCtx.db.get(orderId)))
+      const orders = await Promise.all(orderIds.map((orderId) => queryCtx.db.get("ticketOrders", orderId)))
       const ordersById = new Map<string, Doc<"ticketOrders"> | null>()
       for (const [index, orderId] of orderIds.entries()) ordersById.set(orderId, orders[index] ?? null)
 

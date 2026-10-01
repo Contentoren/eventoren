@@ -15,7 +15,7 @@ export const ticketReservationExpirationContextQuery = internalQuery({
     paymentStatus: "pending" | "paid" | "failed" | "expired"
     checkoutAttemptLeaseUntil?: number
   }> => {
-    const order = await ctx.db.get(args.orderId)
+    const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError("ticketReservationExpirationContextQuery", "The order was not found")
     return createResult({
       paymentReference: order.paymentReference,

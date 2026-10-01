@@ -26,7 +26,7 @@ export const ticketReservationExpireMutation = internalMutation({
     paid: boolean
   }> => {
     const op = "ticketReservationExpireMutation"
-    const order = await ctx.db.get(args.orderId)
+    const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError(op, "The order was not found")
     if (
       order.paymentReference !== args.paymentReference ||

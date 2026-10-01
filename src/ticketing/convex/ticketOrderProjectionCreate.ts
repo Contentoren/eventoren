@@ -5,7 +5,7 @@ import { createResult, createResultErrorCode } from "#result"
 const maxOrderItems = 10
 
 export async function ticketOrderProjectionCreate(ctx: QueryCtx, orderId: Id<"ticketOrders">) {
-  const order = await ctx.db.get(orderId)
+  const order = await ctx.db.get("ticketOrders", orderId)
   if (!order) return null
   const lines = await ctx.db
     .query("ticketOrderLines")

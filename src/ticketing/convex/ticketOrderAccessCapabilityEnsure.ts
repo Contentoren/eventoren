@@ -8,7 +8,7 @@ export async function ticketOrderAccessCapabilityEnsure(
   orderId: Id<"ticketOrders">,
 ): PromiseResult<{ accessToken: string; accessDigest: string }> {
   const op = "ticketOrderAccessCapabilityEnsure"
-  const order = await ctx.db.get(orderId)
+  const order = await ctx.db.get("ticketOrders", orderId)
   if (!order) return createResultError(op, "The order was not found")
   if (order.status !== "paid" || order.paymentStatus !== "paid")
     return createResultError(op, "Ticket access is available only for paid orders")

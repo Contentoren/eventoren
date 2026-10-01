@@ -15,9 +15,9 @@ export const scannerLinkTicketCheckInHistoryPaginatedQuery = query({
     const op = "scannerLinkTicketCheckInHistoryPaginatedQuery"
     const allowed = await scannerLinkEventAuthorizeFn(ctx, args.code, args.eventKey)
     if (!allowed.success) return allowed
-    const ticket = await ctx.db.get(args.ticketId)
+    const ticket = await ctx.db.get("ticketIssued", args.ticketId)
     if (!ticket || ticket.eventKey !== args.eventKey) return createResultError(op, "Ticket unavailable")
-    const order = await ctx.db.get(ticket.orderId)
+    const order = await ctx.db.get("ticketOrders", ticket.orderId)
     if (!order || order.eventKey !== args.eventKey) return createResultError(op, "Ticket unavailable")
     const cursor = scannerLinkHistoryCursorRead(args.cursor, allowed.data._id, ticket._id)
     if (!cursor.success) return cursor

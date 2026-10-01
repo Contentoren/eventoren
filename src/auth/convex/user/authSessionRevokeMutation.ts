@@ -12,6 +12,6 @@ async function authSessionRevokeFn(ctx: MutationCtx, token: string): Promise<boo
     .withIndex("token", (q) => q.eq("token", token))
     .unique()
   if (!session) return false
-  await ctx.db.delete(session._id)
+  await ctx.db.delete("authSessions", session._id)
   return true
 }

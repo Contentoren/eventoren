@@ -9,7 +9,7 @@ export async function ticketFulfillmentWorkEnsure(
   billingOrderReference: string,
 ): PromiseResult<{ workId: Id<"ticketFulfillmentWork">; created: boolean }> {
   const op = "ticketFulfillmentWorkEnsure"
-  const order = await ctx.db.get(orderId)
+  const order = await ctx.db.get("ticketOrders", orderId)
   if (!order) return createResultError(op, "The order was not found")
   if (order.status !== "paid" || order.paymentStatus !== "paid" || order.fulfillmentEligible !== true)
     return createResultError(op, "The order is not eligible for fulfillment")

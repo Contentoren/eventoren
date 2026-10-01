@@ -5,7 +5,7 @@ import { createResult, createResultError, type PromiseResult } from "#result"
 export const ticketFulfillmentWorkPreparedMutation = internalMutation({
   args: { workId: v.id("ticketFulfillmentWork"), fulfillmentReference: v.string() },
   handler: async (ctx, args): PromiseResult<{ prepared: true; replayed: boolean }> => {
-    const work = await ctx.db.get(args.workId)
+    const work = await ctx.db.get("ticketFulfillmentWork", args.workId)
     if (!work) return createResultError("ticketFulfillmentWorkPreparedMutation", "The fulfillment work was not found")
     if (work.status === "prepared") return createResult({ prepared: true, replayed: true })
     const now = new Date().toISOString()

@@ -20,7 +20,7 @@ export async function organizerTicketCheckInTargetResolve(
 
   let ticket: Doc<"ticketIssued"> | undefined
   if (target.ticketId !== undefined) {
-    ticket = (await ctx.db.get(target.ticketId)) ?? undefined
+    ticket = (await ctx.db.get("ticketIssued", target.ticketId)) ?? undefined
     if (!ticket)
       return organizerTicketCheckInErrorCreate(op, "organizer.check-in.unknown-ticket", "The ticket was not found", {
         ticketId: target.ticketId,
@@ -78,7 +78,7 @@ export async function organizerTicketCheckInTargetResolve(
       },
     )
 
-  const order = await ctx.db.get(ticket.orderId)
+  const order = await ctx.db.get("ticketOrders", ticket.orderId)
   if (!order)
     return organizerTicketCheckInErrorCreate(
       op,

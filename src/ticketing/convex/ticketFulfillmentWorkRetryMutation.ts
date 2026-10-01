@@ -6,7 +6,7 @@ import { createResult, createResultError, type PromiseResult } from "#result"
 export const ticketFulfillmentWorkRetryMutation = internalMutation({
   args: { workId: v.id("ticketFulfillmentWork"), errorMessage: v.string() },
   handler: async (ctx, args): PromiseResult<{ retryAt: number }> => {
-    const work = await ctx.db.get(args.workId)
+    const work = await ctx.db.get("ticketFulfillmentWork", args.workId)
     if (!work) return createResultError("ticketFulfillmentWorkRetryMutation", "The fulfillment work was not found")
     if (work.status === "prepared") return createResult({ retryAt: work.nextAttemptAt })
     const delay = Math.min(60 * 60 * 1000, 5 * 60 * 1000 * 2 ** Math.min(work.attemptCount, 6))

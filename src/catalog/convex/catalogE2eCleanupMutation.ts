@@ -168,7 +168,7 @@ async function catalogE2eCleanupAuthorized(
           catalogVersion: version.data,
           updatedAt: now,
         })
-      else await ctx.db.delete(tier._id)
+      else await ctx.db.delete("catalogTicketTiers", tier._id)
     }
     if (!event.deletedAt)
       await ctx.db.patch("catalogEvents", event._id, {

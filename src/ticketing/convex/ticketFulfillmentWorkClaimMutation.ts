@@ -6,7 +6,7 @@ export const ticketFulfillmentWorkClaimMutation = internalMutation({
   args: { workId: v.id("ticketFulfillmentWork") },
   handler: async (ctx, args): PromiseResult<{ claimed: boolean; status: "pending" | "preparing" | "prepared" }> => {
     const op = "ticketFulfillmentWorkClaimMutation"
-    const work = await ctx.db.get(args.workId)
+    const work = await ctx.db.get("ticketFulfillmentWork", args.workId)
     if (!work) return createResultError(op, "The fulfillment work was not found")
     if (work.status === "prepared") return createResult({ claimed: false, status: work.status })
     if (work.nextAttemptAt > Date.now()) return createResult({ claimed: false, status: work.status })

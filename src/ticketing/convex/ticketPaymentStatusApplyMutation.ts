@@ -29,7 +29,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
     ticketCount: number
   }> => {
     const op = "ticketPaymentStatusApplyMutation"
-    const order = await ctx.db.get(args.orderId)
+    const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError(op, "The order was not found")
     if (
       order.paymentReference !== args.paymentReference ||
@@ -116,7 +116,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         .collect()
       for (const reservation of reservations) {
         if (reservation.status !== "active") continue
-        const tier = await ctx.db.get(reservation.tierId)
+        const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
         if (!tier || tier.reserved < reservation.quantity) return createResultError(op, "Reserved inventory is corrupt")
         await ctx.db.patch("catalogTicketTiers", tier._id, { reserved: tier.reserved - reservation.quantity })
         await ctx.db.patch("ticketReservations", reservation._id, {
@@ -206,7 +206,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
 
     let hasCapacityConflict = false
     for (const reservation of activeReservations) {
-      const tier = await ctx.db.get(reservation.tierId)
+      const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
       if (!tier || tier.sold + reservation.quantity > tier.capacity) {
         hasCapacityConflict = true
         break
@@ -214,7 +214,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
     }
     if (hasCapacityConflict) {
       for (const reservation of activeReservations) {
-        const tier = await ctx.db.get(reservation.tierId)
+        const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
         if (tier) {
           await ctx.db.patch("catalogTicketTiers", tier._id, {
             reserved: Math.max(0, tier.reserved - reservation.quantity),
@@ -250,7 +250,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
     }
 
     for (const reservation of activeReservations) {
-      const tier = await ctx.db.get(reservation.tierId)
+      const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
       if (!tier || tier.reserved < reservation.quantity)
         return createResultError(op, "Paid inventory reservation is corrupt")
       await ctx.db.patch("catalogTicketTiers", tier._id, {

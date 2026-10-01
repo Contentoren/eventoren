@@ -59,7 +59,7 @@ export async function organizerTicketCheckInApply(
     buyerName: ticketProjection.buyerName,
     buyerEmail: order.customerEmail,
   })
-  const updatedTicket = await ctx.db.get(ticket._id)
+  const updatedTicket = await ctx.db.get("ticketIssued", ticket._id)
   if (!updatedTicket)
     return organizerTicketCheckInErrorCreate(op, "organizer.check-in.invalid-ticket", "The ticket disappeared")
   console.info("Ticket checked in", {

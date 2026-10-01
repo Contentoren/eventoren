@@ -19,9 +19,9 @@ export const ticketFulfillmentWorkContextQuery = internalQuery({
     status: "pending" | "preparing" | "prepared"
   }> => {
     const op = "ticketFulfillmentWorkContextQuery"
-    const work = await ctx.db.get(args.workId)
+    const work = await ctx.db.get("ticketFulfillmentWork", args.workId)
     if (!work) return createResultError(op, "The fulfillment work was not found")
-    const order = await ctx.db.get(work.orderId)
+    const order = await ctx.db.get("ticketOrders", work.orderId)
     if (!order) return createResultError(op, "The fulfillment order was not found")
     if (order.status !== "paid" || order.paymentStatus !== "paid" || order.fulfillmentEligible !== true)
       return createResultError(op, "The fulfillment order is no longer eligible")

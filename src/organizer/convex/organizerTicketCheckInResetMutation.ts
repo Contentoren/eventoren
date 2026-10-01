@@ -62,7 +62,7 @@ export const organizerTicketCheckInResetMutation = mutation({
         buyerName: ticketProjection.buyerName,
         buyerEmail: order.customerEmail,
       })
-      const updatedTicket = await mutationCtx.db.get(ticket._id)
+      const updatedTicket = await mutationCtx.db.get("ticketIssued", ticket._id)
       if (!updatedTicket)
         return organizerTicketCheckInErrorCreate(op, "organizer.check-in.invalid-ticket", "The ticket disappeared")
       return createResult({

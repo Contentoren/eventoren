@@ -16,7 +16,7 @@ export const authLegacyDevUsersMigrateInternalMutation = internalMutation({
       // Historical records can still contain this value even though the active schema cannot create it.
       const storedRole: string = user.role
       if (storedRole !== "dev") continue
-      await ctx.db.patch(user._id, { role: userRole.admin, updatedAt: new Date().toISOString() })
+      await ctx.db.patch("users", user._id, { role: userRole.admin, updatedAt: new Date().toISOString() })
       migrated += 1
     }
     console.log("Legacy dev role migration batch completed", {

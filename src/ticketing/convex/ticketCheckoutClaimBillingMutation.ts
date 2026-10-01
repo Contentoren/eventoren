@@ -9,7 +9,7 @@ export const ticketCheckoutClaimBillingMutation = internalMutation({
   },
   handler: async (ctx, args): PromiseResult<{ claimed: boolean }> => {
     const op = "ticketCheckoutClaimBillingMutation"
-    const order = await ctx.db.get(args.orderId)
+    const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError(op, "The order was not found")
     if (order.paymentReference !== args.paymentReference) return createResultError(op, "Payment reference mismatch")
     if (order.status !== "reserved") return createResultError(op, "The order is no longer awaiting Billing")

@@ -17,7 +17,7 @@ export const ticketOrderPaymentContextQuery = internalQuery({
     stripeMode: "live" | "test"
     billingOrderReference?: string
   }> => {
-    const order = await ctx.db.get(args.orderId)
+    const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError("ticketOrderPaymentContextQuery", "The order was not found")
     const authorized =
       (args.ownerUserId !== undefined && args.ownerUserId === order.ownerUserId) ||

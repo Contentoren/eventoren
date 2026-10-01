@@ -12,6 +12,6 @@ export const authUserRoleSetInternalMutation = internalMutation({
 async function authUserRoleSetFn(ctx: MutationCtx, userId: IdUser, role: DocUser["role"]): Promise<DocUser | null> {
   const user = await ctx.db.get("users", userId)
   if (!user) return null
-  await ctx.db.patch(userId, { role, updatedAt: new Date().toISOString() })
+  await ctx.db.patch("users", userId, { role, updatedAt: new Date().toISOString() })
   return await ctx.db.get("users", userId)
 }

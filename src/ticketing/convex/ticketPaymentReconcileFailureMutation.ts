@@ -11,7 +11,7 @@ export const ticketPaymentReconcileFailureMutation = internalMutation({
   },
   handler: async (ctx, args): PromiseResult<{ recorded: boolean }> => {
     const op = "ticketPaymentReconcileFailureMutation"
-    const order = await ctx.db.get(args.orderId)
+    const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError(op, "The order was not found")
     if (order.paymentReference !== args.paymentReference || order.stripeMode !== args.stripeMode)
       return createResultError(op, "The payment correlation does not match the order")
