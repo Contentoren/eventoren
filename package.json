@@ -87,8 +87,8 @@
     "convex:logs:production": "bun ./node_modules/convex/bin/main.js logs --env-file .env.production"
   },
   "dependencies": {
-    "@tanstack/solid-router": "^1.170.36",
-    "@tanstack/solid-start": "^1.168.55",
+    "@tanstack/solid-router": "^1.170.38",
+    "@tanstack/solid-start": "^1.168.57",
     "cn": "^0.4.0",
     "gray-matter": "^4.0.3",
     "marked": "^18.0.14",
@@ -111,31 +111,31 @@
     "@solid-primitives/scheduled": "^1.5.3",
     "@zxing/browser": "^0.2.1",
     "@zxing/library": "^0.23.0",
-    "nodemailer": "^10.0.10"
+    "nodemailer": "^10.0.13"
   },
   "devDependencies": {
     "@adaptive-ds/assets-optimizer": "^0.20.0",
-    "@biomejs/biome": "^2.5.14",
+    "@biomejs/biome": "^2.5.15",
     "@edge-runtime/vm": "^5.0.0",
-    "@rstest/core": "^0.12.2",
-    "@rstest/playwright": "^0.12.2",
+    "@rstest/core": "^0.12.3",
+    "@rstest/playwright": "^0.12.3",
     "@tailwindcss/vite": "^4.3.3",
     "@types/bun": "^1.4.2",
-    "@types/mailparser": "^3.4.6",
+    "@types/mailparser": "^3.9.0",
     "@types/node": "^26.6.3",
     "ai-src": "^0.1.0",
     "convex-test": "^0.0.60",
-    "dotenv": "^18.0.4",
-    "imapflow": "^2.0.7",
-    "mailparser": "^3.9.28",
+    "dotenv": "^18.0.5",
+    "imapflow": "^2.1.2",
+    "mailparser": "^3.9.32",
     "playwright": "^1.63.0",
     "tailwindcss": "^4.3.3",
     "ts-morph": "^28.0.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vite-plugin-solid": "^2.11.14",
-    "vitest": "^5.0.2",
-    "wrangler": "^4.141.0"
+    "vitest": "^5.0.3",
+    "wrangler": "^4.145.0"
   },
   "prettier": {
     "semi": false,
