@@ -12,6 +12,7 @@ export { catalogEventListPublishedPageQuery } from "#src/catalog/convex/catalogE
 export { catalogEventListPublishedQuery } from "#src/catalog/convex/catalogEventListPublishedQuery.ts"
 export { catalogEventPublishMutation } from "#src/catalog/convex/catalogEventPublishMutation.ts"
 export { catalogEventUpsertMutation } from "#src/catalog/convex/catalogEventUpsertMutation.ts"
+export { catalogPilatesImageBackfillInternalMutation } from "#src/catalog/convex/catalogPilatesImageBackfillInternalMutation.ts"
 export { catalogImageStageCreateMutation } from "#src/catalog/convex/catalogImageStageCreateMutation.ts"
 export { catalogImageStageClaimMutation } from "#src/catalog/convex/catalogImageStageClaimMutation.ts"
 export { catalogImageStageExpireMutation } from "#src/catalog/convex/catalogImageStageExpireMutation.ts"
