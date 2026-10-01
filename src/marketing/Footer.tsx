@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/solid-router"
 
 export function Footer(props: { readonly linkHref?: (href: string) => string } = {}) {
-  const link = (href: string, label: string, className = "mr-4 underline") =>
+  const link = (href: string, label: string, className = "underline") =>
     props.linkHref ? (
       <a href={props.linkHref(href)} class={className}>
         {label}
@@ -14,7 +14,7 @@ export function Footer(props: { readonly linkHref?: (href: string) => string } =
 
   return (
     <footer class="border-t p-4 text-sm">
-      <nav aria-label="Rechtliche Informationen">
+      <nav aria-label="Rechtliche Informationen" class="flex flex-wrap gap-x-4 gap-y-2">
         {link("/impressum", "Impressum")}
         {link("/datenschutz", "Datenschutz")}
         {link("/terms", "AGB")}

@@ -1,10 +1,12 @@
 import { Link } from "@tanstack/solid-router"
+import { imageList } from "../app/assets/imageList.ts"
+import { urlImage } from "../app/assets/urlImage.ts"
 import { classMerge } from "../ui/classMerge.ts"
 
 export function SiteHeaderLogo(props: { class?: string; href?: string } = {}) {
   const content = () => (
     <img
-      src="/eventoren-logo-light.png"
+      src={urlImage(imageList.eventoren_logo_light2)}
       alt="Eventoren"
       width="1024"
       height="206"
