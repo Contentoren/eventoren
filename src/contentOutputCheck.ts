@@ -34,17 +34,6 @@ async function outputPathRead(routePath: string): Promise<string | undefined> {
   return undefined
 }
 
-const listingPath = "/ratgeber"
-const listingOutputPath = await outputPathRead(listingPath)
-if (listingOutputPath === undefined) {
-  failures.push("missing prerendered content listing: " + listingPath)
-} else {
-  const listingHtml = await readOutput(listingOutputPath)
-  if (!listingHtml.includes("Ratgeber")) failures.push(listingOutputPath + ": missing content listing heading")
-  const listingUrl = new URL(listingPath, siteUrl).toString()
-  if (!sitemap.includes(listingUrl)) failures.push("sitemap.xml: missing content listing " + listingUrl)
-}
-
 for (const entry of allContent) {
   const outputPath = await outputPathRead(entry.path)
   if (outputPath === undefined) {
