@@ -14,7 +14,7 @@ export async function ssoCallbackVerify(page: Page, baseUrl: string, callbacks: 
   const destination = new URL(callback.headers().location ?? "/missing-callback-location", baseUrl)
   expect(destination.origin).toBe(new URL(baseUrl).origin)
   expect(destination.pathname).toBe("/sign-in")
-  expect(destination.searchParams.get("returnTo")).toBe("/admin")
+  expect(destination.searchParams.get("returnTo")).toBe("/admin/bestellungen")
   await expect(page).toHaveURL(new URL("/admin/bestellungen", baseUrl).toString(), { timeout: 60_000 })
   await expect(
     page.getByText(
