@@ -3,7 +3,9 @@ import type { JSX, ParentComponent } from "solid-js"
 import { For, Show } from "solid-js"
 import { Dynamic } from "solid-js/web"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
+import { Img } from "#ui/static/img/Img.jsx"
 import { SiteFrame } from "../components/SiteFrame.tsx"
+import { eventImageErrorHandle } from "../events/eventImageErrorHandle.ts"
 import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { adminListViewPreferenceContextUse } from "../viewPreference/adminListViewPreferenceContextUse.ts"
@@ -74,11 +76,10 @@ export function OrganizerEventListPage(props: {
                                 : "focus-ring flex items-center gap-space-3 p-space-2 sm:gap-space-4 sm:p-space-3"
                             }
                           >
-                            <img
+                            <Img
                               src={eventImageUrlGet(event.imageVariants?.organizer ?? event.imageUrl)}
                               alt={event.imageAlt}
-                              loading="lazy"
-                              decoding="async"
+                              onError={eventImageErrorHandle}
                               class={
                                 viewPreference?.view() === "tiles"
                                   ? "aspect-[16/9] w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
