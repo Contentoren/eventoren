@@ -47,6 +47,7 @@ export const organizerEventListQuery = query({
       })
       const page: ReturnType<typeof organizerEventProjectionCreate>[] = []
       for (const event of sourcePage.page) {
+        if (event.status !== "published" || event.deletedAt !== undefined) continue
         const authorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt)
         if (!authorization.success) continue
         page.push(organizerEventProjectionCreate(event))

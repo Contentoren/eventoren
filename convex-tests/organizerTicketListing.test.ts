@@ -1,7 +1,7 @@
 /// <reference types="vite/client" />
 
 import { convexTest } from "convex-test"
-import { expect, test } from "vitest"
+import { afterEach, expect, test, vi } from "vitest"
 import { api } from "../convex/_generated/api.js"
 import type { Doc, Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
@@ -10,6 +10,10 @@ import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
 const modules = import.meta.glob("../convex/**/*.ts")
 const authSecret = "organizer-ticket-listing-convex-test-secret"
 process.env.AUTH_SECRET = authSecret
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 type EventInsert = Omit<Doc<"catalogEvents">, "_id" | "_creationTime">
 
@@ -219,6 +223,84 @@ test("organizer event pages continue past unauthorized source rows and bind curs
     paginationOpts: { numItems: 2, cursor: first.data.continueCursor },
   })
   expect(mismatchedCursor.success).toBe(false)
+})
+
+test.each(["organizer", "admin"] as const)(
+  "organizer event listing excludes draft, archived, and deleted events for %s",
+  async (role) => {
+    const t = convexTest(schema, modules)
+    const ids = await seed(t)
+    await t.run(async (ctx) => {
+      await ctx.db.insert("catalogEvents", {
+        ...eventInsert("draft-event", "2099-01-01T18:00:00.000Z"),
+        status: "draft",
+      })
+      await ctx.db.insert("catalogEvents", {
+        ...eventInsert("archived-event", "2099-01-01T18:00:01.000Z"),
+        status: "archived",
+      })
+      await ctx.db.insert("catalogEvents", {
+        ...eventInsert("deleted-published-event", "2099-01-01T18:00:02.000Z"),
+        deletedAt: "2026-09-16T00:00:00.000Z",
+      })
+    })
+
+    const result = await t.query(api.organizer.organizerEventListQuery, {
+      token: await tokenFor(ids[`${role}Id`]),
+      paginationOpts: { numItems: 50, cursor: null },
+    })
+
+    expect(result.success).toBe(true)
+    if (!result.success) return
+    expect(result.data.page.map((event) => event.eventKey)).toEqual(
+      role === "admin"
+        ? ["old-event", "before-invitation", "exact-invitation", "after-invitation"]
+        : ["exact-invitation", "after-invitation"],
+    )
+  },
+)
+
+test("organizer event pages continue past filtered source rows to include past published events", async () => {
+  vi.useFakeTimers()
+  vi.setSystemTime(new Date("2026-10-01T12:00:00.000Z"))
+  const t = convexTest(schema, modules)
+  const ids = await seed(t)
+  await t.run(async (ctx) => {
+    await ctx.db.patch("catalogEvents", ids.oldEventId, { status: "draft", startsAt: "2026-09-15T12:00:01.000Z" })
+    await ctx.db.patch("catalogEvents", ids.beforeEventId, {
+      status: "archived",
+      startsAt: "2026-09-15T12:00:02.000Z",
+    })
+    await ctx.db.patch("catalogEvents", ids.exactEventId, {
+      startsAt: "2026-09-15T12:00:03.000Z",
+      deletedAt: "2026-09-16T00:00:00.000Z",
+    })
+    await ctx.db.patch("catalogEvents", ids.afterEventId, {
+      startsAt: "2026-09-15T12:00:04.000Z",
+      endsAt: "2026-09-15T13:00:00.000Z",
+      doorsAt: "2026-09-15T12:00:00.000Z",
+    })
+  })
+  const token = await tokenFor(ids.organizerId)
+
+  const first = await t.query(api.organizer.organizerEventListQuery, {
+    token,
+    paginationOpts: { numItems: 3, cursor: null },
+  })
+  expect(first).toMatchObject({ success: true, data: { page: [], isDone: false } })
+  if (!first.success) return
+
+  const second = await t.query(api.organizer.organizerEventListQuery, {
+    token,
+    paginationOpts: { numItems: 3, cursor: first.data.continueCursor },
+  })
+  expect(second).toMatchObject({
+    success: true,
+    data: {
+      page: [{ eventKey: "after-invitation", status: "published", endsAt: "2026-09-15T13:00:00.000Z" }],
+      isDone: true,
+    },
+  })
 })
 
 test("ticket list and detail search participant and buyer names and preserve legacy/cancelled data", async () => {
