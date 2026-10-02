@@ -5,6 +5,7 @@ import { afterEach, expect, test, vi } from "vitest"
 import { internal } from "../convex/_generated/api.js"
 import type { Doc } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
+import { testFixtureJobsRead } from "./testFixtureJobsRead.js"
 import { catalogSyncLimits } from "../src/catalog/convex/catalogSyncLimits.ts"
 import { catalogSyncSnapshotPayloadBytesCalculate } from "../src/catalog/convex/catalogSyncSnapshotPayloadBytesCalculate.ts"
 
@@ -471,7 +472,7 @@ test.each([400, 409, 413])("does not retry terminal Billing HTTP %s errors", asy
   expect(fetchMock).toHaveBeenCalledTimes(1)
   const syncState = await t.run(async (ctx) => ctx.db.query("catalogSyncStates").withIndex("key").unique())
   expect(syncState).toMatchObject({ status: "failed", attempts: 1 })
-  const scheduledJobs = await t.query(internal.testFixtureJobs.testFixtureJobs, {})
+  const scheduledJobs = await testFixtureJobsRead(t)
   expect(scheduledJobs.filter((job) => job.state.kind === "pending")).toHaveLength(0)
 })
 
