@@ -3,6 +3,7 @@ import { query } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { userRoleIsAdmin } from "#src/auth/model_field/userRoleIsAdmin.ts"
 import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryTokenToUserId.ts"
+import { ticketMaxPerOrder } from "../ticketMaxPerOrder.js"
 
 export const ticketOrderGetAdminQuery = query({
   args: { token: v.string(), orderId: v.id("ticketOrders") },
@@ -16,7 +17,11 @@ export const ticketOrderGetAdminQuery = query({
       const lines = await authorizedCtx.db
         .query("ticketOrderLines")
         .withIndex("orderId", (q) => q.eq("orderId", args.orderId))
-        .collect()
+        // Checkout enforces positive line quantities and at most ticketMaxPerOrder
+        // tickets, so valid orders cannot have more lines than that limit.
+        .take(ticketMaxPerOrder + 1)
+      if (lines.length > ticketMaxPerOrder)
+        return createResultError(op, "The order exceeds the supported ticket line limit")
       return createResult({
         id: order._id,
         customerEmail: order.customerEmail,

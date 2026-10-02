@@ -1,20 +1,77 @@
+import { v } from "convex/values"
 import { internal } from "#convex/_generated/api.js"
 import { internalAction } from "#convex/_generated/server.js"
-import { createResult, type PromiseResult } from "#result"
+import { createResult, createResultError, type PromiseResult } from "#result"
 import { billingEventorenClient } from "./billingEventorenClient.js"
+import {
+  ticketPaymentReconcileScanValidator,
+  type TicketPaymentReconcileScan,
+} from "./ticketPaymentReconcileScanValidator.js"
 
 export const ticketPaymentReconcileScheduledAction = internalAction({
-  args: {},
-  handler: async (ctx): PromiseResult<{ checked: number; fulfilled: number }> => {
+  args: { scan: v.optional(ticketPaymentReconcileScanValidator) },
+  handler: async (ctx, args): PromiseResult<{ checked: number; fulfilled: number }> => {
+    const op = "ticketPaymentReconcileScheduledAction"
     const config = billingEventorenClient.configRead()
     if (!config.success) return config
-    const contexts = await ctx.runQuery(internal.ticketing.ticketPaymentReconcileScheduledContextQuery, {
+    const scan: TicketPaymentReconcileScan = args.scan ?? {
       stripeMode: config.data.stripeMode,
       now: Date.now(),
+      status: "expired",
+      cursor: null,
+      selected: [],
+    }
+    if (
+      scan.stripeMode !== config.data.stripeMode ||
+      scan.selected.some((order) => order.stripeMode !== scan.stripeMode)
+    )
+      return createResultError(op, "The reconciliation Stripe mode changed")
+    if (scan.selected.length >= 25)
+      return createResultError(op, "A continuation must have fewer than 25 selected orders")
+    if ((scan.activeOrderIds?.length ?? 0) > 50)
+      return createResultError(op, "A continuation cannot exclude more than the two active status caps")
+    const contexts: TicketPaymentReconcileScan["selected"] = []
+    if (!args.scan) {
+      const initial = await ctx.runQuery(internal.ticketing.ticketPaymentReconcileScheduledContextQuery, {
+        stripeMode: scan.stripeMode,
+        now: scan.now,
+      })
+      if (!initial.success) return initial
+      contexts.push(...initial.data)
+      // These orders were selected in active statuses at scan start. If Billing
+      // expires them below, they must not consume terminal slots later in this
+      // same chain (the previous combined query selected before any writes).
+      scan.activeOrderIds = initial.data.map((order) => order.orderId)
+    }
+    // One bounded terminal page per invocation; never loop over empty pages.
+    const page = await ctx.runQuery(internal.ticketing.ticketPaymentReconcileTerminalPageQuery, {
+      stripeMode: scan.stripeMode,
+      now: scan.now,
+      status: scan.status,
+      cursor: scan.cursor,
+      numItems: 25 - scan.selected.length,
     })
-    if (!contexts.success) return contexts
+    if (!page.success) return page
+    // Other cron runs may update a selected row's updatedAt during this scan.
+    // Keep each order at most once in the per-status selection, while advancing
+    // even over pages containing only previously selected rows.
+    const selectedIds = new Set(scan.selected.map((order) => order.orderId))
+    const activeIds = new Set(scan.activeOrderIds)
+    const selected = [
+      ...scan.selected,
+      ...page.data.contexts.filter((order) => !selectedIds.has(order.orderId) && !activeIds.has(order.orderId)),
+    ]
+    const selectionDone = page.data.isDone || selected.length === 25
+    // Do not reconcile partial selections: our own updatedAt writes would move
+    // selected rows past the cursor and could select them twice within the cap.
+    if (selectionDone) contexts.push(...selected)
+    const continuation: TicketPaymentReconcileScan | undefined = !selectionDone
+      ? { ...scan, cursor: page.data.continueCursor, selected }
+      : scan.status === "expired"
+        ? { ...scan, status: "released", cursor: null, selected: [] }
+        : undefined
     let checked = 0
-    for (const context of contexts.data) {
+    for (const context of contexts) {
       const status = await billingEventorenClient.statusGet(config.data, context.paymentReference)
       if (!status.success || status.data.kind === "not_found") {
         const recorded = await ctx.runMutation(internal.ticketing.ticketPaymentReconcileFailureMutation, {
@@ -66,6 +123,9 @@ export const ticketPaymentReconcileScheduledAction = internalAction({
         if (!recorded.success) return recorded
       }
     }
+
+    if (continuation)
+      await ctx.scheduler.runAfter(0, internal.ticketing.ticketPaymentReconcileScheduledAction, { scan: continuation })
 
     return createResult({ checked, fulfilled: 0 })
   },

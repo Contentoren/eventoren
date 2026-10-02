@@ -83,7 +83,7 @@ export const ticketTables = {
   })
     .index("checkoutKey", ["checkoutKey"])
     .index("paymentReference", ["paymentReference"])
-    .index("statusAndUpdatedAt", ["status", "updatedAt"])
+    .index("statusAndStripeModeAndUpdatedAt", ["status", "stripeMode", "updatedAt"])
     .index("createdAt", ["createdAt"])
     .index("eventKeyAndCreatedAt", ["eventKey", "createdAt"])
     .index("bookingNumber", ["bookingNumber"])
@@ -195,7 +195,6 @@ export const ticketTables = {
   })
     .index("orderIdAndSequence", ["orderId", "sequence"])
     .index("code", ["code"])
-    .index("eventKey", ["eventKey"])
     .index("eventKeyAndSequenceAndCode", ["eventKey", "sequence", "code"])
     .index("ownerUserId", ["ownerUserId"]),
 

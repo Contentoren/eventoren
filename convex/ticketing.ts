@@ -24,6 +24,7 @@ export { ticketPaymentReconcileAction } from "#src/ticketing/convex/ticketPaymen
 export { ticketPaymentReconcileFailureMutation } from "#src/ticketing/convex/ticketPaymentReconcileFailureMutation.ts"
 export { ticketPaymentReconcileScheduledAction } from "#src/ticketing/convex/ticketPaymentReconcileScheduledAction.ts"
 export { ticketPaymentReconcileScheduledContextQuery } from "#src/ticketing/convex/ticketPaymentReconcileScheduledContextQuery.ts"
+export { ticketPaymentReconcileTerminalPageQuery } from "#src/ticketing/convex/ticketPaymentReconcileTerminalPageQuery.ts"
 export { ticketPaymentStatusApplyMutation } from "#src/ticketing/convex/ticketPaymentStatusApplyMutation.ts"
 export { ticketReservationDeferMutation } from "#src/ticketing/convex/ticketReservationDeferMutation.ts"
 export { ticketReservationExpirationContextQuery } from "#src/ticketing/convex/ticketReservationExpirationContextQuery.ts"

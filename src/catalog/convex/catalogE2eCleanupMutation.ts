@@ -66,7 +66,7 @@ async function catalogE2eCleanupAuthorized(
   // A fixture must have at most one product. Never touch a second, unrecognized product.
   const tiers = await ctx.db
     .query("catalogTicketTiers")
-    .withIndex("eventId", (q) => q.eq("eventId", event._id))
+    .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", event._id))
     .take(2)
   if (tiers.length > 1) return createResultError(op, "Multiple products require manual reconciliation")
   const tier = tiers[0]
@@ -90,7 +90,7 @@ async function catalogE2eCleanupAuthorized(
     .take(101)
   const tickets = await ctx.db
     .query("ticketIssued")
-    .withIndex("eventKey", (q) => q.eq("eventKey", event.eventKey))
+    .withIndex("eventKeyAndSequenceAndCode", (q) => q.eq("eventKey", event.eventKey))
     .take(101)
   if (orders.length > 100 || tickets.length > 100)
     return createResultError(op, "Fixture exceeds bounded verification limit")

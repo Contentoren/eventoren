@@ -73,7 +73,6 @@ export const catalogTables = {
     createdAt: v.string(),
     updatedAt: v.string(),
   })
-    .index("eventId", ["eventId"])
     .index("eventIdAndArchivedAt", ["eventId", "archivedAt", "tierKey"])
     .index("eventIdAndTierKey", ["eventId", "tierKey"]),
 

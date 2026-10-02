@@ -16,38 +16,22 @@ export const ticketPaymentReconcileScheduledContextQuery = internalQuery({
       stripeMode: "live" | "test"
     }[]
   > => {
-    const futureEventCutoff = new Date(args.now).toISOString()
     const reserved = await ctx.db
       .query("ticketOrders")
-      .withIndex("statusAndUpdatedAt", (q) => q.eq("status", "reserved"))
-      .filter((q) => q.eq(q.field("stripeMode"), args.stripeMode))
+      .withIndex("statusAndStripeModeAndUpdatedAt", (q) => q.eq("status", "reserved").eq("stripeMode", args.stripeMode))
       .order("asc")
       .take(25)
     const checkoutCreated = await ctx.db
       .query("ticketOrders")
-      .withIndex("statusAndUpdatedAt", (q) => q.eq("status", "checkout_created"))
-      .filter((q) => q.eq(q.field("stripeMode"), args.stripeMode))
+      .withIndex("statusAndStripeModeAndUpdatedAt", (q) =>
+        q.eq("status", "checkout_created").eq("stripeMode", args.stripeMode),
+      )
       .order("asc")
       .take(25)
-    const terminal = []
-    for (const status of ["expired", "released"] as const) {
-      const orders = await ctx.db
-        .query("ticketOrders")
-        .withIndex("statusAndUpdatedAt", (q) => q.eq("status", status))
-        .filter((q) =>
-          q.and(q.eq(q.field("stripeMode"), args.stripeMode), q.gt(q.field("eventEndsAt"), futureEventCutoff)),
-        )
-        .order("asc")
-        .take(25)
-      terminal.push(
-        ...orders.filter((order) => {
-          const eventEndsAt = Date.parse(order.eventEndsAt)
-          return Number.isFinite(eventEndsAt) && eventEndsAt > args.now
-        }),
-      )
-    }
+    // Terminal partitions need a read-budgeted cursor scan, owned by the
+    // scheduled action and ticketPaymentReconcileTerminalPageQuery.
     return createResult(
-      [...reserved, ...checkoutCreated, ...terminal].map((order) => ({
+      [...reserved, ...checkoutCreated].map((order) => ({
         orderId: order._id,
         paymentReference: order.paymentReference,
         billingOrderReference: order.billingOrderReference,
