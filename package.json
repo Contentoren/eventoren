@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "lint:convex": "eslint \"convex/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}\" \"src/**/convex/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}\"",
+    "lint:convex": "eslint \"convex/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}\" \"src/**/convex/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}\" \"src/**/*_convex/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}\"",
     "dev": "vite dev",
     "vite:dev": "vite --host",
     "build": "bun run boundary:check && bun run legal:compile && bun run content:process:local && bun run content:compile && vite build && bun run boundary:check && bun run ssr:worker && bun run ssr:check",

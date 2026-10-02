@@ -7,6 +7,7 @@ const rootDir = fileURLToPath(new URL("../../", import.meta.url)).replace(/\/$/,
 const convexFiles = [
   "convex/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
   "src/**/convex/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
+  "src/**/*_convex/**/*.{js,jsx,mjs,cjs,ts,tsx,mts,cts}",
 ]
 const ignoredFiles = [
   "**/_generated/**",
