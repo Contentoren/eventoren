@@ -25,7 +25,7 @@ export async function userProfileUpdateInternalFn(
 
   const userId = args.userId as IdUser
   const currentUser: DocUser | null = await ctx.db.get("users", userId)
-  if (!currentUser) {
+  if (!currentUser || currentUser.deletedAt) {
     return createErrorAndLogError(op, "User not found", userId)
   }
 

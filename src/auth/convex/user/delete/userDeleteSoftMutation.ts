@@ -1,7 +1,8 @@
+import { internal } from "#convex/_generated/api.js"
 import { internalMutation, type MutationCtx, mutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { findUserByEmailFn } from "#src/auth/convex/crud/findUserByEmailQuery.ts"
-import { userDeleteHardAuthSessions } from "#src/auth/convex/user/delete_hard_parts/userDeleteHardAuthSessions.ts"
+import { userDeletionPageRemove } from "#src/auth/convex/user/delete/userDeletionPageRemove.ts"
 import { authMutationTokenToUserId } from "#src/utils/convex_backend/authMutationTokenToUserId.ts"
 import {
   type UserDeleteValidatorInternalType,
@@ -42,8 +43,9 @@ export async function userDeleteSoftMutationFn(
   const now = new Date().toISOString()
   await ctx.db.patch("users", userId, { deletedAt: now })
 
-  // Delete all sessions for this user
-  await userDeleteHardAuthSessions(ctx, userId)
+  // Tombstoning above revokes access immediately; remove all sessions in bounded pages.
+  const next = await userDeletionPageRemove(ctx, { userId, hard: false, phase: "sessions", cursor: null })
+  if (next) await ctx.scheduler.runAfter(0, internal.auth.userDeletionContinueInternalMutation, next)
 
   return createResult(null)
 }

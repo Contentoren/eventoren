@@ -1,5 +1,5 @@
 import type { MutationCtx } from "#convex/_generated/server.js"
-import type { PromiseResult } from "#result"
+import { createResultError, type PromiseResult } from "#result"
 import type { IdUser } from "#src/auth/convex/IdUser.ts"
 import { generateOtpCode } from "#src/auth/convex/pw/generateOtpCode.ts"
 import type { OtpPurpose } from "#src/auth/model_field/otpPurpose.ts"
@@ -11,8 +11,8 @@ export async function otpSaveFn(
 ): PromiseResult<string> {
   const op = "otpCodeSaveFn"
   const { userId, email, purpose } = args
-
-  // await otpRemovePreviousFn(ctx, { userId, email, purpose })
+  const user = await ctx.db.get("users", userId)
+  if (!user || user.deletedAt) return createResultError(op, "User not found")
 
   const code = generateOtpCode()
 

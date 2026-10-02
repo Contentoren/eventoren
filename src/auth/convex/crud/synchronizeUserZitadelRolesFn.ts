@@ -17,6 +17,7 @@ export async function synchronizeUserZitadelRolesFn(
   const op = "synchronizeUserZitadelRolesFn"
   const user = await ctx.db.get("users", userId)
   if (!user) return createResultError(op, "User not found by userId", userId)
+  if (user.deletedAt) return createResult(user)
   // Only a sign-in carrying the verified ID-token roles may replace a token-managed global role.
   if (user.zitadelRolesFromIdToken && roleSyncEnabled === undefined) return createResult(user)
 

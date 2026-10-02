@@ -1,12 +1,8 @@
+import { internal } from "#convex/_generated/api.js"
 import { internalMutation, type MutationCtx, mutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { findUserByEmailFn } from "#src/auth/convex/crud/findUserByEmailQuery.ts"
-import { userDeleteHardOtps } from "#src/auth/convex/user/delete_hard/userDeleteHardOtps.ts"
-import { userDeleteHardAuthAccounts } from "#src/auth/convex/user/delete_hard_parts/userDeleteHardAuthAccounts.ts"
-import { userDeleteHardAuthSessions } from "#src/auth/convex/user/delete_hard_parts/userDeleteHardAuthSessions.ts"
-import { userDeleteHardEmailLoginCodes } from "#src/auth/convex/user/delete_hard_parts/userDeleteHardEmailLoginCodes.ts"
-import { userDeleteHardFiles } from "#src/auth/convex/user/delete_hard_parts/userDeleteHardFiles.ts"
-import { userDeleteHardOrgMemberships } from "#src/auth/convex/user/delete_hard_parts/userDeleteHardOrgMemberships.ts"
+import { userDeletionPageRemove } from "#src/auth/convex/user/delete/userDeletionPageRemove.ts"
 import { authMutationTokenToUserId } from "#src/utils/convex_backend/authMutationTokenToUserId.ts"
 import {
   type UserDeleteValidatorInternalType,
@@ -41,18 +37,15 @@ export async function userDeleteHardMutationFn(
   if (!userId) return createResultError(op, "Either userId or email must be provided")
 
   const user = await ctx.db.get("users", userId)
-  if (!user) return createResultError(op, "User not found")
+  if (!user || user.hardDeletionStartedAt) return createResult(null)
 
-  // Clean up ALL dependent records in dependency order
-  await userDeleteHardAuthSessions(ctx, userId)
-  await userDeleteHardOtps(ctx, userId)
-  await userDeleteHardEmailLoginCodes(ctx, userId)
-  await userDeleteHardAuthAccounts(ctx, userId)
-  await userDeleteHardOrgMemberships(ctx, userId)
-  await userDeleteHardFiles(ctx, userId)
-
-  // Finally delete user record
-  await ctx.db.delete("users", userId)
+  // Revoke access atomically before asynchronous physical cleanup. Keep the
+  // identity/account tombstone until every dependent phase has completed.
+  const now = new Date().toISOString()
+  await ctx.db.patch("users", userId, { deletedAt: user.deletedAt ?? now, hardDeletionStartedAt: now })
+  const next = await userDeletionPageRemove(ctx, { userId, hard: true, phase: "sessions", cursor: null })
+  if (next) await ctx.scheduler.runAfter(0, internal.auth.userDeletionContinueInternalMutation, next)
+  console.info(op, { userId, status: "cleanup-scheduled" })
 
   return createResult(null)
 }

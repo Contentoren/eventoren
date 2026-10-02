@@ -20,6 +20,7 @@ export {
   userDeleteHardInternalMutation,
   userDeleteHardMutation,
 } from "#src/auth/convex/user/delete/userDeleteHardMutation.ts"
+export { userDeletionContinueInternalMutation } from "#src/auth/convex/user/delete/userDeletionContinueInternalMutation.ts"
 export {
   userDeleteSoftInternalMutation,
   userDeleteSoftMutation,

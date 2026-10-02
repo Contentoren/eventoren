@@ -26,6 +26,13 @@ export async function createUserFromAuthProviderFn(
   authProvider: CommonAuthProvider,
 ): PromiseResult<UserProfile> {
   const op = "createUserFromAuthProviderFn"
+  const deletingIdentity = await ctx.db
+    .query("authDeletionIdentities")
+    .withIndex("providerAndAccountId", (q) =>
+      q.eq("provider", authProvider.provider).eq("providerAccountId", authProvider.providerId),
+    )
+    .first()
+  if (deletingIdentity) return createResultError(op, "User account deletion is in progress")
 
   // Check if authAccount already exists
   const existingAuthAccount = await ctx.db

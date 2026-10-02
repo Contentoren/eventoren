@@ -10,6 +10,14 @@ import { fieldsConvexCreatedAtUpdatedAt } from "#src/utils/data/fieldsConvexCrea
 import { fieldsConvexCreatedAtUpdatedAtDeletedAt } from "#src/utils/data/fieldsConvexCreatedAtUpdatedAtDeletedAt.ts"
 
 export const authTables = {
+  // Keep all legacy provider identities reserved while account cleanup is paged.
+  authDeletionIdentities: defineTable({
+    userId: vIdUser,
+    provider: v.string(),
+    providerAccountId: v.string(),
+  })
+    .index("userId", ["userId"])
+    .index("providerAndAccountId", ["provider", "providerAccountId"]),
   users: defineTable({
     name: v.string(),
     username: v.optional(v.string()),
@@ -26,11 +34,13 @@ export const authTables = {
     zitadelRolesFromIdToken: v.optional(v.boolean()),
     zitadelRolesSynchronizedAt: v.optional(v.string()),
     organizerInvitedAt: v.optional(v.string()),
+    hardDeletionStartedAt: v.optional(v.string()),
     ...fieldsConvexCreatedAtUpdatedAtDeletedAt,
   })
     //
     .index("email", ["email"])
     .index("username", ["username"])
+    .index("roleSource", ["roleSource"])
     .index("zitadelUserId", ["zitadelUserId"]),
 
   authAccounts: defineTable({
@@ -81,7 +91,8 @@ export const authTables = {
     consumedAt: v.optional(v.string()),
   })
     //
-    .index("emailCode", ["email", "code"]),
+    .index("emailCode", ["email", "code"])
+    .index("userId", ["userId"]),
 
   authOtps: defineTable({
     userId: vIdUser,
@@ -93,5 +104,6 @@ export const authTables = {
     consumedAt: v.optional(v.string()),
   })
     //
-    .index("emailCode", ["email", "code"]),
+    .index("emailCodePurposeConsumedAt", ["email", "code", "purpose", "consumedAt"])
+    .index("userId", ["userId"]),
 } as const

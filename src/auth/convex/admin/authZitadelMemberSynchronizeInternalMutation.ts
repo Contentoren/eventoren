@@ -28,6 +28,11 @@ async function authZitadelMemberSynchronizeFn(
   organizerInvitedAt?: string,
 ): PromiseResult<DocUser | null> {
   const op = "authZitadelMemberSynchronizeFn"
+  const deletingIdentity = await ctx.db
+    .query("authDeletionIdentities")
+    .withIndex("providerAndAccountId", (q) => q.eq("provider", "zitadel").eq("providerAccountId", provider.providerId))
+    .first()
+  if (deletingIdentity) return createResultError(op, "User account deletion is in progress")
   const authAccount = await ctx.db
     .query("authAccounts")
     .withIndex("providerAndAccountId", (q) => q.eq("provider", "zitadel").eq("providerAccountId", provider.providerId))

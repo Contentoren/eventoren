@@ -47,7 +47,7 @@ async function userEmailChange2ConfirmFn(
 
   const userId = args.userId as IdUser
   const user: DocUser | null = await ctx.db.get("users", userId)
-  if (!user) {
+  if (!user || user.deletedAt) {
     return createErrorAndLogError(op, "User not found")
   }
 

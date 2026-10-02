@@ -18,6 +18,23 @@ export async function findOrCreateUserFn(
   authData: CommonAuthProvider,
 ): PromiseResult<SignInUsingSocialAuthResultInternal> {
   const op = "findOrCreateUser"
+  const deletingIdentity = await ctx.db
+    .query("authDeletionIdentities")
+    .withIndex("providerAndAccountId", (q) =>
+      q.eq("provider", authData.provider).eq("providerAccountId", authData.providerId),
+    )
+    .first()
+  if (deletingIdentity) return createResultError(op, "User account deletion is in progress")
+
+  // Account cleanup may have reached its last pages while the user tombstone
+  // still exists. Do not recreate an email-less identity during hard deletion.
+  if (authData.provider === "zitadel") {
+    const identity = await ctx.db
+      .query("users")
+      .withIndex("zitadelUserId", (q) => q.eq("zitadelUserId", authData.providerId))
+      .first()
+    if (identity?.deletedAt) return createResultError(op, "User account has been deleted")
+  }
 
   // Check for existing auth account
   const existingAuthAccount: DocAuthAccount | null = await ctx.db
