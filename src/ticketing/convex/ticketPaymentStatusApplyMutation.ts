@@ -1,11 +1,15 @@
 import { v } from "convex/values"
 import { internal } from "#convex/_generated/api.js"
-import type { Id } from "#convex/_generated/dataModel.js"
+import type { Doc, Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
+import { ticketMaxPerOrder } from "../ticketMaxPerOrder.js"
+import { ticketAccessDigestCreate } from "./ticketAccessDigestCreate.js"
 import { ticketFulfillmentWorkEnsure } from "./ticketFulfillmentWorkEnsure.js"
+import { ticketIssuedCountRead } from "./ticketIssuedCountRead.js"
 import { ticketOrderAccessCapabilityEnsure } from "./ticketOrderAccessCapabilityEnsure.js"
+import { ticketReservationsRelease } from "./ticketReservationsRelease.js"
 
 const paymentStatusValidator = v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"))
 
@@ -45,6 +49,9 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
     if (!attempt || attempt.orderId !== order._id)
       return createResultError(op, "The payment attempt does not belong to the order")
 
+    const ticketCount = await ticketIssuedCountRead(ctx, order._id)
+    if (!ticketCount.success) return ticketCount
+
     const now = new Date().toISOString()
     const bookingNumber = Number.isSafeInteger(args.bookingNumber) ? args.bookingNumber : undefined
     const bookingReference = args.bookingReference?.trim() ? args.bookingReference : undefined
@@ -59,7 +66,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
           orderId: order._id,
           status: order.status,
           paymentStatus: order.paymentStatus,
-          ticketCount: await ticketCountGet(ctx, order._id),
+          ticketCount: ticketCount.data,
         })
       await ctx.db.patch("ticketOrders", order._id, {
         billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
@@ -69,7 +76,12 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       })
       await ctx.db.patch("ticketPaymentAttempts", attempt._id, {
         billingOrderReference: args.billingOrderReference,
-        status: order.status === "checkout_created" ? "checkout_created" : "pending",
+        status:
+          order.paymentStatus === "paid"
+            ? "paid"
+            : order.status === "checkout_created"
+              ? "checkout_created"
+              : "pending",
         lastCheckedAt: now,
         updatedAt: now,
       })
@@ -77,24 +89,24 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         orderId: order._id,
         status: order.status,
         paymentStatus: order.paymentStatus,
-        ticketCount: await ticketCountGet(ctx, order._id),
+        ticketCount: ticketCount.data,
       })
     }
 
     if (args.payment === "failed") {
-      if (order.status === "paid")
+      if (order.status === "paid" || order.paymentStatus === "paid")
         return createResult({
           orderId: order._id,
           status: order.status,
           paymentStatus: order.paymentStatus,
-          ticketCount: await ticketCountGet(ctx, order._id),
+          ticketCount: ticketCount.data,
         })
       if (order.status === "expired")
         return createResult({
           orderId: order._id,
           status: order.status,
           paymentStatus: order.paymentStatus,
-          ticketCount: await ticketCountGet(ctx, order._id),
+          ticketCount: ticketCount.data,
         })
       if (order.status === "released" || order.status === "paid_inventory_conflict") {
         await ctx.db.patch("ticketPaymentAttempts", attempt._id, {
@@ -107,23 +119,12 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
           orderId: order._id,
           status: order.status,
           paymentStatus: order.paymentStatus,
-          ticketCount: await ticketCountGet(ctx, order._id),
+          ticketCount: ticketCount.data,
         })
       }
-      const reservations = await ctx.db
-        .query("ticketReservations")
-        .withIndex("orderId", (q) => q.eq("orderId", order._id))
-        .collect()
-      for (const reservation of reservations) {
-        if (reservation.status !== "active") continue
-        const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
-        if (!tier || tier.reserved < reservation.quantity) return createResultError(op, "Reserved inventory is corrupt")
-        await ctx.db.patch("catalogTicketTiers", tier._id, { reserved: tier.reserved - reservation.quantity })
-        await ctx.db.patch("ticketReservations", reservation._id, {
-          status: "released",
-          releasedAt: now,
-        })
-      }
+      if (ticketCount.data !== 0) return createResultError(op, "An unpaid order already has issued tickets")
+      const release = await ticketReservationsRelease(ctx, order._id, now)
+      if (!release.success) return release
       await ctx.db.patch("ticketOrders", order._id, {
         status: "failed",
         paymentStatus: "failed",
@@ -143,9 +144,9 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
     }
 
     if (order.status === "paid") {
-      await ticketOrderBookingDetailsBackfill(ctx, order._id, order, { bookingNumber, bookingReference }, now)
       const capability = await ticketOrderAccessCapabilityEnsure(ctx, order._id)
       if (!capability.success) return capability
+      await ticketOrderBookingDetailsBackfill(ctx, order._id, order, { bookingNumber, bookingReference }, now)
       await ticketFulfillmentWorkScheduleIfEligible(
         ctx,
         order._id,
@@ -156,7 +157,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         orderId: order._id,
         status: order.status,
         paymentStatus: order.paymentStatus,
-        ticketCount: await ticketCountGet(ctx, order._id),
+        ticketCount: ticketCount.data,
       })
     }
     if (
@@ -185,46 +186,69 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         orderId: order._id,
         status: "paid_inventory_conflict",
         paymentStatus: "paid",
-        ticketCount: await ticketCountGet(ctx, order._id),
+        ticketCount: ticketCount.data,
       })
     }
 
+    // Checkout creates one line/reservation per unique tier, with total quantity <= ticketMaxPerOrder.
+    // The extra row is an overflow sentinel: no transition ever processes a truncated order.
     const reservations = await ctx.db
       .query("ticketReservations")
       .withIndex("orderId", (q) => q.eq("orderId", order._id))
-      .collect()
+      .take(ticketMaxPerOrder + 1)
     const activeReservations = reservations.filter((reservation) => reservation.status === "active")
     const lines = await ctx.db
       .query("ticketOrderLines")
       .withIndex("orderId", (q) => q.eq("orderId", order._id))
-      .collect()
-    if (activeReservations.length !== lines.length)
+      .take(ticketMaxPerOrder + 1)
+    if (
+      reservations.length > ticketMaxPerOrder ||
+      lines.length > ticketMaxPerOrder ||
+      reservations.some((reservation) => !Number.isSafeInteger(reservation.quantity) || reservation.quantity < 1) ||
+      reservations.reduce((total, reservation) => total + reservation.quantity, 0) > ticketMaxPerOrder ||
+      lines.some((line) => !Number.isSafeInteger(line.quantity) || line.quantity < 1) ||
+      lines.reduce((total, line) => total + line.quantity, 0) > ticketMaxPerOrder
+    )
+      return createResultError(op, "Order lines or reservations exceed the order maximum")
+    if (
+      lines.length === 0 ||
+      reservations.length !== lines.length ||
+      activeReservations.length !== lines.length ||
+      new Set(lines.map((line) => line.tierId)).size !== lines.length ||
+      new Set(activeReservations.map((reservation) => reservation.tierId)).size !== activeReservations.length ||
+      lines.some(
+        (line) =>
+          !activeReservations.some(
+            (reservation) => reservation.tierId === line.tierId && reservation.quantity === line.quantity,
+          ),
+      )
+    )
       return createResultError(op, "Paid inventory reservation is incomplete")
+    if (ticketCount.data !== 0) return createResultError(op, "An unpaid order already has issued tickets")
     const participantNamesByTier = new Map(
       activeReservations.map((reservation) => [reservation.tierId, reservation.participantNamesJson]),
     )
 
     let hasCapacityConflict = false
+    const tiers = new Map<Id<"catalogTicketTiers">, Doc<"catalogTicketTiers">>()
     for (const reservation of activeReservations) {
       const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
-      if (!tier || tier.sold + reservation.quantity > tier.capacity) {
-        hasCapacityConflict = true
-        break
-      }
+      if (
+        !tier ||
+        !Number.isSafeInteger(tier.reserved) ||
+        tier.reserved < reservation.quantity ||
+        !Number.isSafeInteger(tier.sold) ||
+        tier.sold < 0 ||
+        !Number.isSafeInteger(tier.capacity) ||
+        tier.capacity < 0
+      )
+        return createResultError(op, "Paid inventory reservation is corrupt")
+      tiers.set(tier._id, tier)
+      if (tier.sold + reservation.quantity > tier.capacity) hasCapacityConflict = true
     }
     if (hasCapacityConflict) {
-      for (const reservation of activeReservations) {
-        const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
-        if (tier) {
-          await ctx.db.patch("catalogTicketTiers", tier._id, {
-            reserved: Math.max(0, tier.reserved - reservation.quantity),
-          })
-        }
-        await ctx.db.patch("ticketReservations", reservation._id, {
-          status: "released",
-          releasedAt: now,
-        })
-      }
+      const release = await ticketReservationsRelease(ctx, order._id, now)
+      if (!release.success) return release
       await ctx.db.patch("ticketOrders", order._id, {
         status: "paid_inventory_conflict",
         paymentStatus: "paid",
@@ -245,40 +269,47 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         orderId: order._id,
         status: "paid_inventory_conflict",
         paymentStatus: "paid",
-        ticketCount: await ticketCountGet(ctx, order._id),
+        ticketCount: ticketCount.data,
       })
     }
 
+    // Preflight every fallible Result operation before inventory/ticket writes (Result errors commit writes).
+    const delivery = await ctx.db
+      .query("ticketOrderDeliveries")
+      .withIndex("orderId", (q) => q.eq("orderId", order._id))
+      .first()
+    const accessToken =
+      delivery?.accessTokenSnapshot ??
+      `${crypto.randomUUID().replaceAll("-", "")}${crypto.randomUUID().replaceAll("-", "")}`
+    const accessDigest = await ticketAccessDigestCreate(accessToken)
+    if (!accessDigest.success) return accessDigest
+    const codes = new Set<string>()
+    for (let index = 0; index < lines.reduce((total, line) => total + line.quantity, 0); index += 1) {
+      const code = await ticketIssuedCodeCreate(ctx, codes)
+      if (!code.success) return code
+      codes.add(code.data)
+    }
     for (const reservation of activeReservations) {
-      const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
-      if (!tier || tier.reserved < reservation.quantity)
-        return createResultError(op, "Paid inventory reservation is corrupt")
+      const tier = tiers.get(reservation.tierId)!
       await ctx.db.patch("catalogTicketTiers", tier._id, {
-        reserved: Math.max(0, tier.reserved - reservation.quantity),
+        reserved: tier.reserved - reservation.quantity,
         sold: tier.sold + reservation.quantity,
       })
       await ctx.db.patch("ticketReservations", reservation._id, { status: "consumed" })
     }
-
+    const ticketCodes = [...codes]
     let sequence = 0
-    const existingTickets = await ctx.db
-      .query("ticketIssued")
-      .withIndex("orderIdAndSequence", (q) => q.eq("orderId", order._id))
-      .collect()
-    sequence = existingTickets.length
     for (const line of lines.sort((left, right) => left.tierKey.localeCompare(right.tierKey))) {
       const participantNames =
         participantNamesRead(line.participantNamesJson) ?? participantNamesRead(participantNamesByTier.get(line.tierId))
       for (let index = 0; index < line.quantity; index += 1) {
         sequence += 1
-        const codeResult = await ticketIssuedCodeCreate(ctx)
-        if (!codeResult.success) return codeResult
         await ctx.db.insert("ticketIssued", {
           orderId: order._id,
           sequence,
           ownerUserId: order.ownerUserId,
           guestAccessDigest: order.guestAccessDigest,
-          code: codeResult.data,
+          code: ticketCodes[sequence - 1]!,
           eventKey: order.eventKey,
           eventTitle: order.eventTitle,
           eventStartsAt: order.eventStartsAt,
@@ -302,6 +333,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       bookingNumber: order.bookingNumber ?? bookingNumber,
       bookingReference: order.bookingReference ?? bookingReference,
       paidAt: now,
+      emailAccessDigest: accessDigest.data,
       lastPaymentCheckAt: now,
       checkoutAttemptLeaseUntil: undefined,
       updatedAt: now,
@@ -312,17 +344,23 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       lastCheckedAt: now,
       updatedAt: now,
     })
-    const capability = await ticketOrderAccessCapabilityEnsure(ctx, order._id)
-    if (!capability.success) return capability
+    if (!delivery)
+      await ctx.db.insert("ticketOrderDeliveries", {
+        orderId: order._id,
+        accessTokenSnapshot: accessToken,
+        createdAt: now,
+        updatedAt: now,
+      })
     await ticketFulfillmentWorkScheduleIfEligible(ctx, order._id, order.fulfillmentEligible, args.billingOrderReference)
     return createResult({ orderId: order._id, status: "paid", paymentStatus: "paid", ticketCount: sequence })
   },
 })
 
-async function ticketIssuedCodeCreate(ctx: MutationCtx): PromiseResult<string> {
+async function ticketIssuedCodeCreate(ctx: MutationCtx, plannedCodes: ReadonlySet<string>): PromiseResult<string> {
   const op = "ticketIssuedCodeCreate"
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const code = `TKT-${crypto.randomUUID().replaceAll("-", "").slice(0, 20).toUpperCase()}`
+    if (plannedCodes.has(code)) continue
     const existing = await ctx.db
       .query("ticketIssued")
       .withIndex("code", (q) => q.eq("code", code))
@@ -355,14 +393,6 @@ async function ticketOrderBookingDetailsBackfill(
   const bookingReference = order.bookingReference ?? args.bookingReference
   if (bookingNumber === order.bookingNumber && bookingReference === order.bookingReference) return
   await ctx.db.patch("ticketOrders", orderId, { bookingNumber, bookingReference, updatedAt: now })
-}
-
-async function ticketCountGet(ctx: MutationCtx, orderId: Id<"ticketOrders">) {
-  return await ctx.db
-    .query("ticketIssued")
-    .withIndex("orderIdAndSequence", (q) => q.eq("orderId", orderId))
-    .collect()
-    .then((tickets) => tickets.length)
 }
 
 function participantNamesRead(value: string | undefined): readonly string[] | undefined {

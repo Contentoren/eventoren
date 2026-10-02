@@ -1,9 +1,8 @@
 import { v } from "convex/values"
-import type { Id } from "#convex/_generated/dataModel.js"
-import type { MutationCtx } from "#convex/_generated/server.js"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { ticketReservationsRelease } from "./ticketReservationsRelease.js"
+import { ticketIssuedCountRead } from "./ticketIssuedCountRead.js"
 
 export const ticketReservationExpireMutation = internalMutation({
   args: {
@@ -35,12 +34,15 @@ export const ticketReservationExpireMutation = internalMutation({
     )
       return createResultError(op, "The payment correlation does not match the order")
 
+    const ticketCount = await ticketIssuedCountRead(ctx, order._id)
+    if (!ticketCount.success) return ticketCount
+
     if (order.status === "paid" || order.paymentStatus === "paid")
       return createResult({
         orderId: order._id,
         status: order.status,
         paymentStatus: order.paymentStatus,
-        ticketCount: await ticketCountGet(ctx, order._id),
+        ticketCount: ticketCount.data,
         expired: false,
         released: false,
         paid: true,
@@ -50,7 +52,7 @@ export const ticketReservationExpireMutation = internalMutation({
         orderId: order._id,
         status: order.status,
         paymentStatus: order.paymentStatus,
-        ticketCount: await ticketCountGet(ctx, order._id),
+        ticketCount: ticketCount.data,
         expired: true,
         released: false,
         paid: false,
@@ -60,7 +62,7 @@ export const ticketReservationExpireMutation = internalMutation({
         orderId: order._id,
         status: order.status,
         paymentStatus: order.paymentStatus,
-        ticketCount: await ticketCountGet(ctx, order._id),
+        ticketCount: ticketCount.data,
         expired: false,
         released: false,
         paid: false,
@@ -70,13 +72,20 @@ export const ticketReservationExpireMutation = internalMutation({
         orderId: order._id,
         status: order.status,
         paymentStatus: order.paymentStatus,
-        ticketCount: await ticketCountGet(ctx, order._id),
+        ticketCount: ticketCount.data,
         expired: false,
         released: false,
         paid: false,
       })
 
+    if (ticketCount.data !== 0) return createResultError(op, "An unpaid order already has issued tickets")
     const now = new Date().toISOString()
+    const attempt = await ctx.db
+      .query("ticketPaymentAttempts")
+      .withIndex("paymentReference", (q) => q.eq("paymentReference", order.paymentReference))
+      .unique()
+    if (attempt && attempt.orderId !== order._id)
+      return createResultError(op, "The payment attempt does not belong to the order")
     const releaseResult = await ticketReservationsRelease(ctx, order._id, now)
     if (!releaseResult.success) return releaseResult
     await ctx.db.patch("ticketOrders", order._id, {
@@ -89,10 +98,6 @@ export const ticketReservationExpireMutation = internalMutation({
       lastPaymentError: args.reason.slice(0, 500),
       updatedAt: now,
     })
-    const attempt = await ctx.db
-      .query("ticketPaymentAttempts")
-      .withIndex("paymentReference", (q) => q.eq("paymentReference", order.paymentReference))
-      .unique()
     if (attempt)
       await ctx.db.patch("ticketPaymentAttempts", attempt._id, {
         billingOrderReference: args.billingOrderReference,
@@ -111,11 +116,3 @@ export const ticketReservationExpireMutation = internalMutation({
     })
   },
 })
-
-async function ticketCountGet(ctx: MutationCtx, orderId: Id<"ticketOrders">): Promise<number> {
-  return await ctx.db
-    .query("ticketIssued")
-    .withIndex("orderIdAndSequence", (q) => q.eq("orderId", orderId))
-    .collect()
-    .then((tickets) => tickets.length)
-}
