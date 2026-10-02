@@ -26,12 +26,12 @@ export async function orgCleanupIfEmptyFn(ctx: MutationCtx, args: OrgCleanupIfEm
     return createResult(null)
   }
 
-  const members = await ctx.db
+  const member = await ctx.db
     .query("orgMembers")
     .withIndex("orgId", (q) => q.eq("orgId", org._id))
-    .collect()
+    .first()
 
-  if (members.length > 0) {
+  if (member) {
     return createResult(null)
   }
 

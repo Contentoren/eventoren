@@ -38,8 +38,7 @@ export async function orgLeaveFn(ctx: MutationCtx, args: OrgLeaveValidatorType):
 
   const member = await ctx.db
     .query("orgMembers")
-    .withIndex("userId", (q) => q.eq("userId", args.userId))
-    .filter((q) => q.eq(q.field("orgId"), org._id))
+    .withIndex("userIdOrgId", (q) => q.eq("userId", args.userId).eq("orgId", org._id))
     .first()
 
   if (!member) {

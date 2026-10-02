@@ -21,5 +21,10 @@ export const orgMemberTables = {
   })
     //
     .index("orgId", ["orgId"])
-    .index("userId", ["userId"]),
+    // orgMemberGetByUserIdFn (via org:getOrgMemberHandleAndRoleInternalQuery)
+    // selects the oldest membership across orgs, not the lowest orgId.
+    // Covered by convex-tests/orgMembership.test.ts default-membership regression.
+    // eslint-disable-next-line @convex-dev/no-duplicate-indexes -- userIdOrgId changes cross-org creation ordering.
+    .index("userId", ["userId"])
+    .index("userIdOrgId", ["userId", "orgId"]),
 } as const
