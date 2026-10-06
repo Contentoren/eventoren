@@ -1,5 +1,6 @@
-import { expect, type Page } from "@rstest/playwright"
+import type { Page } from "@rstest/playwright"
 import { e2eAuthCredentialsGet } from "../config/e2eAuthCredentialsGet.ts"
+import { eventorenE2eReturnUrlMatches } from "./eventorenE2eReturnUrlMatches.ts"
 
 export async function eventorenE2eSignIn(page: Page, baseUrl: string, path: string): Promise<void> {
   const credentials = e2eAuthCredentialsGet(process.env)
@@ -23,39 +24,34 @@ export async function eventorenE2eSignIn(page: Page, baseUrl: string, path: stri
   await page.goto(destination)
 
   if (new URL(page.url()).origin === baseOrigin) {
-    const signIn = page.getByRole("button", { name: /continue with zitadel/i })
-    if (await signIn.isVisible().catch(() => false)) {
-      // The provider can start loading during click; arm the navigation wait first.
-      await Promise.all([page.waitForURL((url) => url.origin !== baseOrigin, { timeout: 60_000 }), signIn.click()])
-    }
+    const signIn = page.getByRole("link", { name: /continue with zitadel/i })
+    await signIn.waitFor({ state: "visible", timeout: 60_000 })
+    // Arm the navigation wait before the click; the SSO link immediately starts the provider redirect.
+    await Promise.all([page.waitForURL((url) => url.origin !== baseOrigin, { timeout: 60_000 }), signIn.click()])
   }
 
   if (new URL(page.url()).origin !== baseOrigin) {
     const username = page.getByRole("textbox", { name: /loginname|username|email/i })
-    await expect(username).toBeVisible({ timeout: 60_000 })
+    await username.waitFor({ state: "visible", timeout: 60_000 })
     await username.fill(credentials.data.username)
     await page.getByRole("button", { name: /next|continue|weiter/i }).click()
 
     const password = page.getByRole("textbox", { name: /password|passwort/i })
-    await expect(password).toBeVisible({ timeout: 60_000 })
+    await password.waitFor({ state: "visible", timeout: 60_000 })
     await password.fill(credentials.data.password)
     await page.getByRole("button", { name: /next|continue|sign in|log in|weiter|anmelden/i }).click()
-    await page.waitForURL((url) => url.origin === baseOrigin, { timeout: 60_000 })
+    await page.waitForURL((url) => eventorenE2eReturnUrlMatches(baseOrigin, returnTarget, url), { timeout: 60_000 })
   }
 
-  await expect
-    .poll(
-      () =>
-        page.evaluate(async () => {
-          const response = await fetch("/api/session", { credentials: "same-origin", cache: "no-store" })
-          const body = await response.json()
-          return (
-            response.status === 200 &&
-            Boolean(body.session) &&
-            response.headers.get("cache-control")?.includes("no-store")
-          )
-        }),
-      { timeout: 60_000 },
-    )
-    .toBe(true)
+  await page.waitForFunction(
+    async () => {
+      const response = await fetch("/api/session", { credentials: "same-origin", cache: "no-store" })
+      const body = await response.json()
+      return (
+        response.status === 200 && Boolean(body.session) && response.headers.get("cache-control")?.includes("no-store")
+      )
+    },
+    undefined,
+    { timeout: 60_000 },
+  )
 }

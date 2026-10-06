@@ -2,14 +2,14 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { describe, expect, it } from "@rstest/core"
-import { e2eInvocationRun } from "./e2eInvocationRun.ts"
 import { e2eCheckpointSave } from "../checkpoint/e2eCheckpointSave.ts"
 import type { e2eStripeTicketReconcile } from "../stripe/e2eStripeTicketReconcile.ts"
+import { e2eInvocationRun } from "./e2eInvocationRun.ts"
 
 describe("Eventoren E2E runner", () => {
   it("runs production SSO and native auth without marking a ticket attempt or running ticket cleanup", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
-    const started: string[] = []
+    const started: { name: string; config: string }[] = []
     let cleanups = 0
     try {
       expect(
@@ -24,7 +24,7 @@ describe("Eventoren E2E runner", () => {
           },
           checkpointDirectory: directory,
           commandRun: async (workflow) => {
-            started.push(workflow.name)
+            started.push(workflow)
             return 0
           },
           catalogCleanup: async () => {
@@ -41,7 +41,11 @@ describe("Eventoren E2E runner", () => {
           }) as typeof e2eStripeTicketReconcile,
         }),
       ).toBe(0)
-      expect(started).toEqual(["SSO", "native auth HTTP", "native auth lifecycle"])
+      expect(started).toEqual([
+        { name: "SSO", config: "e2e/rstest.config.ts" },
+        { name: "native auth HTTP", config: "e2e/native-auth-rstest.config.ts" },
+        { name: "native auth lifecycle", config: "e2e/native-auth-lifecycle-rstest.config.ts" },
+      ])
       expect(cleanups).toBe(0)
       const checkpoint = JSON.parse(await readFile(join(directory, "checkpoint.json"), "utf8"))
       expect(checkpoint.phase).toBe("sso")
