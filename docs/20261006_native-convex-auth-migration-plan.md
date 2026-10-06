@@ -7,7 +7,9 @@
 - Task 4 complete: admin catalogue, scanner management, signed-in organizer, and authenticated orders use native live reads/mutations with dynamic pagination. Identity-provider member management remains HTTP.
 - Task 5 implemented, including explicit Cloudflare Cache API reuse; production evidence pending deployment.
 - Task 6 focused guest capability, authorization, native-client, and protected-state verification complete; typecheck and production build complete. Run mocked native-client tests in isolated processes to preserve module/context isolation.
-- Ready for Luna conventional commits/push and production deployment, followed by production SSO, HTTP-cache/session, and two-client native lifecycle E2E verification.
+- Initial implementation committed, pushed, and deployed to production.
+- Task 6 production verification in progress. Native pagination now handles required/recommended splits, and E2E sign-in enters the explicit SSO flow and validates session readiness. Ready to deploy these refinements and rerun the complete production suite.
+- Anonymous deployed catalogue cache reuse and parameter isolation are confirmed with independent network requests; browser-local caching must be bypassed when inspecting runtime HIT/MISS headers.
 
 ## Goal and decisions
 - Protected browser application data uses native live queries/native mutations with explicit validated session-token arguments.
