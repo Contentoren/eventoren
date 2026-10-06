@@ -1,10 +1,10 @@
 import { v } from "convex/values"
 import { internal } from "#convex/_generated/api.js"
 import { internalMutation } from "#convex/_generated/server.js"
-import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 import { userDeletionPageRemove } from "#src/auth/convex/user/delete/userDeletionPageRemove.ts"
 import { userDeletionPendingPhaseRead } from "#src/auth/convex/user/delete/userDeletionPendingPhaseRead.ts"
 import { userDeleteHardIdentities } from "#src/auth/convex/user/delete_hard_parts/userDeleteHardIdentities.ts"
+import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 
 export const userDeletionContinueInternalMutation = internalMutation({
   args: {
@@ -24,7 +24,8 @@ export const userDeletionContinueInternalMutation = internalMutation({
   },
   handler: async (ctx, args): Promise<void> => {
     const user = await ctx.db.get("users", args.userId)
-    if (args.phase === "identities") {
+    const phase = args.phase
+    if (phase === "identities") {
       if (user || !args.hard) return
       const page = await userDeleteHardIdentities(ctx, args.userId, args.cursor)
       if (!page.isDone)
@@ -35,7 +36,7 @@ export const userDeletionContinueInternalMutation = internalMutation({
       return
     }
     if (!user?.deletedAt || (args.hard && !user.hardDeletionStartedAt)) return
-    const next = await userDeletionPageRemove(ctx, args)
+    const next = await userDeletionPageRemove(ctx, { ...args, phase })
     if (next) {
       await ctx.scheduler.runAfter(0, internal.auth.userDeletionContinueInternalMutation, next)
       return

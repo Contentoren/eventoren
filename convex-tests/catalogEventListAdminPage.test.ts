@@ -47,7 +47,18 @@ async function userTokenCreate(t: ReturnType<typeof convexTest>, role: "user" | 
       updatedAt: now,
     }),
   )
-  return createToken(userId, authSecret)
+  const token = await createToken(userId, authSecret)
+  await t.run(async (ctx) =>
+    ctx.db.insert("authSessions", {
+      userId,
+      loginMethod: "dev",
+      token,
+      expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      createdAt: now,
+      updatedAt: now,
+    }),
+  )
+  return token
 }
 
 test("authorized admin event loading includes every status and ticket data needed by the editor", async () => {

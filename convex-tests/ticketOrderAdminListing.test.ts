@@ -5,7 +5,7 @@ import { expect, test } from "vitest"
 import { api } from "../convex/_generated/api.js"
 import type { Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const authSecret = "admin-order-listing-test-secret"
@@ -20,7 +20,7 @@ test("lists orders from different customers newest first for an admin", async ()
   await orderInsert(t, secondOwnerId, "second@example.test", "2026-09-21T10:00:00.000Z")
 
   const result = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
-    token: await createToken(adminId, authSecret),
+    token: await testAuthSessionTokenCreate(t, adminId, authSecret),
     paginationOpts: { cursor: null, numItems: 50 },
   })
 
@@ -47,7 +47,7 @@ test("rejects the all-orders query for an ordinary user", async () => {
   await orderInsert(t, userId, "private@example.test", "2026-09-21T10:00:00.000Z")
 
   const result = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
-    token: await createToken(userId, authSecret),
+    token: await testAuthSessionTokenCreate(t, userId, authSecret),
     search: "private@example.test",
     paginationOpts: { cursor: null, numItems: 50 },
   })
@@ -62,7 +62,7 @@ test("filters orders by event across paginated results", async () => {
   await orderInsert(t, ownerId, "first@example.test", "2026-09-20T10:00:00.000Z", "selected")
   await orderInsert(t, ownerId, "other@example.test", "2026-09-21T10:00:00.000Z", "other")
   await orderInsert(t, ownerId, "last@example.test", "2026-09-22T10:00:00.000Z", "selected")
-  const token = await createToken(adminId, authSecret)
+  const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
   const first = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
     token,
     eventKey: "selected",
@@ -92,7 +92,7 @@ test("searches past the first page for a booking number, customer email and name
   for (let day = 21; day <= 25; day++)
     await orderInsert(t, ownerId, `other${day}@example.test`, `2026-09-${day}T10:00:00.000Z`, "selected")
   await orderInsert(t, ownerId, "target@example.test", "2026-09-26T10:00:00.000Z", "other")
-  const token = await createToken(adminId, authSecret)
+  const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
   for (const search of ["00001", "TEST-00001", "TARGET@EXAMPLE", "target@example.test"]) {
     let cursor: string | null = null
     let found = false
@@ -163,7 +163,7 @@ test("finds an order older than 500 newer orders by reference, email and name on
     )
   await orderInsert(t, ownerId, "rare@example.test", "2026-09-30T10:00:00.000Z", "other")
 
-  const token = await createToken(adminId, authSecret)
+  const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
   for (const search of ["00001", "TEST-00001", "RARE@EXAMPLE", "rare@example.test", "RARE FINDER"]) {
     const result = await t.query(api.ticketing.ticketOrderListAdminPaginatedQuery, {
       token,
@@ -195,7 +195,7 @@ test("allows admins to read local order detail and rejects ordinary users", asyn
   const orderId = await orderInsert(t, userId, "private@example.test", "2026-09-21T10:00:00.000Z")
 
   const allowed = await t.query(api.ticketing.ticketOrderGetAdminQuery, {
-    token: await createToken(adminId, authSecret),
+    token: await testAuthSessionTokenCreate(t, adminId, authSecret),
     orderId,
   })
   expect(allowed.success).toBe(true)
@@ -211,7 +211,7 @@ test("allows admins to read local order detail and rejects ordinary users", asyn
     })
 
   const rejected = await t.query(api.ticketing.ticketOrderGetAdminQuery, {
-    token: await createToken(userId, authSecret),
+    token: await testAuthSessionTokenCreate(t, userId, authSecret),
     orderId,
   })
   expect(rejected.success).toBe(false)

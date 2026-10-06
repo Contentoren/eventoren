@@ -14,7 +14,7 @@ export async function eventorenLogoutResponse(request: Request): Promise<Respons
     }
   }
 
-  const headers = new Headers({ location: "/" })
+  const headers = new Headers({ location: "/", "cache-control": "no-store" })
   headers.append("set-cookie", eventorenSessionCookie.sessionClear(requestIsSecure(request)))
   headers.append("set-cookie", eventorenLogoutMarkerCookie.create(requestIsSecure(request)))
   return new Response(null, { status: 303, headers })

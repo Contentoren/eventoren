@@ -1,15 +1,18 @@
-import { onMount } from "solid-js"
-import { createResult, createResultError, type PromiseResult, type Result } from "#result"
+import { onCleanup, onMount } from "solid-js"
+import { createResult, type PromiseResult, type Result } from "#result"
 import type { EventorenAuthIdentity } from "#src/auth/model/EventorenAuthIdentity.ts"
+import type { EventorenBrowserSession } from "#src/auth/model/EventorenBrowserSession.ts"
+import { eventorenAuthIdentityCreate } from "#src/auth/model/eventorenAuthIdentityCreate.ts"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import type { EventorenAuthContextValue } from "./eventorenAuthContext.ts"
+import { eventorenBrowserSessionRead } from "./eventorenBrowserSessionRead.ts"
 import { logoutMarkerConsumeStateCreate } from "./logoutMarkerConsumeStateCreate.ts"
 
 type EventorenAuthProviderStateInputs = {
-  readonly currentUserRead: () => PromiseResult<EventorenAuthIdentity | null>
   readonly initialIdentity?: () => EventorenAuthIdentity | null
   readonly initialIdentityResult?: () => Result<EventorenAuthIdentity | null>
   readonly isDemo?: () => boolean
+  readonly sessionRead?: typeof eventorenBrowserSessionRead
 }
 
 export function eventorenAuthProviderStateCreate(inputs: EventorenAuthProviderStateInputs) {
@@ -19,106 +22,104 @@ export function eventorenAuthProviderStateCreate(inputs: EventorenAuthProviderSt
     : (inputs.initialIdentityResult?.() ??
       (inputs.initialIdentity ? createResult(inputs.initialIdentity()) : undefined))
   const initialIdentity = initialIdentityResult?.success ? initialIdentityResult.data : undefined
-  const hasInitialIdentity = !isDemo() && initialIdentityResult !== undefined
   const identity = createSignalObject<EventorenAuthIdentity | null>(initialIdentity ?? null)
-  const ready = createSignalObject(
-    isDemo() || (initialIdentityResult?.success === true && initialIdentityResult.data !== null),
-  )
-  const currentUserRead = inputs.currentUserRead
+  const session = createSignalObject<EventorenBrowserSession | null>(null)
+  const ready = createSignalObject(isDemo() || initialIdentityResult?.success === true)
   let bootstrapPromise: PromiseResult<EventorenAuthIdentity | null> | undefined
   let lifecycleVersion = 0
+  let expiryTimer: ReturnType<typeof setTimeout> | undefined
+  let refreshTimer: ReturnType<typeof setTimeout> | undefined
 
-  const currentUserReadSafe = async (): PromiseResult<EventorenAuthIdentity | null> => {
-    if (isDemo()) return createResult(null)
-    try {
-      return await currentUserRead()
-    } catch (error) {
-      return createResultError(
-        "eventorenAuthProviderCurrentUserRead",
-        "Die Anmeldung konnte nicht geprüft werden.",
-        error instanceof Error ? error.message : String(error),
-      )
-    }
-  }
-
-  const refresh = async (): PromiseResult<EventorenAuthIdentity | null> => {
-    const version = lifecycleVersion
-    if (isDemo()) {
-      identity.set(null)
-      ready.set(true)
-      return createResult(null)
-    }
-    const result = await currentUserReadSafe()
-    if (version !== lifecycleVersion) return result
-    if (!result.success) {
-      ready.set(false)
-      return result
-    }
-    identity.set(result.data)
+  const sessionApply = (value: EventorenBrowserSession | null) => {
+    if (expiryTimer) clearTimeout(expiryTimer)
+    if (refreshTimer) clearTimeout(refreshTimer)
+    session.set(value && value.expiresAt > Date.now() ? value : null)
+    identity.set(value && value.expiresAt > Date.now() ? eventorenAuthIdentityCreate(value.profile) : null)
     ready.set(true)
-    return result
-  }
-
-  const identityApply = (value: EventorenAuthIdentity) => {
-    lifecycleVersion += 1
-    bootstrapPromise = undefined
-    identity.set(value)
-    ready.set(true)
+    if (!value) return
+    expiryTimer = setTimeout(
+      () => {
+        if ((session.get()?.expiresAt ?? 0) <= Date.now()) clear()
+      },
+      Math.max(0, value.expiresAt - Date.now()),
+    )
+    refreshTimer = setTimeout(
+      () => void refresh(),
+      Math.min(5 * 60_000, Math.max(1_000, value.expiresAt - Date.now() - 30_000)),
+    )
   }
 
   const clear = () => {
     lifecycleVersion += 1
     bootstrapPromise = undefined
-    identity.set(null)
-    ready.set(true)
+    sessionApply(null)
+  }
+
+  const refresh = async (): PromiseResult<EventorenAuthIdentity | null> => {
+    if (isDemo()) {
+      clear()
+      return createResult(null)
+    }
+    const version = ++lifecycleVersion
+    const result = await (inputs.sessionRead ?? eventorenBrowserSessionRead)()
+    if (version !== lifecycleVersion) return result.success ? createResult(identity.get()) : result
+    if (!result.success) {
+      sessionApply(null)
+      return result
+    }
+    sessionApply(result.data)
+    return createResult(identity.get())
+  }
+
+  const identityApply = (value: EventorenBrowserSession) => {
+    lifecycleVersion += 1
+    bootstrapPromise = undefined
+    sessionApply(value)
   }
 
   const bootstrap = async (): PromiseResult<EventorenAuthIdentity | null> => {
     if (bootstrapPromise) return bootstrapPromise
-    const version = lifecycleVersion
-    const pending = (async () => {
-      if (isDemo()) {
-        identity.set(null)
-        ready.set(true)
-        return createResult(null)
-      }
-
-      if (hasInitialIdentity) {
-        if (!initialIdentityResult) {
-          ready.set(false)
-          return createResultError("eventorenAuthProviderInitialIdentity", "Die Anmeldung konnte nicht geprüft werden.")
-        }
-        if (!initialIdentityResult.success) {
-          ready.set(false)
-          return initialIdentityResult
-        }
-        if (version !== lifecycleVersion) return createResult(initialIdentityResult.data)
-        identity.set(initialIdentityResult.data)
-        ready.set(true)
-        return createResult(initialIdentityResult.data)
-      }
-
-      const currentResult = await currentUserReadSafe()
-      if (version !== lifecycleVersion) return currentResult.success ? createResult(currentResult.data) : currentResult
-      if (!currentResult.success) {
-        ready.set(false)
-        return currentResult
-      }
-      identity.set(currentResult.data)
-      ready.set(true)
-      return currentResult
-    })()
+    const pending = refresh()
     bootstrapPromise = pending
-    return pending
+    try {
+      return await pending
+    } finally {
+      if (bootstrapPromise === pending) bootstrapPromise = undefined
+    }
   }
 
   logoutMarkerConsumeStateCreate({ clear })
   onMount(() => {
-    if (!isDemo()) void bootstrap()
+    if (isDemo()) {
+      clear()
+      return
+    }
+    void bootstrap()
+    const onFocus = () => {
+      if (document.visibilityState === "visible") void refresh()
+    }
+    window.addEventListener("focus", onFocus)
+    document.addEventListener("visibilitychange", onFocus)
+    onCleanup(() => {
+      lifecycleVersion += 1
+      window.removeEventListener("focus", onFocus)
+      document.removeEventListener("visibilitychange", onFocus)
+      if (expiryTimer) clearTimeout(expiryTimer)
+      if (refreshTimer) clearTimeout(refreshTimer)
+    })
   })
 
   const context: EventorenAuthContextValue = {
-    identity: identity.get,
+    identity: () => {
+      const activeSession = session.get()
+      if (activeSession && activeSession.expiresAt <= Date.now()) return null
+      return identity.get()
+    },
+    token: () => {
+      const activeSession = session.get()
+      if (!activeSession || activeSession.expiresAt <= Date.now()) return null
+      return activeSession.token
+    },
     ready: ready.get,
     identityApply,
     refresh,

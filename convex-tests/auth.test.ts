@@ -41,6 +41,57 @@ test("maps Zitadel identity to an Eventoren session and revokes it on logout", a
   expect(afterLogout.success).toBe(false)
 })
 
+test("rejects a signed token when its persisted session is expired, mismatched, or deleted", async () => {
+  const t = convexTest(schema, modules)
+  const signedIn = await signIn(t, {
+    provider: "zitadel",
+    providerId: "live-session-check",
+    username: "live-session-check",
+    zitadelRoles: ["organizer"],
+  })
+  expect(signedIn.success).toBe(true)
+  if (!signedIn.success) return
+
+  const session = await t.run(async (ctx) =>
+    ctx.db
+      .query("authSessions")
+      .withIndex("token", (q) => q.eq("token", signedIn.data.token))
+      .unique(),
+  )
+  expect(session).not.toBeNull()
+  if (!session) return
+  const differentUserId = await t.run(async (ctx) =>
+    ctx.db.insert("users", {
+      name: "Different session owner",
+      role: "customer",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }),
+  )
+
+  await t.run(async (ctx) => ctx.db.patch("authSessions", session._id, { expiresAt: "2000-01-01T00:00:00.000Z" }))
+  expect((await t.query(api.auth.authCurrentUserGetQuery, { token: signedIn.data.token })).success).toBe(false)
+
+  await t.run(async (ctx) =>
+    ctx.db.patch("authSessions", session._id, { expiresAt: "2999-01-01T00:00:00.000Z", userId: differentUserId }),
+  )
+  expect((await t.query(api.auth.authCurrentUserGetQuery, { token: signedIn.data.token })).success).toBe(false)
+
+  await t.run(async (ctx) =>
+    ctx.db.patch("authSessions", session._id, { userId: session.userId, deletedAt: new Date().toISOString() }),
+  )
+  expect((await t.query(api.auth.authCurrentUserGetQuery, { token: signedIn.data.token })).success).toBe(false)
+
+  await t.run(async (ctx) => {
+    await ctx.db.patch("authSessions", session._id, {
+      deletedAt: undefined,
+      expiresAt: "2999-01-01T00:00:00.000Z",
+    })
+    await ctx.db.patch("users", session.userId, { deletedAt: new Date().toISOString() })
+  })
+  expect((await t.query(api.auth.authCurrentUserGetQuery, { token: signedIn.data.token })).success).toBe(false)
+})
+
 test("persists Zitadel identities without an email and reuses their auth account", async () => {
   const t = convexTest(schema, modules)
   const provider = {

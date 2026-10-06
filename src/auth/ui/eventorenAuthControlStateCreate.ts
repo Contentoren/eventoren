@@ -10,6 +10,7 @@ export function eventorenAuthControlStateCreate() {
   const logout = async (event: SubmitEvent): PromiseResult<void> => {
     event.preventDefault()
     errorMessage.set("")
+    auth.clear()
     let response: Response
     try {
       response = await fetch("/logout", {
@@ -37,7 +38,6 @@ export function eventorenAuthControlStateCreate() {
     }
 
     eventorenSsoAttemptsExhaust()
-    auth.clear()
     window.location.assign("/")
     return createResult(undefined)
   }

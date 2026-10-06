@@ -1,6 +1,6 @@
 import type { MutationCtx } from "#convex/_generated/server.js"
-import { createResult, createResultError, type PromiseResult } from "#result"
-import { verifyTokenResult } from "#src/auth/server/jwt_token/verifyTokenResult.ts"
+import { createResult, type PromiseResult } from "#result"
+import { authTokenSessionResolve } from "#src/utils/convex_backend/authTokenSessionResolve.ts"
 
 export async function authMutationWrapResult<T extends { token: string }, R>(
   ctx: MutationCtx,
@@ -8,12 +8,8 @@ export async function authMutationWrapResult<T extends { token: string }, R>(
   fn: (ctx: MutationCtx, data: Omit<T, "token">) => Promise<R>,
 ): PromiseResult<R> {
   const op = "authMutationWrapResult"
-  if (!args.token) {
-    return createResultError(op, "missing token")
-  }
-  const verifiedResult = await verifyTokenResult(args.token)
+  const verifiedResult = await authTokenSessionResolve(ctx, args.token)
   if (!verifiedResult.success) {
-    console.info(verifiedResult)
     return verifiedResult
   }
   const { token, ...data } = args

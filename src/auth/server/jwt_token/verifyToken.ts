@@ -8,7 +8,7 @@ export async function verifyToken(token: string, secret: string | undefined): Pr
   if (!secret) return createResultError(op, "missing secret")
   try {
     const encodedSecret = new TextEncoder().encode(secret)
-    const verified = await jwtVerify(token, encodedSecret)
+    const verified = await jwtVerify(token, encodedSecret, { algorithms: ["HS256"] })
     const decoded = a.parse(decodedTokenSchema, verified.payload)
     return createResult(decoded)
   } catch (e: any) {

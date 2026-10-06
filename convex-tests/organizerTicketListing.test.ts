@@ -5,7 +5,7 @@ import { afterEach, expect, test, vi } from "vitest"
 import { api } from "../convex/_generated/api.js"
 import type { Doc, Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const authSecret = "organizer-ticket-listing-convex-test-secret"
@@ -17,8 +17,8 @@ afterEach(() => {
 
 type EventInsert = Omit<Doc<"catalogEvents">, "_id" | "_creationTime">
 
-async function tokenFor(userId: Id<"users">) {
-  return await createToken(userId, authSecret)
+async function tokenFor(t: ReturnType<typeof convexTest>, userId: Id<"users">) {
+  return await testAuthSessionTokenCreate(t, userId, authSecret)
 }
 
 function eventInsert(eventKey: string, startsAt: string): EventInsert {
@@ -165,11 +165,11 @@ test("organizer event listing applies the invitation boundary while admins see e
   const t = convexTest(schema, modules)
   const ids = await seed(t)
   const organizer = await t.query(api.organizer.organizerEventListQuery, {
-    token: await tokenFor(ids.organizerId),
+    token: await tokenFor(t, ids.organizerId),
     paginationOpts: { numItems: 50, cursor: null },
   })
   const admin = await t.query(api.organizer.organizerEventListQuery, {
-    token: await tokenFor(ids.adminId),
+    token: await tokenFor(t, ids.adminId),
     paginationOpts: { numItems: 50, cursor: null },
   })
 
@@ -192,8 +192,8 @@ test("organizer event listing applies the invitation boundary while admins see e
 test("organizer event pages continue past unauthorized source rows and bind cursors", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const organizerToken = await tokenFor(ids.organizerId)
-  const adminToken = await tokenFor(ids.adminId)
+  const organizerToken = await tokenFor(t, ids.organizerId)
+  const adminToken = await tokenFor(t, ids.adminId)
 
   const first = await t.query(api.organizer.organizerEventListQuery, {
     token: organizerToken,
@@ -246,7 +246,7 @@ test.each(["organizer", "admin"] as const)(
     })
 
     const result = await t.query(api.organizer.organizerEventListQuery, {
-      token: await tokenFor(ids[`${role}Id`]),
+      token: await tokenFor(t, ids[`${role}Id`]),
       paginationOpts: { numItems: 50, cursor: null },
     })
 
@@ -281,7 +281,7 @@ test("organizer event pages continue past filtered source rows to include past p
       doorsAt: "2026-09-15T12:00:00.000Z",
     })
   })
-  const token = await tokenFor(ids.organizerId)
+  const token = await tokenFor(t, ids.organizerId)
 
   const first = await t.query(api.organizer.organizerEventListQuery, {
     token,
@@ -306,7 +306,7 @@ test("organizer event pages continue past filtered source rows to include past p
 test("ticket list and detail search participant and buyer names and preserve legacy/cancelled data", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const token = await tokenFor(ids.organizerId)
+  const token = await tokenFor(t, ids.organizerId)
 
   const all = await t.query(api.organizer.organizerEventTicketListQuery, {
     eventKey: "exact-invitation",
@@ -361,7 +361,7 @@ test("ticket list and detail search participant and buyer names and preserve leg
 test("ticket pages preserve order across sparse matches, deduplicate shared orders, and bind cursors", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const token = await tokenFor(ids.organizerId)
+  const token = await tokenFor(t, ids.organizerId)
 
   const first = await t.query(api.organizer.organizerEventTicketListQuery, {
     eventKey: "exact-invitation",
@@ -450,8 +450,8 @@ test("ticket pages preserve order across sparse matches, deduplicate shared orde
 test("customer direct access and organizer access before the boundary are rejected", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const customerToken = await tokenFor(ids.customerId)
-  const organizerToken = await tokenFor(ids.organizerId)
+  const customerToken = await tokenFor(t, ids.customerId)
+  const organizerToken = await tokenFor(t, ids.organizerId)
 
   const customer = await t.query(api.organizer.organizerEventTicketListQuery, {
     eventKey: "exact-invitation",
@@ -482,7 +482,7 @@ test("customer direct access and organizer access before the boundary are reject
   })
   const adminDetail = await t.query(api.organizer.organizerEventGetQuery, {
     eventKey: "before-invitation",
-    token: await tokenFor(ids.adminId),
+    token: await tokenFor(t, ids.adminId),
   })
 
   expect(customer.success).toBe(false)

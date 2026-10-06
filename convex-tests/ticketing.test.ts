@@ -5,7 +5,7 @@ import { afterEach, expect, test, vi } from "vitest"
 import { api, internal } from "../convex/_generated/api.js"
 import type { Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 import { ticketCheckoutLegalDocumentRevision } from "../src/ticketing/ticketCheckoutLegalDocumentRevision.ts"
 import { ticketCheckoutLegalDocumentSnapshot } from "../src/ticketing/ticketCheckoutLegalDocumentSnapshot.ts"
 
@@ -31,8 +31,8 @@ async function createUser(t: ReturnType<typeof convexTest>, role: "admin" | "use
   )
 }
 
-async function tokenFor(userId: string) {
-  return await createToken(userId, authSecret)
+async function tokenFor(t: ReturnType<typeof convexTest>, userId: Id<"users">) {
+  return await testAuthSessionTokenCreate(t, userId, authSecret)
 }
 
 function billingMock(
@@ -338,8 +338,8 @@ test("reserves atomically and replays the same checkout without a second Billing
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey123456789012345678901234")
 
   const first = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   const replay = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
@@ -388,8 +388,8 @@ test("persists structured invoice billing details and forwards them to Billing w
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "billingdetailscheckoutkey12345678901")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "billingdetailscheckoutkey12345678901")
   args.customer.billingDetails = {
     givenName: "Ada",
     familyName: "Lovelace",
@@ -455,8 +455,8 @@ test("rejects incomplete structured billing details in the server action", async
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "invalidbillingcheckoutkey123456789")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "invalidbillingcheckoutkey123456789")
   args.customer.billingDetails.address.country = "not-a-country"
 
   const result = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
@@ -472,8 +472,8 @@ test("prepares Event A during unrelated Event B sync, then replays after A edit 
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const adminToken = await tokenFor(adminId)
-  const userToken = await tokenFor(userId)
+  const adminToken = await tokenFor(t, adminId)
+  const userToken = await tokenFor(t, userId)
   const catalogVersion = await seedCatalog(t, adminToken)
   const args = checkoutArgs(userToken, catalogVersion, "revisioncheckoutkey223456789012345678901234")
   const unrelated = await t.mutation(api.catalog.catalogEventUpsertMutation, {
@@ -537,8 +537,8 @@ test("retries a selected-Event freshness rejection with the same reservation and
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "revisionretrykey123456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "revisionretrykey123456789012345678901234")
 
   const staleResponse = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(staleResponse.success).toBe(false)
@@ -561,8 +561,8 @@ test("releases a reservation after Billing rejects a stale revision and confirms
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "revisionreleasekey123456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "revisionreleasekey123456789012345678901234")
 
   const staleResponse = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(staleResponse.success).toBe(false)
@@ -602,8 +602,8 @@ test("persists enabled fulfillment eligibility once and replays it after the all
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey323456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey323456789012345678901234")
 
   const first = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(first).toMatchObject({ success: true, data: { fulfillmentEligible: true, replayed: false } })
@@ -628,10 +628,10 @@ test("requires the generated current legal revision only for a newly enabled che
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
 
   const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
-    ...checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey423456789012345678901234"),
+    ...checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey423456789012345678901234"),
     legalContext: {
       cta: "Kostenpflichtig buchen",
       termsAccepted: true,
@@ -654,8 +654,8 @@ test("requires the exact accepted legal Markdown snapshot for a newly enabled ch
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey823456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey823456789012345678901234")
 
   const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
     ...args,
@@ -676,8 +676,8 @@ test("defaults missing legacy fulfillment eligibility to false without reevaluat
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "legacycheckout123456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "legacycheckout123456789012345678901234")
   const first = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(first).toMatchObject({ success: true, data: { fulfillmentEligible: false } })
   if (!first.success) return
@@ -713,10 +713,10 @@ test("requires participant names for every newly checked-out ticket", async () =
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
 
   const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
-    ...checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey523456789012345678901234"),
+    ...checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey523456789012345678901234"),
     tickets: [{ tierKey: "standard", quantity: 1 }],
   })
 
@@ -731,7 +731,7 @@ test("rejects checkout orders whose total ticket quantity exceeds the order maxi
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const adminToken = await tokenFor(adminId)
+  const adminToken = await tokenFor(t, adminId)
   await seedCatalog(t, adminToken)
   const addedTier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
     eventKey: "ticket-event",
@@ -750,7 +750,7 @@ test("rejects checkout orders whose total ticket quantity exceeds the order maxi
   if (!addedTier.success) return
 
   const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
-    ...checkoutArgs(await tokenFor(userId), addedTier.data.catalogVersion, "checkoutkey923456789012345678901234", {
+    ...checkoutArgs(await tokenFor(t, userId), addedTier.data.catalogVersion, "checkoutkey923456789012345678901234", {
       eventRevision: addedTier.data.eventRevision,
     }),
     tickets: [
@@ -782,10 +782,10 @@ test("rejects checkout return URLs outside the configured Eventoren origin", asy
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
 
   const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
-    ...checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey623456789012345678901234"),
+    ...checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey623456789012345678901234"),
     successUrl: "https://alternate.example.test/checkout/success",
   })
 
@@ -804,10 +804,10 @@ test("canonicalizes same-origin checkout return URLs before persistence", async 
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
 
   const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
-    ...checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey723456789012345678901234"),
+    ...checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey723456789012345678901234"),
     successUrl: "https://eventoren.test:443/checkout/success?result=paid#complete",
     cancelUrl: "https://eventoren.test:443/checkout/cancel?result=cancelled",
   })
@@ -827,8 +827,8 @@ test("does not release a still-payable pending session, then issues exactly once
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey123456789012345678901234")
   const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(checkout.success).toBe(true)
   if (!checkout.success) return
@@ -919,7 +919,7 @@ test("accepts and pays exactly ten tickets across two tiers idempotently", async
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const adminToken = await tokenFor(adminId)
+  const adminToken = await tokenFor(t, adminId)
   await seedCatalog(t, adminToken)
   const addedTier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
     eventKey: "ticket-event",
@@ -940,7 +940,7 @@ test("accepts and pays exactly ten tickets across two tiers idempotently", async
   const checkoutKey = "checkoutkey1023456789012345678901234"
   const checkout = await t.action(
     api.ticketing.ticketCheckoutCreateAction,
-    checkoutArgs(await tokenFor(userId), addedTier.data.catalogVersion, checkoutKey, {
+    checkoutArgs(await tokenFor(t, userId), addedTier.data.catalogVersion, checkoutKey, {
       eventRevision: addedTier.data.eventRevision,
       tickets: [
         { tierKey: "standard", quantity: 2, participantNames: ["Ada", "Grace"] },
@@ -1001,7 +1001,7 @@ test("keeps participant names through paid retries and serves order QR codes thr
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const adminToken = await tokenFor(adminId)
+  const adminToken = await tokenFor(t, adminId)
   await seedCatalog(t, adminToken)
   const addedTier = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
     eventKey: "ticket-event",
@@ -1020,7 +1020,7 @@ test("keeps participant names through paid retries and serves order QR codes thr
   if (!addedTier.success) return
 
   const checkoutKey = "checkoutkey423456789012345678901234"
-  const args = checkoutArgs(await tokenFor(userId), addedTier.data.catalogVersion, checkoutKey, {
+  const args = checkoutArgs(await tokenFor(t, userId), addedTier.data.catalogVersion, checkoutKey, {
     eventRevision: addedTier.data.eventRevision,
     tickets: [
       { tierKey: "standard", quantity: 2, participantNames: ["Ada", "Grace"] },
@@ -1173,8 +1173,8 @@ test("reconciles a paid close-tab checkout and prepares one immutable fulfillmen
   const checkout = await t.action(
     api.ticketing.ticketCheckoutCreateAction,
     checkoutArgs(
-      await tokenFor(userId),
-      await seedCatalog(t, await tokenFor(adminId)),
+      await tokenFor(t, userId),
+      await seedCatalog(t, await tokenFor(t, adminId)),
       "checkoutkey523456789012345678901234",
     ),
   )
@@ -1218,8 +1218,8 @@ test("retries fulfillment preparation without issuing another ticket or access t
   const checkout = await t.action(
     api.ticketing.ticketCheckoutCreateAction,
     checkoutArgs(
-      await tokenFor(userId),
-      await seedCatalog(t, await tokenFor(adminId)),
+      await tokenFor(t, userId),
+      await seedCatalog(t, await tokenFor(t, adminId)),
       "checkoutkey623456789012345678901234",
     ),
   )
@@ -1273,10 +1273,10 @@ test("rejects a payment correlation mismatch without changing inventory", async 
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
   const checkout = await t.action(
     api.ticketing.ticketCheckoutCreateAction,
-    checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234"),
+    checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey123456789012345678901234"),
   )
   expect(checkout.success).toBe(true)
   if (!checkout.success) return
@@ -1297,7 +1297,7 @@ test("releases inventory only after Billing reports failed and keeps guest acces
   billingMock("failed")
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
   const guestAccessToken = "guest_access_token_123456789012345678"
   const args = {
     ...checkoutArgs("", catalogVersion, "checkoutkey123456789012345678901234"),
@@ -1331,9 +1331,9 @@ test("paginates current-user order summaries by indexed creation order without l
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
   const otherUserId = await createUser(t)
-  const token = await tokenFor(userId)
-  const otherToken = await tokenFor(otherUserId)
-  await seedCatalog(t, await tokenFor(adminId))
+  const token = await tokenFor(t, userId)
+  const otherToken = await tokenFor(t, otherUserId)
+  await seedCatalog(t, await tokenFor(t, adminId))
   const detailTierId = await t.run(async (ctx) => {
     const tier = await ctx.db.query("catalogTicketTiers").first()
     if (!tier) throw new Error("test catalog tier is missing")
@@ -1418,7 +1418,7 @@ test("paginates current-user order summaries by indexed creation order without l
 test("legacy order history rejects more than 50 orders without truncating its array contract", async () => {
   const t = convexTest(schema, modules)
   const userId = await createUser(t)
-  const token = await tokenFor(userId)
+  const token = await tokenFor(t, userId)
   for (let index = 0; index < 50; index += 1)
     await insertOrderHistoryOrder(t, userId, index, `2026-11-01T00:${String(index).padStart(2, "0")}:00.000Z`)
 
@@ -1459,9 +1459,9 @@ test("legacy order history rejects more than 50 orders without truncating its ar
 test("legacy order history rejects an oversized order projection instead of returning partial details", async () => {
   const t = convexTest(schema, modules)
   const userId = await createUser(t)
-  const token = await tokenFor(userId)
+  const token = await tokenFor(t, userId)
   const adminId = await createUser(t, "admin")
-  await seedCatalog(t, await tokenFor(adminId))
+  await seedCatalog(t, await tokenFor(t, adminId))
   const tierId = await t.run(async (ctx) => (await ctx.db.query("catalogTicketTiers").first())?._id)
   if (!tierId) throw new Error("Test tier was not found")
   const createdAt = "2026-11-01T00:00:00.000Z"
@@ -1499,8 +1499,8 @@ test("scheduled expiry calls authenticated Billing expiration, releases once, an
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey123456789012345678901234")
   const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(checkout.success).toBe(true)
   if (!checkout.success) return
@@ -1536,8 +1536,8 @@ test("pending and provider errors retain inventory and schedule expiry retries",
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey123456789012345678901234")
   const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(checkout.success).toBe(true)
   if (!checkout.success) return
@@ -1572,8 +1572,8 @@ test("paid expiration result issues once and late paid truth after release canno
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const catalogVersion = await seedCatalog(t, await tokenFor(adminId))
-  const args = checkoutArgs(await tokenFor(userId), catalogVersion, "checkoutkey123456789012345678901234")
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey123456789012345678901234")
   const checkout = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
   expect(checkout.success).toBe(true)
   if (!checkout.success) return
@@ -1635,8 +1635,8 @@ test("unpaid order does not reduce available bestand and only paid order reduces
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t)
-  const adminToken = await tokenFor(adminId)
-  const userToken = await tokenFor(userId)
+  const adminToken = await tokenFor(t, adminId)
+  const userToken = await tokenFor(t, userId)
   const catalogVersion = await seedCatalog(t, adminToken)
 
   const initialEvent = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "ticket-event" })

@@ -77,6 +77,21 @@ async function membershipTestCreate() {
   const token = await createTokenResult(ids.userId, ids.highOrg.orgHandle, "guest")
   const otherToken = await createTokenResult(ids.otherId)
   if (!token.success || !otherToken.success) throw new Error("test token failed")
+  await t.run(async (ctx) => {
+    for (const [userId, tokenValue] of [
+      [ids.userId, token.data],
+      [ids.otherId, otherToken.data],
+    ] as const) {
+      await ctx.db.insert("authSessions", {
+        userId,
+        loginMethod: "dev",
+        token: tokenValue,
+        expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
+  })
   return { t, ...ids, token: token.data, otherToken: otherToken.data }
 }
 

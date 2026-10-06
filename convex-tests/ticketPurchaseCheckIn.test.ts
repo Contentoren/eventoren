@@ -6,7 +6,7 @@ import { afterEach, expect, test, vi } from "vitest"
 import { api } from "../convex/_generated/api.js"
 import type { Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 import { ticketCheckoutLegalDocumentSnapshot } from "../src/ticketing/ticketCheckoutLegalDocumentSnapshot.ts"
 import { ticketQrMatrixCreate } from "../src/ticketing/ticketQrMatrixCreate.ts"
 import { ticketQrSvgGenerate } from "../src/ticketing/ticketQrSvgGenerate.ts"
@@ -19,8 +19,8 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-async function tokenFor(userId: Id<"users">): Promise<string> {
-  return await createToken(userId, authSecret)
+async function tokenFor(t: ReturnType<typeof convexTest>, userId: Id<"users">): Promise<string> {
+  return await testAuthSessionTokenCreate(t, userId, authSecret)
 }
 
 async function seedUsers(t: ReturnType<typeof convexTest>) {
@@ -226,9 +226,9 @@ test("completes the real purchase, wallet, QR check-in, duplicate, reset, and hi
   const billing = billingMock()
   const t = convexTest(schema, modules)
   const users = await seedUsers(t)
-  const adminToken = await tokenFor(users.adminId)
-  const customerToken = await tokenFor(users.customerId)
-  const organizerToken = await tokenFor(users.organizerId)
+  const adminToken = await tokenFor(t, users.adminId)
+  const customerToken = await tokenFor(t, users.customerId)
+  const organizerToken = await tokenFor(t, users.organizerId)
   const catalogVersion = await createPublishedCatalog(t, adminToken)
   if (catalogVersion === undefined) return
 
