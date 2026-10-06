@@ -1,4 +1,4 @@
-import { paginationOptsValidator } from "convex/server"
+import { type PaginationResult, paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { query } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
@@ -26,10 +26,7 @@ export const organizerEventTicketListQuery = query({
     token: v.string(),
     paginationOpts: paginationOptsValidator,
   },
-  handler: async (
-    ctx,
-    args,
-  ): PromiseResult<{ page: readonly OrganizerTicketItem[]; isDone: boolean; continueCursor: string }> =>
+  handler: async (ctx, args): PromiseResult<PaginationResult<OrganizerTicketItem>> =>
     authQueryTokenToUserId(ctx, args, async (queryCtx, { userId }) => {
       const op = "organizerEventTicketListQuery"
       const globalAuthorization = await organizerAuthorizeFn(queryCtx, userId)
@@ -43,6 +40,12 @@ export const organizerEventTicketListQuery = query({
       const search = args.search?.trim().toLowerCase() ?? ""
       const sourceCursorResult = organizerTicketListSourceCursorGet(args.paginationOpts.cursor, args.eventKey, search)
       if (!sourceCursorResult.success) return sourceCursorResult
+      const sourceEndCursorResult = organizerTicketListSourceCursorGet(
+        args.paginationOpts.endCursor ?? null,
+        args.eventKey,
+        search,
+      )
+      if (!sourceEndCursorResult.success) return sourceEndCursorResult
 
       const event = await queryCtx.db
         .query("catalogEvents")
@@ -59,6 +62,7 @@ export const organizerEventTicketListQuery = query({
         .order("asc")
         .paginate({
           cursor: sourceCursorResult.data,
+          endCursor: sourceEndCursorResult.data,
           numItems: pageSize,
           maximumRowsRead: pageSize,
           maximumBytesRead: maxPageBytes,
@@ -79,9 +83,12 @@ export const organizerEventTicketListQuery = query({
       }
 
       return createResult({
+        ...sourcePage,
         page: items,
-        isDone: sourcePage.isDone,
         continueCursor: organizerTicketListCursorCreate(sourcePage.continueCursor, args.eventKey, search),
+        ...(sourcePage.splitCursor
+          ? { splitCursor: organizerTicketListCursorCreate(sourcePage.splitCursor, args.eventKey, search) }
+          : {}),
       })
     }),
 })

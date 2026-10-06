@@ -20,6 +20,7 @@ type Page = {
   readonly page: readonly unknown[]
   readonly isDone: boolean
   readonly continueCursor: string
+  readonly splitCursor?: string | null
   readonly pageStatus?: "SplitRecommended" | "SplitRequired" | null
 }
 type PageQuery = FunctionReference<"query", "public", any, Result<Page>>
@@ -31,8 +32,8 @@ type PageItem<Query extends PageQuery> = PageData<Query>["page"][number]
  * In load-more mode `result` includes the resolved prefix while the next page loads.
  * In all-pages mode `result` remains pending until exhaustion (or a Result error).
  * `pages` preserves backend Results and pagination metadata without transformation.
- * Result-wrapped/custom-cursor queries cannot use Convex's native pagination
- * client. A SplitRequired page fails explicitly rather than aggregating partial data.
+ * Result-wrapped/custom-cursor queries use the SDK's bounded two-query splitting
+ * protocol. Required splits never contribute incomplete items to the aggregate.
  */
 export function queryPaginatedCreate<Query extends PageQuery>(
   query: Query,
@@ -107,6 +108,7 @@ export function queryPaginatedCreate<Query extends PageQuery>(
           cursor: string | null
           read: Accessor<FunctionReturnType<Query> | ResultErr | undefined>
           dispose: () => void
+          split?: { cursor: string; endCursor: string; children: readonly [OwnedPage, OwnedPage] }
         }
         const ownedPages = createSignalObject<readonly OwnedPage[]>([])
         const requestedPages = createSignalObject(1)
@@ -116,18 +118,27 @@ export function queryPaginatedCreate<Query extends PageQuery>(
           ownedPages.set(current.slice(0, count))
           for (const page of current.slice(count)) page.dispose()
         }
-        const append = (cursor: string | null) => {
-          const page = createRoot(
-            (disposePage) => ({
+        const pageCreate = (cursor: string | null, endCursor?: string | null): OwnedPage =>
+          createRoot((disposePage) => {
+            const page: OwnedPage = {
               cursor,
               read: queryCreate(query, {
                 ...currentArgs,
-                paginationOpts: { numItems: pageSize, cursor } satisfies PaginationOptions,
+                paginationOpts: {
+                  numItems: pageSize,
+                  cursor,
+                  ...(endCursor !== undefined ? { endCursor } : {}),
+                } satisfies PaginationOptions,
               } as Omit<FunctionArgs<Query>, "token">),
-              dispose: disposePage,
-            }),
-            owner,
-          )
+              dispose: () => {
+                for (const child of page.split?.children ?? []) child.dispose()
+                disposePage()
+              },
+            }
+            return page
+          }, owner)
+        const append = (cursor: string | null) => {
+          const page = pageCreate(cursor)
           ownedPages.set([...untrack(ownedPages.get), page])
         }
         onCleanup(() => {
@@ -155,15 +166,56 @@ export function queryPaginatedCreate<Query extends PageQuery>(
             const value = page.read()
             snapshots.push(value)
             if (!value || !value.success) {
+              for (const child of page.split?.children ?? []) child.dispose()
+              page.split = undefined
               truncate(index + 1)
               loading = value === undefined
               aggregate = value ?? (!options.allPages && index > 0 ? createResult(items) : undefined)
               break
             }
-            if (value.data.pageStatus === "SplitRequired") {
-              truncate(index + 1)
-              aggregate = createResultError(op, "Pagination requires a split; the backend page is incomplete")
-              break
+            const status = value.data.pageStatus
+            if (status === "SplitRequired" || status === "SplitRecommended") {
+              const splitCursor = value.data.splitCursor
+              const endCursor = value.data.continueCursor
+              if (!splitCursor || splitCursor === page.cursor || splitCursor === endCursor) {
+                for (const child of page.split?.children ?? []) child.dispose()
+                page.split = undefined
+                truncate(index + 1)
+                aggregate = createResultError(op, "Pagination split cursor did not advance")
+                break
+              }
+              if (page.split?.cursor !== splitCursor || page.split.endCursor !== endCursor) {
+                for (const child of page.split?.children ?? []) child.dispose()
+                page.split = {
+                  cursor: splitCursor,
+                  endCursor,
+                  children: [pageCreate(page.cursor, splitCursor), pageCreate(splitCursor, endCursor)],
+                }
+              }
+            } else if (page.split) {
+              for (const child of page.split.children) child.dispose()
+              page.split = undefined
+            }
+            if (page.split) {
+              const [left, right] = page.split.children
+              // Track both pending queries; keep the original recommended page
+              // visible until the atomic replacement, exactly like the SDK.
+              const leftValue = left.read()
+              const rightValue = right.read()
+              if (leftValue !== undefined && rightValue !== undefined) {
+                page.split = undefined
+                batch(() => {
+                  requestedPages.set(untrack(requestedPages.get) + 1)
+                  ownedPages.set([...current.slice(0, index), left, right, ...current.slice(index + 1)])
+                })
+                page.dispose()
+                return
+              }
+              if (status === "SplitRequired") {
+                loading = true
+                aggregate = !options.allPages && index > 0 ? createResult(items) : undefined
+                break
+              }
             }
             items.push(...(value.data.page as readonly PageItem<Query>[]))
             if (value.data.isDone) {

@@ -1,4 +1,4 @@
-import { paginationOptsValidator } from "convex/server"
+import { type PaginationResult, paginationOptsValidator } from "convex/server"
 import { v } from "convex/values"
 import { query } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
@@ -18,14 +18,7 @@ const cursorVersion = 1
 
 export const organizerEventListQuery = query({
   args: { paginationOpts: paginationOptsValidator, token: v.string() },
-  handler: async (
-    ctx,
-    args,
-  ): PromiseResult<{
-    page: readonly ReturnType<typeof organizerEventProjectionCreate>[]
-    isDone: boolean
-    continueCursor: string
-  }> =>
+  handler: async (ctx, args): PromiseResult<PaginationResult<ReturnType<typeof organizerEventProjectionCreate>>> =>
     authQueryTokenToUserId(ctx, args, async (queryCtx, { userId }) => {
       const op = "organizerEventListQuery"
       const globalAuthorization = await organizerAuthorizeFn(queryCtx, userId)
@@ -38,9 +31,12 @@ export const organizerEventListQuery = query({
 
       const sourceCursorResult = organizerEventListSourceCursorGet(args.paginationOpts.cursor, userId)
       if (!sourceCursorResult.success) return sourceCursorResult
+      const sourceEndCursorResult = organizerEventListSourceCursorGet(args.paginationOpts.endCursor ?? null, userId)
+      if (!sourceEndCursorResult.success) return sourceEndCursorResult
 
       const sourcePage = await queryCtx.db.query("catalogEvents").withIndex("startsAt").order("asc").paginate({
         cursor: sourceCursorResult.data,
+        endCursor: sourceEndCursorResult.data,
         numItems: pageSize,
         maximumRowsRead: pageSize,
         maximumBytesRead: maxPageBytes,
@@ -54,9 +50,12 @@ export const organizerEventListQuery = query({
       }
 
       return createResult({
+        ...sourcePage,
         page,
-        isDone: sourcePage.isDone,
         continueCursor: organizerEventListCursorCreate(sourcePage.continueCursor, userId),
+        ...(sourcePage.splitCursor
+          ? { splitCursor: organizerEventListCursorCreate(sourcePage.splitCursor, userId) }
+          : {}),
       })
     }),
 })

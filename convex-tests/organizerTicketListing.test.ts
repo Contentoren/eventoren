@@ -225,6 +225,100 @@ test("organizer event pages continue past unauthorized source rows and bind curs
   expect(mismatchedCursor.success).toBe(false)
 })
 
+test("organizer event splits encode both cursors and validate/decode bounded end cursors for the current user", async () => {
+  const t = convexTest(schema, modules)
+  const ids = await seed(t)
+  const token = await tokenFor(t, ids.adminId)
+  const first = await t.query(api.organizer.organizerEventListQuery, {
+    token,
+    paginationOpts: { numItems: 2, cursor: null },
+  })
+  expect(first).toMatchObject({ success: true, data: { pageStatus: "SplitRequired" } })
+  if (!first.success) return
+  expect(first.data.splitCursor).toEqual(expect.any(String))
+  const splitCursor = first.data.splitCursor!
+  expect(JSON.parse(splitCursor)).toMatchObject({ userId: ids.adminId, version: 1 })
+  const left = await t.query(api.organizer.organizerEventListQuery, {
+    token,
+    paginationOpts: { numItems: 50, cursor: null, endCursor: splitCursor },
+  })
+  const right = await t.query(api.organizer.organizerEventListQuery, {
+    token,
+    paginationOpts: { numItems: 50, cursor: splitCursor, endCursor: first.data.continueCursor },
+  })
+  expect(left).toMatchObject({
+    success: true,
+    data: { page: [{ eventKey: "old-event" }], continueCursor: splitCursor, pageStatus: null, splitCursor: null },
+  })
+  expect(right).toMatchObject({
+    success: true,
+    data: { page: [{ eventKey: "before-invitation" }], continueCursor: first.data.continueCursor },
+  })
+  if (left.success) expect(left.data.page).toHaveLength(1)
+  if (right.success) expect(right.data.page).toHaveLength(1)
+  const wrongUser = await t.query(api.organizer.organizerEventListQuery, {
+    token: await tokenFor(t, ids.organizerId),
+    paginationOpts: { numItems: 50, cursor: null, endCursor: splitCursor },
+  })
+  expect(wrongUser.success).toBe(false)
+  const malformed = await t.query(api.organizer.organizerEventListQuery, {
+    token,
+    paginationOpts: { numItems: 50, cursor: null, endCursor: "not-a-custom-cursor" },
+  })
+  expect(malformed.success).toBe(false)
+})
+
+test("organizer ticket splits retain page status and bind bounded end cursors to event and normalized search", async () => {
+  const t = convexTest(schema, modules)
+  const ids = await seed(t)
+  const token = await tokenFor(t, ids.organizerId)
+  const first = await t.query(api.organizer.organizerEventTicketListQuery, {
+    token,
+    eventKey: "exact-invitation",
+    search: " LOVELACE ",
+    paginationOpts: { numItems: 2, cursor: null },
+  })
+  expect(first).toMatchObject({ success: true, data: { pageStatus: "SplitRequired" } })
+  if (!first.success) return
+  expect(first.data.splitCursor).toEqual(expect.any(String))
+  const splitCursor = first.data.splitCursor!
+  expect(JSON.parse(splitCursor)).toMatchObject({ eventKey: "exact-invitation", search: "lovelace", version: 1 })
+  const left = await t.query(api.organizer.organizerEventTicketListQuery, {
+    token,
+    eventKey: "exact-invitation",
+    search: "lovelace",
+    paginationOpts: { numItems: 50, cursor: null, endCursor: splitCursor },
+  })
+  const right = await t.query(api.organizer.organizerEventTicketListQuery, {
+    token,
+    eventKey: "exact-invitation",
+    search: "lovelace",
+    paginationOpts: { numItems: 50, cursor: splitCursor, endCursor: first.data.continueCursor },
+  })
+  expect(left).toMatchObject({
+    success: true,
+    data: { page: [{ ticketNumber: "TKT-LEGACY" }], continueCursor: splitCursor, pageStatus: null, splitCursor: null },
+  })
+  expect(right).toMatchObject({
+    success: true,
+    data: { page: [{ ticketNumber: "TKT-CANCELLED" }], continueCursor: first.data.continueCursor },
+  })
+  if (left.success) expect(left.data.page).toHaveLength(1)
+  if (right.success) expect(right.data.page).toHaveLength(1)
+  for (const [eventKey, search] of [
+    ["after-invitation", "lovelace"],
+    ["exact-invitation", "hopper"],
+  ]) {
+    const mismatch = await t.query(api.organizer.organizerEventTicketListQuery, {
+      token,
+      eventKey,
+      search,
+      paginationOpts: { numItems: 50, cursor: null, endCursor: splitCursor },
+    })
+    expect(mismatch.success).toBe(false)
+  }
+})
+
 test.each(["organizer", "admin"] as const)(
   "organizer event listing excludes draft, archived, and deleted events for %s",
   async (role) => {
