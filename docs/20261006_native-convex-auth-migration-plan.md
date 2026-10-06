@@ -8,7 +8,9 @@
 - Task 5 implemented, including explicit Cloudflare Cache API reuse; production evidence pending deployment.
 - Task 6 focused guest capability, authorization, native-client, and protected-state verification complete; typecheck and production build complete. Run mocked native-client tests in isolated processes to preserve module/context isolation.
 - Initial implementation committed, pushed, and deployed to production.
-- Task 6 production verification in progress. Native pagination now handles required/recommended splits, and E2E sign-in enters the explicit SSO flow and validates session readiness. Ready to deploy these refinements and rerun the complete production suite.
+- Task 6 complete: the complete production SSO, session/cache HTTP, and two-client native lifecycle suite passes. Live creation/edit, logout, revoked-token denial, and authorized owned-draft cleanup are asserted.
+- Native pagination handles required/recommended splits. E2E uses explicit SSO entry, destination-form readiness, and per-attempt event identities with exact projected-ID ownership checks.
+- Final harness refinements and regression coverage are ready for conventional commits/push and final production deployment.
 - Anonymous deployed catalogue cache reuse and parameter isolation are confirmed with independent network requests; browser-local caching must be bypassed when inspecting runtime HIT/MISS headers.
 
 ## Goal and decisions
