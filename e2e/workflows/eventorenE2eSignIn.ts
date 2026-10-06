@@ -6,26 +6,56 @@ export async function eventorenE2eSignIn(page: Page, baseUrl: string, path: stri
   if (!credentials.success) throw new Error(credentials.errorMessage)
 
   const baseOrigin = new URL(baseUrl).origin
-  const destination = `${baseUrl}${path}`
-  if (page.url() !== destination) await page.goto(destination)
-  const signIn = page.getByRole("link", { name: /continue with zitadel/i })
-  if (new URL(page.url()).origin === baseOrigin && (await signIn.isVisible().catch(() => false))) {
-    // The provider can start loading during click; arm the navigation wait first.
-    await Promise.all([page.waitForURL((url) => url.origin !== baseOrigin, { timeout: 60_000 }), signIn.click()])
+  if (!path.startsWith("/") || path.startsWith("//") || path.includes("\\")) {
+    throw new Error(`Unsafe E2E sign-in return path: ${path}`)
+  }
+  const returnTarget = new URL(path, baseOrigin)
+  if (
+    returnTarget.origin !== baseOrigin ||
+    returnTarget.pathname === "/sso" ||
+    returnTarget.pathname.startsWith("/sso/")
+  ) {
+    throw new Error(`Unsafe E2E sign-in return path: ${path}`)
+  }
+  if (returnTarget.pathname === "/admin") returnTarget.pathname = "/admin/bestellungen"
+  const safeReturnTo = `${returnTarget.pathname}${returnTarget.search}${returnTarget.hash}`
+  const destination = `${baseOrigin}/sso?returnTo=${encodeURIComponent(safeReturnTo)}`
+  await page.goto(destination)
+
+  if (new URL(page.url()).origin === baseOrigin) {
+    const signIn = page.getByRole("button", { name: /continue with zitadel/i })
+    if (await signIn.isVisible().catch(() => false)) {
+      // The provider can start loading during click; arm the navigation wait first.
+      await Promise.all([page.waitForURL((url) => url.origin !== baseOrigin, { timeout: 60_000 }), signIn.click()])
+    }
   }
 
-  // An already-authenticated session may remain on the application; the SSO test
-  // independently requires a callback so this cannot make that workflow pass.
-  if (new URL(page.url()).origin === baseOrigin) return
+  if (new URL(page.url()).origin !== baseOrigin) {
+    const username = page.getByRole("textbox", { name: /loginname|username|email/i })
+    await expect(username).toBeVisible({ timeout: 60_000 })
+    await username.fill(credentials.data.username)
+    await page.getByRole("button", { name: /next|continue|weiter/i }).click()
 
-  const username = page.getByRole("textbox", { name: /loginname|username|email/i })
-  await expect(username).toBeVisible({ timeout: 60_000 })
-  await username.fill(credentials.data.username)
-  await page.getByRole("button", { name: /next|continue|weiter/i }).click()
+    const password = page.getByRole("textbox", { name: /password|passwort/i })
+    await expect(password).toBeVisible({ timeout: 60_000 })
+    await password.fill(credentials.data.password)
+    await page.getByRole("button", { name: /next|continue|sign in|log in|weiter|anmelden/i }).click()
+    await page.waitForURL((url) => url.origin === baseOrigin, { timeout: 60_000 })
+  }
 
-  const password = page.getByRole("textbox", { name: /password|passwort/i })
-  await expect(password).toBeVisible({ timeout: 60_000 })
-  await password.fill(credentials.data.password)
-  await page.getByRole("button", { name: /next|continue|sign in|log in|weiter|anmelden/i }).click()
-  await page.waitForURL((url) => url.origin === baseOrigin, { timeout: 60_000 })
+  await expect
+    .poll(
+      () =>
+        page.evaluate(async () => {
+          const response = await fetch("/api/session", { credentials: "same-origin", cache: "no-store" })
+          const body = await response.json()
+          return (
+            response.status === 200 &&
+            Boolean(body.session) &&
+            response.headers.get("cache-control")?.includes("no-store")
+          )
+        }),
+      { timeout: 60_000 },
+    )
+    .toBe(true)
 }
