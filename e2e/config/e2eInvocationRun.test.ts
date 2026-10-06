@@ -7,7 +7,7 @@ import { e2eCheckpointSave } from "../checkpoint/e2eCheckpointSave.ts"
 import type { e2eStripeTicketReconcile } from "../stripe/e2eStripeTicketReconcile.ts"
 
 describe("Eventoren E2E runner", () => {
-  it("runs production SSO only without marking a ticket attempt or running ticket cleanup", async () => {
+  it("runs production SSO and native auth without marking a ticket attempt or running ticket cleanup", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
     const started: string[] = []
     let cleanups = 0
@@ -41,7 +41,7 @@ describe("Eventoren E2E runner", () => {
           }) as typeof e2eStripeTicketReconcile,
         }),
       ).toBe(0)
-      expect(started).toEqual(["SSO"])
+      expect(started).toEqual(["SSO", "native auth HTTP", "native auth lifecycle"])
       expect(cleanups).toBe(0)
       const checkpoint = JSON.parse(await readFile(join(directory, "checkpoint.json"), "utf8"))
       expect(checkpoint.phase).toBe("sso")
@@ -97,7 +97,7 @@ describe("Eventoren E2E runner", () => {
           },
         }),
       ).toBe(1)
-      expect(started).toEqual(["SSO", "ticket purchase"])
+      expect(started).toEqual(["SSO", "native auth HTTP", "native auth lifecycle", "ticket purchase"])
       expect(JSON.parse(await readFile(join(directory, "checkpoint.json"), "utf8")).phase).toBe("ticket-unreconciled")
       started.length = 0
       expect(
@@ -111,9 +111,39 @@ describe("Eventoren E2E runner", () => {
           },
         }),
       ).toBe(1)
-      expect(started).toEqual(["SSO", "ticket purchase"])
+      expect(started).toEqual(["SSO", "native auth HTTP", "native auth lifecycle", "ticket purchase"])
     } finally {
       await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("stops before subsequent workflows when either native auth workflow fails", async () => {
+    for (const failedWorkflow of ["native auth HTTP", "native auth lifecycle"]) {
+      const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-native-auth-failure-"))
+      try {
+        const started: string[] = []
+        expect(
+          await e2eInvocationRun({
+            target: "development",
+            environment: {},
+            checkpointDirectory: directory,
+            commandRun: async (workflow) => {
+              started.push(workflow.name)
+              return workflow.name === failedWorkflow ? 1 : 0
+            },
+          }),
+        ).toBe(1)
+        expect(started).toEqual(
+          failedWorkflow === "native auth HTTP"
+            ? ["SSO", "native auth HTTP"]
+            : ["SSO", "native auth HTTP", "native auth lifecycle"],
+        )
+        const checkpoint = JSON.parse(await readFile(join(directory, "checkpoint.json"), "utf8"))
+        expect(checkpoint.phase).toBe("sso")
+        expect(checkpoint.ticket).toBeUndefined()
+      } finally {
+        await rm(directory, { recursive: true, force: true })
+      }
     }
   })
 

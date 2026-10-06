@@ -6,7 +6,7 @@ e2eEnvironmentLoad()
 
 export default defineConfig({
   extends: definePlaywrightConfig({}),
-  include: ["e2e/workflows/sso/sso.test.ts"],
+  include: ["e2e/workflows/sso/sso.test.ts", "e2e/workflows/nativeAuth/nativeAuthHttp.test.ts"],
   testEnvironment: "node",
   isolate: false,
 })

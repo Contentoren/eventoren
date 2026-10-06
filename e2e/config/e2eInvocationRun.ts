@@ -1,18 +1,19 @@
 import { spawn } from "node:child_process"
 import { lstat, unlink } from "node:fs/promises"
 import { join } from "node:path"
+import { ConvexHttpClient } from "convex/browser"
+import { api } from "../../convex/_generated/api.js"
+import { e2eCatalogCleanupRun } from "../catalog/e2eCatalogCleanupRun.ts"
+import { e2eCatalogCleanupScan } from "../catalog/e2eCatalogCleanupScan.ts"
 import { e2eCheckpointLoad } from "../checkpoint/e2eCheckpointLoad.ts"
 import { e2eCheckpointRootResolve } from "../checkpoint/e2eCheckpointRootResolve.ts"
 import { e2eCheckpointSave } from "../checkpoint/e2eCheckpointSave.ts"
-import { e2eCheckpointSsoClear } from "../checkpoint/e2eCheckpointSsoClear.ts"
 import type { E2eCheckpoint } from "../checkpoint/e2eCheckpointSchema.ts"
-import { e2eCatalogCleanupScan } from "../catalog/e2eCatalogCleanupScan.ts"
-import { e2eCatalogCleanupRun } from "../catalog/e2eCatalogCleanupRun.ts"
+import { e2eCheckpointSsoClear } from "../checkpoint/e2eCheckpointSsoClear.ts"
 import { ticketE2eImapCleanupScan } from "../mail/ticketE2eImapCleanupScan.ts"
 import { e2eStripeCleanupScan } from "../stripe/e2eStripeCleanupScan.ts"
 import { e2eStripeTicketReconcile } from "../stripe/e2eStripeTicketReconcile.ts"
-import { ConvexHttpClient } from "convex/browser"
-import { api } from "../../convex/_generated/api.js"
+import { e2eCleanupConvexUrlResolve } from "./e2eCleanupConvexUrlResolve.ts"
 import { e2eEnvironmentLoad } from "./e2eEnvironmentLoad.ts"
 import { e2eEnvironmentRead } from "./e2eEnvironmentRead.ts"
 import { e2eInvocationLockAcquire } from "./e2eInvocationLockAcquire.ts"
@@ -21,6 +22,11 @@ import { e2eTraceCleanup } from "./e2eTraceCleanup.ts"
 
 type Workflow = { name: string; config: string }
 const sso: Workflow = { name: "SSO", config: "e2e/rstest.config.ts" }
+const nativeAuth: Workflow = { name: "native auth HTTP", config: "e2e/native-auth-rstest.config.ts" }
+const nativeAuthLifecycle: Workflow = {
+  name: "native auth lifecycle",
+  config: "e2e/native-auth-lifecycle-rstest.config.ts",
+}
 const ticket: Workflow = { name: "ticket purchase", config: "e2e/ticket-rstest.config.ts" }
 
 /** Refuse unsafe targets before the first browser opens; never substitute preview for production. */
@@ -72,8 +78,8 @@ export async function e2eInvocationRun(
       }
     }
     const ssoOnly = target.data.target === "production"
-    // Production runs are deliberately read-only SSO smoke tests. Development keeps
-    // the existing combined workflow and its explicit ticket-target check.
+    // Production runs only the SSO, public-cache/native-auth, and exact-owned-draft
+    // lifecycle workflows. Development additionally keeps its ticket-target check.
     if (!ssoOnly) {
       const ticketSafety = e2eTicketTargetCheck(target.data.target)
       if (!ticketSafety.success) {
@@ -131,7 +137,11 @@ export async function e2eInvocationRun(
       E2E_RUN_ID: checkpoint.runId,
       E2E_INVOCATION_PID: String(process.pid),
     } as Record<string, string>
-    for (const workflow of ssoOnly ? [sso] : [sso, ticket]) {
+    const convexUrl = e2eCleanupConvexUrlResolve(environment, target.data.target)
+    if (convexUrl) childEnvironment.E2E_CLEANUP_CONVEX_URL = convexUrl
+    for (const workflow of ssoOnly
+      ? [sso, nativeAuth, nativeAuthLifecycle]
+      : [sso, nativeAuth, nativeAuthLifecycle, ticket]) {
       if (workflow === ticket && checkpoint.phase === "sso") {
         // The suite records individual effects before performing them. A legacy checkpoint without step evidence stays blocked.
         checkpoint = {
