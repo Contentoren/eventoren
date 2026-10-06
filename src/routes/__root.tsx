@@ -5,6 +5,7 @@ import { HydrationScript } from "solid-js/web"
 import { createResult } from "#result"
 import { eventorenCurrentUserServerFn } from "#src/auth/server/eventorenCurrentUserServerFn.ts"
 import { EventorenAuthProvider } from "#src/auth/ui/EventorenAuthProvider.tsx"
+import { ConvexClientProvider } from "#src/utils/convex_client/ConvexClientProvider.tsx"
 import { ErrorPage } from "#ui/static/pages/ErrorPage.jsx"
 import { rootDocumentStateCreate } from "../app/i18n/rootDocumentStateCreate.ts"
 import { ErrorPageActions } from "../components/ErrorPageActions.tsx"
@@ -52,7 +53,9 @@ function PublicRootContent() {
 
   return (
     <EventorenAuthProvider initialIdentityResult={initialIdentityResult} isDemo={isDemo}>
-      <Outlet />
+      <ConvexClientProvider>
+        <Outlet />
+      </ConvexClientProvider>
     </EventorenAuthProvider>
   )
 }

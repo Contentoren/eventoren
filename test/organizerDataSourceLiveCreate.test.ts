@@ -1,160 +1,147 @@
-import { describe, expect, mock, test } from "bun:test"
-import { demoOrganizerDataSourceCreate } from "../src/demo/fixtures/demoOrganizerDataSourceCreate.ts"
-import type { OrganizerDataSource } from "../src/organizer/OrganizerDataSource.ts"
+import { expect, mock, test } from "bun:test"
+import type { FunctionReference } from "convex/server"
+import type { OrganizerReactiveQuery } from "../src/organizer/OrganizerDataSource.ts"
 import type { OrganizerTicket } from "../src/organizer/OrganizerTicket.ts"
-import { adminSessionTokenRead } from "../src/server/adminSessionTokenRead.ts"
+import type { OrganizerTicketListPage } from "../src/organizer/OrganizerTicketListPage.ts"
 
-const serverCalls: { readonly name: string; readonly input: unknown }[] = []
-let nextTicketCheckInResult: unknown = { success: true, data: { ticket: {} } }
-let requestCookie: string | undefined
-let forwardedQueryInput: unknown
-mock.module("../src/organizer/organizerDataSourceServerCreate.ts", () => ({
-  organizerDataSourceServerCreate: () => ({
-    eventList: async (input: unknown) => {
-      serverCalls.push({ name: "eventList", input })
-      return { success: true, data: { page: [], continueCursor: "", isDone: true } }
-    },
-    eventGet: async (input: unknown) => {
-      serverCalls.push({ name: "eventGet", input })
-      return { success: true, data: {} }
-    },
-    ticketList: async (input: unknown) => {
-      serverCalls.push({ name: "ticketList", input })
-      return { success: true, data: { page: [], continueCursor: "", isDone: true } }
-    },
-    ticketGet: async (input: unknown) => {
-      serverCalls.push({ name: "ticketGet", input })
-      return { success: true, data: {} }
-    },
-    ticketCheckIn: async (input: unknown) => {
-      serverCalls.push({ name: "ticketCheckIn", input })
-      return nextTicketCheckInResult
-    },
-    ticketReset: async (input: unknown) => {
-      serverCalls.push({ name: "ticketReset", input })
-      return { success: true, data: { ticket: {} } }
-    },
-  }),
-}))
-mock.module("@tanstack/solid-start/server", () => ({
-  getRequestHeader: () => requestCookie,
-}))
-mock.module("../src/client/apiClient.ts", () => ({
-  apiClientCreate: () => ({
-    query: async (_reference: unknown, input: unknown) => {
-      forwardedQueryInput = input
-      return { success: true, data: { page: [], continueCursor: "", isDone: true } }
-    },
-  }),
-}))
-
+const solidJsClientPath = "solid-js/dist/solid.js"
+const solidJsClient = (await import(solidJsClientPath)) as typeof import("solid-js")
+mock.module("solid-js", () => solidJsClient)
+const { createRoot, getOwner } = solidJsClient
+const { eventorenAuthContext } = await import("../src/auth/ui/eventorenAuthContext.ts")
+const { convexClientContext } = await import("../src/utils/convex_client/convexClientContext.ts")
 const { organizerDataSourceLiveCreate } = await import("../src/organizer/organizerDataSourceLiveCreate.ts")
-const { organizerEventListFromSession } = await import("../src/server/organizerEventListFromSession.ts")
+mock.restore()
 
-describe("organizer cookie transport", () => {
-  test("uses typed same-origin calls without accepting a browser token", async () => {
-    serverCalls.length = 0
-    const source = organizerDataSourceLiveCreate()
-    const paginationOpts = { numItems: 50, cursor: null }
+test("organizer live source subscribes with the validated token and cleans up", () => {
+  const client = new FakeConvexClient()
+  let result!: ReturnType<typeof organizerDataSourceLiveCreate>["eventGetResult"]
+  let dispose!: () => void
 
-    await source.eventList()
-    await source.eventGet("event-key")
-    await source.ticketList("event-key", "query", paginationOpts)
-    await source.ticketGet("event-key", "ticket-id" as OrganizerTicket["id"])
-    await source.ticketCheckIn("event-key", "ticket-id" as OrganizerTicket["id"])
-    await source.ticketCheckInCode("event-key", "ticket-code")
-    await source.ticketReset("event-key", "ticket-id" as OrganizerTicket["id"])
-
-    expect(serverCalls).toEqual([
-      { name: "eventList", input: { data: { paginationOpts } } },
-      { name: "eventGet", input: { data: { eventKey: "event-key" } } },
-      { name: "ticketList", input: { data: { eventKey: "event-key", search: "query", paginationOpts } } },
-      { name: "ticketGet", input: { data: { eventKey: "event-key", ticketId: "ticket-id" } } },
-      { name: "ticketCheckIn", input: { data: { eventKey: "event-key", ticketId: "ticket-id" } } },
-      { name: "ticketCheckIn", input: { data: { eventKey: "event-key", ticketCode: "ticket-code" } } },
-      { name: "ticketReset", input: { data: { eventKey: "event-key", ticketId: "ticket-id" } } },
-    ])
-  })
-
-  test("keeps duplicate check-in details from the typed transport", async () => {
-    const errorData = JSON.stringify({
-      ticketNumber: "TKT-57C1D37C242F432880CD",
-      previousCheckedInAt: "2026-09-16T18:00:00.000Z",
-      previousOperator: "Organizer Operator",
-      participantName: "Mara Demo",
-      buyerName: "Ada Lovelace",
-      buyerEmail: "buyer@example.com",
-      elapsedMilliseconds: 1_000,
-    })
-    nextTicketCheckInResult = {
-      success: false,
-      op: "organizerTicketCheckInMutation",
-      code: "organizer.check-in.duplicate",
-      errorMessage: "The ticket was already checked in",
-      errorData,
+  createRoot((rootDispose) => {
+    dispose = rootDispose
+    getOwner()!.context = {
+      [convexClientContext.id]: client,
+      [eventorenAuthContext.id]: { token: () => "session-token", ready: () => true },
     }
-
-    const result = await organizerDataSourceLiveCreate().ticketCheckInCode("event-key", "ticket-code")
-
-    expect(result).toEqual({
-      success: false,
-      errorMessage: "The ticket was already checked in",
-      errorCode: "organizer.check-in.duplicate",
-      errorData,
-    })
-    nextTicketCheckInResult = { success: true, data: { ticket: {} } }
+    result = organizerDataSourceLiveCreate().eventGetResult
+    if (!result) throw new Error("eventGetResult should be available")
+    result(() => "summer-event")
   })
 
-  test("reads the organizer session from the canonical cookie only", () => {
-    expect(adminSessionTokenRead("other=value; eventoren-session=cookie-token; another=value")).toEqual({
-      success: true,
-      data: "cookie-token",
-    })
-  })
-
-  test("forwards the HttpOnly cookie to the backend without browser transport state", async () => {
-    requestCookie = "eventoren-session=cookie-token"
-    forwardedQueryInput = undefined
-
-    const result = await organizerEventListFromSession({ paginationOpts: { numItems: 50, cursor: null } })
-
-    expect(result.success).toBe(true)
-    expect(forwardedQueryInput).toEqual({
-      paginationOpts: { numItems: 50, cursor: null },
-      token: "cookie-token",
-    })
-
-    requestCookie = undefined
-    const missingCookieResult = await organizerEventListFromSession({ paginationOpts: { numItems: 50, cursor: null } })
-
-    expect(missingCookieResult).toEqual({
-      success: false,
-      op: "organizerEventListFromSession",
-      errorMessage: "Anmeldung erforderlich",
-    })
-  })
-
-  test("rejects organizer transport when the canonical session cookie is absent", () => {
-    const result = adminSessionTokenRead("other=value")
-
-    expect(result.success).toBe(false)
-    if (result.success) return
-    expect(result.errorMessage).toBe("Anmeldung erforderlich")
-  })
-
-  test("keeps injected organizer data source calls token-free", async () => {
-    const source = demoOrganizerDataSourceCreate()
-    const receivedArguments: unknown[][] = []
-    const injected: OrganizerDataSource = {
-      ...source,
-      eventList: async (...input) => {
-        receivedArguments.push(input)
-        return source.eventList(...input)
-      },
-    }
-
-    await injected.eventList()
-
-    expect(receivedArguments).toEqual([[]])
-  })
+  expect(client.subscriptions).toHaveLength(1)
+  expect(client.subscriptions[0]?.args).toEqual({ eventKey: "summer-event", token: "session-token" })
+  expect(client.mutations).toHaveLength(0)
+  dispose()
+  expect(client.subscriptions[0]?.unsubscribed).toBe(true)
 })
+
+test("organizer actions use native mutations rather than server functions", async () => {
+  const client = new FakeConvexClient()
+  let checkIn!: ReturnType<typeof organizerDataSourceLiveCreate>["ticketCheckIn"]
+  let checkInCode!: ReturnType<typeof organizerDataSourceLiveCreate>["ticketCheckInCode"]
+  let reset!: ReturnType<typeof organizerDataSourceLiveCreate>["ticketReset"]
+  let dispose!: () => void
+
+  createRoot((rootDispose) => {
+    dispose = rootDispose
+    getOwner()!.context = {
+      [convexClientContext.id]: client,
+      [eventorenAuthContext.id]: { token: () => "session-token", ready: () => true },
+    }
+    const source = organizerDataSourceLiveCreate()
+    checkIn = source.ticketCheckIn
+    checkInCode = source.ticketCheckInCode
+    reset = source.ticketReset
+  })
+
+  try {
+    expect(await checkIn("event", "ticket" as never)).toEqual({ success: true, data: client.ticket })
+    expect(await checkInCode("event", "code")).toEqual({ success: true, data: client.ticket })
+    expect(await reset("event", "ticket" as never)).toEqual({ success: true, data: client.ticket })
+    expect(client.mutations.map((call) => call.args)).toEqual([
+      { eventKey: "event", ticketId: "ticket", token: "session-token" },
+      { eventKey: "event", ticketCode: "code", token: "session-token" },
+      { eventKey: "event", ticketId: "ticket", token: "session-token" },
+    ])
+  } finally {
+    dispose()
+  }
+})
+
+test("ticket pages keep the organizer cursor and completion metadata while loading more", () => {
+  const client = new FakeConvexClient()
+  let list!: OrganizerReactiveQuery<OrganizerTicketListPage>
+  let dispose!: () => void
+
+  createRoot((rootDispose) => {
+    dispose = rootDispose
+    getOwner()!.context = {
+      [convexClientContext.id]: client,
+      [eventorenAuthContext.id]: { token: () => "session-token", ready: () => true },
+    }
+    const source = organizerDataSourceLiveCreate()
+    list = source.ticketListResult!(
+      () => "summer-event",
+      () => " Ada ",
+    )
+  })
+
+  try {
+    expect(client.subscriptions[0]?.args).toEqual({
+      eventKey: "summer-event",
+      search: "Ada",
+      paginationOpts: { numItems: 50, cursor: null },
+      token: "session-token",
+    })
+    client.subscriptions[0]?.update({
+      success: true,
+      data: { page: [], isDone: false, continueCursor: "organizer-cursor" },
+    })
+    expect(list.result()).toEqual({
+      success: true,
+      data: { page: [], isDone: false, continueCursor: "organizer-cursor" },
+    })
+
+    list.loadMore()
+    expect(client.subscriptions[1]?.args).toEqual({
+      eventKey: "summer-event",
+      search: "Ada",
+      paginationOpts: { numItems: 50, cursor: "organizer-cursor" },
+      token: "session-token",
+    })
+    client.subscriptions[1]?.update({
+      success: true,
+      data: { page: [], isDone: true, continueCursor: "organizer-done" },
+    })
+    expect(list.result()).toEqual({
+      success: true,
+      data: { page: [], isDone: true, continueCursor: "organizer-done" },
+    })
+  } finally {
+    dispose()
+  }
+})
+
+class FakeConvexClient {
+  readonly subscriptions: {
+    readonly args: unknown
+    readonly update: (value: unknown) => void
+    unsubscribed: boolean
+  }[] = []
+  readonly mutations: { readonly args: unknown }[] = []
+  readonly ticket = { id: "ticket" } as OrganizerTicket
+
+  onUpdate(_query: FunctionReference<"query">, args: unknown, update: (value: unknown) => void) {
+    const subscription = { args, update, unsubscribed: false }
+    this.subscriptions.push(subscription)
+    return () => {
+      subscription.unsubscribed = true
+    }
+  }
+
+  async mutation(_mutation: FunctionReference<"mutation">, args: unknown) {
+    this.mutations.push({ args })
+    return { success: true, data: { ticket: this.ticket } }
+  }
+}

@@ -1,4 +1,4 @@
-import { onMount } from "solid-js"
+import { createEffect, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { CatalogEventUpsertInput } from "../catalog/client/CatalogEventUpsertInput.ts"
 import type { CatalogTicketTierDeleteInput } from "../catalog/client/CatalogTicketTierDeleteInput.ts"
@@ -53,6 +53,7 @@ const emptyTierDraft = (): AdminTierDraft => ({
 
 export function adminCatalogPageStateCreate(inputs: {
   events: () => readonly AdminEventItem[]
+  eventsLive?: () => readonly AdminEventItem[] | undefined
   eventsLoadError?: () => string
   isServerAuthorized: () => boolean
   reloadEvents: () => Promise<
@@ -76,6 +77,8 @@ export function adminCatalogPageStateCreate(inputs: {
   }) => Promise<Result<{ readonly eventKey: string; readonly catalogVersion: number }>>
   categoryHiddenList?: () => Promise<Result<readonly string[]>>
   categoryList?: () => Promise<Result<readonly string[]>>
+  categoryHiddenLive?: () => Result<readonly string[]> | undefined
+  categoryLive?: () => Result<readonly string[]> | undefined
   categoryCreate?: (input: { readonly category: string }) => Promise<Result<void>>
   categoryHide?: (input: { readonly category: string }) => Promise<Result<void>>
   imageUpload?: (file: File) => Promise<Result<EventImageVariants>>
@@ -90,13 +93,33 @@ export function adminCatalogPageStateCreate(inputs: {
   const isSaving = createSignalObject(false)
   const hiddenCategories = createSignalObject<readonly string[]>([])
   const categories = createSignalObject<readonly string[]>([])
-  onMount(() => {
-    void hiddenCategoriesLoad()
-    void categoriesLoad()
+  const optimisticCategories = new Set<string>()
+  createEffect(() => {
+    if (!inputs.isServerAuthorized()) {
+      events.set([])
+      categories.set([])
+      hiddenCategories.set([])
+      selectedEventKey.set("")
+      eventDraft.set(emptyEventDraft())
+      tierDraft.set(emptyTierDraft())
+      return
+    }
+    const liveEvents = inputs.eventsLive?.()
+    if (liveEvents) events.set(liveEvents)
   })
-
+  createEffect(() => {
+    const result = inputs.categoryHiddenLive?.()
+    if (result?.success) hiddenCategories.set(result.data)
+    if (result && !result.success) errorMessage.set(result.errorMessage)
+  })
+  createEffect(() => {
+    const result = inputs.categoryLive?.()
+    if (result?.success) categories.set([...new Set([...result.data, ...optimisticCategories])])
+    if (result && !result.success) errorMessage.set(result.errorMessage)
+  })
   const isAuthorized = () => inputs.isServerAuthorized()
-  const selectedEvent = () => events.get().find((event) => event.id === selectedEventKey.get())
+  const selectedEvent = () =>
+    isAuthorized() ? events.get().find((event) => event.id === selectedEventKey.get()) : undefined
 
   const selectEvent = (event: EventItem) => {
     const adminEvent = events.get().find((candidate) => candidate.id === event.id)
@@ -210,19 +233,20 @@ export function adminCatalogPageStateCreate(inputs: {
 
       successMessage.set("Event gespeichert. Änderungen werden an den Verkaufskatalog synchronisiert.")
       errorMessage.set("")
-      const refreshedEvents = await reloadEvents()
-      if (!refreshedEvents) {
-        successMessage.set("Event gespeichert, aber die Eventliste konnte nicht aktualisiert werden.")
-        return saved.data.eventKey
+      if (!inputs.eventsLive) {
+        const refreshedEvents = await reloadEvents()
+        if (!refreshedEvents) {
+          successMessage.set("Event gespeichert, aber die Eventliste konnte nicht aktualisiert werden.")
+          return saved.data.eventKey
+        }
+        const updated = refreshedEvents.find((event) => event.id === saved.data.eventKey)
+        if (updated) {
+          selectedEventKey.set(updated.id)
+          eventDraft.set(eventToDraft(updated))
+        }
       }
-      const updated = refreshedEvents.find((event) => event.id === saved.data.eventKey)
-      if (!updated) {
-        successMessage.set("Event gespeichert, aber es konnte nicht erneut geladen werden.")
-        return saved.data.eventKey
-      }
-      selectedEventKey.set(updated.id)
-      eventDraft.set(eventToDraft(updated))
-      return updated.id
+      selectedEventKey.set(saved.data.eventKey)
+      return saved.data.eventKey
     } catch (error) {
       errorMessage.set(
         `Event konnte nicht gespeichert werden: ${error instanceof Error ? error.message : String(error)}`,
@@ -312,7 +336,7 @@ export function adminCatalogPageStateCreate(inputs: {
         return
       }
 
-      if (!(await reloadEvents())) return
+      if (!inputs.eventsLive && !(await reloadEvents())) return
       tierDraft.set(emptyTierDraft())
       successMessage.set("Ticketprodukt gespeichert. Der Bestand bleibt serverseitig maßgeblich.")
       errorMessage.set("")
@@ -428,7 +452,7 @@ export function adminCatalogPageStateCreate(inputs: {
         return
       }
 
-      if (!(await reloadEvents())) return
+      if (!inputs.eventsLive && !(await reloadEvents())) return
       tierDraft.set(emptyTierDraft())
       successMessage.set("Ticketprodukt gelöscht.")
       errorMessage.set("")
@@ -460,19 +484,24 @@ export function adminCatalogPageStateCreate(inputs: {
         errorMessage.set(published.errorMessage)
         return
       }
-      const refreshedEvents = await reloadEvents()
-      if (!refreshedEvents) {
-        successMessage.set("")
-        return
+      if (!inputs.eventsLive) {
+        const refreshedEvents = await reloadEvents()
+        if (!refreshedEvents) {
+          successMessage.set("")
+          return
+        }
+        const event = refreshedEvents.find((candidate) => candidate.id === published.data.eventKey)
+        if (!event) {
+          successMessage.set("")
+          errorMessage.set("Das veröffentlichte Event konnte nicht erneut geladen werden.")
+          return
+        }
+        selectedEventKey.set(event.id)
+        eventDraft.set(eventToDraft(event))
+      } else {
+        selectedEventKey.set(published.data.eventKey)
+        eventDraft.set({ ...eventDraft.get(), status: "published" })
       }
-      const event = refreshedEvents.find((candidate) => candidate.id === published.data.eventKey)
-      if (!event) {
-        successMessage.set("")
-        errorMessage.set("Das veröffentlichte Event konnte nicht erneut geladen werden.")
-        return
-      }
-      selectedEventKey.set(event.id)
-      eventDraft.set(eventToDraft(event))
       successMessage.set(
         "Event veröffentlicht. Der öffentliche Katalog wird innerhalb des Cache-Fensters aktualisiert.",
       )
@@ -518,7 +547,7 @@ export function adminCatalogPageStateCreate(inputs: {
     if (!inputs.categoryList) return
     const result = await inputs.categoryList()
     if (!result.success) return errorMessage.set(result.errorMessage)
-    categories.set([...new Set([...categories.get(), ...result.data])])
+    categories.set([...new Set([...result.data, ...optimisticCategories])])
   }
 
   const createCategory = async (category: string): Promise<boolean> => {
@@ -532,6 +561,7 @@ export function adminCatalogPageStateCreate(inputs: {
         errorMessage.set(result.errorMessage)
         return false
       }
+      optimisticCategories.add(category)
       categories.set([...new Set([...categories.get(), category])])
       hiddenCategories.set(hiddenCategories.get().filter((hidden) => hidden !== category))
       errorMessage.set("")
@@ -569,13 +599,18 @@ export function adminCatalogPageStateCreate(inputs: {
     }
   }
 
+  onMount(() => {
+    if (!inputs.categoryHiddenLive) void hiddenCategoriesLoad()
+    if (!inputs.categoryLive) void categoriesLoad()
+  })
+
   return {
-    events: events.get,
-    hiddenCategories: hiddenCategories.get,
-    categories: categories.get,
+    events: () => (isAuthorized() ? events.get() : []),
+    hiddenCategories: () => (isAuthorized() ? hiddenCategories.get() : []),
+    categories: () => (isAuthorized() ? categories.get() : []),
     selectedEvent: selectedEvent,
-    selectedEventKey: selectedEventKey.get,
-    eventDraft: eventDraft.get,
+    selectedEventKey: () => (isAuthorized() ? selectedEventKey.get() : ""),
+    eventDraft: () => (isAuthorized() ? eventDraft.get() : emptyEventDraft()),
     eventDraftRevision: eventDraftRevision.get,
     tierDraft: tierDraft.get,
     isAuthorized,

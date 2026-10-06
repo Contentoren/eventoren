@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test"
 import type { ConvexHttpClient } from "convex/browser"
 import { adminTicketOrderGet } from "../src/admin/adminTicketOrderGet.ts"
+import { adminTicketOrderBillingGet } from "../src/admin/adminTicketOrderBillingGet.ts"
 
 test("denied admin lookup never calls Billing and does not expose order PII", async () => {
   const client = {
@@ -8,6 +9,26 @@ test("denied admin lookup never calls Billing and does not expose order PII", as
   } as unknown as ConvexHttpClient
   const result = await adminTicketOrderGet({ token: "unauthorized", orderId: "order" }, client)
   expect(result).toMatchObject({ success: false, errorMessage: "Bestellung konnte nicht geladen werden." })
+})
+
+test("billing-only lookup authorizes through the admin order query and returns no order snapshot", async () => {
+  const client = {
+    query: async () => ({
+      success: true,
+      data: {
+        id: "order",
+        paymentReference: "payment-reference",
+        billingOrderReference: null,
+        customerEmail: "private@example.test",
+      },
+    }),
+  } as unknown as ConvexHttpClient
+  const result = await adminTicketOrderBillingGet({ token: "admin", orderId: "order" }, client)
+  expect(result).toEqual({
+    success: true,
+    data: { bookingNumber: undefined, bookingReference: undefined, stripeDetails: null, stripeError: null },
+  })
+  expect(JSON.stringify(result)).not.toContain("private@example.test")
 })
 
 test("missing Billing configuration preserves the authorized local order", async () => {

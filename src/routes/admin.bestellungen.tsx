@@ -3,16 +3,11 @@ import { createServerFn } from "@tanstack/solid-start"
 import { AdminTicketOrdersPage } from "../admin/AdminTicketOrdersPage.tsx"
 import { adminTicketOrdersPageStateCreate } from "../admin/adminTicketOrdersPageStateCreate.ts"
 import { adminTicketOrdersSearchParse } from "../admin/adminTicketOrdersSearchParse.ts"
-import { adminTicketOrdersGet } from "../server/adminTicketOrdersGet.ts"
-import { adminTicketOrderGet } from "../server/adminTicketOrderGet.ts"
+import { adminTicketOrderBillingGet } from "../server/adminTicketOrderBillingGet.ts"
 
-const getAdminTicketOrders = createServerFn({ method: "GET" })
-  .validator((input: Parameters<typeof adminTicketOrdersGet>[0]) => input)
-  .handler(({ data }) => adminTicketOrdersGet(data))
-
-const getAdminTicketOrder = createServerFn({ method: "GET" })
-  .validator((input: Parameters<typeof adminTicketOrderGet>[0]) => input)
-  .handler(({ data }) => adminTicketOrderGet(data))
+const getAdminTicketOrderBilling = createServerFn({ method: "GET" })
+  .validator((input: Parameters<typeof adminTicketOrderBillingGet>[0]) => input)
+  .handler(({ data }) => adminTicketOrderBillingGet(data))
 const adminRoute = getRouteApi("/admin")
 
 export const Route = createFileRoute("/admin/bestellungen")({
@@ -25,8 +20,8 @@ function AdminTicketOrdersRoute() {
   const navigate = useNavigate()
   const adminData = adminRoute.useLoaderData()
   const state = adminTicketOrdersPageStateCreate({
-    list: (input) => getAdminTicketOrders({ data: input }),
-    getDetails: (input) => getAdminTicketOrder({ data: input }),
+    useNativeQueries: true,
+    getBillingDetails: (input) => getAdminTicketOrderBilling({ data: input }),
     events: () => {
       const data = adminData()
       return data.authorized && data.eventsResult.success ? data.eventsResult.data : []

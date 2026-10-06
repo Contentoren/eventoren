@@ -1,10 +1,12 @@
 import { expect, mock, test } from "bun:test"
-import { createRoot, createSignal } from "solid-js"
+import { createRoot, createSignal, getOwner } from "solid-js"
 import { createResult } from "../src/ui/createResult.ts"
 import type { TicketOrderListPage } from "../src/ticketing/TicketOrderListPage.ts"
 import type { TicketOrderProjection } from "../src/ticketing/TicketOrderProjection.ts"
 import type { TicketOrderSummary } from "../src/ticketing/TicketOrderSummary.ts"
 import { ticketOrderHistoryPageStateCreate } from "../src/ticketing/ticketOrderHistoryPageStateCreate.ts"
+import { eventorenAuthContext } from "../src/auth/ui/eventorenAuthContext.ts"
+import { convexClientContext } from "../src/utils/convex_client/convexClientContext.ts"
 
 const summaryCreate = (id: string): TicketOrderSummary => ({
   id,
@@ -202,6 +204,68 @@ test("clears summaries and an open detail when authentication is removed", async
         expect(state.selectedOrder()).toBeNull()
         expect(state.isLoading()).toBe(false)
         expect(state.isDetailLoading()).toBe(false)
+        dispose()
+        resolve()
+      })
+    })
+  })
+})
+
+test("native history accumulates live pages and clears query results on token generation changes", async () => {
+  const calls: { args: Record<string, any>; update: (value: any) => void; unsubscribe: () => void }[] = []
+  const client = {
+    onUpdate: (_query: unknown, args: Record<string, any>, update: (value: any) => void) => {
+      let active = true
+      const call = {
+        args,
+        update,
+        unsubscribe: () => {
+          active = false
+        },
+      }
+      calls.push(call)
+      return () => {
+        active = false
+        call.unsubscribe()
+      }
+    },
+  }
+
+  await new Promise<void>((resolve) => {
+    createRoot((dispose) => {
+      const [token, setToken] = createSignal<string | null>("native-a")
+      const owner = getOwner()!
+      owner.context = {
+        [eventorenAuthContext.id]: {
+          identity: () => null,
+          token,
+          ready: () => true,
+          identityApply: () => undefined,
+          refresh: async () => createResult(null),
+          clear: () => setToken(null),
+        },
+        [convexClientContext.id]: client,
+      }
+      const state = ticketOrderHistoryPageStateCreate({ useNativeQueries: true })
+      state.sessionSync()
+      void flush().then(async () => {
+        const firstPageCall = calls.find((call) => call.args.paginationOpts?.cursor === null)
+        expect(firstPageCall?.args.token).toBe("native-a")
+        firstPageCall?.update(createResult(pageCreate([summaryCreate("native-one")], "native-next", false)))
+        expect(state.orders().map((order) => order.id)).toEqual(["native-one"])
+
+        state.loadMore()
+        const secondPageCall = calls.find((call) => call.args.paginationOpts?.cursor === "native-next")
+        expect(secondPageCall?.args.token).toBe("native-a")
+        secondPageCall?.update(createResult(pageCreate([summaryCreate("native-two")], "native-end", true)))
+        expect(state.orders().map((order) => order.id)).toEqual(["native-one", "native-two"])
+
+        setToken("native-b")
+        await flush()
+        expect(state.orders()).toEqual([])
+        expect(calls.some((call) => call.args.token === "native-b" && call.args.paginationOpts?.cursor === null)).toBe(
+          true,
+        )
         dispose()
         resolve()
       })

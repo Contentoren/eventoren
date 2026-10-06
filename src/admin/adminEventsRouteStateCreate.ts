@@ -1,74 +1,81 @@
 import { getRouteApi } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
+import { eventorenAuthContextUse } from "#src/auth/ui/eventorenAuthContextUse.ts"
+import { api } from "#convex/_generated/api.js"
+import { queryPaginatedCreate } from "#src/utils/convex_client/queryPaginatedCreate.ts"
+import { queryCreate } from "#src/utils/convex_client/queryCreate.ts"
+import { mutationCreate } from "#src/utils/convex_client/mutationCreate.ts"
+import { createResultError } from "#result"
 import { adminImageUploadFromSession } from "#src/server/adminImageUploadFromSession.ts"
-import { catalogCategoryHiddenListFromSession } from "#src/server/catalogCategoryHiddenListFromSession.ts"
-import { catalogCategoryHideFromSession } from "#src/server/catalogCategoryHideFromSession.ts"
-import { catalogCategoryCreateFromSession } from "#src/server/catalogCategoryCreateFromSession.ts"
-import { catalogCategoryListFromSession } from "#src/server/catalogCategoryListFromSession.ts"
-import { catalogEventDeleteFromSession } from "#src/server/catalogEventDeleteFromSession.ts"
-import { catalogEventPublishFromSession } from "#src/server/catalogEventPublishFromSession.ts"
-import { catalogEventsAdminGet } from "#src/server/catalogEventsAdminGet.ts"
-import { catalogEventUpsertFromSession } from "#src/server/catalogEventUpsertFromSession.ts"
-import { catalogTicketTierDeleteFromSession } from "#src/server/catalogTicketTierDeleteFromSession.ts"
-import { catalogTicketTierUpsertFromSession } from "#src/server/catalogTicketTierUpsertFromSession.ts"
 import { adminCatalogPageStateCreate } from "./adminCatalogPageStateCreate.ts"
 
 const adminRoute = getRouteApi("/admin")
-const reloadAdminEvents = createServerFn({ method: "GET" }).handler(catalogEventsAdminGet)
-const saveAdminEvent = createServerFn({ method: "POST" })
-  .validator((input: Parameters<typeof catalogEventUpsertFromSession>[0]) => input)
-  .handler(({ data }) => catalogEventUpsertFromSession(data))
-const saveAdminTicketTier = createServerFn({ method: "POST" })
-  .validator((input: Parameters<typeof catalogTicketTierUpsertFromSession>[0]) => input)
-  .handler(({ data }) => catalogTicketTierUpsertFromSession(data))
-const deleteAdminTicketTier = createServerFn({ method: "POST" })
-  .validator((input: Parameters<typeof catalogTicketTierDeleteFromSession>[0]) => input)
-  .handler(({ data }) => catalogTicketTierDeleteFromSession(data))
-const publishAdminEvent = createServerFn({ method: "POST" })
-  .validator((input: Parameters<typeof catalogEventPublishFromSession>[0]) => input)
-  .handler(({ data }) => catalogEventPublishFromSession(data))
-const deleteAdminEvent = createServerFn({ method: "POST" })
-  .validator((input: Parameters<typeof catalogEventDeleteFromSession>[0]) => input)
-  .handler(({ data }) => catalogEventDeleteFromSession(data))
-const getHiddenAdminCategories = createServerFn({ method: "GET" }).handler(catalogCategoryHiddenListFromSession)
-const getAdminCategories = createServerFn({ method: "GET" }).handler(catalogCategoryListFromSession)
-const createAdminCategory = createServerFn({ method: "POST" })
-  .validator((input: Parameters<typeof catalogCategoryCreateFromSession>[0]) => input)
-  .handler(({ data }) => catalogCategoryCreateFromSession(data))
-const hideAdminCategory = createServerFn({ method: "POST" })
-  .validator((input: Parameters<typeof catalogCategoryHideFromSession>[0]) => input)
-  .handler(({ data }) => catalogCategoryHideFromSession(data))
 const uploadAdminImage = createServerFn({ method: "POST" })
   .validator((data: FormData) => data)
   .handler(({ data }) => adminImageUploadFromSession(data))
 
 export function adminEventsRouteStateCreate() {
   const data = adminRoute.useLoaderData()
+  const auth = eventorenAuthContextUse()
+  const liveEvents = queryPaginatedCreate(
+    api.catalog.catalogEventListAdminPageQuery,
+    () => (data().authorized ? {} : undefined),
+    { pageSize: 50, allPages: true },
+  )
+  const liveEventsResult = liveEvents.result
+  const categoriesResult = queryCreate(api.catalog.catalogCategoryListQuery, () => (data().authorized ? {} : undefined))
+  const hiddenCategoriesResult = queryCreate(api.catalog.catalogCategoryHiddenListQuery, () =>
+    data().authorized ? {} : undefined,
+  )
+  const eventUpsert = mutationCreate(api.catalog.catalogEventUpsertMutation)
+  const ticketTierUpsert = mutationCreate(api.catalog.catalogTicketTierUpsertMutation)
+  const ticketTierDelete = mutationCreate(api.catalog.catalogTicketTierDeleteMutation)
+  const eventPublish = mutationCreate(api.catalog.catalogEventPublishMutation)
+  const eventDelete = mutationCreate(api.catalog.catalogEventDeleteMutation)
+  const categoryCreate = mutationCreate(api.catalog.catalogCategoryCreateMutation)
+  const categoryHide = mutationCreate(api.catalog.catalogCategoryHideMutation)
   const eventsResultGet = () => {
+    const live = liveEventsResult()
+    if (live) return live
     const routeData = data()
-    return routeData.authorized ? routeData.eventsResult : undefined
+    return isServerAuthorized() ? (routeData.authorized ? routeData.eventsResult : undefined) : undefined
   }
+  const isServerAuthorized = () => data().authorized && (!auth.ready() || !!auth.token())
+  const categoryListResultGet = () => categoriesResult()
+  const hiddenCategoryListResultGet = () => hiddenCategoriesResult()
 
   return adminCatalogPageStateCreate({
     events: () => {
       const result = eventsResultGet()
       return result?.success ? result.data : []
     },
+    eventsLive: () => {
+      const result = liveEventsResult()
+      return result?.success ? result.data : undefined
+    },
     eventsLoadError: () => {
       const result = eventsResultGet()
       return result && !result.success ? result.errorMessage : ""
     },
-    isServerAuthorized: () => data().authorized,
-    reloadEvents: () => reloadAdminEvents(),
-    eventUpsert: (input) => saveAdminEvent({ data: input }),
-    ticketTierDelete: (input) => deleteAdminTicketTier({ data: input }),
-    ticketTierUpsert: (input) => saveAdminTicketTier({ data: input }),
-    eventPublish: (input) => publishAdminEvent({ data: input }),
-    eventDelete: (input) => deleteAdminEvent({ data: input }),
-    categoryHiddenList: () => getHiddenAdminCategories(),
-    categoryList: () => getAdminCategories(),
-    categoryCreate: (input) => createAdminCategory({ data: input }),
-    categoryHide: (input) => hideAdminCategory({ data: input }),
+    isServerAuthorized,
+    categoryLive: categoryListResultGet,
+    categoryHiddenLive: hiddenCategoryListResultGet,
+    reloadEvents: async () => {
+      const result = liveEventsResult()
+      if (result?.success) return result
+      return result ?? createResultError("adminEventsRouteStateCreate", "Admin-Veranstaltungen werden geladen.")
+    },
+    eventUpsert,
+    ticketTierDelete,
+    ticketTierUpsert,
+    eventPublish,
+    eventDelete,
+    categoryHiddenList: async () =>
+      hiddenCategoriesResult() ?? createResultError("adminEventsRouteStateCreate", "Kategorien werden geladen."),
+    categoryList: async () =>
+      categoriesResult() ?? createResultError("adminEventsRouteStateCreate", "Kategorien werden geladen."),
+    categoryCreate,
+    categoryHide,
     imageUpload: (file) => {
       const data = new FormData()
       data.set("file", file)

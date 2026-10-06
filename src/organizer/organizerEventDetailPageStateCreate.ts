@@ -1,5 +1,5 @@
 import type { PaginationOptions } from "convex/server"
-import { createEffect, on, onCleanup, onMount } from "solid-js"
+import { createEffect, createRenderEffect, on, onCleanup, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import type { OrganizerDataResult } from "./OrganizerDataResult.ts"
 import type { OrganizerDataSource } from "./OrganizerDataSource.ts"
@@ -32,6 +32,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
   const selectedTicket = createSignalObject<OrganizerTicket | undefined>(undefined)
   const selectedTicketId = createSignalObject(inputs.initialTicketId())
   const search = createSignalObject(inputs.initialSearch())
+  const eventKey = () => inputs.eventKey()
   const mobileView = createSignalObject(inputs.initialMobileView?.() ?? "tickets")
   const searchReplace = (value: string, ticketId: string) => inputs.searchReplace(value, ticketId, mobileView.get())
   const mobileViewSelect = (view: "profile" | "scanner" | "tickets") => {
@@ -49,6 +50,13 @@ export function organizerEventDetailPageStateCreate(inputs: {
   let scannerFeedbackClear = () => {}
   let ticketListRevision = 0
   let activeEventKey = inputs.eventKey()
+  const eventResult = dataSource.eventGetResult?.(eventKey)
+  const reactiveTicketList = dataSource.ticketListResult?.(eventKey, search.get)
+  const ticketId = () => {
+    const value = selectedTicketId.get()
+    return value ? (value as OrganizerTicket["id"]) : undefined
+  }
+  const ticketResult = dataSource.ticketGetResult?.(eventKey, ticketId)
 
   const errorMessage = () => {
     const message = actionError.get()
@@ -142,6 +150,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
   }
 
   const eventLoad = async () => {
+    if (eventResult) return
     const eventKey = inputs.eventKey()
     try {
       const eventResult = await dataSource.eventGet(eventKey)
@@ -154,9 +163,74 @@ export function organizerEventDetailPageStateCreate(inputs: {
     }
   }
 
+  if (eventResult) {
+    createRenderEffect(() => {
+      const result = eventResult()
+      if (!result) {
+        event.set(undefined)
+        if (inputs.linkAccess) actionError.set({ code: "load" })
+        return
+      }
+      if (result.success) event.set(result.data)
+      else {
+        event.set(undefined)
+        if (inputs.linkAccess) actionError.set({ code: "load", message: result.errorMessage })
+      }
+    })
+  }
+
+  if (reactiveTicketList) {
+    createRenderEffect(() => {
+      const result = reactiveTicketList.result()
+      if (!result) {
+        tickets.set([])
+        selectedTicket.set(undefined)
+        cursor.set(null)
+        isDone.set(false)
+        loading.set(true)
+        actionError.set(null)
+        return
+      }
+      loading.set(false)
+      if (!result.success) {
+        tickets.set([])
+        actionSuccess.set(null)
+        actionError.set({ code: "load", message: result.errorMessage })
+        return
+      }
+      tickets.set([...result.data.page].sort(organizerTicketOrderCompare))
+      cursor.set(result.data.continueCursor)
+      isDone.set(result.data.isDone)
+      actionError.set(null)
+      const selected = result.data.page.find((ticket) => ticket.id === selectedTicketId.get())
+      if (selected) selectedTicket.set(selected)
+    })
+  }
+
+  if (ticketResult) {
+    createRenderEffect(() => {
+      const ticketId = selectedTicketId.get()
+      const result = ticketResult()
+      if (!ticketId) {
+        selectedTicket.set(undefined)
+        return
+      }
+      if (!result) {
+        selectedTicket.set(undefined)
+        return
+      }
+      if (result.success) selectedTicket.set(result.data)
+      else {
+        selectedTicket.set(undefined)
+        actionSuccess.set(null)
+        actionError.set({ code: "load", message: result.errorMessage })
+      }
+    })
+  }
+
   onMount(() => {
-    void eventLoad()
-    void ticketLoad(search.get(), ticketListRevision)
+    if (!eventResult) void eventLoad()
+    if (!reactiveTicketList) void ticketLoad(search.get(), ticketListRevision)
   })
 
   createEffect(
@@ -167,18 +241,18 @@ export function organizerEventDetailPageStateCreate(inputs: {
         if (eventChanged) {
           activeEventKey = nextEventKey
           event.set(undefined)
-          void eventLoad()
+          if (!eventResult) void eventLoad()
         }
         if (eventChanged || nextSearch !== search.get()) {
           search.set(nextSearch)
           selectedTicketId.set("")
           selectedTicket.set(undefined)
           const revision = ticketListReset()
-          void ticketLoad(nextSearch, revision)
+          if (!reactiveTicketList) void ticketLoad(nextSearch, revision)
         }
         if (nextTicketId === selectedTicketId.get()) return
         selectedTicketId.set(nextTicketId)
-        if (nextTicketId) void ticketDetailLoad(nextTicketId)
+        if (nextTicketId && !ticketResult) void ticketDetailLoad(nextTicketId)
         if (!nextTicketId) selectedTicket.set(undefined)
       },
     ),
@@ -202,7 +276,7 @@ export function organizerEventDetailPageStateCreate(inputs: {
       const update = () => {
         if (revision !== ticketListRevision) return
         searchReplace(value, selectedTicketId.get())
-        void ticketLoad(value, revision)
+        if (!reactiveTicketList) void ticketLoad(value, revision)
       }
       if (typeof requestIdleCallback === "function") {
         requestIdleCallback(update)
@@ -213,6 +287,11 @@ export function organizerEventDetailPageStateCreate(inputs: {
   }
 
   const loadMore = () => {
+    if (reactiveTicketList) {
+      if (loading.get() || isDone.get()) return
+      reactiveTicketList.loadMore()
+      return
+    }
     if (loading.get() || isDone.get()) return
     const revision = ticketListRevision
     void ticketPageLoad(cursor.get(), revision, search.get()).catch(() => {

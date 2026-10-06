@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { createRoot } from "solid-js"
+import { createRoot, createSignal } from "solid-js"
 import { adminCatalogPageStateCreate } from "../src/admin/adminCatalogPageStateCreate.ts"
 import { adminEventDetailsFormStateCreate } from "../src/admin/adminEventDetailsFormStateCreate.ts"
 import { adminEventNewCatalogStateCreate } from "../src/admin/adminEventNewCatalogStateCreate.ts"
@@ -345,7 +345,7 @@ describe("admin catalog page state", () => {
     expect(state.selectedEvent()?.id).toBe("draft-event")
   })
 
-  test("reports a saved existing event even when refreshing the event list fails", async () => {
+  test("keeps mutation success independent from delayed live event propagation", async () => {
     await createRoot(async (dispose) => {
       try {
         const event: AdminEventItem = {
@@ -372,10 +372,9 @@ describe("admin catalog page state", () => {
         let savedTitle = ""
         const state = adminCatalogPageStateCreate({
           events: () => [event],
+          eventsLive: () => undefined,
           isServerAuthorized: () => true,
-          reloadEvents: async () => {
-            throw new Error("route invalidation failed")
-          },
+          reloadEvents: async () => ({ success: false, errorMessage: "stale query" }),
           eventUpsert: async (input) => {
             savedTitle = input.title
             return createResult({ eventKey: input.eventKey, catalogVersion: 2 })
@@ -388,12 +387,73 @@ describe("admin catalog page state", () => {
         expect(savedTitle).toBe("Updated title")
         expect(state.eventDraft().title).toBe("Updated title")
         expect(state.isSaving()).toBe(false)
-        expect(state.errorMessage()).toBe("Admin-Veranstaltungen konnten nicht geladen werden.")
-        expect(state.successMessage()).toBe("Event gespeichert, aber die Eventliste konnte nicht aktualisiert werden.")
+        expect(state.errorMessage()).toBe("")
+        expect(state.successMessage()).toContain("Event gespeichert")
       } finally {
         dispose()
       }
     })
+  })
+
+  test("replaces removed live categories while retaining locally created categories", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        const [categoryResult, setCategoryResult] = createSignal<
+          ReturnType<typeof createResult<readonly string[]>> | undefined
+        >(undefined)
+        const state = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+          categoryLive: categoryResult,
+          categoryCreate: async () => createResult(undefined),
+        })
+        setCategoryResult(createResult(["First", "Removed"]))
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        expect(state.categories()).toEqual(["First", "Removed"])
+        expect(await state.createCategory("Local")).toBe(true)
+        setCategoryResult(createResult(["First"]))
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        expect(state.categories()).toEqual(["First", "Local"])
+      } finally {
+        dispose()
+      }
+    })
+  })
+
+  test("hides loader and category snapshots as soon as the auth boundary closes", () => {
+    const event: AdminEventItem = {
+      id: "private-event",
+      status: "draft",
+      catalogVersion: 1,
+      title: "Private event",
+      subtitle: "",
+      description: "",
+      category: "konzerte",
+      startsAt: "",
+      endsAt: "",
+      doorsAt: "",
+      venue: "",
+      city: "",
+      address: "",
+      organizer: "",
+      imageUrl: "",
+      imageAlt: "",
+      tags: [],
+      soldOut: false,
+      tiers: [],
+    }
+    const [authorized, setAuthorized] = createSignal(true)
+    const state = adminCatalogPageStateCreate({
+      events: () => [event],
+      isServerAuthorized: authorized,
+      reloadEvents: async () => ({ success: true, data: [event] }),
+    })
+    expect(state.events()).toEqual([event])
+    setAuthorized(false)
+    expect(state.events()).toEqual([])
+    expect(state.categories()).toEqual([])
+    expect(state.hiddenCategories()).toEqual([])
   })
 
   test("shows the reason when saving an event rejects", async () => {

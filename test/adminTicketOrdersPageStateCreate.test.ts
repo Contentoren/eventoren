@@ -1,8 +1,10 @@
 import { expect, test } from "bun:test"
-import { createRoot } from "solid-js"
+import { createRoot, createSignal, getOwner } from "solid-js"
 import type { AdminTicketOrderDetails } from "../src/admin/AdminTicketOrderDetails.ts"
 import type { AdminTicketOrderListPage } from "../src/admin/AdminTicketOrderListPage.ts"
 import { adminTicketOrdersPageStateCreate } from "../src/admin/adminTicketOrdersPageStateCreate.ts"
+import { eventorenAuthContext } from "../src/auth/ui/eventorenAuthContext.ts"
+import { convexClientContext } from "../src/utils/convex_client/convexClientContext.ts"
 
 test("a late detail response cannot replace a newer order or reopen a closed detail", async () => {
   await createRoot(async (dispose) => {
@@ -156,5 +158,58 @@ test("calculates available tickets count and labels for all and filtered events"
     expect(state.selectedOrderId()).toBeNull()
 
     dispose()
+  })
+})
+
+test("native admin orders react to filters and discard accumulated rows when auth changes", async () => {
+  const calls: { args: Record<string, any>; update: (value: any) => void }[] = []
+  const client = {
+    onUpdate: (_query: unknown, args: Record<string, any>, update: (value: any) => void) => {
+      const call = { args, update }
+      calls.push(call)
+      return () => undefined
+    },
+  }
+
+  await new Promise<void>((resolve) => {
+    createRoot((dispose) => {
+      const [token, setToken] = createSignal<string | null>("admin-a")
+      const [search, setSearch] = createSignal("")
+      getOwner()!.context = {
+        [eventorenAuthContext.id]: {
+          identity: () => null,
+          token,
+          ready: () => true,
+          identityApply: () => undefined,
+          refresh: async () => ({ success: true as const, data: null }),
+          clear: () => setToken(null),
+        },
+        [convexClientContext.id]: client,
+      }
+      const state = adminTicketOrdersPageStateCreate({
+        useNativeQueries: true,
+        searchSignal: { get: search, set: setSearch },
+      })
+      void Promise.resolve().then(async () => {
+        const first = calls.find((call) => call.args.token === "admin-a")
+        expect(first?.args.paginationOpts.cursor).toBeNull()
+        first?.update({
+          success: true,
+          data: { page: [{ id: "private-a" }], continueCursor: "next", isDone: false },
+        })
+        expect(state.orders().map((order) => order.id)).toEqual(["private-a"])
+
+        setSearch("booking")
+        await Promise.resolve()
+        expect(calls.some((call) => call.args.search === "booking" && call.args.paginationOpts.cursor === null)).toBe(
+          true,
+        )
+        setToken("admin-b")
+        await Promise.resolve()
+        expect(state.orders()).toEqual([])
+        dispose()
+        resolve()
+      })
+    })
   })
 })

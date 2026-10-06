@@ -252,6 +252,7 @@ describe("organizer event detail state", () => {
       expect(state.isDone()).toBe(true)
       expect(calls).toEqual([
         { search: "", cursor: null },
+        { search: "", cursor: null },
         { search: "", cursor: "all-1" },
         { search: "", cursor: "all-2" },
         { search: "target", cursor: null },

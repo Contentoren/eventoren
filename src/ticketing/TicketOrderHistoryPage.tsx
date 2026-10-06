@@ -23,6 +23,7 @@ export function TicketOrderHistoryPage(
   const state =
     props.state ??
     ticketOrderHistoryPageStateCreate({
+      useNativeQueries: true,
       authenticated: () => Boolean(auth.identity()),
       authenticationKey: () => auth.identity()?.userId,
       ready: auth.ready,
