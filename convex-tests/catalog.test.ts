@@ -5,7 +5,7 @@ import { afterEach, expect, test, vi } from "vitest"
 import { api } from "../convex/_generated/api.js"
 import type { Doc } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 import type { EventFilter } from "../src/events/EventFilter.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
@@ -28,8 +28,8 @@ async function createUser(t: ReturnType<typeof convexTest>, role: "user" | "admi
   )
 }
 
-async function tokenFor(userId: string) {
-  return await createToken(userId, authSecret)
+async function tokenFor(t: ReturnType<typeof convexTest>, userId: Id<"users">) {
+  return await testAuthSessionTokenCreate(t, userId, authSecret)
 }
 
 function eventArgs(token: string, status?: "draft" | "published" | "archived") {
@@ -121,7 +121,7 @@ async function catalogPublishedPageGet(
 test("rejects catalog writes without an admin role", async () => {
   const t = convexTest(schema, modules)
   const userId = await createUser(t, "user")
-  const token = await tokenFor(userId)
+  const token = await tokenFor(t, userId)
 
   const missingToken = await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(""))
   const regularUser = await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token))
@@ -132,8 +132,8 @@ test("rejects catalog writes without an admin role", async () => {
 
 test("persists an admin-created category without an event and restores a hidden category", async () => {
   const t = convexTest(schema, modules)
-  const adminToken = await tokenFor(await createUser(t, "admin"))
-  const userToken = await tokenFor(await createUser(t, "user"))
+  const adminToken = await tokenFor(t, await createUser(t, "admin"))
+  const userToken = await tokenFor(t, await createUser(t, "user"))
 
   expect(
     (await t.mutation(api.catalog.catalogCategoryCreateMutation, { category: "Test", token: userToken })).success,
@@ -155,8 +155,8 @@ test("deleting an event hides it without removing its order or ticket tier", asy
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
   const userId = await createUser(t, "user")
-  const token = await tokenFor(adminId)
-  const userToken = await tokenFor(userId)
+  const token = await tokenFor(t, adminId)
+  const userToken = await tokenFor(t, userId)
   const eventId = await t.run(async (ctx) => ctx.db.insert("catalogEvents", catalogEventInsert()))
   const tierId = await t.run(async (ctx) =>
     ctx.db.insert("catalogTicketTiers", catalogTierInsert(eventId, { sold: 1 })),
@@ -221,7 +221,7 @@ test("deleting an event hides it without removing its order or ticket tier", asy
 test("admin writes are versioned and published reads match EventItem", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
-  const token = await tokenFor(adminId)
+  const token = await tokenFor(t, adminId)
 
   const event = await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
   expect(event.success).toBe(true)
@@ -284,7 +284,7 @@ test("admin writes are versioned and published reads match EventItem", async () 
 test("event and tier configuration changes advance one event revision while no-op edits preserve sequencing", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
-  const token = await tokenFor(adminId)
+  const token = await tokenFor(t, adminId)
   const first = await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
   expect(first).toMatchObject({ success: true, data: { eventRevision: 1 } })
   if (!first.success) return
@@ -336,7 +336,7 @@ test("event and tier configuration changes advance one event revision while no-o
 test("event inclusions and exclusions preserve omitted values and explicitly saved empty arrays", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
-  const token = await tokenFor(adminId)
+  const token = await tokenFor(t, adminId)
 
   const initial = await t.mutation(api.catalog.catalogEventUpsertMutation, {
     ...eventArgs(token, "draft"),
@@ -370,7 +370,7 @@ test("event inclusions and exclusions preserve omitted values and explicitly sav
 
 test("tier upsert preserves omitted additional admissions and clears them only when explicitly empty", async () => {
   const t = convexTest(schema, modules)
-  const token = await tokenFor(await createUser(t, "admin"))
+  const token = await tokenFor(t, await createUser(t, "admin"))
   await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
 
   const tierArgs = {
@@ -446,7 +446,7 @@ test("tier upsert preserves omitted additional admissions and clears them only w
 test("tier upsert requires start and end times and defaults empty doors time to start", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
-  const token = await tokenFor(adminId)
+  const token = await tokenFor(t, adminId)
   await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
 
   const missingStart = await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
@@ -504,7 +504,7 @@ test("tier upsert requires start and end times and defaults empty doors time to 
 test("tier upsert rejects malformed ISO start, admission, and end times", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
-  const token = await tokenFor(adminId)
+  const token = await tokenFor(t, adminId)
   await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
 
   const validTimes = {
@@ -586,7 +586,7 @@ test("legacy additional admission timestamps remain readable without an invented
 test("admins delete unused tiers and hide sold tiers while retaining historical inventory", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
-  const token = await tokenFor(adminId)
+  const token = await tokenFor(t, adminId)
   const eventId = await t.run(async (ctx) => ctx.db.insert("catalogEvents", catalogEventInsert()))
   await t.run(async (ctx) => {
     await ctx.db.insert("catalogTicketTiers", catalogTierInsert(eventId, { tierKey: "unused" }))
@@ -636,7 +636,7 @@ test("admins delete unused tiers and hide sold tiers while retaining historical 
 test("ticket products with active reservations cannot be deleted", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
-  const token = await tokenFor(adminId)
+  const token = await tokenFor(t, adminId)
   const eventId = await t.run(async (ctx) => ctx.db.insert("catalogEvents", catalogEventInsert()))
   await t.run(async (ctx) => ctx.db.insert("catalogTicketTiers", catalogTierInsert(eventId, { reserved: 1 })))
 
@@ -977,7 +977,7 @@ test("published tier page rejects requests exceeding its read limit", async () =
 test("tier capacity cannot undercut reserved and sold inventory", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")
-  const token = await tokenFor(adminId)
+  const token = await tokenFor(t, adminId)
 
   await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))
   await t.mutation(api.catalog.catalogTicketTierUpsertMutation, {
@@ -1066,7 +1066,7 @@ test.each(invalidDateOrderCases)(
   async ({ startsAt, endsAt }) => {
     vi.useFakeTimers()
     const t = convexTest(schema, modules)
-    const token = await tokenFor(await createUser(t, "admin"))
+    const token = await tokenFor(t, await createUser(t, "admin"))
     expect((await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "draft"))).success).toBe(true)
     const tierArgs = {
       eventKey: "catalog-event",
@@ -1115,7 +1115,7 @@ test.each([
   { name: "valid overnight", startsAt: "2026-10-01T22:00:00Z", endsAt: "2026-10-02T01:00:00Z" },
 ])("event and tier upserts accept $name with independent product and doors times", async ({ startsAt, endsAt }) => {
   const t = convexTest(schema, modules)
-  const token = await tokenFor(await createUser(t, "admin"))
+  const token = await tokenFor(t, await createUser(t, "admin"))
   expect(
     (
       await t.mutation(api.catalog.catalogEventUpsertMutation, {
@@ -1160,7 +1160,7 @@ test.each([
   { name: "doors-only", startsAt: "", endsAt: "", doorsAt: "2026-10-01T19:00:00Z" },
 ])("event upsert preserves $name date drafts", async ({ startsAt, endsAt, doorsAt }) => {
   const t = convexTest(schema, modules)
-  const token = await tokenFor(await createUser(t, "admin"))
+  const token = await tokenFor(t, await createUser(t, "admin"))
   const result = await t.mutation(api.catalog.catalogEventUpsertMutation, {
     ...eventArgs(token, "draft"),
     startsAt,
@@ -1173,7 +1173,7 @@ test.each([
 
 test("invalid optional event doors time rejects an empty draft without writes or sync changes", async () => {
   const t = convexTest(schema, modules)
-  const token = await tokenFor(await createUser(t, "admin"))
+  const token = await tokenFor(t, await createUser(t, "admin"))
   const before = await catalogWriteStateGet(t)
   const result = await t.mutation(api.catalog.catalogEventUpsertMutation, {
     ...eventArgs(token, "draft"),
