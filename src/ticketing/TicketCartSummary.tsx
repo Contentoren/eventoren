@@ -29,9 +29,9 @@ export function TicketCartSummary(props: {
   const text = ticketCheckoutText
 
   return (
-    <UiCard>
+    <UiCard class="border-0 shadow-sm">
       <section class="flex flex-col gap-space-3" aria-labelledby={state.headingId}>
-        <div class="flex items-center gap-space-3 border-b border-border-subtle pb-space-3">
+        <div class="flex items-center gap-space-3 pb-space-3">
           <div class="min-w-0 flex-1">
             <h2 id={state.headingId} class="text-base font-semibold text-content">
               {props.event.title}
@@ -72,7 +72,7 @@ export function TicketCartSummary(props: {
                             onClick={() => state.decreaseTier(row.id)}
                             disabled={!row.canDecrease}
                             aria-label={`${text().decreaseTicket} ${row.name}`}
-                            class="focus-ring flex size-9 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-strong transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
+                            class="focus-ring flex size-9 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-subtle transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             −
                           </Button>
@@ -90,7 +90,7 @@ export function TicketCartSummary(props: {
                             onClick={() => state.increaseTier(row.id)}
                             disabled={!row.canIncrease}
                             aria-label={`${text().increaseTicket} ${row.name}`}
-                            class="focus-ring flex size-9 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-strong transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
+                            class="focus-ring flex size-9 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-subtle transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             +
                           </Button>
@@ -101,7 +101,7 @@ export function TicketCartSummary(props: {
                 )}
               </For>
 
-              <div class="flex items-baseline justify-between gap-space-4 border-t border-border-subtle pt-space-3">
+              <div class="flex items-baseline justify-between gap-space-4 pt-space-3">
                 <dt class="text-sm text-content-muted">{text().subtotal}</dt>
                 <dd class="text-sm font-medium text-content">{state.subtotalLabel()}</dd>
               </div>
@@ -109,13 +109,13 @@ export function TicketCartSummary(props: {
                 <dt class="text-sm text-content-muted">{text().fees}</dt>
                 <dd class="text-sm font-medium text-content">{state.feeLabel()}</dd>
               </div>
-              <div class="flex items-baseline justify-between gap-space-4 border-t border-border-subtle pt-space-3">
+              <div class="flex items-baseline justify-between gap-space-4 pt-space-3">
                 <dt class="text-base font-semibold text-content">{text().total}</dt>
                 <dd class="text-base font-bold text-content">{state.totalLabel()}</dd>
               </div>
             </dl>
 
-            <div class="flex items-center gap-2 rounded-control border border-border-subtle bg-surface-muted px-3 py-2 text-xs text-content-muted">
+            <div class="flex items-center gap-2 rounded-control bg-surface-muted px-3 py-2 text-xs text-content-muted">
               <svg
                 viewBox="0 0 20 20"
                 fill="currentColor"
@@ -157,7 +157,7 @@ export function TicketCartSummary(props: {
           </Show>
         </div>
 
-        <div class="flex flex-col gap-space-3 rounded-control border border-border-subtle bg-surface-muted/50 p-space-3">
+        <div class="flex flex-col gap-space-3 rounded-control bg-surface-muted/50 p-space-3">
           <p class="text-xs font-medium text-content">{text().paymentMethods}</p>
           <ul class="grid w-full grid-cols-4 gap-space-3" aria-label={text().supportedPaymentMethods}>
             <li class="min-w-0">

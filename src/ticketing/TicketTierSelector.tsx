@@ -27,7 +27,7 @@ export function TicketTierSelector(props: {
         <For each={state.rows()}>
           {(row) => (
             <li>
-              <UiCard padded={false} class="p-5">
+              <UiCard padded={false} class="border-0 shadow-sm p-5">
                 <div class="flex flex-col gap-space-4 sm:flex-row sm:items-start sm:justify-between">
                   <div class="flex flex-col gap-space-2">
                     <p class="text-base font-semibold text-content">{row.name}</p>
@@ -51,7 +51,7 @@ export function TicketTierSelector(props: {
                         onClick={() => state.decreaseTier(row.id)}
                         disabled={!row.canDecrease}
                         aria-label={`Ein Ticket weniger für ${row.name}`}
-                        class="focus-ring flex size-10 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-strong transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
+                        class="focus-ring flex size-10 items-center justify-center rounded-control bg-surface-muted text-lg font-semibold text-content ring-1 ring-inset ring-border-subtle transition-colors hover:text-content hover:ring-brand-accent disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         −
                       </Button>

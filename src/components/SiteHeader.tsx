@@ -36,7 +36,7 @@ export function SiteHeader(
   })
 
   return (
-    <header class="sticky top-0 z-30 border-b border-border-subtle bg-surface-base/90 text-content backdrop-blur-xl">
+    <header class="sticky top-0 z-30 bg-surface-base/90 text-content backdrop-blur-xl">
       <SiteHeaderSkipLink />
 
       <UiContainer>

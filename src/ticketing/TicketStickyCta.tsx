@@ -8,7 +8,7 @@ export function TicketStickyCta(props: { event: EventItem; cart: TicketCart; lab
 
   return (
     <section
-      class="sticky bottom-0 z-20 border-t border-border-strong bg-surface-base/90 px-space-6 py-space-4 backdrop-blur-xl lg:hidden"
+      class="sticky bottom-0 z-20 border-t border-border-subtle bg-surface-base/90 px-space-6 py-space-4 backdrop-blur-xl lg:hidden"
       aria-label="Ticketauswahl fortsetzen"
     >
       <div class="mx-auto flex max-w-6xl flex-col gap-space-3 sm:flex-row sm:items-center sm:justify-between">

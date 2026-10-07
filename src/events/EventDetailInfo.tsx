@@ -42,7 +42,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                           </span>
                         </div>
                         <div
-                          class="flex size-7 shrink-0 items-center justify-center rounded-full border border-border-subtle/60 bg-surface-muted/40 text-content-muted transition-colors group-hover:border-border-strong group-hover:text-content"
+                          class="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-muted/60 text-content-muted transition-colors group-hover:text-content"
                           aria-hidden="true"
                         >
                           <svg
@@ -95,7 +95,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                 Inklusive
               </span>
               <div
-                class="flex size-7 shrink-0 items-center justify-center rounded-full border border-border-subtle/60 bg-surface-muted/40 text-content-muted transition-colors group-hover:border-border-strong group-hover:text-content"
+                class="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-muted/60 text-content-muted transition-colors group-hover:text-content"
                 aria-hidden="true"
               >
                 <svg
@@ -166,7 +166,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                 Nicht enthalten
               </span>
               <div
-                class="flex size-7 shrink-0 items-center justify-center rounded-full border border-border-subtle/60 bg-surface-muted/40 text-content-muted transition-colors group-hover:border-border-strong group-hover:text-content"
+                class="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-muted/60 text-content-muted transition-colors group-hover:text-content"
                 aria-hidden="true"
               >
                 <svg
@@ -197,7 +197,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                     {(exclusion) => (
                       <li class="flex items-start gap-space-3 text-sm leading-relaxed text-content-muted sm:text-base">
                         <span
-                          class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-border-subtle/60 bg-surface-muted/40 text-content-muted"
+                          class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-surface-muted text-content-muted"
                           aria-hidden="true"
                         >
                           <svg
@@ -237,7 +237,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                 Ablauf
               </span>
               <div
-                class="flex size-7 shrink-0 items-center justify-center rounded-full border border-border-subtle/60 bg-surface-muted/40 text-content-muted transition-colors group-hover:border-border-strong group-hover:text-content"
+                class="flex size-7 shrink-0 items-center justify-center rounded-full bg-surface-muted/60 text-content-muted transition-colors group-hover:text-content"
                 aria-hidden="true"
               >
                 <svg
@@ -301,7 +301,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                   const buttonId = `event-faq-button-${index()}`
 
                   return (
-                    <li class="overflow-hidden rounded-control border border-border-subtle bg-surface transition-colors">
+                    <li class="overflow-hidden rounded-control bg-surface-muted/60 transition-colors">
                       <Button
                         variant="none"
                         size="none"
@@ -340,7 +340,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
                           id={contentId}
                           role="region"
                           aria-labelledby={buttonId}
-                          class="border-t border-border-subtle/40 p-space-5 text-base leading-relaxed text-content-muted sm:p-space-6"
+                          class="p-space-5 text-base leading-relaxed text-content-muted sm:p-space-6"
                         >
                           {faq.answer}
                         </div>

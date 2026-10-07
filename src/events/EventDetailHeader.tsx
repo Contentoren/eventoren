@@ -22,10 +22,10 @@ export function EventDetailHeader(props: { event: EventItem }) {
         </Show>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 sm:gap-y-4 my-2 py-5 sm:my-4 border-y border-border-subtle">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 sm:gap-y-4 my-2 py-5 sm:my-4">
         <div class="flex items-center gap-3">
           <div
-            class="size-9 shrink-0 flex items-center justify-center rounded-md border border-border-subtle bg-surface-muted/60 text-brand-accent shadow-xs"
+            class="size-9 shrink-0 flex items-center justify-center rounded-md bg-surface-muted text-brand-accent shadow-xs"
             aria-hidden="true"
           >
             <svg
@@ -51,7 +51,7 @@ export function EventDetailHeader(props: { event: EventItem }) {
 
         <div class="flex items-center gap-3">
           <div
-            class="size-9 shrink-0 flex items-center justify-center rounded-md border border-border-subtle bg-surface-muted/60 text-brand-accent shadow-xs"
+            class="size-9 shrink-0 flex items-center justify-center rounded-md bg-surface-muted text-brand-accent shadow-xs"
             aria-hidden="true"
           >
             <svg
@@ -75,7 +75,7 @@ export function EventDetailHeader(props: { event: EventItem }) {
 
         <div class="flex items-center gap-3">
           <div
-            class="size-9 shrink-0 flex items-center justify-center rounded-md border border-border-subtle bg-surface-muted/60 text-brand-accent shadow-xs"
+            class="size-9 shrink-0 flex items-center justify-center rounded-md bg-surface-muted text-brand-accent shadow-xs"
             aria-hidden="true"
           >
             <svg
@@ -99,7 +99,7 @@ export function EventDetailHeader(props: { event: EventItem }) {
 
         <div class="flex items-center gap-3">
           <div
-            class="size-9 shrink-0 flex items-center justify-center rounded-md border border-border-subtle bg-surface-muted/60 text-brand-accent shadow-xs"
+            class="size-9 shrink-0 flex items-center justify-center rounded-md bg-surface-muted text-brand-accent shadow-xs"
             aria-hidden="true"
           >
             <svg
