@@ -5,7 +5,7 @@ export function UiCard(props: { children: JSX.Element; padded?: boolean; class?:
   return (
     <div
       class={classMerge(
-        "rounded-card border border-border-strong bg-surface text-content",
+        "rounded-card border border-border-subtle bg-surface text-content",
         props.padded !== false && "p-space-6",
         props.class,
       )}

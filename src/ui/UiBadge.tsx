@@ -5,7 +5,7 @@ import { classMerge } from "./classMerge.ts"
    while every pair clears WCAG AA (most clear AAA). Rings are lifted to /50
    to keep a visible contour on near-black surfaces. */
 const toneClass = {
-  neutral: "bg-surface-muted text-content ring-border-strong",
+  neutral: "bg-surface-muted text-content ring-border-subtle",
   brand: "bg-brand-soft text-brand-accent ring-brand-accent/50",
   success: "bg-success-soft text-success ring-success/50",
   warning: "bg-warning-soft text-warning ring-warning/50",

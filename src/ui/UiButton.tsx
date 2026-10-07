@@ -4,7 +4,7 @@ import { classMerge } from "./classMerge.ts"
 const variantClass = {
   primary: "bg-brand text-brand-content hover:bg-brand-strong",
   secondary:
-    "bg-surface-muted text-content ring-1 ring-inset ring-border-strong hover:bg-surface hover:ring-brand-accent/60",
+    "bg-surface-muted text-content ring-1 ring-inset ring-border-subtle hover:bg-surface hover:ring-brand-accent/60",
   ghost: "bg-transparent text-content-muted hover:bg-surface-muted hover:text-content",
   /* Bright danger fill needs dark ink to stay readable. */
   danger: "bg-danger text-surface-base hover:brightness-110",
