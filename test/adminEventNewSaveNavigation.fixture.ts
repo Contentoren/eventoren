@@ -10,8 +10,6 @@ let catalog: AdminCatalogPageState
 let search: { tab?: "products" }
 let calls: string[]
 let navigation: unknown
-let invalidateOptions: { sync?: boolean; filter?: (match: { routeId: string }) => boolean } | undefined
-let invalidateWait: Promise<void> | undefined
 let navigateWait: Promise<void> | undefined
 
 // Keep router/server-function mocks isolated from the rest of the test suite.
@@ -22,14 +20,6 @@ mock.module("@tanstack/solid-router", () => ({
       calls.push("navigate")
       navigation = options
       await navigateWait
-    },
-  }),
-  useRouter: () => ({
-    invalidate: async (options: typeof invalidateOptions) => {
-      calls.push("invalidate")
-      invalidateOptions = options
-      await invalidateWait
-      calls.push("invalidated")
     },
   }),
 }))
@@ -55,6 +45,7 @@ const returnedKey = "server-returned-key"
 const setup = (
   options: {
     failure?: "event" | "tier" | "tier-refresh"
+    eventWait?: Promise<void>
     tierWait?: Promise<void>
     tierRefreshWait?: Promise<void>
   } = {},
@@ -75,6 +66,7 @@ const setup = (
     },
     eventUpsert: async (input) => {
       calls.push("save-event")
+      await options.eventWait
       if (options.failure === "event") return { success: false, errorMessage: "Event failed", op: "event" }
       events = [
         {
@@ -129,20 +121,16 @@ beforeEach(() => {
   search = {}
   calls = []
   navigation = undefined
-  invalidateOptions = undefined
-  invalidateWait = undefined
   navigateWait = undefined
 })
 
 test.each([undefined, "products"] as const)(
-  "details save awaits admin invalidation and replace navigation with the returned key (tab=%s)",
+  "details save reloads and replace-navigates with the returned key (tab=%s)",
   async (tab) => {
     await createRoot(async (dispose) => {
       try {
         search = tab ? { tab } : {}
-        const invalidation = deferred()
         const navigating = deferred()
-        invalidateWait = invalidation.promise
         navigateWait = navigating.promise
         const { form } = setup()
         let finished = false
@@ -150,21 +138,13 @@ test.each([undefined, "products"] as const)(
           finished = true
         })
         await flush()
-        expect(calls).toEqual(["save-event", "reload-1", "invalidate"])
-        expect(navigation).toBeUndefined()
-        expect(form.pendingAction()).toBe("save")
-        expect(invalidateOptions?.sync).toBe(true)
-        expect(invalidateOptions?.filter?.({ routeId: "/admin" })).toBe(true)
-        expect(invalidateOptions?.filter?.({ routeId: "/admin/events_/new" })).toBe(false)
-        invalidation.resolve()
-        await flush()
+        expect(calls).toEqual(["save-event", "reload-1", "navigate"])
         expect(navigation).toEqual({
           to: "/admin/events/$eventKey",
           params: { eventKey: returnedKey },
           search: tab ? { tab } : {},
           replace: true,
         })
-        expect(calls).toEqual(["save-event", "reload-1", "invalidate", "invalidated", "navigate"])
         expect(finished).toBe(false)
         expect(form.pendingAction()).toBe("save")
         navigating.resolve()
@@ -177,16 +157,16 @@ test.each([undefined, "products"] as const)(
   },
 )
 
-test("navigation preserves the actual tab if it changes while loader invalidation is pending", async () => {
+test("navigation preserves the tab selected while the event save is pending", async () => {
   await createRoot(async (dispose) => {
     try {
-      const invalidation = deferred()
-      invalidateWait = invalidation.promise
-      const { form } = setup()
+      const savingEvent = deferred()
+      const { form } = setup({ eventWait: savingEvent.promise })
       const saving = form.submit(submitEvent)
       await flush()
+      expect(calls).toEqual(["save-event"])
       search = { tab: "products" }
-      invalidation.resolve()
+      savingEvent.resolve()
       await saving
       expect(navigation).toMatchObject({ search: { tab: "products" } })
     } finally {
@@ -195,7 +175,7 @@ test("navigation preserves the actual tab if it changes while loader invalidatio
   })
 })
 
-test("failed event save does not invalidate or navigate", async () => {
+test("failed event save does not navigate", async () => {
   await createRoot(async (dispose) => {
     try {
       const { form } = setup({ failure: "event" })
@@ -231,15 +211,7 @@ test("ticket-first creation waits for the full tier save and refresh, not the in
       expect(navigation).toBeUndefined()
       refresh.resolve()
       await flush()
-      expect(calls).toEqual([
-        "save-event",
-        "reload-1",
-        "save-tier",
-        "reload-2",
-        "invalidate",
-        "invalidated",
-        "navigate",
-      ])
+      expect(calls).toEqual(["save-event", "reload-1", "save-tier", "reload-2", "navigate"])
       expect(navigation).toEqual({
         to: "/admin/events/$eventKey",
         params: { eventKey: returnedKey },
@@ -256,21 +228,17 @@ test("ticket-first creation waits for the full tier save and refresh, not the in
   })
 })
 
-test.each(["event", "tier", "tier-refresh"] as const)(
-  "ticket-first %s failure does not invalidate or navigate",
-  async (failure) => {
-    await createRoot(async (dispose) => {
-      try {
-        search = { tab: "products" }
-        const { state } = setup({ failure })
-        await state.catalog.saveTier()
-        expect(state.catalog.errorMessage()).not.toBe("")
-        expect(calls).not.toContain("invalidate")
-        expect(navigation).toBeUndefined()
-        if (failure === "event") expect(calls).not.toContain("save-tier")
-      } finally {
-        dispose()
-      }
-    })
-  },
-)
+test.each(["event", "tier", "tier-refresh"] as const)("ticket-first %s failure does not navigate", async (failure) => {
+  await createRoot(async (dispose) => {
+    try {
+      search = { tab: "products" }
+      const { state } = setup({ failure })
+      await state.catalog.saveTier()
+      expect(state.catalog.errorMessage()).not.toBe("")
+      expect(navigation).toBeUndefined()
+      if (failure === "event") expect(calls).not.toContain("save-tier")
+    } finally {
+      dispose()
+    }
+  })
+})

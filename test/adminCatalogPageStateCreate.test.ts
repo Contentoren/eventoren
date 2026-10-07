@@ -1,689 +1,717 @@
 import { describe, expect, test } from "bun:test"
 import { createRoot, createSignal } from "solid-js"
+import { isServer } from "solid-js/web"
 import { adminCatalogPageStateCreate } from "../src/admin/adminCatalogPageStateCreate.ts"
 import { adminEventDetailsFormStateCreate } from "../src/admin/adminEventDetailsFormStateCreate.ts"
 import { adminEventNewCatalogStateCreate } from "../src/admin/adminEventNewCatalogStateCreate.ts"
 import type { AdminEventItem } from "../src/admin/AdminEventItem.ts"
 import { createResult } from "../src/ui/createResult.ts"
 
-describe("admin catalog page state", () => {
-  test("saves editable included and excluded lines without blank entries", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        let saved: { inclusions?: string[]; exclusions?: string[] } | undefined
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          eventUpsert: async (input) => {
-            saved = input
-            return createResult({ eventKey: input.eventKey, catalogVersion: 1 })
-          },
-        })
-        state.eventFieldChange("eventKey", "concert")
-        state.eventFieldChange("title", "Concert")
-        state.eventFieldChange("inclusions", [" Ticket ", "  ", "Entry"])
-        state.eventFieldChange("exclusions", [" Travel "])
-        await state.saveEvent()
-        expect(saved?.inclusions).toEqual(["Ticket", "Entry"])
-        expect(saved?.exclusions).toEqual(["Travel"])
-      } finally {
-        dispose()
-      }
+// Solid's server effects do not react to source changes; exercise the browser runtime in isolation.
+if (isServer) {
+  test("live category retention regressions pass with reactive Solid state", async () => {
+    const subprocess = Bun.spawn(["bun", "--conditions=browser", "test", import.meta.path], {
+      stdout: "pipe",
+      stderr: "pipe",
     })
+    const [exitCode, stdout, stderr] = await Promise.all([
+      subprocess.exited,
+      new Response(subprocess.stdout).text(),
+      new Response(subprocess.stderr).text(),
+    ])
+    expect(exitCode, `${stdout}\n${stderr}`).toBe(0)
+    expect(`${stdout}\n${stderr}`).toContain("18 pass")
   })
-
-  test("saves an unsaved event before its first ticket and keeps the publish selection", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        const calls: string[] = []
-        let events: AdminEventItem[] = []
-        const original = adminCatalogPageStateCreate({
-          events: () => events,
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: events }),
-          eventUpsert: async (input) => {
-            calls.push("event")
-            events = [
-              {
-                id: input.eventKey,
-                title: input.title,
-                status: input.status ?? "draft",
-                catalogVersion: 1,
-                subtitle: input.subtitle,
-                description: input.description,
-                category: input.category,
-                startsAt: input.startsAt,
-                endsAt: input.endsAt,
-                doorsAt: input.doorsAt,
-                venue: input.venue,
-                city: input.city,
-                address: input.address,
-                organizer: input.organizer,
-                imageUrl: input.imageUrl,
-                imageAlt: input.imageAlt,
-                tags: input.tags,
-                soldOut: false,
-                tiers: [],
-              },
-            ]
-            return createResult({ eventKey: input.eventKey, catalogVersion: 1 })
-          },
-          ticketTierUpsert: async (input) => {
-            calls.push("ticket")
-            events = [
-              {
-                ...events[0]!,
-                tiers: [
-                  {
-                    id: input.tierKey,
-                    name: input.name,
-                    description: input.description,
-                    priceCents: input.priceCents,
-                    feeCents: input.feeCents,
-                    capacity: input.capacity,
-                    available: input.capacity,
-                  },
-                ],
-              },
-            ]
-            return createResult({ tierKey: input.tierKey, catalogVersion: 2 })
-          },
-        })
-        const catalog = adminEventNewCatalogStateCreate(original)
-        catalog.eventFieldChange("title", "New concert")
-        catalog.eventFieldChange("status", "published")
-        catalog.tierFieldChange("tierKey", "standard")
-        catalog.tierFieldChange("name", "Standard")
-        catalog.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
-        catalog.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
-        catalog.tierFieldChange("priceCents", "2500")
-        catalog.tierFieldChange("feeCents", "0")
-        catalog.tierFieldChange("capacity", "20")
-
-        await catalog.saveTier()
-
-        expect(calls).toEqual(["event", "ticket"])
-        expect(catalog.selectedEvent()?.tiers[0]?.name).toBe("Standard")
-        expect(catalog.eventDraft().status).toBe("published")
-        expect(catalog.selectedEventKey()).toMatch(/^new-concert-/u)
-      } finally {
-        dispose()
-      }
-    })
-  })
-
-  test("offers the published catalog status before an event has a ticket product", () => {
-    const catalog = adminCatalogPageStateCreate({
-      events: () => [],
-      isServerAuthorized: () => true,
-      reloadEvents: async () => ({ success: true, data: [] }),
-    })
-    const form = adminEventDetailsFormStateCreate({ catalog })
-
-    expect(form.statusOptions()).toContain("published")
-    expect(form.canPublish()).toBe(false)
-  })
-
-  test("saves a new event as a draft until a ticket product allows publication", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        let savedStatus = ""
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          eventUpsert: async (input) => {
-            savedStatus = input.status ?? ""
-            return createResult({ eventKey: input.eventKey, catalogVersion: 1 })
-          },
-        })
-        state.eventFieldChange("eventKey", "new-concert")
-        state.eventFieldChange("title", "New concert")
-        state.eventFieldChange("status", "published")
-
-        await state.saveEvent()
-
-        expect(savedStatus).toBe("draft")
-      } finally {
-        dispose()
-      }
-    })
-  })
-
-  test("prefills legacy tier times from its event while preserving tier-specific times", () => {
-    const event: AdminEventItem = {
-      id: "concert",
-      status: "draft",
-      catalogVersion: 1,
-      title: "Concert",
-      subtitle: "",
-      description: "",
-      category: "konzerte",
-      startsAt: "2026-10-01T18:00:00.000Z",
-      endsAt: "2026-10-01T22:00:00.000Z",
-      doorsAt: "2026-10-01T17:00:00.000Z",
-      venue: "Hall",
-      city: "Berlin",
-      address: "",
-      organizer: "Eventoren",
-      imageUrl: "",
-      imageAlt: "",
-      tags: [],
-      soldOut: false,
-      tiers: [],
-    }
-    const state = adminCatalogPageStateCreate({
-      events: () => [event],
-      isServerAuthorized: () => true,
-      reloadEvents: async () => ({ success: true, data: [event] }),
-    })
-    state.selectEvent(event)
-    state.selectTier({
-      id: "legacy",
-      name: "Legacy",
-      description: "",
-      priceCents: 1000,
-      feeCents: 0,
-      capacity: 10,
-      available: 10,
-    })
-    expect(state.tierDraft()).toMatchObject({ startsAt: event.startsAt, doorsAt: event.doorsAt, endsAt: event.endsAt })
-    state.selectTier({
-      id: "custom",
-      name: "Custom",
-      description: "",
-      startsAt: "2026-10-02T18:00:00.000Z",
-      doorsAt: "2026-10-02T17:00:00.000Z",
-      endsAt: "2026-10-02T23:00:00.000Z",
-      priceCents: 1000,
-      feeCents: 0,
-      capacity: 10,
-      available: 10,
-    })
-    expect(state.tierDraft()).toMatchObject({
-      startsAt: "2026-10-02T18:00:00.000Z",
-      doorsAt: "2026-10-02T17:00:00.000Z",
-      endsAt: "2026-10-02T23:00:00.000Z",
-    })
-  })
-
-  test("requires tier start and end and defaults blank doors time to start when saving", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        let received: { startsAt: string; doorsAt: string; endsAt: string } | undefined
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          ticketTierUpsert: async (input) => {
-            received = input
-            return createResult({ tierKey: input.tierKey, catalogVersion: 1 })
-          },
-        })
-        state.eventFieldChange("eventKey", "concert")
-        state.tierFieldChange("tierKey", "standard")
-        state.tierFieldChange("name", "Standard")
-        state.tierFieldChange("priceCents", "1000")
-        state.tierFieldChange("feeCents", "0")
-        state.tierFieldChange("capacity", "10")
-        await state.saveTier()
-        expect(state.errorMessage()).toBe("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
-        expect(received).toBeUndefined()
-
-        state.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
-        state.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
-        await state.saveTier()
-        expect(received).toMatchObject({
-          startsAt: "2026-10-01T18:00:00.000Z",
-          doorsAt: "2026-10-01T18:00:00.000Z",
-          endsAt: "2026-10-01T22:00:00.000Z",
-        })
-      } finally {
-        dispose()
-      }
-    })
-  })
-
-  test("publishing saves edited event details before making them public", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        const event: AdminEventItem = {
-          id: "concert",
-          status: "draft" as const,
-          catalogVersion: 1,
-          title: "Original title",
-          subtitle: "",
-          description: "",
-          category: "konzerte" as const,
-          startsAt: "2026-10-01T18:00:00.000Z",
-          endsAt: "2026-10-01T22:00:00.000Z",
-          doorsAt: "2026-10-01T17:00:00.000Z",
-          venue: "Test hall",
-          city: "Berlin",
-          address: "Teststraße 1",
-          organizer: "Eventoren",
-          imageUrl: "/images/test.webp",
-          imageAlt: "Test event",
-          tags: [],
-          soldOut: false,
-          tiers: [
-            {
-              id: "standard",
-              name: "Standard",
-              description: "",
-              priceCents: 2000,
-              feeCents: 0,
-              capacity: 100,
-              available: 100,
+} else {
+  describe("admin catalog page state", () => {
+    test("saves editable included and excluded lines without blank entries", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          let saved: { inclusions?: string[]; exclusions?: string[] } | undefined
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            eventUpsert: async (input) => {
+              saved = input
+              return createResult({ eventKey: input.eventKey, catalogVersion: 1 })
             },
-          ],
+          })
+          state.eventFieldChange("eventKey", "concert")
+          state.eventFieldChange("title", "Concert")
+          state.eventFieldChange("inclusions", [" Ticket ", "  ", "Entry"])
+          state.eventFieldChange("exclusions", [" Travel "])
+          await state.saveEvent()
+          expect(saved?.inclusions).toEqual(["Ticket", "Entry"])
+          expect(saved?.exclusions).toEqual(["Travel"])
+        } finally {
+          dispose()
         }
-        const calls: string[] = []
-        let stored = event
-        const state = adminCatalogPageStateCreate({
-          events: () => [event],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [stored] }),
-          eventUpsert: async (input) => {
-            calls.push("save")
-            stored = { ...stored, title: input.title, status: input.status ?? "draft" }
-            return createResult({ eventKey: input.eventKey, catalogVersion: 2 })
-          },
-          eventPublish: async ({ eventKey }) => {
-            calls.push("publish")
-            stored = { ...stored, status: "published" }
-            return createResult({ eventKey, catalogVersion: 3 })
-          },
-        })
-        state.selectEvent(event)
-        state.eventFieldChange("title", "Updated title")
-        state.eventFieldChange("status", "published")
-
-        await state.publishEvent()
-
-        expect(calls).toEqual(["save", "publish"])
-        expect(state.selectedEvent()?.title).toBe("Updated title")
-        expect(state.eventDraft().status).toBe("published")
-        expect(state.errorMessage()).toBe("")
-      } finally {
-        dispose()
-      }
-    })
-  })
-
-  test("exposes an event selected after state creation during server rendering", () => {
-    const event = {
-      id: "draft-event",
-      status: "draft" as const,
-      catalogVersion: 1,
-      title: "Draft event",
-      subtitle: "",
-      description: "",
-      category: "konzerte" as const,
-      startsAt: "2026-10-01T18:00:00.000Z",
-      endsAt: "2026-10-01T22:00:00.000Z",
-      doorsAt: "2026-10-01T17:00:00.000Z",
-      venue: "Test hall",
-      city: "Berlin",
-      address: "Teststraße 1",
-      organizer: "Eventoren",
-      imageUrl: "/images/test.webp",
-      imageAlt: "Test event",
-      tags: [],
-      soldOut: false,
-      tiers: [],
-    }
-    const state = adminCatalogPageStateCreate({
-      events: () => [event],
-      isServerAuthorized: () => true,
-      reloadEvents: async () => ({ success: true, data: [event] }),
+      })
     })
 
-    state.selectEvent(event)
+    test("saves an unsaved event before its first ticket and keeps the publish selection", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          const calls: string[] = []
+          let events: AdminEventItem[] = []
+          const original = adminCatalogPageStateCreate({
+            events: () => events,
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: events }),
+            eventUpsert: async (input) => {
+              calls.push("event")
+              events = [
+                {
+                  id: input.eventKey,
+                  title: input.title,
+                  status: input.status ?? "draft",
+                  catalogVersion: 1,
+                  subtitle: input.subtitle,
+                  description: input.description,
+                  category: input.category,
+                  startsAt: input.startsAt,
+                  endsAt: input.endsAt,
+                  doorsAt: input.doorsAt,
+                  venue: input.venue,
+                  city: input.city,
+                  address: input.address,
+                  organizer: input.organizer,
+                  imageUrl: input.imageUrl,
+                  imageAlt: input.imageAlt,
+                  tags: input.tags,
+                  soldOut: false,
+                  tiers: [],
+                },
+              ]
+              return createResult({ eventKey: input.eventKey, catalogVersion: 1 })
+            },
+            ticketTierUpsert: async (input) => {
+              calls.push("ticket")
+              events = [
+                {
+                  ...events[0]!,
+                  tiers: [
+                    {
+                      id: input.tierKey,
+                      name: input.name,
+                      description: input.description,
+                      priceCents: input.priceCents,
+                      feeCents: input.feeCents,
+                      capacity: input.capacity,
+                      available: input.capacity,
+                    },
+                  ],
+                },
+              ]
+              return createResult({ tierKey: input.tierKey, catalogVersion: 2 })
+            },
+          })
+          const catalog = adminEventNewCatalogStateCreate(original)
+          catalog.eventFieldChange("title", "New concert")
+          catalog.eventFieldChange("status", "published")
+          catalog.tierFieldChange("tierKey", "standard")
+          catalog.tierFieldChange("name", "Standard")
+          catalog.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
+          catalog.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
+          catalog.tierFieldChange("priceCents", "2500")
+          catalog.tierFieldChange("feeCents", "0")
+          catalog.tierFieldChange("capacity", "20")
 
-    expect(state.selectedEvent()?.id).toBe("draft-event")
-  })
+          await catalog.saveTier()
 
-  test("keeps mutation success independent from delayed live event propagation", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        const event: AdminEventItem = {
-          id: "existing-event",
-          status: "draft",
-          catalogVersion: 1,
-          title: "Original title",
-          subtitle: "",
-          description: "",
-          category: "konzerte",
-          startsAt: "",
-          endsAt: "",
-          doorsAt: "",
-          venue: "",
-          city: "",
-          address: "",
-          organizer: "",
-          imageUrl: "",
-          imageAlt: "",
-          tags: [],
-          soldOut: false,
-          tiers: [],
+          expect(calls).toEqual(["event", "ticket"])
+          expect(catalog.selectedEvent()?.tiers[0]?.name).toBe("Standard")
+          expect(catalog.eventDraft().status).toBe("published")
+          expect(catalog.selectedEventKey()).toMatch(/^new-concert-/u)
+        } finally {
+          dispose()
         }
-        let savedTitle = ""
-        const state = adminCatalogPageStateCreate({
-          events: () => [event],
-          eventsLive: () => undefined,
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: false, errorMessage: "stale query" }),
-          eventUpsert: async (input) => {
-            savedTitle = input.title
-            return createResult({ eventKey: input.eventKey, catalogVersion: 2 })
-          },
-        })
-        state.selectEvent(event)
-        state.eventFieldChange("title", "Updated title")
+      })
+    })
 
-        await expect(state.saveEvent()).resolves.toBe("existing-event")
-        expect(savedTitle).toBe("Updated title")
-        expect(state.eventDraft().title).toBe("Updated title")
-        expect(state.isSaving()).toBe(false)
-        expect(state.errorMessage()).toBe("")
-        expect(state.successMessage()).toContain("Event gespeichert")
-      } finally {
-        dispose()
+    test("offers the published catalog status before an event has a ticket product", () => {
+      const catalog = adminCatalogPageStateCreate({
+        events: () => [],
+        isServerAuthorized: () => true,
+        reloadEvents: async () => ({ success: true, data: [] }),
+      })
+      const form = adminEventDetailsFormStateCreate({ catalog })
+
+      expect(form.statusOptions()).toContain("published")
+      expect(form.canPublish()).toBe(false)
+    })
+
+    test("saves a new event as a draft until a ticket product allows publication", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          let savedStatus = ""
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            eventUpsert: async (input) => {
+              savedStatus = input.status ?? ""
+              return createResult({ eventKey: input.eventKey, catalogVersion: 1 })
+            },
+          })
+          state.eventFieldChange("eventKey", "new-concert")
+          state.eventFieldChange("title", "New concert")
+          state.eventFieldChange("status", "published")
+
+          await state.saveEvent()
+
+          expect(savedStatus).toBe("draft")
+        } finally {
+          dispose()
+        }
+      })
+    })
+
+    test("prefills legacy tier times from its event while preserving tier-specific times", () => {
+      const event: AdminEventItem = {
+        id: "concert",
+        status: "draft",
+        catalogVersion: 1,
+        title: "Concert",
+        subtitle: "",
+        description: "",
+        category: "konzerte",
+        startsAt: "2026-10-01T18:00:00.000Z",
+        endsAt: "2026-10-01T22:00:00.000Z",
+        doorsAt: "2026-10-01T17:00:00.000Z",
+        venue: "Hall",
+        city: "Berlin",
+        address: "",
+        organizer: "Eventoren",
+        imageUrl: "",
+        imageAlt: "",
+        tags: [],
+        soldOut: false,
+        tiers: [],
       }
+      const state = adminCatalogPageStateCreate({
+        events: () => [event],
+        isServerAuthorized: () => true,
+        reloadEvents: async () => ({ success: true, data: [event] }),
+      })
+      state.selectEvent(event)
+      state.selectTier({
+        id: "legacy",
+        name: "Legacy",
+        description: "",
+        priceCents: 1000,
+        feeCents: 0,
+        capacity: 10,
+        available: 10,
+      })
+      expect(state.tierDraft()).toMatchObject({
+        startsAt: event.startsAt,
+        doorsAt: event.doorsAt,
+        endsAt: event.endsAt,
+      })
+      state.selectTier({
+        id: "custom",
+        name: "Custom",
+        description: "",
+        startsAt: "2026-10-02T18:00:00.000Z",
+        doorsAt: "2026-10-02T17:00:00.000Z",
+        endsAt: "2026-10-02T23:00:00.000Z",
+        priceCents: 1000,
+        feeCents: 0,
+        capacity: 10,
+        available: 10,
+      })
+      expect(state.tierDraft()).toMatchObject({
+        startsAt: "2026-10-02T18:00:00.000Z",
+        doorsAt: "2026-10-02T17:00:00.000Z",
+        endsAt: "2026-10-02T23:00:00.000Z",
+      })
     })
-  })
 
-  test("replaces removed live categories while retaining locally created categories", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        const [categoryResult, setCategoryResult] = createSignal<
-          ReturnType<typeof createResult<readonly string[]>> | undefined
-        >(undefined)
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          categoryLive: categoryResult,
-          categoryCreate: async () => createResult(undefined),
-        })
-        setCategoryResult(createResult(["First", "Removed"]))
-        await new Promise((resolve) => setTimeout(resolve, 0))
-        expect(state.categories()).toEqual(["First", "Removed"])
-        expect(await state.createCategory("Local")).toBe(true)
-        setCategoryResult(createResult(["First"]))
-        await new Promise((resolve) => setTimeout(resolve, 0))
-        expect(state.categories()).toEqual(["First", "Local"])
-      } finally {
-        dispose()
+    test("requires tier start and end and defaults blank doors time to start when saving", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          let received: { startsAt: string; doorsAt: string; endsAt: string } | undefined
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            ticketTierUpsert: async (input) => {
+              received = input
+              return createResult({ tierKey: input.tierKey, catalogVersion: 1 })
+            },
+          })
+          state.eventFieldChange("eventKey", "concert")
+          state.tierFieldChange("tierKey", "standard")
+          state.tierFieldChange("name", "Standard")
+          state.tierFieldChange("priceCents", "1000")
+          state.tierFieldChange("feeCents", "0")
+          state.tierFieldChange("capacity", "10")
+          await state.saveTier()
+          expect(state.errorMessage()).toBe("Beginn und Ende sind erforderlich. Bitte gib beide Zeitpunkte ein.")
+          expect(received).toBeUndefined()
+
+          state.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
+          state.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
+          await state.saveTier()
+          expect(received).toMatchObject({
+            startsAt: "2026-10-01T18:00:00.000Z",
+            doorsAt: "2026-10-01T18:00:00.000Z",
+            endsAt: "2026-10-01T22:00:00.000Z",
+          })
+        } finally {
+          dispose()
+        }
+      })
+    })
+
+    test("publishing saves edited event details before making them public", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          const event: AdminEventItem = {
+            id: "concert",
+            status: "draft" as const,
+            catalogVersion: 1,
+            title: "Original title",
+            subtitle: "",
+            description: "",
+            category: "konzerte" as const,
+            startsAt: "2026-10-01T18:00:00.000Z",
+            endsAt: "2026-10-01T22:00:00.000Z",
+            doorsAt: "2026-10-01T17:00:00.000Z",
+            venue: "Test hall",
+            city: "Berlin",
+            address: "Teststraße 1",
+            organizer: "Eventoren",
+            imageUrl: "/images/test.webp",
+            imageAlt: "Test event",
+            tags: [],
+            soldOut: false,
+            tiers: [
+              {
+                id: "standard",
+                name: "Standard",
+                description: "",
+                priceCents: 2000,
+                feeCents: 0,
+                capacity: 100,
+                available: 100,
+              },
+            ],
+          }
+          const calls: string[] = []
+          let stored = event
+          const state = adminCatalogPageStateCreate({
+            events: () => [event],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [stored] }),
+            eventUpsert: async (input) => {
+              calls.push("save")
+              stored = { ...stored, title: input.title, status: input.status ?? "draft" }
+              return createResult({ eventKey: input.eventKey, catalogVersion: 2 })
+            },
+            eventPublish: async ({ eventKey }) => {
+              calls.push("publish")
+              stored = { ...stored, status: "published" }
+              return createResult({ eventKey, catalogVersion: 3 })
+            },
+          })
+          state.selectEvent(event)
+          state.eventFieldChange("title", "Updated title")
+          state.eventFieldChange("status", "published")
+
+          await state.publishEvent()
+
+          expect(calls).toEqual(["save", "publish"])
+          expect(state.selectedEvent()?.title).toBe("Updated title")
+          expect(state.eventDraft().status).toBe("published")
+          expect(state.errorMessage()).toBe("")
+        } finally {
+          dispose()
+        }
+      })
+    })
+
+    test("exposes an event selected after state creation during server rendering", () => {
+      const event = {
+        id: "draft-event",
+        status: "draft" as const,
+        catalogVersion: 1,
+        title: "Draft event",
+        subtitle: "",
+        description: "",
+        category: "konzerte" as const,
+        startsAt: "2026-10-01T18:00:00.000Z",
+        endsAt: "2026-10-01T22:00:00.000Z",
+        doorsAt: "2026-10-01T17:00:00.000Z",
+        venue: "Test hall",
+        city: "Berlin",
+        address: "Teststraße 1",
+        organizer: "Eventoren",
+        imageUrl: "/images/test.webp",
+        imageAlt: "Test event",
+        tags: [],
+        soldOut: false,
+        tiers: [],
       }
+      const state = adminCatalogPageStateCreate({
+        events: () => [event],
+        isServerAuthorized: () => true,
+        reloadEvents: async () => ({ success: true, data: [event] }),
+      })
+
+      state.selectEvent(event)
+
+      expect(state.selectedEvent()?.id).toBe("draft-event")
     })
-  })
 
-  test("hides loader and category snapshots as soon as the auth boundary closes", () => {
-    const event: AdminEventItem = {
-      id: "private-event",
-      status: "draft",
-      catalogVersion: 1,
-      title: "Private event",
-      subtitle: "",
-      description: "",
-      category: "konzerte",
-      startsAt: "",
-      endsAt: "",
-      doorsAt: "",
-      venue: "",
-      city: "",
-      address: "",
-      organizer: "",
-      imageUrl: "",
-      imageAlt: "",
-      tags: [],
-      soldOut: false,
-      tiers: [],
-    }
-    const [authorized, setAuthorized] = createSignal(true)
-    const state = adminCatalogPageStateCreate({
-      events: () => [event],
-      isServerAuthorized: authorized,
-      reloadEvents: async () => ({ success: true, data: [event] }),
+    test("keeps mutation success independent from delayed live event propagation", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          const event: AdminEventItem = {
+            id: "existing-event",
+            status: "draft",
+            catalogVersion: 1,
+            title: "Original title",
+            subtitle: "",
+            description: "",
+            category: "konzerte",
+            startsAt: "",
+            endsAt: "",
+            doorsAt: "",
+            venue: "",
+            city: "",
+            address: "",
+            organizer: "",
+            imageUrl: "",
+            imageAlt: "",
+            tags: [],
+            soldOut: false,
+            tiers: [],
+          }
+          let savedTitle = ""
+          const state = adminCatalogPageStateCreate({
+            events: () => [event],
+            eventsLive: () => undefined,
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: false, errorMessage: "stale query" }),
+            eventUpsert: async (input) => {
+              savedTitle = input.title
+              return createResult({ eventKey: input.eventKey, catalogVersion: 2 })
+            },
+          })
+          state.selectEvent(event)
+          state.eventFieldChange("title", "Updated title")
+
+          await expect(state.saveEvent()).resolves.toBe("existing-event")
+          expect(savedTitle).toBe("Updated title")
+          expect(state.eventDraft().title).toBe("Updated title")
+          expect(state.isSaving()).toBe(false)
+          expect(state.errorMessage()).toBe("")
+          expect(state.successMessage()).toContain("Event gespeichert")
+        } finally {
+          dispose()
+        }
+      })
     })
-    expect(state.events()).toEqual([event])
-    setAuthorized(false)
-    expect(state.events()).toEqual([])
-    expect(state.categories()).toEqual([])
-    expect(state.hiddenCategories()).toEqual([])
-  })
 
-  test("shows the reason when saving an event rejects", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          eventUpsert: async () => {
-            throw new Error("Verbindung zum Katalog fehlgeschlagen")
-          },
-        })
-        state.eventFieldChange("eventKey", "new-event")
-        state.eventFieldChange("title", "New event")
+    test("replaces removed live categories while retaining locally created categories", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          const [categoryResult, setCategoryResult] = createSignal<
+            ReturnType<typeof createResult<readonly string[]>> | undefined
+          >(undefined)
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            categoryLive: categoryResult,
+            categoryCreate: async () => createResult(undefined),
+          })
+          setCategoryResult(createResult(["First", "Removed"]))
+          await new Promise((resolve) => setTimeout(resolve, 0))
+          expect(state.categories()).toEqual(["First", "Removed"])
+          expect(await state.createCategory("Local")).toBe(true)
+          setCategoryResult(createResult(["First"]))
+          await new Promise((resolve) => setTimeout(resolve, 0))
+          expect(state.categories()).toEqual(["First", "Local"])
+        } finally {
+          dispose()
+        }
+      })
+    })
 
-        await state.saveEvent()
-
-        expect(state.errorMessage()).toBe(
-          "Event konnte nicht gespeichert werden: Verbindung zum Katalog fehlgeschlagen",
-        )
-        expect(state.isSaving()).toBe(false)
-      } finally {
-        dispose()
+    test("hides loader and category snapshots as soon as the auth boundary closes", () => {
+      const event: AdminEventItem = {
+        id: "private-event",
+        status: "draft",
+        catalogVersion: 1,
+        title: "Private event",
+        subtitle: "",
+        description: "",
+        category: "konzerte",
+        startsAt: "",
+        endsAt: "",
+        doorsAt: "",
+        venue: "",
+        city: "",
+        address: "",
+        organizer: "",
+        imageUrl: "",
+        imageAlt: "",
+        tags: [],
+        soldOut: false,
+        tiers: [],
       }
+      const [authorized, setAuthorized] = createSignal(true)
+      const state = adminCatalogPageStateCreate({
+        events: () => [event],
+        isServerAuthorized: authorized,
+        reloadEvents: async () => ({ success: true, data: [event] }),
+      })
+      expect(state.events()).toEqual([event])
+      setAuthorized(false)
+      expect(state.events()).toEqual([])
+      expect(state.categories()).toEqual([])
+      expect(state.hiddenCategories()).toEqual([])
     })
-  })
 
-  test("turns an unexpected ticket mutation rejection into feedback and always ends the saving state", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          ticketTierUpsert: async () => {
-            throw new Error("connection lost")
-          },
-        })
-        state.eventFieldChange("eventKey", "existing-event")
-        state.tierFieldChange("tierKey", "standard")
-        state.tierFieldChange("name", "Standard")
-        state.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
-        state.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
-        state.tierFieldChange("priceCents", "2501")
-        state.tierFieldChange("feeCents", "0")
-        state.tierFieldChange("capacity", "10")
+    test("shows the reason when saving an event rejects", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            eventUpsert: async () => {
+              throw new Error("Verbindung zum Katalog fehlgeschlagen")
+            },
+          })
+          state.eventFieldChange("eventKey", "new-event")
+          state.eventFieldChange("title", "New event")
 
-        await expect(state.saveTier()).resolves.toBeUndefined()
-        expect(state.isSaving()).toBe(false)
-        expect(state.errorMessage()).toBe("Ticketprodukt konnte nicht gespeichert werden.")
-      } finally {
-        dispose()
-      }
+          await state.saveEvent()
+
+          expect(state.errorMessage()).toBe(
+            "Event konnte nicht gespeichert werden: Verbindung zum Katalog fehlgeschlagen",
+          )
+          expect(state.isSaving()).toBe(false)
+        } finally {
+          dispose()
+        }
+      })
     })
-  })
 
-  test("deletes the selected ticket product and clears its draft", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          ticketTierDelete: async () => createResult({ tierKey: "standard", catalogVersion: 2 }),
-        })
-        state.eventFieldChange("eventKey", "existing-event")
-        state.tierFieldChange("tierKey", "standard")
+    test("turns an unexpected ticket mutation rejection into feedback and always ends the saving state", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            ticketTierUpsert: async () => {
+              throw new Error("connection lost")
+            },
+          })
+          state.eventFieldChange("eventKey", "existing-event")
+          state.tierFieldChange("tierKey", "standard")
+          state.tierFieldChange("name", "Standard")
+          state.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
+          state.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
+          state.tierFieldChange("priceCents", "2501")
+          state.tierFieldChange("feeCents", "0")
+          state.tierFieldChange("capacity", "10")
 
-        await state.deleteTier()
-
-        expect(state.tierDraft().tierKey).toBe("")
-        expect(state.successMessage()).toBe("Ticketprodukt gelöscht.")
-        expect(state.isSaving()).toBe(false)
-      } finally {
-        dispose()
-      }
+          await expect(state.saveTier()).resolves.toBeUndefined()
+          expect(state.isSaving()).toBe(false)
+          expect(state.errorMessage()).toBe("Ticketprodukt konnte nicht gespeichert werden.")
+        } finally {
+          dispose()
+        }
+      })
     })
-  })
 
-  test("removes a selected category from the picker and switches the draft to an available category", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          categoryHide: async () => createResult(undefined),
-        })
-        const picker = adminEventDetailsFormStateCreate({ catalog: state }).categoryPicker
-        picker.categorySelect("Test")
+    test("deletes the selected ticket product and clears its draft", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            ticketTierDelete: async () => createResult({ tierKey: "standard", catalogVersion: 2 }),
+          })
+          state.eventFieldChange("eventKey", "existing-event")
+          state.tierFieldChange("tierKey", "standard")
 
-        await picker.categoryRemove("Test")
+          await state.deleteTier()
 
-        expect(state.hiddenCategories()).toContain("Test")
-        expect(picker.categoryOptions()).not.toContain("Test")
-        expect(state.eventDraft().category).toBe("konzerte")
-      } finally {
-        dispose()
-      }
+          expect(state.tierDraft().tierKey).toBe("")
+          expect(state.successMessage()).toBe("Ticketprodukt gelöscht.")
+          expect(state.isSaving()).toBe(false)
+        } finally {
+          dispose()
+        }
+      })
     })
-  })
 
-  test("adds a category independently of saving an event and keeps it in the picker", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        const created: string[] = []
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          categoryCreate: async ({ category }) => {
-            created.push(category)
-            return createResult(undefined)
-          },
-        })
-        const picker = adminEventDetailsFormStateCreate({ catalog: state }).categoryPicker
-        picker.newCategory.set(" Test ")
+    test("removes a selected category from the picker and switches the draft to an available category", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            categoryHide: async () => createResult(undefined),
+          })
+          const picker = adminEventDetailsFormStateCreate({ catalog: state }).categoryPicker
+          picker.categorySelect("Test")
 
-        await picker.categoryCreate()
-        state.startNewEvent()
+          await picker.categoryRemove("Test")
 
-        expect(created).toEqual(["Test"])
-        expect(state.categories()).toContain("Test")
-        expect(adminEventDetailsFormStateCreate({ catalog: state }).categoryPicker.categoryOptions()).toContain("Test")
-        expect(picker.newCategory.get()).toBe("")
-      } finally {
-        dispose()
-      }
+          expect(state.hiddenCategories()).toContain("Test")
+          expect(picker.categoryOptions()).not.toContain("Test")
+          expect(state.eventDraft().category).toBe("konzerte")
+        } finally {
+          dispose()
+        }
+      })
     })
-  })
 
-  test("does not replace a manually edited image URL when an upload finishes", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        let resolveUpload!: (
-          result: ReturnType<typeof createResult<{ assetId: string; detail: string; card: string; organizer: string }>>,
-        ) => void
-        const state = adminCatalogPageStateCreate({
-          events: () => [],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [] }),
-          imageUpload: () =>
-            new Promise((resolve) => {
-              resolveUpload = resolve
+    test("adds a category independently of saving an event and keeps it in the picker", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          const created: string[] = []
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            categoryCreate: async ({ category }) => {
+              created.push(category)
+              return createResult(undefined)
+            },
+          })
+          const picker = adminEventDetailsFormStateCreate({ catalog: state }).categoryPicker
+          picker.newCategory.set(" Test ")
+
+          await picker.categoryCreate()
+          state.startNewEvent()
+
+          expect(created).toEqual(["Test"])
+          expect(state.categories()).toContain("Test")
+          expect(adminEventDetailsFormStateCreate({ catalog: state }).categoryPicker.categoryOptions()).toContain(
+            "Test",
+          )
+          expect(picker.newCategory.get()).toBe("")
+        } finally {
+          dispose()
+        }
+      })
+    })
+
+    test("does not replace a manually edited image URL when an upload finishes", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          let resolveUpload!: (
+            result: ReturnType<
+              typeof createResult<{ assetId: string; detail: string; card: string; organizer: string }>
+            >,
+          ) => void
+          const state = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            imageUpload: () =>
+              new Promise((resolve) => {
+                resolveUpload = resolve
+              }),
+          })
+          state.eventFieldChange("eventKey", "new-event")
+          state.eventFieldChange("title", "Edited title")
+          const form = adminEventDetailsFormStateCreate({ catalog: state })
+          const upload = form.imageUpload(new File(["image"], "event.png", { type: "image/png" }))
+
+          form.imageUrlChange("https://example.com/manual.webp")
+          resolveUpload(
+            createResult({
+              assetId: "asset",
+              detail: "https://example.com/upload.webp",
+              card: "card",
+              organizer: "organizer",
             }),
-        })
-        state.eventFieldChange("eventKey", "new-event")
-        state.eventFieldChange("title", "Edited title")
-        const form = adminEventDetailsFormStateCreate({ catalog: state })
-        const upload = form.imageUpload(new File(["image"], "event.png", { type: "image/png" }))
+          )
+          await upload
 
-        form.imageUrlChange("https://example.com/manual.webp")
-        resolveUpload(
-          createResult({
-            assetId: "asset",
-            detail: "https://example.com/upload.webp",
-            card: "card",
-            organizer: "organizer",
-          }),
-        )
-        await upload
-
-        expect(state.eventDraft().imageUrl).toBe("https://example.com/manual.webp")
-        expect(state.eventDraft().imageVariants).toBeUndefined()
-        expect(state.eventDraft().title).toBe("Edited title")
-      } finally {
-        dispose()
-      }
-    })
-  })
-
-  test("ignores an upload after the draft is reset to the same event key", async () => {
-    await createRoot(async (dispose) => {
-      try {
-        let resolveUpload!: (
-          result: ReturnType<typeof createResult<{ assetId: string; detail: string; card: string; organizer: string }>>,
-        ) => void
-        const event: AdminEventItem = {
-          id: "same-event",
-          status: "draft",
-          catalogVersion: 1,
-          title: "Current title",
-          subtitle: "",
-          description: "",
-          category: "konzerte" as const,
-          startsAt: "2026-10-01T18:00:00.000Z",
-          endsAt: "2026-10-01T22:00:00.000Z",
-          doorsAt: "2026-10-01T17:00:00.000Z",
-          venue: "Hall",
-          city: "Berlin",
-          address: "",
-          organizer: "Eventoren",
-          imageUrl: "https://example.com/current.webp",
-          imageAlt: "",
-          tags: [],
-          soldOut: false,
-          tiers: [],
+          expect(state.eventDraft().imageUrl).toBe("https://example.com/manual.webp")
+          expect(state.eventDraft().imageVariants).toBeUndefined()
+          expect(state.eventDraft().title).toBe("Edited title")
+        } finally {
+          dispose()
         }
-        const state = adminCatalogPageStateCreate({
-          events: () => [event],
-          isServerAuthorized: () => true,
-          reloadEvents: async () => ({ success: true, data: [event] }),
-          imageUpload: () =>
-            new Promise((resolve) => {
-              resolveUpload = resolve
+      })
+    })
+
+    test("ignores an upload after the draft is reset to the same event key", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          let resolveUpload!: (
+            result: ReturnType<
+              typeof createResult<{ assetId: string; detail: string; card: string; organizer: string }>
+            >,
+          ) => void
+          const event: AdminEventItem = {
+            id: "same-event",
+            status: "draft",
+            catalogVersion: 1,
+            title: "Current title",
+            subtitle: "",
+            description: "",
+            category: "konzerte" as const,
+            startsAt: "2026-10-01T18:00:00.000Z",
+            endsAt: "2026-10-01T22:00:00.000Z",
+            doorsAt: "2026-10-01T17:00:00.000Z",
+            venue: "Hall",
+            city: "Berlin",
+            address: "",
+            organizer: "Eventoren",
+            imageUrl: "https://example.com/current.webp",
+            imageAlt: "",
+            tags: [],
+            soldOut: false,
+            tiers: [],
+          }
+          const state = adminCatalogPageStateCreate({
+            events: () => [event],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [event] }),
+            imageUpload: () =>
+              new Promise((resolve) => {
+                resolveUpload = resolve
+              }),
+          })
+          state.selectEvent(event)
+          const form = adminEventDetailsFormStateCreate({ catalog: state })
+          const upload = form.imageUpload(new File(["image"], "event.png", { type: "image/png" }))
+
+          state.selectEvent(event)
+          state.eventFieldChange("title", "Newer title")
+          resolveUpload(
+            createResult({
+              assetId: "asset",
+              detail: "https://example.com/upload.webp",
+              card: "card",
+              organizer: "organizer",
             }),
-        })
-        state.selectEvent(event)
-        const form = adminEventDetailsFormStateCreate({ catalog: state })
-        const upload = form.imageUpload(new File(["image"], "event.png", { type: "image/png" }))
+          )
+          await upload
 
-        state.selectEvent(event)
-        state.eventFieldChange("title", "Newer title")
-        resolveUpload(
-          createResult({
-            assetId: "asset",
-            detail: "https://example.com/upload.webp",
-            card: "card",
-            organizer: "organizer",
-          }),
-        )
-        await upload
-
-        expect(state.eventDraft().imageUrl).toBe(event.imageUrl)
-        expect(state.eventDraft().title).toBe("Newer title")
-        expect(state.eventDraft().imageVariants).toBeUndefined()
-      } finally {
-        dispose()
-      }
+          expect(state.eventDraft().imageUrl).toBe(event.imageUrl)
+          expect(state.eventDraft().title).toBe("Newer title")
+          expect(state.eventDraft().imageVariants).toBeUndefined()
+        } finally {
+          dispose()
+        }
+      })
     })
   })
-})
+}
