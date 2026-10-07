@@ -30,6 +30,31 @@ describe("E2E auth credentials", () => {
     ])
   })
 
+  test("retries CLI lookup without XDG_CONFIG_HOME after a failure", () => {
+    const previousXdgConfigHome = process.env.XDG_CONFIG_HOME
+    process.env.XDG_CONFIG_HOME = "/nonstandard/config"
+    const commandEnvironments: NodeJS.ProcessEnv[] = []
+    let commandCount = 0
+
+    try {
+      const result = e2eAuthCredentialsGet({}, (args, environment) => {
+        commandEnvironments.push(environment ?? {})
+        commandCount += 1
+        if (commandCount === 1) throw new Error("CLI lookup failed")
+        return args.at(-1) === "username" ? "local-admin" : "local-password"
+      })
+
+      expect(result).toEqual({ success: true, data: { username: "local-admin", password: "local-password" } })
+      expect(commandEnvironments).toHaveLength(3)
+      expect(commandEnvironments[0].XDG_CONFIG_HOME).toBe("/nonstandard/config")
+      expect(commandEnvironments[1].XDG_CONFIG_HOME).toBeUndefined()
+      expect(commandEnvironments[2].XDG_CONFIG_HOME).toBeUndefined()
+    } finally {
+      if (previousXdgConfigHome === undefined) delete process.env.XDG_CONFIG_HOME
+      else process.env.XDG_CONFIG_HOME = previousXdgConfigHome
+    }
+  })
+
   test("returns a Result error when the credential command fails without leaking command output", () => {
     const result = e2eAuthCredentialsGet({}, () => {
       throw new Error("private CLI output")

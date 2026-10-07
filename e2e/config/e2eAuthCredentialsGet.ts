@@ -2,20 +2,22 @@ import { execFileSync } from "node:child_process"
 import { delimiter, sep } from "node:path"
 import { createResult, createResultError } from "#result"
 
-type CredentialCommandRun = (args: string[]) => string
+type CredentialCommandRun = (args: string[], environment?: NodeJS.ProcessEnv) => string
 
 // Bun/Rstest prepend the project's node_modules/.bin, which can contain a different CLI build.
-const e2eCredentialCommandRun: CredentialCommandRun = (args) =>
+const e2eCredentialCommandRun: CredentialCommandRun = (args, environment = process.env) =>
   execFileSync("zitadel-cli", args, {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "ignore"],
-    env: {
-      ...process.env,
-      PATH: process.env.PATH?.split(delimiter)
-        .filter((directory) => !directory.endsWith(`${sep}node_modules${sep}.bin`))
-        .join(delimiter),
-    },
+    env: environment,
   })
+
+const e2eCredentialCommandEnvironment = (): NodeJS.ProcessEnv => ({
+  ...process.env,
+  PATH: process.env.PATH?.split(delimiter)
+    .filter((directory) => !directory.endsWith(`${sep}node_modules${sep}.bin`))
+    .join(delimiter),
+})
 
 export const e2eAuthCredentialsGet = (
   environment: Record<string, string | undefined>,
@@ -35,14 +37,31 @@ export const e2eAuthCredentialsGet = (
 
   try {
     const credentialArgs = ["credentials", "get", "testadmin", "--profile", "contentoren", "--field"]
-    const resolvedUsername = credentialCommandRun([...credentialArgs, "username"]).trim()
-    const resolvedPassword = credentialCommandRun([...credentialArgs, "password"]).trim()
+    const commandEnvironment = e2eCredentialCommandEnvironment()
+    const resolveCredentials = (environment: NodeJS.ProcessEnv) => ({
+      username: credentialCommandRun([...credentialArgs, "username"], environment).trim(),
+      password: credentialCommandRun([...credentialArgs, "password"], environment).trim(),
+    })
+    let credentials: ReturnType<typeof resolveCredentials>
 
-    if (!resolvedUsername || !resolvedPassword) {
+    try {
+      credentials = resolveCredentials(commandEnvironment)
+    } catch {
+      if (commandEnvironment.XDG_CONFIG_HOME === undefined) {
+        return createResultError(
+          op,
+          "Unable to resolve testadmin credentials; set E2E_AUTH_USERNAME and E2E_AUTH_PASSWORD or configure zitadel-cli",
+        )
+      }
+      const { XDG_CONFIG_HOME: _xdgConfigHome, ...fallbackEnvironment } = commandEnvironment
+      credentials = resolveCredentials(fallbackEnvironment)
+    }
+
+    if (!credentials.username || !credentials.password) {
       return createResultError(op, "Zitadel CLI returned empty testadmin credentials")
     }
 
-    return createResult({ username: resolvedUsername, password: resolvedPassword })
+    return createResult(credentials)
   } catch {
     return createResultError(
       op,
