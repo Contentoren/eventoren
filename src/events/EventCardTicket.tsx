@@ -12,7 +12,7 @@ export function EventCardTicket(props: { event: EventItem; href?: string }) {
   const state = eventCardStateCreate({ event: () => props.event })
 
   return (
-    <article class="group relative h-full overflow-hidden rounded-card border-2 border-border-strong bg-surface shadow-sm transition-all duration-200 hover:border-brand hover:shadow-md">
+    <article class="group relative h-full overflow-hidden rounded-card bg-surface shadow-sm transition-all duration-200 hover:shadow-md">
       <EventCardLink event={props.event} href={props.href}>
         {/* Taller vertical image aspect ratio */}
         <div class="relative aspect-[4/3] overflow-hidden bg-surface-muted">
@@ -66,7 +66,7 @@ export function EventCardTicket(props: { event: EventItem; href?: string }) {
             class={classArr(
               "inline-flex h-10 items-center justify-center rounded-control px-4 text-sm font-bold shadow-sm transition-colors",
               props.event.soldOut
-                ? "border border-border-strong bg-surface-muted text-content-muted"
+                ? "bg-surface-muted text-content-muted"
                 : "bg-brand text-brand-content group-hover:bg-brand-strong",
             )}
           >

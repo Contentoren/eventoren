@@ -20,11 +20,11 @@ export function EventFilterBar(props: {
     <section class="flex flex-col gap-space-4" aria-label="Events filtern">
       <search aria-label="Events durchsuchen">
         <form
-          class="grid grid-cols-1 gap-space-2 rounded-card border border-border-strong/40 bg-surface p-space-2 shadow-lg sm:grid-cols-2 lg:grid-cols-[1fr_1.2fr_1fr_auto] lg:items-center"
+          class="grid grid-cols-1 gap-space-2 rounded-card bg-surface p-space-2 shadow-lg sm:grid-cols-2 lg:grid-cols-[1fr_1.2fr_1fr_auto] lg:items-center"
           onSubmit={state.submitSearch}
         >
           {/* Category selection */}
-          <div class="relative flex h-13 items-center rounded-control border border-border-subtle bg-surface-muted px-space-4 transition-colors hover:border-border-strong focus-within:border-brand-accent focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand-accent/20">
+          <div class="relative flex h-13 items-center rounded-control bg-surface-muted px-space-4 transition-colors focus-within:border-brand-accent focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand-accent/20">
             <label for="event-filter-category" class="sr-only">
               Kategorie
             </label>
@@ -64,7 +64,7 @@ export function EventFilterBar(props: {
           </div>
 
           {/* Ort / Search input */}
-          <div class="relative flex h-13 items-center rounded-control border border-border-subtle bg-surface-muted px-space-4 transition-colors hover:border-border-strong focus-within:border-brand-accent focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand-accent/20">
+          <div class="relative flex h-13 items-center rounded-control bg-surface-muted px-space-4 transition-colors focus-within:border-brand-accent focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand-accent/20">
             <label for="event-filter-location" class="sr-only">
               Ort wählen
             </label>
@@ -85,7 +85,7 @@ export function EventFilterBar(props: {
           </div>
 
           {/* Datum / Zeitraum selection */}
-          <div class="relative flex h-13 items-center rounded-control border border-border-subtle bg-surface-muted px-space-4 transition-colors hover:border-border-strong focus-within:border-brand-accent focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand-accent/20">
+          <div class="relative flex h-13 items-center rounded-control bg-surface-muted px-space-4 transition-colors focus-within:border-brand-accent focus-within:bg-surface focus-within:ring-2 focus-within:ring-brand-accent/20">
             <label for="event-filter-date" class="sr-only">
               Datum
             </label>
