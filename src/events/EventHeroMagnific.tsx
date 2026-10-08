@@ -1,6 +1,8 @@
 import { For } from "solid-js"
 import { classArr } from "../ui/classArr.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
+import { imageList } from "../app/assets/imageList.js"
+import { urlImage } from "../app/assets/urlImage.js"
 import { eventHeroMagnificStateCreate } from "./eventHeroMagnificStateCreate.ts"
 import { eventHeroResultsAnchorId } from "./eventHeroResultsAnchorId.ts"
 
@@ -29,7 +31,7 @@ export function EventHeroMagnific(props: { eventCount?: number }) {
           class="pointer-events-none absolute bottom-0 left-1/2 h-[350px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,#38bdf8_0%,transparent_75%)] opacity-15 blur-3xl"
         />
         <img
-          src="/images/festival-lights_3f89b9a5.webp"
+          src={urlImage(imageList.i1920x1080_webp_festival_lights)}
           alt=""
           aria-hidden="true"
           class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10 mix-blend-screen"

@@ -1,7 +1,10 @@
 import type { CatalogImage } from "@adaptive-ds/assets-service"
 
 const publicBaseUrl =
-  import.meta.env.VITE_ASSETS_PUBLIC_BASE_URL?.trim() || "https://assets-service-public.contentoren.de/eventoren/public"
+  import.meta.env.VITE_ASSETS_PUBLIC_BASE_URL?.trim() ||
+  (import.meta.env.PROD
+    ? "https://assets.eventoren.de/production/public"
+    : "https://assets.eventoren.de/development/public")
 
 type ManagedImagePath = Pick<CatalogImage, "path"> | string
 

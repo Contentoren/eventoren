@@ -1,10 +1,12 @@
 import type { OrganizerTicket } from "../../organizer/OrganizerTicket.ts"
+import { imageList } from "../../app/assets/imageList.js"
+import { urlImage } from "../../app/assets/urlImage.js"
 
 const eventFields = {
   eventId: "demo-event-xyz",
   eventKey: "xyz",
   eventTitle: "Kraftklub — Karges Land Tour",
-  imageUrl: "/images/concert-crowd_460af152.webp",
+  imageUrl: urlImage(imageList.i1920x1080_webp_concert_crowd),
   imageAlt: "Beleuchtete Konzertbühne und feierndes Publikum",
   eventStartsAt: "2027-04-16T21:00:00+02:00",
   eventEndsAt: "2027-04-16T23:00:00+02:00",

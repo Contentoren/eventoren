@@ -2,6 +2,8 @@ import { mdiAccountOutline } from "@adaptive-ds/mdi/mdiAccountOutline.js"
 import { mdiLogout } from "@adaptive-ds/mdi/mdiLogout.js"
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
+import { imageList } from "../app/assets/imageList.js"
+import { urlImage } from "../app/assets/urlImage.js"
 import { AdminListViewControl } from "#src/viewPreference/AdminListViewControl.tsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { CorvuPopover } from "#ui/interactive/popover/CorvuPopover.jsx"
@@ -23,8 +25,8 @@ export function AdminSidebarContent(props: {
         aria-label="Eventoren"
         class="focus-ring flex items-center px-2"
       >
-        <img src="/eventoren-logo-light.png" alt="" aria-hidden="true" class="h-8 w-auto max-w-full dark:hidden" />
-        <img src="/eventoren-logo.png" alt="" aria-hidden="true" class="hidden h-8 w-auto max-w-full dark:block" />
+        <img src={urlImage(imageList.eventoren_logo_light)} alt="" aria-hidden="true" class="h-8 w-auto max-w-full dark:hidden" />
+        <img src={urlImage(imageList.eventoren_logo_light2)} alt="" aria-hidden="true" class="hidden h-8 w-auto max-w-full dark:block" />
       </Link>
 
       <nav

@@ -1,28 +1,30 @@
 import type { EventHeroImage } from "./EventHeroImage.ts"
+import { imageList } from "../app/assets/imageList.js"
+import { urlImage } from "../app/assets/urlImage.js"
 
 export const eventHeroImages: readonly EventHeroImage[] = [
   {
-    src: "/images/festival-lights_3f89b9a5.webp",
+    src: urlImage(imageList.i1920x1080_webp_festival_lights),
     alt: "Festivalbühne bei Nacht mit beleuchteter Kuppel und Publikum",
     label: "Festival",
   },
   {
-    src: "/images/concert-crowd_460af152.webp",
+    src: urlImage(imageList.i1920x1080_webp_concert_crowd),
     alt: "Ausverkauftes Konzert mit feiernder Menge vor der Bühne",
     label: "Konzert",
   },
   {
-    src: "/images/dj-stage_ba046940.webp",
+    src: urlImage(imageList.i1920x1080_webp_dj_stage),
     alt: "DJ-Pult auf Festivalbühne mit blauen Lichtstrahlen",
     label: "DJ Stage",
   },
   {
-    src: "/images/stage-beams_0d113a31.webp",
+    src: urlImage(imageList.i1920x1080_webp_stage_beams),
     alt: "Bühnenlichtstrahlen und Nebel über der Live-Crowd",
     label: "Stage Beams",
   },
   {
-    src: "/images/event-production_193062e0.webp",
+    src: urlImage(imageList.i1920x1080_webp_event_production),
     alt: "Bühnenlichter, Scheinwerfer und Konzerthalle im Nebel",
     label: "Production",
   },

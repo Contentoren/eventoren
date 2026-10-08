@@ -7,7 +7,7 @@ type Meta = JSX.MetaHTMLAttributes<HTMLMetaElement>
 const siteUrl = "https://eventoren.de"
 const siteName = "eventoren"
 const siteDescription = "A public Solid website built with Adaptive DS."
-const ogImage = siteUrl + "/logo.svg"
+const ogImage = "https://assets.eventoren.de/production/public/images/1200x630_webp/eventoren-og_default_v1.avif"
 
 function pageMeta(input: { readonly title: string; readonly description?: string; readonly path?: string }): Meta[] {
   const description = input.description ?? siteDescription
@@ -23,7 +23,7 @@ function pageMeta(input: { readonly title: string; readonly description?: string
     { property: "og:image", content: ogImage },
     { property: "og:image:width", content: "1200" },
     { property: "og:image:height", content: "630" },
-    { property: "og:image:alt", content: siteName + " logo" },
+    { property: "og:image:alt", content: "Eventoren Veranstaltungen und Erlebnisse" },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: input.title },
     { name: "twitter:description", content: description },

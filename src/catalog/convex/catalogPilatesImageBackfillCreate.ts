@@ -17,7 +17,7 @@ export function catalogPilatesImageBackfillCreate(
     return
 
   // Existing published assets, not environment-dependent frontend/local paths.
-  const publicBaseUrl = "https://assets-service-public.contentoren.de/eventoren/public/"
+  const publicBaseUrl = "https://assets.eventoren.de/production/public/"
   const detail = new URL(imageList.pilates_detail.path, publicBaseUrl).toString()
   const card = new URL(imageList.pilates_card.path, publicBaseUrl).toString()
   return {

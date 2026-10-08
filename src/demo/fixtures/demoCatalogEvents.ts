@@ -1,4 +1,6 @@
 import type { EventItem } from "../../events/EventItem.ts"
+import { imageList } from "../../app/assets/imageList.js"
+import { urlImage } from "../../app/assets/urlImage.js"
 
 export const demoCatalogEvents: readonly EventItem[] = [
   {
@@ -16,7 +18,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
     city: "Berlin",
     address: "Uber-Platz 1",
     organizer: "Eventoren Live GmbH",
-    imageUrl: "/images/concert-crowd_460af152.webp",
+    imageUrl: urlImage(imageList.i1920x1080_webp_concert_crowd),
     imageAlt: "Beleuchtete Konzertbühne und feierndes Publikum",
     tags: ["Indie", "Rock", "Support: Blond"],
     soldOut: false,
@@ -65,7 +67,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
     city: "München",
     address: "Königsplatz 1",
     organizer: "Münchner Kulturpass",
-    imageUrl: "/images/festival-lights_3f89b9a5.webp",
+    imageUrl: urlImage(imageList.i1920x1080_webp_festival_lights),
     imageAlt: "Lichtinstallation vor einer nächtlichen Veranstaltungsbühne",
     tags: ["Museum", "Nachtveranstaltung", "Shuttle inklusive"],
     soldOut: false,
@@ -105,7 +107,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
     city: "Mainz",
     address: "Nordmole 1",
     organizer: "Hafenlicht Kulturverein",
-    imageUrl: "/images/stage-beams_0d113a31.webp",
+    imageUrl: urlImage(imageList.i1920x1080_webp_stage_beams),
     imageAlt: "Scheinwerferlicht über einem abendlichen Open-Air-Gelände",
     tags: ["Film", "Open Air", "Originalfassung"],
     soldOut: false,
@@ -145,7 +147,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
     city: "Berlin",
     address: "Straße des 17. Juni 100",
     organizer: "Berlin Marathon Veranstaltungs GmbH",
-    imageUrl: "/images/event-production_193062e0.webp",
+    imageUrl: urlImage(imageList.i1920x1080_webp_event_production),
     imageAlt: "Sportveranstaltung mit Startbogen und dichtem Publikum",
     tags: ["Laufen", "Marathon", "Zeitmessung"],
     soldOut: false,
