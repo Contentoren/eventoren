@@ -3,7 +3,10 @@ import { catalogImageForward } from "../src/catalog/convex/catalogImageForward.t
 
 const calls: { path: string; method: string; body?: unknown; authorization?: string }[] = []
 let publicationStatus = "succeeded"
-let defaultEnvironment = "production"
+let settingsEnvironment: unknown = {
+  r2Prefix: "production",
+  publicBaseUrl: "https://assets.example",
+}
 let catalogOutputs: unknown[] = [
   { assetId: "asset-1", class: "image", key: "detail", path: "images/detail.avif" },
   { assetId: "asset-1", class: "image", key: "card", path: "images/card.avif" },
@@ -24,7 +27,7 @@ function serviceFetch(input: string | URL | Request, init?: RequestInit): Promis
     authorization: new Headers(init?.headers).get("authorization") ?? undefined,
   })
   let data: unknown
-  if (url.pathname === "/api/v1/projects/project-1") data = { defaultEnvironment }
+  if (url.pathname.endsWith("/settings")) data = { environment: settingsEnvironment }
   else if (url.pathname.endsWith("/uploads/intent"))
     data = {
       uploadId: "upload-1",
@@ -39,12 +42,8 @@ function serviceFetch(input: string | URL | Request, init?: RequestInit): Promis
   else if (url.pathname.endsWith("/complete")) data = { assetId: "asset-1", workflowId: "ingest" }
   else if (url.pathname.endsWith("/workflows/ingest/status")) data = { status: "succeeded" }
   else if (url.pathname.endsWith("/workflows/variants/status")) data = { status: publicationStatus }
-  else if (url.pathname.endsWith("/workflows/target/status")) data = { status: "succeeded" }
   else if (url.pathname.endsWith("/assets/asset-1/outputs")) data = { workflowId: "variants" }
-  else if (url.pathname.endsWith("/assets/asset-1/reprocess")) data = { workflowId: "target" }
-  else if (url.pathname.endsWith("/current")) data = { catalog: { outputs: catalogOutputs } }
-  else if (url.pathname.endsWith("/environments/production") || url.pathname.endsWith("/environments/development"))
-    data = { id: "environment-1", publicBaseUrl: "https://assets.example/eventoren/public/" }
+  else if (url.pathname.endsWith("/catalogs/current")) data = { catalog: { outputs: catalogOutputs } }
   else throw new Error("unexpected service request")
   return Promise.resolve(Response.json({ ok: true, data }))
 }
@@ -52,7 +51,6 @@ function serviceFetch(input: string | URL | Request, init?: RequestInit): Promis
 function configSet() {
   vi.stubEnv("ASSETS_SERVICE_API_URL", "https://api.example")
   vi.stubEnv("ASSETS_SERVICE_PROJECT_ID", "project-1")
-  vi.stubEnv("ASSETS_SERVICE_ENVIRONMENT", "production")
   vi.stubEnv("ASSETS_SERVICE_ACCESS_TOKEN", "private-token")
   vi.stubGlobal("fetch", serviceFetch)
 }
@@ -60,7 +58,10 @@ function configSet() {
 afterEach(() => {
   calls.length = 0
   publicationStatus = "succeeded"
-  defaultEnvironment = "production"
+  settingsEnvironment = {
+    r2Prefix: "production",
+    publicBaseUrl: "https://assets.example",
+  }
   catalogOutputs = [
     { assetId: "asset-1", class: "image", key: "detail", path: "images/detail.avif" },
     { assetId: "asset-1", class: "image", key: "card", path: "images/card.avif" },
@@ -70,7 +71,7 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-test("sends signed PUT without bearer token, waits for both workflows, returns only published catalog URLs", async () => {
+test("sends strict single-binding intent, waits for both workflows, returns canonical binding URLs", async () => {
   configSet()
   const result = await catalogImageForward({
     filename: "event.png",
@@ -82,17 +83,18 @@ test("sends signed PUT without bearer token, waits for both workflows, returns o
     success: true,
     data: {
       assetId: "asset-1",
-      detail: "https://assets.example/eventoren/public/images/detail.avif",
-      card: "https://assets.example/eventoren/public/images/card.avif",
-      organizer: "https://assets.example/eventoren/public/images/organizer.avif",
+      detail: "https://assets.example/production/public/images/detail.avif",
+      card: "https://assets.example/production/public/images/card.avif",
+      organizer: "https://assets.example/production/public/images/organizer.avif",
     },
   })
-  expect(calls.find((call) => call.path.endsWith("/uploads/intent"))?.body).toMatchObject({
+  const intentBody = calls.find((call) => call.path.endsWith("/uploads/intent"))?.body as Record<string, unknown>
+  expect(intentBody).toMatchObject({
     originalFilename: "event-stage-1.png",
     folders: ["events"],
-    environment: "production",
     sha256: "039058c6f2c0cb492c533b0a4d14ef77cc0f78abccced5287d84a1a2011cfb81",
   })
+  expect(intentBody).not.toHaveProperty("environment")
   expect(calls.find((call) => call.path === "/upload")?.authorization).toBeUndefined()
   expect(calls.find((call) => call.path.endsWith("/assets/asset-1/outputs"))?.body).toEqual({
     outputs: [
@@ -101,7 +103,10 @@ test("sends signed PUT without bearer token, waits for both workflows, returns o
       { kind: "image", key: "organizer", width: 1920, height: 1080, format: "avif", quality: 80 },
     ],
   })
-  expect(calls.find((call) => call.path.endsWith("/current"))).toBeTruthy()
+  expect(calls.find((call) => call.path.endsWith("/catalogs/current"))).toBeTruthy()
+  expect(calls.some((call) => call.path.includes("/environments/"))).toBe(false)
+  expect(calls.some((call) => call.path.includes("/catalogs/production/"))).toBe(false)
+  expect(calls.some((call) => call.path.includes("/reprocess"))).toBe(false)
 })
 
 test("fails instead of fabricating a URL if a published variant is absent", async () => {
@@ -126,21 +131,18 @@ test("does not read catalog when publication fails", async () => {
     stageId: "stage-3",
   })
   expect(result.success).toBe(false)
-  expect(calls.some((call) => call.path.endsWith("/current"))).toBe(false)
+  expect(calls.some((call) => call.path.endsWith("/catalogs/current"))).toBe(false)
 })
 
-test("reprocesses and publishes into the target environment when the project default differs", async () => {
+test("fails closed without uploading when the single binding is missing", async () => {
   configSet()
-  defaultEnvironment = "development"
+  settingsEnvironment = null
   const result = await catalogImageForward({
     filename: "event.png",
     mediaType: "image/png",
     bytes: new Uint8Array([1, 2, 3]),
     stageId: "stage-4",
   })
-  expect(result.success).toBe(true)
-  expect(calls.find((call) => call.path.endsWith("/assets/asset-1/reprocess"))?.body).toEqual({
-    environmentId: "environment-1",
-  })
-  expect(calls.some((call) => call.path.endsWith("/workflows/target/status"))).toBe(true)
+  expect(result).toEqual({ success: false, op: "catalogImageForward", errorMessage: expect.any(String) })
+  expect(calls.some((call) => call.path.endsWith("/uploads/intent"))).toBe(false)
 })
