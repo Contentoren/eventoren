@@ -200,5 +200,8 @@
   "bin": {
     "eventoren": "./dist/cli.js"
   },
+  "patchedDependencies": {
+    "@adaptive-ds/assets-service@0.6.5": "patches/@adaptive-ds%2Fassets-service@0.6.5.patch"
+  },
   "sideEffects": false
 }

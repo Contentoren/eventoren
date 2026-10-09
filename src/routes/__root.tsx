@@ -3,6 +3,7 @@ import type { JSX } from "solid-js"
 import { Suspense } from "solid-js"
 import { HydrationScript } from "solid-js/web"
 import { createResult } from "#result"
+import { urlDocument } from "../app/assets/urlDocument.ts"
 import { eventorenCurrentUserServerFn } from "#src/auth/server/eventorenCurrentUserServerFn.ts"
 import { EventorenAuthProvider } from "#src/auth/ui/EventorenAuthProvider.tsx"
 import { ConvexClientProvider } from "#src/utils/convex_client/ConvexClientProvider.tsx"
@@ -32,7 +33,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+      { rel: "icon", type: "image/svg+xml", href: urlDocument("favicon.svg") },
       { rel: "manifest", href: "/site.webmanifest" },
     ],
     scripts: [

@@ -34,6 +34,14 @@ test("Image source bisync excludes payment-methods while restoring other origina
       expect(args).toContain("--exclude")
       expect(args).toContain("/payment-methods/**")
       expect(args).toContain("--resync")
+      for (const migrated of [
+        "/1920x1080_webp/concert-crowd.jpg",
+        "/1920x1080_webp/dj-stage.jpg",
+        "/1920x1080_webp/event-production.jpg",
+        "/1920x1080_webp/festival-lights.jpg",
+        "/1920x1080_webp/stage-beams.jpg",
+      ])
+        expect(args).toContain(migrated)
       await mkdir(join(local, "campaign"), { recursive: true })
       await writeFile(join(local, "campaign", "banner.png"), await readFile(join(remote, "campaign", "banner.png")))
       if (!args.includes("/payment-methods/**")) {

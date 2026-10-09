@@ -1,0 +1,15 @@
+diff --git a/dist/catalog/catalogDocumentSchema.d.ts b/dist/catalog/catalogDocumentSchema.d.ts
+index 7e56175f85897ab0ec04ad32ea9686b2be0f8bcf..e218e0fbd771a35c9ef70c7a7b54c1f906a7396f
+--- a/dist/catalog/catalogDocumentSchema.d.ts
++++ b/dist/catalog/catalogDocumentSchema.d.ts
+@@ -8,8 +8,8 @@ export declare const catalogDocumentSchema: v.StrictObjectSchema<{
+     readonly mediaType: v.SchemaWithPipe<readonly [v.StringSchema<undefined>, v.RegexAction<string, undefined>]>;
+     readonly metadata: v.StrictObjectSchema<{
+         readonly kind: v.LiteralSchema<"document", undefined>;
+-        readonly extension: v.PicklistSchema<["pdf", "json", "doc", "docx", "xls", "xlsx", "xlsm", "ppt", "pptx", "odt", "ods", "odp", "rtf", "csv", "txt"], undefined>;
+-        readonly mediaType: v.PicklistSchema<["application/pdf", "application/json", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel.sheet.macroenabled.12", "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "application/vnd.oasis.opendocument.text", "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.oasis.opendocument.presentation", "application/rtf", "text/csv", "text/plain"], undefined>;
++        readonly extension: v.PicklistSchema<["svg", "ico", "pdf", "json", "doc", "docx", "xls", "xlsx", "xlsm", "ppt", "pptx", "odt", "ods", "odp", "rtf", "csv", "txt"], undefined>;
++        readonly mediaType: v.PicklistSchema<["image/svg+xml", "image/vnd.microsoft.icon", "application/pdf", "application/json", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel.sheet.macroenabled.12", "application/vnd.ms-powerpoint", "application/vnd.openxmlformats-officedocument.presentationml.presentation", "application/vnd.oasis.opendocument.text", "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.oasis.opendocument.presentation", "application/rtf", "text/csv", "text/plain"], undefined>;
+     }, undefined>;
+ }, undefined>;
+ export type CatalogDocument = v.InferOutput<typeof catalogDocumentSchema>;
