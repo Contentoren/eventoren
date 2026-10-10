@@ -25,8 +25,18 @@ export function AdminSidebarContent(props: {
         aria-label="Eventoren"
         class="focus-ring flex items-center px-2"
       >
-        <img src={urlImage(imageList.eventoren_logo_light)} alt="" aria-hidden="true" class="h-8 w-auto max-w-full dark:hidden" />
-        <img src={urlImage(imageList.eventoren_logo_light2)} alt="" aria-hidden="true" class="hidden h-8 w-auto max-w-full dark:block" />
+        <img
+          src={urlImage(imageList.eventoren_logo_light)}
+          alt=""
+          aria-hidden="true"
+          class="h-8 w-auto max-w-full dark:hidden"
+        />
+        <img
+          src={urlImage(imageList.eventoren_logo_light2)}
+          alt=""
+          aria-hidden="true"
+          class="hidden h-8 w-auto max-w-full dark:block"
+        />
       </Link>
 
       <nav
