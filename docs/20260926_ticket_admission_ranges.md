@@ -1,20 +1,5 @@
 # Ticketprodukt: zusätzliche Einlasszeiträume
 
-## Goal
-- In `/admin/events/:eventKey?tab=products`, each entry added by “Weiteren Einlass hinzufügen” has its own required start and end datetime.
-- Make “Ticketprodukt speichern” use the existing `contrast` button variant.
-- Make create/edit/save validation consistent: incomplete or invalid admission ranges must produce a clear error, valid products must save, and invalid input must not silently reuse an earlier value.
+The primary `doorsAt` value remains a single timestamp. Additional admissions are stored as ranges with `startsAt` and `endsAt`; each range must be complete, parseable, and end after its start before a product can be saved.
 
-## Decisions
-- The existing primary `doorsAt` stays a single timestamp; only additional admissions become ranges.
-- Store additional ranges as `{ startsAt: string; endsAt: string }` in the catalog and expose them consistently in the admin draft and event tier. Preserve existing stored single timestamps on read/edit without inventing an end time: show the legacy start with an empty end until an administrator supplies the end before saving. Keep schema read compatibility with existing documents.
-- Use existing UI components via `#ui/...` and the existing `contrast` variant. No new dependencies. Limit changes to admin catalog/form, relevant model/storage/mapping and focused tests; ticket/order rendering is outside scope because it does not currently consume additional admissions.
-
-## Tasks
-1. Update tier/draft/client/storage contracts and mapping for additional admission ranges with legacy timestamp compatibility. Validate complete chronological ranges at the save boundary. Add focused catalog/mutation tests. Status: completed.
-2. Update admin create/edit form state and UI to edit start/end per additional admission, handle clearing/replacing dates correctly, present precise validation, and use `contrast` for save. Add focused form state tests. Status: completed.
-3. Verify focused tests and, if local authentication permits, browser-check the products tab create/edit/save flow. Status: completed.
-
-## Current context
-- User confirmed each additional admission is a start/end range, not missing product-level dates. Exact intermittent validation error is unknown.
-- `additionalDoorsAt` now contains start/end ranges. Legacy single-timestamp entries show their original start with an empty end until edited.
+Legacy additional-admission entries stored as single timestamps remain readable. The editor shows the legacy start with an empty end rather than inventing a duration; the user must provide an end or remove that entry before saving. Additional ranges are catalog/admin data and are not currently consumed by ticket or order rendering.
