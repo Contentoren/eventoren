@@ -2,6 +2,7 @@ import { getRouteApi } from "@tanstack/solid-router"
 import { createEffect, createMemo, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { TicketCart } from "../ticketing/TicketCart.ts"
+import { ticketCartActivationCodeMerge } from "../ticketing/ticketCartActivationCodeMerge.ts"
 import { ticketCartForEventResolve } from "../ticketing/ticketCartForEventResolve.ts"
 import { ticketCartDraftAddOrUpdate } from "../ticketing/ticketCartDraftAddOrUpdate.ts"
 import { ticketCartDraftLoad } from "../ticketing/ticketCartDraftLoad.ts"
@@ -18,20 +19,19 @@ export function eventDetailPageStateCreate(inputs: { event: () => EventItem }) {
   const navigate = routeApi.useNavigate()
 
   const event = createMemo(() => inputs.event())
-  const cart = createMemo(
-    () =>
-      ticketCartForEventResolve(event(), ticketCartSearchParse(params().eventId, search().tickets ?? "")) ?? {
-        eventId: event().id,
-        lines: [],
-      },
-  )
+  const cart = createMemo(() => {
+    const resolved = ticketCartForEventResolve(event(), ticketCartSearchParse(params().eventId, search().tickets ?? ""))
+    if (!resolved) return { eventId: event().id, lines: [] }
+    return ticketCartActivationCodeMerge(resolved, ticketCartDraftLoad())
+  })
   const hydrated = createSignalObject(false)
 
   let initializedEventId = ""
 
   const applyCart = (next: TicketCart, resetScroll = false) => {
     const existing = ticketCartDraftLoad()
-    if (existing.some((entry) => entry.eventId === params().eventId)) {
+    const carriesCode = next.lines.some((line) => (line.activationCode ?? "").trim().length > 0)
+    if (carriesCode || existing.some((entry) => entry.eventId === params().eventId)) {
       const updated = ticketCartDraftAddOrUpdate(existing, next)
       ticketCartDraftSave(updated)
     }

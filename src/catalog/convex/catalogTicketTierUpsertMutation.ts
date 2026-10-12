@@ -3,6 +3,7 @@ import { type MutationCtx, mutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import type { IdUser } from "#src/auth/convex/IdUser.ts"
 import { eventTicketTierMaxPerOrderGet } from "#src/events/eventTicketTierMaxPerOrderGet.ts"
+import { eventTicketTierActivationCodeRequiredGet } from "#src/events/eventTicketTierActivationCodeRequiredGet.ts"
 import { authMutationTokenToUserId } from "#src/utils/convex_backend/authMutationTokenToUserId.ts"
 import { catalogAdminAuthorizeFn } from "./catalogAdminAuthorizeFn.js"
 import { catalogSyncAdvanceFn } from "./catalogSyncAdvanceFn.js"
@@ -20,6 +21,7 @@ const catalogTicketTierArgsValidator = v.object({
   feeCents: v.number(),
   capacity: v.number(),
   maxPerOrder: v.optional(v.number()),
+  activationCodeRequired: v.optional(v.boolean()),
   sortOrder: v.optional(v.number()),
   token: v.string(),
 })
@@ -99,6 +101,7 @@ async function catalogTicketTierUpsertAuthorizedFn(
     feeCents: args.feeCents,
     capacity: args.capacity,
     maxPerOrder: args.maxPerOrder ?? eventTicketTierMaxPerOrderGet(existing ?? {}),
+    activationCodeRequired: args.activationCodeRequired ?? eventTicketTierActivationCodeRequiredGet(existing ?? {}),
     reserved,
     sold,
     sortOrder: args.sortOrder ?? existing?.sortOrder ?? 0,
@@ -119,6 +122,7 @@ async function catalogTicketTierUpsertAuthorizedFn(
       feeCents: existing.feeCents,
       capacity: existing.capacity,
       maxPerOrder: eventTicketTierMaxPerOrderGet(existing),
+      activationCodeRequired: eventTicketTierActivationCodeRequiredGet(existing),
       reserved: existing.reserved,
       sold: existing.sold,
       sortOrder: existing.sortOrder,

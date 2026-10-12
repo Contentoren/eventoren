@@ -16,6 +16,12 @@ export const ticketReservationReleaseMutation = internalMutation({
     if (order.status === "expired") return createResult({ orderId: order._id, released: false })
     if (order.status === "released") return createResult({ orderId: order._id, released: false })
     const now = new Date().toISOString()
+    const attempt = await ctx.db
+      .query("ticketPaymentAttempts")
+      .withIndex("paymentReference", (q) => q.eq("paymentReference", order.paymentReference))
+      .unique()
+    if (attempt && attempt.orderId !== order._id)
+      return createResultError("ticketReservationReleaseMutation", "The payment attempt does not belong to the order")
     const releaseResult = await ticketReservationsRelease(ctx, order._id, now)
     if (!releaseResult.success) return releaseResult
     await ctx.db.patch("ticketOrders", order._id, {
@@ -26,10 +32,6 @@ export const ticketReservationReleaseMutation = internalMutation({
       lastPaymentError: args.reason.slice(0, 500),
       updatedAt: now,
     })
-    const attempt = await ctx.db
-      .query("ticketPaymentAttempts")
-      .withIndex("paymentReference", (q) => q.eq("paymentReference", order.paymentReference))
-      .unique()
     if (attempt)
       await ctx.db.patch("ticketPaymentAttempts", attempt._id, {
         status: "failed",

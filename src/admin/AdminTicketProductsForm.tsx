@@ -3,6 +3,7 @@ import { For, Index, Show } from "solid-js"
 import { InputDateTime } from "#ui/input/datetime/InputDateTime.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
+import { Checkbox } from "#ui/input/check/Checkbox.jsx"
 import { Textarea } from "#ui/input/textarea/Textarea.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
@@ -157,6 +158,20 @@ export function AdminTicketProductsForm(props: {
               value={state.feeEuro.get()}
               onInput={state.feeEuro.set}
             />
+          </div>
+          <div>
+            <Checkbox
+              id="admin-tier-activation-code-required"
+              class="items-center text-sm text-content"
+              checked={props.state.tierDraft().activationCodeRequired}
+              onChange={(checked) => props.state.tierFieldChange("activationCodeRequired", checked)}
+              disabled={props.state.isSaving()}
+            >
+              Freischaltungscode erforderlich
+            </Checkbox>
+            <p class="mt-1 text-sm text-content-muted">
+              Bei aktivierter Pflicht brauchen Käufer einen gültigen Freischaltungscode für dieses Produkt.
+            </p>
           </div>
           <div class="grid gap-4 md:grid-cols-2">
             <Field

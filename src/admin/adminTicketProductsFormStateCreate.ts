@@ -137,6 +137,7 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
     catalog.tierFieldChange("feeCents", "")
     catalog.tierFieldChange("capacity", "")
     catalog.tierFieldChange("maxPerOrder", "10")
+    catalog.tierFieldChange("activationCodeRequired", false)
     catalog.tierFieldChange("sortOrder", String((catalog.selectedEvent()?.tiers.length ?? 0) + 1))
     priceEuro.set("")
     feeEuro.set("")

@@ -1,6 +1,6 @@
 import { v } from "convex/values"
 import { internal } from "#convex/_generated/api.js"
-import type { Id } from "#convex/_generated/dataModel.js"
+import type { Doc, Id } from "#convex/_generated/dataModel.js"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
@@ -8,11 +8,14 @@ import { ticketCheckoutLegalDocumentRevision } from "../ticketCheckoutLegalDocum
 import { ticketCheckoutLegalDocumentSnapshot } from "../ticketCheckoutLegalDocumentSnapshot.js"
 import { eventTicketTierMaxPerOrderGet } from "#src/events/eventTicketTierMaxPerOrderGet.ts"
 import { ticketCheckoutContextCanonicalize } from "./ticketCheckoutContextCanonicalize.js"
+import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.js"
+import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
 
 const ticketSelectionValidator = v.object({
   tierKey: v.string(),
   quantity: v.number(),
   participantNames: v.optional(v.array(v.string())),
+  activationCode: v.optional(v.string()),
 })
 
 export const ticketCheckoutPrepareMutation = internalMutation({
@@ -189,6 +192,10 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         existing.status === "paid_inventory_conflict"
       )
         return createResultError(op, "The checkout is no longer retryable")
+      const codes = await ticketActivationCodeLifecyclePlan(ctx, existing, "consume")
+      if (!codes.success) return codes
+      if (codes.data.hasOwnershipConflict)
+        return createResultError(op, "The activation code reservation is no longer owned by this checkout")
       return createResult({
         orderId: existing._id,
         paymentReference: existing.paymentReference,
@@ -254,7 +261,10 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     if (args.eventRevision !== (event.eventRevision ?? 1)) return createResultError(op, "The event revision is stale")
 
     const requestedSelections = [...args.tickets].sort((left, right) => left.tierKey.localeCompare(right.tierKey))
-    const quantitiesByTier = new Map<string, { quantity: number; participantNames: string[] }>()
+    const quantitiesByTier = new Map<
+      string,
+      { quantity: number; participantNames: string[]; activationCode?: string }
+    >()
     for (const selection of requestedSelections) {
       if (!Number.isSafeInteger(selection.quantity) || selection.quantity < 1)
         return createResultError(op, "Ticket quantity is invalid")
@@ -262,13 +272,20 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         return createResultError(op, "Each ticket requires exactly one participant name")
       if (selection.participantNames.some((name) => name.trim().length === 0))
         return createResultError(op, "Participant names are incomplete")
-      const aggregated = quantitiesByTier.get(selection.tierKey) ?? { quantity: 0, participantNames: [] }
+      const activationCode =
+        selection.activationCode === undefined ? undefined : ticketActivationCodeNormalize(selection.activationCode)
+      const previous = quantitiesByTier.get(selection.tierKey)
+      if (previous && previous.activationCode !== activationCode)
+        return createResultError(op, "Each ticket product must use the same activation code")
+      const aggregated = previous ?? { quantity: 0, participantNames: [], activationCode }
       aggregated.quantity += selection.quantity
       if (!Number.isSafeInteger(aggregated.quantity)) return createResultError(op, "Ticket quantity is invalid")
       aggregated.participantNames.push(...selection.participantNames)
       quantitiesByTier.set(selection.tierKey, aggregated)
     }
     const lineInputs: Array<{
+      tier: Doc<"catalogTicketTiers">
+      activationCode?: Doc<"ticketActivationCodes">
       tierId: Id<"catalogTicketTiers">
       tierKey: string
       tierName: string
@@ -291,11 +308,62 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       const perOrderLimit = eventTicketTierMaxPerOrderGet({ maxPerOrder: tier.maxPerOrder })
       if (aggregated.quantity > perOrderLimit)
         return createResultError(op, `The ticket quantity exceeds the maximum per order of ${perOrderLimit}`)
+      if (
+        !Number.isSafeInteger(tier.reserved) ||
+        tier.reserved < 0 ||
+        !Number.isSafeInteger(tier.sold) ||
+        tier.sold < 0 ||
+        !Number.isSafeInteger(tier.capacity) ||
+        tier.capacity < 0
+      )
+        return createResultError(op, "Reserved inventory is corrupt")
       const available = tier.capacity - tier.sold
       if (aggregated.quantity > available) return createResultError(op, "The requested ticket quantity is unavailable")
+      let activationCode: Doc<"ticketActivationCodes"> | undefined
+      if (tier.activationCodeRequired === true) {
+        if (!aggregated.activationCode)
+          return createResultError(op, "An activation code is required for this ticket product")
+        if (!/^[A-Z0-9]{8}$/u.test(aggregated.activationCode))
+          return createResultError(op, "The activation code is invalid for this ticket product")
+        const matches = await ctx.db
+          .query("ticketActivationCodes")
+          .withIndex("code", (q) => q.eq("code", aggregated.activationCode!))
+          .take(2)
+        const code = matches[0]
+        if (
+          matches.length !== 1 ||
+          !code ||
+          code.eventId !== event._id ||
+          code.tierId !== tier._id ||
+          code.eventKey !== event.eventKey ||
+          code.tierKey !== tier.tierKey
+        )
+          return createResultError(op, "The activation code is invalid for this ticket product")
+        const charged = await ctx.db
+          .query("ticketActivationCodeReservations")
+          .withIndex("codeIdAndCreatedAt", (q) => q.eq("codeId", code._id))
+          .filter((q) => q.eq(q.field("status"), "consumed"))
+          .first()
+        const active = await ctx.db
+          .query("ticketActivationCodeReservations")
+          .withIndex("codeIdAndCreatedAt", (q) => q.eq("codeId", code._id))
+          .filter((q) => q.eq(q.field("status"), "reserved"))
+          .first()
+        if (
+          code.status !== "available" ||
+          code.orderId !== undefined ||
+          code.consumedAt !== undefined ||
+          charged ||
+          active
+        )
+          return createResultError(op, "The activation code is no longer available")
+        activationCode = code
+      }
       subtotalCents += tier.priceCents * aggregated.quantity
       feeCents += tier.feeCents * aggregated.quantity
       lineInputs.push({
+        tier,
+        activationCode,
         tierId: tier._id,
         tierKey: tier.tierKey,
         tierName: tier.name,
@@ -366,6 +434,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       await ctx.db.insert("ticketOrderLines", {
         orderId,
         tierId: line.tierId,
+        ...(line.activationCode ? { activationCodeId: line.activationCode._id } : {}),
         eventKey: event.eventKey,
         tierKey: line.tierKey,
         tierName: line.tierName,
@@ -376,11 +445,28 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         feeCents: line.feeCents,
         createdAt: now,
       })
-      const tier = await ctx.db.get("catalogTicketTiers", line.tierId)
-      if (!tier) return createResultError(op, "The ticket tier disappeared during reservation")
       await ctx.db.patch("catalogTicketTiers", line.tierId, {
-        reserved: tier.reserved + line.quantity,
+        reserved: line.tier.reserved + line.quantity,
       })
+      if (line.activationCode) {
+        await ctx.db.patch("ticketActivationCodes", line.activationCode._id, {
+          status: "reserved",
+          orderId,
+          reservedAt: now,
+          updatedAt: now,
+        })
+        await ctx.db.insert("ticketActivationCodeReservations", {
+          codeId: line.activationCode._id,
+          orderId,
+          tierId: line.tierId,
+          eventId: event._id,
+          eventKey: event.eventKey,
+          tierKey: line.tierKey,
+          status: "reserved",
+          createdAt: now,
+          updatedAt: now,
+        })
+      }
       await ctx.db.insert("ticketReservations", {
         orderId,
         tierId: line.tierId,

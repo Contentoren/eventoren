@@ -12,11 +12,13 @@ import type { TicketContact } from "./TicketContact.ts"
 import type { TicketParticipantNames } from "./TicketParticipantNames.ts"
 import type { TicketRequiredFieldKey } from "./TicketRequiredFieldKey.ts"
 import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
+import { ticketActivationCodeMissing } from "./ticketActivationCodeMissing.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
 import { ticketCheckoutCreate } from "./ticketCheckoutCreate.ts"
 import { ticketCheckoutKeyCreate } from "./ticketCheckoutKeyCreate.ts"
 import { ticketCheckoutLegalDocumentRevision } from "./ticketCheckoutLegalDocumentRevision.ts"
 import { ticketCheckoutLegalDocumentSnapshot } from "./ticketCheckoutLegalDocumentSnapshot.ts"
+import { ticketCheckoutTicketsCreate } from "./ticketCheckoutTicketsCreate.ts"
 import { ticketCheckoutReturnUrlCreate } from "./ticketCheckoutReturnUrlCreate.ts"
 import { ticketCheckoutSearchOrderIds } from "./ticketCheckoutSearchOrderIds.ts"
 import { ticketCheckoutStepLabels } from "./ticketCheckoutStepLabels.ts"
@@ -278,6 +280,20 @@ export function ticketCheckoutFormStateCreate(inputs: {
       errorMessage.set(text.emptyCart)
       return
     }
+    const missingCode = inputs
+      .items()
+      .flatMap((item) =>
+        ticketActivationCodeMissing(item.event, item.cart).map((missing) => ({
+          ...missing,
+          eventTitle: item.event.title,
+        })),
+      )[0]
+    if (missingCode) {
+      errorMessage.set(
+        `Für „${missingCode.tierName}" ist ein Freischaltungscode erforderlich. Bitte kehre zu „${missingCode.eventTitle}" zurück und trage den Code ein.`,
+      )
+      return
+    }
     if (!termsAccepted.get() || !privacyAcknowledged.get()) {
       errorMessage.set(text.legalRequired)
       return
@@ -382,13 +398,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
           eventKey: item.event.id,
           catalogVersion: item.event.catalogVersion,
           eventRevision: item.event.eventRevision ?? 1,
-          tickets: item.cart.lines
-            .filter((line) => line.quantity > 0)
-            .map((line) => ({
-              tierKey: line.tierId,
-              quantity: line.quantity,
-              participantNames: [...(validatedParticipantNames.data[item.event.id]?.[line.tierId] ?? [])],
-            })),
+          tickets: ticketCheckoutTicketsCreate(item.cart, validatedParticipantNames.data),
           successUrl: returnUrl.data,
           cancelUrl: returnUrl.data,
           locale: "de",

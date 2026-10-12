@@ -109,6 +109,7 @@
     "dayjs": "^1.11.23",
     "gray-matter": "^4.0.3",
     "jose": "^6.2.12",
+    "jspdf": "^4.2.1",
     "marked": "^18.1.0",
     "nodemailer": "^10.1.0",
     "pdf-generator": "file:../pdf-generator",

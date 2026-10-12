@@ -1,5 +1,6 @@
 import { getRouteApi } from "@tanstack/solid-router"
 import { createEffect } from "solid-js"
+import type { AdminEventDetailTab } from "./adminEventDetailSearchParse.ts"
 import { adminEventsRouteStateCreate } from "./adminEventsRouteStateCreate.ts"
 
 const route = getRouteApi("/admin/events_/$eventKey")
@@ -16,6 +17,7 @@ export function adminEventDetailRouteStateCreate() {
     catalog,
     event: () => catalog.events().find((candidate) => candidate.id === params().eventKey),
     eventKey: () => params().eventKey,
-    tab: (): "details" | "products" => (search().tab === "products" ? "products" : "details"),
+    tab: (): AdminEventDetailTab =>
+      search().tab === "products" || search().tab === "codes" ? search().tab : "details",
   }
 }

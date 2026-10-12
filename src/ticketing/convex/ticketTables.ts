@@ -27,6 +27,18 @@ const ticketFulfillmentWorkStatusValidator = v.union(
   v.literal("prepared"),
 )
 
+const ticketActivationCodeStatusValidator = v.union(
+  v.literal("available"),
+  v.literal("reserved"),
+  v.literal("consumed"),
+)
+
+const ticketActivationCodeReservationStatusValidator = v.union(
+  v.literal("reserved"),
+  v.literal("released"),
+  v.literal("consumed"),
+)
+
 export const ticketTables = {
   ticketOrders: defineTable({
     checkoutKey: v.string(),
@@ -102,6 +114,8 @@ export const ticketTables = {
   ticketOrderLines: defineTable({
     orderId: v.id("ticketOrders"),
     tierId: v.id("catalogTicketTiers"),
+    // Immutable required-code evidence, independent of later product configuration or deleted history.
+    activationCodeId: v.optional(v.id("ticketActivationCodes")),
     eventKey: v.string(),
     tierKey: v.string(),
     tierName: v.string(),
@@ -216,4 +230,37 @@ export const ticketTables = {
   })
     .index("ticketIdAndOccurredAt", ["ticketId", "occurredAt"])
     .index("eventKeyAndOccurredAt", ["eventKey", "occurredAt"]),
+
+  ticketActivationCodes: defineTable({
+    eventId: v.id("catalogEvents"),
+    tierId: v.id("catalogTicketTiers"),
+    eventKey: v.string(),
+    tierKey: v.string(),
+    code: v.string(),
+    number: v.number(),
+    status: ticketActivationCodeStatusValidator,
+    orderId: v.optional(v.id("ticketOrders")),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+    reservedAt: v.optional(v.string()),
+    consumedAt: v.optional(v.string()),
+  })
+    .index("code", ["code"])
+    .index("tierIdAndNumber", ["tierId", "number"])
+    .index("tierIdAndStatusAndNumber", ["tierId", "status", "number"])
+    .index("orderId", ["orderId"]),
+
+  ticketActivationCodeReservations: defineTable({
+    codeId: v.id("ticketActivationCodes"),
+    orderId: v.id("ticketOrders"),
+    tierId: v.id("catalogTicketTiers"),
+    eventId: v.id("catalogEvents"),
+    eventKey: v.string(),
+    tierKey: v.string(),
+    status: ticketActivationCodeReservationStatusValidator,
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("codeIdAndCreatedAt", ["codeId", "createdAt"])
+    .index("orderId", ["orderId"]),
 } as const

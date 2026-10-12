@@ -1,3 +1,5 @@
+import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.js"
+
 export function ticketCheckoutContextCanonicalize(input: {
   checkoutKey: string
   eventKey: string
@@ -7,6 +9,7 @@ export function ticketCheckoutContextCanonicalize(input: {
     tierKey: string
     quantity: number
     participantNames?: readonly string[]
+    activationCode?: string
   }[]
   stripeMode: "live" | "test"
   successUrl: string
@@ -61,6 +64,9 @@ export function ticketCheckoutContextCanonicalize(input: {
         tierKey: ticket.tierKey,
         quantity: ticket.quantity,
         ...(ticket.participantNames !== undefined ? { participantNames: [...ticket.participantNames] } : {}),
+        ...(ticket.activationCode !== undefined
+          ? { activationCode: ticketActivationCodeNormalize(ticket.activationCode) }
+          : {}),
       })),
   })
 }

@@ -8,6 +8,7 @@ export type TicketCheckoutCreateInput = {
   readonly tickets: {
     readonly tierKey: string
     readonly quantity: number
+    readonly activationCode?: string
     readonly participantNames: string[]
   }[]
   readonly successUrl: string

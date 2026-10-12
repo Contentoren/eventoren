@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/solid-router"
-import { Show } from "solid-js"
+import { Match, Show, Switch } from "solid-js"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
+import { AdminActivationCodesPanel } from "./AdminActivationCodesPanel.tsx"
 import { AdminEventDetailHeader } from "./AdminEventDetailHeader.tsx"
 import { AdminEventDetailsForm } from "./AdminEventDetailsForm.tsx"
 import { AdminEventFeedback } from "./AdminEventFeedback.tsx"
@@ -36,13 +37,18 @@ export function AdminEventDetailPage(props: { state: ReturnType<typeof adminEven
                 tab={props.state.tab()}
                 tierCount={event().tiers.length}
               />
-              <Show
-                when={props.state.tab() === "products"}
-                fallback={<AdminEventDetailsForm state={props.state.catalog} />}
-              >
-                <AdminEventFeedback state={props.state.catalog} />
-                <AdminTicketProductsForm state={props.state.catalog} />
-              </Show>
+              <Switch>
+                <Match when={props.state.tab() === "products"}>
+                  <AdminEventFeedback state={props.state.catalog} />
+                  <AdminTicketProductsForm state={props.state.catalog} />
+                </Match>
+                <Match when={props.state.tab() === "codes"}>
+                  <AdminActivationCodesPanel eventKey={props.state.eventKey} tiers={() => event().tiers} />
+                </Match>
+                <Match when={true}>
+                  <AdminEventDetailsForm state={props.state.catalog} />
+                </Match>
+              </Switch>
             </>
           )}
         </Show>

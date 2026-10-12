@@ -7,6 +7,7 @@ import type { TicketCart } from "./TicketCart.ts"
 import type { TicketCartDraft } from "./TicketCartDraft.ts"
 import { ticketCartDraftEventName } from "./ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "./ticketCartDraftLoad.ts"
+import { ticketCartActivationCodeMerge } from "./ticketCartActivationCodeMerge.ts"
 import { ticketCartForEventResolve } from "./ticketCartForEventResolve.ts"
 import { ticketCartSearchParse } from "./ticketCartSearchParse.ts"
 import { ticketCheckoutText } from "./ticketCheckoutText.ts"
@@ -90,7 +91,7 @@ export function checkoutPageStateCreate(input: {
 
       const resolvedCart = ticketCartForEventResolve(event, ticketCartSearchParse(eventId, search().tickets ?? ""))
       if (!resolvedCart) return []
-      return [{ event, cart: resolvedCart }]
+      return [{ event, cart: ticketCartActivationCodeMerge(resolvedCart, cart.get()) }]
     }
 
     const draft = cart.get()

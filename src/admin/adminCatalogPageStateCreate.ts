@@ -7,6 +7,7 @@ import type { EventItem } from "../events/EventItem.ts"
 import type { EventTicketTier } from "../events/EventTicketTier.ts"
 import type { EventImageVariants } from "../events/EventImageVariants.ts"
 import { eventTicketTierMaxPerOrderGet } from "../events/eventTicketTierMaxPerOrderGet.ts"
+import { eventTicketTierActivationCodeRequiredGet } from "../events/eventTicketTierActivationCodeRequiredGet.ts"
 import { eventHighlightsGet } from "../events/eventHighlightsGet.ts"
 import { eventInclusionsGet } from "../events/eventInclusionsGet.ts"
 import { eventExclusionsGet } from "../events/eventExclusionsGet.ts"
@@ -50,6 +51,7 @@ const emptyTierDraft = (): AdminTierDraft => ({
   feeCents: "",
   capacity: "",
   maxPerOrder: "10",
+  activationCodeRequired: false,
   sortOrder: "0",
 })
 
@@ -166,6 +168,7 @@ export function adminCatalogPageStateCreate(inputs: {
       feeCents: String(tier.feeCents),
       capacity: String(tier.capacity),
       maxPerOrder: String(eventTicketTierMaxPerOrderGet(tier)),
+      activationCodeRequired: eventTicketTierActivationCodeRequiredGet(tier),
       sortOrder: String(tier.sortOrder ?? 0),
     })
     errorMessage.set("")
@@ -339,6 +342,7 @@ export function adminCatalogPageStateCreate(inputs: {
         feeCents,
         capacity,
         maxPerOrder,
+        activationCodeRequired: draft.activationCodeRequired,
         sortOrder,
       })
       if (!saved.success) {
@@ -423,6 +427,7 @@ export function adminCatalogPageStateCreate(inputs: {
           feeCents: tier.feeCents,
           capacity: tier.capacity,
           maxPerOrder: eventTicketTierMaxPerOrderGet(tier),
+          activationCodeRequired: eventTicketTierActivationCodeRequiredGet(tier),
           sortOrder: index + 1,
         })
         if (!saved.success) {

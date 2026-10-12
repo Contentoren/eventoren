@@ -1,6 +1,7 @@
 import type { Doc } from "#convex/_generated/dataModel.js"
 import type { EventItem } from "#src/events/EventItem.ts"
 import { eventTicketTierMaxPerOrderGet } from "#src/events/eventTicketTierMaxPerOrderGet.ts"
+import { eventTicketTierActivationCodeRequiredGet } from "#src/events/eventTicketTierActivationCodeRequiredGet.ts"
 
 export function catalogEventToEventItem(
   event: Doc<"catalogEvents">,
@@ -23,6 +24,7 @@ export function catalogEventToEventItem(
     capacity: tier.capacity,
     available: Math.max(0, tier.capacity - tier.sold),
     maxPerOrder: eventTicketTierMaxPerOrderGet(tier),
+    activationCodeRequired: eventTicketTierActivationCodeRequiredGet(tier),
     sortOrder: tier.sortOrder,
   }))
 

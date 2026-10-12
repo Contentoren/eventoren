@@ -1,5 +1,6 @@
 import type { TicketCart } from "./TicketCart.ts"
 import type { TicketCartDraft } from "./TicketCartDraft.ts"
+import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.ts"
 import { ticketCartDraftKey } from "./ticketCartDraftKey.ts"
 import { ticketCartDraftMaxAgeMs } from "./ticketCartDraftMaxAgeMs.ts"
 import { ticketCartSearchParse } from "./ticketCartSearchParse.ts"
@@ -13,16 +14,32 @@ const isTicketCart = (value: unknown): value is TicketCart => {
 
   return candidate.lines.every((line) => {
     if (typeof line !== "object" || line === null) return false
-    const candidateLine = line as { tierId?: unknown; quantity?: unknown }
-    return (
-      typeof candidateLine.tierId === "string" &&
-      candidateLine.tierId.length > 0 &&
-      typeof candidateLine.quantity === "number" &&
-      Number.isFinite(candidateLine.quantity) &&
-      candidateLine.quantity >= 0
+    const candidateLine = line as { tierId?: unknown; quantity?: unknown; activationCode?: unknown }
+    if (
+      typeof candidateLine.tierId !== "string" ||
+      candidateLine.tierId.length === 0 ||
+      typeof candidateLine.quantity !== "number" ||
+      !Number.isFinite(candidateLine.quantity) ||
+      candidateLine.quantity < 0
     )
+      return false
+    if (candidateLine.activationCode === undefined) return true
+    return typeof candidateLine.activationCode === "string"
   })
 }
+
+const normalizeDraftCarts = (carts: TicketCart[]): TicketCart[] =>
+  carts.map((cart) => ({
+    ...cart,
+    lines: cart.lines.map((line) => {
+      const raw = line.activationCode
+      if (!raw) return { tierId: line.tierId, quantity: line.quantity }
+      const normalized = ticketActivationCodeNormalize(raw)
+      return normalized.length > 0
+        ? { tierId: line.tierId, quantity: line.quantity, activationCode: normalized }
+        : { tierId: line.tierId, quantity: line.quantity }
+    }),
+  }))
 
 export function ticketCartDraftLoad(now: number = Date.now()): TicketCartDraft {
   if (typeof localStorage === "undefined") return []
@@ -64,7 +81,7 @@ export function ticketCartDraftLoad(now: number = Date.now()): TicketCartDraft {
 
   if (candidate.version === 2) {
     if (!Array.isArray(candidate.carts) || !candidate.carts.every(isTicketCart)) return []
-    return candidate.carts
+    return normalizeDraftCarts(candidate.carts)
   }
 
   if (typeof candidate.eventId !== "string" || candidate.eventId.length === 0) return []

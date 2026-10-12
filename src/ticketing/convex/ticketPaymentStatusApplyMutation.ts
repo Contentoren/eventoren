@@ -9,6 +9,8 @@ import { ticketFulfillmentWorkEnsure } from "./ticketFulfillmentWorkEnsure.js"
 import { ticketIssuedCountRead } from "./ticketIssuedCountRead.js"
 import { ticketOrderAccessCapabilityEnsure } from "./ticketOrderAccessCapabilityEnsure.js"
 import { ticketReservationsRelease } from "./ticketReservationsRelease.js"
+import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
+import { ticketActivationCodeLifecycleApply } from "./ticketActivationCodeLifecycleApply.js"
 
 const paymentStatusValidator = v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"))
 
@@ -142,7 +144,11 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       return createResult({ orderId: order._id, status: "failed", paymentStatus: "failed", ticketCount: 0 })
     }
 
+    const activationCodes = await ticketActivationCodeLifecyclePlan(ctx, order, "consume")
+    if (!activationCodes.success) return activationCodes
     if (order.status === "paid") {
+      if (activationCodes.data.hasOwnershipConflict)
+        return createResultError(op, "A fulfilled order no longer owns its activation code")
       const capability = await ticketOrderAccessCapabilityEnsure(ctx, order._id)
       if (!capability.success) return capability
       await ticketOrderBookingDetailsBackfill(ctx, order._id, order, { bookingNumber, bookingReference }, now)
@@ -165,12 +171,14 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       order.status === "released" ||
       order.status === "paid_inventory_conflict"
     ) {
+      await ticketActivationCodeLifecycleApply(ctx, activationCodes.data, now)
       await ctx.db.patch("ticketOrders", order._id, {
         status: "paid_inventory_conflict",
         paymentStatus: "paid",
         billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
         bookingNumber: order.bookingNumber ?? bookingNumber,
         bookingReference: order.bookingReference ?? bookingReference,
+        paidAt: order.paidAt ?? now,
         lastPaymentCheckAt: now,
         checkoutAttemptLeaseUntil: undefined,
         updatedAt: now,
@@ -242,8 +250,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       tiers.set(tier._id, tier)
       if (tier.sold + reservation.quantity > tier.capacity) hasCapacityConflict = true
     }
-    if (hasCapacityConflict) {
-      const release = await ticketReservationsRelease(ctx, order._id, now)
+    if (hasCapacityConflict || activationCodes.data.hasOwnershipConflict) {
+      const release = await ticketReservationsRelease(ctx, order._id, now, "consume")
       if (!release.success) return release
       await ctx.db.patch("ticketOrders", order._id, {
         status: "paid_inventory_conflict",
@@ -251,6 +259,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
         bookingNumber: order.bookingNumber ?? bookingNumber,
         bookingReference: order.bookingReference ?? bookingReference,
+        paidAt: order.paidAt ?? now,
         lastPaymentCheckAt: now,
         checkoutAttemptLeaseUntil: undefined,
         updatedAt: now,
@@ -285,6 +294,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       if (!code.success) return code
       codes.add(code.data)
     }
+    await ticketActivationCodeLifecycleApply(ctx, activationCodes.data, now)
     for (const reservation of activeReservations) {
       const tier = tiers.get(reservation.tierId)!
       await ctx.db.patch("catalogTicketTiers", tier._id, {

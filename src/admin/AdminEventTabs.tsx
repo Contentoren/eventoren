@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/solid-router"
 import { Show } from "solid-js"
+import type { AdminEventDetailTab } from "./adminEventDetailSearchParse.ts"
 
-export function AdminEventTabs(props: { eventKey?: string; tab: "details" | "products"; tierCount?: number }) {
+export function AdminEventTabs(props: { eventKey?: string; tab: AdminEventDetailTab; tierCount?: number }) {
   const base =
     "rounded-lg px-4 py-3 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-ring"
   if (!props.eventKey) {
@@ -63,6 +64,14 @@ export function AdminEventTabs(props: { eventKey?: string; tab: "details" | "pro
             !
           </span>
         </Show>
+      </Link>
+      <Link
+        to="/admin/events/$eventKey"
+        params={{ eventKey: props.eventKey }}
+        search={{ tab: "codes" }}
+        class={`${base} ${props.tab === "codes" ? "bg-brand-soft text-content" : "text-content-muted hover:bg-surface hover:text-content"}`}
+      >
+        Freischaltungscodes
       </Link>
     </nav>
   )

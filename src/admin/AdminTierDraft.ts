@@ -12,5 +12,6 @@ export type AdminTierDraft = {
   feeCents: string
   capacity: string
   maxPerOrder: string
+  activationCodeRequired: boolean
   sortOrder: string
 }

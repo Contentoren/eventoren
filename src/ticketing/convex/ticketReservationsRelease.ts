@@ -1,13 +1,20 @@
 import type { Doc, Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
+import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
+import { ticketActivationCodeLifecycleApply } from "./ticketActivationCodeLifecycleApply.js"
 
 export async function ticketReservationsRelease(
   ctx: MutationCtx,
   orderId: Id<"ticketOrders">,
   now: string,
+  activationCodeDisposition: "release" | "consume" = "release",
 ): PromiseResult<void> {
   const op = "ticketReservationsRelease"
+  const order = await ctx.db.get("ticketOrders", orderId)
+  if (!order) return createResultError(op, "The order was not found")
+  const codes = await ticketActivationCodeLifecyclePlan(ctx, order, activationCodeDisposition)
+  if (!codes.success) return codes
   // Per-product limits replace the former global total cap: one reservation
   // per checkout line with positive quantities, summed per tier below.
   const reservations = await ctx.db
@@ -38,5 +45,6 @@ export async function ticketReservationsRelease(
       releasedAt: now,
     })
   }
+  await ticketActivationCodeLifecycleApply(ctx, codes.data, now)
   return createResult(undefined)
 }

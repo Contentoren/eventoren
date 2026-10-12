@@ -5,12 +5,14 @@ import { createResult, createResultError, type PromiseResult, type Result } from
 import { billingEventorenClient } from "./billingEventorenClient.js"
 import { ticketCheckoutE2eRouteCheck } from "./ticketCheckoutE2eRouteCheck.js"
 import { ticketOrderAccessResolve } from "./ticketOrderAccessResolve.js"
+import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.js"
 
 const checkoutKeyValidator = v.string()
 const ticketSelectionValidator = v.object({
   tierKey: v.string(),
   quantity: v.number(),
   participantNames: v.optional(v.array(v.string())),
+  activationCode: v.optional(v.string()),
 })
 const billingDetailsValidator = v.object({
   givenName: v.string(),
@@ -145,6 +147,9 @@ export const ticketCheckoutCreateAction = action({
     const tickets = args.tickets.map((ticket) => ({
       tierKey: ticket.tierKey,
       quantity: ticket.quantity,
+      ...(ticket.activationCode !== undefined
+        ? { activationCode: ticketActivationCodeNormalize(ticket.activationCode) }
+        : {}),
       ...(ticket.participantNames !== undefined
         ? { participantNames: ticket.participantNames.map((name) => name.trim()) }
         : {}),

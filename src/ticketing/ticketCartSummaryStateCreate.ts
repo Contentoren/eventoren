@@ -1,6 +1,7 @@
 import { createMemo, createUniqueId } from "solid-js"
 import type { EventItem } from "../events/EventItem.ts"
 import { eventPriceFrom } from "../events/eventPriceFrom.ts"
+import type { Result } from "../ui/Result.ts"
 import type { TicketCart } from "./TicketCart.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
 import { ticketTierSelectorStateCreate } from "./ticketTierSelectorStateCreate.ts"
@@ -12,6 +13,11 @@ export function ticketCartSummaryStateCreate(inputs: {
   cart: () => TicketCart
   minimumQuantity?: () => number | undefined
   onCartChange?: (cart: TicketCart) => void
+  validate?: (input: {
+    readonly eventKey: string
+    readonly tierKey: string
+    readonly code: string
+  }) => Promise<Result<{ readonly valid: boolean }>>
 }) {
   const minimumQuantity = () => inputs.minimumQuantity?.() ?? 0
   const headingId = `ticket-cart-summary-${createUniqueId()}`
@@ -20,6 +26,7 @@ export function ticketCartSummaryStateCreate(inputs: {
     event: inputs.event,
     cart: inputs.cart,
     onCartChange: (cart) => inputs.onCartChange?.(cart),
+    ...(inputs.validate ? { validate: inputs.validate } : {}),
   })
 
   const total = createMemo(() => ticketCartTotalCalculate(inputs.cart(), inputs.event()))

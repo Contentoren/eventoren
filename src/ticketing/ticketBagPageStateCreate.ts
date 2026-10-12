@@ -9,6 +9,7 @@ import { eventTicketTierMaxPerOrderGet } from "../events/eventTicketTierMaxPerOr
 import type { TicketBagGroup } from "./TicketBagGroup.ts"
 import type { TicketBagItem } from "./TicketBagItem.ts"
 import type { TicketCartDraft } from "./TicketCartDraft.ts"
+import { ticketBagQuantityAllowed } from "./ticketBagQuantityAllowed.ts"
 import { ticketCartForEventResolve } from "./ticketCartForEventResolve.ts"
 import { ticketCartDraftEventName } from "./ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "./ticketCartDraftLoad.ts"
@@ -156,6 +157,15 @@ export function ticketBagPageStateCreate(input: {
   const catalogError = createMemo(() => (catalog.get().success ? "" : "Der Eventkatalog ist gerade nicht verfügbar."))
 
   const updateQuantity = (eventId: string, tierId: string, quantity: number) => {
+    const current =
+      normalizedCart()
+        .find((entry) => entry.eventId === eventId)
+        ?.lines.find((line) => line.tierId === tierId)?.quantity ?? 0
+    const catalogResult = catalog.get()
+    const currentEvent = catalogResult.success
+      ? catalogResult.data.find((candidate) => candidate.id === eventId)
+      : undefined
+    if (!ticketBagQuantityAllowed(currentEvent, tierId, current, quantity)) return
     const updated = ticketCartDraftQuantitySet(normalizedCart(), eventId, tierId, quantity)
     cart.set(updated)
     ticketCartDraftSave(updated)

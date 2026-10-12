@@ -112,6 +112,7 @@ test("authorized admin event loading includes every status and ticket data neede
       capacity: 10,
       available: 7,
       maxPerOrder: 10,
+      activationCodeRequired: false,
       sold: 3,
       sortOrder: 0,
     },

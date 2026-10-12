@@ -13,6 +13,7 @@ export type CatalogTicketTierUpsertInput = {
   readonly feeCents: number
   readonly capacity: number
   readonly maxPerOrder?: number
+  readonly activationCodeRequired?: boolean
   readonly sortOrder?: number
   readonly token: string
 }
