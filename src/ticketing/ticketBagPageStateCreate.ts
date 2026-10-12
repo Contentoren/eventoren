@@ -5,15 +5,16 @@ import type { ApiClientResult } from "../client/apiClient.ts"
 import { eventDateFormat } from "../events/eventDateFormat.ts"
 import { eventTimeFormat } from "../events/eventTimeFormat.ts"
 import type { EventItem } from "../events/EventItem.ts"
+import { eventTicketTierMaxPerOrderGet } from "../events/eventTicketTierMaxPerOrderGet.ts"
 import type { TicketBagGroup } from "./TicketBagGroup.ts"
 import type { TicketBagItem } from "./TicketBagItem.ts"
 import type { TicketCartDraft } from "./TicketCartDraft.ts"
+import { ticketCartForEventResolve } from "./ticketCartForEventResolve.ts"
 import { ticketCartDraftEventName } from "./ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "./ticketCartDraftLoad.ts"
 import { ticketCartDraftQuantitySet } from "./ticketCartDraftQuantitySet.ts"
 import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
 import { ticketCartDraftTotalQuantity } from "./ticketCartDraftTotalQuantity.ts"
-import { ticketMaxPerOrder } from "./ticketMaxPerOrder.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 
 export function ticketBagPageStateCreate(input: {
@@ -64,13 +65,24 @@ export function ticketBagPageStateCreate(input: {
     })
   })
 
+  const normalizedCart = createMemo<TicketCartDraft>(() => {
+    const catalogResult = catalog.get()
+    if (!catalogResult.success) return []
+    return cart.get().flatMap((currentCart) => {
+      const event = catalogResult.data.find((candidate) => candidate.id === currentCart.eventId)
+      if (!event) return []
+      const resolved = ticketCartForEventResolve(event, currentCart)
+      return resolved ? [resolved] : []
+    })
+  })
+
   const groups = createMemo<readonly TicketBagGroup[]>(() => {
     const result: TicketBagGroup[] = []
     const catalogResult = catalog.get()
 
     if (!catalogResult.success) return result
 
-    for (const currentCart of cart.get()) {
+    for (const currentCart of normalizedCart()) {
       const currentEvent = (catalogResult.data as readonly EventItem[]).find(
         (event: EventItem) => event.id === currentCart.eventId,
       )
@@ -93,7 +105,7 @@ export function ticketBagPageStateCreate(input: {
           unitPriceLabel: ticketPriceFormat(unitPriceCents),
           totalPriceCents,
           totalPriceLabel: ticketPriceFormat(totalPriceCents),
-          maxQuantity: Math.min(tier.available, ticketMaxPerOrder),
+          maxQuantity: Math.min(tier.available, eventTicketTierMaxPerOrderGet(tier)),
         })
       }
 
@@ -138,13 +150,13 @@ export function ticketBagPageStateCreate(input: {
     }
   })
 
-  const totalQuantity = createMemo(() => ticketCartDraftTotalQuantity(cart.get()))
+  const totalQuantity = createMemo(() => ticketCartDraftTotalQuantity(normalizedCart()))
 
   const isEmpty = createMemo(() => groups().length === 0 || totalQuantity() === 0)
   const catalogError = createMemo(() => (catalog.get().success ? "" : "Der Eventkatalog ist gerade nicht verfügbar."))
 
   const updateQuantity = (eventId: string, tierId: string, quantity: number) => {
-    const updated = ticketCartDraftQuantitySet(cart.get(), eventId, tierId, quantity)
+    const updated = ticketCartDraftQuantitySet(normalizedCart(), eventId, tierId, quantity)
     cart.set(updated)
     ticketCartDraftSave(updated)
   }

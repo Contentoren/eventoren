@@ -1,8 +1,6 @@
 import type { QueryCtx } from "#convex/_generated/server.js"
 import type { Id } from "#convex/_generated/dataModel.js"
-import { createResult, createResultErrorCode } from "#result"
-
-const maxOrderItems = 10
+import { createResult } from "#result"
 
 export async function ticketOrderProjectionCreate(ctx: QueryCtx, orderId: Id<"ticketOrders">) {
   const order = await ctx.db.get("ticketOrders", orderId)
@@ -10,20 +8,11 @@ export async function ticketOrderProjectionCreate(ctx: QueryCtx, orderId: Id<"ti
   const lines = await ctx.db
     .query("ticketOrderLines")
     .withIndex("orderId", (q) => q.eq("orderId", orderId))
-    .take(maxOrderItems + 1)
+    .collect()
   const tickets = await ctx.db
     .query("ticketIssued")
     .withIndex("orderIdAndSequence", (q) => q.eq("orderId", orderId))
-    .take(maxOrderItems + 1)
-  if (lines.length > maxOrderItems || tickets.length > maxOrderItems)
-    return {
-      ...createResultErrorCode(
-        "ticketOrderProjectionCreate",
-        "Order details exceed the supported 10-item limit.",
-        "ticketing.order-details.limit-exceeded",
-      ),
-      statusCode: 400,
-    }
+    .collect()
   return createResult({
     id: order._id,
     checkoutKey: order.checkoutKey,

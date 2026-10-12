@@ -725,7 +725,7 @@ test("requires participant names for every newly checked-out ticket", async () =
   expect(orders).toHaveLength(0)
 })
 
-test("rejects checkout orders whose total ticket quantity exceeds the order maximum", async () => {
+test("enforces the per-product order limit while mixed products above ten stay permitted", async () => {
   environmentSet()
   const billing = billingMock()
   const t = convexTest(schema, modules)
@@ -743,13 +743,13 @@ test("rejects checkout orders whose total ticket quantity exceeds the order maxi
     endsAt: "2026-10-01T22:00:00.000Z",
     priceCents: 4_000,
     feeCents: 500,
-    capacity: 20,
+    capacity: 30,
     token: adminToken,
   })
   expect(addedTier.success).toBe(true)
   if (!addedTier.success) return
 
-  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+  const mixed = await t.action(api.ticketing.ticketCheckoutCreateAction, {
     ...checkoutArgs(await tokenFor(t, userId), addedTier.data.catalogVersion, "checkoutkey923456789012345678901234", {
       eventRevision: addedTier.data.eventRevision,
     }),
@@ -763,17 +763,26 @@ test("rejects checkout orders whose total ticket quantity exceeds the order maxi
     ],
   })
 
-  expect(result).toMatchObject({ success: false, errorMessage: "The maximum number of tickets per order is 10" })
-  expect(billing.checkoutCallsGet()).toBe(0)
-  const inventory = await t.run(async (ctx) => {
-    const orders = await ctx.db.query("ticketOrders").collect()
-    const reservations = await ctx.db.query("ticketReservations").collect()
-    const tiers = await ctx.db.query("catalogTicketTiers").collect()
-    return { orders, reservations, tiers }
+  expect(mixed.success).toBe(true)
+  expect(billing.checkoutCallsGet()).toBe(1)
+
+  const exceeded = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...checkoutArgs(await tokenFor(t, userId), addedTier.data.catalogVersion, "checkoutkey933456789012345678901234", {
+      eventRevision: addedTier.data.eventRevision,
+    }),
+    tickets: [
+      {
+        tierKey: "vip",
+        quantity: 11,
+        participantNames: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K"],
+      },
+    ],
   })
-  expect(inventory.orders).toHaveLength(0)
-  expect(inventory.reservations).toHaveLength(0)
-  expect(inventory.tiers.every((tier) => tier.reserved === 0)).toBe(true)
+
+  expect(exceeded).toMatchObject({
+    success: false,
+    errorMessage: "The ticket quantity exceeds the maximum per order of 10",
+  })
 })
 
 test("rejects checkout return URLs outside the configured Eventoren origin", async () => {
@@ -913,7 +922,8 @@ test("does not release a still-payable pending session, then issues exactly once
   })
 })
 
-test("accepts and pays exactly ten tickets across two tiers idempotently", async () => {
+test.each([8, 23])("accepts and pays two standard and %i VIP tickets idempotently", async (vipQuantity) => {
+  const totalQuantity = vipQuantity + 2
   environmentSet()
   billingMock()
   const t = convexTest(schema, modules)
@@ -931,7 +941,8 @@ test("accepts and pays exactly ten tickets across two tiers idempotently", async
     endsAt: "2026-10-01T22:00:00.000Z",
     priceCents: 4_000,
     feeCents: 500,
-    capacity: 10,
+    capacity: Math.max(10, vipQuantity),
+    maxPerOrder: vipQuantity > 10 ? 25 : 10,
     token: adminToken,
   })
   expect(addedTier.success).toBe(true)
@@ -946,8 +957,8 @@ test("accepts and pays exactly ten tickets across two tiers idempotently", async
         { tierKey: "standard", quantity: 2, participantNames: ["Ada", "Grace"] },
         {
           tierKey: "vip",
-          quantity: 8,
-          participantNames: ["Lin", "Max", "Noah", "Oskar", "Pia", "Quinn", "Ruth", "Sven"],
+          quantity: vipQuantity,
+          participantNames: Array.from({ length: vipQuantity }, (_, index) => `VIP ${index + 1}`),
         },
       ],
     }),
@@ -964,18 +975,18 @@ test("accepts and pays exactly ten tickets across two tiers idempotently", async
       payment: "paid",
     })
   const paid = await applyPaid()
-  expect(paid).toMatchObject({ success: true, data: { status: "paid", ticketCount: 10 } })
+  expect(paid).toMatchObject({ success: true, data: { status: "paid", ticketCount: totalQuantity } })
   const ticketsAfterFirstApply = await t.run(async (ctx) =>
     (await ctx.db.query("ticketIssued").collect()).sort((left, right) => left.sequence - right.sequence),
   )
-  expect(ticketsAfterFirstApply).toHaveLength(10)
+  expect(ticketsAfterFirstApply).toHaveLength(totalQuantity)
   const ticketIds = ticketsAfterFirstApply.map((ticket) => ticket._id)
   const ticketCodes = ticketsAfterFirstApply.map((ticket) => ticket.code)
-  expect(new Set(ticketIds).size).toBe(10)
-  expect(new Set(ticketCodes).size).toBe(10)
+  expect(new Set(ticketIds).size).toBe(totalQuantity)
+  expect(new Set(ticketCodes).size).toBe(totalQuantity)
 
   const paidRetry = await applyPaid()
-  expect(paidRetry).toMatchObject({ success: true, data: { status: "paid", ticketCount: 10 } })
+  expect(paidRetry).toMatchObject({ success: true, data: { status: "paid", ticketCount: totalQuantity } })
   const finalState = await t.run(async (ctx) => ({
     tickets: (await ctx.db.query("ticketIssued").collect()).sort((left, right) => left.sequence - right.sequence),
     tiers: (await ctx.db.query("catalogTicketTiers").collect()).sort((left, right) =>
@@ -983,13 +994,13 @@ test("accepts and pays exactly ten tickets across two tiers idempotently", async
     ),
     reservations: await ctx.db.query("ticketReservations").collect(),
   }))
-  expect(finalState.tickets).toHaveLength(10)
+  expect(finalState.tickets).toHaveLength(totalQuantity)
   expect(finalState.tickets.map((ticket) => ticket._id)).toEqual(ticketIds)
   expect(finalState.tickets.map((ticket) => ticket.code)).toEqual(ticketCodes)
   expect(finalState.tiers).toHaveLength(2)
   expect(finalState.tiers.map(({ tierKey, sold, reserved }) => ({ tierKey, sold, reserved }))).toEqual([
     { tierKey: "standard", sold: 2, reserved: 0 },
-    { tierKey: "vip", sold: 8, reserved: 0 },
+    { tierKey: "vip", sold: vipQuantity, reserved: 0 },
   ])
   expect(finalState.reservations).toHaveLength(2)
   expect(finalState.reservations.every((reservation) => reservation.status === "consumed")).toBe(true)
@@ -1456,7 +1467,7 @@ test("legacy order history rejects more than 50 orders without truncating its ar
   })
 })
 
-test("legacy order history rejects an oversized order projection instead of returning partial details", async () => {
+test("legacy order history and customer detail preserve all product lines above ten", async () => {
   const t = convexTest(schema, modules)
   const userId = await createUser(t)
   const token = await tokenFor(t, userId)
@@ -1483,13 +1494,13 @@ test("legacy order history rejects an oversized order projection instead of retu
   })
 
   const legacy = await t.query(api.ticketing.ticketOrderListMineQuery, { token })
-  expect(legacy).toMatchObject({
-    success: false,
-    code: "ticketing.order-details.limit-exceeded",
-    statusCode: 400,
-  })
+  expect(legacy.success).toBe(true)
+  if (legacy.success) expect(legacy.data[0]?.lines).toHaveLength(11)
   const detail = await t.query(api.ticketing.ticketOrderGetQuery, { orderId, token })
-  expect(detail).toMatchObject({ success: false, code: "ticketing.order-details.limit-exceeded", statusCode: 400 })
+  expect(detail).toMatchObject({
+    success: true,
+    data: { lines: Array.from({ length: 11 }, () => expect.objectContaining({ quantity: 1 })) },
+  })
 })
 
 test("scheduled expiry calls authenticated Billing expiration, releases once, and is idempotent", async () => {

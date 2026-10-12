@@ -1,19 +1,18 @@
 import type { TicketCart } from "./TicketCart.ts"
 import type { TicketCartLine } from "./TicketCartLine.ts"
-import { ticketMaxPerOrder } from "./ticketMaxPerOrder.ts"
 
 export function ticketCartSearchParse(eventId: string, value: string): TicketCart {
   if (value.length === 0) return { eventId, lines: [] }
 
   const lines: TicketCartLine[] = []
   for (const entry of value.split(",")) {
-    const [tierId, rawQuantity] = entry.split(":")
-    if (!tierId || !rawQuantity) continue
+    const [tierId, rawQuantity, extra] = entry.split(":")
+    if (!tierId || !rawQuantity || extra !== undefined || !/^\d+$/.test(rawQuantity)) continue
 
-    const quantity = Number.parseInt(rawQuantity, 10)
-    if (!Number.isFinite(quantity) || quantity <= 0) continue
+    const quantity = Number(rawQuantity)
+    if (!Number.isSafeInteger(quantity) || quantity < 1) continue
 
-    lines.push({ tierId, quantity: Math.min(quantity, ticketMaxPerOrder) })
+    lines.push({ tierId, quantity })
   }
 
   return { eventId, lines }

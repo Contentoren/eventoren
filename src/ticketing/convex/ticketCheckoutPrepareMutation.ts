@@ -6,7 +6,7 @@ import { createResult, createResultError, type PromiseResult } from "#result"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 import { ticketCheckoutLegalDocumentRevision } from "../ticketCheckoutLegalDocumentRevision.js"
 import { ticketCheckoutLegalDocumentSnapshot } from "../ticketCheckoutLegalDocumentSnapshot.js"
-import { ticketMaxPerOrder } from "../ticketMaxPerOrder.js"
+import { eventTicketTierMaxPerOrderGet } from "#src/events/eventTicketTierMaxPerOrderGet.ts"
 import { ticketCheckoutContextCanonicalize } from "./ticketCheckoutContextCanonicalize.js"
 
 const ticketSelectionValidator = v.object({
@@ -254,7 +254,20 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     if (args.eventRevision !== (event.eventRevision ?? 1)) return createResultError(op, "The event revision is stale")
 
     const requestedSelections = [...args.tickets].sort((left, right) => left.tierKey.localeCompare(right.tierKey))
-    const seenTierKeys = new Set<string>()
+    const quantitiesByTier = new Map<string, { quantity: number; participantNames: string[] }>()
+    for (const selection of requestedSelections) {
+      if (!Number.isSafeInteger(selection.quantity) || selection.quantity < 1)
+        return createResultError(op, "Ticket quantity is invalid")
+      if (selection.participantNames === undefined || selection.participantNames.length !== selection.quantity)
+        return createResultError(op, "Each ticket requires exactly one participant name")
+      if (selection.participantNames.some((name) => name.trim().length === 0))
+        return createResultError(op, "Participant names are incomplete")
+      const aggregated = quantitiesByTier.get(selection.tierKey) ?? { quantity: 0, participantNames: [] }
+      aggregated.quantity += selection.quantity
+      if (!Number.isSafeInteger(aggregated.quantity)) return createResultError(op, "Ticket quantity is invalid")
+      aggregated.participantNames.push(...selection.participantNames)
+      quantitiesByTier.set(selection.tierKey, aggregated)
+    }
     const lineInputs: Array<{
       tierId: Id<"catalogTicketTiers">
       tierKey: string
@@ -267,40 +280,33 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     }> = []
     let subtotalCents = 0
     let feeCents = 0
-    for (const selection of requestedSelections) {
-      if (seenTierKeys.has(selection.tierKey)) return createResultError(op, "Ticket tiers must be selected once")
-      seenTierKeys.add(selection.tierKey)
-      if (!Number.isInteger(selection.quantity) || selection.quantity < 1 || selection.quantity > 1_000)
-        return createResultError(op, "Ticket quantity is invalid")
-      if (selection.participantNames === undefined || selection.participantNames.length !== selection.quantity)
-        return createResultError(op, "Each ticket requires exactly one participant name")
-      if (selection.participantNames.some((name) => name.trim().length === 0))
-        return createResultError(op, "Participant names are incomplete")
+    for (const [tierKey, aggregated] of [...quantitiesByTier.entries()].sort(([left], [right]) =>
+      left.localeCompare(right),
+    )) {
       const tier = await ctx.db
         .query("catalogTicketTiers")
-        .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", selection.tierKey))
+        .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", tierKey))
         .unique()
       if (!tier || tier.archivedAt) return createResultError(op, "The ticket tier was not found")
+      const perOrderLimit = eventTicketTierMaxPerOrderGet({ maxPerOrder: tier.maxPerOrder })
+      if (aggregated.quantity > perOrderLimit)
+        return createResultError(op, `The ticket quantity exceeds the maximum per order of ${perOrderLimit}`)
       const available = tier.capacity - tier.sold
-      if (selection.quantity > available) return createResultError(op, "The requested ticket quantity is unavailable")
-      subtotalCents += tier.priceCents * selection.quantity
-      feeCents += tier.feeCents * selection.quantity
+      if (aggregated.quantity > available) return createResultError(op, "The requested ticket quantity is unavailable")
+      subtotalCents += tier.priceCents * aggregated.quantity
+      feeCents += tier.feeCents * aggregated.quantity
       lineInputs.push({
         tierId: tier._id,
         tierKey: tier.tierKey,
         tierName: tier.name,
         tierDescription: tier.description,
-        quantity: selection.quantity,
-        ...(selection.participantNames !== undefined
-          ? { participantNames: selection.participantNames.map((name) => name.trim()) }
-          : {}),
+        quantity: aggregated.quantity,
+        participantNames: aggregated.participantNames.map((name) => name.trim()),
         priceCents: tier.priceCents,
         feeCents: tier.feeCents,
       })
     }
     if (lineInputs.length === 0) return createResultError(op, "At least one ticket is required")
-    if (lineInputs.reduce((total, line) => total + line.quantity, 0) > ticketMaxPerOrder)
-      return createResultError(op, `The maximum number of tickets per order is ${ticketMaxPerOrder}`)
     if (subtotalCents + feeCents < 1) return createResultError(op, "The selected tickets are not payable")
     const now = new Date().toISOString()
     const expiresAt = Date.now() + 15 * 60 * 1000

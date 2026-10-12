@@ -111,6 +111,7 @@ test("authorized admin event loading includes every status and ticket data neede
       feeCents: 250,
       capacity: 10,
       available: 7,
+      maxPerOrder: 10,
       sold: 3,
       sortOrder: 0,
     },

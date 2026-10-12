@@ -65,6 +65,7 @@ export const catalogTables = {
     priceCents: v.number(),
     feeCents: v.number(),
     capacity: v.number(),
+    maxPerOrder: v.optional(v.number()),
     reserved: v.number(),
     sold: v.number(),
     archivedAt: v.optional(v.string()),

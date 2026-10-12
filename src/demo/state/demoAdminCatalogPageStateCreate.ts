@@ -5,6 +5,7 @@ import type { AdminEventDraft } from "../../admin/AdminEventDraft.ts"
 import type { AdminTierDraft } from "../../admin/AdminTierDraft.ts"
 import type { EventItem } from "../../events/EventItem.ts"
 import type { EventTicketTier } from "../../events/EventTicketTier.ts"
+import { eventTicketTierMaxPerOrderGet } from "../../events/eventTicketTierMaxPerOrderGet.ts"
 import { eventHighlightsGet } from "../../events/eventHighlightsGet.ts"
 import { eventInclusionsGet } from "../../events/eventInclusionsGet.ts"
 import { eventExclusionsGet } from "../../events/eventExclusionsGet.ts"
@@ -44,6 +45,7 @@ const emptyTierDraft = (): AdminTierDraft => ({
   priceCents: "",
   feeCents: "",
   capacity: "",
+  maxPerOrder: "10",
   sortOrder: "0",
 })
 
@@ -122,6 +124,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
       priceCents: String(tier.priceCents),
       feeCents: String(tier.feeCents),
       capacity: String(tier.capacity),
+      maxPerOrder: String(eventTicketTierMaxPerOrderGet(tier)),
       sortOrder: String(tier.sortOrder ?? 0),
     })
     baseErrorMessage.set("")
@@ -187,8 +190,12 @@ export function demoAdminCatalogPageStateCreate(inputs: {
     const priceCents = nonNegativeIntegerParse(draft.priceCents)
     const feeCents = nonNegativeIntegerParse(draft.feeCents)
     const capacity = nonNegativeIntegerParse(draft.capacity)
-    if (priceCents === null || feeCents === null || capacity === null) {
-      baseErrorMessage.set("Preis, Gebühr und Kapazität müssen ganze Zahlen ab 0 sein.")
+    const maxPerOrder =
+      draft.maxPerOrder.trim() === "" ? eventTicketTierMaxPerOrderGet({}) : positiveIntegerParse(draft.maxPerOrder)
+    if (priceCents === null || feeCents === null || capacity === null || maxPerOrder === null) {
+      baseErrorMessage.set(
+        "Preis, Gebühr, Kapazität und Höchstmenge je Bestellung müssen ganze Zahlen sein (Höchstmenge ab 1).",
+      )
       return
     }
     isSaving.set(true)
@@ -206,6 +213,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
         priceCents,
         feeCents,
         capacity,
+        maxPerOrder,
         available: Math.min(existingTier?.available ?? capacity, capacity),
       }
       const updated = {
@@ -362,4 +370,10 @@ function nonNegativeIntegerParse(value: string): number | null {
   if (!/^\d+$/u.test(value.trim())) return null
   const parsed = Number(value)
   return Number.isSafeInteger(parsed) ? parsed : null
+}
+
+function positiveIntegerParse(value: string): number | null {
+  const parsed = nonNegativeIntegerParse(value)
+  if (parsed === null || parsed < 1) return null
+  return parsed
 }

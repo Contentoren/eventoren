@@ -108,7 +108,8 @@ export function AdminTicketProductsForm(props: {
               {props.state.tierDraft().tierKey ? "Ticketprodukt bearbeiten" : "Neues Ticketprodukt"}
             </h2>
             <p class="mt-1 text-sm text-content-muted">
-              Reservierte und verkaufte Mengen bleiben beim Ändern der Gesamtkapazität geschützt.
+              Reservierte und verkaufte Mengen bleiben beim Ändern der Gesamtkapazität geschützt. Die Höchstmenge
+              begrenzt die Tickets je Produkt und Bestellung (Standard 10).
             </p>
           </div>
 
@@ -129,6 +130,16 @@ export function AdminTicketProductsForm(props: {
               step="1"
               value={props.state.tierDraft().capacity}
               onInput={(value) => props.state.tierFieldChange("capacity", value)}
+            />
+            <Field
+              id="admin-tier-max-per-order"
+              label="Tickets pro Bestellung (je Produkt)"
+              required
+              type="number"
+              min="1"
+              step="1"
+              value={props.state.tierDraft().maxPerOrder}
+              onInput={(value) => props.state.tierFieldChange("maxPerOrder", value)}
             />
             <Field
               id="admin-tier-price"

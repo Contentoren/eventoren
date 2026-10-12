@@ -222,4 +222,97 @@ describe("admin ticket products form state", () => {
       }
     })
   })
+
+  test("new tiers default maxPerOrder to 10 and legacy tiers fall back to 10 when selected", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        const catalog = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+        })
+        const form = adminTicketProductsFormStateCreate(catalog)
+        form.newTier()
+        expect(catalog.tierDraft().maxPerOrder).toBe("10")
+
+        form.selectTier({
+          id: "legacy-ticket",
+          name: "Legacy",
+          description: "",
+          priceCents: 500,
+          feeCents: 0,
+          capacity: 50,
+          available: 50,
+        })
+        expect(catalog.tierDraft().maxPerOrder).toBe("10")
+
+        form.selectTier({
+          id: "limited-ticket",
+          name: "Limited",
+          description: "",
+          priceCents: 500,
+          feeCents: 0,
+          capacity: 50,
+          available: 50,
+          maxPerOrder: 3,
+        })
+        expect(catalog.tierDraft().maxPerOrder).toBe("3")
+      } finally {
+        dispose()
+      }
+    })
+  })
+
+  test("saveTier rejects invalid maxPerOrder and persists configured values above 10", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        const saved: { maxPerOrder?: number }[] = []
+        const catalog = adminCatalogPageStateCreate({
+          events: () => [],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [] }),
+          ticketTierUpsert: async (input) => {
+            saved.push({ maxPerOrder: input.maxPerOrder })
+            return { success: true, data: { tierKey: input.tierKey, catalogVersion: 1 } }
+          },
+        })
+        const form = adminTicketProductsFormStateCreate(catalog)
+        catalog.eventFieldChange("eventKey", "concert")
+        catalog.tierFieldChange("tierKey", "ticket-1")
+        catalog.tierFieldChange("name", "General admission")
+        catalog.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
+        catalog.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
+        catalog.tierFieldChange("priceCents", "1000")
+        catalog.tierFieldChange("feeCents", "0")
+        catalog.tierFieldChange("capacity", "100")
+        form.priceEuro.set("10")
+        form.feeEuro.set("0")
+
+        for (const maxPerOrder of ["0", "-1", "2.5", "abc", "9007199254740992"]) {
+          catalog.tierFieldChange("maxPerOrder", maxPerOrder)
+          await form.submit({ preventDefault() {} } as SubmitEvent)
+          expect(form.validationMessage()).toBe("Die Höchstmenge je Bestellung muss eine ganze Zahl ab 1 sein.")
+        }
+        expect(saved).toEqual([])
+
+        catalog.tierFieldChange("maxPerOrder", "")
+        await catalog.saveTier()
+        expect(saved).toEqual([{ maxPerOrder: 10 }])
+
+        catalog.tierFieldChange("tierKey", "ticket-1")
+        catalog.tierFieldChange("name", "General admission")
+        catalog.tierFieldChange("startsAt", "2026-10-01T18:00:00.000Z")
+        catalog.tierFieldChange("endsAt", "2026-10-01T22:00:00.000Z")
+        catalog.tierFieldChange("priceCents", "1000")
+        catalog.tierFieldChange("feeCents", "0")
+        catalog.tierFieldChange("capacity", "100")
+        catalog.tierFieldChange("maxPerOrder", "25")
+        await catalog.saveTier()
+        expect(saved).toEqual([{ maxPerOrder: 10 }, { maxPerOrder: 25 }])
+        expect(catalog.errorMessage()).toBe("")
+      } finally {
+        dispose()
+      }
+    })
+  })
 })

@@ -2,6 +2,7 @@ import { getRouteApi } from "@tanstack/solid-router"
 import { createEffect, createMemo, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { TicketCart } from "../ticketing/TicketCart.ts"
+import { ticketCartForEventResolve } from "../ticketing/ticketCartForEventResolve.ts"
 import { ticketCartDraftAddOrUpdate } from "../ticketing/ticketCartDraftAddOrUpdate.ts"
 import { ticketCartDraftLoad } from "../ticketing/ticketCartDraftLoad.ts"
 import { ticketCartDraftSave } from "../ticketing/ticketCartDraftSave.ts"
@@ -17,7 +18,13 @@ export function eventDetailPageStateCreate(inputs: { event: () => EventItem }) {
   const navigate = routeApi.useNavigate()
 
   const event = createMemo(() => inputs.event())
-  const cart = createMemo(() => ticketCartSearchParse(params().eventId, search().tickets ?? ""))
+  const cart = createMemo(
+    () =>
+      ticketCartForEventResolve(event(), ticketCartSearchParse(params().eventId, search().tickets ?? "")) ?? {
+        eventId: event().id,
+        lines: [],
+      },
+  )
   const hydrated = createSignalObject(false)
 
   let initializedEventId = ""

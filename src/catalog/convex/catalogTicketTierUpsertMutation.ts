@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import { type MutationCtx, mutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import type { IdUser } from "#src/auth/convex/IdUser.ts"
+import { eventTicketTierMaxPerOrderGet } from "#src/events/eventTicketTierMaxPerOrderGet.ts"
 import { authMutationTokenToUserId } from "#src/utils/convex_backend/authMutationTokenToUserId.ts"
 import { catalogAdminAuthorizeFn } from "./catalogAdminAuthorizeFn.js"
 import { catalogSyncAdvanceFn } from "./catalogSyncAdvanceFn.js"
@@ -18,6 +19,7 @@ const catalogTicketTierArgsValidator = v.object({
   priceCents: v.number(),
   feeCents: v.number(),
   capacity: v.number(),
+  maxPerOrder: v.optional(v.number()),
   sortOrder: v.optional(v.number()),
   token: v.string(),
 })
@@ -61,6 +63,8 @@ async function catalogTicketTierUpsertAuthorizedFn(
     return createResultError(op, "Fee must be a non-negative integer")
   if (!Number.isInteger(args.capacity) || args.capacity < 0)
     return createResultError(op, "Capacity must be a non-negative integer")
+  if (args.maxPerOrder !== undefined && (!Number.isSafeInteger(args.maxPerOrder) || args.maxPerOrder < 1))
+    return createResultError(op, "Max per order must be a positive integer")
   if (args.sortOrder !== undefined && (!Number.isInteger(args.sortOrder) || args.sortOrder < 0))
     return createResultError(op, "Sort order must be a non-negative integer")
 
@@ -94,6 +98,7 @@ async function catalogTicketTierUpsertAuthorizedFn(
     priceCents: args.priceCents,
     feeCents: args.feeCents,
     capacity: args.capacity,
+    maxPerOrder: args.maxPerOrder ?? eventTicketTierMaxPerOrderGet(existing ?? {}),
     reserved,
     sold,
     sortOrder: args.sortOrder ?? existing?.sortOrder ?? 0,
@@ -113,6 +118,7 @@ async function catalogTicketTierUpsertAuthorizedFn(
       priceCents: existing.priceCents,
       feeCents: existing.feeCents,
       capacity: existing.capacity,
+      maxPerOrder: eventTicketTierMaxPerOrderGet(existing),
       reserved: existing.reserved,
       sold: existing.sold,
       sortOrder: existing.sortOrder,

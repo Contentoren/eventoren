@@ -199,6 +199,7 @@ test("builds a stable indexed snapshot in bounded batches and pages", async () =
 
   const events = await readSnapshotEvents(t, 1)
   expect(events.map((event) => event.eventRevision)).toEqual(Array.from({ length: 33 }, () => 1))
+  expect((events[0]?.tiers as Record<string, unknown>[])[0]).not.toHaveProperty("maxPerOrder")
   expect(
     await t.run(async (ctx) =>
       (await ctx.db.query("catalogEvents").collect()).every((event) => event.eventRevision === 1),
@@ -305,6 +306,19 @@ test("stops an old builder at a concurrent version and does not publish partial 
 test("retries the same billing payload and preserves version idempotency", async () => {
   const t = convexTest(schema, modules)
   await seedCatalog(t, 2)
+  await t.run(async (ctx) => {
+    const event = await ctx.db
+      .query("catalogEvents")
+      .withIndex("eventKey", (q) => q.eq("eventKey", "event-001"))
+      .unique()
+    if (!event) throw new Error("event missing")
+    const tier = await ctx.db
+      .query("catalogTicketTiers")
+      .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", "standard"))
+      .unique()
+    if (!tier) throw new Error("tier missing")
+    await ctx.db.patch("catalogTicketTiers", tier._id, { maxPerOrder: 25 })
+  })
   await buildUntilReady(t, 1)
   process.env.EVENTOREN_BILLING_BASE_URL = "https://billing.test"
   process.env.EVENTOREN_BILLING_ORGANIZATION_ID = "eventoren"
@@ -347,10 +361,18 @@ test("retries the same billing payload and preserves version idempotency", async
   expect(second).toMatchObject({ success: true, data: { catalogVersion: 1, replayed: true } })
   expect(bodies).toHaveLength(2)
   expect(bodies[0]).toBe(bodies[1])
-  expect(JSON.parse(bodies[0] ?? "{}")).toMatchObject({
+  const billingPayload = JSON.parse(bodies[0] ?? "{}") as {
+    catalogVersion: number
+    events: { eventKey: string; tiers: Record<string, unknown>[] }[]
+  }
+  expect(billingPayload).toMatchObject({
     catalogVersion: 1,
-    events: [{ eventKey: "event-000" }, { eventKey: "event-001" }],
+    events: [
+      { eventKey: "event-000", tiers: [{ tierKey: "standard" }] },
+      { eventKey: "event-001", tiers: [{ tierKey: "standard" }] },
+    ],
   })
+  for (const event of billingPayload.events) expect(event.tiers[0]).not.toHaveProperty("maxPerOrder")
 })
 
 test("rejects malformed and cross-version snapshot cursors without scanning the snapshot", async () => {

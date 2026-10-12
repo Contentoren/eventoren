@@ -6,6 +6,7 @@ import type { CatalogTicketTierUpsertInput } from "../catalog/client/CatalogTick
 import type { EventItem } from "../events/EventItem.ts"
 import type { EventTicketTier } from "../events/EventTicketTier.ts"
 import type { EventImageVariants } from "../events/EventImageVariants.ts"
+import { eventTicketTierMaxPerOrderGet } from "../events/eventTicketTierMaxPerOrderGet.ts"
 import { eventHighlightsGet } from "../events/eventHighlightsGet.ts"
 import { eventInclusionsGet } from "../events/eventInclusionsGet.ts"
 import { eventExclusionsGet } from "../events/eventExclusionsGet.ts"
@@ -48,6 +49,7 @@ const emptyTierDraft = (): AdminTierDraft => ({
   priceCents: "",
   feeCents: "",
   capacity: "",
+  maxPerOrder: "10",
   sortOrder: "0",
 })
 
@@ -163,6 +165,7 @@ export function adminCatalogPageStateCreate(inputs: {
       priceCents: String(tier.priceCents),
       feeCents: String(tier.feeCents),
       capacity: String(tier.capacity),
+      maxPerOrder: String(eventTicketTierMaxPerOrderGet(tier)),
       sortOrder: String(tier.sortOrder ?? 0),
     })
     errorMessage.set("")
@@ -297,6 +300,8 @@ export function adminCatalogPageStateCreate(inputs: {
     const priceCents = nonNegativeIntegerParse(draft.priceCents)
     const feeCents = nonNegativeIntegerParse(draft.feeCents)
     const capacity = nonNegativeIntegerParse(draft.capacity)
+    const maxPerOrder =
+      draft.maxPerOrder.trim() === "" ? eventTicketTierMaxPerOrderGet({}) : positiveIntegerParse(draft.maxPerOrder)
     const sortOrder = nonNegativeIntegerParse(draft.sortOrder)
     if (priceCents === null) {
       errorMessage.set("Der Preis muss eine ganze Zahl ab 0 sein.")
@@ -308,6 +313,10 @@ export function adminCatalogPageStateCreate(inputs: {
     }
     if (capacity === null) {
       errorMessage.set("Die Kapazität ist erforderlich und muss eine ganze Zahl ab 0 sein.")
+      return
+    }
+    if (maxPerOrder === null) {
+      errorMessage.set("Die Höchstmenge je Bestellung muss eine ganze Zahl ab 1 sein.")
       return
     }
     if (sortOrder === null) {
@@ -329,6 +338,7 @@ export function adminCatalogPageStateCreate(inputs: {
         priceCents,
         feeCents,
         capacity,
+        maxPerOrder,
         sortOrder,
       })
       if (!saved.success) {
@@ -412,6 +422,7 @@ export function adminCatalogPageStateCreate(inputs: {
           priceCents: tier.priceCents,
           feeCents: tier.feeCents,
           capacity: tier.capacity,
+          maxPerOrder: eventTicketTierMaxPerOrderGet(tier),
           sortOrder: index + 1,
         })
         if (!saved.success) {
@@ -665,4 +676,10 @@ function nonNegativeIntegerParse(value: string): number | null {
   if (!/^\d+$/u.test(value.trim())) return null
   const parsed = Number(value)
   return Number.isSafeInteger(parsed) ? parsed : null
+}
+
+function positiveIntegerParse(value: string): number | null {
+  const parsed = nonNegativeIntegerParse(value)
+  if (parsed === null || parsed < 1) return null
+  return parsed
 }

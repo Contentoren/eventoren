@@ -5,15 +5,17 @@ import { afterEach, expect, test, vi } from "vitest"
 import { api, internal } from "../convex/_generated/api.js"
 import type { Doc, Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 import { ticketFulfillmentWorkSnapshotCreate } from "../src/ticketing/convex/ticketFulfillmentWorkSnapshotCreate.ts"
-import { ticketMaxPerOrder } from "../src/ticketing/ticketMaxPerOrder.ts"
+import { ticketAccessDigestCreate } from "../src/ticketing/convex/ticketAccessDigestCreate.ts"
 import { billingEventorenClient } from "../src/ticketing/convex/billingEventorenClient.ts"
 import type { TicketPaymentReconcileScan } from "../src/ticketing/convex/ticketPaymentReconcileScanValidator.ts"
 import { createResult } from "#result"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const authSecret = "ticket-read-bounds-test-secret"
+// Legacy per-product default: tiers without a stored maxPerOrder allow 10 each.
+const ticketMaxPerOrder = 10
 const now = Date.parse("2026-10-02T12:00:00.000Z")
 const future = "2026-11-01T22:00:00.000Z"
 const past = "2026-10-01T22:00:00.000Z"
@@ -478,7 +480,7 @@ test("admin detail returns every valid order line in creation order and keeps au
   await orderDetailsInsert(t, orderId, ticketMaxPerOrder)
 
   const result = await t.query(api.ticketing.ticketOrderGetAdminQuery, {
-    token: await createToken(adminId, authSecret),
+    token: await testAuthSessionTokenCreate(t, adminId, authSecret),
     orderId,
   })
   expect(result.success).toBe(true)
@@ -494,7 +496,7 @@ test("admin detail returns every valid order line in creation order and keeps au
         feeCents: 100,
       })),
     })
-  for (const token of [await createToken(ownerId, authSecret), ""]) {
+  for (const token of [await testAuthSessionTokenCreate(t, ownerId, authSecret), ""]) {
     const rejected = await t.query(api.ticketing.ticketOrderGetAdminQuery, { token, orderId })
     expect(rejected.success).toBe(false)
   }
@@ -546,19 +548,49 @@ test("fulfillment includes every valid issued ticket in sequence order and immut
   )
 })
 
-test("per-order readers reject an overflow instead of returning incomplete successful snapshots", async () => {
+test("per-order readers return complete snapshots above ten when each product stays within its limit", async () => {
   process.env.AUTH_SECRET = authSecret
   const t = convexTest(schema, modules)
   const adminId = await userInsert(t, "admin")
-  const orderId = await t.run(async (ctx) => ctx.db.insert("ticketOrders", orderInput("overflow")))
+  const ownerId = await userInsert(t, "user")
+  const guestAccessToken = "readbounds_guest_access_token_00000001"
+  const digest = await ticketAccessDigestCreate(guestAccessToken)
+  if (!digest.success) throw new Error(digest.errorMessage)
+  const orderId = await t.run(async (ctx) =>
+    ctx.db.insert(
+      "ticketOrders",
+      orderInput("overflow", {
+        ownerUserId: ownerId,
+        emailAccessDigest: digest.data,
+      }),
+    ),
+  )
   await orderDetailsInsert(t, orderId, ticketMaxPerOrder + 1)
   const adminResult = await t.query(api.ticketing.ticketOrderGetAdminQuery, {
-    token: await createToken(adminId, authSecret),
+    token: await testAuthSessionTokenCreate(t, adminId, authSecret),
     orderId,
   })
-  expect(adminResult.success).toBe(false)
+  expect(adminResult.success).toBe(true)
+  if (adminResult.success) expect(adminResult.data.lines).toHaveLength(ticketMaxPerOrder + 1)
   const fulfillmentResult = await t.run(async (ctx) => ticketFulfillmentWorkSnapshotCreate(ctx, orderId, "billing"))
-  expect(fulfillmentResult.success).toBe(false)
+  expect(fulfillmentResult.success).toBe(true)
+  if (fulfillmentResult.success) expect(fulfillmentResult.data.tickets).toHaveLength(ticketMaxPerOrder + 1)
+  const ownerResult = await t.query(api.ticketing.ticketOrderGetQuery, {
+    orderId,
+    token: await testAuthSessionTokenCreate(t, ownerId, authSecret),
+  })
+  const guestResult = await t.query(api.ticketing.ticketOrderByAccessTokenQuery, { guestAccessToken })
+  for (const result of [ownerResult, guestResult]) {
+    expect(result).toMatchObject({
+      success: true,
+      data: {
+        lines: Array.from({ length: ticketMaxPerOrder + 1 }, () => expect.objectContaining({ quantity: 1 })),
+        tickets: Array.from({ length: ticketMaxPerOrder + 1 }, (_, index) =>
+          expect.objectContaining({ sequence: index + 1 }),
+        ),
+      },
+    })
+  }
 })
 
 test("fulfillment still rejects missing tickets and invalid immutable checkout or legal snapshots", async () => {

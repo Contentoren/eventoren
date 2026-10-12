@@ -6,7 +6,7 @@ import { eventTimeFormat } from "../../events/eventTimeFormat.ts"
 import type { TicketBagGroup } from "../../ticketing/TicketBagGroup.ts"
 import type { TicketBagItem } from "../../ticketing/TicketBagItem.ts"
 import type { TicketCartDraft } from "../../ticketing/TicketCartDraft.ts"
-import { ticketMaxPerOrder } from "../../ticketing/ticketMaxPerOrder.ts"
+import { eventTicketTierMaxPerOrderGet } from "../../events/eventTicketTierMaxPerOrderGet.ts"
 import { ticketCartDraftQuantitySet } from "../../ticketing/ticketCartDraftQuantitySet.ts"
 import { ticketPriceFormat } from "../../ticketing/ticketPriceFormat.ts"
 import { demoCartStore } from "./demoCartStore.ts"
@@ -45,7 +45,7 @@ export function demoCartPageStateCreate(inputs: { events: readonly EventItem[]; 
           unitPriceLabel: ticketPriceFormat(unitPriceCents),
           totalPriceCents,
           totalPriceLabel: ticketPriceFormat(totalPriceCents),
-          maxQuantity: Math.min(tier.available, ticketMaxPerOrder),
+          maxQuantity: Math.min(tier.available, eventTicketTierMaxPerOrderGet(tier)),
         })
       }
 

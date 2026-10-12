@@ -3,7 +3,6 @@ import type { TicketPdfTicket } from "pdf-generator"
 import type { Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
-import { ticketMaxPerOrder } from "../ticketMaxPerOrder.js"
 
 export type TicketFulfillmentWorkSnapshot = Omit<EventorenTicketFulfillmentPrepareRequest, "onlineTicketUrl">
 
@@ -18,11 +17,9 @@ export async function ticketFulfillmentWorkSnapshotCreate(
   const tickets = await ctx.db
     .query("ticketIssued")
     .withIndex("orderIdAndSequence", (q) => q.eq("orderId", orderId))
-    // Checkout enforces ticketMaxPerOrder; read one extra to reject corrupt
-    // orders instead of preparing a silently incomplete fulfillment snapshot.
-    .take(ticketMaxPerOrder + 1)
-  if (tickets.length > ticketMaxPerOrder)
-    return createResultError(op, "The order exceeds the supported issued ticket limit")
+    // Per-product limits replace the former global total cap; collect the
+    // whole per-order set so legitimate orders above ten stay complete.
+    .collect()
   if (tickets.length === 0) return createResultError(op, "The paid order has no issued tickets")
 
   const checkoutContext = checkoutContextRead(order.checkoutContextJson)

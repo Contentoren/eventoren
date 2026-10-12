@@ -7,7 +7,9 @@ import type { Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
 import { ticketCheckoutLegalDocumentRevision } from "../src/ticketing/ticketCheckoutLegalDocumentRevision.js"
 import { ticketCheckoutLegalDocumentSnapshot } from "../src/ticketing/ticketCheckoutLegalDocumentSnapshot.js"
-import { ticketMaxPerOrder } from "../src/ticketing/ticketMaxPerOrder.js"
+
+// Tiers seeded without a stored maxPerOrder fall back to the legacy default of 10 per product.
+const ticketMaxPerOrder = 10
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const now = "2026-10-02T00:00:00.000Z"

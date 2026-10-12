@@ -4,7 +4,6 @@ import type { Doc, Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
-import { ticketMaxPerOrder } from "../ticketMaxPerOrder.js"
 import { ticketAccessDigestCreate } from "./ticketAccessDigestCreate.js"
 import { ticketFulfillmentWorkEnsure } from "./ticketFulfillmentWorkEnsure.js"
 import { ticketIssuedCountRead } from "./ticketIssuedCountRead.js"
@@ -190,24 +189,21 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       })
     }
 
-    // Checkout creates one line/reservation per unique tier, with total quantity <= ticketMaxPerOrder.
-    // The extra row is an overflow sentinel: no transition ever processes a truncated order.
+    // Checkout creates one line/reservation per unique tier with per-product
+    // limits; the per-order read collects the whole set so legitimate orders
+    // above ten are never truncated.
     const reservations = await ctx.db
       .query("ticketReservations")
       .withIndex("orderId", (q) => q.eq("orderId", order._id))
-      .take(ticketMaxPerOrder + 1)
+      .collect()
     const activeReservations = reservations.filter((reservation) => reservation.status === "active")
     const lines = await ctx.db
       .query("ticketOrderLines")
       .withIndex("orderId", (q) => q.eq("orderId", order._id))
-      .take(ticketMaxPerOrder + 1)
+      .collect()
     if (
-      reservations.length > ticketMaxPerOrder ||
-      lines.length > ticketMaxPerOrder ||
       reservations.some((reservation) => !Number.isSafeInteger(reservation.quantity) || reservation.quantity < 1) ||
-      reservations.reduce((total, reservation) => total + reservation.quantity, 0) > ticketMaxPerOrder ||
-      lines.some((line) => !Number.isSafeInteger(line.quantity) || line.quantity < 1) ||
-      lines.reduce((total, line) => total + line.quantity, 0) > ticketMaxPerOrder
+      lines.some((line) => !Number.isSafeInteger(line.quantity) || line.quantity < 1)
     )
       return createResultError(op, "Order lines or reservations exceed the order maximum")
     if (

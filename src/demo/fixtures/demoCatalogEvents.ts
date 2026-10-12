@@ -31,6 +31,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
         feeCents: 690,
         capacity: 1200,
         available: 842,
+        maxPerOrder: 10,
       },
       {
         id: "oberrang",
@@ -40,6 +41,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
         feeCents: 790,
         capacity: 600,
         available: 214,
+        maxPerOrder: 10,
       },
       {
         id: "early-entry",
@@ -49,6 +51,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
         feeCents: 1090,
         capacity: 120,
         available: 18,
+        maxPerOrder: 10,
       },
     ],
   },
@@ -80,6 +83,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
         feeCents: 180,
         capacity: 3000,
         available: 1760,
+        maxPerOrder: 10,
       },
       {
         id: "museum-reduced",
@@ -89,6 +93,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
         feeCents: 120,
         capacity: 1000,
         available: 620,
+        maxPerOrder: 10,
       },
     ],
   },
@@ -120,6 +125,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
         feeCents: 160,
         capacity: 160,
         available: 74,
+        maxPerOrder: 10,
       },
       {
         id: "kino-wiese",
@@ -129,6 +135,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
         feeCents: 110,
         capacity: 500,
         available: 312,
+        maxPerOrder: 10,
       },
     ],
   },
@@ -160,6 +167,7 @@ export const demoCatalogEvents: readonly EventItem[] = [
         feeCents: 1250,
         capacity: 800,
         available: 96,
+        maxPerOrder: 10,
       },
     ],
   },

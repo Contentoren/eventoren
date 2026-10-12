@@ -394,6 +394,13 @@ export function AdminCatalogPage(props: {
                       onInput={(value) => state.tierFieldChange("capacity", value)}
                     />
                     <Field
+                      id="admin-tier-max-per-order"
+                      label="Tickets pro Bestellung (je Produkt)"
+                      type="number"
+                      value={state.tierDraft().maxPerOrder}
+                      onInput={(value) => state.tierFieldChange("maxPerOrder", value)}
+                    />
+                    <Field
                       id="admin-tier-sort"
                       label="Sortierung"
                       type="number"
