@@ -21,9 +21,9 @@ In der Listenansicht von `/admin/bestellungen` lassen sich die sieben Spalten Ev
 ## Status und aktueller Kontext
 - Exploration abgeschlossen; keine bestehende Resize-Komponente gefunden.
 - Aufgabe 1: abgeschlossen; getestete Breiten-/Storage-/Resize-Helfer unter `src/admin/adminTicketOrdersColumnWidths*.ts` vorhanden.
-- Aufgabe 2: in Arbeit; UI-Integration nutzt die vorhandenen neuen Helfer.
-- Aufgabe 3: vorbereitet; abschließende Browserprüfung folgt nach UI-Integration.
+- Aufgabe 2: abgeschlossen; gemeinsames Desktop-Raster, Resize-Griffe und Reset-Icon integriert.
+- Aufgabe 3: abgeschlossen; Spaltensteuerung in Desktop-/Mobildarstellung und Detailabfrage mit gezieltem Wiederöffnungs-Regressionsfall unabhängig geprüft.
 - Hauptansicht: `src/admin/AdminTicketOrdersPage.tsx`, Grid-Header und Grid-Zeilen derzeit fest definiert.
 - Lokale Demo: `/demo/admin/orders` bzw. `/demo/admin/bestellungen`; laufenden Server vor Prüfung ermitteln.
 - Bestehende Arbeitskopie enthält weitere fremde Änderungen; nicht zurücksetzen oder verändern.
-- Parallel wird der separat gemeldete Ladefehler beim Schließen und Wiederöffnen anderer Bestelldetails untersucht; Spaltensteuerung darf die Detail-/Abfragelogik nicht verändern.
+- Die native Detailabfrage liest ihren bisherigen Detailzustand ohne reaktive Abhängigkeit (`untrack`), damit das anschließende Schreiben keine Rückkopplung auslöst. Spaltensteuerung bleibt von der Detail-/Abfragelogik getrennt.
