@@ -171,7 +171,7 @@ if (isServer) {
       expect(form.canPublish()).toBe(false)
     })
 
-    test("saves a new event as a draft until a ticket product allows publication", async () => {
+    test("preserves published status on save even when event has no ticket products", async () => {
       await createRoot(async (dispose) => {
         try {
           let savedStatus = ""
@@ -190,7 +190,7 @@ if (isServer) {
 
           await state.saveEvent()
 
-          expect(savedStatus).toBe("draft")
+          expect(savedStatus).toBe("published")
         } finally {
           dispose()
         }

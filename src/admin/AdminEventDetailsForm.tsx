@@ -277,8 +277,12 @@ export function AdminEventDetailsForm(props: {
           valueText={state.statusLabel}
         />
         <Show when={!state.canPublish()}>
-          <p class="mt-2 text-sm text-content-muted">
-            Veröffentlichen ist möglich, sobald das Event gespeichert ist und mindestens ein Ticketprodukt hat.
+          <p class="mt-2 text-sm text-content-muted">Veröffentlichen ist möglich, sobald das Event gespeichert ist.</p>
+        </Show>
+        <Show when={state.canPublish() && (props.state.selectedEvent()?.tiers.length ?? 0) === 0}>
+          <p class="mt-2 text-sm text-amber-500 dark:text-amber-400">
+            Hinweis: Das Event hat noch keine Ticketprodukte. Es kann veröffentlicht werden, wird aber im öffentlichen
+            Verkaufskatalog erst sichtbar, sobald mindestens ein Ticketprodukt aktiv ist.
           </p>
         </Show>
       </FormSection>

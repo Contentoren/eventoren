@@ -281,6 +281,34 @@ test("admin writes are versioned and published reads match EventItem", async () 
   expect(syncState).toMatchObject([{ version: published.data.catalogVersion, status: "pending", attempts: 0 }])
 })
 
+test("published events without active tiers stay out of public catalog lists", async () => {
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const token = await tokenFor(t, adminId)
+
+  const event = await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "published"))
+  expect(event.success).toBe(true)
+  if (!event.success) return
+
+  const published = await t.mutation(api.catalog.catalogEventPublishMutation, {
+    eventKey: "catalog-event",
+    token,
+  })
+  expect(published.success).toBe(true)
+
+  expect(await t.query(api.catalog.catalogEventListPublishedQuery, {})).toEqual([])
+  const page = await catalogPublishedPageGet(t, { query: "", location: "", category: "alle", timeWindow: "alle" }, 10)
+  expect(page.page).toEqual([])
+
+  await t.run(async (ctx) => {
+    const [storedEvent] = await ctx.db.query("catalogEvents").collect()
+    if (!storedEvent) throw new Error("Expected published event")
+    await ctx.db.insert("catalogTicketTiers", catalogTierInsert(storedEvent._id))
+  })
+
+  expect(await t.query(api.catalog.catalogEventListPublishedQuery, {})).toHaveLength(1)
+})
+
 test("event and tier configuration changes advance one event revision while no-op edits preserve sequencing", async () => {
   const t = convexTest(schema, modules)
   const adminId = await createUser(t, "admin")

@@ -69,16 +69,6 @@ async function catalogEventUpsertAuthorizedFn(
         : undefined
   const status = args.status ?? existing?.status ?? "draft"
 
-  if (status === "published") {
-    const tier = existing
-      ? await ctx.db
-          .query("catalogTicketTiers")
-          .withIndex("eventIdAndArchivedAt", (q) => q.eq("eventId", existing._id).eq("archivedAt", undefined))
-          .first()
-      : null
-    if (!tier) return createResultError(op, "Published events need a ticket tier")
-  }
-
   const now = new Date().toISOString()
   const eventData = {
     eventKey: args.eventKey,

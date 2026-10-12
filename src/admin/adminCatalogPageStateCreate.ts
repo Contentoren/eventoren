@@ -224,7 +224,7 @@ export function adminCatalogPageStateCreate(inputs: {
         inclusions: draft.inclusions.map((item) => item.trim()).filter(Boolean),
         exclusions: draft.exclusions.map((item) => item.trim()).filter(Boolean),
         tags: draft.highlights.map((highlight) => highlight.title.trim()),
-        status: draft.status === "published" && !selectedEvent()?.tiers.length ? "draft" : draft.status,
+        status: draft.status,
       })
       if (!saved.success) {
         errorMessage.set(saved.errorMessage)

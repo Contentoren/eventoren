@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/solid-router"
+import { Show } from "solid-js"
 
-export function AdminEventTabs(props: { eventKey?: string; tab: "details" | "products" }) {
+export function AdminEventTabs(props: { eventKey?: string; tab: "details" | "products"; tierCount?: number }) {
   const base =
     "rounded-lg px-4 py-3 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-ring"
   if (!props.eventKey) {
@@ -19,9 +20,17 @@ export function AdminEventTabs(props: { eventKey?: string; tab: "details" | "pro
         <Link
           to="/admin/events/new"
           search={{ tab: "products" }}
-          class={`${base} ${props.tab === "products" ? "bg-brand-soft text-content" : "text-content-muted hover:bg-surface hover:text-content"}`}
+          class={`${base} inline-flex items-center gap-1.5 ${props.tab === "products" ? "bg-brand-soft text-content" : "text-content-muted hover:bg-surface hover:text-content"}`}
         >
-          Ticketprodukte
+          <span>Ticketprodukte</span>
+          <Show when={(props.tierCount ?? 0) === 0}>
+            <span
+              class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white leading-none"
+              title="Keine Ticketprodukte"
+            >
+              !
+            </span>
+          </Show>
         </Link>
       </nav>
     )
@@ -43,9 +52,17 @@ export function AdminEventTabs(props: { eventKey?: string; tab: "details" | "pro
         to="/admin/events/$eventKey"
         params={{ eventKey: props.eventKey }}
         search={{ tab: "products" }}
-        class={`${base} ${props.tab === "products" ? "bg-brand-soft text-content" : "text-content-muted hover:bg-surface hover:text-content"}`}
+        class={`${base} inline-flex items-center gap-1.5 ${props.tab === "products" ? "bg-brand-soft text-content" : "text-content-muted hover:bg-surface hover:text-content"}`}
       >
-        Ticketprodukte
+        <span>Ticketprodukte</span>
+        <Show when={(props.tierCount ?? 0) === 0}>
+          <span
+            class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white leading-none"
+            title="Keine Ticketprodukte"
+          >
+            !
+          </span>
+        </Show>
       </Link>
     </nav>
   )

@@ -33,6 +33,6 @@ export const catalogEventListPublishedQuery = query({
         return catalogEventToEventItem(event, tiers, syncState?.syncedVersion)
       }),
     )
-    return items
+    return items.filter((item) => item.tiers.length > 0)
   },
 })

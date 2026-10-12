@@ -62,6 +62,11 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
         <Badge variant="subtle" class="w-fit border-0">
           {adminEventStatusLabel("status" in event ? event.status : "published")}
         </Badge>
+        <Show when={event.tiers.length === 0}>
+          <Badge variant="filledYellow" class="w-fit border-0 whitespace-nowrap">
+            Keine Ticketprodukte
+          </Badge>
+        </Show>
       </div>
     </>
   )

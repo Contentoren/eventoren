@@ -31,7 +31,11 @@ export function AdminEventDetailPage(props: { state: ReturnType<typeof adminEven
           {(event) => (
             <>
               <AdminEventDetailHeader event={event()} />
-              <AdminEventTabs eventKey={props.state.eventKey()} tab={props.state.tab()} />
+              <AdminEventTabs
+                eventKey={props.state.eventKey()}
+                tab={props.state.tab()}
+                tierCount={event().tiers.length}
+              />
               <Show
                 when={props.state.tab() === "products"}
                 fallback={<AdminEventDetailsForm state={props.state.catalog} />}

@@ -79,11 +79,13 @@ export const catalogEventListPublishedPageQuery = query({
     )
     // A catalog card cannot infer the cheapest price or availability from a prefix.
     // Mark oversized tier lists as incomplete; the detail endpoint pages all tiers.
-    const page = eventItems.map(({ event, tiers }) =>
-      tiers.length > maxActiveTiersPerEvent
-        ? { ...catalogEventToEventItem(event, [], syncState?.syncedVersion), tiersComplete: false }
-        : catalogEventToEventItem(event, tiers, syncState?.syncedVersion),
-    )
+    const page = eventItems
+      .filter(({ tiers }) => tiers.length > 0)
+      .map(({ event, tiers }) =>
+        tiers.length > maxActiveTiersPerEvent
+          ? { ...catalogEventToEventItem(event, [], syncState?.syncedVersion), tiersComplete: false }
+          : catalogEventToEventItem(event, tiers, syncState?.syncedVersion),
+      )
 
     return createResult({
       page,

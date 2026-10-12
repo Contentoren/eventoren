@@ -19,9 +19,7 @@ export function adminEventDetailsFormStateCreate(inputs: {
     get: () => inputs.catalog.eventDraft().status,
     set: (value: string) => inputs.catalog.eventFieldChange("status", value as AdminEventDraft["status"]),
   }
-  const canPublish = createMemo(
-    () => Boolean(inputs.catalog.selectedEventKey()) && (inputs.catalog.selectedEvent()?.tiers.length ?? 0) > 0,
-  )
+  const canPublish = createMemo(() => Boolean(inputs.catalog.selectedEventKey()))
   const imageUploading = createSignalObject(false)
   const imageUploadError = createSignalObject("")
   const imageDragActive = createSignalObject(false)
