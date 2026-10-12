@@ -77,3 +77,4 @@ pnpm-lock.yaml
 /.rstest/playwright-traces/
 # npm publishing
 .npmrc
+bun.lock
