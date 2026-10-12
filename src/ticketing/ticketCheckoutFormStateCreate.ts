@@ -280,14 +280,12 @@ export function ticketCheckoutFormStateCreate(inputs: {
       errorMessage.set(text.emptyCart)
       return
     }
-    const missingCode = inputs
-      .items()
-      .flatMap((item) =>
-        ticketActivationCodeMissing(item.event, item.cart).map((missing) => ({
-          ...missing,
-          eventTitle: item.event.title,
-        })),
-      )[0]
+    const missingCode = inputs.items().flatMap((item) =>
+      ticketActivationCodeMissing(item.event, item.cart).map((missing) => ({
+        ...missing,
+        eventTitle: item.event.title,
+      })),
+    )[0]
     if (missingCode) {
       errorMessage.set(
         `Für „${missingCode.tierName}" ist ein Freischaltungscode erforderlich. Bitte kehre zu „${missingCode.eventTitle}" zurück und trage den Code ein.`,

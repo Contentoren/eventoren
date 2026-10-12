@@ -4,7 +4,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { promisify } from "node:util"
 import { describe, expect, test } from "bun:test"
-import { ticketActivationCodesPdfGenerate } from "../src/ticketing/ticketActivationCodesPdfGenerate"
+import { ticketActivationCodesPdfGenerate } from "../src/ticketing/ticketActivationCodesPdfGenerate.js"
 
 const execFileAsync = promisify(execFile)
 

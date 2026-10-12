@@ -341,13 +341,11 @@ export const ticketCheckoutPrepareMutation = internalMutation({
           return createResultError(op, "The activation code is invalid for this ticket product")
         const charged = await ctx.db
           .query("ticketActivationCodeReservations")
-          .withIndex("codeIdAndCreatedAt", (q) => q.eq("codeId", code._id))
-          .filter((q) => q.eq(q.field("status"), "consumed"))
+          .withIndex("codeIdAndStatusAndCreatedAt", (q) => q.eq("codeId", code._id).eq("status", "consumed"))
           .first()
         const active = await ctx.db
           .query("ticketActivationCodeReservations")
-          .withIndex("codeIdAndCreatedAt", (q) => q.eq("codeId", code._id))
-          .filter((q) => q.eq(q.field("status"), "reserved"))
+          .withIndex("codeIdAndStatusAndCreatedAt", (q) => q.eq("codeId", code._id).eq("status", "reserved"))
           .first()
         if (
           code.status !== "available" ||

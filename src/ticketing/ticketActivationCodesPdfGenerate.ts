@@ -45,7 +45,9 @@ export const ticketActivationCodesPdfGenerate = async (
   doc.text("Freischaltungscodes", marginX, marginTop)
   doc.setFont("helvetica", "normal")
   doc.setFontSize(11)
-  const metaLines = doc.splitTextToSize([`Event: ${eventName}`, `Produkt: ${productName}`], contentWidth) as string[]
+  const metaLines = [`Event: ${eventName}`, `Produkt: ${productName}`].flatMap(
+    (line) => doc.splitTextToSize(line, contentWidth) as string[],
+  )
   doc.text(metaLines, marginX, marginTop + 9)
 
   let cursorY = marginTop + 9 + metaLines.length * 5.5 + 4

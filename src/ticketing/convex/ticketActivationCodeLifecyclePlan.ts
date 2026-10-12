@@ -9,6 +9,8 @@ export async function ticketActivationCodeLifecyclePlan(
   disposition: "release" | "consume",
 ) {
   const op = "ticketActivationCodeLifecyclePlan"
+  // These are complete, order-scoped sets (one line/claim per selected product),
+  // bounded by checkout transaction size, not the unbounded code reservation history.
   const lines = await ctx.db
     .query("ticketOrderLines")
     .withIndex("orderId", (q) => q.eq("orderId", order._id))
@@ -48,10 +50,15 @@ export async function ticketActivationCodeLifecyclePlan(
       code.eventId !== history.eventId
     )
       return createResultError(op, "The activation code reservation is corrupt")
+    const identities = await ctx.db
+      .query("ticketActivationCodes")
+      .withIndex("code", (q) => q.eq("code", code.code))
+      .take(2)
+    if (!/^[A-Z0-9]{8}$/u.test(code.code) || identities.length !== 1 || identities[0]!._id !== code._id)
+      return createResultError(op, "The activation code identity is corrupt")
     const active = await ctx.db
       .query("ticketActivationCodeReservations")
-      .withIndex("codeIdAndCreatedAt", (q) => q.eq("codeId", code._id))
-      .filter((q) => q.eq(q.field("status"), "reserved"))
+      .withIndex("codeIdAndStatusAndCreatedAt", (q) => q.eq("codeId", code._id).eq("status", "reserved"))
       .take(2)
     if (code.status === "reserved" ? active.length !== 1 || active[0]!.orderId !== code.orderId : active.length !== 0)
       return createResultError(op, "The activation code active ownership history is corrupt")
@@ -60,16 +67,26 @@ export async function ticketActivationCodeLifecyclePlan(
     // Cross-check it against charged history so corruption can never reopen a paid code.
     const charged = await ctx.db
       .query("ticketActivationCodeReservations")
-      .withIndex("codeIdAndCreatedAt", (q) => q.eq("codeId", code._id))
-      .filter((q) => q.eq(q.field("status"), "consumed"))
+      .withIndex("codeIdAndStatusAndCreatedAt", (q) => q.eq("codeId", code._id).eq("status", "consumed"))
       .first()
     if ((code.consumedAt !== undefined) !== (charged !== null))
       return createResultError(op, "The activation code charged history is corrupt")
     if (charged) {
       const chargedOrder = await ctx.db.get("ticketOrders", charged.orderId)
+      const chargedLines =
+        charged.orderId === order._id
+          ? lines
+          : await ctx.db
+              .query("ticketOrderLines")
+              .withIndex("orderId", (q) => q.eq("orderId", charged.orderId))
+              .collect()
       if (
         !chargedOrder ||
         chargedOrder.paymentStatus !== "paid" ||
+        chargedOrder.eventKey !== code.eventKey ||
+        (chargedOrder.status !== "paid" && chargedOrder.status !== "paid_inventory_conflict") ||
+        chargedLines.filter((candidate) => candidate.activationCodeId === code._id && candidate.tierId === code.tierId)
+          .length !== 1 ||
         charged.tierId !== code.tierId ||
         charged.eventId !== code.eventId ||
         charged.eventKey !== code.eventKey ||
@@ -102,6 +119,7 @@ export async function ticketActivationCodeLifecyclePlan(
       const ownership = ownerHistories.filter((candidate) => candidate.codeId === code._id)
       if (
         !owner ||
+        owner.eventKey !== code.eventKey ||
         ownerLines.filter((candidate) => candidate.activationCodeId === code._id && candidate.tierId === code.tierId)
           .length !== 1 ||
         ownership.length !== 1 ||

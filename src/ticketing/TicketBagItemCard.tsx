@@ -5,6 +5,7 @@ import { Img } from "#ui/static/img/Img.jsx"
 import type { EventItem } from "../events/EventItem.ts"
 import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import type { TicketBagItem } from "./TicketBagItem.ts"
+import { ticketBagItemCardStateCreate } from "./ticketBagItemCardStateCreate.ts"
 
 export function TicketBagItemCard(props: {
   event: EventItem
@@ -15,8 +16,14 @@ export function TicketBagItemCard(props: {
   onQuantityChange: (quantity: number) => void
   onRemove: () => void
 }) {
+  const gate = ticketBagItemCardStateCreate({ eventId: () => props.event.id, item: () => props.item })
+
+  // Native select on purpose: #ui SelectSingleNative/SelectSingle offer only
+  // whole-control disabled with plain string options and no per-option
+  // disabled, so they cannot keep decreases enabled while increases stay
+  // locked. The native options below carry that state instead.
   const quantityOptions = () => {
-    const count = Math.max(1, props.item.maxQuantity)
+    const count = gate.visibleMaxQuantity()
     return Array.from({ length: count }, (_, i) => i + 1)
   }
 
@@ -114,6 +121,30 @@ export function TicketBagItemCard(props: {
             </div>
           </div>
 
+          <Show when={props.item.activationCodeRequired}>
+            <p role="status" class="text-sm text-content-muted">
+              {gate.message()}{" "}
+              <Show
+                when={props.eventHref}
+                fallback={
+                  <Link
+                    to="/events/$eventId"
+                    params={{ eventId: props.event.id }}
+                    class="focus-ring font-medium text-brand-accent hover:underline"
+                  >
+                    Code auf der Eventseite eingeben
+                  </Link>
+                }
+              >
+                {(href) => (
+                  <a href={href()} class="focus-ring font-medium text-brand-accent hover:underline">
+                    Code auf der Eventseite eingeben
+                  </a>
+                )}
+              </Show>
+            </p>
+          </Show>
+
           {/* Controls: Quantity & Remove */}
           <div class="mt-space-2 flex items-center gap-space-5 border-t border-border-subtle/60 pt-space-3 dark:border-border-strong/20">
             <div class="flex items-center gap-space-4">
@@ -125,12 +156,19 @@ export function TicketBagItemCard(props: {
                   id={`bag-qty-${props.item.tierId}`}
                   value={props.item.quantity}
                   ref={(element) => (element.value = String(props.item.quantity))}
-                  onChange={(e) => props.onQuantityChange(Number.parseInt(e.currentTarget.value, 10))}
+                  onChange={(e) => {
+                    const next = Number.parseInt(e.currentTarget.value, 10)
+                    if (!gate.quantityAllowed(next)) {
+                      e.currentTarget.value = String(props.item.quantity)
+                      return
+                    }
+                    props.onQuantityChange(next)
+                  }}
                   class="focus-ring h-10 appearance-none rounded-lg border border-border-strong/60 bg-surface pl-space-4 pr-9 text-sm font-semibold text-content"
                 >
                   <For each={quantityOptions()}>
                     {(qty) => (
-                      <option value={qty} selected={qty === props.item.quantity}>
+                      <option value={qty} selected={qty === props.item.quantity} disabled={gate.optionDisabled(qty)}>
                         {qty}
                       </option>
                     )}

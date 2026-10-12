@@ -262,5 +262,7 @@ export const ticketTables = {
     updatedAt: v.string(),
   })
     .index("codeIdAndCreatedAt", ["codeId", "createdAt"])
+    // Charged scars can predate arbitrarily many later releases; never scan/truncate that history.
+    .index("codeIdAndStatusAndCreatedAt", ["codeId", "status", "createdAt"])
     .index("orderId", ["orderId"]),
 } as const

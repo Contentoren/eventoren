@@ -8,4 +8,6 @@ export type TicketBagItem = {
   totalPriceCents: number
   totalPriceLabel: string
   maxQuantity: number
+  activationCodeRequired?: boolean
+  activationCode?: string
 }

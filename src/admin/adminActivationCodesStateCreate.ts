@@ -64,14 +64,68 @@ export function adminActivationCodesStateCreate(inputs: {
   }
   const selectedTier = () => inputs.tiers().find((tier) => tier.id === selectedTierKey.get())
 
-  // Default to the first code-gated product once tiers load; keep an explicit choice afterwards.
+  const pageLoad = async () => {
+    const listPage = inputs.listPage
+    const eventKey = inputs.eventKey()
+    const tierKey = selectedTierKey.get()
+    if (!listPage || !eventKey || !tierKey || isLoading.get() || isDone.get()) return
+    const request = listRequest
+    isLoading.set(true)
+    errorMessage.set("")
+    const result = await listPage({
+      eventKey,
+      tierKey,
+      ...(statusFilter.get() ? { status: statusFilter.get() as TicketActivationCodeStatus } : {}),
+      paginationOpts: { cursor: cursor.get(), numItems: pageSize },
+    })
+    if (request !== listRequest) return
+    if (!result.success) {
+      isLoading.set(false)
+      errorMessage.set(result.errorMessage)
+      return
+    }
+    const knownIds = new Set(codes.get().map((code) => code.id))
+    codes.set([...codes.get(), ...result.data.page.filter((code) => !knownIds.has(code.id))])
+    cursor.set(result.data.continueCursor)
+    isDone.set(result.data.isDone)
+    isLoading.set(false)
+  }
+
+  const reload = () => {
+    listRequest++
+    codes.set([])
+    cursor.set(null)
+    isDone.set(inputs.listPage ? false : true)
+    isLoading.set(false)
+    errorMessage.set("")
+    if (inputs.listPage) void pageLoad()
+  }
+
+  // Default to the first code-gated product once tiers load; if the selected
+  // product disappears (archive/removal), fall back to a remaining product or
+  // clear the selection so list/generate/export never use a stale tier.
   createEffect(
     on(
       () => inputs.tiers().map((tier) => tier.id),
       () => {
-        if (selectedTierKey.get()) return
-        const first = tiersWithRequirementFirst()[0]
-        if (first) selectedTierKey.set(first.id)
+        const available = tiersWithRequirementFirst()
+        const current = selectedTierKey.get()
+        if (available.length === 0) {
+          if (current !== "") {
+            selectedTierKey.set("")
+            feedback.set("")
+            reload()
+          }
+          return
+        }
+        if (!current || !available.some((tier) => tier.id === current)) {
+          const first = available[0]
+          if (first && first.id !== current) {
+            selectedTierKey.set(first.id)
+            feedback.set("")
+            reload()
+          }
+        }
       },
     ),
   )
@@ -113,43 +167,6 @@ export function adminActivationCodesStateCreate(inputs: {
     isLoading.set(nativeList.isLoading())
   })
 
-  const pageLoad = async () => {
-    const listPage = inputs.listPage
-    const eventKey = inputs.eventKey()
-    const tierKey = selectedTierKey.get()
-    if (!listPage || !eventKey || !tierKey || isLoading.get() || isDone.get()) return
-    const request = listRequest
-    isLoading.set(true)
-    errorMessage.set("")
-    const result = await listPage({
-      eventKey,
-      tierKey,
-      ...(statusFilter.get() ? { status: statusFilter.get() as TicketActivationCodeStatus } : {}),
-      paginationOpts: { cursor: cursor.get(), numItems: pageSize },
-    })
-    if (request !== listRequest) return
-    if (!result.success) {
-      isLoading.set(false)
-      errorMessage.set(result.errorMessage)
-      return
-    }
-    const knownIds = new Set(codes.get().map((code) => code.id))
-    codes.set([...codes.get(), ...result.data.page.filter((code) => !knownIds.has(code.id))])
-    cursor.set(result.data.continueCursor)
-    isDone.set(result.data.isDone)
-    isLoading.set(false)
-  }
-
-  const reload = () => {
-    listRequest++
-    codes.set([])
-    cursor.set(null)
-    isDone.set(inputs.listPage ? false : true)
-    isLoading.set(false)
-    errorMessage.set("")
-    if (inputs.listPage) void pageLoad()
-  }
-
   const selectTier = (tierKey: string) => {
     if (selectedTierKey.get() === tierKey) return
     selectedTierKey.set(tierKey)
@@ -172,6 +189,7 @@ export function adminActivationCodesStateCreate(inputs: {
       errorMessage.set(`Bitte eine Anzahl zwischen 1 und ${ticketActivationCodeLimits.countMax} eingeben.`)
       return
     }
+    const request = listRequest
     generatePending.set(true)
     errorMessage.set("")
     feedback.set("")
@@ -179,6 +197,7 @@ export function adminActivationCodesStateCreate(inputs: {
       const result = inputs.generate
         ? await inputs.generate({ eventKey, tierKey, count })
         : await nativeGenerate!({ eventKey, tierKey, count })
+      if (request !== listRequest || selectedTierKey.get() !== tierKey || inputs.eventKey() !== eventKey) return
       if (!result.success) {
         errorMessage.set(result.errorMessage)
         return
@@ -190,6 +209,7 @@ export function adminActivationCodesStateCreate(inputs: {
       )
       reload()
     } catch {
+      if (request !== listRequest || selectedTierKey.get() !== tierKey || inputs.eventKey() !== eventKey) return
       errorMessage.set("Freischaltungscodes konnten nicht erzeugt werden.")
     } finally {
       generatePending.set(false)
@@ -222,6 +242,7 @@ export function adminActivationCodesStateCreate(inputs: {
       ? await inputs.exportAll({ eventKey, tierKey })
       : await nativeExportAll({ eventKey, tierKey })
     if (!result.success) {
+      if (selectedTierKey.get() !== tierKey || inputs.eventKey() !== eventKey) return null
       errorMessage.set(result.errorMessage)
       return null
     }
@@ -235,11 +256,13 @@ export function adminActivationCodesStateCreate(inputs: {
     const eventKey = inputs.eventKey()
     const tierKey = selectedTierKey.get()
     if (!eventKey || !tierKey || exportPending.get()) return
+    const request = listRequest
     exportPending.set(true)
     errorMessage.set("")
     feedback.set("")
     try {
       const snapshot = await exportSnapshotGet(eventKey, tierKey)
+      if (request !== listRequest || selectedTierKey.get() !== tierKey || inputs.eventKey() !== eventKey) return
       if (!snapshot) return
       const { eventName, productName, codes } = snapshot
       const filename = adminActivationCodeExportFilename(eventName, productName, format)
@@ -253,6 +276,7 @@ export function adminActivationCodesStateCreate(inputs: {
       }
       feedback.set(`${codes.length} ${codes.length === 1 ? "Code" : "Codes"} als ${format.toUpperCase()} exportiert.`)
     } catch {
+      if (request !== listRequest || selectedTierKey.get() !== tierKey || inputs.eventKey() !== eventKey) return
       errorMessage.set(
         format === "csv"
           ? "Freischaltungscodes konnten nicht als CSV exportiert werden."

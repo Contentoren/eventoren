@@ -3,7 +3,6 @@ import { createRoot } from "solid-js"
 import type { EventItem } from "../src/events/EventItem.ts"
 import type { TicketCart } from "../src/ticketing/TicketCart.ts"
 import { ticketActivationCodeMissing } from "../src/ticketing/ticketActivationCodeMissing.ts"
-import { ticketBagQuantityAllowed } from "../src/ticketing/ticketBagQuantityAllowed.ts"
 import { ticketTierSelectorStateCreate } from "../src/ticketing/ticketTierSelectorStateCreate.ts"
 import { createResult } from "../src/ui/createResult.ts"
 import { createResultError } from "../src/ui/createResultError.ts"
@@ -357,11 +356,108 @@ test("missing protected codes are reported for checkout while usable codes pass"
   ).toEqual([])
 })
 
-test("the cart route cannot increase protected products and may always decrease", () => {
-  const event = gateEvent()
-  expect(ticketBagQuantityAllowed(event, "vip", 1, 2)).toBe(false)
-  expect(ticketBagQuantityAllowed(event, "vip", 1, 1)).toBe(true)
-  expect(ticketBagQuantityAllowed(event, "vip", 1, 0)).toBe(true)
-  expect(ticketBagQuantityAllowed(event, "standard", 1, 2)).toBe(true)
-  expect(ticketBagQuantityAllowed(undefined, "vip", 1, 2)).toBe(true)
+test("selector rows keep stable object identity with reactive getters", async () => {
+  await createRoot(async (dispose) => {
+    try {
+      const fixture = setup(validCode)
+      const first = fixture.state.rows().find((row) => row.id === "vip")
+      expect(first?.activationCodeValue).toBe("")
+
+      fixture.state.activationCodeChange("vip", "abc")
+      const afterTyping = fixture.state.rows().find((row) => row.id === "vip")
+      expect(afterTyping).toBe(first)
+      expect(afterTyping?.activationCodeValue).toBe("ABC")
+      expect(afterTyping?.activationCodeStatus).toBe("idle")
+
+      fixture.state.activationCodeChange("vip", "ABCDEFGH")
+      await waitFor(
+        () => fixture.state.rows().find((row) => row.id === "vip")?.activationCodeStatus === "valid",
+        "valid code",
+      )
+      const afterValid = fixture.state.rows().find((row) => row.id === "vip")
+      expect(afterValid).toBe(first)
+      expect(afterValid?.activationCodeStatus).toBe("valid")
+      expect(afterValid?.canIncrease).toBe(true)
+
+      fixture.state.increaseTier("vip")
+      const afterQuantity = fixture.state.rows().find((row) => row.id === "vip")
+      expect(afterQuantity).toBe(first)
+      expect(afterQuantity?.quantity).toBe(1)
+      expect(afterQuantity?.name).toBe("VIP")
+      expect(fixture.cart().lines).toEqual([{ tierId: "vip", quantity: 1, activationCode: "ABCDEFGH" }])
+    } finally {
+      dispose()
+    }
+  })
+  await flush()
+})
+
+test("decreasing after an invalid replacement never reattaches unvalidated text", async () => {
+  await createRoot(async (dispose) => {
+    try {
+      const fixture = setup((input) => Promise.resolve(createResult({ valid: input.code === "ABCDEFGH" })))
+      fixture.state.activationCodeChange("vip", "ABCDEFGH")
+      await waitFor(
+        () => fixture.state.rows().find((row) => row.id === "vip")?.activationCodeStatus === "valid",
+        "valid code",
+      )
+      fixture.state.increaseTier("vip")
+      fixture.state.increaseTier("vip")
+      expect(fixture.cart().lines).toEqual([{ tierId: "vip", quantity: 2, activationCode: "ABCDEFGH" }])
+
+      fixture.state.activationCodeChange("vip", "ZZZZ9999")
+      await waitFor(
+        () => fixture.state.rows().find((row) => row.id === "vip")?.activationCodeStatus === "invalid",
+        "invalid replacement",
+      )
+      expect(fixture.cart().lines).toEqual([{ tierId: "vip", quantity: 2 }])
+
+      fixture.state.decreaseTier("vip")
+      expect(fixture.cart().lines).toEqual([{ tierId: "vip", quantity: 1 }])
+      expect("activationCode" in (fixture.cart().lines[0] ?? {})).toBe(false)
+    } finally {
+      dispose()
+    }
+  })
+  await flush()
+})
+
+test("clearing a pending or invalid input resets to idle and ignores stale responses", async () => {
+  await createRoot(async (dispose) => {
+    try {
+      const resolvers: Array<(result: ValidateResult) => void> = []
+      const fixture = setup(
+        () =>
+          new Promise<ValidateResult>((resolve) => {
+            resolvers.push(resolve)
+          }),
+      )
+      fixture.state.activationCodeChange("vip", "AAAAAAAA")
+      await waitFor(() => resolvers.length === 1, "pending request")
+      expect(fixture.state.rows().find((row) => row.id === "vip")?.activationCodeStatus).toBe("checking")
+
+      fixture.state.activationCodeChange("vip", "")
+      expect(fixture.state.rows().find((row) => row.id === "vip")?.activationCodeValue).toBe("")
+      expect(fixture.state.rows().find((row) => row.id === "vip")?.activationCodeStatus).toBe("idle")
+
+      resolvers[0]?.(createResult({ valid: true as const }))
+      await flush()
+      expect(fixture.state.rows().find((row) => row.id === "vip")?.activationCodeStatus).toBe("idle")
+      expect(fixture.state.rows().find((row) => row.id === "vip")?.canIncrease).toBe(false)
+
+      fixture.state.activationCodeChange("vip", "CCCCCCCC")
+      await waitFor(() => resolvers.length === 2, "second request")
+      resolvers[1]?.(createResult({ valid: false as const }))
+      await waitFor(
+        () => fixture.state.rows().find((row) => row.id === "vip")?.activationCodeStatus === "invalid",
+        "invalid code",
+      )
+      fixture.state.activationCodeChange("vip", "")
+      expect(fixture.state.rows().find((row) => row.id === "vip")?.activationCodeStatus).toBe("idle")
+      expect(fixture.state.rows().find((row) => row.id === "vip")?.activationCodeValue).toBe("")
+    } finally {
+      dispose()
+    }
+  })
+  await flush()
 })

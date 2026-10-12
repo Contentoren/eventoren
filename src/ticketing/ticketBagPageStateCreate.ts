@@ -6,10 +6,11 @@ import { eventDateFormat } from "../events/eventDateFormat.ts"
 import { eventTimeFormat } from "../events/eventTimeFormat.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import { eventTicketTierMaxPerOrderGet } from "../events/eventTicketTierMaxPerOrderGet.ts"
+import { eventTicketTierActivationCodeRequiredGet } from "../events/eventTicketTierActivationCodeRequiredGet.ts"
 import type { TicketBagGroup } from "./TicketBagGroup.ts"
 import type { TicketBagItem } from "./TicketBagItem.ts"
 import type { TicketCartDraft } from "./TicketCartDraft.ts"
-import { ticketBagQuantityAllowed } from "./ticketBagQuantityAllowed.ts"
+import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.ts"
 import { ticketCartForEventResolve } from "./ticketCartForEventResolve.ts"
 import { ticketCartDraftEventName } from "./ticketCartDraftEventName.ts"
 import { ticketCartDraftLoad } from "./ticketCartDraftLoad.ts"
@@ -107,6 +108,8 @@ export function ticketBagPageStateCreate(input: {
           totalPriceCents,
           totalPriceLabel: ticketPriceFormat(totalPriceCents),
           maxQuantity: Math.min(tier.available, eventTicketTierMaxPerOrderGet(tier)),
+          activationCodeRequired: eventTicketTierActivationCodeRequiredGet(tier),
+          activationCode: line.activationCode ? ticketActivationCodeNormalize(line.activationCode) : "",
         })
       }
 
@@ -157,15 +160,6 @@ export function ticketBagPageStateCreate(input: {
   const catalogError = createMemo(() => (catalog.get().success ? "" : "Der Eventkatalog ist gerade nicht verfügbar."))
 
   const updateQuantity = (eventId: string, tierId: string, quantity: number) => {
-    const current =
-      normalizedCart()
-        .find((entry) => entry.eventId === eventId)
-        ?.lines.find((line) => line.tierId === tierId)?.quantity ?? 0
-    const catalogResult = catalog.get()
-    const currentEvent = catalogResult.success
-      ? catalogResult.data.find((candidate) => candidate.id === eventId)
-      : undefined
-    if (!ticketBagQuantityAllowed(currentEvent, tierId, current, quantity)) return
     const updated = ticketCartDraftQuantitySet(normalizedCart(), eventId, tierId, quantity)
     cart.set(updated)
     ticketCartDraftSave(updated)
