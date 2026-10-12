@@ -323,7 +323,9 @@ test("a restored draft code with a failing revalidation stays locked", async () 
 test("validation is isolated per product", async () => {
   await createRoot(async (dispose) => {
     try {
-      const fixture = setup((input) => Promise.resolve(createResult({ valid: (input.tierKey === "vip") as const })))
+      const fixture = setup((input) =>
+        Promise.resolve(input.tierKey === "vip" ? createResult({ valid: true }) : createResult({ valid: false })),
+      )
       fixture.state.activationCodeChange("vip", "ABCDEFGH")
       await waitFor(
         () => fixture.state.rows().find((row) => row.id === "vip")?.activationCodeStatus === "valid",
