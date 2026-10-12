@@ -57,11 +57,13 @@ export const catalogSyncSnapshotBuildMutation = internalMutation({
         maximumRowsRead: catalogSyncLimits.buildEventsPerBatch,
         maximumBytesRead: catalogSyncLimits.buildEventsPerBatch * catalogSyncLimits.snapshotChunkMaxBytes,
       })
-    const nextEventCount = snapshot.eventCount + eventPage.page.length
+    // Drafts may be incomplete; Billing's full revisions describe purchasable events only.
+    const publishedEvents = eventPage.page.filter((event) => event.status === "published")
+    const nextEventCount = snapshot.eventCount + publishedEvents.length
     if (nextEventCount > catalogSyncLimits.billingMaxEvents)
       return createResultError(op, `Catalog exceeds Billing's ${catalogSyncLimits.billingMaxEvents}-event limit`)
 
-    for (const event of eventPage.page) {
+    for (const event of publishedEvents) {
       if (event.eventRevision === undefined) await ctx.db.patch("catalogEvents", event._id, { eventRevision: 1 })
       if (event.catalogVersion > args.requestedVersion)
         return createResultError(op, `Catalog event ${event.eventKey} is newer than requestedVersion`)

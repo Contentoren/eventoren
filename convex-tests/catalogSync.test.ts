@@ -8,6 +8,8 @@ import schema from "../convex/schema.js"
 import { testFixtureJobsRead } from "./testFixtureJobsRead.js"
 import { catalogSyncLimits } from "../src/catalog/convex/catalogSyncLimits.ts"
 import { catalogSyncSnapshotPayloadBytesCalculate } from "../src/catalog/convex/catalogSyncSnapshotPayloadBytesCalculate.ts"
+import { billingEventorenClient } from "../src/ticketing/convex/billingEventorenClient.ts"
+import type { EventorenCatalogUpsertRequest } from "billing/contracts/eventorenCatalogUpsertRequestSchema"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 
@@ -115,6 +117,212 @@ async function readSnapshotEvents(t: ReturnType<typeof convexTest>, version: num
     cursor = page.continueCursor
   }
 }
+
+function billingTestConfigSet() {
+  process.env.EVENTOREN_BILLING_BASE_URL = "https://billing.test"
+  process.env.EVENTOREN_BILLING_ORGANIZATION_ID = "eventoren"
+  process.env.EVENTOREN_BILLING_API_CREDENTIAL = "credential"
+  process.env.EVENTOREN_BILLING_STRIPE_MODE = "test"
+  process.env.EVENTOREN_PUBLIC_BASE_URL = "https://eventoren.test"
+}
+
+async function billingCatalogResponseCreate(body: string, replayed = false) {
+  const payload = JSON.parse(body) as EventorenCatalogUpsertRequest
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(JSON.stringify({ catalogVersion: payload.catalogVersion, events: payload.events })),
+  )
+  const catalogDigest = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("")
+  return new Response(
+    JSON.stringify({
+      success: true,
+      data: { catalogVersion: payload.catalogVersion, catalogDigest, eventCount: payload.events.length, replayed },
+    }),
+    { status: 200 },
+  )
+}
+
+test("fresh snapshots page past incomplete unpublished events without editing their fixtures", async () => {
+  const t = convexTest(schema, modules)
+  await seedCatalog(t, 33)
+  await t.run(async (ctx) => {
+    const events = await ctx.db.query("catalogEvents").collect()
+    for (const event of events) {
+      if (event.eventKey === "event-032") continue
+      await ctx.db.patch("catalogEvents", event._id, {
+        status: event.eventKey === "event-031" ? "archived" : "draft",
+        startsAt: "",
+        endsAt: "",
+        doorsAt: "",
+        venue: "",
+        city: "",
+        organizer: "",
+      })
+    }
+  })
+  const fixturesBefore = await t.run(async (ctx) =>
+    (await ctx.db.query("catalogEvents").collect()).filter((event) => event.status !== "published"),
+  )
+  const built = await buildUntilReady(t, 1)
+  expect(built).toMatchObject({ status: "ready", eventCount: 1, chunkCount: 1 })
+  const events = await readSnapshotEvents(t, 1)
+  expect(events.map((event) => event.eventKey)).toEqual(["event-032"])
+  expect(built.payloadBytes).toBe(new TextEncoder().encode(JSON.stringify({ catalogVersion: 1, events })).byteLength)
+  expect(
+    await t.run(async (ctx) =>
+      (await ctx.db.query("catalogEvents").collect()).filter((event) => event.status !== "published"),
+    ),
+  ).toEqual(fixturesBefore)
+})
+
+test("retained ready v339 recovers pre-HTTP validation failure with a stable published-only request", async () => {
+  const t = convexTest(schema, modules)
+  await seedCatalog(t, 25, 339)
+  await buildUntilReady(t, 339)
+  // Emulate the already persisted legacy builder output, not a replacement snapshot/version.
+  await t.run(async (ctx) => {
+    const chunks = await ctx.db.query("catalogSyncSnapshotChunks").collect()
+    for (const chunk of chunks.slice(0, 2)) {
+      const event = JSON.parse(chunk.payloadJson)
+      const status = chunk.chunkIndex === 0 ? "draft" : "archived"
+      Object.assign(event, { status, startsAt: "", endsAt: "", doorsAt: "", venue: "", city: "", organizer: "" })
+      await ctx.db.patch("catalogSyncSnapshotChunks", chunk._id, { payloadJson: JSON.stringify(event) })
+      const row = await ctx.db
+        .query("catalogEvents")
+        .withIndex("eventKey", (q) => q.eq("eventKey", chunk.eventKey))
+        .unique()
+      if (!row) throw new Error("event missing")
+      await ctx.db.patch("catalogEvents", row._id, {
+        status,
+        startsAt: "",
+        endsAt: "",
+        doorsAt: "",
+        venue: "",
+        city: "",
+        organizer: "",
+      })
+    }
+    const snapshot = await ctx.db
+      .query("catalogSyncSnapshots")
+      .withIndex("version", (q) => q.eq("version", 339))
+      .unique()
+    if (!snapshot) throw new Error("snapshot missing")
+    const retainedEvents = (
+      await ctx.db
+        .query("catalogSyncSnapshotChunks")
+        .withIndex("versionAndChunkIndex", (q) => q.eq("version", 339))
+        .collect()
+    ).map((chunk) => JSON.parse(chunk.payloadJson))
+    await ctx.db.patch("catalogSyncSnapshots", snapshot._id, {
+      payloadBytes: new TextEncoder().encode(JSON.stringify({ catalogVersion: 339, events: retainedEvents }))
+        .byteLength,
+    })
+    const state = await ctx.db.query("catalogSyncStates").withIndex("key").unique()
+    if (!state) throw new Error("state missing")
+    await ctx.db.patch("catalogSyncStates", state._id, { status: "failed", syncedVersion: 276, attempts: 743 })
+  })
+  const retainedRead = () =>
+    t.run(async (ctx) => ({
+      snapshots: await ctx.db.query("catalogSyncSnapshots").collect(),
+      chunks: await ctx.db.query("catalogSyncSnapshotChunks").collect(),
+      events: await ctx.db.query("catalogEvents").collect(),
+      tiers: await ctx.db.query("catalogTicketTiers").collect(),
+    }))
+  const before = await retainedRead()
+  billingTestConfigSet()
+  const bodies: string[] = []
+  const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+    const body = typeof init?.body === "string" ? init.body : ""
+    bodies.push(body)
+    return billingCatalogResponseCreate(body, bodies.length > 1)
+  })
+  vi.stubGlobal("fetch", fetchMock)
+  const config = billingEventorenClient.configRead()
+  if (!config.success) throw new Error(config.errorMessage)
+  const original = await billingEventorenClient.catalogPush(config.data, {
+    organizationId: "eventoren",
+    catalogVersion: 339,
+    events: (await readSnapshotEvents(t, 339)) as EventorenCatalogUpsertRequest["events"],
+  })
+  expect(original.success).toBe(false)
+  expect(fetchMock).not.toHaveBeenCalled()
+
+  const recovered = await t.action(internal.catalog.catalogSyncPushAction, { requestedVersion: 339 })
+  const retry = await t.action(internal.catalog.catalogSyncPushAction, { requestedVersion: 339 })
+  expect(recovered).toMatchObject({ success: true, data: { catalogVersion: 339, replayed: false } })
+  expect(retry).toMatchObject({ success: true, data: { catalogVersion: 339, replayed: true } })
+  expect(bodies).toHaveLength(2)
+  expect(bodies[0]).toBe(bodies[1])
+  const payload = JSON.parse(bodies[0]!) as EventorenCatalogUpsertRequest
+  expect(payload.events).toHaveLength(23)
+  expect(payload.events.every((event) => event.status === "published")).toBe(true)
+  const response = await (await billingCatalogResponseCreate(bodies[0]!)).json()
+  expect(await t.run(async (ctx) => ctx.db.query("catalogSyncStates").withIndex("key").unique())).toMatchObject({
+    version: 339,
+    status: "synced",
+    syncedVersion: 339,
+    syncedDigest: response.data.catalogDigest,
+    attempts: 0,
+  })
+  expect(await retainedRead()).toEqual(before)
+  expect(before.snapshots[0]).toMatchObject({ version: 339, status: "ready", eventCount: 25, chunkCount: 25 })
+})
+
+test.each(["fresh", "retained"])("%s snapshots still reject invalid published rows before HTTP", async (kind) => {
+  const t = convexTest(schema, modules)
+  await seedCatalog(t, 1)
+  if (kind === "retained") await buildUntilReady(t, 1)
+  await t.run(async (ctx) => {
+    if (kind === "retained") {
+      const chunk = await ctx.db.query("catalogSyncSnapshotChunks").first()
+      if (!chunk) throw new Error("chunk missing")
+      await ctx.db.patch("catalogSyncSnapshotChunks", chunk._id, {
+        payloadJson: JSON.stringify({ ...JSON.parse(chunk.payloadJson), startsAt: "" }),
+      })
+      return
+    }
+    const event = await ctx.db.query("catalogEvents").first()
+    if (!event) throw new Error("event missing")
+    await ctx.db.patch("catalogEvents", event._id, { startsAt: "" })
+  })
+  billingTestConfigSet()
+  const fetchMock = vi.fn()
+  vi.stubGlobal("fetch", fetchMock)
+  const result = await t.action(internal.catalog.catalogSyncPushAction, { requestedVersion: 1 })
+  expect(result.success).toBe(false)
+  expect(fetchMock).not.toHaveBeenCalled()
+  expect(await t.run(async (ctx) => ctx.db.query("catalogSyncStates").withIndex("key").unique())).toMatchObject({
+    status: "failed",
+  })
+})
+
+test("a catalog with only incomplete unpublished events sends a valid empty full revision", async () => {
+  const t = convexTest(schema, modules)
+  await seedCatalog(t, 2)
+  await t.run(async (ctx) => {
+    for (const event of await ctx.db.query("catalogEvents").collect()) {
+      await ctx.db.patch("catalogEvents", event._id, { status: "draft", startsAt: "" })
+    }
+  })
+  billingTestConfigSet()
+  const bodies: string[] = []
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const body = typeof init?.body === "string" ? init.body : ""
+      bodies.push(body)
+      return billingCatalogResponseCreate(body)
+    }),
+  )
+  expect(await t.action(internal.catalog.catalogSyncPushAction, { requestedVersion: 1 })).toMatchObject({
+    success: true,
+  })
+  expect(JSON.parse(bodies[0]!)).toEqual({ organizationId: "eventoren", catalogVersion: 1, events: [] })
+  expect(await t.query(internal.catalog.catalogSyncSnapshotQuery, { requestedVersion: 1 })).toMatchObject({
+    eventCount: 0,
+    events: [],
+  })
+})
 
 test("requests a full snapshot refresh without editing catalog events", async () => {
   vi.useFakeTimers()
