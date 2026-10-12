@@ -1,4 +1,4 @@
-import { createEffect, on, onMount, useContext } from "solid-js"
+import { createEffect, on, onMount, untrack, useContext } from "solid-js"
 import { api } from "#convex/_generated/api.js"
 import type { Id } from "#convex/_generated/dataModel.js"
 import type { FunctionReference, PaginationOptions } from "convex/server"
@@ -171,7 +171,7 @@ export function adminTicketOrdersPageStateCreate(
     if (!("success" in result) || !result.success) return
     const data: AdminTicketOrderLocalDetails = result.data
     if (data.id !== orderId) return
-    const existing = details.get()
+    const existing = untrack(details.get)
     const requestKey = `${orderId}:${currentToken ?? ""}:${data.billingOrderReference ?? ""}:${data.paymentReference}`
     const billingUnchanged =
       existing?.id === orderId &&

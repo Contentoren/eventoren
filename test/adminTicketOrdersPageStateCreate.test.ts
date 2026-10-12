@@ -1,10 +1,63 @@
-import { expect, test } from "bun:test"
-import { createRoot, createSignal, getOwner } from "solid-js"
+import { expect, mock, test } from "bun:test"
 import type { AdminTicketOrderDetails } from "../src/admin/AdminTicketOrderDetails.ts"
 import type { AdminTicketOrderListPage } from "../src/admin/AdminTicketOrderListPage.ts"
-import { adminTicketOrdersPageStateCreate } from "../src/admin/adminTicketOrdersPageStateCreate.ts"
-import { eventorenAuthContext } from "../src/auth/ui/eventorenAuthContext.ts"
-import { convexClientContext } from "../src/utils/convex_client/convexClientContext.ts"
+
+const solidJsClientPath = "solid-js/dist/solid.js"
+const solid = (await import(solidJsClientPath)) as unknown as typeof import("solid-js")
+mock.module("solid-js", () => solid)
+const { batch, createRenderEffect, createRoot, createSignal, getOwner, untrack } = solid
+const { eventorenAuthContext } = await import("../src/auth/ui/eventorenAuthContext.ts")
+const { convexClientContext } = await import("../src/utils/convex_client/convexClientContext.ts")
+const { adminTicketOrdersPageStateCreate } = await import("../src/admin/adminTicketOrdersPageStateCreate.ts")
+mock.restore()
+
+test("native details load order B after closing A, including cached subscription results in a provider", async () => {
+  let dispose = () => undefined
+  let state!: ReturnType<typeof adminTicketOrdersPageStateCreate>
+  const calls: { args: Record<string, any>; update: (value: any) => void; unsubscribed: boolean }[] = []
+  createRoot((rootDispose) => {
+    dispose = rootDispose
+    getOwner()!.context = {
+      [eventorenAuthContext.id]: {
+        token: () => "admin-a",
+        ready: () => true,
+      },
+      [convexClientContext.id]: {
+        onUpdate: (_query: unknown, args: Record<string, any>, update: (value: any) => void) => {
+          const call = { args, update, unsubscribed: false }
+          calls.push(call)
+          if (args.orderId) update({ success: true, data: { id: args.orderId, paymentReference: args.orderId } })
+          return () => {
+            call.unsubscribed = true
+          }
+        },
+      },
+    }
+    createRenderEffect(() =>
+      untrack(() => {
+        state = adminTicketOrdersPageStateCreate({ useNativeQueries: true })
+      }),
+    )
+  })
+  try {
+    await state.orderOpen("A")
+    expect(state.details()?.id).toBe("A")
+    expect(state.detailsLoading()).toBe(false)
+    state.orderClose()
+    expect(state.details()).toBeNull()
+    expect(state.detailsLoading()).toBe(false)
+    await state.orderOpen("B")
+    expect(state.selectedOrderId()).toBe("B")
+    expect(state.details()?.id).toBe("B")
+    expect(state.detailsLoading()).toBe(false)
+    const old = calls.find((call) => call.args.orderId === "A")!
+    expect(old.unsubscribed).toBe(true)
+    old.update({ success: true, data: { id: "A", paymentReference: "A" } })
+    expect(state.details()?.id).toBe("B")
+  } finally {
+    dispose()
+  }
+})
 
 test("a late detail response cannot replace a newer order or reopen a closed detail", async () => {
   await createRoot(async (dispose) => {
