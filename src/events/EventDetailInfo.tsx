@@ -13,7 +13,7 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
         <h2 id="event-description" class="text-xl font-semibold text-content">
           Über dieses Event
         </h2>
-        <p class="text-base leading-relaxed text-content-muted">{state.description()}</p>
+        <p class="whitespace-pre-line text-base leading-relaxed text-content-muted">{state.description()}</p>
 
         <Show when={state.hasHighlights()}>
           <div class="flex flex-col gap-space-3 pt-space-2">
