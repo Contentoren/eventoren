@@ -1,19 +1,9 @@
 import { Link } from "@tanstack/solid-router"
-import { imageList } from "../app/assets/imageList.ts"
-import { urlImage } from "../app/assets/urlImage.ts"
 import { classMerge } from "../ui/classMerge.ts"
+import { EventorenLogo } from "./EventorenLogo.tsx"
 
 export function SiteHeaderLogo(props: { class?: string; href?: string } = {}) {
-  const content = () => (
-    <img
-      src={urlImage(imageList.eventoren_logo_light2)}
-      alt="Eventoren"
-      width="1024"
-      height="206"
-      decoding="async"
-      class="h-7 w-auto max-md:h-5 sm:h-8"
-    />
-  )
+  const content = () => <EventorenLogo iconClass="h-7 w-auto shrink-0 max-md:h-5 sm:h-8" />
   const className = classMerge(
     "focus-ring flex shrink-0 items-center rounded-control transition-opacity hover:opacity-90",
     props.class,

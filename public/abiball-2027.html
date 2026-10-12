@@ -80,9 +80,12 @@ input,select{font:inherit;color:inherit}
   height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;
 }
 .header-left{display:flex;align-items:center;gap:22px}
-.header-logo{display:flex;align-items:center;text-decoration:none;transition:opacity .15s}
+.header-logo{display:flex;align-items:center;gap:8px;text-decoration:none;transition:opacity .15s}
 .header-logo:hover{opacity:.85}
 .header-logo img{height:28px;width:auto;display:block}
+.header-wordmark{display:flex;flex-direction:column;line-height:1;gap:1px}
+.header-name{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:18px;letter-spacing:-.02em;color:var(--color-content)}
+.header-sub{font-size:10px;font-weight:500;color:var(--color-content-muted)}
 .header-nav{display:flex;align-items:center;gap:8px}
 .nav-link{
   color:var(--color-content-muted);font-size:14px;font-weight:600;text-decoration:none;
@@ -309,7 +312,11 @@ h2.sec{font-size:22px;margin:30px 0 14px}
   <div class="header-inner">
     <div class="header-left">
       <a href="/" class="header-logo" aria-label="Eventoren – zur Startseite">
-        <img src="https://assets.eventoren.de/production/public/images/eventoren-logo-light_default_v1.avif" alt="Eventoren" width="1024" height="206">
+        <img src="/logo.svg" alt="" aria-hidden="true" width="24" height="24">
+        <span class="header-wordmark" aria-hidden="true">
+          <span class="header-name">eventoren</span>
+          <span class="header-sub">eine Marke von Semesterkur</span>
+        </span>
       </a>
       <nav class="header-nav">
         <a href="/" class="nav-link">Events entdecken</a>

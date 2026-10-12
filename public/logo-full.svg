@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 206" role="img" aria-labelledby="eventoren-logo-full-title eventoren-logo-full-desc">
+  <title id="eventoren-logo-full-title">Eventoren – eine Marke von Semesterkur</title>
+  <desc id="eventoren-logo-full-desc">Goldenes Ticket neben dem Schriftzug eventoren mit dem Untertitel eine Marke von Semesterkur.</desc>
+  <g transform="translate(20.2 20.2) scale(6.9)">
+    <g transform="rotate(-60 12 12)">
+      <path fill="#ffc851" fill-rule="evenodd" d="M15.58,16.8L12,14.5L8.42,16.8L9.5,12.68L6.21,10L10.46,9.74L12,5.8L13.54,9.74L17.79,10L14.5,12.68M20,12C20,10.89 20.9,10 22,10V6C22,4.89 21.1,4 20,4H4A2,2 0 0,0 2,6V10C3.11,10 4,10.9 4,12A2,2 0 0,1 2,14V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V14A2,2 0 0,1 20,12Z"/>
+    </g>
+  </g>
+  <text x="215" y="136" font-family="Nunito,Quicksand,Lato,'Segoe UI',system-ui,-apple-system,sans-serif" font-size="132" font-weight="800" fill="#171f32">eventoren</text>
+  <text x="219" y="180" font-family="Nunito,Quicksand,Lato,'Segoe UI',system-ui,-apple-system,sans-serif" font-size="37" font-weight="600" fill="#475569">eine Marke von Semesterkur</text>
+</svg>
