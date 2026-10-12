@@ -22,4 +22,4 @@ Replace raster product-logo usages with a consistent SVG ticket and HTML/Tailwin
 - Task 1: SVG sources and managed registration complete; managed public URLs currently return 404, so the application uses local public paths.
 - Task 2: complete.
 - Task 3: complete.
-- Task 4: in progress.
+- Task 4: complete; logo scope committed and pushed, then deployed to production and verified in a browser.
