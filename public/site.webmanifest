@@ -7,7 +7,7 @@
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "/logo.svg",
+      "src": "https://assets.eventoren.de/production/public/documents/public/logo_default_v2.svg",
       "sizes": "any",
       "type": "image/svg+xml"
     }

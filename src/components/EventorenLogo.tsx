@@ -1,4 +1,5 @@
 import { Show } from "solid-js"
+import { urlDocument } from "../app/assets/urlDocument.ts"
 import { classMerge } from "../ui/classMerge.ts"
 
 export function EventorenLogo(
@@ -7,7 +8,7 @@ export function EventorenLogo(
   return (
     <span class={classMerge("flex items-center gap-2", props.class)}>
       <img
-        src="/logo.svg"
+        src={urlDocument("logo.svg")}
         alt=""
         aria-hidden="true"
         decoding="async"
