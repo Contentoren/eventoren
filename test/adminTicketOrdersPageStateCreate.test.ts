@@ -5,14 +5,14 @@ import type { AdminTicketOrderListPage } from "../src/admin/AdminTicketOrderList
 const solidJsClientPath = "solid-js/dist/solid.js"
 const solid = (await import(solidJsClientPath)) as unknown as typeof import("solid-js")
 mock.module("solid-js", () => solid)
-const { batch, createRenderEffect, createRoot, createSignal, getOwner, untrack } = solid
+const { createRenderEffect, createRoot, createSignal, getOwner, untrack } = solid
 const { eventorenAuthContext } = await import("../src/auth/ui/eventorenAuthContext.ts")
 const { convexClientContext } = await import("../src/utils/convex_client/convexClientContext.ts")
 const { adminTicketOrdersPageStateCreate } = await import("../src/admin/adminTicketOrdersPageStateCreate.ts")
 mock.restore()
 
 test("native details load order B after closing A, including cached subscription results in a provider", async () => {
-  let dispose = () => undefined
+  let dispose: () => void = () => undefined
   let state!: ReturnType<typeof adminTicketOrdersPageStateCreate>
   const calls: { args: Record<string, any>; update: (value: any) => void; unsubscribed: boolean }[] = []
   createRoot((rootDispose) => {
