@@ -2,9 +2,29 @@ import { Link } from "@tanstack/solid-router"
 import { Show } from "solid-js"
 import type { AdminEventDetailTab } from "./adminEventDetailSearchParse.ts"
 
-export function AdminEventTabs(props: { eventKey?: string; tab: AdminEventDetailTab; tierCount?: number }) {
+export type AdminEventTabsProps = {
+  eventKey?: string
+  tab: AdminEventDetailTab
+  tierCount?: number
+}
+
+export function AdminEventTabs(props: AdminEventTabsProps) {
   const base =
     "rounded-lg px-4 py-3 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-ring"
+  const showTierWarning = () => (props.tierCount ?? 0) === 0
+  const ticketProductsLabel = (
+    <>
+      Ticketprodukte
+      <Show when={showTierWarning()}>
+        <span
+          title="Keine Ticketprodukte"
+          class="ml-1.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white leading-none"
+        >
+          !
+        </span>
+      </Show>
+    </>
+  )
   if (!props.eventKey) {
     return (
       <nav
@@ -23,15 +43,7 @@ export function AdminEventTabs(props: { eventKey?: string; tab: AdminEventDetail
           search={{ tab: "products" }}
           class={`${base} inline-flex items-center gap-1.5 ${props.tab === "products" ? "bg-brand-soft text-content" : "text-content-muted hover:bg-surface hover:text-content"}`}
         >
-          <span>Ticketprodukte</span>
-          <Show when={(props.tierCount ?? 0) === 0}>
-            <span
-              class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white leading-none"
-              title="Keine Ticketprodukte"
-            >
-              !
-            </span>
-          </Show>
+          {ticketProductsLabel}
         </Link>
       </nav>
     )
@@ -55,15 +67,7 @@ export function AdminEventTabs(props: { eventKey?: string; tab: AdminEventDetail
         search={{ tab: "products" }}
         class={`${base} inline-flex items-center gap-1.5 ${props.tab === "products" ? "bg-brand-soft text-content" : "text-content-muted hover:bg-surface hover:text-content"}`}
       >
-        <span>Ticketprodukte</span>
-        <Show when={(props.tierCount ?? 0) === 0}>
-          <span
-            class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white leading-none"
-            title="Keine Ticketprodukte"
-          >
-            !
-          </span>
-        </Show>
+        {ticketProductsLabel}
       </Link>
       <Link
         to="/admin/events/$eventKey"
@@ -71,7 +75,7 @@ export function AdminEventTabs(props: { eventKey?: string; tab: AdminEventDetail
         search={{ tab: "codes" }}
         class={`${base} ${props.tab === "codes" ? "bg-brand-soft text-content" : "text-content-muted hover:bg-surface hover:text-content"}`}
       >
-        Freischaltungscodes
+        Freischaltungscode
       </Link>
     </nav>
   )
