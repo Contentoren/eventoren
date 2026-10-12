@@ -50,7 +50,7 @@ if (isServer) {
       new Response(subprocess.stderr).text(),
     ])
     expect(exitCode, `${stdout}\n${stderr}`).toBe(0)
-    expect(`${stdout}\n${stderr}`).toContain("7 pass")
+    expect(`${stdout}\n${stderr}`).toContain("10 pass")
   })
 } else {
   describe("admin event image preview", () => {
@@ -207,6 +207,117 @@ if (isServer) {
           oldPreview.onError()
           expect(form.imagePreview()!.failed()).toBe(false)
           expect(catalog.eventDraft().imageUrl).toBe(unavailableUrl)
+        } finally {
+          dispose()
+        }
+      })
+    })
+
+    test("shows an immediate local preview during file upload", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          let resolveUpload!: (value: { readonly success: true; readonly data: typeof variants }) => void
+          const gate = new Promise<{ readonly success: true; readonly data: typeof variants }>((resolve) => {
+            resolveUpload = resolve
+          })
+          const catalog = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => createResult([]),
+            imageUpload: () => gate,
+          })
+          const form = adminEventDetailsFormStateCreate({ catalog })
+          expect(form.imagePreview()).toBeUndefined()
+          const uploadTask = form.imageUpload(new File(["image"], "event.png", { type: "image/png" }))
+          expect(form.imageUploading()).toBe(true)
+          const preview = form.imagePreview()
+          expect(preview).toBeDefined()
+          expect(preview!.src.length).toBeGreaterThan(0)
+          expect(preview!.src).not.toBe(variants.detail)
+          resolveUpload(createResult(variants))
+          await uploadTask
+          expect(form.imageUploading()).toBe(false)
+          expect(catalog.eventDraft().imageUrl).toBe(variants.detail)
+          expect(form.imagePreview()!.src).toBe(variants.detail)
+        } finally {
+          dispose()
+        }
+      })
+    })
+
+    test("submit during active upload waits for upload and saves with the uploaded image", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          let resolveUpload!: (value: { readonly success: true; readonly data: typeof variants }) => void
+          const gate = new Promise<{ readonly success: true; readonly data: typeof variants }>((resolve) => {
+            resolveUpload = resolve
+          })
+          const savedInputs: Array<{ imageUrl: string; eventKey: string }> = []
+          const catalog = adminCatalogPageStateCreate({
+            events: () => [],
+            eventsLive: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => createResult([]),
+            imageUpload: () => gate,
+            eventUpsert: async (input) => {
+              savedInputs.push({ imageUrl: input.imageUrl, eventKey: input.eventKey })
+              return createResult({ eventKey: input.eventKey, catalogVersion: 1 })
+            },
+          })
+          let savedKey: string | undefined
+          const form = adminEventDetailsFormStateCreate({
+            catalog,
+            onSaved: (eventKey) => {
+              savedKey = eventKey
+            },
+          })
+          catalog.eventFieldChange("eventKey", "test-event")
+          catalog.eventFieldChange("title", "Test Event")
+          const uploadTask = form.imageUpload(new File(["image"], "event.png", { type: "image/png" }))
+          expect(form.imageUploading()).toBe(true)
+          const submitPromise = form.submit({ preventDefault() {} } as SubmitEvent)
+          expect(form.pendingAction()).toBe("save")
+          expect(savedInputs.length).toBe(0)
+          resolveUpload(createResult(variants))
+          await uploadTask
+          await submitPromise
+          expect(form.imageUploading()).toBe(false)
+          expect(form.pendingAction()).toBeNull()
+          expect(catalog.eventDraft().imageUrl).toBe(variants.detail)
+          expect(savedInputs.length).toBe(1)
+          expect(savedInputs[0]!.imageUrl).toBe(variants.detail)
+          expect(savedKey).toBe("test-event")
+        } finally {
+          dispose()
+        }
+      })
+    })
+
+    test("preserves upload on new event when eventKey changes during upload", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          let resolveUpload!: (value: { readonly success: true; readonly data: typeof variants }) => void
+          const gate = new Promise<{ readonly success: true; readonly data: typeof variants }>((resolve) => {
+            resolveUpload = resolve
+          })
+          const catalog = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => createResult([]),
+            imageUpload: () => gate,
+          })
+          const form = adminEventDetailsFormStateCreate({ catalog })
+          expect(catalog.eventDraft().eventKey).toBe("")
+          const uploadTask = form.imageUpload(new File(["image"], "event.png", { type: "image/png" }))
+          expect(form.imageUploading()).toBe(true)
+          catalog.eventFieldChange("eventKey", "new-event-key")
+          catalog.eventFieldChange("title", "New Event")
+          resolveUpload(createResult(variants))
+          await uploadTask
+          expect(form.imageUploading()).toBe(false)
+          expect(catalog.eventDraft().imageUrl).toBe(variants.detail)
+          expect(catalog.eventDraft().imageVariants).toEqual(variants)
+          expect(form.imagePreview()!.src).toBe(variants.detail)
         } finally {
           dispose()
         }

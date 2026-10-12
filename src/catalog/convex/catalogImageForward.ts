@@ -115,7 +115,7 @@ export async function catalogImageForward(input: {
       if (!status.success) return false
       if (status.data.status === "succeeded") return true
       if (status.data.status === "failed" || status.data.status === "cancelled") return false
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      await new Promise((resolve) => setTimeout(resolve, Math.min(500 + attempt * 250, 2000)))
     }
     return false
   }

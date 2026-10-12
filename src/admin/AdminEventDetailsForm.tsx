@@ -205,8 +205,8 @@ export function AdminEventDetailsForm(props: {
               JPEG, PNG, WebP oder AVIF, maximal 10 MB. Alternativ kannst du oben eine Bild-URL eingeben.
             </p>
             <Show when={state.imageUploading()}>
-              <p role="status" class="mt-2 text-sm text-content-muted">
-                Bild wird hochgeladen …
+              <p role="status" class="mt-2 text-sm font-medium text-brand animate-pulse">
+                Bild wird hochgeladen und verarbeitet …
               </p>
             </Show>
             <Show when={state.imageUploadError()}>
@@ -302,16 +302,24 @@ export function AdminEventDetailsForm(props: {
       </Show>
       <AdminEventFeedback state={props.state} />
       <div class="flex flex-wrap items-center gap-3 border-t border-border pt-5 [.admin-workspace_&]:border-t-0">
-        <Button type="submit" disabled={props.state.isSaving() || state.imageUploading() || !!state.pendingAction()}>
-          {state.pendingAction() === "save" ? "Speichert …" : "Änderungen speichern"}
+        <Button type="submit" disabled={props.state.isSaving() || !!state.pendingAction()}>
+          {state.pendingAction() === "save"
+            ? state.imageUploading()
+              ? "Wartet auf Upload …"
+              : "Speichert …"
+            : "Änderungen speichern"}
         </Button>
         <Button
           type="button"
           variant="filledGreen"
-          disabled={props.state.isSaving() || state.imageUploading() || !!state.pendingAction() || !state.canPublish()}
+          disabled={props.state.isSaving() || !!state.pendingAction() || !state.canPublish()}
           onClick={state.publish}
         >
-          {state.pendingAction() === "publish" ? "Wird veröffentlicht …" : "Veröffentlichen"}
+          {state.pendingAction() === "publish"
+            ? state.imageUploading()
+              ? "Wartet auf Upload …"
+              : "Wird veröffentlicht …"
+            : "Veröffentlichen"}
         </Button>
       </div>
     </form>

@@ -1,4 +1,4 @@
-import { createMemo, onMount } from "solid-js"
+import { createMemo, onCleanup, onMount } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import { eventImageUrlGet } from "../events/eventImageUrlGet.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
@@ -25,7 +25,24 @@ export function adminEventDetailsFormStateCreate(inputs: {
   const imageUploading = createSignalObject(false)
   const imageUploadError = createSignalObject("")
   const imageDragActive = createSignalObject(false)
+  const localPreviewUrl = createSignalObject("")
+  let activeUploadPromise: Promise<void> | null = null
+
+  const revokeLocalPreview = () => {
+    const url = localPreviewUrl.get()
+    if (!url) return
+    localPreviewUrl.set("")
+    try {
+      if (typeof URL !== "undefined" && typeof URL.revokeObjectURL === "function") URL.revokeObjectURL(url)
+    } catch {
+      // Ignore revocation failures (e.g. test environments).
+    }
+  }
+  onCleanup(revokeLocalPreview)
+
   const imagePreviewSource = createMemo(() => {
+    const local = localPreviewUrl.get()
+    if (local) return local
     const draft = inputs.catalog.eventDraft()
     if (!draft.imageUrl) return ""
     return eventImageUrlGet(draft.imageVariants?.detail ?? draft.imageUrl)
@@ -41,6 +58,7 @@ export function adminEventDetailsFormStateCreate(inputs: {
 
   const imageUrlChange = (value: string) => {
     imageRequestRevision += 1
+    revokeLocalPreview()
     inputs.catalog.eventFieldChange("imageUrl", value)
     inputs.catalog.eventFieldChange("imageVariants", undefined)
   }
@@ -53,26 +71,51 @@ export function adminEventDetailsFormStateCreate(inputs: {
     const isCurrentUpload = () =>
       requestRevision === imageRequestRevision &&
       inputs.catalog.eventDraftRevision() === draftRevision &&
-      inputs.catalog.eventDraft().eventKey === eventKey
+      (!eventKey || inputs.catalog.eventDraft().eventKey === eventKey)
     imageUploadError.set("")
     imageUploading.set(true)
+    let previewUrlForRequest = ""
     try {
-      if (!inputs.catalog.imageUpload) {
-        imageUploadError.set("Für den Bild-Upload ist eine gültige Admin-Sitzung erforderlich.")
-        return
+      if (typeof URL !== "undefined" && typeof URL.createObjectURL === "function") {
+        try {
+          previewUrlForRequest = URL.createObjectURL(file)
+          if (typeof previewUrlForRequest === "string" && previewUrlForRequest)
+            localPreviewUrl.set(previewUrlForRequest)
+          else previewUrlForRequest = ""
+        } catch {
+          previewUrlForRequest = ""
+        }
       }
-      const result = await inputs.catalog.imageUpload(file)
-      if (!result.success) {
-        if (isCurrentUpload()) imageUploadError.set(result.errorMessage)
-        return
-      }
-      if (!isCurrentUpload()) return
-      inputs.catalog.eventFieldChange("imageUrl", result.data.detail)
-      inputs.catalog.eventFieldChange("imageVariants", result.data)
     } catch {
-      if (isCurrentUpload()) imageUploadError.set("Bild-Upload fehlgeschlagen. Bitte versuche es erneut.")
+      previewUrlForRequest = ""
+    }
+    const uploadTask = (async () => {
+      try {
+        if (!inputs.catalog.imageUpload) {
+          if (isCurrentUpload())
+            imageUploadError.set("Für den Bild-Upload ist eine gültige Admin-Sitzung erforderlich.")
+          return
+        }
+        const result = await inputs.catalog.imageUpload(file)
+        if (!result.success) {
+          if (isCurrentUpload()) imageUploadError.set(result.errorMessage)
+          return
+        }
+        if (!isCurrentUpload()) return
+        inputs.catalog.eventFieldChange("imageUrl", result.data.detail)
+        inputs.catalog.eventFieldChange("imageVariants", result.data)
+      } catch {
+        if (isCurrentUpload()) imageUploadError.set("Bild-Upload fehlgeschlagen. Bitte versuche es erneut.")
+      } finally {
+        if (previewUrlForRequest && localPreviewUrl.get() === previewUrlForRequest) revokeLocalPreview()
+        imageUploading.set(false)
+      }
+    })()
+    activeUploadPromise = uploadTask
+    try {
+      await uploadTask
     } finally {
-      imageUploading.set(false)
+      if (activeUploadPromise === uploadTask) activeUploadPromise = null
     }
   }
 
@@ -91,10 +134,14 @@ export function adminEventDetailsFormStateCreate(inputs: {
 
   const submit = async (event: SubmitEvent) => {
     event.preventDefault()
-    if (imageUploading.get() || pendingAction.get()) return
+    if (pendingAction.get()) return
     validationMessage.set("")
     pendingAction.set("save")
     try {
+      if (imageUploading.get() && activeUploadPromise) {
+        await activeUploadPromise
+        if (imageUploadError.get()) return
+      }
       const eventKey = await inputs.catalog.saveEvent()
       if (eventKey) await inputs.onSaved?.(eventKey)
     } finally {
@@ -103,9 +150,13 @@ export function adminEventDetailsFormStateCreate(inputs: {
   }
 
   const publish = async () => {
-    if (imageUploading.get() || pendingAction.get()) return
+    if (pendingAction.get()) return
     pendingAction.set("publish")
     try {
+      if (imageUploading.get() && activeUploadPromise) {
+        await activeUploadPromise
+        if (imageUploadError.get()) return
+      }
       await inputs.catalog.publishEvent()
     } finally {
       pendingAction.set(null)
