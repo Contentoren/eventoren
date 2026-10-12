@@ -1,11 +1,12 @@
 import { For, Show } from "solid-js"
-import { Button } from "#ui/interactive/button/Button.jsx"
+import { InputDateTime } from "#ui/input/datetime/InputDateTime.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { SelectMultiple } from "#ui/input/select/SelectMultiple.jsx"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
+import { ScannerLinkShareControls } from "./ScannerLinkShareControls.tsx"
 import { scannerHelperManagementStateCreate } from "./scannerHelperManagementStateCreate.ts"
 import { scannerLinkListHrefCreate } from "./scannerLinkListHrefCreate.ts"
-import { ScannerLinkShareControls } from "./ScannerLinkShareControls.tsx"
 
 export function ScannerHelperManagement(props: { readonly code: string }) {
   const state = scannerHelperManagementStateCreate(() => props.code)
@@ -54,12 +55,11 @@ export function ScannerHelperManagement(props: { readonly code: string }) {
             </div>
             <label class="flex flex-col gap-space-1">
               Ablaufdatum und Uhrzeit
-              <Input
-                type="datetime-local"
+              <InputDateTime
                 required
                 max={state.maxExpiry()}
                 value={state.expiry.get()}
-                onInput={(event) => state.expiry.set(event.currentTarget.value)}
+                onInput={(val) => state.expiry.set(val)}
                 disabled={state.pending()}
               />
             </label>

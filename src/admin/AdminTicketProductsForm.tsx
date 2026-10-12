@@ -1,5 +1,6 @@
 import { mdiDelete } from "@adaptive-ds/mdi/mdiDelete.js"
 import { For, Index, Show } from "solid-js"
+import { InputDateTime } from "#ui/input/datetime/InputDateTime.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
 import { Textarea } from "#ui/input/textarea/Textarea.jsx"
@@ -271,17 +272,31 @@ function Field(props: {
   return (
     <div class="min-w-0">
       <Label for={props.id}>{props.label}</Label>
-      <Input
-        id={props.id}
-        type={props.type ?? "text"}
-        inputmode={props.inputmode}
-        min={props.min}
-        step={props.step}
-        required={props.required}
-        value={props.value}
-        class={`mt-2 min-w-0 max-w-full ${props.type === "datetime-local" ? "max-sm:px-1" : ""} [.admin-workspace_&]:border-0`}
-        onInput={(event) => props.onInput(event.currentTarget.value)}
-      />
+      <Show
+        when={props.type === "datetime-local"}
+        fallback={
+          <Input
+            id={props.id}
+            type={props.type ?? "text"}
+            inputmode={props.inputmode}
+            min={props.min}
+            step={props.step}
+            required={props.required}
+            value={props.value}
+            class={`mt-2 min-w-0 max-w-full ${props.type === "datetime-local" ? "max-sm:px-1" : ""} [.admin-workspace_&]:border-0`}
+            onInput={(event) => props.onInput(event.currentTarget.value)}
+          />
+        }
+      >
+        <InputDateTime
+          id={props.id}
+          value={props.value}
+          required={props.required}
+          min={props.min}
+          onInput={props.onInput}
+          class="mt-2"
+        />
+      </Show>
     </div>
   )
 }

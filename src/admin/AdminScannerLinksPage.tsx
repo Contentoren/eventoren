@@ -2,6 +2,7 @@ import { For, Show } from "solid-js"
 import { ScannerLinkShareControls } from "#src/organizer/ScannerLinkShareControls.tsx"
 import { scannerLinkListHrefCreate } from "#src/organizer/scannerLinkListHrefCreate.ts"
 import { UiContainer } from "#src/ui/UiContainer.tsx"
+import { InputDateTime } from "#ui/input/datetime/InputDateTime.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { SelectMultiple } from "#ui/input/select/SelectMultiple.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
@@ -70,13 +71,11 @@ export function AdminScannerLinksPage(props: {
               </div>
               <label class="flex flex-col gap-1">
                 Ablaufdatum und Uhrzeit
-                <Input
-                  class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
-                  type="datetime-local"
+                <InputDateTime
                   required
                   max={state.maxExpiry()}
                   value={state.organizerExpiry.get()}
-                  onInput={(event) => state.organizerExpiry.set(event.currentTarget.value)}
+                  onInput={(val) => state.organizerExpiry.set(val)}
                   disabled={state.pending()}
                 />
               </label>
@@ -175,13 +174,11 @@ export function AdminScannerLinksPage(props: {
                     </div>
                     <label class="flex flex-col gap-1">
                       Ablaufdatum und Uhrzeit
-                      <Input
-                        class="min-h-11 rounded-lg border-0 bg-surface-muted/60 dark:bg-slate-800/60"
-                        type="datetime-local"
+                      <InputDateTime
                         required
                         max={state.maxExpiry(parent.expiresAt)}
                         value={state.helperExpiry.get()}
-                        onInput={(event) => state.helperExpiry.set(event.currentTarget.value)}
+                        onInput={(val) => state.helperExpiry.set(val)}
                         disabled={state.pending()}
                       />
                     </label>

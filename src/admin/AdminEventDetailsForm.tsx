@@ -1,5 +1,6 @@
 import { mdiClose } from "@adaptive-ds/mdi/mdiClose.js"
 import { For, type JSXElement, Show } from "solid-js"
+import { InputDateTime } from "#ui/input/datetime/InputDateTime.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
 import { SelectSingleNative } from "#ui/input/select/SelectSingleNative.jsx"
@@ -347,14 +348,27 @@ function Field(props: {
   return (
     <div class={props.class}>
       <Label for={props.id}>{props.label}</Label>
-      <Input
-        id={props.id}
-        type={props.type ?? "text"}
-        value={props.value}
-        required={props.required}
-        class="mt-2 [.admin-workspace_&]:border-0"
-        onInput={(event) => props.onInput(event.currentTarget.value)}
-      />
+      <Show
+        when={props.type === "datetime-local"}
+        fallback={
+          <Input
+            id={props.id}
+            type={props.type ?? "text"}
+            value={props.value}
+            required={props.required}
+            class="mt-2 [.admin-workspace_&]:border-0"
+            onInput={(event) => props.onInput(event.currentTarget.value)}
+          />
+        }
+      >
+        <InputDateTime
+          id={props.id}
+          value={props.value}
+          required={props.required}
+          onInput={props.onInput}
+          class="mt-2"
+        />
+      </Show>
     </div>
   )
 }
