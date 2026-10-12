@@ -89,7 +89,7 @@ describe("ticket event-started pre-loop guard", () => {
     }
   })
 
-  it("still blocks an uncertain payment before any child runs without mutating the checkpoint", async () => {
+  it("permits the ticket child when payment is uncertain so its canonical proof decides", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-payment-started-"))
     try {
       await devTicketCheckpointSave(directory, {
@@ -99,21 +99,38 @@ describe("ticket event-started pre-loop guard", () => {
         eventId: `ticket-e2e-${runId}`,
         productId: "paid-ticket",
       })
-      const before = await readFile(join(directory, "checkpoint.json"), "utf8")
-      let started = 0
+      const ticketResolver = (async () =>
+        createResult({
+          key: "sk_test_mock",
+          accountId: "acct_mock",
+          organizationId: "org_mock",
+        })) as never
+      const started: string[] = []
+      const runIds: string[] = []
       expect(
         await e2eInvocationRun({
           target: "development",
           environment: {},
           checkpointDirectory: directory,
-          commandRun: async () => {
-            started++
-            return 0
+          historicalStripeConfigResolve: ticketResolver,
+          commandRun: async (workflow, environment) => {
+            started.push(workflow.name)
+            runIds.push(environment.E2E_RUN_ID!)
+            return 1
           },
+          catalogHistoricalCleanup: async () => ({ success: true, data: { truncated: false } }),
         }),
       ).toBe(1)
-      expect(started).toBe(0)
-      expect(await readFile(join(directory, "checkpoint.json"), "utf8")).toBe(before)
+      // The three completed workflows are skipped; only the unfinished ticket child runs.
+      // Its started-payment proof adopts paid success or retries the SAME hosted
+      // session only on open/unpaid with no intent; every other state retains.
+      expect(started).toEqual(["ticket purchase"])
+      expect(runIds).toEqual([runId])
+      const retained = JSON.parse(await readFile(join(directory, "checkpoint.json"), "utf8"))
+      expect(retained.runId).toBe(runId)
+      expect(retained.ticket.step).toBe("payment")
+      expect(retained.ticket.status).toBe("started")
+      expect(retained.completedWorkflows).toEqual([...completedPrefix])
     } finally {
       await rm(directory, { recursive: true, force: true })
     }

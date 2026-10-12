@@ -10,6 +10,8 @@ const session = v.object({
   payment_status: v.string(),
   customer: v.nullable(v.string()),
   subscription: v.nullable(v.string()),
+  url: v.optional(v.nullable(v.string())),
+  payment_intent: v.optional(v.nullable(v.string())),
   metadata,
 })
 const customer = v.object({ id: v.string(), livemode: v.literal(false), deleted: v.optional(v.boolean()), metadata })
@@ -24,6 +26,7 @@ const paymentIntent = v.object({
   id: v.string(),
   livemode: v.literal(false),
   customer: v.nullable(v.string()),
+  status: v.optional(v.string()),
   metadata,
 })
 const invoice = v.object({ id: v.string(), livemode: v.literal(false), customer: v.nullable(v.string()), metadata })
@@ -32,6 +35,7 @@ const charge = v.object({
   livemode: v.literal(false),
   customer: v.nullable(v.string()),
   payment_intent: v.nullable(v.string()),
+  status: v.optional(v.string()),
 })
 
 const schemas = { session, customer, subscription, paymentIntent, invoice, charge } as const

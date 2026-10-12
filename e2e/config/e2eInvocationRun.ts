@@ -148,17 +148,18 @@ export async function e2eInvocationRun(
       return 1
     }
     // Uncertain ticket writes stay blocked before any child runs, except the
-    // event, product and checkout steps: their exact-marker proofs live in
-    // the ticket child (ticketPurchaseEventStep, ticketPurchaseProductStep
-    // and the checkout read-only proof in ticketPurchaseCheckoutStep), which
+    // event, product, checkout and payment steps: their exact-marker proofs live in
+    // the ticket child (ticketPurchaseEventStep, ticketPurchaseProductStep,
+    // the checkout read-only proof in ticketPurchaseCheckoutStep and the
+    // started-payment read-only proof in ticketPurchasePaymentStep), which
     // adopts a proven existing own row/session or creates once on positively
-    // authorized absence with the same run intent. Other payment-adjacent
-    // started steps still require their existing Stripe proof and reconcile
-    // separately. Payment stays blocked until its appropriate proof lands.
-    if (
-      checkpoint.ticket?.status === "started" &&
-      ["publication", "payment", "checkin"].includes(checkpoint.ticket.step)
-    ) {
+    // authorized absence with the same run intent. A proven open/unpaid
+    // payment with no intent retries the SAME hosted session URL; paid
+    // adopts success; every other payment state retains. Other
+    // payment-adjacent started steps still require their existing Stripe proof
+    // and reconcile separately. Publication/checkin stay blocked until their
+    // appropriate proof lands.
+    if (checkpoint.ticket?.status === "started" && ["publication", "checkin"].includes(checkpoint.ticket.step)) {
       console.error(
         `Ticket ${checkpoint.ticket.step} for ${checkpoint.runId} has uncertain external effects; reconcile before rerunning`,
       )
