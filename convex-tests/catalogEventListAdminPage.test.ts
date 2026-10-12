@@ -180,23 +180,22 @@ test("public catalog loading remains published-only after adding the admin query
   await t.run(async (ctx) => {
     for (const status of ["draft", "published", "archived"] as const) {
       const eventId = await ctx.db.insert("catalogEvents", catalogEventInsert(status))
-      if (status === "published") {
-        await ctx.db.insert("catalogTicketTiers", {
-          eventId,
-          tierKey: "standard",
-          name: "Standard",
-          description: "",
-          priceCents: 2500,
-          feeCents: 250,
-          capacity: 10,
-          reserved: 0,
-          sold: 0,
-          sortOrder: 0,
-          catalogVersion: 1,
-          createdAt: "2026-09-01T00:00:00.000Z",
-          updatedAt: "2026-09-01T00:00:00.000Z",
-        })
-      }
+      if (status !== "published") continue
+      await ctx.db.insert("catalogTicketTiers", {
+        eventId,
+        tierKey: "standard",
+        name: "Standard",
+        description: "Freie Platzwahl",
+        priceCents: 2500,
+        feeCents: 250,
+        capacity: 10,
+        reserved: 2,
+        sold: 3,
+        sortOrder: 0,
+        catalogVersion: 1,
+        createdAt: "2026-09-01T00:00:00.000Z",
+        updatedAt: "2026-09-01T00:00:00.000Z",
+      })
     }
   })
 
