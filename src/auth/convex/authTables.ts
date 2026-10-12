@@ -58,11 +58,14 @@ export const authTables = {
     loginMethod: v.union(loginMethodValidator),
     token: v.string(),
     expiresAt: v.string(),
+    e2eRunId: v.optional(v.string()),
+    e2eMarkedAt: v.optional(v.string()),
     ...fieldsConvexCreatedAtUpdatedAtDeletedAt,
   })
     //
     .index("userId", ["userId"])
-    .index("token", ["token"]),
+    .index("token", ["token"])
+    .index("e2eRunId", ["e2eRunId"]),
 
   authRateLimits: defineTable({
     identifier: v.string(),

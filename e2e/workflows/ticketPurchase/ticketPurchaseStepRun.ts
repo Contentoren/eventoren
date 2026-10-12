@@ -37,7 +37,18 @@ export async function ticketPurchaseStepRun(
     throw new Error(`Cannot advance ticket workflow to ${step}; preceding step is uncertain`)
   }
   const completed = current === position && context.checkpoint.ticket.status === "completed"
-  if (current === position && context.checkpoint.ticket.status === "started" && !readOnly) {
+  // The event and product steps reconcile their own uncertain writes with an
+  // exact-marker admin proof inside ticketPurchaseEventStep and
+  // ticketPurchaseProductStep (adopt the proven own row, or create once on
+  // positively authorized absence). Every other uncertain write stays blocked
+  // here and must reconcile via its existing proof.
+  if (
+    current === position &&
+    context.checkpoint.ticket.status === "started" &&
+    !readOnly &&
+    step !== "event" &&
+    step !== "product"
+  ) {
     throw new Error(`Ticket ${step} has an uncertain external effect; reconcile the exact run before retrying`)
   }
   const record = async (evidence: Partial<Ticket>) => {

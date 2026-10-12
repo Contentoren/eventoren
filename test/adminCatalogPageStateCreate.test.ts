@@ -20,7 +20,7 @@ if (isServer) {
       new Response(subprocess.stderr).text(),
     ])
     expect(exitCode, `${stdout}\n${stderr}`).toBe(0)
-    expect(`${stdout}\n${stderr}`).toContain("18 pass")
+    expect(`${stdout}\n${stderr}`).toContain("19 pass")
   })
 } else {
   describe("admin catalog page state", () => {
@@ -124,6 +124,35 @@ if (isServer) {
           expect(catalog.selectedEvent()?.tiers[0]?.name).toBe("Standard")
           expect(catalog.eventDraft().status).toBe("published")
           expect(catalog.selectedEventKey()).toMatch(/^new-concert-/u)
+        } finally {
+          dispose()
+        }
+      })
+    })
+
+    test("saves a new-event create with an explicit technical key without slug replacement", async () => {
+      await createRoot(async (dispose) => {
+        try {
+          let saved: { eventKey?: string; title?: string } | undefined
+          const original = adminCatalogPageStateCreate({
+            events: () => [],
+            isServerAuthorized: () => true,
+            reloadEvents: async () => ({ success: true, data: [] }),
+            eventUpsert: async (input) => {
+              saved = input
+              return createResult({ eventKey: input.eventKey, catalogVersion: 1 })
+            },
+          })
+          const catalog = adminEventNewCatalogStateCreate(original)
+          catalog.eventFieldChange("title", "[native-auth-e2e:run:attempt] lifecycle draft")
+          catalog.eventFieldChange("eventKey", "native-auth-attempt")
+          const eventKey = await catalog.saveEvent()
+          expect(eventKey).toBe("native-auth-attempt")
+          expect(saved).toMatchObject({
+            eventKey: "native-auth-attempt",
+            title: "[native-auth-e2e:run:attempt] lifecycle draft",
+          })
+          expect(catalog.errorMessage()).toBe("")
         } finally {
           dispose()
         }

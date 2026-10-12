@@ -14,6 +14,9 @@ export { signInUsingSocialAuth3InternalMutation } from "#src/auth/convex/sign_in
 export { notifyTelegramAuthInternalAction } from "#src/auth/convex/telegram/notifyTelegramAuth.ts"
 export { authCurrentUserGetQuery } from "#src/auth/convex/user/authCurrentUserGetQuery.ts"
 export { authSessionRevokeMutation } from "#src/auth/convex/user/authSessionRevokeMutation.ts"
+export { authSessionE2eMarkMutation } from "#src/auth/convex/e2e/authSessionE2eMarkMutation.ts"
+export { authSessionE2eDiscoveryQuery } from "#src/auth/convex/e2e/authSessionE2eDiscoveryQuery.ts"
+export { authSessionE2eCleanupMutation } from "#src/auth/convex/e2e/authSessionE2eCleanupMutation.ts"
 export { authUserRoleSetInternalMutation } from "#src/auth/convex/user/authUserRoleSetInternalMutation.ts"
 export { authUserZitadelRolesSynchronizeInternalMutation } from "#src/auth/convex/user/authUserZitadelRolesSynchronizeInternalMutation.ts"
 export {

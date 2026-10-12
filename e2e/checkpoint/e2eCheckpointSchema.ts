@@ -1,6 +1,13 @@
 import * as v from "valibot"
 
 /** Target-bound evidence. Never store capability links, QR codes, card data or credentials. */
+export const e2eSelectedWorkflowSchema = v.picklist([
+  "SSO",
+  "native auth HTTP",
+  "native auth lifecycle",
+  "ticket purchase",
+])
+
 export const e2eCheckpointSchema = v.strictObject({
   version: v.literal(1),
   target: v.picklist(["production", "development"]),
@@ -8,6 +15,9 @@ export const e2eCheckpointSchema = v.strictObject({
   runId: v.pipe(v.string(), v.regex(/^[0-9a-z]+-[0-9a-f-]{36}$/u)),
   createdAt: v.pipe(v.number(), v.integer(), v.minValue(1)),
   phase: v.picklist(["sso", "ticket-unreconciled"]),
+  selectedWorkflows: v.optional(v.array(e2eSelectedWorkflowSchema)),
+  completedWorkflows: v.optional(v.array(e2eSelectedWorkflowSchema)),
+  cleanupPhase: v.optional(v.picklist(["pending", "failed"])),
   ticket: v.optional(
     v.strictObject({
       step: v.picklist([

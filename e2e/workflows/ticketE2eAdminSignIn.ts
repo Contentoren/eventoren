@@ -10,9 +10,13 @@ export async function ticketE2eAdminSignIn(page: Page, baseUrl: string): Promise
     (url) => url.origin === origin && (url.pathname === "/admin/bestellungen" || url.pathname === "/admin/events"),
     { timeout: 60_000 },
   )
+  // Authenticated admin workspace proof: the shared sign-in helper already waited for
+  // an authorized /api/session, and only authorized admins render AdminShell with
+  // Admin-Navigation. The Abmelden action lives inside the closed account popover
+  // (its trigger is named after the signed-in user), so it must not be asserted
+  // visible here.
   const navigation = page.getByRole("navigation", { name: "Admin-Navigation" })
   await expect(navigation.getByRole("link", { name: "Events", exact: true })).toBeVisible({ timeout: 30_000 })
-  await expect(page.getByRole("button", { name: "Abmelden", exact: true })).toBeVisible()
   await expect(page.locator("main#content h1")).toHaveText(
     new URL(page.url()).pathname === "/admin/bestellungen" ? "Bestellungen" : "Events",
   )
