@@ -15,7 +15,9 @@ Repositories:
 - E2E purchases are restricted to preview/Stripe test mode. Delayed SEPA outcomes use controlled fixtures rather than live charges or waiting for settlement.
 - Preserve existing uncommitted E2E ownership-proof changes and the unrelated Billing documentation change.
 - Shared contract changes must be packaged through Billing's existing vendored-client workflow and consumed by both repositories.
-- Billing contracts, trusted Checkout policy enforcement, additive lifecycle persistence/status and verified completion processing are implemented. Eventoren catalog persistence and the admin selector are implemented. Client/sync integration, issuance/cancellation, delivery, and rollout remain in progress.
+- Billing policy enforcement, lifecycle evidence, retryable cancellation notifications, and independent ticket-only email processing/worker are implemented. Eventoren issuance/reconciliation/cancellation, ticket-only work/access/promotion, and customer/admin/organizer projections are implemented. Paid-email ticket deduplication, final verification, and rollout remain in progress.
+- Ticket-only delivery uses optional `deliveryMode` (`tickets_only` or `paid`, omitted means legacy paid), independent Billing confirmation state, and additive migration 0073. Eventoren consumes the refreshed Billing client package 0.1.9.
+- Production rollout remains pending final integrated verification. Billing production loads the application bundle and static files from `dist`; isolated client packaging is safe, but a full server build is a deployment operation and must use the staged window.
 - Verified configured test/live method choices: card, Klarna, SEPA debit, Bancontact. PayPal, iDEAL, bank transfer, and standalone Wero remain unavailable; bank transfer also has no existing usable rail configuration. Do not expose these as selectable custom methods.
 - Shared status evidence uses optional `checkoutCompletedAt`, `paymentMethodType`, `stripePaymentIntentStatus`, and a strictly correlated `cancellation` object. Early issuance requires the joint completed/SEPA/processing evidence, not any field alone.
 
@@ -122,17 +124,17 @@ Acceptance: SEPA-only checkout cannot offer an unrelated method; default checkou
 - [x] Update `src/checkout/server/organizationDynamicCheckoutStatusGet.ts` to expose the additive lifecycle evidence.
 - [x] Extend `src/payments/stripeEventProcess.ts` and the appropriate session processor to persist verified completed/processing SEPA without entering paid booking/invoice work.
 - [ ] Keep `src/payments/stripeCheckoutSessionPaidProcess.ts` genuinely paid-only. On later success, update payment truth and existing paid financial work without reissuing tickets.
-- [ ] Reuse pending async-failure handling and persist the cancellation reason needed by Eventoren.
-- [ ] Add SEPA-only dispute correlation using verified charge/PaymentIntent/context records and existing correlation helpers. Persist cancellation despite an originally paid context.
+- [x] Reuse pending async-failure handling and persist the cancellation reason needed by Eventoren.
+- [x] Add SEPA-only dispute correlation using verified charge/PaymentIntent/context records and existing correlation helpers. Persist cancellation despite an originally paid context.
 - [ ] Test duplicate and reordered completion/success/failure/dispute events, wrong organization/mode/session correlation, and expiry versus processing.
 
 Acceptance: unpaid completion never becomes paid; unrelated/card disputes are untouched; cancellation remains terminal even if later positive events arrive.
 
 ### 4. Shared client packaging and Eventoren consumption
 
-- [ ] Build the Billing client with `scripts/billingPackageBuild.ts` / `bun run package:build`.
-- [ ] Update Eventoren's existing vendored Billing dependency and lockfile using its established packaging workflow.
-- [ ] Update `src/ticketing/convex/billingEventorenClient.ts` and status/checkout consumers to carry the additive fields. Old responses without them keep their current behavior.
+- [x] Build the Billing client with `scripts/billingPackageBuild.ts` / `bun run package:build`.
+- [x] Update Eventoren's existing vendored Billing dependency and lockfile using its established packaging workflow.
+- [x] Update `src/ticketing/convex/billingEventorenClient.ts` and status/checkout consumers to carry the additive fields. Old responses without them keep their current behavior.
 - [ ] Regenerate existing generated API/client artifacts only where required by the repository workflow.
 
 Acceptance: both repositories agree on catalog/status contracts without a breaking payment enum change.
@@ -140,10 +142,10 @@ Acceptance: both repositories agree on catalog/status contracts without a breaki
 ### 5. Eventoren: persist and synchronize the event override
 
 - [x] Update `src/catalog/convex/catalogTables.ts`, `src/catalog/client/CatalogEventUpsertInput.ts`, `src/catalog/client/catalogEventUpsert.ts`, and `src/catalog/convex/catalogEventUpsertMutation.ts`.
-- [ ] Carry the policy through `src/events/EventItem.ts`, `src/catalog/convex/catalogEventToEventItem.ts`, and the catalog snapshot/push paths, including `catalogSyncSnapshotBuildMutation.ts`, `catalogSyncSnapshotQuery.ts`, and `catalogSyncPushAction.ts` where applicable.
+- [x] Carry the policy through `src/events/EventItem.ts`, `src/catalog/convex/catalogEventToEventItem.ts`, and the catalog snapshot/push paths, including `catalogSyncSnapshotBuildMutation.ts`, `catalogSyncSnapshotQuery.ts`, and `catalogSyncPushAction.ts` where applicable.
 - [x] Include normalized policy changes in revision/change comparisons; preserve omission for existing events.
-- [ ] Keep checkout identity/context handling aligned with event revision and snapshot semantics. Do not pass a browser-selected whitelist to Billing.
-- [ ] Add focused upsert and sync tests.
+- [x] Keep checkout identity/context handling aligned with event revision and snapshot semantics. Do not pass a browser-selected whitelist to Billing.
+- [x] Add focused upsert and sync tests.
 
 Acceptance: create/edit and sync round-trip custom selections; absent/default settings remain absent; ordering-only changes do not cause false revisions.
 
@@ -160,35 +162,35 @@ Acceptance: collapsed default, Allow all selected, correct mutual exclusion, emp
 
 ### 7. Eventoren: issue valid tickets before SEPA settlement
 
-- [ ] Add minimal issuance/completion/cancellation markers in `src/ticketing/convex/ticketTables.ts` as needed; do not globally reinterpret the order/payment enums.
-- [ ] Refactor the issuance portion of `src/ticketing/convex/ticketPaymentStatusApplyMutation.ts` so verified processing SEPA completion can issue tickets while financial payment remains pending.
-- [ ] Reuse the existing allocation and reservation-to-sold accounting exactly once. Pending without eligible completion evidence must not issue.
-- [ ] On later paid application, update settlement/booking details without duplicate issued rows, inventory changes, or ticket delivery.
-- [ ] Update `ticketPaymentReconcileAction.ts`, `ticketPaymentReconcileScheduledAction.ts`, and `ticketPaymentReconcileScheduledContextQuery.ts` so pending issued orders stay reconciled. Pass completion/method/cancellation evidence through all apply callers.
-- [ ] Preserve unfinished-checkout expiry, late-paid inventory-conflict handling, and bank-transfer paid-only issuance.
-- [ ] Test both completion/settlement orders and duplicate reconciliation.
+- [x] Add minimal issuance/completion markers in `src/ticketing/convex/ticketTables.ts` as needed; do not globally reinterpret the order/payment enums. Cancellation markers are completed with task 8.
+- [x] Refactor the issuance portion of `src/ticketing/convex/ticketPaymentStatusApplyMutation.ts` so verified processing SEPA completion can issue tickets while financial payment remains pending.
+- [x] Reuse the existing allocation and reservation-to-sold accounting exactly once. Pending without eligible completion evidence must not issue.
+- [x] On later paid application, update settlement/booking details without duplicate issued rows or inventory changes. Delivery deduplication is completed with task 9.
+- [x] Update `ticketPaymentReconcileAction.ts`, `ticketPaymentReconcileScheduledAction.ts`, and `ticketPaymentReconcileScheduledContextQuery.ts` so pending issued orders stay reconciled. Pass completion/method/cancellation evidence through all apply callers.
+- [x] Preserve unfinished-checkout expiry, late-paid inventory-conflict handling, and bank-transfer paid-only issuance.
+- [x] Test both completion/settlement orders and duplicate reconciliation.
 
 Acceptance: the customer receives a valid SEPA ticket before settlement; ordinary pending checkout cannot obtain a ticket; settlement is idempotent.
 
 ### 8. Cross-repository: cancel issued tickets on SEPA failure/return
 
-- [ ] Add a narrow authenticated outcome receiver in Eventoren's existing `convex/http.ts` routing and a transactional internal cancellation mutation exported through `convex/ticketing.ts`.
-- [ ] Validate full payment/order correlation and stable Stripe event identity. Duplicate delivery succeeds without repeated side effects; mismatched orders are not silently accepted.
-- [ ] Mark the order's tickets cancelled, preserve history and issued counters, release only any remaining reservations, and prevent later issuance/delivery/reactivation.
-- [ ] In Billing, deliver async-failure/dispute cancellation from the relevant Stripe processing path, using a fixed configured destination and server-only authentication. Use existing Stripe event retry semantics rather than an unrelated receipt worker or generic outbox.
-- [ ] Persist the same cancellation evidence in Billing status responses. Make Eventoren's direct reconciliation honor it even for already-paid orders; do not add an endless scan of historical paid orders.
-- [ ] Ensure `src/organizer/convex/organizerTicketCheckInApply.ts` rejects cancelled tickets and preserves previous check-in history.
+- [x] Add a narrow authenticated outcome receiver in Eventoren's existing `convex/http.ts` routing and a transactional internal cancellation mutation exported through `convex/ticketing.ts`.
+- [x] Validate full payment/order correlation and stable Stripe event identity. Duplicate delivery succeeds without repeated side effects; mismatched orders are not silently accepted.
+- [x] Mark the order's tickets cancelled, preserve history and issued counters, release only any remaining reservations, and prevent later issuance/delivery/reactivation.
+- [x] In Billing, deliver async-failure/dispute cancellation from the relevant Stripe processing path, using a fixed configured destination and server-only authentication. Use existing Stripe event retry semantics rather than an unrelated receipt worker or generic outbox.
+- [x] Persist the same cancellation evidence in Billing status responses. Make Eventoren's direct reconciliation honor it even for already-paid orders; do not add an endless scan of historical paid orders.
+- [x] Ensure `src/organizer/convex/organizerTicketCheckInApply.ts` rejects cancelled tickets and preserves previous check-in history.
 - [ ] Test cancellation before/after issuance, after settlement, duplicate delivery, lost callback response/retry, authentication/correlation failure, and positive events after cancellation.
 
 Acceptance: later failed/returned SEPA invalidates admission automatically, including an already-paid order; no cancelled ticket can be revived by a delayed event.
 
 ### 9. Cross-repository: delivery and customer/admin projections
 
-- [ ] Separate early ticket delivery from paid financial fulfillment. Reuse existing mail transport/templates and durable delivery conventions; add only the bounded ticket-only work needed for eligible pending SEPA.
-- [ ] Update the Eventoren fulfillment snapshot/scheduling paths, including `ticketFulfillmentWorkSnapshotCreate.ts`, so valid early-issued tickets are accessible and delivered once.
-- [ ] Extend Billing's authenticated fulfillment/confirmation integration as needed for ticket-only delivery, explicitly checking verified SEPA completion. Keep invoice/receipt and booking assignment paid-only in `eventorenTicketFulfillmentPrepare.ts`, `eventorenTicketConfirmationProcess.ts`, and related workers.
+- [x] Separate early ticket delivery from paid financial fulfillment. Reuse existing mail transport/templates and durable delivery conventions; add only the bounded ticket-only work needed for eligible pending SEPA.
+- [x] Update the Eventoren fulfillment snapshot/scheduling paths, including `ticketFulfillmentWorkSnapshotCreate.ts`, so valid early-issued tickets are accessible and delivered once.
+- [x] Extend Billing's authenticated fulfillment/confirmation integration as needed for ticket-only delivery, explicitly checking verified SEPA completion. Keep invoice/receipt and booking assignment paid-only in `eventorenTicketFulfillmentPrepare.ts`, `eventorenTicketConfirmationProcess.ts`, and related workers.
 - [ ] On later settlement, send only financial artifacts still due; do not duplicate ticket delivery. Stop undelivered ticket work after cancellation.
-- [ ] Include cancellation/issuance evidence in `ticketOrderProjectionCreate.ts`, customer order/status/history views, admin order views, and organizer display where currently missing.
+- [x] Include cancellation/issuance evidence in `ticketOrderProjectionCreate.ts`, customer order/status/history views, admin order views, and organizer display where currently missing.
 
 Acceptance: valid pending tickets are available and delivered; no early paid receipt; cancelled tickets are clearly invalid; normal paid checkout stays unchanged.
 
@@ -231,6 +233,7 @@ Run `bun run convex:codegen` when the schema/API changes require it. Use adjacen
 - [ ] Ensure both sides are ready before creating restricted events or issuing pending-SEPA tickets. Leave existing event defaults and organization/instance settings untouched.
 - [ ] Keep early SEPA issuance disabled during mixed-version deployment; use a minimal server-side readiness gate if existing controls cannot prevent it. Enable only after authenticated cancellation delivery and the receiver are configured and verified.
 - [ ] Before production deployment, obtain a consistent Billing database backup, confirm additive migration/rollback constraints, and verify each service's health after its staged update. Do not change production Stripe mode or create live E2E purchases.
+- [ ] Include `charge.dispute.created` in Billing's managed Stripe webhook endpoint subscriptions for the appropriate test/live endpoints; verify the deployed endpoints retain all existing required events.
 
 ## Out of scope
 
