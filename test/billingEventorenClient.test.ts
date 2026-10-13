@@ -244,10 +244,47 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
   })
 
   expect(catalog).toMatchObject({ success: true, data: { catalogVersion: 7, eventCount: 1 } })
-  expect(checkout).toMatchObject({ success: true, data: { status: "checkout_created", url: expect.any(String) } })
-  expect(status).toMatchObject({ success: true, data: { kind: "status", data: { payment: "pending" } } })
-  expect(expiration).toMatchObject({ success: true, data: { kind: "status", data: { payment: "expired" } } })
+  const paymentReference = checkoutInput().paymentReference
+  expect(checkout).toEqual({
+    success: true,
+    data: {
+      paymentReference,
+      orderReference: "billing-order-1",
+      stripeMode: "test",
+      status: "checkout_created",
+      url: "https://checkout.stripe.test/session",
+    },
+  })
+  expect(status).toEqual({
+    success: true,
+    data: {
+      kind: "status",
+      data: {
+        paymentReference,
+        orderReference: "billing-order-1",
+        stripeMode: "test",
+        status: "checkout_created",
+        payment: "pending",
+        expiresAt: null,
+      },
+    },
+  })
+  expect(expiration).toEqual({
+    success: true,
+    data: {
+      kind: "status",
+      data: {
+        paymentReference,
+        orderReference: "billing-order-1",
+        stripeMode: "test",
+        status: "expired",
+        payment: "expired",
+        expiresAt: null,
+      },
+    },
+  })
   expect(fulfillment).toMatchObject({ success: true, data: { status: "accepted", replayed: false } })
+  expect(fulfillment.success && fulfillment.data).not.toHaveProperty("deliveryMode")
   expect(requests).toHaveLength(6)
   expect(requests[0]?.url).toBe("https://billing.test/api/checkout/organizations/eventoren/catalog")
   expect(requests[0]?.init).toMatchObject({
@@ -273,6 +310,7 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
   expect(requests[3]?.url).toContain("/expire?organizationId=eventoren-test")
   expect(requests[4]?.url).toBe("https://billing.test/api/checkout/organizations/eventoren/ticket-fulfillment")
   expect(JSON.parse(String(requests[4]?.init?.body))).toMatchObject({ organizationId: "eventoren-test" })
+  expect(JSON.parse(String(requests[4]?.init?.body))).not.toHaveProperty("deliveryMode")
   expect(paymentDetails).toMatchObject({
     success: true,
     data: { charge: { paymentMethod: { card: { last4: "4242" } } } },
@@ -280,6 +318,49 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
   expect(requests[5]?.url).toContain("/ticket-checkout/payment_checkoutkey123456789012345678901234/payment-details?")
   expect(requests[5]?.url).toContain("organizationId=eventoren-test")
   expect(requests[5]?.url).toContain("orderReference=order_123abc")
+})
+
+test.each(["tickets_only", "paid"] as const)(
+  "preserves explicit %s fulfillment delivery mode through the packaged Billing client",
+  async (deliveryMode) => {
+    environmentSet()
+    let requestBody: unknown
+    const input = { ...fulfillmentInput(), deliveryMode }
+    const config = billingEventorenClient.configRead({
+      fetcher: async (_input, init) => {
+        requestBody = JSON.parse(String(init?.body))
+        const response = await fulfillmentResponse(input.paymentReference).json()
+        return Response.json({ ...response, data: { ...response.data, deliveryMode } })
+      },
+    })
+    expect(config.success).toBe(true)
+    if (!config.success) return
+
+    const result = await billingEventorenClient.ticketFulfillmentPrepare(config.data, input)
+    expect(requestBody).toMatchObject({ deliveryMode })
+    expect(result).toMatchObject({ success: true, data: { deliveryMode } })
+  },
+)
+
+test("rejects unsupported fulfillment delivery modes without sending a request", async () => {
+  environmentSet()
+  let requests = 0
+  const config = billingEventorenClient.configRead({
+    fetcher: async () => {
+      requests += 1
+      return fulfillmentResponse(fulfillmentInput().paymentReference)
+    },
+  })
+  expect(config.success).toBe(true)
+  if (!config.success) return
+
+  const result = await billingEventorenClient.ticketFulfillmentPrepare(config.data, {
+    ...fulfillmentInput(),
+    // @ts-expect-error Exercise the runtime contract for an unsupported delivery purpose.
+    deliveryMode: "receipt_only",
+  })
+  expect(result.success).toBe(false)
+  expect(requests).toBe(0)
 })
 
 test.each(["payment_failed", "sepa_disputed"] as const)(
@@ -346,8 +427,11 @@ test("nullable lifecycle evidence stays null rather than becoming issuance evide
     cancellation: null,
   }
   const config = billingEventorenClient.configRead({
-    fetcher: async () => {
-      const payload = await checkoutResponse(checkoutInput().paymentReference).json()
+    fetcher: async (input) => {
+      const response = new URL(String(input)).pathname.endsWith("/ticket-checkout")
+        ? checkoutResponse(checkoutInput().paymentReference)
+        : statusResponse(checkoutInput().paymentReference)
+      const payload = await response.json()
       return Response.json({ ...payload, data: { ...payload.data, ...lifecycle } })
     },
   })
@@ -356,6 +440,12 @@ test("nullable lifecycle evidence stays null rather than becoming issuance evide
     success: true,
     data: lifecycle,
   })
+  for (const result of [
+    await billingEventorenClient.statusGet(config.data, checkoutInput().paymentReference),
+    await billingEventorenClient.ticketCheckoutExpire(config.data, checkoutInput().paymentReference),
+  ]) {
+    expect(result).toMatchObject({ success: true, data: { kind: "status", data: lifecycle } })
+  }
 })
 
 test("preserves 404 semantics and normalizes Billing transport errors", async () => {
