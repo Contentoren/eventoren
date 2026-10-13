@@ -77,6 +77,14 @@ export function AdminEventTabs(props: AdminEventTabsProps) {
       >
         Freischaltungscode
       </Link>
+      <Link
+        to="/admin/events/$eventKey"
+        params={{ eventKey: props.eventKey }}
+        search={{ tab: "release" }}
+        class={`${base} ${props.tab === "release" ? "bg-brand-soft text-content" : "text-content-muted hover:bg-surface hover:text-content"}`}
+      >
+        Freigabe
+      </Link>
     </nav>
   )
 }

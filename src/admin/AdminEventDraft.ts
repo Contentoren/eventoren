@@ -12,6 +12,7 @@ export type AdminEventDraft = {
   startsAt: string
   endsAt: string
   doorsAt: string
+  bookingOpensAt: string
   venue: string
   city: string
   address: string

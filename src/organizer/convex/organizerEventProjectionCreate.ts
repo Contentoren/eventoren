@@ -12,6 +12,7 @@ export function organizerEventProjectionCreate(event: Doc<"catalogEvents">): Org
     startsAt: event.startsAt,
     endsAt: event.endsAt,
     doorsAt: event.doorsAt,
+    bookingOpensAt: event.bookingOpensAt,
     status: event.status,
   }
 }

@@ -6,6 +6,7 @@ import { AdminActivationCodesPanel } from "./AdminActivationCodesPanel.tsx"
 import { AdminEventDetailHeader } from "./AdminEventDetailHeader.tsx"
 import { AdminEventDetailsForm } from "./AdminEventDetailsForm.tsx"
 import { AdminEventFeedback } from "./AdminEventFeedback.tsx"
+import { AdminEventReleaseForm } from "./AdminEventReleaseForm.tsx"
 import { AdminEventTabs } from "./AdminEventTabs.tsx"
 import { AdminTicketProductsForm } from "./AdminTicketProductsForm.tsx"
 import type { adminEventDetailRouteStateCreate } from "./adminEventDetailRouteStateCreate.ts"
@@ -44,6 +45,9 @@ export function AdminEventDetailPage(props: { state: ReturnType<typeof adminEven
                 </Match>
                 <Match when={props.state.tab() === "codes"}>
                   <AdminActivationCodesPanel eventKey={props.state.eventKey} tiers={() => event().tiers} />
+                </Match>
+                <Match when={props.state.tab() === "release"}>
+                  <AdminEventReleaseForm state={props.state.catalog} />
                 </Match>
                 <Match when={true}>
                   <AdminEventDetailsForm state={props.state.catalog} />

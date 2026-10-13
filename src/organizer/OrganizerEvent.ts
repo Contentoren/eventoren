@@ -10,5 +10,6 @@ export type OrganizerEvent = {
   readonly startsAt: string
   readonly endsAt: string
   readonly doorsAt: string
+  readonly bookingOpensAt?: string
   readonly status: "draft" | "published" | "archived"
 }

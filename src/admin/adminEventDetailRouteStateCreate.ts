@@ -17,7 +17,6 @@ export function adminEventDetailRouteStateCreate() {
     catalog,
     event: () => catalog.events().find((candidate) => candidate.id === params().eventKey),
     eventKey: () => params().eventKey,
-    tab: (): AdminEventDetailTab =>
-      search().tab === "products" || search().tab === "codes" ? search().tab : "details",
+    tab: (): AdminEventDetailTab => search().tab ?? "details",
   }
 }

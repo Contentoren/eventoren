@@ -12,6 +12,7 @@ export type CatalogEventUpsertInput = {
   readonly startsAt: string
   readonly endsAt: string
   readonly doorsAt: string
+  readonly bookingOpensAt?: string
   readonly venue: string
   readonly city: string
   readonly address: string

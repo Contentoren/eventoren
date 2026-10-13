@@ -15,6 +15,7 @@ export const catalogTables = {
     startsAt: v.string(),
     endsAt: v.string(),
     doorsAt: v.string(),
+    bookingOpensAt: v.optional(v.string()),
     venue: v.string(),
     city: v.string(),
     address: v.string(),

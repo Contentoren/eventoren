@@ -39,6 +39,7 @@ export function catalogEventToEventItem(
     startsAt: event.startsAt,
     endsAt: event.endsAt,
     doorsAt: event.doorsAt,
+    bookingOpensAt: event.bookingOpensAt,
     venue: event.venue,
     city: event.city,
     address: event.address,

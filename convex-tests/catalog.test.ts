@@ -396,6 +396,57 @@ test("event inclusions and exclusions preserve omitted values and explicitly sav
   expect(adminPage.success && adminPage.data.page[0]).toMatchObject({ inclusions: [], exclusions: [] })
 })
 
+test("booking opening persists, survives omitted upserts, and clears only with an explicit empty string", async () => {
+  const t = convexTest(schema, modules)
+  const token = await tokenFor(t, await createUser(t, "admin"))
+  const bookingOpensAt = "2099-10-01T12:00:00.000Z"
+  const created = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    ...eventArgs(token, "published"),
+    bookingOpensAt,
+  })
+  expect(created.success).toBe(true)
+  const event = await t.run(async (ctx) => ctx.db.query("catalogEvents").first())
+  expect(event?.bookingOpensAt).toBe(bookingOpensAt)
+  if (!event || !created.success) return
+  await t.run(async (ctx) => ctx.db.insert("catalogTicketTiers", catalogTierInsert(event._id)))
+
+  const omitted = await t.mutation(api.catalog.catalogEventUpsertMutation, eventArgs(token, "published"))
+  expect(omitted).toEqual(created)
+  const publicEvent = await t.query(api.catalog.catalogEventGetPublishedQuery, { eventKey: "catalog-event" })
+  expect(publicEvent).toMatchObject({ bookingOpensAt, title: "Katalogveranstaltung", imageUrl: "/images/test.webp" })
+  expect(publicEvent?.tiers).toHaveLength(1)
+  const publicList = await t.query(api.catalog.catalogEventListPublishedQuery, {})
+  expect(publicList[0]?.bookingOpensAt).toBe(bookingOpensAt)
+  const adminPage = await t.query(api.catalog.catalogEventListAdminPageQuery, {
+    token,
+    paginationOpts: { numItems: 10, cursor: null },
+  })
+  expect(adminPage.success && adminPage.data.page[0]?.bookingOpensAt).toBe(bookingOpensAt)
+
+  const cleared = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+    ...eventArgs(token, "published"),
+    bookingOpensAt: "",
+  })
+  expect(cleared).toMatchObject({ success: true, data: { eventRevision: created.data.eventRevision + 1 } })
+  expect(cleared.success && cleared.data.catalogVersion).toBe(created.data.catalogVersion + 1)
+  expect((await t.run(async (ctx) => ctx.db.get("catalogEvents", event._id)))?.bookingOpensAt).toBeUndefined()
+})
+
+test.each(["invalid", " ", "2026-10-13", "2026-10-13T18:00", "2026-02-30T18:00:00Z"])(
+  "event upsert rejects invalid booking opening %s without writing catalog state",
+  async (bookingOpensAt) => {
+    const t = convexTest(schema, modules)
+    const token = await tokenFor(t, await createUser(t, "admin"))
+    const result = await t.mutation(api.catalog.catalogEventUpsertMutation, {
+      ...eventArgs(token),
+      bookingOpensAt,
+    })
+    expect(result.success).toBe(false)
+    expect(await t.run(async (ctx) => ctx.db.query("catalogEvents").first())).toBeNull()
+    expect(await t.run(async (ctx) => ctx.db.query("catalogSyncStates").first())).toBeNull()
+  },
+)
+
 test("tier upsert preserves omitted additional admissions and clears them only when explicitly empty", async () => {
   const t = convexTest(schema, modules)
   const token = await tokenFor(t, await createUser(t, "admin"))

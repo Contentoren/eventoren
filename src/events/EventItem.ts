@@ -15,6 +15,7 @@ export type EventItem = {
   startsAt: string
   endsAt: string
   doorsAt: string
+  bookingOpensAt?: string
   venue: string
   city: string
   address: string

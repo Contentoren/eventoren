@@ -1,4 +1,5 @@
 import { createEffect, onMount } from "solid-js"
+import * as v from "valibot"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { CatalogEventUpsertInput } from "../catalog/client/CatalogEventUpsertInput.ts"
 import type { CatalogTicketTierDeleteInput } from "../catalog/client/CatalogTicketTierDeleteInput.ts"
@@ -11,6 +12,7 @@ import { eventTicketTierActivationCodeRequiredGet } from "../events/eventTicketT
 import { eventHighlightsGet } from "../events/eventHighlightsGet.ts"
 import { eventInclusionsGet } from "../events/eventInclusionsGet.ts"
 import { eventExclusionsGet } from "../events/eventExclusionsGet.ts"
+import { eventBookingOpensAtSchema } from "../events/eventBookingOpensAtSchema.ts"
 import { eventCategoryLabels } from "../events/eventCategoryLabels.ts"
 import type { Result } from "../ui/Result.ts"
 import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
@@ -28,6 +30,7 @@ const emptyEventDraft = (): AdminEventDraft => ({
   startsAt: "",
   endsAt: "",
   doorsAt: "",
+  bookingOpensAt: "",
   venue: "",
   city: "",
   address: "",
@@ -213,6 +216,10 @@ export function adminCatalogPageStateCreate(inputs: {
     }
     if (draft.startsAt.trim() && draft.endsAt.trim() && Date.parse(draft.endsAt) <= Date.parse(draft.startsAt)) {
       errorMessage.set("Das Ende muss nach dem Beginn liegen.")
+      return
+    }
+    if (draft.bookingOpensAt && !v.safeParse(eventBookingOpensAtSchema, draft.bookingOpensAt).success) {
+      errorMessage.set("Bitte gib einen gültigen Buchungsstart mit Datum und Uhrzeit ein.")
       return
     }
     if (draft.highlights.some((highlight) => !highlight.title.trim())) {
@@ -670,6 +677,7 @@ function eventToDraft(event: AdminEventItem): AdminEventDraft {
     startsAt: event.startsAt,
     endsAt: event.endsAt,
     doorsAt: event.doorsAt,
+    bookingOpensAt: event.bookingOpensAt ?? "",
     venue: event.venue,
     city: event.city,
     address: event.address,

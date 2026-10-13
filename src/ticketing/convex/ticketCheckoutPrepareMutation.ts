@@ -7,6 +7,7 @@ import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 import { ticketCheckoutLegalDocumentRevision } from "../ticketCheckoutLegalDocumentRevision.js"
 import { ticketCheckoutLegalDocumentSnapshot } from "../ticketCheckoutLegalDocumentSnapshot.js"
 import { eventTicketTierMaxPerOrderGet } from "#src/events/eventTicketTierMaxPerOrderGet.ts"
+import { eventBookingIsOpen } from "#src/events/eventBookingIsOpen.ts"
 import { ticketCheckoutContextCanonicalize } from "./ticketCheckoutContextCanonicalize.js"
 import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.js"
 import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
@@ -78,6 +79,12 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     replayed: boolean
   }> => {
     const op = "ticketCheckoutPrepareMutation"
+    const event = await ctx.db
+      .query("catalogEvents")
+      .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
+      .unique()
+    // Check before replay/code lifecycle handling as well as before new reservations.
+    if (event && !eventBookingIsOpen(event)) return createResultError(op, "Booking for this event is not open yet")
     const existing = await ctx.db
       .query("ticketOrders")
       .withIndex("checkoutKey", (q) => q.eq("checkoutKey", args.checkoutKey))
@@ -251,10 +258,6 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       .withIndex("key", (q) => q.eq("key", "catalog"))
       .unique()
     if (!syncState) return createResultError(op, "The catalog is not available")
-    const event = await ctx.db
-      .query("catalogEvents")
-      .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
-      .unique()
     if (!event) return createResultError(op, "The event was not found")
     if (event.status !== "published") return createResultError(op, "The event is not available for checkout")
     if (args.eventRevision === undefined) return createResultError(op, "The event revision is required")

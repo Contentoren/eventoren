@@ -102,10 +102,13 @@ export const catalogSyncPushAction = internalAction({
       catalogVersion: args.requestedVersion,
       // Apply the same selection to retained ready snapshots without rewriting their chunks/counts.
       // Keep malformed published/unknown-status rows for Billing's strict validation, never hide them.
-      // Billing's strict event schema has no imageVariants; retain them in local snapshots only.
+      // Billing's strict event schema has neither imageVariants nor bookingOpensAt;
+      // retain these Eventoren-only fields in local snapshots, not the Billing request.
       events: events
         .filter((event) => event.status !== "draft" && event.status !== "archived")
-        .map(({ imageVariants: _imageVariants, ...event }) => event) as EventorenCatalogUpsertRequest["events"],
+        .map(
+          ({ imageVariants: _imageVariants, bookingOpensAt: _bookingOpensAt, ...event }) => event,
+        ) as EventorenCatalogUpsertRequest["events"],
     } satisfies EventorenCatalogUpsertRequest
     const serializedBillingPayload = JSON.stringify(billingPayload)
     const serializedBillingPayloadBytes = new TextEncoder().encode(serializedBillingPayload).byteLength

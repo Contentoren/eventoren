@@ -2,6 +2,8 @@ import { createResult } from "../ui/createResult.ts"
 import { createResultError } from "../ui/createResultError.ts"
 import type { Result } from "../ui/Result.ts"
 import type { EventItem } from "./EventItem.ts"
+import * as v from "valibot"
+import { eventBookingOpensAtSchema } from "./eventBookingOpensAtSchema.ts"
 
 const op = "eventItemParse"
 
@@ -15,6 +17,11 @@ export function eventItemParse(input: unknown): Result<EventItem> {
     return createResultError(op, "Event benötigt einen Titel.", input)
   if (typeof candidate.startsAt !== "string" || Number.isNaN(Date.parse(candidate.startsAt)))
     return createResultError(op, "Event benötigt ein gültiges Startdatum.", input)
+  if (
+    candidate.bookingOpensAt !== undefined &&
+    !v.safeParse(eventBookingOpensAtSchema, candidate.bookingOpensAt).success
+  )
+    return createResultError(op, "Event benötigt eine gültige Buchungsfreigabe.", input)
   if (typeof candidate.category !== "string" || candidate.category.length === 0)
     return createResultError(op, "Event benötigt eine Kategorie.", input)
   if (!Array.isArray(candidate.tiers) || candidate.tiers.length === 0)

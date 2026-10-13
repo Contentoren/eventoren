@@ -142,6 +142,29 @@ async function billingCatalogResponseCreate(body: string, replayed = false) {
   )
 }
 
+test("scheduled booking openings survive local snapshots without leaking unsupported fields to Billing", async () => {
+  const t = convexTest(schema, modules)
+  await seedCatalog(t, 1)
+  const bookingOpensAt = "2026-12-01T12:00:00.000Z"
+  await t.run(async (ctx) => {
+    const event = await ctx.db.query("catalogEvents").first()
+    if (!event) throw new Error("Missing event fixture")
+    await ctx.db.patch("catalogEvents", event._id, { bookingOpensAt })
+  })
+  await buildUntilReady(t, 1)
+  expect((await readSnapshotEvents(t, 1))[0]?.bookingOpensAt).toBe(bookingOpensAt)
+  billingTestConfigSet()
+  let payload: Record<string, unknown> | undefined
+  vi.stubGlobal("fetch", async (_input: unknown, init: RequestInit) => {
+    const body = String(init.body)
+    payload = JSON.parse(body)
+    return billingCatalogResponseCreate(body)
+  })
+  const pushed = await t.action(internal.catalog.catalogSyncPushAction, { requestedVersion: 1 })
+  expect(pushed.success).toBe(true)
+  expect((payload?.events as Record<string, unknown>[])[0]).not.toHaveProperty("bookingOpensAt")
+})
+
 test("fresh snapshots page past incomplete unpublished events without editing their fixtures", async () => {
   const t = convexTest(schema, modules)
   await seedCatalog(t, 33)

@@ -1,4 +1,5 @@
 import { v } from "convex/values"
+import * as a from "valibot"
 import { type MutationCtx, mutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import type { IdUser } from "#src/auth/convex/IdUser.ts"
@@ -7,6 +8,7 @@ import { catalogAdminAuthorizeFn } from "./catalogAdminAuthorizeFn.js"
 import { catalogSyncAdvanceFn } from "./catalogSyncAdvanceFn.js"
 import { catalogAllowedStripePaymentMethodsValidator } from "./catalogAllowedStripePaymentMethodsValidator.ts"
 import { catalogAllowedStripePaymentMethodsNormalize } from "../catalogAllowedStripePaymentMethodsNormalize.ts"
+import { eventBookingOpensAtSchema } from "#src/events/eventBookingOpensAtSchema.ts"
 
 const catalogEventArgsValidator = v.object({
   eventKey: v.string(),
@@ -17,6 +19,7 @@ const catalogEventArgsValidator = v.object({
   startsAt: v.string(),
   endsAt: v.string(),
   doorsAt: v.string(),
+  bookingOpensAt: v.optional(v.string()),
   venue: v.string(),
   city: v.string(),
   address: v.string(),
@@ -52,6 +55,10 @@ async function catalogEventUpsertAuthorizedFn(
   if (!policyResult.success) return policyResult
 
   if (args.eventKey.length === 0) return createResultError(op, "Event key is required")
+  if (args.bookingOpensAt !== undefined && args.bookingOpensAt !== "") {
+    const openingResult = a.safeParse(eventBookingOpensAtSchema, args.bookingOpensAt)
+    if (!openingResult.success) return createResultError(op, a.summarize(openingResult.issues))
+  }
   if (args.startsAt.trim() && Number.isNaN(Date.parse(args.startsAt)))
     return createResultError(op, "Start time must be a valid date and time")
   if (args.endsAt.trim() && Number.isNaN(Date.parse(args.endsAt)))
@@ -76,6 +83,7 @@ async function catalogEventUpsertAuthorizedFn(
         ? existing.imageVariants
         : undefined
   const status = args.status ?? existing?.status ?? "draft"
+  const bookingOpensAt = args.bookingOpensAt === undefined ? existing?.bookingOpensAt : args.bookingOpensAt || undefined
 
   const now = new Date().toISOString()
   const eventData = {
@@ -87,6 +95,7 @@ async function catalogEventUpsertAuthorizedFn(
     startsAt: args.startsAt,
     endsAt: args.endsAt,
     doorsAt: args.doorsAt,
+    bookingOpensAt,
     venue: args.venue,
     city: args.city,
     address: args.address,
@@ -114,6 +123,7 @@ async function catalogEventUpsertAuthorizedFn(
       startsAt: existing.startsAt,
       endsAt: existing.endsAt,
       doorsAt: existing.doorsAt,
+      bookingOpensAt: existing.bookingOpensAt,
       venue: existing.venue,
       city: existing.city,
       address: existing.address,

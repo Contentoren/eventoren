@@ -97,6 +97,7 @@ export const catalogSyncSnapshotBuildMutation = internalMutation({
         startsAt: event.startsAt,
         endsAt: event.endsAt,
         doorsAt: event.doorsAt,
+        ...(event.bookingOpensAt !== undefined ? { bookingOpensAt: event.bookingOpensAt } : {}),
         venue: event.venue,
         city: event.city,
         address: event.address,

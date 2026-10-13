@@ -8,6 +8,7 @@ import schema from "../convex/schema.js"
 import { billingEventorenClient } from "../src/ticketing/convex/billingEventorenClient.js"
 import { ticketCheckoutLegalDocumentRevision } from "../src/ticketing/ticketCheckoutLegalDocumentRevision.js"
 import { ticketCheckoutLegalDocumentSnapshot } from "../src/ticketing/ticketCheckoutLegalDocumentSnapshot.js"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const now = "2026-10-12T00:00:00.000Z"
@@ -147,6 +148,57 @@ async function orderPrepare(h: Harness, key = "a") {
     stripeMode: "test" as const,
   }
 }
+
+test.each(["guest", "owner"])(
+  "scheduled booking rejects %s checkout before opening without reservations or code consumption",
+  async (identity) => {
+    const h = await harnessCreate()
+    const opensAt = Date.parse("2026-10-13T18:00:00.000Z")
+    vi.setSystemTime(opensAt - 1)
+    const ownerUserId = await h.t.run(async (ctx) => {
+      await ctx.db.patch("catalogEvents", h.eventId, { bookingOpensAt: new Date(opensAt).toISOString() })
+      return ctx.db.insert("users", { name: "Existing contact", role: "user", createdAt: now, updatedAt: now })
+    })
+    const rejected = await h.t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, {
+      ...h.args,
+      ...(identity === "owner" ? { ownerUserId } : {}),
+    })
+    expect(rejected).toMatchObject({ success: false, errorMessage: "Booking for this event is not open yet" })
+    const state = await stateRead(h)
+    expect(state.orders).toEqual([])
+    expect(state.lines).toEqual([])
+    expect(state.reservations).toEqual([])
+    expect(state.histories).toEqual([])
+    expect(state.tiers.every((tier) => tier.reserved === 0 && tier.sold === 0)).toBe(true)
+    expect(state.codes.every((code) => code.status === "available")).toBe(true)
+
+    vi.setSystemTime(opensAt)
+    const allowed = await h.t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, {
+      ...h.args,
+      ...(identity === "owner" ? { ownerUserId } : {}),
+    })
+    expect(allowed).toMatchObject({ success: true, data: { replayed: false, status: "reserved" } })
+    const opened = await stateRead(h)
+    expect(opened.orders).toHaveLength(1)
+    expect(opened.reservations).toHaveLength(1)
+    expect(opened.codes.find((code) => code.code === codes[0])?.status).toBe("reserved")
+  },
+)
+
+test("an existing checkout cannot replay through a newly scheduled booking restriction", async () => {
+  const h = await harnessCreate()
+  const opened = await h.t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, h.args)
+  expect(opened.success).toBe(true)
+  await h.t.run(async (ctx) =>
+    ctx.db.patch("catalogEvents", h.eventId, {
+      bookingOpensAt: new Date(Date.now() + 60_000).toISOString(),
+    }),
+  )
+  const beforeReplay = await stateRead(h)
+  const replay = await h.t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, h.args)
+  expect(replay).toMatchObject({ success: false, errorMessage: "Booking for this event is not open yet" })
+  expect(await stateRead(h)).toEqual(beforeReplay)
+})
 
 async function stateRead(h: Harness) {
   return h.t.run(async (ctx) => ({
@@ -293,6 +345,68 @@ test("normalized idempotent replay keeps the exact reservation; altered code con
   ).toMatchObject({ success: false, errorMessage: expect.stringContaining("different ownership or checkout evidence") })
   expect(await stateRead(h)).toEqual(before)
 })
+
+test.each(["guest", "contact"])(
+  "public %s checkout enforces scheduled opening before Billing and opens exactly at the boundary",
+  async (identity) => {
+    const h = await harnessCreate()
+    const opensAt = Date.parse("2026-10-13T18:00:00.000Z")
+    vi.setSystemTime(opensAt - 1)
+    const userId = await h.t.run(async (ctx) => {
+      await ctx.db.patch("catalogEvents", h.eventId, { bookingOpensAt: new Date(opensAt).toISOString() })
+      return ctx.db.insert("users", { name: "Existing contact", role: "user", createdAt: now, updatedAt: now })
+    })
+    const authSecret = "booking-opening-contact-test-secret"
+    vi.stubEnv("AUTH_SECRET", authSecret)
+    const token = await testAuthSessionTokenCreate(h.t, userId, authSecret)
+    const checkoutKey = "b".repeat(32)
+    const billing = vi.spyOn(billingEventorenClient, "ticketCheckoutCreate").mockResolvedValue({
+      success: true,
+      data: {
+        paymentReference: `payment_${checkoutKey}`,
+        orderReference: "billing-scheduled-opening",
+        stripeMode: "test",
+        status: "checkout_created",
+        url: "https://billing.example.com/pay",
+      },
+    })
+    const args = {
+      checkoutKey,
+      ...(identity === "contact" ? { token } : { guestAccessToken: "g".repeat(32) }),
+      eventKey: h.args.eventKey,
+      catalogVersion: 1,
+      eventRevision: 1,
+      successUrl: h.args.successUrl,
+      cancelUrl: h.args.cancelUrl,
+      legalContext: h.args.legalContext,
+      tickets: h.args.tickets,
+      customer: {
+        email: "buyer@example.com",
+        givenName: "Ada",
+        familyName: "Lovelace",
+        address: "Street",
+        phone: "",
+        billingDetails: {
+          givenName: "Ada",
+          familyName: "Lovelace",
+          address: { line1: "Street", postalCode: "10115", city: "Berlin", country: "DE" },
+        },
+      },
+    }
+    const rejected = await h.t.action(api.ticketing.ticketCheckoutCreateAction, args)
+    expect(rejected).toMatchObject({ success: false, errorMessage: "Booking for this event is not open yet" })
+    expect(billing).not.toHaveBeenCalled()
+    const blocked = await stateRead(h)
+    expect(blocked.orders).toEqual([])
+    expect(blocked.reservations).toEqual([])
+    expect(blocked.codes.every((code) => code.status === "available")).toBe(true)
+
+    vi.setSystemTime(opensAt)
+    const allowed = await h.t.action(api.ticketing.ticketCheckoutCreateAction, args)
+    expect(allowed).toMatchObject({ success: true, data: { status: "checkout_created" } })
+    expect(billing).toHaveBeenCalledTimes(1)
+  },
+)
 
 test("public checkout accepts and normalizes optional code evidence without forwarding codes to Billing", async () => {
   const h = await harnessCreate()
