@@ -144,7 +144,7 @@ describe("ticket purchase stage persistence", () => {
       } as unknown as TicketPurchaseContext
       expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
       await ticketPurchaseCheckoutStep(context)
-      await expect(ticketPurchasePaymentStep(context)).rejects.toThrow("hosted session is no longer open")
+      await expect(ticketPurchasePaymentStep(context, { environment: {} })).rejects.toThrow("uncertain external effect")
       context.checkpoint.ticket.orderId = undefined
       await expect(ticketPurchaseCheckoutStep(context)).rejects.toThrow("exact saved order")
       context.checkpoint.ticket.orderId = "different-order"
@@ -154,9 +154,10 @@ describe("ticket purchase stage persistence", () => {
     }
   })
 
-  it("fails closed when the Stripe browser URL is unavailable", async () => {
+  it("fails closed for missing backend and credentials without touching the hosted page", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-step-test-"))
     try {
+      let pageEffects = 0
       const context = {
         directory,
         checkpoint: {
@@ -179,13 +180,17 @@ describe("ticket purchase stage persistence", () => {
         },
         checkoutPage: {
           url: () => {
+            pageEffects += 1
             throw new Error("browser closed")
           },
         },
       } as unknown as TicketPurchaseContext
       expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
-      await expect(ticketPurchasePaymentStep(context)).rejects.toThrow("Exact test checkout session")
+      await expect(ticketPurchasePaymentStep(context, { environment: {} })).rejects.toThrow(
+        "Ticket payment has an uncertain external effect; reconcile the exact run before retrying",
+      )
       expect(context.checkpoint.ticket).toMatchObject({ step: "payment", status: "started" })
+      expect(pageEffects).toBe(0)
       expect((await e2eCheckpointLoad(directory, context.checkpoint)).success).toBe(true)
     } finally {
       await rm(directory, { recursive: true, force: true })

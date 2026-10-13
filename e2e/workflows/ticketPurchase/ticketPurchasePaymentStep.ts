@@ -23,6 +23,8 @@ type PaymentProofInput = {
   stripeKey?: string
   stripeAccountId?: string
   stripeOrganizationId?: string
+  proofTimeoutMs?: number
+  proofPollIntervalMs?: number
 }
 
 export async function ticketPurchasePaymentStep(
@@ -36,40 +38,30 @@ export async function ticketPurchasePaymentStep(
     await ticketPurchaseCheckoutEvidenceCheck(context)
     return
   }
+  // Completed checkout never creates a new checkout/order here: fall through
+  // to the standard payment runner below, which persists payment-started then
+  // proves read-only (paid adopts, retry restores the exact saved URL).
   if (context.checkpoint.ticket.step === "checkout" && context.checkpoint.ticket.status === "completed") {
     await ticketPurchaseCheckoutEvidenceCheck(context)
-    if (!context.checkoutPage)
-      throw new Error(
-        "Checkout exists but the hosted session is no longer open; reconcile Stripe TEST and the order before payment retry",
-      )
   }
-  // Uncertain payment-started reaches this child through the runner gate
-  // because this step proves the exact saved run before touching the hosted
-  // form: a proven paid session/order adopts the known success without card
-  // entry, a proven open/unpaid session in a known active app state with no
-  // payment intent/charge restores the SAME authoritative hosted session URL
-  // (exact Stripe GET url including its fragment) before the normal card
-  // form, and every terminal-app/pending/foreign/expired/unknown/unavailable
-  // case retains without effect. No new order/checkout is ever created here;
-  // intents persist through the standard steps. Completed payment above skips
-  // mutation entirely.
+  // Resumed payment-started: reconcile (prove/submit/poll, no record), then
+  // record completion once. Fresh: standard runner records started/completed
+  // around the same reconcile. Top level closes the guest after either success.
   if (context.checkpoint.ticket.step === "payment" && context.checkpoint.ticket.status === "started") {
     await ticketPurchasePaymentStartedReconcile(context, input)
+    await ticketPurchasePaymentRecordCompleted(context)
+    await ticketPurchasePaymentCloseGuest(context)
     return
   }
   await ticketPurchaseStepRun(context, "payment", false, async () => {
-    await ticketPurchasePaymentBrowserSubmit(context)
-    await ticketPurchasePaymentStartedReconcile(context, input, true)
+    await ticketPurchasePaymentStartedReconcile(context, input)
   })
-  await context.guestContext?.close()
-  context.guestContext = undefined
-  context.checkoutPage = undefined
+  await ticketPurchasePaymentCloseGuest(context)
 }
 
 async function ticketPurchasePaymentStartedReconcile(
   context: TicketPurchaseContext,
   input: PaymentProofInput,
-  paidOnly = false,
 ): Promise<void> {
   const runId = context.checkpoint.runId
   const ticket = context.checkpoint.ticket
@@ -79,14 +71,13 @@ async function ticketPurchasePaymentStartedReconcile(
     ticket.participantName !== `E2E Participant ${runId}`
   )
     throw new Error("Ticket marker does not match the run; reconcile manually")
+  // Changed disk state never pays.
+  await ticketPurchasePaymentAssertPersisted(context)
   const environment = input.environment ?? process.env
   const backend = e2eTicketBackendResolve(environment)
   const stripeKey = input.stripeKey ?? environment["E2E_STRIPE_TEST_SECRET_KEY"]?.trim() ?? ""
   const stripeAccountId = input.stripeAccountId ?? environment["E2E_STRIPE_TEST_ACCOUNT_ID"]?.trim() ?? ""
   const stripeOrganizationId = input.stripeOrganizationId ?? environment["E2E_BILLING_ORGANIZATION_ID"]?.trim() ?? ""
-  // Without the canonical backend and TEST credentials the uncertain payment
-  // stays blocked without touching the page, preserving the historic
-  // fails-closed gate for unproven retries.
   if (!backend.success || !stripeKey || !stripeAccountId || !stripeOrganizationId)
     throw new Error("Ticket payment has an uncertain external effect; reconcile the exact run before retrying")
   const adminClient = input.client ?? new ConvexHttpClient(backend.data.convexUrl)
@@ -122,33 +113,86 @@ async function ticketPurchasePaymentStartedReconcile(
     }
   }
   const stripe = input.stripe ?? e2eStripeTestClientCreate(stripeKey)
-  const proof = await ticketPurchasePaymentProofCheck({
+  const proofBase = {
     checkpoint: context.checkpoint,
     organizationId: stripeOrganizationId,
     accountId: stripeAccountId,
     key: stripeKey,
     orderProof,
     stripe,
-  })
-  if (!proof.success) throw new Error(proof.errorMessage)
-  if (proof.data.state === "paid") {
-    if (proof.data.orderId !== ticket.orderId || proof.data.stripeSession !== ticket.stripeSession)
-      throw new Error("Adopted payment evidence changed; reconcile before continuing")
-    if (!paidOnly) await ticketPurchasePaymentRecordCompleted(context)
-    return
   }
-  if (paidOnly) throw new Error("Canonical saved order/Stripe paid proof missing; checkpoint retained")
+  // Pre-submit refusal retains immediately with no browser effect.
+  const proof = await ticketPurchasePaymentProofCheck(proofBase)
+  if (!proof.success) throw new Error(proof.errorMessage)
   if (proof.data.orderId !== ticket.orderId || proof.data.stripeSession !== ticket.stripeSession)
     throw new Error("Adopted payment evidence changed; reconcile before continuing")
+  // Exact paid proof adopts with no browser. No record/close here.
+  if (proof.data.state === "paid") return
+  const guestBefore = context.guestContext
   await ticketPurchasePaymentRestoreHostedPage(context, proof.data.hostedUrl, proof.data.stripeSession)
-  await ticketPurchasePaymentBrowserSubmit(context)
-  // The UI label is not a receipt. Re-read the exact saved order, account,
-  // session and owned customer; no retry or new session is allowed here.
-  await ticketPurchasePaymentStartedReconcile(context, input, true)
-  await ticketPurchasePaymentRecordCompleted(context)
-  await context.guestContext?.close()
-  context.guestContext = undefined
-  context.checkoutPage = undefined
+  const createdNewContext = context.guestContext !== undefined && context.guestContext !== guestBefore
+  try {
+    await ticketPurchasePaymentBrowserSubmit(context)
+    // Single submit only. Poll read-only until fulfilled paid; transient
+    // post-submit proof failures are re-read until the deadline, never a
+    // second submit and never accepted as authorization.
+    await ticketPurchasePaymentPollPaid(context, {
+      organizationId: stripeOrganizationId,
+      accountId: stripeAccountId,
+      key: stripeKey,
+      orderProof,
+      stripe,
+      timeoutMs: input.proofTimeoutMs ?? 180_000,
+      intervalMs: input.proofPollIntervalMs ?? 2_000,
+    })
+  } catch (error) {
+    if (createdNewContext) {
+      const leaked = context.guestContext
+      context.guestContext = undefined
+      context.checkoutPage = undefined
+      if (leaked && leaked !== guestBefore) {
+        try {
+          await leaked.close()
+        } catch {
+          // Original error stays authoritative.
+        }
+      }
+    }
+    throw error
+  }
+}
+
+async function ticketPurchasePaymentPollPaid(
+  context: TicketPurchaseContext,
+  input: {
+    organizationId: string
+    accountId: string
+    key: string
+    orderProof: Parameters<typeof ticketPurchasePaymentProofCheck>[0]["orderProof"]
+    stripe: Parameters<typeof ticketPurchasePaymentProofCheck>[0]["stripe"]
+    timeoutMs: number
+    intervalMs: number
+  },
+): Promise<void> {
+  const ticket = context.checkpoint.ticket
+  const deadline = Date.now() + Math.max(0, input.timeoutMs)
+  for (;;) {
+    const proof = await ticketPurchasePaymentProofCheck({
+      checkpoint: context.checkpoint,
+      organizationId: input.organizationId,
+      accountId: input.accountId,
+      key: input.key,
+      orderProof: input.orderProof,
+      stripe: input.stripe,
+    })
+    if (proof.success && proof.data.state === "paid") {
+      if (proof.data.orderId !== ticket.orderId || proof.data.stripeSession !== ticket.stripeSession)
+        throw new Error("Adopted payment evidence changed; reconcile before continuing")
+      return
+    }
+    if (Date.now() >= deadline) throw new Error("Canonical saved order/Stripe paid proof missing; checkpoint retained")
+    await new Promise((resolve) => setTimeout(resolve, Math.max(0, input.intervalMs)))
+  }
 }
 
 async function ticketPurchasePaymentRestoreHostedPage(
@@ -156,9 +200,6 @@ async function ticketPurchasePaymentRestoreHostedPage(
   hostedUrl: string,
   sessionId: string,
 ): Promise<void> {
-  // The hosted URL must be the exact authoritative Stripe session URL
-  // (https checkout.stripe.com origin, saved session path segment, required
-  // fragment): a constructed or foreign URL never proves the saved session.
   let authoritative: URL
   try {
     authoritative = new URL(hostedUrl)
@@ -180,10 +221,6 @@ async function ticketPurchasePaymentRestoreHostedPage(
     } catch {
       url = undefined
     }
-    // Reuse only the exact authoritative URL (including its fragment) or an
-    // owned recognized Stripe checkout redirect on the same origin whose path
-    // still carries the exact saved session segment: never any page that
-    // merely contains the session id as a substring.
     if (url && context.checkpoint.ticket.orderId) {
       if (url.href === authoritative.href) return
       if (
@@ -195,13 +232,21 @@ async function ticketPurchasePaymentRestoreHostedPage(
     }
   }
   if (!context.browser) throw new Error("Exact test checkout session and order must be observed before card entry")
+  const previous = context.guestContext
   const guestContext = await context.browser.newContext()
   context.browserErrors.observe(guestContext)
   try {
     const page = await guestContext.newPage()
+    await page.goto(hostedUrl)
+    if (previous && previous !== guestContext) {
+      try {
+        await previous.close()
+      } catch {
+        // Replacement cleanup best-effort.
+      }
+    }
     context.guestContext = guestContext
     context.checkoutPage = page
-    await page.goto(hostedUrl)
   } catch (error) {
     try {
       await guestContext.close()
@@ -219,7 +264,7 @@ async function ticketPurchasePaymentBrowserSubmit(context: TicketPurchaseContext
   try {
     if (page) url = new URL(page.url())
   } catch {
-    // An unavailable browser URL is not evidence that the saved session is still open.
+    // Unavailable URL is not proof the saved session is open.
   }
   if (
     !page ||
@@ -243,9 +288,18 @@ async function ticketPurchasePaymentBrowserSubmit(context: TicketPurchaseContext
   await page.locator('input[name="billingPostalCode"]').fill("10115")
   const postalCode = page.getByLabel(/zip|postal code/i)
   if ((await postalCode.count()) > 0 && (await postalCode.isVisible())) await postalCode.fill("10115")
+  // Changed disk state never pays.
+  await ticketPurchasePaymentAssertPersisted(context)
   await page.getByTestId("hosted-payment-submit-button").click()
+  // No app label required (restored guest has no original storage); the poll
+  // proves fulfillment. No second submit.
   await expect(page).toHaveURL(/\/checkout(?:\?|#)/u, { timeout: 90_000 })
-  await expect(page.getByText("Bezahlt", { exact: true }).first()).toBeVisible({ timeout: 180_000 })
+}
+
+async function ticketPurchasePaymentAssertPersisted(context: TicketPurchaseContext): Promise<void> {
+  const stored = await e2eCheckpointLoad(context.directory, context.checkpoint)
+  if (!stored.success || !stored.data || !isDeepStrictEqual(stored.data, context.checkpoint))
+    throw new Error("Ticket payment checkpoint changed; reconcile before continuing")
 }
 
 async function ticketPurchasePaymentRecordCompleted(context: TicketPurchaseContext): Promise<void> {
@@ -259,4 +313,17 @@ async function ticketPurchasePaymentRecordCompleted(context: TicketPurchaseConte
   const saved = await e2eCheckpointSave(context.directory, next)
   if (!saved.success) throw new Error(saved.errorMessage)
   context.checkpoint = next as TicketPurchaseContext["checkpoint"]
+}
+
+async function ticketPurchasePaymentCloseGuest(context: TicketPurchaseContext): Promise<void> {
+  const guest = context.guestContext
+  context.guestContext = undefined
+  context.checkoutPage = undefined
+  if (guest) {
+    try {
+      await guest.close()
+    } catch {
+      // Best-effort.
+    }
+  }
 }

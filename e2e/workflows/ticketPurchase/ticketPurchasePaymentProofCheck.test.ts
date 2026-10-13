@@ -252,6 +252,172 @@ test("retains foreign, expired and unavailable payment proof without mutation", 
   ).toBe(false)
 })
 
+test("reports the backend refusal reason instead of swallowing it", async () => {
+  const { calls, stripe } = stripeFixture()
+  const result = await ticketPurchasePaymentProofCheck({
+    checkpoint: startedPaymentCheckpoint({}),
+    organizationId: org,
+    accountId: account,
+    key,
+    orderProof: async () => ({
+      success: false as const,
+      errorMessage: "Exact test order/event ownership cannot be proven",
+    }),
+    stripe,
+  })
+  expect(result.success).toBe(false)
+  expect(result.success ? "" : result.errorMessage).toBe(
+    "App order correlation refused (Exact test order/event ownership cannot be proven); checkpoint retained",
+  )
+  expect(calls).toEqual([])
+})
+
+test("maps hostile refusal diagnostics to the fixed unknown reason without leaking", async () => {
+  const { calls, stripe } = stripeFixture()
+  const hostile = `Bad;\nDROP users;--${"\u0007"}${"x".repeat(300)}`
+  const result = await ticketPurchasePaymentProofCheck({
+    checkpoint: startedPaymentCheckpoint({}),
+    organizationId: org,
+    accountId: account,
+    key,
+    orderProof: async () => ({ success: false as const, errorMessage: hostile }),
+    stripe,
+  })
+  expect(result.success).toBe(false)
+  expect(result.success ? "" : result.errorMessage).toBe(
+    "App order correlation refused (unknown reason); checkpoint retained",
+  )
+  expect(calls).toEqual([])
+})
+
+test("never echoes secrets, tokens or PII from backend refusal diagnostics", async () => {
+  for (const secret of [
+    "sk_test_51SecretToken123456789",
+    "rk_test_51SecretToken123456789",
+    "Bearer sess_token_abc123XYZ",
+    "buyer@example.test",
+    "E2E Participant abc-12345678-1234-1234-1234-123456789abc",
+    "order-1 cs_test_123 cus_123",
+  ]) {
+    const { calls, stripe } = stripeFixture()
+    const result = await ticketPurchasePaymentProofCheck({
+      checkpoint: startedPaymentCheckpoint({}),
+      organizationId: org,
+      accountId: account,
+      key,
+      orderProof: async () => ({ success: false as const, errorMessage: `custom failure: ${secret}` }),
+      stripe,
+    })
+    expect(result.success).toBe(false)
+    const message = result.success ? "" : result.errorMessage
+    expect(message).toBe("App order correlation refused (unknown reason); checkpoint retained")
+    expect(message).not.toContain(secret)
+    expect(message).not.toContain("sk_test")
+    expect(message).not.toContain("sess_token")
+    expect(message).not.toContain("@")
+    expect(calls).toEqual([])
+  }
+})
+
+test("reports every safe backend refusal constant from the exact allowlist", async () => {
+  for (const reason of [
+    "Run marker mismatch",
+    "Invalid order ID",
+    "Exact test order/event ownership cannot be proven",
+    "Saved order payment/Billing references missing",
+    "Exact event order discovery exceeds proof bound",
+    "Other active or uncorrelated event order conflicts with saved proof",
+  ]) {
+    const { calls, stripe } = stripeFixture()
+    const result = await ticketPurchasePaymentProofCheck({
+      checkpoint: startedPaymentCheckpoint({}),
+      organizationId: org,
+      accountId: account,
+      key,
+      orderProof: async () => ({ success: false as const, errorMessage: reason }),
+      stripe,
+    })
+    expect(result.success).toBe(false)
+    expect(result.success ? "" : result.errorMessage).toBe(
+      `App order correlation refused (${reason}); checkpoint retained`,
+    )
+    expect(calls).toEqual([])
+  }
+})
+
+test("requires a one-time payment mode and a null subscription for paid adoption and retry", async () => {
+  for (const session of [
+    { mode: "subscription", subscription: null },
+    { mode: "payment", subscription: "sub_test_123" },
+    { mode: "subscription", subscription: "sub_test_123" },
+    { mode: "setup", subscription: null },
+  ]) {
+    const retryFixture = stripeFixture({
+      session: {
+        id: "cs_test_123",
+        livemode: false,
+        ...session,
+        status: "open",
+        payment_status: "unpaid",
+        customer: "cus_123",
+        url: authoritativeUrl,
+        payment_intent: null,
+        metadata,
+      },
+    })
+    const retry = await ticketPurchasePaymentProofCheck({
+      checkpoint: startedPaymentCheckpoint({}),
+      organizationId: org,
+      accountId: account,
+      key,
+      orderProof: orderProofPending,
+      stripe: retryFixture.stripe,
+    })
+    expect(retry.success).toBe(false)
+    expect(retry.success ? "" : retry.errorMessage).toMatch(/mode|subscription/u)
+    expect(retryFixture.calls.every((call) => call.startsWith("GET"))).toBe(true)
+    const paidFixture = stripeFixture({
+      session: {
+        id: "cs_test_123",
+        livemode: false,
+        ...session,
+        status: "complete",
+        payment_status: "paid",
+        customer: "cus_123",
+        metadata,
+      },
+    })
+    const paid = await ticketPurchasePaymentProofCheck({
+      checkpoint: startedPaymentCheckpoint({}),
+      organizationId: org,
+      accountId: account,
+      key,
+      orderProof: orderProofPaid,
+      stripe: paidFixture.stripe,
+    })
+    expect(paid.success).toBe(false)
+    expect(paid.success ? "" : paid.errorMessage).toMatch(/mode|subscription/u)
+  }
+})
+
+test("distinguishes proof shape mismatch from backend refusal", async () => {
+  const { calls, stripe } = stripeFixture()
+  const result = await ticketPurchasePaymentProofCheck({
+    checkpoint: startedPaymentCheckpoint({}),
+    organizationId: org,
+    accountId: account,
+    key,
+    orderProof: async () => ({
+      success: true,
+      data: { paymentReference: "", orderReference: "", status: "checkout_created", paymentStatus: "pending" },
+    }),
+    stripe,
+  })
+  expect(result.success).toBe(false)
+  expect(result.success ? "" : result.errorMessage).toBe("App order proof shape mismatch; checkpoint retained")
+  expect(calls).toEqual([])
+})
+
 test("preserves the exact authoritative session URL fragment instead of constructing one", async () => {
   const exact = "https://checkout.stripe.com/c/pay/cs_test_123#cs_test_exactfragment99"
   const { stripe } = stripeFixture({
@@ -560,6 +726,45 @@ test("preserves unrelated proven historical effects on a reused customer", async
     stripe,
   })
   expect(result).toMatchObject({ success: true, data: { state: "retry", hostedUrl: authoritativeUrl } })
+})
+
+test("refuses reused-shaped historical effects with missing or foreign organization or mode", async () => {
+  const reused = { id: "cus_123", livemode: false, metadata: reusedCustomerMetadata }
+  for (const intentMetadata of [
+    { ...reusedCustomerMetadata, organization_id: "org_foreign" },
+    { ...reusedCustomerMetadata, stripe_mode: "live" },
+    { ...reusedCustomerMetadata, organization_id: "" },
+    { ...reusedCustomerMetadata, stripe_mode: "" },
+    {
+      source: "eventoren_ticket",
+      event_key: reusedCustomerMetadata.event_key,
+      payment_reference: "payment_old",
+      order_reference: "order_old",
+    },
+    {
+      source: "eventoren_ticket",
+      event_key: reusedCustomerMetadata.event_key,
+      organization_id: org,
+      payment_reference: "payment_old",
+      order_reference: "order_old",
+    },
+  ]) {
+    const { stripe } = stripeFixture({
+      customer: reused,
+      intents: [{ id: "pi_old", livemode: false, customer: "cus_123", metadata: intentMetadata }],
+      charges: [],
+    })
+    const result = await ticketPurchasePaymentProofCheck({
+      checkpoint: startedPaymentCheckpoint({}),
+      organizationId: org,
+      accountId: account,
+      key,
+      orderProof: orderProofPending,
+      stripe,
+    })
+    expect(result.success).toBe(false)
+    expect(result.success ? "" : result.errorMessage).toMatch(/payment effect/u)
+  }
 })
 
 test("refuses current-bound or ambiguous effects on a reused customer", async () => {

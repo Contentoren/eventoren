@@ -40,6 +40,89 @@ function checkpointBase(step: string, status: string, extra: Record<string, unkn
   }
 }
 
+function stripePaymentFixture(session: Record<string, unknown>, customer: Record<string, unknown>) {
+  const calls: string[] = []
+  const stripe = e2eStripeTestClientCreate("sk_test_dummy", (async (
+    url: string | URL | Request,
+    init?: RequestInit,
+  ) => {
+    const path = new URL(String(url)).pathname
+    calls.push(`${init?.method} ${path}`)
+    if (path.endsWith("/account")) return Response.json({ id: "acct_test" })
+    if (path.includes("/checkout/sessions/")) return Response.json(session)
+    if (path.includes("/customers/")) return Response.json(customer)
+    return Response.json({ data: [], has_more: false })
+  }) as typeof fetch)
+  return { calls, stripe }
+}
+
+const paymentProofInput = (stripe: ReturnType<typeof e2eStripeTestClientCreate>) => ({
+  environment: {
+    E2E_TARGET: "development",
+    E2E_CLEANUP_CONVEX_URL: "https://eventoren-convex.leonardomora.de",
+  },
+  stripeKey: "sk_test_dummy",
+  stripeAccountId: "acct_test",
+  stripeOrganizationId: "org_test",
+  stripe,
+})
+
+const pendingOrderProof = async () => ({
+  success: true,
+  data: {
+    paymentReference: "payment_123",
+    orderReference: "order_123",
+    status: "checkout_created",
+    paymentStatus: "pending",
+  },
+})
+
+const paidOrderProof = async () => ({
+  success: true,
+  data: {
+    paymentReference: "payment_123",
+    orderReference: "order_123",
+    status: "paid",
+    paymentStatus: "paid",
+  },
+})
+
+function openUnpaidSession() {
+  return {
+    id: "cs_test_123456789",
+    livemode: false,
+    mode: "payment",
+    status: "open",
+    payment_status: "unpaid",
+    customer: "cus_123",
+    subscription: null,
+    url: "https://checkout.stripe.com/c/pay/cs_test_123456789#saved",
+    payment_intent: null,
+    metadata: {
+      source: "eventoren_ticket",
+      event_key: `ticket-e2e-${runId}`,
+      organization_id: "org_test",
+      stripe_mode: "test",
+      payment_reference: "payment_123",
+      order_reference: "order_123",
+    },
+  }
+}
+
+function stableTestCustomer() {
+  return {
+    id: "cus_123",
+    livemode: false,
+    metadata: {
+      source: "eventoren_ticket",
+      event_key: `ticket-e2e-${runId}`,
+      organization_id: "org_test",
+      stripe_mode: "test",
+      payment_reference: "payment_123",
+      order_reference: "order_123",
+    },
+  }
+}
 function locatorFake(options: { count: number; visible?: boolean; click?: () => void; check?: () => void }) {
   return {
     count: async () => options.count,
@@ -92,7 +175,7 @@ describe("ticket purchase card method selection proves card fields on the actual
     expect(headerClicks).toBe(0)
   })
 
-  it("retains the payment-started checkpoint instead of replaying an uncertain payment effect", async () => {
+  it("retains the payment-started checkpoint for missing backend and credentials without touching the page", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
     try {
       let pageTouched = false
@@ -110,7 +193,7 @@ describe("ticket purchase card method selection proves card fields on the actual
         ),
       } as unknown as TicketPurchaseContext
       expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
-      await expect(ticketPurchasePaymentStep(context)).rejects.toThrow("uncertain external effect")
+      await expect(ticketPurchasePaymentStep(context, { environment: {} })).rejects.toThrow("uncertain external effect")
       expect(pageTouched).toBe(false)
       expect(context.checkpoint.ticket).toMatchObject({ step: "payment", status: "started" })
     } finally {
@@ -118,17 +201,24 @@ describe("ticket purchase card method selection proves card fields on the actual
     }
   })
 
-  it("retains checkout evidence when the hosted session is no longer open instead of creating a new session", async () => {
+  it("retains without a new checkout when completed checkout has no page and credentials are missing", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
     try {
+      let checkoutCreates = 0
       const context = {
         directory,
         checkpoint: checkpointBase("checkout", "completed"),
-        browser: { newContext: () => Promise.reject(new Error("second checkout")) },
+        browser: {
+          newContext: () => {
+            checkoutCreates += 1
+            return Promise.reject(new Error("second checkout must not be created"))
+          },
+        },
       } as unknown as TicketPurchaseContext
       expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
-      await expect(ticketPurchasePaymentStep(context)).rejects.toThrow("hosted session is no longer open")
-      expect(context.checkpoint.ticket).toMatchObject({ step: "checkout", status: "completed" })
+      await expect(ticketPurchasePaymentStep(context, { environment: {} })).rejects.toThrow("uncertain external effect")
+      expect(checkoutCreates).toBe(0)
+      expect(context.checkpoint.ticket).toMatchObject({ step: "payment", status: "started" })
     } finally {
       await rm(directory, { recursive: true, force: true })
     }
@@ -143,8 +233,84 @@ describe("ticket purchase card method selection proves card fields on the actual
         checkoutPage: { url: () => "https://checkout.stripe.com/c/pay/cs_test_foreign" },
       } as unknown as TicketPurchaseContext
       expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
-      await expect(ticketPurchasePaymentStep(context)).rejects.toThrow("Exact test checkout session")
+      const { stripe } = stripePaymentFixture(openUnpaidSession(), stableTestCustomer())
+      await expect(
+        ticketPurchasePaymentStep(context, { ...paymentProofInput(stripe), orderProof: pendingOrderProof }),
+      ).rejects.toThrow("Exact test checkout session")
       expect(context.checkpoint.ticket).toMatchObject({ step: "payment", status: "started" })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("fresh refused payment proof leaves the hosted form untouched", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
+    try {
+      let pageTouched = false
+      const context = {
+        directory,
+        checkpoint: checkpointBase("checkout", "completed"),
+        checkoutPage: new Proxy(
+          {},
+          {
+            get: () => () => {
+              pageTouched = true
+              throw new Error("payment page must not be touched")
+            },
+          },
+        ),
+      } as unknown as TicketPurchaseContext
+      expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+      const foreignSession = {
+        ...openUnpaidSession(),
+        metadata: { ...openUnpaidSession().metadata, event_key: "ticket-e2e-foreign" },
+      }
+      const { calls, stripe } = stripePaymentFixture(foreignSession, stableTestCustomer())
+      await expect(
+        ticketPurchasePaymentStep(context, { ...paymentProofInput(stripe), orderProof: pendingOrderProof }),
+      ).rejects.toThrow("unique run/organization/order ownership")
+      expect(pageTouched).toBe(false)
+      expect(calls.every((call) => call.startsWith("GET "))).toBe(true)
+      expect(context.checkpoint.ticket).toMatchObject({
+        step: "payment",
+        status: "started",
+        orderId: "order-1",
+        stripeSession: "cs_test_123456789",
+      })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("fresh exact paid proof adopts without touching the browser", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
+    try {
+      let pageTouched = false
+      const context = {
+        directory,
+        checkpoint: checkpointBase("checkout", "completed"),
+        checkoutPage: new Proxy(
+          {},
+          {
+            get: () => () => {
+              pageTouched = true
+              throw new Error("payment page must not be touched")
+            },
+          },
+        ),
+      } as unknown as TicketPurchaseContext
+      expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+      const paidSession = { ...openUnpaidSession(), status: "complete", payment_status: "paid" }
+      const { calls, stripe } = stripePaymentFixture(paidSession, stableTestCustomer())
+      await ticketPurchasePaymentStep(context, { ...paymentProofInput(stripe), orderProof: paidOrderProof })
+      expect(pageTouched).toBe(false)
+      expect(calls.every((call) => call.startsWith("GET "))).toBe(true)
+      expect(context.checkpoint.ticket).toMatchObject({
+        step: "payment",
+        status: "completed",
+        orderId: "order-1",
+        stripeSession: "cs_test_123456789",
+      })
     } finally {
       await rm(directory, { recursive: true, force: true })
     }
@@ -257,7 +423,7 @@ describe("ticket purchase card method selection proves card fields on the actual
     }
   })
 
-  it("UI Bezahlt without canonical paid proof retains the same payment-started receipt", async () => {
+  it("single submit without fulfilled paid proof retains the same payment-started receipt", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-paid-proof-test-"))
     try {
       let submits = 0
@@ -326,6 +492,8 @@ describe("ticket purchase card method selection proves card fields on the actual
           stripeAccountId: "acct_test",
           stripeOrganizationId: "org_test",
           stripe,
+          proofTimeoutMs: 0,
+          proofPollIntervalMs: 0,
           orderProof: async () => ({
             success: true,
             data: {
@@ -345,6 +513,378 @@ describe("ticket purchase card method selection proves card fields on the actual
         orderId: "order-1",
         stripeSession: "cs_test_123456789",
       })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("pending submit flips to paid then completes and closes the restored guest without original storage", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
+    try {
+      let fulfilled = false
+      let submits = 0
+      let restoredContexts = 0
+      let closedContexts = 0
+      const orderProof = async () =>
+        fulfilled
+          ? {
+              success: true as const,
+              data: {
+                paymentReference: "payment_123",
+                orderReference: "order_123",
+                status: "paid",
+                paymentStatus: "paid",
+              },
+            }
+          : {
+              success: true as const,
+              data: {
+                paymentReference: "payment_123",
+                orderReference: "order_123",
+                status: "checkout_created",
+                paymentStatus: "pending",
+              },
+            }
+      const calls: string[] = []
+      const stripe = e2eStripeTestClientCreate("sk_test_dummy", (async (
+        url: string | URL | Request,
+        init?: RequestInit,
+      ) => {
+        const path = new URL(String(url)).pathname
+        calls.push(`${init?.method} ${path}`)
+        if (path.endsWith("/account")) return Response.json({ id: "acct_test" })
+        if (path.includes("/checkout/sessions/"))
+          return fulfilled
+            ? Response.json({
+                id: "cs_test_123456789",
+                livemode: false,
+                mode: "payment",
+                status: "complete",
+                payment_status: "paid",
+                customer: "cus_123",
+                subscription: null,
+                metadata: {
+                  source: "eventoren_ticket",
+                  event_key: `ticket-e2e-${runId}`,
+                  organization_id: "org_test",
+                  stripe_mode: "test",
+                  payment_reference: "payment_123",
+                  order_reference: "order_123",
+                },
+              })
+            : Response.json(openUnpaidSession())
+        if (path.includes("/customers/")) return Response.json(stableTestCustomer())
+        return Response.json({ data: [], has_more: false })
+      }) as typeof fetch)
+      const cardField = {
+        ...locatorFake({ count: 1 }),
+        isVisible: async () => true,
+        fill: async () => {},
+        click: async () => {},
+      }
+      const fakePage = {
+        url: () => "https://checkout.stripe.com/c/pay/cs_test_123456789#saved",
+        goto: async () => {},
+        getByRole: (role: string) => (String(role).includes("radio") ? locatorFake({ count: 0 }) : cardField),
+        getByLabel: () => cardField,
+        getByText: () => cardField,
+        locator: () => cardField,
+        getByTestId: () => ({
+          click: async () => {
+            submits += 1
+            fulfilled = true
+          },
+        }),
+      }
+      const context = {
+        directory,
+        checkpoint: checkpointBase("checkout", "completed"),
+        browser: {
+          newContext: async () => {
+            restoredContexts += 1
+            return {
+              newPage: async () => fakePage,
+              storageState: async () => {
+                throw new Error("restored guest has no original storage")
+              },
+              close: async () => {
+                closedContexts += 1
+              },
+            }
+          },
+        },
+        browserErrors: { observe: () => {} },
+      } as unknown as TicketPurchaseContext
+      expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+      await ticketPurchasePaymentStep(context, {
+        ...paymentProofInput(stripe),
+        orderProof,
+        proofTimeoutMs: 5_000,
+        proofPollIntervalMs: 0,
+      })
+      expect(submits).toBe(1)
+      expect(restoredContexts).toBe(1)
+      expect(closedContexts).toBe(1)
+      expect(context.guestContext).toBe(undefined)
+      expect(context.checkoutPage).toBe(undefined)
+      expect(calls.every((call) => call.startsWith("GET "))).toBe(true)
+      expect(context.checkpoint.ticket).toMatchObject({
+        step: "payment",
+        status: "completed",
+        orderId: "order-1",
+        stripeSession: "cs_test_123456789",
+      })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("completed checkout without a page adopts exact paid proof without a browser", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
+    try {
+      let restoredContexts = 0
+      const context = {
+        directory,
+        checkpoint: checkpointBase("checkout", "completed"),
+        browser: {
+          newContext: async () => {
+            restoredContexts += 1
+            throw new Error("paid adoption must not restore a guest")
+          },
+        },
+        browserErrors: { observe: () => {} },
+      } as unknown as TicketPurchaseContext
+      expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+      const paidSession = { ...openUnpaidSession(), status: "complete", payment_status: "paid" }
+      const { calls, stripe } = stripePaymentFixture(paidSession, stableTestCustomer())
+      await ticketPurchasePaymentStep(context, { ...paymentProofInput(stripe), orderProof: paidOrderProof })
+      expect(restoredContexts).toBe(0)
+      expect(calls.every((call) => call.startsWith("GET "))).toBe(true)
+      expect(context.checkpoint.ticket).toMatchObject({
+        step: "payment",
+        status: "completed",
+        orderId: "order-1",
+        stripeSession: "cs_test_123456789",
+      })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("changed checkpoint during form preparation never submits", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
+    try {
+      let submits = 0
+      let tampered = false
+      const cardField = {
+        ...locatorFake({ count: 1 }),
+        isVisible: async () => true,
+        fill: async () => {
+          if (!tampered) {
+            tampered = true
+            await e2eCheckpointSave(directory, checkpointBase("payment", "completed"))
+          }
+        },
+        click: async () => {},
+      }
+      const context = {
+        directory,
+        checkpoint: checkpointBase("payment", "started"),
+        checkoutPage: {
+          url: () => "https://checkout.stripe.com/c/pay/cs_test_123456789#saved",
+          getByRole: (role: string) => (String(role).includes("radio") ? locatorFake({ count: 0 }) : cardField),
+          getByLabel: () => cardField,
+          getByText: () => cardField,
+          locator: () => cardField,
+          getByTestId: () => ({
+            click: async () => {
+              submits += 1
+            },
+          }),
+        },
+        browserErrors: { observe: () => {} },
+      } as unknown as TicketPurchaseContext
+      expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+      const { stripe } = stripePaymentFixture(openUnpaidSession(), stableTestCustomer())
+      await expect(
+        ticketPurchasePaymentStep(context, {
+          ...paymentProofInput(stripe),
+          orderProof: pendingOrderProof,
+          proofTimeoutMs: 0,
+          proofPollIntervalMs: 0,
+        }),
+      ).rejects.toThrow("checkpoint changed")
+      expect(tampered).toBe(true)
+      expect(submits).toBe(0)
+      expect(context.checkpoint.ticket).toMatchObject({
+        step: "payment",
+        status: "started",
+        orderId: "order-1",
+        stripeSession: "cs_test_123456789",
+      })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("pending app proof catches up to Stripe paid after one submit with no second submit", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
+    try {
+      let submits = 0
+      let appPolls = 0
+      let closedContexts = 0
+      const orderProof = async () => {
+        if (submits === 0)
+          return {
+            success: true as const,
+            data: {
+              paymentReference: "payment_123",
+              orderReference: "order_123",
+              status: "checkout_created",
+              paymentStatus: "pending",
+            },
+          }
+        appPolls += 1
+        return appPolls < 3
+          ? {
+              success: true as const,
+              data: {
+                paymentReference: "payment_123",
+                orderReference: "order_123",
+                status: "checkout_created",
+                paymentStatus: "pending",
+              },
+            }
+          : {
+              success: true as const,
+              data: {
+                paymentReference: "payment_123",
+                orderReference: "order_123",
+                status: "paid",
+                paymentStatus: "paid",
+              },
+            }
+      }
+      const calls: string[] = []
+      const stripe = e2eStripeTestClientCreate("sk_test_dummy", (async (
+        url: string | URL | Request,
+        init?: RequestInit,
+      ) => {
+        const path = new URL(String(url)).pathname
+        calls.push(`${init?.method} ${path}`)
+        if (path.endsWith("/account")) return Response.json({ id: "acct_test" })
+        if (path.includes("/checkout/sessions/"))
+          return submits === 0
+            ? Response.json(openUnpaidSession())
+            : Response.json({ ...openUnpaidSession(), status: "complete", payment_status: "paid" })
+        if (path.includes("/customers/")) return Response.json(stableTestCustomer())
+        return Response.json({ data: [], has_more: false })
+      }) as typeof fetch)
+      const cardField = {
+        ...locatorFake({ count: 1 }),
+        isVisible: async () => true,
+        fill: async () => {},
+        click: async () => {},
+      }
+      const fakePage = {
+        url: () => "https://checkout.stripe.com/c/pay/cs_test_123456789#saved",
+        goto: async () => {},
+        getByRole: (role: string) => (String(role).includes("radio") ? locatorFake({ count: 0 }) : cardField),
+        getByLabel: () => cardField,
+        getByText: () => cardField,
+        locator: () => cardField,
+        getByTestId: () => ({
+          click: async () => {
+            submits += 1
+          },
+        }),
+      }
+      const context = {
+        directory,
+        checkpoint: checkpointBase("checkout", "completed"),
+        browser: {
+          newContext: async () => ({
+            newPage: async () => fakePage,
+            close: async () => {
+              closedContexts += 1
+            },
+          }),
+        },
+        browserErrors: { observe: () => {} },
+      } as unknown as TicketPurchaseContext
+      expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+      await ticketPurchasePaymentStep(context, {
+        ...paymentProofInput(stripe),
+        orderProof,
+        proofTimeoutMs: 5_000,
+        proofPollIntervalMs: 0,
+      })
+      expect(submits).toBe(1)
+      expect(appPolls).toBeGreaterThanOrEqual(3)
+      expect(closedContexts).toBe(1)
+      expect(context.checkpoint.ticket).toMatchObject({
+        step: "payment",
+        status: "completed",
+        orderId: "order-1",
+        stripeSession: "cs_test_123456789",
+      })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it("foreign and refused proof never restores a hosted page or submits", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
+    try {
+      let submits = 0
+      let restoredContexts = 0
+      const cardField = {
+        ...locatorFake({ count: 1 }),
+        isVisible: async () => true,
+        fill: async () => {},
+        click: async () => {},
+      }
+      const context = {
+        directory,
+        checkpoint: checkpointBase("payment", "started"),
+        checkoutPage: {
+          url: () => "https://checkout.stripe.com/c/pay/cs_test_123456789#saved",
+          getByRole: (role: string) => (String(role).includes("radio") ? locatorFake({ count: 0 }) : cardField),
+          getByLabel: () => cardField,
+          getByText: () => cardField,
+          locator: () => cardField,
+          getByTestId: () => ({
+            click: async () => {
+              submits += 1
+            },
+          }),
+        },
+        browser: {
+          newContext: async () => {
+            restoredContexts += 1
+            throw new Error("refused proof must not restore a guest")
+          },
+        },
+        browserErrors: { observe: () => {} },
+      } as unknown as TicketPurchaseContext
+      expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+      const foreignSession = {
+        ...openUnpaidSession(),
+        metadata: { ...openUnpaidSession().metadata, event_key: "ticket-e2e-foreign" },
+      }
+      const { calls, stripe } = stripePaymentFixture(foreignSession, stableTestCustomer())
+      await expect(
+        ticketPurchasePaymentStep(context, {
+          ...paymentProofInput(stripe),
+          orderProof: pendingOrderProof,
+          proofTimeoutMs: 0,
+          proofPollIntervalMs: 0,
+        }),
+      ).rejects.toThrow("unique run/organization/order ownership")
+      expect(restoredContexts).toBe(0)
+      expect(submits).toBe(0)
+      expect(calls.every((call) => call.startsWith("GET "))).toBe(true)
+      expect(context.checkpoint.ticket).toMatchObject({ step: "payment", status: "started" })
     } finally {
       await rm(directory, { recursive: true, force: true })
     }

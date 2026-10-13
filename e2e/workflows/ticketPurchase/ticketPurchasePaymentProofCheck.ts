@@ -23,11 +23,27 @@ export type TicketPurchasePaymentProofDisposition =
   | { state: "paid"; orderId: string; stripeSession: string }
 
 /**
+ * Exact fixed allowlist of safe backend refusal messages from
+ * src/ticketing/convex/ticketE2eOrderProofQuery.ts. Any other backend
+ * errorMessage (secrets, tokens, PII, custom diagnostics) maps to the
+ * unknown constant and is never echoed.
+ */
+const ticketE2eOrderProofRefusals = new Set([
+  "Run marker mismatch",
+  "Invalid order ID",
+  "Exact test order/event ownership cannot be proven",
+  "Saved order payment/Billing references missing",
+  "Exact event order discovery exceeds proof bound",
+  "Other active or uncorrelated event order conflicts with saved proof",
+])
+const ticketE2eOrderProofUnknownRefusal = "unknown reason"
+
+/**
  * Read-only started-payment proof for the exact saved TEST order/session. It
  * never creates, pays, expires, cancels, refunds or deletes anything: only the
  * saved app order proof, the Stripe TEST account lookup, the authoritative
  * Stripe session GET (TEST metadata/origin/current status/authoritative hosted
- * URL/direct payment intent), the linked customer GET (stable source/
+ * URL/direct payment intent/subscription), the linked customer GET (stable source/
  * organization/test-mode only: Billing reuses one customer per email so a
  * reused customer's creation metadata keeps the FIRST run's event/payment/
  * order refs and is never refreshed) and its payment-intent/charge lists are
@@ -83,8 +99,18 @@ export async function ticketPurchasePaymentProofCheck(input: {
   } catch {
     return createResultError(op, "App order proof unavailable; checkpoint retained")
   }
-  if (!proof.success || !proof.data?.paymentReference || !proof.data.orderReference)
-    return createResultError(op, "App order correlation could not be verified; checkpoint retained")
+  if (!proof.success) {
+    // Never echo arbitrary backend errorMessage: only the exact fixed
+    // allowlist of safe refusal constants from ticketE2eOrderProofQuery may
+    // appear in diagnostics. Anything else (tokens, secrets, PII, custom
+    // diagnostics) maps to the unknown constant so a custom orderProof can
+    // never leak through.
+    const raw = proof.errorMessage ?? ""
+    const reason = ticketE2eOrderProofRefusals.has(raw) ? raw : ticketE2eOrderProofUnknownRefusal
+    return createResultError(op, `App order correlation refused (${reason}); checkpoint retained`)
+  }
+  if (!proof.data?.paymentReference || !proof.data.orderReference)
+    return createResultError(op, "App order proof shape mismatch; checkpoint retained")
   const account = await input.stripe.account()
   if (!account.success || account.data !== accountId)
     return createResultError(op, "Stripe TEST account identity mismatch; checkpoint retained")
@@ -123,10 +149,13 @@ export async function ticketPurchasePaymentProofCheck(input: {
     !customerStable(customer.data.metadata)
   )
     return createResultError(op, "Saved session customer ownership unavailable or foreign; checkpoint retained")
-  if (
-    !(["payment", "subscription"] as string[]).includes(session.data.mode) ||
-    !(["open", "expired", "complete"] as string[]).includes(session.data.status)
-  )
+  // Only a one-time payment checkout may authorize paid adoption or retry:
+  // a subscription mode or a linked subscription never proves the saved
+  // payment, even when the session is otherwise complete/paid or open/unpaid.
+  if (session.data.mode !== "payment") return createResultError(op, "Unexpected checkout mode or status")
+  if (session.data.subscription !== null)
+    return createResultError(op, "Saved session subscription cannot authorize payment proof; checkpoint retained")
+  if (!(["open", "expired", "complete"] as string[]).includes(session.data.status))
     return createResultError(op, "Unexpected checkout mode or status")
   if (session.data.status === "complete") {
     // ticketPaymentStatusApplyMutation distinguishes fulfilled paid orders from
@@ -196,17 +225,22 @@ export async function ticketPurchasePaymentProofCheck(input: {
   if (!intents.success || !charges.success)
     return createResultError(op, "Payment effect proof unavailable; checkpoint retained")
   // A reused customer carries proven historical effects from earlier runs:
-  // only intents provably bound to other payment/order refs are preserved,
-  // and only charges bound to those preserved intents. Any current-bound or
-  // ambiguous (unknown refs, foreign customer, orphan charge) effect refuses
-  // retry; the explicit saved-session payment_intent===null check above stays
-  // mandatory.
+  // only intents provably bound to the same TEST organization/mode with
+  // other payment/order refs are preserved, and only charges bound to those
+  // preserved intents. Billing binds every intent to the current organization
+  // in TEST mode, so the same customer/source with different nonempty refs
+  // alone never proves history: missing/foreign organization or mode retains.
+  // Any current-bound or ambiguous (unknown refs, foreign customer, orphan
+  // charge) effect refuses retry; the explicit saved-session
+  // payment_intent===null check above stays mandatory.
   const intentProvenHistorical = (entry: unknown): boolean => {
     const candidate = entry as { customer?: unknown; metadata?: unknown }
     if (candidate.customer !== customerId) return false
     const metadata = (candidate.metadata ?? {}) as Record<string, string>
     return (
       metadata["source"] === "eventoren_ticket" &&
+      metadata["organization_id"] === organizationId &&
+      metadata["stripe_mode"] === "test" &&
       typeof metadata["payment_reference"] === "string" &&
       metadata["payment_reference"].length > 0 &&
       typeof metadata["order_reference"] === "string" &&
