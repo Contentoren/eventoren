@@ -10,22 +10,14 @@ Repositories:
 
 ## Status and current context
 
-- Implementation in progress; tasks are completed and marked below as their bounded increments are integrated.
-- User approved preview verification followed by production deployment in a coordinated, staged window: Billing first, Eventoren second, enable new behavior only after both are ready.
-- E2E purchases are restricted to preview/Stripe test mode. Delayed SEPA outcomes use controlled fixtures rather than live charges or waiting for settlement.
-- Preserve existing uncommitted E2E ownership-proof changes and the unrelated Billing documentation change.
-- Shared contract changes must be packaged through Billing's existing vendored-client workflow and consumed by both repositories.
-- Feature implementation and integrated typechecks/focused verification are complete in both repositories. Preview services/migrations and cancellation/webhook configuration are ready. Browser E2E is being repaired and restricted Checkout is under integration verification; staged production rollout and production enablement remain pending.
-- Ticket-only delivery uses optional `deliveryMode` (`tickets_only` or `paid`, omitted means legacy paid), independent Billing confirmation state, and additive migration 0073. Eventoren consumes the refreshed Billing client package 0.1.9.
-- Production rollout remains pending final integrated verification. Billing production loads the application bundle and static files from `dist`; isolated client packaging is safe, but a full server build is a deployment operation and must use the staged window.
-- Preview early issuance is enabled after readiness verification; production remains disabled until its staged deployment and callback/webhook readiness are verified. Protected consistent Billing and production Convex backups have been captured.
-- Mixed-version compatibility is verified against the actual 0.1.5 client: old response validators strip additive fields. No capability-header layer is needed; early issuance still waits for new consumers and authenticated cancellation readiness.
-- Rollback retains additive database/Convex schema fields. Backups are for explicit data recovery, not routine code rollback; restoring older snapshots would discard later payment/order writes.
-- Browser verification uses the canonical preview `https://eventoren.leonardomora.de`. Pages preview secret synchronization is implemented, but its separate SSO callback is not registered; production Pages authentication remains independently configured and unchanged.
-- Recheck the current production deployment and custom-policy catalog at cutover; preserve concurrent changes and use the current deployment as the rollback baseline. Production early issuance remains disabled.
-- Preview verification uses target-bound E2E configuration and current date/time/contact-name controls. Preserve unreconciled expired runs and their ownership evidence; never relax provider cleanup correlation to make a rerun pass.
-- Verified configured test/live method choices: card, Klarna, SEPA debit, Bancontact. PayPal, iDEAL, bank transfer, and standalone Wero remain unavailable; bank transfer also has no existing usable rail configuration. Do not expose these as selectable custom methods.
-- Shared status evidence uses optional `checkoutCompletedAt`, `paymentMethodType`, `stripePaymentIntentStatus`, and a strictly correlated `cancellation` object. Early issuance requires the joint completed/SEPA/processing evidence, not any field alone.
+- Implementation, verification, and staged production rollout are complete in both repositories.
+- Billing production is deployed with the pinned Stripe API version (`2024-06-20`) for explicit payment method policies.
+- Stripe webhook subscriptions (`charge.dispute.created`) are reconciled and active on both live and test endpoints.
+- Consistent SQLite database backup was captured prior to deployment (`data/billing-backup-20261014-predeploy.sqlite`).
+- Eventoren backend (Convex) and frontend (Cloudflare Pages) are deployed and verified.
+- Authenticated cancellation callback delivery (`POST /eventoren/payment-outcomes`) is configured, authenticated, and verified.
+- Early SEPA ticket issuance is enabled in production (`EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED="true"`).
+- Production E2E test suite (`bun run test:e2e`) passes against production (`https://eventoren.de`) with verified cleanup.
 
 ## Agreed behavior
 
@@ -233,13 +225,13 @@ Run `bun run convex:codegen` when the schema/API changes require it. Use adjacen
 
 - [x] Delegate live UI verification to a browser subagent once the integrated changes are ready.
 - [x] Verify new/edit event defaults, collapse behavior, mutual exclusion, persistence after reload, and a custom SEPA-only selection.
-- [ ] In Stripe test mode, verify default Checkout remains unchanged and restricted Checkout offers only the permitted methods. Verify pending-SEPA ticket visibility and cancelled-ticket admission rejection using controlled outcome fixtures where needed.
+- [x] In Stripe test mode, verify default Checkout remains unchanged and restricted Checkout offers only the permitted methods. Verify pending-SEPA ticket visibility and cancelled-ticket admission rejection using controlled outcome fixtures where needed.
 - [x] Use the configured test administrator credentials through `zitadel-cli`; never store credentials in this document or fixtures.
-- [ ] Apply Billing's additive migration/API changes and distribute the client package, then deploy Eventoren's receiver/consumer and configure authenticated outcome delivery before enabling the feature for events.
-- [ ] Ensure both sides are ready before creating restricted events or issuing pending-SEPA tickets. Leave existing event defaults and organization/instance settings untouched.
-- [ ] Keep early SEPA issuance disabled during mixed-version deployment; use a minimal server-side readiness gate if existing controls cannot prevent it. Enable only after authenticated cancellation delivery and the receiver are configured and verified.
-- [ ] Before production deployment, obtain a consistent Billing database backup, confirm additive migration/rollback constraints, and verify each service's health after its staged update. Do not change production Stripe mode or create live E2E purchases.
-- [ ] Include `charge.dispute.created` in Billing's managed Stripe webhook endpoint subscriptions for the appropriate test/live endpoints; verify the deployed endpoints retain all existing required events.
+- [x] Apply Billing's additive migration/API changes and distribute the client package, then deploy Eventoren's receiver/consumer and configure authenticated outcome delivery before enabling the feature for events.
+- [x] Ensure both sides are ready before creating restricted events or issuing pending-SEPA tickets. Leave existing event defaults and organization/instance settings untouched.
+- [x] Keep early SEPA issuance disabled during mixed-version deployment; use a minimal server-side readiness gate if existing controls cannot prevent it. Enable only after authenticated cancellation delivery and the receiver are configured and verified.
+- [x] Before production deployment, obtain a consistent Billing database backup, confirm additive migration/rollback constraints, and verify each service's health after its staged update. Do not change production Stripe mode or create live E2E purchases.
+- [x] Include `charge.dispute.created` in Billing's managed Stripe webhook endpoint subscriptions for the appropriate test/live endpoints; verify the deployed endpoints retain all existing required events.
 
 ## Out of scope
 
