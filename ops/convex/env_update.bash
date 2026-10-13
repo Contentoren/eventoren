@@ -14,6 +14,13 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 2
 fi
 
+# Bash read would silently discard NUL bytes before framing the selected values.
+if IFS= read -r -d '' nul_prefix <"$ENV_FILE"; then
+  echo "error: Environment file contains unsupported NUL bytes" >&2
+  exit 1
+fi
+unset nul_prefix
+
 trim() {
   local value="$1"
   value="${value#"${value%%[![:space:]]*}"}"

@@ -264,6 +264,29 @@ test("production missing, invalid and failing synthetic config sources stop befo
   }
 })
 
+test("production config credential failure stops before later valid assignments, lookup, encoder, or Convex", () => {
+  const fixture = fixtureCreate("VALUE=synthetic-local-secret\n", "production")
+  const validConfig = readFileSync(fixture.config, "utf8")
+  writeFileSync(
+    fixture.config,
+    [
+      "echo synthetic-source-secret",
+      "echo synthetic-source-secret >&2",
+      'ASSETS_TOKEN="$(printf synthetic-credential-secret >&2; exit 17)"',
+      validConfig,
+    ].join("\n"),
+  )
+  const result = fixture.run()
+  expect(result.code).toBe(3)
+  for (const secret of ["synthetic-source-secret", "synthetic-credential-secret", "synthetic-local-secret"]) {
+    expect(result.output).not.toContain(secret)
+  }
+  expect(fixture.records()).toEqual([])
+  expect(existsSync(join(fixture.dir, "arguments"))).toBe(false)
+  expect(existsSync(join(fixture.dir, "events"))).toBe(false)
+  fixture.clean()
+})
+
 test("production lookup failure is secret-safe and cannot partially upload local values", () => {
   const fixture = fixtureCreate("VALUE=synthetic-local-secret\n", "production", "lookup")
   const result = fixture.run()
