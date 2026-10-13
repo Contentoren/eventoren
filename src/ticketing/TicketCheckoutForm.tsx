@@ -454,6 +454,7 @@ export function TicketCheckoutForm(props: {
                   <Input
                     id="checkout-terms-acceptance"
                     type="checkbox"
+                    autocomplete="off"
                     required
                     checked={state.termsAccepted()}
                     onChange={(event) => state.termsAcceptanceChange(event.currentTarget.checked)}
@@ -474,6 +475,7 @@ export function TicketCheckoutForm(props: {
                   <Input
                     id="checkout-privacy-acknowledgement"
                     type="checkbox"
+                    autocomplete="off"
                     required
                     checked={state.privacyAcknowledged()}
                     onChange={(event) => state.privacyAcknowledgementChange(event.currentTarget.checked)}

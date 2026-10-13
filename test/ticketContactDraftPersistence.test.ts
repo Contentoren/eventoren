@@ -135,15 +135,19 @@ const formDraft: TicketCheckoutFormDraft = {
   },
   participantNames: { event: { standard: ["Grace"] } },
   documentSetRevision: ticketCheckoutLegalDocumentRevision,
-  termsAccepted: true,
-  privacyAcknowledged: false,
 }
 
-test("saves and loads the full checkout draft, including participant names and legal consent", () => {
+test("saves and loads contact details and participant names without consent", () => {
   expect(ticketContactDraftSave(formDraft).success).toBe(true)
 
   expect(storage.getItem(ticketContactDraftKey)).toBe(JSON.stringify(formDraft))
   expect(ticketContactDraftLoad()).toEqual({ success: true, data: formDraft })
+})
+
+test("never serializes consent fields supplied by a legacy draft", () => {
+  const legacyDraft = { ...formDraft, termsAccepted: true, privacyAcknowledged: true, legalAccepted: true }
+  expect(ticketContactDraftSave(legacyDraft).success).toBe(true)
+  expect(storage.getItem(ticketContactDraftKey)).toBe(JSON.stringify(formDraft))
 })
 
 test("loads legacy contact-only drafts without carrying the old combined consent forward", () => {
@@ -173,46 +177,18 @@ test("loads legacy contact-only drafts without carrying the old combined consent
     },
     participantNames: {},
     documentSetRevision: ticketCheckoutLegalDocumentRevision,
-    termsAccepted: false,
-    privacyAcknowledged: false,
   })
 })
 
-test("restores separate consent only when the saved legal document revision matches", () => {
-  const draftWithRevision = {
-    ...formDraft,
-    contact: { ...formDraft.contact, firstName: "Revision" },
-    participantNames: { event: { standard: ["Participant"] } },
+test("ignores stored consent regardless of whether the legal document revision matches", () => {
+  for (const documentSetRevision of [ticketCheckoutLegalDocumentRevision, "sha256:old-revision", undefined]) {
+    storage.setItem(
+      ticketContactDraftKey,
+      JSON.stringify({ ...formDraft, documentSetRevision, termsAccepted: true, privacyAcknowledged: true }),
+    )
+    expect(ticketContactDraftLoad()).toEqual({ success: true, data: formDraft })
+    expect(storage.getItem(ticketContactDraftKey)).toBe(JSON.stringify(formDraft))
   }
-
-  storage.setItem(ticketContactDraftKey, JSON.stringify(draftWithRevision))
-  expect(ticketContactDraftLoad()).toEqual({ success: true, data: draftWithRevision })
-
-  storage.setItem(
-    ticketContactDraftKey,
-    JSON.stringify({ ...draftWithRevision, documentSetRevision: "sha256:old-revision" }),
-  )
-  expect(ticketContactDraftLoad()).toEqual({
-    success: true,
-    data: {
-      ...draftWithRevision,
-      documentSetRevision: ticketCheckoutLegalDocumentRevision,
-      termsAccepted: false,
-      privacyAcknowledged: false,
-    },
-  })
-
-  const { documentSetRevision: _missingRevision, ...legacyDraft } = draftWithRevision
-  storage.setItem(ticketContactDraftKey, JSON.stringify(legacyDraft))
-  expect(ticketContactDraftLoad()).toEqual({
-    success: true,
-    data: {
-      ...draftWithRevision,
-      documentSetRevision: ticketCheckoutLegalDocumentRevision,
-      termsAccepted: false,
-      privacyAcknowledged: false,
-    },
-  })
 })
 
 test("handles malformed JSON and malformed fields without throwing", () => {
@@ -247,8 +223,6 @@ test("handles malformed JSON and malformed fields without throwing", () => {
       },
       participantNames: { event: { standard: ["Grace", ""] } },
       documentSetRevision: ticketCheckoutLegalDocumentRevision,
-      termsAccepted: false,
-      privacyAcknowledged: false,
     },
   })
 })
@@ -285,7 +259,7 @@ test("retains participant values by event, tier, and ticket index while dropping
   expect(aligned).toEqual({ eventA: { standard: ["Ada", "Grace", ""] }, eventB: { standard: [""] } })
 })
 
-test("debounces repeated edits and saves the latest contact and consent values during idle time", () => {
+test("debounces contact edits while keeping checked consent only in the current form", () => {
   let state: ReturnType<typeof ticketCheckoutFormStateCreate> | undefined
   let dispose: (() => void) | undefined
   createRoot((rootDispose) => {
@@ -318,11 +292,35 @@ test("debounces repeated edits and saves the latest contact and consent values d
     expect(saved.success).toBe(true)
     if (!saved.success) return
     expect(saved.data.contact).toMatchObject({ firstName: "Ada", lastName: "Lovelace" })
-    expect(saved.data.termsAccepted).toBe(true)
-    expect(saved.data.privacyAcknowledged).toBe(true)
+    expect(saved.data).not.toHaveProperty("termsAccepted")
+    expect(saved.data).not.toHaveProperty("privacyAcknowledged")
+    expect(state.termsAccepted()).toBe(true)
+    expect(state.privacyAcknowledged()).toBe(true)
+    expect(JSON.parse(storage.getItem(ticketContactDraftKey)!)).not.toHaveProperty("termsAccepted")
+    expect(JSON.parse(storage.getItem(ticketContactDraftKey)!)).not.toHaveProperty("privacyAcknowledged")
   } finally {
     dispose?.()
   }
+})
+
+test("checking consent alone does not schedule or write a draft save", () => {
+  expect(ticketContactDraftSave(formDraft).success).toBe(true)
+  const storedDraft = storage.getItem(ticketContactDraftKey)
+  createRoot((dispose) => {
+    try {
+      const state = ticketCheckoutFormStateCreate({
+        items: () => [],
+        appOrigin: () => ({ success: true, data: "https://eventoren.test" }),
+      })
+      state.termsAcceptanceChange(true)
+      state.privacyAcknowledgementChange(true)
+      checkoutWindow.runTimers()
+      expect(checkoutWindow.idleCallbacks).toHaveLength(0)
+      expect(storage.getItem(ticketContactDraftKey)).toBe(storedDraft)
+    } finally {
+      dispose()
+    }
+  })
 })
 
 test("ignores stale idle saves without disrupting the newer scheduled save", () => {
@@ -434,8 +432,8 @@ test("submit flushes pending edits before an early empty-cart return", async () 
     expect(saved.success).toBe(true)
     if (saved.success) {
       expect(saved.data.contact.email).toBe("ada@example.test")
-      expect(saved.data.termsAccepted).toBe(true)
-      expect(saved.data.privacyAcknowledged).toBe(true)
+      expect(saved.data).not.toHaveProperty("termsAccepted")
+      expect(saved.data).not.toHaveProperty("privacyAcknowledged")
     }
   } finally {
     dispose?.()

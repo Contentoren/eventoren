@@ -99,8 +99,6 @@ export function ticketCheckoutFormStateCreate(inputs: {
     contact: contact.get(),
     participantNames: ticketParticipantNamesAlign(participantNames.get(), inputs.items()),
     documentSetRevision: ticketCheckoutLegalDocumentRevision,
-    termsAccepted: termsAccepted.get(),
-    privacyAcknowledged: privacyAcknowledged.get(),
   })
 
   const persistDraft = (immediate = false) => {
@@ -133,7 +131,10 @@ export function ticketCheckoutFormStateCreate(inputs: {
   }
 
   onCleanup(() => {
-    if (typeof window !== "undefined") window.removeEventListener("pagehide", flushDraft)
+    if (typeof window !== "undefined") {
+      window.removeEventListener("pagehide", handlePageHide)
+      window.removeEventListener("pageshow", handlePageShow)
+    }
     if (hydrated.get()) flushDraft()
   })
 
@@ -143,16 +144,30 @@ export function ticketCheckoutFormStateCreate(inputs: {
     ticketContactDraftSave(draftSnapshot())
   }
 
+  const legalConsentReset = () => {
+    termsAccepted.set(false)
+    privacyAcknowledged.set(false)
+  }
+
+  const handlePageHide = () => {
+    // Clear consent before the browser can preserve this page in its back-forward cache.
+    legalConsentReset()
+    flushDraft()
+  }
+
+  const handlePageShow = (event: PageTransitionEvent) => {
+    if (event.persisted) legalConsentReset()
+  }
+
   onMount(() => {
     const draft = ticketContactDraftLoad()
     if (draft.success) {
       contact.set(draft.data.contact)
       participantNames.set(ticketParticipantNamesAlign(draft.data.participantNames, inputs.items()))
-      termsAccepted.set(draft.data.termsAccepted)
-      privacyAcknowledged.set(draft.data.privacyAcknowledged)
     }
     hydrated.set(true)
-    window.addEventListener("pagehide", flushDraft)
+    window.addEventListener("pagehide", handlePageHide)
+    window.addEventListener("pageshow", handlePageShow)
   })
 
   const stepLabels = createMemo(() => ticketCheckoutStepOrder.map((entry) => ticketCheckoutStepLabels()[entry]))
@@ -241,17 +256,13 @@ export function ticketCheckoutFormStateCreate(inputs: {
   }
 
   const termsAcceptanceChange = (accepted: boolean) => {
-    draftChanged = true
     termsAccepted.set(accepted)
     errorMessage.set("")
-    persistDraft()
   }
 
   const privacyAcknowledgementChange = (accepted: boolean) => {
-    draftChanged = true
     privacyAcknowledged.set(accepted)
     errorMessage.set("")
-    persistDraft()
   }
 
   const participantNameChange = (eventId: string, tierId: string, ticketIndex: number, value: string) => {

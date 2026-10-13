@@ -5,6 +5,7 @@ import type { TicketCheckoutFormDraft } from "./TicketCheckoutFormDraft.ts"
 import type { TicketContact } from "./TicketContact.ts"
 import { ticketCheckoutLegalDocumentRevision } from "./ticketCheckoutLegalDocumentRevision.ts"
 import { ticketContactDraftKey } from "./ticketContactDraftKey.ts"
+import { ticketContactDraftSave } from "./ticketContactDraftSave.ts"
 import { ticketContactEmpty } from "./ticketContactEmpty.ts"
 
 const op = "ticketContactDraftLoad"
@@ -15,8 +16,6 @@ export function ticketContactDraftLoad(): Result<TicketCheckoutFormDraft> {
       contact: ticketContactEmpty(),
       participantNames: {},
       documentSetRevision: ticketCheckoutLegalDocumentRevision,
-      termsAccepted: false,
-      privacyAcknowledged: false,
     })
   }
 
@@ -31,8 +30,6 @@ export function ticketContactDraftLoad(): Result<TicketCheckoutFormDraft> {
       contact: ticketContactEmpty(),
       participantNames: {},
       documentSetRevision: ticketCheckoutLegalDocumentRevision,
-      termsAccepted: false,
-      privacyAcknowledged: false,
     })
 
   let parsed: unknown = null
@@ -45,7 +42,6 @@ export function ticketContactDraftLoad(): Result<TicketCheckoutFormDraft> {
 
   const candidate = parsed as Partial<TicketContact & TicketCheckoutFormDraft>
   const contactCandidate = candidate.contact ?? candidate
-  const sameLegalRevision = candidate.documentSetRevision === ticketCheckoutLegalDocumentRevision
   const participantNames: Record<string, Record<string, readonly string[]>> = {}
   if (typeof candidate.participantNames === "object" && candidate.participantNames !== null) {
     for (const [eventId, eventNames] of Object.entries(candidate.participantNames)) {
@@ -57,7 +53,7 @@ export function ticketContactDraftLoad(): Result<TicketCheckoutFormDraft> {
       participantNames[eventId] = validTiers
     }
   }
-  return createResult({
+  const draft: TicketCheckoutFormDraft = {
     contact: {
       firstName: typeof contactCandidate.firstName === "string" ? contactCandidate.firstName : "",
       lastName: typeof contactCandidate.lastName === "string" ? contactCandidate.lastName : "",
@@ -75,8 +71,9 @@ export function ticketContactDraftLoad(): Result<TicketCheckoutFormDraft> {
     },
     participantNames,
     documentSetRevision: ticketCheckoutLegalDocumentRevision,
-    // A legacy combined acceptance is not evidence of either distinct consent.
-    termsAccepted: sameLegalRevision && candidate.termsAccepted === true,
-    privacyAcknowledged: sameLegalRevision && candidate.privacyAcknowledged === true,
-  })
+  }
+  // Remove legacy consent from storage without making checkout depend on a successful save.
+  if ("termsAccepted" in candidate || "privacyAcknowledged" in candidate || "legalAccepted" in candidate)
+    ticketContactDraftSave(draft)
+  return createResult(draft)
 }

@@ -11,7 +11,15 @@ export function ticketContactDraftSave(draft: TicketCheckoutFormDraft | null): R
 
   try {
     if (draft === null) localStorage.removeItem(ticketContactDraftKey)
-    else localStorage.setItem(ticketContactDraftKey, JSON.stringify(draft))
+    else
+      localStorage.setItem(
+        ticketContactDraftKey,
+        JSON.stringify({
+          contact: draft.contact,
+          participantNames: draft.participantNames,
+          documentSetRevision: draft.documentSetRevision,
+        }),
+      )
   } catch (error) {
     return createResultError(op, "Entwurf konnte nicht gespeichert werden.", error)
   }
