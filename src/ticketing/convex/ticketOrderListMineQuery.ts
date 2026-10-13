@@ -10,7 +10,7 @@ const legacyOrderLimit = 50
 export const ticketOrderListMineQuery = query({
   args: { token: v.string() },
   handler: async (ctx, args): PromiseResult<readonly unknown[]> =>
-    authQueryTokenToUserId(ctx, args, async (authorizedCtx, authorizedArgs) => {
+    authQueryTokenToUserId(ctx, args, async (authorizedCtx, authorizedArgs): PromiseResult<readonly unknown[]> => {
       const orders = await authorizedCtx.db
         .query("ticketOrders")
         .withIndex("ownerUserIdAndCreatedAt", (q) => q.eq("ownerUserId", authorizedArgs.userId))
@@ -34,7 +34,6 @@ export const ticketOrderListMineQuery = query({
       )) {
         const projection = await ticketOrderProjectionCreate(authorizedCtx, order._id)
         if (!projection) continue
-        if (!projection.success) return projection
         projections.push(projection.data)
       }
       return createResult(projections)
