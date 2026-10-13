@@ -15,9 +15,15 @@ Repositories:
 - E2E purchases are restricted to preview/Stripe test mode. Delayed SEPA outcomes use controlled fixtures rather than live charges or waiting for settlement.
 - Preserve existing uncommitted E2E ownership-proof changes and the unrelated Billing documentation change.
 - Shared contract changes must be packaged through Billing's existing vendored-client workflow and consumed by both repositories.
-- Billing policy enforcement, lifecycle evidence, retryable cancellation notifications, and independent ticket-only email processing/worker are implemented. Eventoren issuance/reconciliation/cancellation, ticket-only work/access/promotion, and customer/admin/organizer projections are implemented. Paid-email ticket deduplication, final verification, and rollout remain in progress.
+- Feature implementation and integrated typechecks/focused verification are complete in both repositories. Preview services/migrations and cancellation/webhook configuration are ready. Browser E2E is being repaired and restricted Checkout is under integration verification; staged production rollout and production enablement remain pending.
 - Ticket-only delivery uses optional `deliveryMode` (`tickets_only` or `paid`, omitted means legacy paid), independent Billing confirmation state, and additive migration 0073. Eventoren consumes the refreshed Billing client package 0.1.9.
 - Production rollout remains pending final integrated verification. Billing production loads the application bundle and static files from `dist`; isolated client packaging is safe, but a full server build is a deployment operation and must use the staged window.
+- Preview early issuance is enabled after readiness verification; production remains disabled until its staged deployment and callback/webhook readiness are verified. Protected consistent Billing and production Convex backups have been captured.
+- Mixed-version compatibility is verified against the actual 0.1.5 client: old response validators strip additive fields. No capability-header layer is needed; early issuance still waits for new consumers and authenticated cancellation readiness.
+- Rollback retains additive database/Convex schema fields. Backups are for explicit data recovery, not routine code rollback; restoring older snapshots would discard later payment/order writes.
+- Browser verification uses the canonical preview `https://eventoren.leonardomora.de`. Pages preview secret synchronization is implemented, but its separate SSO callback is not registered; production Pages authentication remains independently configured and unchanged.
+- Recheck the current production deployment and custom-policy catalog at cutover; preserve concurrent changes and use the current deployment as the rollback baseline. Production early issuance remains disabled.
+- Preview verification uses target-bound E2E configuration and current date/time/contact-name controls. Preserve unreconciled expired runs and their ownership evidence; never relax provider cleanup correlation to make a rerun pass.
 - Verified configured test/live method choices: card, Klarna, SEPA debit, Bancontact. PayPal, iDEAL, bank transfer, and standalone Wero remain unavailable; bank transfer also has no existing usable rail configuration. Do not expose these as selectable custom methods.
 - Shared status evidence uses optional `checkoutCompletedAt`, `paymentMethodType`, `stripePaymentIntentStatus`, and a strictly correlated `cancellation` object. Early issuance requires the joint completed/SEPA/processing evidence, not any field alone.
 
@@ -123,10 +129,10 @@ Acceptance: SEPA-only checkout cannot offer an unrelated method; default checkou
 - [x] Add the necessary nullable lifecycle fields in `src/platform/database/schema.ts` and a migration through the existing Drizzle workflow. Store completion time, resolved method, and cancellation evidence; do not add redundant policy storage.
 - [x] Update `src/checkout/server/organizationDynamicCheckoutStatusGet.ts` to expose the additive lifecycle evidence.
 - [x] Extend `src/payments/stripeEventProcess.ts` and the appropriate session processor to persist verified completed/processing SEPA without entering paid booking/invoice work.
-- [ ] Keep `src/payments/stripeCheckoutSessionPaidProcess.ts` genuinely paid-only. On later success, update payment truth and existing paid financial work without reissuing tickets.
+- [x] Keep `src/payments/stripeCheckoutSessionPaidProcess.ts` genuinely paid-only. On later success, update payment truth and existing paid financial work without reissuing tickets.
 - [x] Reuse pending async-failure handling and persist the cancellation reason needed by Eventoren.
 - [x] Add SEPA-only dispute correlation using verified charge/PaymentIntent/context records and existing correlation helpers. Persist cancellation despite an originally paid context.
-- [ ] Test duplicate and reordered completion/success/failure/dispute events, wrong organization/mode/session correlation, and expiry versus processing.
+- [x] Test duplicate and reordered completion/success/failure/dispute events, wrong organization/mode/session correlation, and expiry versus processing.
 
 Acceptance: unpaid completion never becomes paid; unrelated/card disputes are untouched; cancellation remains terminal even if later positive events arrive.
 
@@ -135,7 +141,7 @@ Acceptance: unpaid completion never becomes paid; unrelated/card disputes are un
 - [x] Build the Billing client with `scripts/billingPackageBuild.ts` / `bun run package:build`.
 - [x] Update Eventoren's existing vendored Billing dependency and lockfile using its established packaging workflow.
 - [x] Update `src/ticketing/convex/billingEventorenClient.ts` and status/checkout consumers to carry the additive fields. Old responses without them keep their current behavior.
-- [ ] Regenerate existing generated API/client artifacts only where required by the repository workflow.
+- [x] Regenerate existing generated API/client artifacts only where required by the repository workflow.
 
 Acceptance: both repositories agree on catalog/status contracts without a breaking payment enum change.
 
@@ -180,7 +186,7 @@ Acceptance: the customer receives a valid SEPA ticket before settlement; ordinar
 - [x] In Billing, deliver async-failure/dispute cancellation from the relevant Stripe processing path, using a fixed configured destination and server-only authentication. Use existing Stripe event retry semantics rather than an unrelated receipt worker or generic outbox.
 - [x] Persist the same cancellation evidence in Billing status responses. Make Eventoren's direct reconciliation honor it even for already-paid orders; do not add an endless scan of historical paid orders.
 - [x] Ensure `src/organizer/convex/organizerTicketCheckInApply.ts` rejects cancelled tickets and preserves previous check-in history.
-- [ ] Test cancellation before/after issuance, after settlement, duplicate delivery, lost callback response/retry, authentication/correlation failure, and positive events after cancellation.
+- [x] Test cancellation before/after issuance, after settlement, duplicate delivery, lost callback response/retry, authentication/correlation failure, and positive events after cancellation.
 
 Acceptance: later failed/returned SEPA invalidates admission automatically, including an already-paid order; no cancelled ticket can be revived by a delayed event.
 
@@ -189,16 +195,16 @@ Acceptance: later failed/returned SEPA invalidates admission automatically, incl
 - [x] Separate early ticket delivery from paid financial fulfillment. Reuse existing mail transport/templates and durable delivery conventions; add only the bounded ticket-only work needed for eligible pending SEPA.
 - [x] Update the Eventoren fulfillment snapshot/scheduling paths, including `ticketFulfillmentWorkSnapshotCreate.ts`, so valid early-issued tickets are accessible and delivered once.
 - [x] Extend Billing's authenticated fulfillment/confirmation integration as needed for ticket-only delivery, explicitly checking verified SEPA completion. Keep invoice/receipt and booking assignment paid-only in `eventorenTicketFulfillmentPrepare.ts`, `eventorenTicketConfirmationProcess.ts`, and related workers.
-- [ ] On later settlement, send only financial artifacts still due; do not duplicate ticket delivery. Stop undelivered ticket work after cancellation.
+- [x] On later settlement, send only financial artifacts still due; do not duplicate ticket delivery. Stop undelivered ticket work after cancellation.
 - [x] Include cancellation/issuance evidence in `ticketOrderProjectionCreate.ts`, customer order/status/history views, admin order views, and organizer display where currently missing.
 
 Acceptance: valid pending tickets are available and delivered; no early paid receipt; cancelled tickets are clearly invalid; normal paid checkout stays unchanged.
 
 ### 10. Focused automated verification
 
-- [ ] Each implementation increment runs only its relevant tests; add new focused test files if a behavior has no suitable existing home.
-- [ ] Run shared package/type checks after contract integration, not after every small UI edit.
-- [ ] Use webhook fixtures for delayed Stripe outcomes; do not wait business days or run the full E2E suite for individual changes.
+- [x] Each implementation increment runs only its relevant tests; add new focused test files if a behavior has no suitable existing home.
+- [x] Run shared package/type checks after contract integration, not after every small UI edit.
+- [x] Use webhook fixtures for delayed Stripe outcomes; do not wait business days or run the full E2E suite for individual changes.
 
 Existing targeted commands, selected by the task rather than all run on every increment:
 
@@ -225,10 +231,10 @@ Run `bun run convex:codegen` when the schema/API changes require it. Use adjacen
 
 ### 11. Final browser verification and rollout
 
-- [ ] Delegate live UI verification to a browser subagent once the integrated changes are ready.
-- [ ] Verify new/edit event defaults, collapse behavior, mutual exclusion, persistence after reload, and a custom SEPA-only selection.
+- [x] Delegate live UI verification to a browser subagent once the integrated changes are ready.
+- [x] Verify new/edit event defaults, collapse behavior, mutual exclusion, persistence after reload, and a custom SEPA-only selection.
 - [ ] In Stripe test mode, verify default Checkout remains unchanged and restricted Checkout offers only the permitted methods. Verify pending-SEPA ticket visibility and cancelled-ticket admission rejection using controlled outcome fixtures where needed.
-- [ ] Use the configured test administrator credentials through `zitadel-cli`; never store credentials in this document or fixtures.
+- [x] Use the configured test administrator credentials through `zitadel-cli`; never store credentials in this document or fixtures.
 - [ ] Apply Billing's additive migration/API changes and distribute the client package, then deploy Eventoren's receiver/consumer and configure authenticated outcome delivery before enabling the feature for events.
 - [ ] Ensure both sides are ready before creating restricted events or issuing pending-SEPA tickets. Leave existing event defaults and organization/instance settings untouched.
 - [ ] Keep early SEPA issuance disabled during mixed-version deployment; use a minimal server-side readiness gate if existing controls cannot prevent it. Enable only after authenticated cancellation delivery and the receiver are configured and verified.
