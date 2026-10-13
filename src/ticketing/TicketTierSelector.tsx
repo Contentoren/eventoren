@@ -31,7 +31,7 @@ export function TicketTierSelector(props: {
             <li>
               <UiCard padded={false} class="border-0 shadow-sm p-5">
                 <div class="flex flex-col gap-space-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div class="flex flex-col gap-space-2">
+                  <div class="flex min-w-0 flex-1 flex-col gap-space-2">
                     <p class="text-base font-semibold text-content">{row.name}</p>
                     <p class="text-sm text-content-muted">{row.description}</p>
                     <Show when={row.soldOut}>
@@ -39,14 +39,14 @@ export function TicketTierSelector(props: {
                     </Show>
                   </div>
 
-                  <div class="flex flex-col items-start gap-space-3 sm:items-end">
+                  <div class="flex shrink-0 flex-col items-start gap-space-3 sm:items-end">
                     <div class="sm:text-right">
                       <p class="text-lg font-semibold text-content">{row.priceLabel}</p>
                       <p class="text-sm text-content-muted">{row.totalLabel}</p>
                     </div>
 
                     <div class="flex flex-col items-start gap-space-2 sm:items-end">
-                      <div class="flex flex-wrap items-center gap-space-3">
+                      <div class="flex items-center gap-space-3">
                         <Show when={row.activationCodeRequired}>
                           <Label for={row.activationCodeFieldId} class="sr-only">
                             Freischaltungscode für {row.name}
