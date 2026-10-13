@@ -46,6 +46,19 @@ async function ticketProgressToDone(directory: string, target: Pick<E2eCheckpoin
   }
 }
 
+async function checkpointNativeWorkflowsComplete(directory: string) {
+  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  for (const workflow of ["SSO", "native auth HTTP", "native auth lifecycle"] as const) {
+    const loaded = await e2eCheckpointLoad(directory, target)
+    if (!loaded.success || !loaded.data) throw new Error("Cannot load fixture checkpoint")
+    const saved = await e2eCheckpointSave(directory, {
+      ...loaded.data,
+      completedWorkflows: [...(loaded.data.completedWorkflows ?? []), workflow],
+    })
+    expect(saved.success).toBe(true)
+  }
+}
+
 function mockStripeReconcile() {
   return async () =>
     createResult({
@@ -772,7 +785,7 @@ describe("Eventoren E2E runner", () => {
     }
   })
 
-  it("refuses an uncertain payment before rerunning even read-only SSO", async () => {
+  it("routes started payment to exact ticket proof without rerunning completed workflows or cleaning effects", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
     try {
       const runId = "abc-12345678-1234-1234-1234-123456789abc"
@@ -785,6 +798,8 @@ describe("Eventoren E2E runner", () => {
             runId,
             createdAt: 1_000_000,
             phase: "ticket-unreconciled",
+            selectedWorkflows: ["SSO", "native auth HTTP", "native auth lifecycle", "ticket purchase"],
+            completedWorkflows: [],
             ticket: {
               step: "payment",
               status: "started",
@@ -798,19 +813,31 @@ describe("Eventoren E2E runner", () => {
           })
         ).success,
       ).toBe(true)
+      await checkpointNativeWorkflowsComplete(directory)
+      const before = await readFile(join(directory, "checkpoint.json"), "utf8")
       const started: string[] = []
+      let cleanupCalls = 0
       expect(
         await e2eInvocationRun({
           target: "development",
           environment: {},
           checkpointDirectory: directory,
+          historicalStripeConfigResolve: async () =>
+            createResult({ key: "sk_test_mock", accountId: "acct_mock", organizationId: "org_mock" }),
           commandRun: async (workflow) => {
             started.push(workflow.name)
-            return 0
+            // The child owns the read-only proof; refusal must retain every effect.
+            return 1
+          },
+          cleanupSessionCreate: async () => {
+            cleanupCalls++
+            throw new Error("failed ticket must not reach cleanup")
           },
         }),
       ).toBe(1)
-      expect(started).toEqual([])
+      expect(started).toEqual(["ticket purchase"])
+      expect(cleanupCalls).toBe(0)
+      expect(await readFile(join(directory, "checkpoint.json"), "utf8")).toBe(before)
     } finally {
       await rm(directory, { recursive: true, force: true })
     }
@@ -830,6 +857,8 @@ describe("Eventoren E2E runner", () => {
             runId,
             createdAt,
             phase: "ticket-unreconciled",
+            selectedWorkflows: ["SSO", "native auth HTTP", "native auth lifecycle", "ticket purchase"],
+            completedWorkflows: [],
             ticket: {
               step: "payment",
               status: "started",
@@ -844,6 +873,7 @@ describe("Eventoren E2E runner", () => {
           })
         ).success,
       ).toBe(true)
+      await checkpointNativeWorkflowsComplete(directory)
       const before = await readFile(join(directory, "checkpoint.json"), "utf8")
       let called = 0
       expect(
@@ -851,8 +881,10 @@ describe("Eventoren E2E runner", () => {
           target: "development",
           environment: {},
           checkpointDirectory: directory,
+          historicalStripeConfigResolve: async () =>
+            createResult({ key: "sk_test_mock", accountId: "acct_mock", organizationId: "org_mock" }),
           commandRun: async () => {
-            throw new Error("must not run browser")
+            throw new Error("browser unavailable; exact ticket proof cannot complete")
           },
           catalogCleanup: async () => {
             called++
@@ -881,6 +913,8 @@ describe("Eventoren E2E runner", () => {
             runId,
             createdAt,
             phase: "ticket-unreconciled",
+            selectedWorkflows: ["SSO", "native auth HTTP", "native auth lifecycle", "ticket purchase"],
+            completedWorkflows: [],
             ticket: {
               step: "payment",
               status: "started",
@@ -894,6 +928,7 @@ describe("Eventoren E2E runner", () => {
           })
         ).success,
       ).toBe(true)
+      await checkpointNativeWorkflowsComplete(directory)
       const before = await readFile(join(directory, "checkpoint.json"), "utf8")
       let swept = 0
       expect(
@@ -905,8 +940,10 @@ describe("Eventoren E2E runner", () => {
             E2E_STRIPE_TEST_ACCOUNT_ID: "acct_mock",
             E2E_BILLING_ORGANIZATION_ID: "org_mock",
           },
+          historicalStripeConfigResolve: async () =>
+            createResult({ key: "sk_test_mock", accountId: "acct_mock", organizationId: "org_mock" }),
           commandRun: async () => {
-            throw new Error("browser must not run")
+            throw new Error("browser unavailable; exact ticket proof cannot complete")
           },
           stripeReconcile: async () => {
             swept++
@@ -952,6 +989,8 @@ describe("Eventoren E2E runner", () => {
             runId,
             createdAt,
             phase: "ticket-unreconciled",
+            selectedWorkflows: ["SSO", "native auth HTTP", "native auth lifecycle", "ticket purchase"],
+            completedWorkflows: [],
             ticket: {
               step: "payment",
               status: "started",
@@ -966,6 +1005,7 @@ describe("Eventoren E2E runner", () => {
           })
         ).success,
       ).toBe(true)
+      await checkpointNativeWorkflowsComplete(directory)
       const previous = await readFile(join(directory, "checkpoint.json"), "utf8")
       let scanned = false
       expect(
@@ -977,8 +1017,10 @@ describe("Eventoren E2E runner", () => {
             TEST_CUSTOMER_MAILCOW_USER: "buyer@example.test",
             TEST_CUSTOMER_MAILCOW_PASS: "unused",
           },
+          historicalStripeConfigResolve: async () =>
+            createResult({ key: "sk_test_mock", accountId: "acct_mock", organizationId: "org_mock" }),
           commandRun: async () => {
-            throw new Error("browser must not start")
+            throw new Error("browser unavailable; exact ticket proof cannot complete")
           },
           mailCleanup: async () => {
             scanned = true

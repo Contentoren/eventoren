@@ -13,7 +13,7 @@ const target = environmentResult.data.target
 const binding = { target, baseUrl: baseUrl as NativeAuthHttpCheckpoint["baseUrl"] }
 
 async function httpCheckpointDirectoryGet(): Promise<string> {
-  const root = await e2eCheckpointRootResolve()
+  const root = await e2eCheckpointRootResolve(binding)
   if (!root.success) throw new Error(root.errorMessage)
   return root.data.directory
 }

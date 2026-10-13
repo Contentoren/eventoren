@@ -18,7 +18,7 @@ export async function ticketPurchaseContextCreate(
   if (!environment.success) throw new Error(environment.errorMessage)
   const guard = e2eTicketTargetCheck(environment.data.target)
   if (!guard.success) throw new Error(guard.errorMessage)
-  const root = await e2eCheckpointRootResolve()
+  const root = await e2eCheckpointRootResolve({ target: environment.data.target, baseUrl: environment.data.baseUrl })
   if (!root.success) throw new Error(root.errorMessage)
   const loaded = await e2eCheckpointLoad(root.data.directory, environment.data)
   if (

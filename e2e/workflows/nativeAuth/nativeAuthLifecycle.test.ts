@@ -76,7 +76,10 @@ test("native auth keeps live catalog lifecycle scoped to active sessions", async
   // The direct runner uses the same checkpoint target identity as the
   // invocation runner: it resumes the retained run when E2E_RUN_ID is absent
   // and refuses foreign runs or targets instead of creating replacements.
-  const root = await e2eCheckpointRootResolve()
+  const root = await e2eCheckpointRootResolve({
+    target: environmentResult.data.target,
+    baseUrl: environmentResult.data.baseUrl,
+  })
   if (!root.success) throw new Error(root.errorMessage)
   const directory = root.data.directory
   const target = { target: environmentResult.data.target, baseUrl: environmentResult.data.baseUrl }

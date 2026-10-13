@@ -137,7 +137,13 @@ export async function e2eInvocationCleanupSessionCreate(input: {
     const markFn: CleanupSessionMark =
       mark ??
       (async (args) =>
-        e2eAuthSessionMark({ convexUrl, runId: input.runId, token: args.token, mark: undefined })
+        e2eAuthSessionMark({
+          convexUrl,
+          runId: input.runId,
+          token: args.token,
+          environment: input.env,
+          directory: input.env.E2E_CHECKPOINT_DIRECTORY,
+        })
           .then((marked) => {
             if (!marked.success)
               return { success: false as const, errorMessage: "Auth session marking rejected; fixtures retained" }

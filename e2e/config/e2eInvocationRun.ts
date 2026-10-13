@@ -73,9 +73,12 @@ export async function e2eInvocationRun(
     console.error(target.errorMessage)
     return 1
   }
-  const root = input.checkpointDirectory
-    ? { success: true as const, data: { directory: input.checkpointDirectory, fallback: false } }
-    : await e2eCheckpointRootResolve()
+  const root = await e2eCheckpointRootResolve({
+    target: target.data.target,
+    baseUrl: target.data.baseUrl,
+    directory: input.checkpointDirectory,
+    environment,
+  })
   if (!root.success) {
     console.error(root.errorMessage)
     return 1
@@ -125,7 +128,7 @@ export async function e2eInvocationRun(
         version: 1,
         target: target.data.target,
         baseUrl: target.data.baseUrl as E2eCheckpoint["baseUrl"],
-        runId: `${Date.now().toString(36)}-${crypto.randomUUID()}`,
+        runId: root.data.retainedRunId ?? `${Date.now().toString(36)}-${crypto.randomUUID()}`,
         createdAt: Date.now(),
         phase: "sso",
         selectedWorkflows: selectedNames,
@@ -198,6 +201,7 @@ export async function e2eInvocationRun(
       ...nonSecretEnvironment,
       E2E_BASE_URL: target.data.baseUrl,
       E2E_RUN_ID: checkpoint.runId,
+      E2E_CHECKPOINT_DIRECTORY: root.data.directory,
       E2E_INVOCATION_PID: String(process.pid),
     } as Record<string, string>
     const convexUrl = e2eCleanupConvexUrlResolve(environment, target.data.target)
@@ -378,7 +382,7 @@ export async function e2eInvocationRun(
         targetBaseUrl: checkpoint.baseUrl,
         convexUrl: cleanupConvexUrl ?? "",
         runId: checkpoint.runId,
-        env: environment,
+        env: { ...environment, E2E_CHECKPOINT_DIRECTORY: root.data.directory },
       })
     } catch {
       cleanupSession = {

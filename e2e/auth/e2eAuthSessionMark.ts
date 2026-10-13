@@ -28,6 +28,7 @@ export async function e2eAuthSessionMark(input: {
   runId: string
   token: string
   directory?: string
+  environment?: Record<string, string | undefined>
   now?: number
   mark?: SessionMarkFn
 }) {
@@ -36,6 +37,9 @@ export async function e2eAuthSessionMark(input: {
   if (!input.token) return createResultError(op, "Auth session token is missing")
   const convexUrl = input.convexUrl.trim()
   if (!convexUrl) return createResultError(op, "Missing E2E cleanup Convex URL")
+  const root = await e2eCheckpointRootResolve({ directory: input.directory, environment: input.environment })
+  if (!root.success) return root
+  const directory = root.data.directory
   let marked: MarkPageResult
   try {
     marked = input.mark
@@ -52,8 +56,6 @@ export async function e2eAuthSessionMark(input: {
   const data = (marked.data ?? {}) as { sessionId?: unknown; creationTime?: unknown; runId?: unknown }
   if (typeof data.sessionId !== "string" || typeof data.creationTime !== "number")
     return createResultError(op, "Auth session marking returned no session identity; fixtures retained")
-  const directory = input.directory ?? (await e2eAuthSessionDirectoryResolve())
-  if (!directory) return createResultError(op, "No private auth evidence directory; fixtures retained")
   const tokenDigest = createHash("sha256").update(input.token, "utf8").digest("hex")
   const kept = await e2eAuthSessionEvidenceAppend(directory, input.runId, {
     sessionId: data.sessionId,
@@ -64,12 +66,6 @@ export async function e2eAuthSessionMark(input: {
   })
   if (!kept.success) return kept
   return createResult({ sessionId: data.sessionId, creationTime: data.creationTime, runId: input.runId })
-}
-
-async function e2eAuthSessionDirectoryResolve(): Promise<string | null> {
-  const root = await e2eCheckpointRootResolve()
-  if (!root.success) return null
-  return root.data.directory
 }
 
 export function e2eAuthSessionEvidencePath(directory: string, runId: string): string {
