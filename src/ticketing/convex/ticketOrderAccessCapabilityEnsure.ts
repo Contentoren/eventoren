@@ -2,6 +2,7 @@ import type { Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { ticketAccessDigestCreate } from "./ticketAccessDigestCreate.js"
+import { ticketFulfillmentWorkEligible } from "./ticketFulfillmentWorkEligible.js"
 
 export async function ticketOrderAccessCapabilityEnsure(
   ctx: MutationCtx,
@@ -10,8 +11,15 @@ export async function ticketOrderAccessCapabilityEnsure(
   const op = "ticketOrderAccessCapabilityEnsure"
   const order = await ctx.db.get("ticketOrders", orderId)
   if (!order) return createResultError(op, "The order was not found")
-  if (order.status !== "paid" || order.paymentStatus !== "paid")
-    return createResultError(op, "Ticket access is available only for paid orders")
+  if (order.cancellation !== undefined) return createResultError(op, "The order was cancelled")
+  if (order.emailAccessRevokedAt !== undefined) return createResultError(op, "The ticket access capability was revoked")
+  const paid = order.status === "paid" && order.paymentStatus === "paid"
+  const issued =
+    typeof order.ticketsIssuedAt === "string" &&
+    /^\d{4}-\d{2}-\d{2}T/u.test(order.ticketsIssuedAt) &&
+    Number.isFinite(Date.parse(order.ticketsIssuedAt))
+  if (!paid && !(issued && ticketFulfillmentWorkEligible(order, "tickets_only")))
+    return createResultError(op, "Ticket access requires paid or valid early-issued SEPA tickets")
 
   const existing = await ctx.db
     .query("ticketOrderDeliveries")

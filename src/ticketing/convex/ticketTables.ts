@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
+import { ticketPaymentCancellationValidator } from "./ticketPaymentCancellationValidator.js"
 
 const ticketOrderStatusValidator = v.union(
   v.literal("reserved"),
@@ -103,6 +104,9 @@ export const ticketTables = {
     // Durable allocation marker: reservations became sold and all ticket rows were inserted.
     // Independent of settlement; older paid orders need no backfill.
     ticketsIssuedAt: v.optional(v.string()),
+    stripeSessionId: v.optional(v.string()),
+    stripePaymentIntentId: v.optional(v.string()),
+    cancellation: v.optional(ticketPaymentCancellationValidator),
     paidAt: v.optional(v.string()),
     releasedAt: v.optional(v.string()),
     checkoutAttemptLeaseUntil: v.optional(v.number()),
@@ -111,6 +115,7 @@ export const ticketTables = {
   })
     .index("checkoutKey", ["checkoutKey"])
     .index("paymentReference", ["paymentReference"])
+    .index("cancellationStripeEventId", ["cancellation.stripeEventId"])
     .index("statusAndStripeModeAndUpdatedAt", ["status", "stripeMode", "updatedAt"])
     .index("createdAt", ["createdAt"])
     .index("eventKeyAndCreatedAt", ["eventKey", "createdAt"])
@@ -182,6 +187,8 @@ export const ticketTables = {
     paymentReference: v.string(),
     billingOrderReference: v.string(),
     stripeMode: v.optional(v.union(v.literal("live"), v.literal("test"))),
+    // Missing mode is legacy paid work; promotion reuses this same durable row.
+    deliveryMode: v.optional(v.union(v.literal("tickets_only"), v.literal("paid"))),
     requestSnapshotJson: v.string(),
     onlineTicketUrl: v.optional(v.string()),
     status: ticketFulfillmentWorkStatusValidator,
@@ -191,6 +198,7 @@ export const ticketTables = {
     lastError: v.optional(v.string()),
     fulfillmentReference: v.optional(v.string()),
     preparedAt: v.optional(v.string()),
+    cancelledAt: v.optional(v.string()),
     createdAt: v.string(),
     updatedAt: v.string(),
   })

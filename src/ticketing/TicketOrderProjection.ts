@@ -1,3 +1,5 @@
+import type { TicketPaymentCancellation } from "./TicketPaymentCancellation.ts"
+
 export type TicketOrderProjection = {
   readonly id: string
   readonly checkoutKey: string
@@ -41,6 +43,18 @@ export type TicketOrderProjection = {
   readonly checkoutUrl?: string
   readonly createdAt: string
   readonly updatedAt: string
+  readonly ticketsIssuedAt?: string
+  readonly paymentMethodType?: string
+  readonly checkoutCompletedAt?: string
+  readonly stripePaymentIntentStatus?:
+    | "requires_payment_method"
+    | "requires_confirmation"
+    | "requires_action"
+    | "processing"
+    | "requires_capture"
+    | "canceled"
+    | "succeeded"
+  readonly cancellation?: TicketPaymentCancellation
   readonly lines: readonly {
     readonly tierKey: string
     readonly tierName: string
@@ -65,6 +79,7 @@ export type TicketOrderProjection = {
     readonly priceCents: number
     readonly feeCents: number
     readonly participantName?: string
+    readonly cancelled?: boolean
     readonly issuedAt: string
   }[]
 }

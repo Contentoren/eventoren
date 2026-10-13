@@ -46,6 +46,18 @@ export function AdminTicketOrderDetailsPanel(props: {
             </Show>
             <p>Bestellstatus: {state.localStatusLabel(props.order.orderStatus)}</p>
             <p>Zahlungsstatus: {state.localStatusLabel(props.order.paymentStatus)}</p>
+            <Show when={props.order.ticketsIssuedAt}>
+              <p>Tickets ausgestellt: {props.dateFormat(props.order.ticketsIssuedAt!)}</p>
+            </Show>
+            <Show when={props.order.cancellation}>
+              <p class="font-semibold text-danger">
+                Storniert (
+                {props.order.cancellation!.reason === "sepa_disputed"
+                  ? "SEPA-Rücklastschrift"
+                  : "Zahlung fehlgeschlagen"}
+                ): {props.dateFormat(props.order.cancellation!.cancelledAt)}
+              </p>
+            </Show>
             <p>
               Zahlungsreferenz: <span class="break-all">{props.order.paymentReference}</span>
             </p>

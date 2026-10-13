@@ -325,7 +325,7 @@ export function OrganizerEventDetailPage(props: {
                                       <Button
                                         variant="contrast"
                                         class="min-h-11 w-full rounded-lg"
-                                        disabled={state.actionPending()}
+                                        disabled={state.actionPending() || ticket.cancelled}
                                         onClick={() => void state.ticketReset()}
                                       >
                                         {state.actionPending() ? state.text().working : state.text().reset}
@@ -600,7 +600,7 @@ export function OrganizerEventDetailPage(props: {
                                   variant="outline"
                                   size="lg"
                                   class="min-h-12 w-full rounded-lg border-0 bg-surface-muted shadow-sm shadow-slate-900/5 dark:bg-slate-800 dark:shadow-black/20"
-                                  disabled={state.actionPending()}
+                                  disabled={state.actionPending() || ticket().cancelled}
                                   onClick={() => void state.ticketReset()}
                                 >
                                   {state.actionPending() ? state.text().working : state.text().reset}

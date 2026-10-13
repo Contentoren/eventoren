@@ -43,7 +43,7 @@ export function organizerTicketProjectionCreate(
     buyerEmail: order.customerEmail,
     paymentStatus: order.paymentStatus,
     orderStatus: order.status,
-    cancelled: ticket.cancelled ?? false,
+    cancelled: ticket.cancelled === true || Boolean(order.cancellation),
     checkedIn: ticket.checkedInAt !== undefined,
     checkedInAt: ticket.checkedInAt ?? null,
     checkedOutAt: ticket.checkedOutAt ?? null,

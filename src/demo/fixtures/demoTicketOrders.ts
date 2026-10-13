@@ -154,5 +154,10 @@ function summaryCreate(order: TicketOrderProjection): TicketOrderSummary {
     paymentStatus: order.paymentStatus,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
+    bookingNumber: order.bookingNumber,
+    bookingReference: order.bookingReference,
+    ticketsIssuedAt: order.ticketsIssuedAt,
+    paymentMethodType: order.paymentMethodType,
+    cancellation: order.cancellation,
   }
 }

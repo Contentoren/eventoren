@@ -75,3 +75,55 @@ test("does not expose a booking reference while unpaid or in inventory-conflict 
   expect(ticketOrderWalletPassStateCreate({ order: () => pending }).orderReferenceDisplay()).toBeUndefined()
   expect(ticketOrderWalletPassStateCreate({ order: () => conflict }).orderReferenceDisplay()).toBeUndefined()
 })
+
+test("labels valid early-issued SEPA tickets as SEPA in Bearbeitung with active references", () => {
+  const sepaOrder: TicketOrderProjection = {
+    ...orderCreate({
+      paymentStatus: "pending",
+      status: "checkout_created",
+      bookingReference: "BOOK-SEPA-42",
+    }),
+    ticketsIssuedAt: "2026-10-12T10:00:00.000Z",
+    paymentMethodType: "sepa_debit",
+  }
+  const state = ticketOrderWalletPassStateCreate({ order: () => sepaOrder })
+
+  expect(state.statusLabel()).toBe("SEPA in Bearbeitung")
+  expect(state.statusTone()).toBe("brand")
+  expect(state.orderReferenceDisplay()).toEqual({
+    label: "Bestellnummer",
+    value: "BOOK-SEPA-42",
+  })
+})
+
+test("labels cancelled orders as Storniert with danger tone and unavailable notice", () => {
+  const cancelledOrder: TicketOrderProjection = {
+    ...orderCreate({
+      paymentStatus: "failed",
+      status: "failed",
+    }),
+    cancellation: {
+      cancelledAt: "2026-10-12T12:00:00.000Z",
+      organizationId: "org-1",
+      eventKey: "event-key",
+      orderReference: "ord-ref",
+      paymentReference: "payment-ref",
+      stripeMode: "test",
+      paymentMethodType: "sepa_debit",
+      stripeEventId: "evt_fail",
+      stripeSessionId: "cs_fail",
+      stripePaymentIntentId: "pi_fail",
+      reason: "payment_failed",
+      stripeEventType: "checkout.session.async_payment_failed",
+      stripeChargeId: null,
+      stripeDisputeId: null,
+    },
+  }
+  const state = ticketOrderWalletPassStateCreate({ order: () => cancelledOrder })
+
+  expect(state.statusLabel()).toBe("Storniert")
+  expect(state.statusTone()).toBe("danger")
+  expect(state.ticketsUnavailableMessage()).toBe(
+    "Diese Bestellung wurde storniert. Es sind keine gültigen Tickets verfügbar.",
+  )
+})

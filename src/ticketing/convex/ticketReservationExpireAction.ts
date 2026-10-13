@@ -3,6 +3,7 @@ import { internal } from "#convex/_generated/api.js"
 import type { Id } from "#convex/_generated/dataModel.js"
 import { type ActionCtx, internalAction } from "#convex/_generated/server.js"
 import { billingEventorenClient } from "./billingEventorenClient.js"
+import { ticketPaymentStatusApplyArgsCreate } from "./ticketPaymentStatusApplyArgsCreate.js"
 
 export const ticketReservationExpireAction = internalAction({
   args: { orderId: v.id("ticketOrders") },
@@ -64,6 +65,20 @@ async function ticketReservationExpireActionHandler(
       stripeMode: status.stripeMode,
       reason: "Billing confirmed that the checkout session expired",
     })
+  // Apply the provider response before any local retry/expiry decision. A
+  // completed processing debit may not have issued locally yet; deferring it
+  // without applying this evidence would miss early issuance at the cutoff.
+  const applied = await ctx.runMutation(
+    internal.ticketing.ticketPaymentStatusApplyMutation,
+    ticketPaymentStatusApplyArgsCreate(args.orderId, { ...status, payment: status.payment }),
+  )
+  if (!applied.success) {
+    await ctx.runMutation(internal.ticketing.ticketReservationDeferMutation, {
+      orderId: args.orderId,
+      reason: applied.errorMessage,
+    })
+    return applied
+  }
   if (status.payment === "pending") {
     await ctx.runMutation(internal.ticketing.ticketReservationDeferMutation, {
       orderId: args.orderId,
@@ -71,11 +86,5 @@ async function ticketReservationExpireActionHandler(
     })
     return { success: true as const, data: { action: "deferred" as const } }
   }
-  return await ctx.runMutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
-    orderId: args.orderId,
-    paymentReference: status.paymentReference,
-    billingOrderReference: status.orderReference,
-    stripeMode: status.stripeMode,
-    payment: status.payment,
-  })
+  return applied
 }

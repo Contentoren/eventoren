@@ -1,3 +1,5 @@
+import type { TicketPaymentCancellation } from "./TicketPaymentCancellation.ts"
+
 export type TicketOrderSummary = {
   readonly id: string
   readonly checkoutKey: string
@@ -30,4 +32,7 @@ export type TicketOrderSummary = {
   readonly paymentStatus: "pending" | "paid" | "failed" | "expired"
   readonly createdAt: string
   readonly updatedAt: string
+  readonly ticketsIssuedAt?: string
+  readonly paymentMethodType?: string
+  readonly cancellation?: TicketPaymentCancellation
 }

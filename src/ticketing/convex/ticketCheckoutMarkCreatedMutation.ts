@@ -22,6 +22,7 @@ export const ticketCheckoutMarkCreatedMutation = internalMutation({
     const op = "ticketCheckoutMarkCreatedMutation"
     const order = await ctx.db.get("ticketOrders", args.orderId)
     if (!order) return createResultError(op, "The order was not found")
+    if (order.cancellation !== undefined) return createResultError(op, "The order was cancelled")
     if (order.paymentReference !== args.paymentReference) return createResultError(op, "Payment reference mismatch")
     if (order.status === "paid") return createResultError(op, "The order is already paid")
     if (

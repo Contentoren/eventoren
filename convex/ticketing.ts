@@ -30,6 +30,7 @@ export { ticketPaymentReconcileScheduledAction } from "#src/ticketing/convex/tic
 export { ticketPaymentReconcileScheduledContextQuery } from "#src/ticketing/convex/ticketPaymentReconcileScheduledContextQuery.ts"
 export { ticketPaymentReconcileTerminalPageQuery } from "#src/ticketing/convex/ticketPaymentReconcileTerminalPageQuery.ts"
 export { ticketPaymentStatusApplyMutation } from "#src/ticketing/convex/ticketPaymentStatusApplyMutation.ts"
+export { ticketPaymentCancellationMutation } from "#src/ticketing/convex/ticketPaymentCancellationMutation.ts"
 export { ticketReservationDeferMutation } from "#src/ticketing/convex/ticketReservationDeferMutation.ts"
 export { ticketReservationExpirationContextQuery } from "#src/ticketing/convex/ticketReservationExpirationContextQuery.ts"
 export { ticketReservationExpireAction } from "#src/ticketing/convex/ticketReservationExpireAction.ts"

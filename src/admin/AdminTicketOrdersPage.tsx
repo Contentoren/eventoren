@@ -88,8 +88,8 @@ export function AdminTicketOrdersPage(props?: {
         <Show when={!tile}>
           <span class="text-sm text-content-muted xl:hidden">Status:</span>
         </Show>
-        <UiBadge tone={state.paymentTone(order.paymentStatus)} class="ring-0">
-          {state.paymentLabel(order.paymentStatus)}
+        <UiBadge tone={state.paymentTone(order.paymentStatus, order)} class="ring-0">
+          {state.paymentLabel(order.paymentStatus, order)}
         </UiBadge>
       </div>
       <Show when={tile}>

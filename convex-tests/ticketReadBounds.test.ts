@@ -467,6 +467,55 @@ async function terminalSelectionRead(t: TestContext, stripeMode: "live" | "test"
   throw new Error("Terminal selection did not finish within the fixture's page bound")
 }
 
+test("pending issued debits remain in the bounded active scan after event end without booking, while paid history stays excluded", async () => {
+  const t = convexTest({ schema, modules, transactionLimits: { documentsRead: 100 } })
+  const expected = await t.run(async (ctx) => {
+    const ids: Id<"ticketOrders">[] = []
+    for (const status of ["reserved", "checkout_created"] as const) {
+      ids.push(
+        await ctx.db.insert(
+          "ticketOrders",
+          orderInput(`issued-${status}`, {
+            status,
+            paymentStatus: "pending",
+            eventEndsAt: past,
+            ticketsIssuedAt: timestamp(1),
+            checkoutCompletedAt: timestamp(1),
+            paymentMethodType: "sepa_debit",
+            stripePaymentIntentStatus: "processing",
+            reservationExpiresAt: now - 1,
+          }),
+        ),
+      )
+    }
+    for (let index = 0; index < 150; index++)
+      await ctx.db.insert(
+        "ticketOrders",
+        orderInput(`paid-history-${index}`, {
+          status: "paid",
+          paymentStatus: "paid",
+          ticketsIssuedAt: timestamp(1),
+          paymentMethodType: "sepa_debit",
+          updatedAt: timestamp(0),
+        }),
+      )
+    return ids
+  })
+  const result = await t.query(internal.ticketing.ticketPaymentReconcileScheduledContextQuery, {
+    stripeMode: "test",
+    now,
+  })
+  expect(result.success).toBe(true)
+  if (result.success) expect(result.data.map((context) => context.orderId)).toEqual(expected)
+  await t.run(async (ctx) => {
+    await ctx.db.patch(expected[0]!, { status: "paid", paymentStatus: "paid" })
+    await ctx.db.patch(expected[1]!, { status: "failed", paymentStatus: "failed" })
+  })
+  expect(
+    await t.query(internal.ticketing.ticketPaymentReconcileScheduledContextQuery, { stripeMode: "test", now }),
+  ).toMatchObject({ success: true, data: [] })
+})
+
 test("admin detail returns every valid order line in creation order and keeps authentication and role checks", async () => {
   process.env.AUTH_SECRET = authSecret
   const t = convexTest(schema, modules)

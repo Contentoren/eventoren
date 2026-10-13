@@ -4,6 +4,7 @@ import { action } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { billingEventorenClient } from "./billingEventorenClient.js"
 import { ticketOrderAccessResolve } from "./ticketOrderAccessResolve.js"
+import { ticketPaymentStatusApplyArgsCreate } from "./ticketPaymentStatusApplyArgsCreate.js"
 
 export const ticketPaymentReconcileAction = action({
   args: {
@@ -34,35 +35,21 @@ export const ticketPaymentReconcileAction = action({
     if (!statusResult.success) return statusResult
     if (statusResult.data.kind === "not_found")
       return createResultError("ticketPaymentReconcileAction", "Payment not found")
-    if (statusResult.data.data.payment === "expired")
+    const payment = statusResult.data.data
+    if (payment.payment === "expired")
       return await ctx.runMutation(internal.ticketing.ticketReservationExpireMutation, {
         orderId: args.orderId,
-        paymentReference: statusResult.data.data.paymentReference,
-        billingOrderReference: statusResult.data.data.orderReference,
-        stripeMode: statusResult.data.data.stripeMode,
+        paymentReference: payment.paymentReference,
+        billingOrderReference: payment.orderReference,
+        stripeMode: payment.stripeMode,
         reason: "Billing confirmed that the checkout session expired",
       })
-    const applied = await ctx.runMutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
-      orderId: args.orderId,
-      paymentReference: statusResult.data.data.paymentReference,
-      billingOrderReference: statusResult.data.data.orderReference,
-      stripeMode: statusResult.data.data.stripeMode,
-      payment: statusResult.data.data.payment,
-      bookingNumber: statusResult.data.data.bookingNumber ?? undefined,
-      bookingReference: statusResult.data.data.bookingReference ?? undefined,
-      ...(statusResult.data.data.checkoutCompletedAt !== undefined
-        ? { checkoutCompletedAt: statusResult.data.data.checkoutCompletedAt }
-        : {}),
-      ...(statusResult.data.data.paymentMethodType !== undefined
-        ? { paymentMethodType: statusResult.data.data.paymentMethodType }
-        : {}),
-      ...(statusResult.data.data.stripePaymentIntentStatus !== undefined
-        ? { stripePaymentIntentStatus: statusResult.data.data.stripePaymentIntentStatus }
-        : {}),
-      ...(statusResult.data.data.cancellation !== undefined
-        ? { cancellation: statusResult.data.data.cancellation }
-        : {}),
-    })
+    // Explicit reconciliation also fetches paid orders: a lost SEPA cancellation
+    // callback must be recoverable without polling all paid history.
+    const applied = await ctx.runMutation(
+      internal.ticketing.ticketPaymentStatusApplyMutation,
+      ticketPaymentStatusApplyArgsCreate(args.orderId, { ...payment, payment: payment.payment }),
+    )
     if (!applied.success) return applied
     return createResult(applied.data)
   },

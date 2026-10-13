@@ -446,6 +446,72 @@ test("archived ticket products are excluded from the Billing catalog snapshot", 
   expect((await readSnapshotEvents(t, 1))[0]?.tiers).toEqual([])
 })
 
+test("paginated snapshots push a normalized custom policy and keep default absence and retry policy immutable", async () => {
+  const t = convexTest(schema, modules)
+  await seedCatalog(t, catalogSyncLimits.snapshotQueryPageSize + 1)
+  const eventId = await t.run(async (ctx) => {
+    const event = await ctx.db.query("catalogEvents").withIndex("eventKey").order("desc").first()
+    if (!event) throw new Error("event missing")
+    await ctx.db.patch("catalogEvents", event._id, {
+      allowedStripePaymentMethods: ["sepa_debit", "card", "sepa_debit"],
+    })
+    return event._id
+  })
+  await buildUntilReady(t, 1)
+  const snapshotEvents = await readSnapshotEvents(t, 1)
+  expect(snapshotEvents.at(-1)?.allowedStripePaymentMethods).toEqual(["card", "sepa_debit"])
+  expect(snapshotEvents[0]).not.toHaveProperty("allowedStripePaymentMethods")
+
+  // Retry must use the policy frozen with this revision, not the subsequently edited live row.
+  await t.run(async (ctx) => {
+    await ctx.db.patch("catalogEvents", eventId, { allowedStripePaymentMethods: ["klarna"] })
+  })
+  billingTestConfigSet()
+  const bodies: string[] = []
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const body = typeof init?.body === "string" ? init.body : ""
+      bodies.push(body)
+      return billingCatalogResponseCreate(body, bodies.length > 1)
+    }),
+  )
+
+  expect(await t.action(internal.catalog.catalogSyncPushAction, { requestedVersion: 1 })).toMatchObject({
+    success: true,
+    data: { catalogVersion: 1, replayed: false },
+  })
+  expect(await t.action(internal.catalog.catalogSyncPushAction, { requestedVersion: 1 })).toMatchObject({
+    success: true,
+    data: { catalogVersion: 1, replayed: true },
+  })
+  expect(bodies).toHaveLength(2)
+  expect(bodies[1]).toBe(bodies[0])
+  const payload = JSON.parse(bodies[0]!) as EventorenCatalogUpsertRequest
+  expect(payload.events).toEqual(snapshotEvents)
+  expect(payload.events.at(-1)?.allowedStripePaymentMethods).toEqual(["card", "sepa_debit"])
+  expect(payload.events[0]).not.toHaveProperty("allowedStripePaymentMethods")
+})
+
+test("an explicit empty stored policy fails snapshot synchronization without broadening it or sending HTTP", async () => {
+  const t = convexTest(schema, modules)
+  await seedCatalog(t, 1)
+  await t.run(async (ctx) => {
+    const event = await ctx.db.query("catalogEvents").first()
+    if (!event) throw new Error("event missing")
+    await ctx.db.patch("catalogEvents", event._id, { allowedStripePaymentMethods: [] })
+  })
+  billingTestConfigSet()
+  const fetchMock = vi.fn()
+  vi.stubGlobal("fetch", fetchMock)
+
+  expect(await t.action(internal.catalog.catalogSyncPushAction, { requestedVersion: 1 })).toMatchObject({
+    success: false,
+  })
+  expect(fetchMock).not.toHaveBeenCalled()
+  expect(await t.query(internal.catalog.catalogSyncSnapshotQuery, { requestedVersion: 1 })).toBeNull()
+})
+
 test("retries reuse immutable version chunks and requestedVersion selects that version", async () => {
   const t = convexTest(schema, modules)
   await seedCatalog(t, 1)

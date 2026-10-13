@@ -11,43 +11,10 @@ import { ticketReservationsRelease } from "./ticketReservationsRelease.js"
 import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
 import { ticketActivationCodeLifecycleApply } from "./ticketActivationCodeLifecycleApply.js"
 import { ticketOrderTicketsIssue } from "./ticketOrderTicketsIssue.js"
+import { ticketPaymentCancellationValidator } from "./ticketPaymentCancellationValidator.js"
+import { ticketPaymentCancellationApply } from "./ticketPaymentCancellationApply.js"
 
 const paymentStatusValidator = v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"))
-const cancellationValidator = v.union(
-  v.object({
-    cancelledAt: v.string(),
-    organizationId: v.string(),
-    eventKey: v.string(),
-    orderReference: v.string(),
-    paymentReference: v.string(),
-    stripeMode: v.union(v.literal("live"), v.literal("test")),
-    paymentMethodType: v.literal("sepa_debit"),
-    stripeEventId: v.string(),
-    stripeSessionId: v.string(),
-    stripePaymentIntentId: v.string(),
-    reason: v.literal("payment_failed"),
-    stripeEventType: v.literal("checkout.session.async_payment_failed"),
-    stripeChargeId: v.union(v.string(), v.null()),
-    stripeDisputeId: v.null(),
-  }),
-  v.object({
-    cancelledAt: v.string(),
-    organizationId: v.string(),
-    eventKey: v.string(),
-    orderReference: v.string(),
-    paymentReference: v.string(),
-    stripeMode: v.union(v.literal("live"), v.literal("test")),
-    paymentMethodType: v.literal("sepa_debit"),
-    stripeEventId: v.string(),
-    stripeSessionId: v.string(),
-    stripePaymentIntentId: v.string(),
-    reason: v.literal("sepa_disputed"),
-    stripeEventType: v.literal("charge.dispute.created"),
-    stripeChargeId: v.string(),
-    stripeDisputeId: v.string(),
-  }),
-)
-
 export const ticketPaymentStatusApplyMutation = internalMutation({
   args: {
     orderId: v.id("ticketOrders"),
@@ -71,7 +38,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         v.null(),
       ),
     ),
-    cancellation: v.optional(v.union(cancellationValidator, v.null())),
+    cancellation: v.optional(v.union(ticketPaymentCancellationValidator, v.null())),
   },
   handler: async (
     ctx,
@@ -98,6 +65,42 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       .unique()
     if (!attempt || attempt.orderId !== order._id)
       return createResultError(op, "The payment attempt does not belong to the order")
+
+    if (args.cancellation) {
+      const cancellation = await ticketPaymentCancellationApply(ctx, order, args.cancellation)
+      if (!cancellation.success) return cancellation
+    }
+    // Ticket cancellation is terminal, independently of financial settlement. Never
+    // run issuance, activation-code consumption or fulfillment on a delayed success.
+    if (order.cancellation || args.cancellation) {
+      const cancelledOrder = await ctx.db.get("ticketOrders", order._id)
+      if (!cancelledOrder) return createResultError(op, "The order was not found")
+      const paymentStatus = args.payment === "paid" ? "paid" : cancelledOrder.paymentStatus
+      const status = args.payment === "paid" ? "paid" : cancelledOrder.status
+      const now = new Date().toISOString()
+      await ctx.db.patch("ticketOrders", order._id, {
+        status,
+        paymentStatus,
+        ...(args.payment === "paid"
+          ? {
+              paidAt: cancelledOrder.paidAt ?? now,
+              bookingNumber: cancelledOrder.bookingNumber ?? args.bookingNumber,
+              bookingReference: cancelledOrder.bookingReference ?? args.bookingReference,
+              stripePaymentIntentStatus: "succeeded" as const,
+            }
+          : {}),
+        lastPaymentCheckAt: now,
+        updatedAt: now,
+      })
+      await ctx.db.patch("ticketPaymentAttempts", attempt._id, {
+        ...(args.payment === "paid" ? { status: "paid" as const } : {}),
+        lastCheckedAt: now,
+        updatedAt: now,
+      })
+      const count = await ticketIssuedCountRead(ctx, order._id)
+      if (!count.success) return count
+      return createResult({ orderId: order._id, status, paymentStatus, ticketCount: count.data })
+    }
 
     const ticketCount = await ticketIssuedCountRead(ctx, order._id)
     if (!ticketCount.success) return ticketCount
@@ -166,6 +169,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         lastCheckedAt: now,
         updatedAt: now,
       })
+      if (earlyIssuanceEligible)
+        await ticketFulfillmentWorkScheduleIfEligible(ctx, order._id, true, args.billingOrderReference, "tickets_only")
       return createResult({
         orderId: order._id,
         status: order.status,
@@ -341,10 +346,11 @@ async function ticketFulfillmentWorkScheduleIfEligible(
   orderId: Id<"ticketOrders">,
   fulfillmentEligible: boolean | undefined,
   billingOrderReference: string | undefined,
+  deliveryMode: "tickets_only" | "paid" = "paid",
 ) {
   if (fulfillmentEligible !== true || billingOrderReference === undefined) return
-  const work = await ticketFulfillmentWorkEnsure(ctx, orderId, billingOrderReference)
-  if (!work.success || !work.data.created) return
+  const work = await ticketFulfillmentWorkEnsure(ctx, orderId, billingOrderReference, deliveryMode)
+  if (!work.success || (!work.data.created && !work.data.promoted)) return
   await ctx.scheduler.runAfter(0, internal.ticketing.ticketFulfillmentPrepareAction, { workId: work.data.workId })
 }
 

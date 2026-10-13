@@ -15,8 +15,20 @@ type EventInsert = Omit<Doc<"catalogEvents">, "_id" | "_creationTime">
 type OrderInsert = Omit<Doc<"ticketOrders">, "_id" | "_creationTime">
 type TicketInsert = Omit<Doc<"ticketIssued">, "_id" | "_creationTime">
 
-async function tokenFor(userId: Id<"users">): Promise<string> {
-  return await createToken(userId, authSecret)
+async function tokenFor(t: ReturnType<typeof convexTest>, userId: Id<"users">): Promise<string> {
+  const token = await createToken(userId, authSecret)
+  const now = new Date().toISOString()
+  await t.run(async (ctx) => {
+    await ctx.db.insert("authSessions", {
+      userId,
+      token,
+      loginMethod: "email",
+      expiresAt: "2099-10-13T10:00:00.000Z",
+      createdAt: now,
+      updatedAt: now,
+    })
+  })
+  return token
 }
 
 function eventInsert(eventKey: string): EventInsert {
@@ -189,7 +201,7 @@ function expectErrorCode(result: { success: false; code?: string }): void {
 test("rejects invalid, order, duplicate-code, wrong-event, unpaid, and cancelled check-ins", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const token = await tokenFor(ids.organizerId)
+  const token = await tokenFor(t, ids.organizerId)
 
   const invalid = await t.mutation(api.organizer.organizerTicketCheckInMutation, {
     eventKey: "check-in-event",
@@ -221,6 +233,11 @@ test("rejects invalid, order, duplicate-code, wrong-event, unpaid, and cancelled
     ticketCode: "TKT-UNPAID",
     token,
   })
+  const beforeCancelledCheckIn = await t.run(async (ctx) => ({
+    tickets: await ctx.db.query("ticketIssued").collect(),
+    orders: await ctx.db.query("ticketOrders").collect(),
+    history: await ctx.db.query("ticketCheckInHistory").collect(),
+  }))
   const cancelled = await t.mutation(api.organizer.organizerTicketCheckInMutation, {
     eventKey: "check-in-event",
     ticketCode: "TKT-CANCELLED",
@@ -241,6 +258,12 @@ test("rejects invalid, order, duplicate-code, wrong-event, unpaid, and cancelled
   expect(unpaid.code).toBe("organizer.check-in.unpaid")
   expectErrorCode(cancelled)
   expect(cancelled.code).toBe("organizer.check-in.cancelled")
+  const afterCancelledCheckIn = await t.run(async (ctx) => ({
+    tickets: await ctx.db.query("ticketIssued").collect(),
+    orders: await ctx.db.query("ticketOrders").collect(),
+    history: await ctx.db.query("ticketCheckInHistory").collect(),
+  }))
+  expect(afterCancelledCheckIn).toEqual(beforeCancelledCheckIn)
 
   const history = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
     eventKey: "check-in-event",
@@ -254,8 +277,8 @@ test("rejects invalid, order, duplicate-code, wrong-event, unpaid, and cancelled
 test("checks in atomically, reports the previous operator and exposes current projection", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const firstToken = await tokenFor(ids.organizerId)
-  const secondToken = await tokenFor(ids.secondOrganizerId)
+  const firstToken = await tokenFor(t, ids.organizerId)
+  const secondToken = await tokenFor(t, ids.secondOrganizerId)
 
   const first = await t.mutation(api.organizer.organizerTicketCheckInMutation, {
     eventKey: "check-in-event",
@@ -312,8 +335,8 @@ test("checks in atomically, reports the previous operator and exposes current pr
 test("allows only one concurrent check-in and writes one audit event", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const firstToken = await tokenFor(ids.organizerId)
-  const secondToken = await tokenFor(ids.secondOrganizerId)
+  const firstToken = await tokenFor(t, ids.organizerId)
+  const secondToken = await tokenFor(t, ids.secondOrganizerId)
 
   const results = await Promise.all([
     t.mutation(api.organizer.organizerTicketCheckInMutation, {
@@ -351,8 +374,8 @@ test("allows only one concurrent check-in and writes one audit event", async () 
 test("requires organizer authorization for check-in and reset, then permits reset and recheck-in", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const organizerToken = await tokenFor(ids.organizerId)
-  const customerToken = await tokenFor(ids.customerId)
+  const organizerToken = await tokenFor(t, ids.organizerId)
+  const customerToken = await tokenFor(t, ids.customerId)
 
   const unauthorizedCheckIn = await t.mutation(api.organizer.organizerTicketCheckInMutation, {
     eventKey: "check-in-event",
@@ -413,7 +436,7 @@ test("requires organizer authorization for check-in and reset, then permits rese
 test("paginates check-in history by indexed cursor in newest-first order", async () => {
   const t = convexTest(schema, modules)
   const ids = await seed(t)
-  const token = await tokenFor(ids.organizerId)
+  const token = await tokenFor(t, ids.organizerId)
 
   await t.run(async (ctx) => {
     const ticket = await ctx.db.get(ids.paidTicketId)

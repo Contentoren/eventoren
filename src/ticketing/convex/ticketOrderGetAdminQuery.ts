@@ -48,6 +48,9 @@ export const ticketOrderGetAdminQuery = query({
         paymentStatus: order.paymentStatus,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
+        ticketsIssuedAt: order.ticketsIssuedAt ?? null,
+        paymentMethodType: order.paymentMethodType ?? null,
+        cancellation: order.cancellation ?? null,
         lines: lines.map((line) => ({
           tierName: line.tierName,
           quantity: line.quantity,

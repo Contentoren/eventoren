@@ -28,6 +28,11 @@ export const ticketPaymentReconcileScheduledContextQuery = internalQuery({
       )
       .order("asc")
       .take(25)
+    // Issued SEPA orders retain an active status until settlement/cancellation.
+    // Do not filter by ticket count, booking details, reservation deadline or
+    // event end here: a processing debit has no local settlement timeout.
+    // Paid history is deliberately absent; explicit reconciliation and the
+    // authenticated cancellation receiver recover post-settlement outcomes.
     // Terminal partitions need a read-budgeted cursor scan, owned by the
     // scheduled action and ticketPaymentReconcileTerminalPageQuery.
     return createResult(

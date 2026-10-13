@@ -19,8 +19,14 @@ export type AdminTicketOrdersPageState = {
   readonly eventOptions: () => { readonly type: "item"; readonly value: string }[]
   readonly eventText: (event: string) => string
   readonly eventForOrder: (order: AdminTicketOrderSummary) => AdminEventItem | undefined
-  readonly paymentLabel: (status: AdminTicketOrderSummary["paymentStatus"]) => string | undefined
-  readonly paymentTone: (status: AdminTicketOrderSummary["paymentStatus"]) => "success" | "warning" | "danger"
+  readonly paymentLabel: (
+    status: AdminTicketOrderSummary["paymentStatus"],
+    order?: AdminTicketOrderSummary,
+  ) => string | undefined
+  readonly paymentTone: (
+    status: AdminTicketOrderSummary["paymentStatus"],
+    order?: AdminTicketOrderSummary,
+  ) => "success" | "warning" | "danger" | "brand"
   readonly priceFormat: (cents: number) => string
   readonly reload: () => void
   readonly details: Accessor<AdminTicketOrderDetails | null>

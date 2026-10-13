@@ -3,6 +3,7 @@ import { internal } from "#convex/_generated/api.js"
 import { internalAction } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { billingEventorenClient } from "./billingEventorenClient.js"
+import { ticketPaymentStatusApplyArgsCreate } from "./ticketPaymentStatusApplyArgsCreate.js"
 import {
   ticketPaymentReconcileScanValidator,
   type TicketPaymentReconcileScan,
@@ -104,21 +105,10 @@ export const ticketPaymentReconcileScheduledAction = internalAction({
         }
         continue
       }
-      const applied = await ctx.runMutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
-        orderId: context.orderId,
-        paymentReference: payment.paymentReference,
-        billingOrderReference: payment.orderReference,
-        stripeMode: payment.stripeMode,
-        payment: payment.payment,
-        bookingNumber: payment.bookingNumber ?? undefined,
-        bookingReference: payment.bookingReference ?? undefined,
-        ...(payment.checkoutCompletedAt !== undefined ? { checkoutCompletedAt: payment.checkoutCompletedAt } : {}),
-        ...(payment.paymentMethodType !== undefined ? { paymentMethodType: payment.paymentMethodType } : {}),
-        ...(payment.stripePaymentIntentStatus !== undefined
-          ? { stripePaymentIntentStatus: payment.stripePaymentIntentStatus }
-          : {}),
-        ...(payment.cancellation !== undefined ? { cancellation: payment.cancellation } : {}),
-      })
+      const applied = await ctx.runMutation(
+        internal.ticketing.ticketPaymentStatusApplyMutation,
+        ticketPaymentStatusApplyArgsCreate(context.orderId, { ...payment, payment: payment.payment }),
+      )
       if (!applied.success) {
         const recorded = await ctx.runMutation(internal.ticketing.ticketPaymentReconcileFailureMutation, {
           orderId: context.orderId,

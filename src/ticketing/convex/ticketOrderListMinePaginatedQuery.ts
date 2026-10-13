@@ -63,6 +63,9 @@ export const ticketOrderListMinePaginatedQuery = query({
             paymentStatus: order.paymentStatus,
             createdAt: order.createdAt,
             updatedAt: order.updatedAt,
+            ticketsIssuedAt: order.ticketsIssuedAt,
+            paymentMethodType: order.paymentMethodType,
+            cancellation: order.cancellation,
           }),
         ),
       })

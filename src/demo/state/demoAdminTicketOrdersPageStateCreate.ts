@@ -123,10 +123,20 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
       return `${ticketCountFormat(count)} ${count === 1 ? "Ticket" : "Tickets"} zum Kauf verfügbar`
     },
     ticketCountFormat,
-    paymentLabel: (status: AdminTicketOrderSummary["paymentStatus"]) =>
-      ({ pending: "Offen", paid: "Bezahlt", failed: "Fehlgeschlagen", expired: "Abgelaufen" })[status],
-    paymentTone: (status: AdminTicketOrderSummary["paymentStatus"]) =>
-      status === "paid" ? ("success" as const) : status === "pending" ? ("warning" as const) : ("danger" as const),
+    paymentLabel: (status: AdminTicketOrderSummary["paymentStatus"], order?: AdminTicketOrderSummary) => {
+      if (order?.cancellation) return "Storniert"
+      if (order?.paymentStatus === "pending" && order.ticketsIssuedAt) return "SEPA in Bearbeitung"
+      return { pending: "Offen", paid: "Bezahlt", failed: "Fehlgeschlagen", expired: "Abgelaufen" }[status]
+    },
+    paymentTone: (status: AdminTicketOrderSummary["paymentStatus"], order?: AdminTicketOrderSummary) => {
+      if (order?.cancellation) return "danger" as const
+      if (order?.paymentStatus === "pending" && order.ticketsIssuedAt) return "brand" as const
+      return status === "paid"
+        ? ("success" as const)
+        : status === "pending"
+          ? ("warning" as const)
+          : ("danger" as const)
+    },
     priceFormat: ticketPriceFormat,
     reload,
     details: () => {

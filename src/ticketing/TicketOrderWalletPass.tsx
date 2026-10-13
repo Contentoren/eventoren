@@ -66,27 +66,45 @@ export function TicketOrderWalletPass(props: { order: TicketOrderProjection }) {
             <For each={state.order().tickets}>
               {(ticket) => (
                 <section class="overflow-hidden rounded-control border border-border-subtle bg-surface shadow-none">
-                  <div class="p-space-4">
-                    <h4 class="text-xl font-semibold text-content">{state.ticketTitle(ticket)}</h4>
-                    <p class="mt-space-1 text-content-muted">{state.participantName(ticket)}</p>
+                  <div class="flex items-start justify-between gap-space-4 p-space-4">
+                    <div>
+                      <h4 class="text-xl font-semibold text-content">{state.ticketTitle(ticket)}</h4>
+                      <p class="mt-space-1 text-content-muted">{state.participantName(ticket)}</p>
+                    </div>
+                    <Show when={ticket.cancelled}>
+                      <UiBadge tone="danger">Storniert</UiBadge>
+                    </Show>
                   </div>
-                  <div class="flex flex-col items-center gap-space-3 border-t border-border-subtle bg-surface-muted p-space-5">
-                    <TicketQrCode value={ticket.code} label={state.ticketQrLabel(ticket)} />
-                    <p class="max-w-sm text-center text-xs leading-relaxed text-content-muted">
-                      Zeige diesen Code am Einlass vor. Gib ihn nicht an andere Personen weiter.
-                    </p>
-                    <UiButton
-                      variant="secondary"
-                      class="print:hidden"
-                      onClick={() => {
-                        if (typeof window !== "undefined") {
-                          window.print()
-                        }
-                      }}
-                    >
-                      Ticket drucken
-                    </UiButton>
-                  </div>
+                  <Show
+                    when={!ticket.cancelled}
+                    fallback={
+                      <div class="flex flex-col items-center gap-space-2 border-t border-border-subtle bg-danger-soft p-space-5 text-center">
+                        <p class="text-sm font-semibold text-danger">Ticket storniert – Nicht gültig für Einlass</p>
+                        <p class="max-w-sm text-xs leading-relaxed text-content-muted">
+                          Die zugehörige Zahlung ist fehlgeschlagen oder wurde zurückgebucht. Dieses Ticket berechtigt
+                          nicht zum Einlass.
+                        </p>
+                      </div>
+                    }
+                  >
+                    <div class="flex flex-col items-center gap-space-3 border-t border-border-subtle bg-surface-muted p-space-5">
+                      <TicketQrCode value={ticket.code} label={state.ticketQrLabel(ticket)} />
+                      <p class="max-w-sm text-center text-xs leading-relaxed text-content-muted">
+                        Zeige diesen Code am Einlass vor. Gib ihn nicht an andere Personen weiter.
+                      </p>
+                      <UiButton
+                        variant="secondary"
+                        class="print:hidden"
+                        onClick={() => {
+                          if (typeof window !== "undefined") {
+                            window.print()
+                          }
+                        }}
+                      >
+                        Ticket drucken
+                      </UiButton>
+                    </div>
+                  </Show>
                 </section>
               )}
             </For>

@@ -97,6 +97,9 @@ export const ticketOrderListAdminPaginatedQuery = query({
             totalCents: order.totalCents,
             createdAt: order.createdAt,
             updatedAt: order.updatedAt,
+            ticketsIssuedAt: order.ticketsIssuedAt,
+            paymentMethodType: order.paymentMethodType,
+            cancellation: order.cancellation,
           }),
         ),
       })

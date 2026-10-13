@@ -4,16 +4,20 @@ import type { Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
 
-export type TicketFulfillmentWorkSnapshot = Omit<EventorenTicketFulfillmentPrepareRequest, "onlineTicketUrl">
+export type TicketFulfillmentWorkSnapshot = Omit<EventorenTicketFulfillmentPrepareRequest, "onlineTicketUrl"> & {
+  deliveryMode?: "tickets_only" | "paid"
+}
 
 export async function ticketFulfillmentWorkSnapshotCreate(
   ctx: MutationCtx,
   orderId: Id<"ticketOrders">,
   billingOrderReference: string,
+  deliveryMode: "tickets_only" | "paid" = "paid",
 ): PromiseResult<TicketFulfillmentWorkSnapshot> {
   const op = "ticketFulfillmentWorkSnapshotCreate"
   const order = await ctx.db.get("ticketOrders", orderId)
   if (!order) return createResultError(op, "The order was not found")
+  if (order.cancellation !== undefined) return createResultError(op, "The order was cancelled")
   const tickets = await ctx.db
     .query("ticketIssued")
     .withIndex("orderIdAndSequence", (q) => q.eq("orderId", orderId))
@@ -21,6 +25,8 @@ export async function ticketFulfillmentWorkSnapshotCreate(
     // whole per-order set so legitimate orders above ten stay complete.
     .collect()
   if (tickets.length === 0) return createResultError(op, "The paid order has no issued tickets")
+  if (tickets.some((ticket) => ticket.cancelled === true))
+    return createResultError(op, "The order has cancelled tickets")
 
   const checkoutContext = checkoutContextRead(order.checkoutContextJson)
   if (!checkoutContext.success) return checkoutContext
@@ -32,6 +38,7 @@ export async function ticketFulfillmentWorkSnapshotCreate(
     return createResultError(op, "The order has no immutable legal snapshot")
 
   return createResult({
+    deliveryMode,
     orderReference: billingOrderReference,
     paymentReference: order.paymentReference,
     event: {

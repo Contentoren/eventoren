@@ -84,7 +84,8 @@ export async function ticketActivationCodeLifecyclePlan(
         !chargedOrder ||
         (chargedOrder.paymentStatus !== "paid" && chargedOrder.ticketsIssuedAt === undefined) ||
         chargedOrder.eventKey !== code.eventKey ||
-        (chargedOrder.status !== "paid" &&
+        (chargedOrder.cancellation === undefined &&
+          chargedOrder.status !== "paid" &&
           chargedOrder.status !== "paid_inventory_conflict" &&
           !(
             chargedOrder.paymentStatus === "pending" &&

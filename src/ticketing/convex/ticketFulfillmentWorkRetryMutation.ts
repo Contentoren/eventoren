@@ -4,11 +4,22 @@ import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 
 export const ticketFulfillmentWorkRetryMutation = internalMutation({
-  args: { workId: v.id("ticketFulfillmentWork"), errorMessage: v.string() },
+  args: {
+    workId: v.id("ticketFulfillmentWork"),
+    errorMessage: v.string(),
+    deliveryMode: v.optional(v.union(v.literal("tickets_only"), v.literal("paid"))),
+    attemptCount: v.optional(v.number()),
+  },
   handler: async (ctx, args): PromiseResult<{ retryAt: number }> => {
     const work = await ctx.db.get("ticketFulfillmentWork", args.workId)
     if (!work) return createResultError("ticketFulfillmentWorkRetryMutation", "The fulfillment work was not found")
-    if (work.status === "prepared") return createResult({ retryAt: work.nextAttemptAt })
+    if (
+      work.status === "prepared" ||
+      work.cancelledAt !== undefined ||
+      (work.deliveryMode ?? "paid") !== (args.deliveryMode ?? "paid") ||
+      (args.attemptCount !== undefined && args.attemptCount !== work.attemptCount)
+    )
+      return createResult({ retryAt: work.nextAttemptAt })
     const delay = Math.min(60 * 60 * 1000, 5 * 60 * 1000 * 2 ** Math.min(work.attemptCount, 6))
     const retryAt = Date.now() + delay
     await ctx.db.patch("ticketFulfillmentWork", work._id, {

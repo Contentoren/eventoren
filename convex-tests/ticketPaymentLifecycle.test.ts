@@ -200,8 +200,8 @@ async function distractorsInsert({ t, correlation }: Harness) {
   })
 }
 
-test("processing SEPA stays unissued while the readiness gate is disabled", async () => {
-  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "false")
+test.each([undefined, "false", "1"])("processing SEPA stays unissued with gate value %s", async (enabled) => {
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", enabled)
   const h = await checkoutCreate([2])
   expect(
     await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
@@ -215,6 +215,66 @@ test("processing SEPA stays unissued while the readiness gate is disabled", asyn
   const state = await stateRead(h)
   expect(state.order?.ticketsIssuedAt).toBeUndefined()
   expect(state.tiers[0]).toMatchObject({ reserved: 2, sold: 0 })
+  expect(state.work).toHaveLength(0)
+})
+
+test.each([
+  {
+    label: "pending card",
+    checkoutCompletedAt: now,
+    paymentMethodType: "card",
+    stripePaymentIntentStatus: "processing",
+  },
+  {
+    label: "bank instructions",
+    checkoutCompletedAt: now,
+    paymentMethodType: "customer_balance",
+    stripePaymentIntentStatus: "processing",
+  },
+  { label: "open Checkout", paymentMethodType: "sepa_debit", stripePaymentIntentStatus: "processing" },
+  {
+    label: "null completion",
+    checkoutCompletedAt: null,
+    paymentMethodType: "sepa_debit",
+    stripePaymentIntentStatus: "processing",
+  },
+  { label: "unresolved method", checkoutCompletedAt: now, stripePaymentIntentStatus: "processing" },
+  { label: "unresolved intent", checkoutCompletedAt: now, paymentMethodType: "sepa_debit" },
+  {
+    label: "requires action",
+    checkoutCompletedAt: now,
+    paymentMethodType: "sepa_debit",
+    stripePaymentIntentStatus: "requires_action",
+  },
+  {
+    label: "canceled intent",
+    checkoutCompletedAt: now,
+    paymentMethodType: "sepa_debit",
+    stripePaymentIntentStatus: "canceled",
+  },
+  {
+    label: "inconsistent financial pending",
+    checkoutCompletedAt: now,
+    paymentMethodType: "sepa_debit",
+    stripePaymentIntentStatus: "succeeded",
+  },
+] as const)("$label never authorizes pending issuance even with the gate enabled", async ({ label, ...evidence }) => {
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "true")
+  const h = await checkoutCreate([2])
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+      ...h.correlation,
+      payment: "pending",
+      ...evidence,
+    }),
+  ).toMatchObject({ success: true, data: { paymentStatus: "pending", ticketCount: 0 } })
+  const state = await stateRead(h)
+  expect(state.order?.ticketsIssuedAt).toBeUndefined()
+  expect(state.order?.paidAt).toBeUndefined()
+  expect(state.tiers[0]).toMatchObject({ reserved: 2, sold: 0 })
+  expect(state.reservations.every((reservation) => reservation.status === "active")).toBe(true)
+  expect(state.tickets).toHaveLength(0)
+  expect(state.deliveries).toHaveLength(0)
   expect(state.work).toHaveLength(0)
 })
 
@@ -263,7 +323,8 @@ test("early-issued SEPA survives expiry and settles without allocating or delive
   expect(issued.order?.paidAt).toBeUndefined()
   expect(issued.order?.ticketsIssuedAt).toBeDefined()
   expect(issued.tiers[0]).toMatchObject({ reserved: 0, sold: 2 })
-  expect(issued.work).toHaveLength(0)
+  expect(issued.work).toHaveLength(1)
+  expect(issued.work[0]?.deliveryMode).toBe("tickets_only")
   expect(await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)).toMatchObject({
     success: true,
     data: { ticketCount: 2 },
@@ -277,16 +338,175 @@ test("early-issued SEPA survives expiry and settles without allocating or delive
       ...h.correlation,
       payment: "paid",
       stripePaymentIntentStatus: "succeeded",
+      bookingNumber: 42,
+      bookingReference: "settled-sepa",
     }),
   ).toMatchObject({ success: true, data: { paymentStatus: "paid", ticketCount: 2 } })
   await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)
   const settled = await stateRead(h)
   expect(settled.order?.stripePaymentIntentStatus).toBe("succeeded")
+  expect(settled.order).toMatchObject({ bookingNumber: 42, bookingReference: "settled-sepa" })
+  expect(settled.order?.ticketsIssuedAt).toBe(issued.order?.ticketsIssuedAt)
   expect(settled.tickets).toEqual(issued.tickets)
   expect(settled.tiers).toEqual(issued.tiers)
   expect(settled.deliveries).toEqual(issued.deliveries)
   expect(settled.work).toHaveLength(1)
+  expect(settled.work[0]).toMatchObject({ _id: issued.work[0]!._id, deliveryMode: "paid" })
+  expect(JSON.parse(settled.work[0]!.requestSnapshotJson)).toEqual({
+    ...JSON.parse(issued.work[0]!.requestSnapshotJson),
+    deliveryMode: "paid",
+  })
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+      ...h.correlation,
+      payment: "paid",
+    }),
+  ).toMatchObject({ success: true, data: { paymentStatus: "paid", ticketCount: 2 } })
+  const duplicate = await stateRead(h)
+  expect(duplicate.tickets).toEqual(settled.tickets)
+  expect(duplicate.tiers).toEqual(settled.tiers)
+  expect(duplicate.reservations).toEqual(settled.reservations)
+  expect(duplicate.deliveries).toEqual(settled.deliveries)
+  expect(duplicate.work).toEqual(settled.work)
 })
+
+test("settlement before SEPA completion uses paid issuance once and does not regress payment", async () => {
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "true")
+  const h = await checkoutCreate([2])
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+      ...h.correlation,
+      payment: "paid",
+      stripePaymentIntentStatus: "succeeded",
+    }),
+  ).toMatchObject({ success: true, data: { paymentStatus: "paid", ticketCount: 2 } })
+  const paid = await stateRead(h)
+  for (let index = 0; index < 2; index += 1)
+    expect(
+      await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+        ...h.correlation,
+        payment: "pending",
+        checkoutCompletedAt: now,
+        paymentMethodType: "sepa_debit",
+        stripePaymentIntentStatus: "processing",
+      }),
+    ).toMatchObject({ success: true, data: { status: "paid", paymentStatus: "paid", ticketCount: 2 } })
+  const completed = await stateRead(h)
+  expect(completed.order).toMatchObject({
+    checkoutCompletedAt: now,
+    stripePaymentIntentStatus: "succeeded",
+    ticketsIssuedAt: paid.order?.ticketsIssuedAt,
+    paidAt: paid.order?.paidAt,
+  })
+  expect(completed.tickets).toEqual(paid.tickets)
+  expect(completed.tiers).toEqual(paid.tiers)
+  expect(completed.reservations).toEqual(paid.reservations)
+  expect(completed.deliveries).toEqual(paid.deliveries)
+  expect(completed.work).toEqual(paid.work)
+})
+
+test("processing SEPA consumes its activation code once before settlement", async () => {
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "true")
+  const h = await checkoutCreate([1])
+  const codeId = await h.t.run(async (ctx) => {
+    const line = await ctx.db
+      .query("ticketOrderLines")
+      .withIndex("orderId", (q) => q.eq("orderId", h.correlation.orderId))
+      .unique()
+    const codeId = await ctx.db.insert("ticketActivationCodes", {
+      eventId: h.eventId,
+      tierId: line!.tierId,
+      eventKey: "lifecycle",
+      tierKey: line!.tierKey,
+      code: "SEPA1234",
+      number: 1,
+      status: "reserved",
+      orderId: h.correlation.orderId,
+      createdAt: now,
+      updatedAt: now,
+      reservedAt: now,
+    })
+    await ctx.db.insert("ticketActivationCodeReservations", {
+      codeId,
+      orderId: h.correlation.orderId,
+      tierId: line!.tierId,
+      eventId: h.eventId,
+      eventKey: "lifecycle",
+      tierKey: line!.tierKey,
+      status: "reserved",
+      createdAt: now,
+      updatedAt: now,
+    })
+    await ctx.db.patch("ticketOrderLines", line!._id, { activationCodeId: codeId })
+    return codeId
+  })
+  const processing = {
+    ...h.correlation,
+    payment: "pending" as const,
+    checkoutCompletedAt: now,
+    paymentMethodType: "sepa_debit",
+    stripePaymentIntentStatus: "processing" as const,
+  }
+  expect(await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)).toMatchObject({
+    success: true,
+    data: { paymentStatus: "pending", ticketCount: 1 },
+  })
+  const codeRead = () =>
+    h.t.run(async (ctx) => ({
+      code: await ctx.db.get("ticketActivationCodes", codeId),
+      claim: await ctx.db
+        .query("ticketActivationCodeReservations")
+        .withIndex("orderId", (q) => q.eq("orderId", h.correlation.orderId))
+        .unique(),
+    }))
+  const consumed = await codeRead()
+  expect(consumed.code).toMatchObject({ status: "consumed", orderId: h.correlation.orderId })
+  expect(consumed.code?.consumedAt).toBeDefined()
+  expect(consumed.claim?.status).toBe("consumed")
+  expect(await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)).toMatchObject({
+    success: true,
+    data: { ticketCount: 1 },
+  })
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+      ...h.correlation,
+      payment: "paid",
+    }),
+  ).toMatchObject({ success: true, data: { paymentStatus: "paid", ticketCount: 1 } })
+  expect(await codeRead()).toEqual(consumed)
+})
+
+test.each(["capacity", "corruption", "wrong correlation"] as const)(
+  "processing SEPA %s failure leaves allocation and lifecycle retryable without partial writes",
+  async (kind) => {
+    vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "true")
+    const h = await checkoutCreate([2])
+    if (kind !== "wrong correlation")
+      await h.t.run(async (ctx) => {
+        const tier = await ctx.db
+          .query("catalogTicketTiers")
+          .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", h.eventId).eq("tierKey", "tier-00"))
+          .unique()
+        await ctx.db.patch(
+          "catalogTicketTiers",
+          tier!._id,
+          kind === "capacity" ? { sold: tier!.capacity } : { reserved: 0 },
+        )
+      })
+    const before = await stateRead(h)
+    expect(
+      await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+        ...h.correlation,
+        ...(kind === "wrong correlation" ? { paymentReference: "foreign-payment" } : {}),
+        payment: "pending",
+        checkoutCompletedAt: now,
+        paymentMethodType: "sepa_debit",
+        stripePaymentIntentStatus: "processing",
+      }),
+    ).toMatchObject({ success: false })
+    expect(await stateRead(h)).toEqual(before)
+  },
+)
 
 test.each([{ quantities: Array.from({ length: ticketMaxPerOrder }, () => 1) }, { quantities: [ticketMaxPerOrder] }])(
   "maximum legitimate order issues every ticket, preserves fulfillment totals and ignores stale/duplicate events: %j",

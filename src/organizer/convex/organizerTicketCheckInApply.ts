@@ -18,6 +18,12 @@ export async function organizerTicketCheckInApply(
   ticket: ReturnType<typeof organizerTicketProjectionCreate>
 }> {
   const { event, order, ticket } = target
+  if (ticket.cancelled === true)
+    return organizerTicketCheckInErrorCreate(op, "organizer.check-in.cancelled", "The ticket is cancelled", {
+      eventKey: event.eventKey,
+      ticketId: ticket._id,
+      ticketNumber: ticket.code,
+    })
   if (order.status !== "paid" || order.paymentStatus !== "paid")
     return organizerTicketCheckInErrorCreate(op, "organizer.check-in.unpaid", "The ticket order is not paid", {
       eventKey: event.eventKey,
@@ -25,12 +31,6 @@ export async function organizerTicketCheckInApply(
       ticketNumber: ticket.code,
       orderStatus: order.status,
       paymentStatus: order.paymentStatus,
-    })
-  if (ticket.cancelled === true)
-    return organizerTicketCheckInErrorCreate(op, "organizer.check-in.cancelled", "The ticket is cancelled", {
-      eventKey: event.eventKey,
-      ticketId: ticket._id,
-      ticketNumber: ticket.code,
     })
   if (ticket.checkedInAt !== undefined) return organizerTicketCheckInDuplicateErrorCreate(op, ticket, order, event)
 

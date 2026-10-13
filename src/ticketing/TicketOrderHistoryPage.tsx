@@ -118,20 +118,28 @@ export function TicketOrderHistoryPage(
                     </div>
                     <UiBadge
                       tone={
-                        order.paymentStatus === "paid"
-                          ? "success"
-                          : order.paymentStatus === "pending"
-                            ? "warning"
-                            : "danger"
+                        order.cancellation
+                          ? "danger"
+                          : order.paymentStatus === "paid"
+                            ? "success"
+                            : order.paymentStatus === "pending"
+                              ? order.ticketsIssuedAt
+                                ? "brand"
+                                : "warning"
+                              : "danger"
                       }
                     >
-                      {order.paymentStatus === "paid"
-                        ? "Bezahlt"
-                        : order.paymentStatus === "pending"
-                          ? "Zahlung offen"
-                          : order.paymentStatus === "expired"
-                            ? "Abgelaufen"
-                            : "Zahlung fehlgeschlagen"}
+                      {order.cancellation
+                        ? "Storniert"
+                        : order.paymentStatus === "paid"
+                          ? "Bezahlt"
+                          : order.paymentStatus === "pending"
+                            ? order.ticketsIssuedAt
+                              ? "SEPA in Bearbeitung"
+                              : "Zahlung offen"
+                            : order.paymentStatus === "expired"
+                              ? "Abgelaufen"
+                              : "Zahlung fehlgeschlagen"}
                     </UiBadge>
                   </div>
 

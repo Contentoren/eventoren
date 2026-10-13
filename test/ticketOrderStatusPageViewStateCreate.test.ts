@@ -98,3 +98,93 @@ test("labels paid legacy references and internal IDs accurately", () => {
     { label: "Interne Bestell-ID", value: paidOrder.id },
   ])
 })
+
+test("distinguishes valid early-issued SEPA tickets from standard pending", () => {
+  const sepaIssuedOrder: TicketOrderProjection = {
+    ...orderCreate("pending", "checkout_created"),
+    bookingReference: "BOOK-SEPA-001",
+    ticketsIssuedAt: "2026-10-12T10:00:00.000Z",
+    paymentMethodType: "sepa_debit",
+    tickets: [
+      {
+        id: "t-1",
+        sequence: 1,
+        code: "CODE-1",
+        eventKey: "demo-event",
+        eventTitle: "Demo event",
+        eventStartsAt: "2026-10-01T18:00:00.000Z",
+        eventDoorsAt: "2026-10-01T17:00:00.000Z",
+        venue: "Demo venue",
+        city: "Berlin",
+        address: "Demo street 1",
+        tierKey: "tier-1",
+        tierName: "Standard",
+        priceCents: 1000,
+        feeCents: 100,
+        cancelled: false,
+        issuedAt: "2026-10-12T10:00:00.000Z",
+      },
+    ],
+  }
+  const state = ticketOrderStatusPageViewStateCreate({
+    orderIds: () => [],
+    checkoutKey: () => undefined,
+    state: () => ({
+      orders: () => [sepaIssuedOrder],
+      isLoading: () => false,
+      isRefreshing: () => false,
+      errorMessage: () => "",
+      refresh: async () => {},
+      goToEvents: async () => {},
+    }),
+  })
+
+  expect(state.isPaid()).toBe(false)
+  expect(state.isIssuedPending()).toBe(true)
+  expect(state.hasFailedOrder()).toBe(false)
+  expect(state.confirmationSymbol()).toBe("✓")
+  expect(state.confirmationTitle()).toBe("Deine Tickets sind bereit – Zahlung in Bearbeitung")
+  expect(state.confirmationMessage()).toContain("SEPA-Lastschrift wird verarbeitet")
+  expect(state.paidOrderReferences()).toEqual([{ label: "Bestellnummer", value: "BOOK-SEPA-001" }])
+})
+
+test("distinguishes cancelled orders and marks them as clearly invalid", () => {
+  const cancelledOrder: TicketOrderProjection = {
+    ...orderCreate("failed", "failed"),
+    cancellation: {
+      cancelledAt: "2026-10-12T11:00:00.000Z",
+      organizationId: "org-1",
+      eventKey: "demo-event",
+      orderReference: "ord-ref",
+      paymentReference: "demo-payment",
+      stripeMode: "test",
+      paymentMethodType: "sepa_debit",
+      stripeEventId: "evt_1",
+      stripeSessionId: "cs_1",
+      stripePaymentIntentId: "pi_1",
+      reason: "payment_failed",
+      stripeEventType: "checkout.session.async_payment_failed",
+      stripeChargeId: null,
+      stripeDisputeId: null,
+    },
+  }
+  const state = ticketOrderStatusPageViewStateCreate({
+    orderIds: () => [],
+    checkoutKey: () => undefined,
+    state: () => ({
+      orders: () => [cancelledOrder],
+      isLoading: () => false,
+      isRefreshing: () => false,
+      errorMessage: () => "",
+      refresh: async () => {},
+      goToEvents: async () => {},
+    }),
+  })
+
+  expect(state.isPaid()).toBe(false)
+  expect(state.hasCancelledOrder()).toBe(true)
+  expect(state.hasFailedOrder()).toBe(true)
+  expect(state.confirmationSymbol()).toBe("!")
+  expect(state.confirmationTitle()).toBe("Deine Bestellung wurde storniert")
+  expect(state.confirmationMessage()).toContain("storniert")
+})

@@ -49,6 +49,11 @@ export async function ticketOrderProjectionCreate(ctx: QueryCtx, orderId: Id<"ti
     checkoutUrl: order.checkoutUrl,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
+    ticketsIssuedAt: order.ticketsIssuedAt,
+    paymentMethodType: order.paymentMethodType,
+    checkoutCompletedAt: order.checkoutCompletedAt,
+    stripePaymentIntentStatus: order.stripePaymentIntentStatus,
+    cancellation: order.cancellation,
     lines: lines.map((line) => ({
       tierKey: line.tierKey,
       tierName: line.tierName,
@@ -73,6 +78,7 @@ export async function ticketOrderProjectionCreate(ctx: QueryCtx, orderId: Id<"ti
       priceCents: ticket.priceCents,
       feeCents: ticket.feeCents,
       participantName: ticket.participantName,
+      cancelled: ticket.cancelled === true || Boolean(order.cancellation),
       issuedAt: ticket.issuedAt,
     })),
   })
