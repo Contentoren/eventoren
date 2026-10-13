@@ -62,6 +62,27 @@ export async function e2eStripeHistoricalConfigResolve(input: {
   const explicitKey = (environment["E2E_STRIPE_TEST_SECRET_KEY"] ?? "").trim()
   const explicitAccountId = (environment["E2E_STRIPE_TEST_ACCOUNT_ID"] ?? "").trim()
   const explicitOrganizationId = (environment["E2E_BILLING_ORGANIZATION_ID"] ?? "").trim()
+  // An explicit organization is not authority to cross the selected target.
+  // Standalone explicit configurations may have no local target file, but an
+  // accessible target configuration must agree before any provider call.
+  if (explicitOrganizationId) {
+    let targetRaw: string | undefined
+    try {
+      targetRaw = await (input.fileRead ?? e2eStripeHistoricalConfigFileReadDefault)(
+        join(input.eventorenDirectory ?? process.cwd(), `.env.${input.target}`),
+      )
+    } catch {
+      // The explicit credential path also supports hosts without target files.
+    }
+    if (targetRaw !== undefined) {
+      const targetOrganizationId = (dotenvParse(targetRaw)["EVENTOREN_BILLING_ORGANIZATION_ID"] ?? "").trim()
+      if (!targetOrganizationId || targetOrganizationId !== explicitOrganizationId)
+        return createResultError(
+          op,
+          "Explicit E2E billing organization differs from selected target; checkpoint retained",
+        )
+    }
+  }
   if (
     v.safeParse(testKeySchema, explicitKey).success &&
     v.safeParse(accountSchema, explicitAccountId).success &&

@@ -19,7 +19,7 @@ function accountFixture(accountId: string) {
   return { account: async () => createResult(accountId) }
 }
 
-test("honors explicit E2E_TEST credentials with a read-only TEST account check and no service reads", async () => {
+test("honors explicit credentials matching the selected target without Billing service reads", async () => {
   let serviceReads = 0
   const unreadable = async (): Promise<never> => {
     serviceReads++
@@ -34,7 +34,11 @@ test("honors explicit E2E_TEST credentials with a read-only TEST account check a
     },
     billingProjectResolve: unreadable as never,
     serviceEnvironmentFiles: unreadable as never,
-    fileRead: unreadable,
+    eventorenDirectory: "/eventoren-fixture",
+    fileRead: async (path) => {
+      expect(path).toBe("/eventoren-fixture/.env.development")
+      return `EVENTOREN_BILLING_ORGANIZATION_ID=${explicitOrganizationId}\n`
+    },
     fileStat: unreadable as never,
     stripeClient: accountFixture(explicitAccountId),
   })
@@ -54,11 +58,77 @@ test("fails explicit credentials on TEST account mismatch without leaking the ke
       E2E_BILLING_ORGANIZATION_ID: explicitOrganizationId,
     },
     stripeClient: accountFixture("acct_other02"),
+    fileRead: async () => `EVENTOREN_BILLING_ORGANIZATION_ID=${explicitOrganizationId}\n`,
   })
   expect(result.success).toBe(false)
   if (result.success) throw new Error("expected failure")
   expect(result.errorMessage).toMatch(/account identity mismatch/)
   expect(JSON.stringify(result)).not.toContain(explicitKey)
+})
+
+test.each(["development", "production"] as const)(
+  "rejects an explicit organization conflicting with the selected %s target before provider access",
+  async (target) => {
+    let accountCalls = 0
+    const paths: string[] = []
+    const result = await e2eStripeHistoricalConfigResolve({
+      target,
+      eventorenDirectory: "/eventoren-fixture",
+      environment: {
+        E2E_STRIPE_TEST_SECRET_KEY: explicitKey,
+        E2E_STRIPE_TEST_ACCOUNT_ID: explicitAccountId,
+        E2E_BILLING_ORGANIZATION_ID: explicitOrganizationId,
+      },
+      fileRead: async (path) => {
+        paths.push(path)
+        return "EVENTOREN_BILLING_ORGANIZATION_ID=org_selectedtarget\n"
+      },
+      stripeClient: {
+        account: async () => {
+          accountCalls++
+          return createResult(explicitAccountId)
+        },
+      },
+    })
+    expect(result.success).toBe(false)
+    if (result.success) throw new Error("expected target mismatch")
+    expect(result.errorMessage).toMatch(/differs from selected target/)
+    expect(paths).toEqual([`/eventoren-fixture/.env.${target}`])
+    expect(accountCalls).toBe(0)
+    expect(JSON.stringify(result)).not.toContain(explicitKey)
+    expect(JSON.stringify(result)).not.toContain(explicitOrganizationId)
+  },
+)
+
+test("rejects an accessible target missing its organization even with partial explicit credentials", async () => {
+  let fallbackCalls = 0
+  const result = await e2eStripeHistoricalConfigResolve({
+    target: "development",
+    environment: { E2E_BILLING_ORGANIZATION_ID: explicitOrganizationId },
+    fileRead: async () => "PUBLIC_ENV_MODE=development\n",
+    billingProjectResolve: async () => {
+      fallbackCalls++
+      return createResult({ directory: "/unused", units: [] })
+    },
+  })
+  expect(result.success).toBe(false)
+  expect(fallbackCalls).toBe(0)
+})
+
+test("allows standalone explicit credentials when the selected target file is inaccessible", async () => {
+  const result = await e2eStripeHistoricalConfigResolve({
+    target: "development",
+    environment: {
+      E2E_STRIPE_TEST_SECRET_KEY: explicitKey,
+      E2E_STRIPE_TEST_ACCOUNT_ID: explicitAccountId,
+      E2E_BILLING_ORGANIZATION_ID: explicitOrganizationId,
+    },
+    fileRead: async () => {
+      throw new Error("target unavailable")
+    },
+    stripeClient: accountFixture(explicitAccountId),
+  })
+  expect(result).toMatchObject({ success: true, data: { organizationId: explicitOrganizationId } })
 })
 
 test("resolves the registered Billing TEST default while ignoring live keys", async () => {
