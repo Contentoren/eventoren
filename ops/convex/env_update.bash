@@ -46,7 +46,7 @@ done <"$ENV_FILE"
 for index in "${!KEYS[@]}"; do
   key="${KEYS[$index]}"
   echo "Setting Convex env var: $key"
-  bun convex env set "$key" "${VALUES[$index]}" --env-file="$ENV_FILE" >/dev/null
+  printf '%s' "${VALUES[$index]}" | bun convex env set "$key" --env-file="$ENV_FILE" >/dev/null
 done
 
 if [[ "$ENV_NAME" == "production" ]]; then
@@ -91,7 +91,7 @@ if [[ "$ENV_NAME" == "production" ]]; then
       ASSETS_SERVICE_ACCESS_TOKEN) value="$ASSETS_TOKEN" ;;
     esac
     echo "Setting Convex env var: $key"
-    bun convex env set "$key" "$value" --env-file="$ENV_FILE" >/dev/null
+    printf '%s' "$value" | bun convex env set "$key" --env-file="$ENV_FILE" >/dev/null
   done
 fi
 
