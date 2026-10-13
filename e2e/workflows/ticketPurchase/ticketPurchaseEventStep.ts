@@ -95,7 +95,12 @@ export async function ticketPurchaseEventStep(
     // Explicitly authorized absence: same admin session, same canonical
     // target, exact marker proven absent. Create once with the SAME
     // run/event intent below.
-    const start = new Date(context.checkpoint.ticket.mailSince + 14 * 24 * 60 * 60_000)
+    // InputDateTime's time select offers five-minute slots. Round only the
+    // start, then derive doors/end so their intended offsets stay exact.
+    const timeSlotMs = 5 * 60_000
+    const start = new Date(
+      Math.ceil((context.checkpoint.ticket.mailSince + 14 * 24 * 60 * 60_000) / timeSlotMs) * timeSlotMs,
+    )
     const doors = new Date(start.getTime() - 30 * 60_000)
     const end = new Date(start.getTime() + 3 * 60 * 60_000)
     const localDateTime = (date: Date) =>
@@ -114,9 +119,15 @@ export async function ticketPurchaseEventStep(
     await page.locator("#admin-event-address").fill("Ticket E2E Teststraße 1, 10115 Berlin")
     await page.getByText("Erweitert", { exact: true }).click()
     await page.locator("#admin-event-key").fill(eventKey)
-    await page.locator("#admin-event-starts").fill(localDateTime(start))
-    await page.locator("#admin-event-doors").fill(localDateTime(doors))
-    await page.locator("#admin-event-ends").fill(localDateTime(end))
+    for (const [id, date] of [
+      ["admin-event-starts", start],
+      ["admin-event-doors", doors],
+      ["admin-event-ends", end],
+    ] as const) {
+      const value = localDateTime(date)
+      await page.locator(`#${id}`).fill(value.slice(0, 10))
+      await page.locator(`#${id}-time`).selectOption(value.slice(11, 16))
+    }
     // The submit click fulfilling is the only UI contract asserted here. The
     // success toast ("Event gespeichert …", role=status) is not authoritative:
     // a DEV write submitted the same owned key yet reported zero status

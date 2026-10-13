@@ -26,6 +26,7 @@ let scenario: ProductScenario = {
 }
 const gotoUrls: string[] = []
 const fills: Array<{ selector: string; value: string }> = []
+const selections: Array<{ selector: string; value: string }> = []
 const clicks: string[] = []
 let catalogCalls = 0
 let signInCalls = 0
@@ -48,6 +49,9 @@ function locatorMock(key: string, countValue = 0) {
     },
     fill: async (value: string) => {
       fills.push({ selector: key, value })
+    },
+    selectOption: async (value: string) => {
+      selections.push({ selector: key, value })
     },
   }
   return locator
@@ -219,6 +223,7 @@ function baseScenario(overrides: Partial<ProductScenario> = {}): ProductScenario
 function resetState() {
   gotoUrls.length = 0
   fills.length = 0
+  selections.length = 0
   clicks.length = 0
   catalogCalls = 0
   signInCalls = 0
@@ -230,6 +235,58 @@ function fillValue(selector: string) {
 }
 
 describe("ticket product authoritative backend identity instead of DOM draggable extraction", () => {
+  it("fills split product dates and five-minute local times across midnight and the Berlin DST change", async () => {
+    const previousTimezone = process.env.TZ
+    try {
+      for (const [timezone, startTime, endTime] of [
+        ["UTC", "23:55", "02:55"],
+        ["Europe/Berlin", "22:55", "01:55"],
+      ] as const) {
+        process.env.TZ = timezone
+        const directory = await mkdtemp(join("/tmp/opencode", "eventoren-ticket-product-dates-"))
+        try {
+          scenario = baseScenario({ backendSequence: ["absent", "own"] })
+          resetState()
+          // The same fourteen elapsed days as EventStep cross Berlin's DST
+          // change. Round once, then retain the exact three-hour window.
+          const checkpoint = startedCheckpoint({
+            step: "product",
+            status: "started",
+            mailSince: new Date(2026, 9, 13, 23, 51, 37).getTime(),
+          })
+          expect((await e2eCheckpointSave(directory, checkpoint as never)).success).toBe(true)
+          await ticketPurchaseProductStep(contextCreate(directory, checkpoint), { environment: developmentEnvironment })
+          expect(fillValue("#admin-tier-starts")).toEqual(["2026-10-27"])
+          expect(fillValue("#admin-tier-ends")).toEqual(["2026-10-28"])
+          expect(selections).toEqual([
+            { selector: "#admin-tier-starts-time", value: startTime },
+            { selector: "#admin-tier-ends-time", value: endTime },
+          ])
+          // Keep event-inherited doors and other default fields unchanged.
+          expect(fills.map((fill) => fill.selector)).toEqual([
+            "#admin-tier-name",
+            "#admin-tier-capacity",
+            "#admin-tier-price",
+            "#admin-tier-fee",
+            "#admin-tier-starts",
+            "#admin-tier-ends",
+          ])
+          const ticket = await storedTicket(directory)
+          expect(ticket.eventId).toBe(eventKey)
+          expect(ticket.productId).toBe("ticket-1")
+          expect(ticket.status).toBe("completed")
+          expect(clicks).toEqual(["button:Ticketprodukt speichern"])
+          expect(catalogCalls).toBe(2)
+        } finally {
+          await rm(directory, { recursive: true, force: true })
+        }
+      }
+    } finally {
+      if (previousTimezone === undefined) delete process.env.TZ
+      else process.env.TZ = previousTimezone
+    }
+  })
+
   it("creates once on authorized absence and records the same backend product id", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-product-absent-"))
     try {

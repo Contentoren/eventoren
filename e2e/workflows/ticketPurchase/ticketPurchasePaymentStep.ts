@@ -277,6 +277,8 @@ async function ticketPurchasePaymentBrowserSubmit(context: TicketPurchaseContext
     throw new Error("Exact test checkout session and order must be observed before card entry")
   }
   await ticketPurchaseCardMethodSelect(page)
+  // Checkout contact identity is a separate required field from cardholder name.
+  await page.getByLabel(/^(?:full\s*name|name|vollständiger\s+name)$/i).fill(context.checkpoint.ticket.participantName)
   await expect(page.getByLabel(/card number|kartennummer/i)).toBeVisible()
   await page.getByLabel(/card number|kartennummer/i).fill("4242424242424242")
   await page.getByLabel(/expiration date|expiry|gültig bis/i).fill("1234")

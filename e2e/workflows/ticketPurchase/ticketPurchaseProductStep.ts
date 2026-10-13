@@ -126,7 +126,12 @@ export async function ticketPurchaseProductStep(
     await expect(page.locator("form:has(#admin-tier-name)")).toHaveAttribute("data-hydrated", "true", {
       timeout: 30_000,
     })
-    const start = new Date(context.checkpoint.ticket.mailSince + 14 * 24 * 60 * 60_000)
+    // Match the event's five-minute start slot; derive the end afterwards so
+    // the product window remains three hours and inherited doors stay intact.
+    const timeSlotMs = 5 * 60_000
+    const start = new Date(
+      Math.ceil((context.checkpoint.ticket.mailSince + 14 * 24 * 60 * 60_000) / timeSlotMs) * timeSlotMs,
+    )
     const end = new Date(start.getTime() + 3 * 60 * 60_000)
     const localDateTime = (date: Date) =>
       new Date(date.getTime() - date.getTimezoneOffset() * 60_000).toISOString().slice(0, 16)
@@ -134,8 +139,14 @@ export async function ticketPurchaseProductStep(
     await page.locator("#admin-tier-capacity").fill("10")
     await page.locator("#admin-tier-price").fill("24.00")
     await page.locator("#admin-tier-fee").fill("0.00")
-    await page.locator("#admin-tier-starts").fill(localDateTime(start))
-    await page.locator("#admin-tier-ends").fill(localDateTime(end))
+    for (const [id, date] of [
+      ["admin-tier-starts", start],
+      ["admin-tier-ends", end],
+    ] as const) {
+      const value = localDateTime(date)
+      await page.locator(`#${id}`).fill(value.slice(0, 10))
+      await page.locator(`#${id}-time`).selectOption(value.slice(11, 16))
+    }
     // The submit click fulfilling is the only UI contract asserted here. The
     // success toast ("Ticketprodukt gespeichert", role=status) is not
     // authoritative: a DEV write submitted the same owned marker yet reported

@@ -423,6 +423,72 @@ describe("ticket purchase card method selection proves card fields on the actual
     }
   })
 
+  for (const [contactLabel, cardholderLabel] of [
+    ["Vollständiger Name", "Name des/der Karteninhaber/in"],
+    ["Full name", "Cardholder name"],
+    ["Name", "Cardholder name"],
+  ]) {
+    it(`fills separate contact and cardholder controls on the ${contactLabel} form before submitting`, async () => {
+      const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-payment-test-"))
+      try {
+        const controls = [
+          { label: contactLabel, value: "" },
+          { label: cardholderLabel, value: "" },
+          { label: "Card number", value: "" },
+          { label: "Expiration date", value: "" },
+          { label: "Company name", value: "" },
+        ]
+        const filledLabels: string[] = []
+        let submits = 0
+        const field = { ...locatorFake({ count: 1 }), fill: async () => {}, click: async () => {} }
+        const page = {
+          url: () => openUnpaidSession().url,
+          getByRole: () => field,
+          getByLabel: (label: RegExp) => {
+            const matches = controls.filter((control) => label.test(control.label))
+            return {
+              ...locatorFake({ count: matches.length }),
+              fill: async (value: string) => {
+                expect(matches.length).toBe(1)
+                matches[0].value = value
+                filledLabels.push(matches[0].label)
+              },
+            }
+          },
+          getByText: () => field,
+          locator: () => field,
+          getByTestId: () => ({
+            click: async () => {
+              expect(controls[0].value).toBe(`E2E Participant ${runId}`)
+              expect(controls[1].value).toBe("E2E Ticket Test")
+              submits += 1
+            },
+          }),
+        }
+        const context = {
+          directory,
+          checkpoint: checkpointBase("payment", "started"),
+          checkoutPage: page,
+        } as unknown as TicketPurchaseContext
+        expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+        const { stripe } = stripePaymentFixture(openUnpaidSession(), stableTestCustomer())
+        await expect(
+          ticketPurchasePaymentStep(context, {
+            ...paymentProofInput(stripe),
+            orderProof: pendingOrderProof,
+            proofTimeoutMs: 0,
+            proofPollIntervalMs: 0,
+          }),
+        ).rejects.toThrow("Canonical saved order/Stripe paid proof missing")
+        expect(filledLabels).toEqual([contactLabel, "Card number", "Expiration date", cardholderLabel])
+        expect(controls[4].value).toBe("")
+        expect(submits).toBe(1)
+      } finally {
+        await rm(directory, { recursive: true, force: true })
+      }
+    })
+  }
+
   it("single submit without fulfilled paid proof retains the same payment-started receipt", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-paid-proof-test-"))
     try {

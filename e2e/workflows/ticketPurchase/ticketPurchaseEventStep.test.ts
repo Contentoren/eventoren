@@ -30,6 +30,7 @@ let scenario: EventScenario = {
 }
 const gotoUrls: string[] = []
 const fills: Array<{ selector: string; value: string }> = []
+const timeSelections: Array<{ selector: string; value: string }> = []
 let catalogCalls = 0
 const capturedClients: unknown[] = []
 
@@ -47,7 +48,13 @@ function locatorMock(key: string, countValue: number) {
     count: async () => countValue,
     click: async () => {},
     fill: async (value: string) => {
+      if (/^#admin-event-(starts|doors|ends)$/u.test(key) && !/^\d{4}-\d{2}-\d{2}$/u.test(value))
+        throw new Error("Split event date inputs accept only YYYY-MM-DD")
       fills.push({ selector: key, value })
+    },
+    selectOption: async (value: string) => {
+      if (!/^\d{2}:\d[05]$/u.test(value)) throw new Error("Event time must be an available five-minute slot")
+      timeSelections.push({ selector: key, value })
     },
     or: () => locator,
     first: () => locator,
@@ -206,11 +213,38 @@ function baseScenario(overrides: Partial<EventScenario> = {}): EventScenario {
 function resetState() {
   gotoUrls.length = 0
   fills.length = 0
+  timeSelections.length = 0
   catalogCalls = 0
   capturedClients.length = 0
 }
 
 describe("ticket event reconciliation before replacement", () => {
+  it("fills separate local dates and five-minute time selects while preserving doors and duration across midnight", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-event-split-datetime-"))
+    try {
+      scenario = baseScenario({ backendSequence: ["absent", "own"] })
+      resetState()
+      const checkpoint = startedCheckpoint({
+        mailSince: new Date(2026, 9, 27, 23, 51, 17).getTime() - 14 * 24 * 60 * 60_000,
+      })
+      expect((await e2eCheckpointSave(directory, checkpoint as never)).success).toBe(true)
+      await ticketPurchaseEventStep(contextCreate(directory, checkpoint), { environment: developmentEnvironment })
+      expect(fills.filter((fill) => /^#admin-event-(starts|doors|ends)$/u.test(fill.selector))).toEqual([
+        { selector: "#admin-event-starts", value: "2026-10-27" },
+        { selector: "#admin-event-doors", value: "2026-10-27" },
+        { selector: "#admin-event-ends", value: "2026-10-28" },
+      ])
+      expect(timeSelections).toEqual([
+        { selector: "#admin-event-starts-time", value: "23:55" },
+        { selector: "#admin-event-doors-time", value: "23:25" },
+        { selector: "#admin-event-ends-time", value: "02:55" },
+      ])
+      expect((await storedTicket(directory)).status).toBe("completed")
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
   it("creates once with the same UUID on explicitly authorized absence", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-event-absent-"))
     try {
