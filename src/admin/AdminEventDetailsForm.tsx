@@ -1,6 +1,7 @@
 import { mdiClose } from "@adaptive-ds/mdi/mdiClose.js"
 import { For, type JSXElement, Show } from "solid-js"
 import { InputDateTime } from "#ui/input/datetime/InputDateTime.jsx"
+import { CheckMultiple } from "#ui/input/check/CheckMultiple.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
 import { SelectSingleNative } from "#ui/input/select/SelectSingleNative.jsx"
@@ -286,6 +287,34 @@ export function AdminEventDetailsForm(props: {
           </p>
         </Show>
       </FormSection>
+
+      <details
+        open={state.paymentSectionOpen()}
+        class="rounded-lg border border-border bg-surface-muted p-4 text-content [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70"
+      >
+        <summary class="cursor-pointer font-semibold">Zahlungsmethoden</summary>
+        <div class="mt-4 flex flex-col gap-3">
+          <p class="text-sm text-content-muted">
+            Alle erlauben übernimmt die bestehenden Kontoeinstellungen. Eine eigene Auswahl ersetzt diese Vorgabe für
+            dieses Event. Die tatsächliche Verfügbarkeit wird im Checkout geprüft.
+          </p>
+          <CheckMultiple
+            valueSignal={state.paymentSignal}
+            getOptions={state.paymentOptions}
+            valueText={state.paymentLabel}
+          />
+          <p class="text-sm text-content-muted">
+            Nicht verfügbar: PayPal und iDEAL sind im Konto nicht freigeschaltet. Banküberweisung hat keine
+            konfigurierten Zahlungswege. Eigenständiges Wero ist nicht verfügbar.
+          </p>
+          <Show when={state.unavailablePaymentSelection()}>
+            <p role="alert" class="text-sm text-content-muted">
+              Bestehende, nicht verfügbare Auswahl: {state.unavailablePaymentSelection()}. Zum Ersetzen „Alle erlauben“
+              wählen.
+            </p>
+          </Show>
+        </div>
+      </details>
 
       <details class="rounded-lg border border-border bg-surface-muted p-4 text-content [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/70 dark:[.admin-workspace_&]:bg-slate-800/70">
         <summary class="cursor-pointer font-semibold">Erweitert</summary>

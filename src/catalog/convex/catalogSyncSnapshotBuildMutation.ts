@@ -1,4 +1,6 @@
 import { v } from "convex/values"
+import * as a from "valibot"
+import { eventorenAllowedStripePaymentMethodsSchema } from "billing/contracts/eventorenAllowedStripePaymentMethodsSchema"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { catalogSyncLimits } from "./catalogSyncLimits.js"
@@ -80,6 +82,12 @@ export const catalogSyncSnapshotBuildMutation = internalMutation({
       if (tierPage.some((tier) => tier.catalogVersion > args.requestedVersion))
         return createResultError(op, `Catalog tiers for ${event.eventKey} are newer than requestedVersion`)
 
+      const policyResult = a.safeParse(
+        a.optional(eventorenAllowedStripePaymentMethodsSchema),
+        event.allowedStripePaymentMethods,
+      )
+      if (!policyResult.success) return createResultError(op, a.summarize(policyResult.issues), event.eventKey)
+
       const payloadJson = JSON.stringify({
         eventKey: event.eventKey,
         title: event.title,
@@ -100,6 +108,7 @@ export const catalogSyncSnapshotBuildMutation = internalMutation({
         status: event.status,
         catalogVersion: args.requestedVersion,
         eventRevision: event.eventRevision ?? 1,
+        ...(policyResult.output !== undefined ? { allowedStripePaymentMethods: policyResult.output } : {}),
         tiers: tierPage.map((tier) => ({
           tierKey: tier.tierKey,
           name: tier.name,

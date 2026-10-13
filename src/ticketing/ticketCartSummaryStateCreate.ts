@@ -7,6 +7,7 @@ import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
 import { ticketTierSelectorStateCreate } from "./ticketTierSelectorStateCreate.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 import { ticketCheckoutText } from "./ticketCheckoutText.ts"
+import { ticketPaymentHintsGet } from "./ticketPaymentHintsGet.ts"
 
 export function ticketCartSummaryStateCreate(inputs: {
   event: () => EventItem
@@ -76,6 +77,7 @@ export function ticketCartSummaryStateCreate(inputs: {
   }
 
   return {
+    paymentHints: () => ticketPaymentHintsGet([inputs.event()]),
     headingId,
     rows,
     isEmpty,

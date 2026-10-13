@@ -5,6 +5,8 @@ import type { IdUser } from "#src/auth/convex/IdUser.ts"
 import { authMutationTokenToUserId } from "#src/utils/convex_backend/authMutationTokenToUserId.ts"
 import { catalogAdminAuthorizeFn } from "./catalogAdminAuthorizeFn.js"
 import { catalogSyncAdvanceFn } from "./catalogSyncAdvanceFn.js"
+import { catalogAllowedStripePaymentMethodsValidator } from "./catalogAllowedStripePaymentMethodsValidator.ts"
+import { catalogAllowedStripePaymentMethodsNormalize } from "../catalogAllowedStripePaymentMethodsNormalize.ts"
 
 const catalogEventArgsValidator = v.object({
   eventKey: v.string(),
@@ -28,6 +30,7 @@ const catalogEventArgsValidator = v.object({
   highlights: v.optional(v.array(v.object({ title: v.string(), description: v.string() }))),
   inclusions: v.optional(v.array(v.string())),
   exclusions: v.optional(v.array(v.string())),
+  allowedStripePaymentMethods: v.optional(catalogAllowedStripePaymentMethodsValidator),
   status: v.optional(v.union(v.literal("draft"), v.literal("published"), v.literal("archived"))),
   token: v.string(),
 })
@@ -45,6 +48,9 @@ async function catalogEventUpsertAuthorizedFn(
   const adminResult = await catalogAdminAuthorizeFn(ctx, args.userId)
   if (!adminResult.success) return adminResult
 
+  const policyResult = catalogAllowedStripePaymentMethodsNormalize(args.allowedStripePaymentMethods)
+  if (!policyResult.success) return policyResult
+
   if (args.eventKey.length === 0) return createResultError(op, "Event key is required")
   if (args.startsAt.trim() && Number.isNaN(Date.parse(args.startsAt)))
     return createResultError(op, "Start time must be a valid date and time")
@@ -60,6 +66,8 @@ async function catalogEventUpsertAuthorizedFn(
     .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
     .unique()
   if (existing?.deletedAt) return createResultError(op, "Deleted event keys cannot be reused")
+  const existingPolicyResult = catalogAllowedStripePaymentMethodsNormalize(existing?.allowedStripePaymentMethods)
+  if (!existingPolicyResult.success) return existingPolicyResult
   // An explicit manual URL change invalidates the previous uploaded image references.
   const imageVariants =
     args.imageVariants && args.imageUrl === args.imageVariants.detail
@@ -90,6 +98,8 @@ async function catalogEventUpsertAuthorizedFn(
     highlights: args.highlights ?? existing?.highlights,
     inclusions: args.inclusions ?? existing?.inclusions,
     exclusions: args.exclusions ?? existing?.exclusions,
+    // This full upsert uses omission (including the UI's empty selection) to clear an override.
+    allowedStripePaymentMethods: policyResult.data,
     status,
   }
 
@@ -115,6 +125,7 @@ async function catalogEventUpsertAuthorizedFn(
       highlights: existing.highlights,
       inclusions: existing.inclusions,
       exclusions: existing.exclusions,
+      allowedStripePaymentMethods: existingPolicyResult.data,
       status: existing.status,
     }) !== JSON.stringify(eventData)
 

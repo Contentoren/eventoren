@@ -1,6 +1,7 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
+import { catalogAllowedStripePaymentMethodsValidator } from "./catalogAllowedStripePaymentMethodsValidator.ts"
 
 const catalogEventStatusValidator = v.union(v.literal("draft"), v.literal("published"), v.literal("archived"))
 
@@ -32,6 +33,7 @@ export const catalogTables = {
     highlights: v.optional(v.array(v.object({ title: v.string(), description: v.string() }))),
     inclusions: v.optional(v.array(v.string())),
     exclusions: v.optional(v.array(v.string())),
+    allowedStripePaymentMethods: v.optional(catalogAllowedStripePaymentMethodsValidator),
     status: catalogEventStatusValidator,
     deletedAt: v.optional(v.string()),
     catalogVersion: v.number(),

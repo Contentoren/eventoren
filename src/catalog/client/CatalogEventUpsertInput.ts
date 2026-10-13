@@ -1,6 +1,7 @@
 import type { EventCategory } from "../../events/EventCategory.ts"
 import type { EventImageVariants } from "../../events/EventImageVariants.ts"
 import type { EventHighlight } from "../../events/EventHighlight.ts"
+import type { CatalogAllowedStripePaymentMethods } from "../catalogAllowedStripePaymentMethodsSchema.ts"
 
 export type CatalogEventUpsertInput = {
   readonly eventKey: string
@@ -22,6 +23,7 @@ export type CatalogEventUpsertInput = {
   readonly highlights: EventHighlight[]
   readonly inclusions?: string[]
   readonly exclusions?: string[]
+  readonly allowedStripePaymentMethods?: CatalogAllowedStripePaymentMethods
   readonly status?: "draft" | "published" | "archived"
   readonly token: string
 }

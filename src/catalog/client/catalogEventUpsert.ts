@@ -5,6 +5,7 @@ import { createResult } from "../../ui/createResult.ts"
 import { createResultError } from "../../ui/createResultError.ts"
 import type { Result } from "../../ui/Result.ts"
 import type { CatalogEventUpsertInput } from "./CatalogEventUpsertInput.ts"
+import { catalogAllowedStripePaymentMethodsNormalize } from "../catalogAllowedStripePaymentMethodsNormalize.ts"
 
 const op = "catalogEventUpsert"
 
@@ -12,8 +13,13 @@ export async function catalogEventUpsert(
   input: CatalogEventUpsertInput,
   client?: ConvexHttpClient,
 ): Promise<Result<{ readonly eventKey: string; readonly catalogVersion: number }>> {
+  const policyResult = catalogAllowedStripePaymentMethodsNormalize(input.allowedStripePaymentMethods)
+  if (!policyResult.success) return policyResult
   try {
-    const response = await (client ?? apiClientCreate()).mutation(api.catalog.catalogEventUpsertMutation, input)
+    const response = await (client ?? apiClientCreate()).mutation(api.catalog.catalogEventUpsertMutation, {
+      ...input,
+      allowedStripePaymentMethods: policyResult.data,
+    })
     if (!response.success) return createResultError(op, response.errorMessage, response)
     return createResult(response.data)
   } catch (error) {

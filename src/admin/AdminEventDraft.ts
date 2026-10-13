@@ -1,6 +1,7 @@
 import type { EventCategory } from "../events/EventCategory.ts"
 import type { EventImageVariants } from "../events/EventImageVariants.ts"
 import type { EventHighlight } from "../events/EventHighlight.ts"
+import type { CatalogAllowedStripePaymentMethods } from "../catalog/catalogAllowedStripePaymentMethodsSchema.ts"
 
 export type AdminEventDraft = {
   eventKey: string
@@ -22,4 +23,5 @@ export type AdminEventDraft = {
   inclusions: string[]
   exclusions: string[]
   status: "draft" | "published" | "archived"
+  allowedStripePaymentMethods?: CatalogAllowedStripePaymentMethods
 }

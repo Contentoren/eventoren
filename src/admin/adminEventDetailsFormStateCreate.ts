@@ -6,12 +6,35 @@ import type { AdminEventDraft } from "./AdminEventDraft.ts"
 import { adminCategoryPickerStateCreate } from "./adminCategoryPickerStateCreate.ts"
 import { adminDateTimeIsoFromLocal } from "./adminDateTimeIsoFromLocal.ts"
 import { adminDateTimeLocalFromIso } from "./adminDateTimeLocalFromIso.ts"
+import { catalogAllowedStripePaymentMethodsNormalize } from "../catalog/catalogAllowedStripePaymentMethodsNormalize.ts"
 
 export function adminEventDetailsFormStateCreate(inputs: {
   catalog: AdminCatalogPageState
   onSaved?: (eventKey: string) => void | Promise<void>
 }) {
   const validationMessage = createSignalObject("")
+  const paymentOptions = ["allow_all", "card", "klarna", "sepa_debit", "bancontact"]
+  const paymentSelection = () => {
+    const methods = inputs.catalog.eventDraft().allowedStripePaymentMethods
+    return methods?.length ? [...methods] : ["allow_all"]
+  }
+  const paymentSignal = {
+    get: paymentSelection,
+    set: (values: string[]) => {
+      const defaultAdded = values.includes("allow_all") && !paymentSelection().includes("allow_all")
+      const selected = defaultAdded ? [] : values.filter((value) => value !== "allow_all")
+      // Existing unavailable overrides remain visible, but cannot be newly selected.
+      if (selected.some((value) => !paymentOptions.includes(value) && !paymentSelection().includes(value))) return
+      const normalized = catalogAllowedStripePaymentMethodsNormalize(selected)
+      if (!normalized.success) return
+      inputs.catalog.eventFieldChange("allowedStripePaymentMethods", normalized.data)
+    },
+  }
+  // Depends on draft identity, not checkbox changes, so clearing a custom policy does not collapse the section.
+  const paymentSectionOpen = createMemo(() => {
+    inputs.catalog.eventDraftRevision()
+    return Boolean(inputs.catalog.selectedEvent()?.allowedStripePaymentMethods?.length)
+  })
   const hydrated = createSignalObject(false)
   onMount(() => hydrated.set(true))
   const categoryPicker = adminCategoryPickerStateCreate({ catalog: inputs.catalog })
@@ -162,6 +185,23 @@ export function adminEventDetailsFormStateCreate(inputs: {
   }
 
   return {
+    paymentSignal,
+    paymentSectionOpen,
+    paymentOptions: () => paymentOptions,
+    paymentLabel: (value: string) =>
+      (
+        ({
+          allow_all: "Alle erlauben (Allow all)",
+          card: "Kredit-/Debitkarten · Apple Pay / Google Pay",
+          klarna: "Klarna",
+          sepa_debit: "SEPA-Lastschrift",
+          bancontact: "Bancontact",
+        }) as Record<string, string>
+      )[value] ?? value,
+    unavailablePaymentSelection: () =>
+      paymentSelection()
+        .filter((value) => !paymentOptions.includes(value))
+        .join(", "),
     categoryPicker,
     hydrated: hydrated.get,
     validationMessage: validationMessage.get,

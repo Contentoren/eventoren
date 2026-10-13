@@ -50,6 +50,7 @@ export function catalogEventToEventItem(
     highlights: event.highlights,
     inclusions: event.inclusions,
     exclusions: event.exclusions,
+    allowedStripePaymentMethods: event.allowedStripePaymentMethods,
     soldOut: eventTiers.length > 0 && eventTiers.every((tier) => tier.available === 0),
     tiers: eventTiers,
   }

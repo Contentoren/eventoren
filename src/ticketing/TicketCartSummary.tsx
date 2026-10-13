@@ -1,7 +1,5 @@
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
-import { imageList } from "../app/assets/imageList.ts"
-import { urlImage } from "../app/assets/urlImage.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiButton } from "../ui/UiButton.tsx"
 import { UiCard } from "../ui/UiCard.tsx"
@@ -159,56 +157,10 @@ export function TicketCartSummary(props: {
 
         <div class="flex flex-col gap-space-3 rounded-control bg-surface-muted/50 p-space-3">
           <p class="text-xs font-medium text-content">{text().paymentMethods}</p>
-          <ul class="grid w-full grid-cols-4 gap-space-3" aria-label={text().supportedPaymentMethods}>
-            <li class="min-w-0">
-              <img
-                src={urlImage(imageList.payment_methods_paypal_old)}
-                alt="PayPal"
-                class="h-10 w-full object-contain"
-              />
-            </li>
-            <li class="min-w-0">
-              <img
-                src={urlImage(imageList.payment_methods_visa_alternate)}
-                alt="Visa"
-                class="h-10 w-full object-contain"
-              />
-            </li>
-            <li class="min-w-0">
-              <img src={urlImage(imageList.payment_methods_sepa)} alt="SEPA" class="h-10 w-full object-contain" />
-            </li>
-            <li class="min-w-0">
-              <img
-                src={urlImage(imageList.payment_methods_klarna_sofort)}
-                alt="Klarna Sofort"
-                class="h-10 w-full object-contain"
-              />
-            </li>
-            <li class="min-w-0">
-              <img
-                src={urlImage(imageList.payment_methods_mastercard)}
-                alt="Mastercard"
-                class="h-10 w-full object-contain"
-              />
-            </li>
-            <li class="min-w-0">
-              <img src={urlImage(imageList.payment_methods_maestro)} alt="Maestro" class="h-10 w-full object-contain" />
-            </li>
-            <li class="min-w-0">
-              <img
-                src={urlImage(imageList.payment_methods_american_express)}
-                alt="American Express"
-                class="h-10 w-full object-contain"
-              />
-            </li>
-            <li class="min-w-0">
-              <img
-                src={urlImage(imageList.payment_methods_discover)}
-                alt="Discover"
-                class="h-10 w-full object-contain"
-              />
-            </li>
+          <ul class="text-xs text-content-muted" aria-label={text().supportedPaymentMethods}>
+            <For each={state.paymentHints()}>{(label) => <li>{label}</li>}</For>
           </ul>
+          <p class="text-xs text-content-muted">Die verfügbaren Zahlungsmethoden werden im Checkout angezeigt.</p>
         </div>
       </section>
     </UiCard>

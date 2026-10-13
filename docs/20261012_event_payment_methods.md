@@ -10,11 +10,14 @@ Repositories:
 
 ## Status and current context
 
-- Plan ready for implementation; implementation not started.
-- The event currently has no payment-method override, and the checkout path does not supply an explicit Stripe method list.
-- Eventoren currently issues tickets only after Billing reports `paid`.
-- Billing already handles Checkout asynchronous payment success/failure, but has no SEPA dispute cancellation path. Eventoren does not currently cancel issued tickets on a later payment failure.
-- Eventoren consumes Billing's packaged client through its existing vendored dependency. Shared contract changes must be packaged and consumed by both repositories.
+- Implementation in progress; tasks are completed and marked below as their bounded increments are integrated.
+- User approved preview verification followed by production deployment in a coordinated, staged window: Billing first, Eventoren second, enable new behavior only after both are ready.
+- E2E purchases are restricted to preview/Stripe test mode. Delayed SEPA outcomes use controlled fixtures rather than live charges or waiting for settlement.
+- Preserve existing uncommitted E2E ownership-proof changes and the unrelated Billing documentation change.
+- Shared contract changes must be packaged through Billing's existing vendored-client workflow and consumed by both repositories.
+- Billing contracts, trusted Checkout policy enforcement, additive lifecycle persistence/status and verified completion processing are implemented. Eventoren catalog persistence and the admin selector are implemented. Client/sync integration, issuance/cancellation, delivery, and rollout remain in progress.
+- Verified configured test/live method choices: card, Klarna, SEPA debit, Bancontact. PayPal, iDEAL, bank transfer, and standalone Wero remain unavailable; bank transfer also has no existing usable rail configuration. Do not expose these as selectable custom methods.
+- Shared status evidence uses optional `checkoutCompletedAt`, `paymentMethodType`, `stripePaymentIntentStatus`, and a strictly correlated `cancellation` object. Early issuance requires the joint completed/SEPA/processing evidence, not any field alone.
 
 ## Agreed behavior
 
@@ -94,30 +97,30 @@ Use the existing libraries from each repository's `package.json` and existing `#
 
 ### 1. Billing: method capability mapping and shared contracts
 
-- [ ] Confirm the enforceable method mappings and account-specific availability, including Wero and bank-transfer options, without changing global Stripe configuration or upgrading the API speculatively.
-- [ ] Extend `src/billing-client/contracts/eventorenCatalogEventSchema.ts` with the optional allowlist; retain compatibility with older catalog data.
-- [ ] Extend `src/billing-client/contracts/eventorenTicketCheckoutStatusResponseSchema.ts` with optional completion, resolved-method, and cancellation evidence. Apply the same projection to any relevant checkout response schema.
-- [ ] Keep the buyer-facing `eventorenTicketCheckoutCreateRequestSchema` free of a method override.
-- [ ] Add focused contract tests in `src/billing-client/contracts/eventorenBillingContracts.test.ts`.
+- [x] Confirm the enforceable method mappings and account-specific availability, including Wero and bank-transfer options, without changing global Stripe configuration or upgrading the API speculatively.
+- [x] Extend `src/billing-client/contracts/eventorenCatalogEventSchema.ts` with the optional allowlist; retain compatibility with older catalog data.
+- [x] Extend `src/billing-client/contracts/eventorenTicketCheckoutStatusResponseSchema.ts` with optional completion, resolved-method, and cancellation evidence. Apply the same projection to any relevant checkout response schema.
+- [x] Keep the buyer-facing `eventorenTicketCheckoutCreateRequestSchema` free of a method override.
+- [x] Add focused contract tests in `src/billing-client/contracts/eventorenBillingContracts.test.ts`.
 
 Acceptance: old payloads still parse; no override is distinguishable from a custom list; virtual Allow all never crosses the API; standalone Wero is not fabricated.
 
 ### 2. Billing: enforce the event policy at Stripe Checkout creation
 
-- [ ] Carry the catalog field through catalog upsert serialization in `src/checkout/server/eventorenCatalogUpsertHandlerCreate.ts`.
-- [ ] In `src/checkout/server/eventorenTicketCheckoutHandlerCreate.ts`, resolve the policy from the persisted event and include it in the commercial/source snapshot.
-- [ ] Thread a trusted internal option through `src/checkout/server/organizationDynamicCheckoutCreate.ts` to `src/payments/stripeCheckoutSessionCreate.ts`. Do not unnecessarily expose it through the generic public dynamic-checkout input.
-- [ ] Set `payment_method_types` only for an explicit event override, with any required method-specific options. Preserve current request construction when absent.
-- [ ] Reuse the saved policy and options on checkout replay, preserving existing identity/revision checks.
-- [ ] Test explicit restriction, absent override/fallback, invalid methods/currency, bank-transfer options, and retry after an event policy edit.
+- [x] Carry the catalog field through catalog upsert serialization in `src/checkout/server/eventorenCatalogUpsertHandlerCreate.ts`.
+- [x] In `src/checkout/server/eventorenTicketCheckoutHandlerCreate.ts`, resolve the policy from the persisted event and include it in the commercial/source snapshot.
+- [x] Thread a trusted internal option through `src/checkout/server/organizationDynamicCheckoutCreate.ts` to `src/payments/stripeCheckoutSessionCreate.ts`. Do not unnecessarily expose it through the generic public dynamic-checkout input.
+- [x] Set `payment_method_types` only for an explicit event override, with any required method-specific options. Preserve current request construction when absent.
+- [x] Reuse the saved policy and options on checkout replay, preserving existing identity/revision checks.
+- [x] Test explicit restriction, absent override/fallback, invalid methods/currency, bank-transfer options, and retry after an event policy edit.
 
 Acceptance: SEPA-only checkout cannot offer an unrelated method; default checkout is unchanged; replay does not adopt a newer custom policy.
 
 ### 3. Billing: persist completion and adverse payment outcomes
 
-- [ ] Add the necessary nullable lifecycle fields in `src/platform/database/schema.ts` and a migration through the existing Drizzle workflow. Store completion time, resolved method, and cancellation evidence; do not add redundant policy storage.
-- [ ] Update `src/checkout/server/organizationDynamicCheckoutStatusGet.ts` to expose the additive lifecycle evidence.
-- [ ] Extend `src/payments/stripeEventProcess.ts` and the appropriate session processor to persist verified completed/processing SEPA without entering paid booking/invoice work.
+- [x] Add the necessary nullable lifecycle fields in `src/platform/database/schema.ts` and a migration through the existing Drizzle workflow. Store completion time, resolved method, and cancellation evidence; do not add redundant policy storage.
+- [x] Update `src/checkout/server/organizationDynamicCheckoutStatusGet.ts` to expose the additive lifecycle evidence.
+- [x] Extend `src/payments/stripeEventProcess.ts` and the appropriate session processor to persist verified completed/processing SEPA without entering paid booking/invoice work.
 - [ ] Keep `src/payments/stripeCheckoutSessionPaidProcess.ts` genuinely paid-only. On later success, update payment truth and existing paid financial work without reissuing tickets.
 - [ ] Reuse pending async-failure handling and persist the cancellation reason needed by Eventoren.
 - [ ] Add SEPA-only dispute correlation using verified charge/PaymentIntent/context records and existing correlation helpers. Persist cancellation despite an originally paid context.
@@ -136,9 +139,9 @@ Acceptance: both repositories agree on catalog/status contracts without a breaki
 
 ### 5. Eventoren: persist and synchronize the event override
 
-- [ ] Update `src/catalog/convex/catalogTables.ts`, `src/catalog/client/CatalogEventUpsertInput.ts`, `src/catalog/client/catalogEventUpsert.ts`, and `src/catalog/convex/catalogEventUpsertMutation.ts`.
+- [x] Update `src/catalog/convex/catalogTables.ts`, `src/catalog/client/CatalogEventUpsertInput.ts`, `src/catalog/client/catalogEventUpsert.ts`, and `src/catalog/convex/catalogEventUpsertMutation.ts`.
 - [ ] Carry the policy through `src/events/EventItem.ts`, `src/catalog/convex/catalogEventToEventItem.ts`, and the catalog snapshot/push paths, including `catalogSyncSnapshotBuildMutation.ts`, `catalogSyncSnapshotQuery.ts`, and `catalogSyncPushAction.ts` where applicable.
-- [ ] Include normalized policy changes in revision/change comparisons; preserve omission for existing events.
+- [x] Include normalized policy changes in revision/change comparisons; preserve omission for existing events.
 - [ ] Keep checkout identity/context handling aligned with event revision and snapshot semantics. Do not pass a browser-selected whitelist to Billing.
 - [ ] Add focused upsert and sync tests.
 
@@ -146,12 +149,12 @@ Acceptance: create/edit and sync round-trip custom selections; absent/default se
 
 ### 6. Eventoren: collapsed admin selector
 
-- [ ] Extend `src/admin/AdminEventDraft.ts` and `src/admin/adminEventDetailsFormStateCreate.ts`.
-- [ ] Add the section to shared `src/admin/AdminEventDetailsForm.tsx`, using existing collapsed `<details>` conventions and `CheckMultiple`.
-- [ ] Implement Allow all exclusivity and normalization outside the generic component. Do not change `CheckMultiple` behavior for other consumers.
-- [ ] Provide accurate labels, group card wallets under cards, and make unsupported choices unavailable rather than claiming they can be enforced.
-- [ ] Keep the existing create/edit routes and buyer payment hints aligned with the event setting; no unrelated checkout redesign.
-- [ ] Add state/adapter tests. Defer live-browser verification to task 11.
+- [x] Extend `src/admin/AdminEventDraft.ts` and `src/admin/adminEventDetailsFormStateCreate.ts`.
+- [x] Add the section to shared `src/admin/AdminEventDetailsForm.tsx`, using existing collapsed `<details>` conventions and `CheckMultiple`.
+- [x] Implement Allow all exclusivity and normalization outside the generic component. Do not change `CheckMultiple` behavior for other consumers.
+- [x] Provide accurate labels, group card wallets under cards, and make unsupported choices unavailable rather than claiming they can be enforced.
+- [x] Keep the existing create/edit routes and buyer payment hints aligned with the event setting; no unrelated checkout redesign.
+- [x] Add state/adapter tests. Defer live-browser verification to task 11.
 
 Acceptance: collapsed default, Allow all selected, correct mutual exclusion, empty selection returns to default, and saved custom selections are visible on edit.
 
@@ -226,6 +229,8 @@ Run `bun run convex:codegen` when the schema/API changes require it. Use adjacen
 - [ ] Use the configured test administrator credentials through `zitadel-cli`; never store credentials in this document or fixtures.
 - [ ] Apply Billing's additive migration/API changes and distribute the client package, then deploy Eventoren's receiver/consumer and configure authenticated outcome delivery before enabling the feature for events.
 - [ ] Ensure both sides are ready before creating restricted events or issuing pending-SEPA tickets. Leave existing event defaults and organization/instance settings untouched.
+- [ ] Keep early SEPA issuance disabled during mixed-version deployment; use a minimal server-side readiness gate if existing controls cannot prevent it. Enable only after authenticated cancellation delivery and the receiver are configured and verified.
+- [ ] Before production deployment, obtain a consistent Billing database backup, confirm additive migration/rollback constraints, and verify each service's health after its staged update. Do not change production Stripe mode or create live E2E purchases.
 
 ## Out of scope
 

@@ -1,5 +1,6 @@
 import { UiButton } from "../ui/UiButton.tsx"
 import { TicketBagPaymentMethods } from "./TicketBagPaymentMethods.tsx"
+import type { EventItem } from "../events/EventItem.ts"
 
 export function TicketBagSummary(props: {
   subtotalLabel: string
@@ -7,6 +8,7 @@ export function TicketBagSummary(props: {
   totalLabel: string
   quantity: number
   onCheckout: () => void
+  events: readonly EventItem[]
 }) {
   return (
     <aside aria-label="Warenkorb-Zusammenfassung" class="flex flex-col gap-space-5">
@@ -49,7 +51,7 @@ export function TicketBagSummary(props: {
         </div>
 
         <div class="mt-space-5">
-          <TicketBagPaymentMethods title="Zahlungsmethoden" />
+          <TicketBagPaymentMethods title="Zahlungsmethoden" events={props.events} />
         </div>
       </div>
     </aside>

@@ -109,6 +109,7 @@ export function TicketBagPageView(props: {
 
               <div class="lg:sticky lg:top-24 lg:self-start">
                 <TicketBagSummary
+                  events={props.state.groups().map((group) => group.event)}
                   subtotalLabel={props.state.totals().subtotalLabel}
                   feeLabel={props.state.totals().feeLabel}
                   totalLabel={props.state.totals().totalLabel}

@@ -103,7 +103,7 @@
     "@tanstack/solid-start": "^1.168.58",
     "@zxing/browser": "^0.2.1",
     "@zxing/library": "^0.23.0",
-    "billing": "file:vendor/billing-0.1.5.tgz",
+    "billing": "file:vendor/billing-0.1.8.tgz",
     "cn": "^0.4.0",
     "convex": "^1.46.0",
     "dayjs": "^1.11.23",

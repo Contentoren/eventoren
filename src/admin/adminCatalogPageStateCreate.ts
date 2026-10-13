@@ -17,6 +17,7 @@ import type { AdminCatalogPageState } from "./AdminCatalogPageState.ts"
 import type { AdminEventDraft } from "./AdminEventDraft.ts"
 import type { AdminEventItem } from "./AdminEventItem.ts"
 import type { AdminTierDraft } from "./AdminTierDraft.ts"
+import { catalogAllowedStripePaymentMethodsNormalize } from "../catalog/catalogAllowedStripePaymentMethodsNormalize.ts"
 
 const emptyEventDraft = (): AdminEventDraft => ({
   eventKey: "",
@@ -218,10 +219,16 @@ export function adminCatalogPageStateCreate(inputs: {
       errorMessage.set("Jedes Highlight benötigt einen Titel.")
       return
     }
+    const paymentPolicy = catalogAllowedStripePaymentMethodsNormalize(draft.allowedStripePaymentMethods)
+    if (!paymentPolicy.success) {
+      errorMessage.set(paymentPolicy.errorMessage)
+      return
+    }
     isSaving.set(true)
     try {
       const saved = await inputs.eventUpsert({
         ...draft,
+        allowedStripePaymentMethods: paymentPolicy.data,
         eventKey: draft.eventKey.trim(),
         highlights: draft.highlights.map((highlight) => ({
           title: highlight.title.trim(),
@@ -670,6 +677,9 @@ function eventToDraft(event: AdminEventItem): AdminEventDraft {
     imageUrl: event.imageUrl,
     imageVariants: event.imageVariants,
     imageAlt: event.imageAlt,
+    allowedStripePaymentMethods: event.allowedStripePaymentMethods?.length
+      ? [...event.allowedStripePaymentMethods]
+      : undefined,
     highlights: [...eventHighlightsGet(event)],
     inclusions: [...eventInclusionsGet(event)],
     exclusions: [...eventExclusionsGet(event)],
