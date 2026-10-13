@@ -32,6 +32,9 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   value="$(trim "${line#*=}")"
   [[ -z "$key" || ! "$key" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] && continue
   [[ "$key" == CONVEX_SELF_HOSTED_* || "$key" == CONVEX_SITE_URL ]] && continue
+  case "$key" in
+    CONVEX_DEPLOY_KEY|CONVEX_DEPLOYMENT_TOKEN|CONVEX_DEPLOYMENT|CONVEX_URL|PUBLIC_CONVEX_URL|NEXT_PUBLIC_CONVEX_URL|VITE_CONVEX_URL|REACT_APP_CONVEX_URL|EXPO_PUBLIC_CONVEX_URL|PUBLIC_CONVEX_SITE_URL|NEXT_PUBLIC_CONVEX_SITE_URL|VITE_CONVEX_SITE_URL|REACT_APP_CONVEX_SITE_URL|EXPO_PUBLIC_CONVEX_SITE_URL) continue ;;
+  esac
 
   if [[ "$value" == \"* && "$value" == *\" ]]; then
     value="${value:1:${#value}-2}"
@@ -43,12 +46,6 @@ while IFS= read -r line || [[ -n "$line" ]]; do
   VALUES+=("$value")
 done <"$ENV_FILE"
 
-for index in "${!KEYS[@]}"; do
-  key="${KEYS[$index]}"
-  echo "Setting Convex env var: $key"
-  printf '%s' "${VALUES[$index]}" | bun convex env set "$key" --env-file="$ENV_FILE" >/dev/null
-done
-
 if [[ "$ENV_NAME" == "production" ]]; then
   ASSETS_CLI_ENV_FILE="${ASSETS_CLI_ENV_FILE:-$HOME/.config/project-creator/assets/eventoren/assets-cli.env}"
   if [[ ! -f "$ASSETS_CLI_ENV_FILE" ]]; then
@@ -58,7 +55,10 @@ if [[ "$ENV_NAME" == "production" ]]; then
 
   # The assets CLI config is private and already has the approved service identity.
   # Its project ID is a CLI selector, so resolve the service UUID from the authenticated API.
-  source "$ASSETS_CLI_ENV_FILE"
+  if ! source "$ASSETS_CLI_ENV_FILE" >/dev/null 2>&1; then
+    echo "error: unable to load assets-service CLI config" >&2
+    exit 3
+  fi
   if [[ -z "${ASSETS_API_URL:-}" || -z "${ASSETS_PROJECT:-}" || -z "${ASSETS_TOKEN:-}" || "${ASSETS_ENVIRONMENT:-}" != "production" ]]; then
     echo "error: assets-service CLI config must identify the production project and credential" >&2
     exit 3
@@ -76,7 +76,7 @@ if [[ "$ENV_NAME" == "production" ]]; then
     const id = body?.data?.id ?? body?.id
     if (body?.ok === false || typeof id !== "string" || !id) process.exit(1)
     process.stdout.write(id)
-  ')" || {
+  ' 2>/dev/null)" || {
     echo "error: unable to resolve the authenticated production assets-service project" >&2
     exit 3
   }
@@ -90,9 +90,32 @@ if [[ "$ENV_NAME" == "production" ]]; then
       ASSETS_SERVICE_ENVIRONMENT) value="$ASSETS_SERVICE_ENVIRONMENT" ;;
       ASSETS_SERVICE_ACCESS_TOKEN) value="$ASSETS_TOKEN" ;;
     esac
-    echo "Setting Convex env var: $key"
-    printf '%s' "$value" | bun convex env set "$key" --env-file="$ENV_FILE" >/dev/null
+    # Derived production values retain precedence over local assignments.
+    KEYS+=("$key")
+    VALUES+=("$value")
   done
 fi
 
-echo "Convex env sync complete (${#KEYS[@]} variables)"
+if [[ "${#KEYS[@]}" -eq 0 ]]; then
+  echo "Convex env sync complete (0 variables)"
+  exit 0
+fi
+
+umask 077
+UPLOAD_FILE="$(mktemp "${TMPDIR:-/tmp}/convex-env.XXXXXX")"
+trap 'rm -f -- "$UPLOAD_FILE"' EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+
+# Keep the existing parser's strings; send values only over stdin, never argv.
+for index in "${!KEYS[@]}"; do
+  printf '%s\0%s\0' "${KEYS[$index]}" "${VALUES[$index]}"
+done | bun "$SCRIPT_DIR/envPayloadEncode.ts" >"$UPLOAD_FILE"
+
+if bun convex env set --force --from-file "$UPLOAD_FILE" --env-file="$ENV_FILE" >/dev/null 2>&1; then
+  echo "Convex env sync complete (${#KEYS[@]} assignments)"
+else
+  status=$?
+  echo "error: Convex env sync failed" >&2
+  exit "$status"
+fi

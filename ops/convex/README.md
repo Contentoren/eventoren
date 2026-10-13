@@ -47,6 +47,13 @@ bun run convex:deploy:development
 bun run convex:env:upload:development
 ```
 
+Function deployment and runtime environment upload are separate operations.
+`bun run convex:deploy:development` and `bun run convex:deploy:production` deploy
+code only; after changing Convex runtime configuration, explicitly run the matching
+`bun run convex:env:upload:development` or
+`bun run convex:env:upload:production` command. Deployment does not reconcile local
+and remote environment values.
+
 The provision command renders the Quadlet, reloads the user systemd manager,
 and restarts the durable `eventoren-convex-preview.service`. It also preserves
 the existing Project Registry routes. Verify the network path without sending

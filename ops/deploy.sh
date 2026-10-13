@@ -31,7 +31,4 @@ cd "$REPO_DIR"
 echo "Deploying Convex backend functions to the configured self-hosted $ENV_NAME instance"
 bun convex deploy --typecheck disable --env-file="$ENV_FILE"
 
-echo "Synchronizing Convex deployment environment from .env.$ENV_NAME"
-bash "$SCRIPT_DIR/convex/env_update.bash" "$ENV_NAME"
-
-echo "Self-hosted Convex $ENV_NAME deployment complete"
+echo "Self-hosted Convex $ENV_NAME function deployment complete"
