@@ -11,9 +11,12 @@ import type { TicketCheckoutStep } from "./TicketCheckoutStep.ts"
 import type { TicketContact } from "./TicketContact.ts"
 import type { TicketParticipantNames } from "./TicketParticipantNames.ts"
 import type { TicketRequiredFieldKey } from "./TicketRequiredFieldKey.ts"
+import { ticketCartDraftAddOrUpdate } from "./ticketCartDraftAddOrUpdate.ts"
+import { ticketCartDraftLoad } from "./ticketCartDraftLoad.ts"
 import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
 import { ticketActivationCodeMissing } from "./ticketActivationCodeMissing.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
+import { ticketCheckoutCancelUrlCreate } from "./ticketCheckoutCancelUrlCreate.ts"
 import { ticketCheckoutCreate } from "./ticketCheckoutCreate.ts"
 import { ticketCheckoutKeyCreate } from "./ticketCheckoutKeyCreate.ts"
 import { ticketCheckoutLegalDocumentRevision } from "./ticketCheckoutLegalDocumentRevision.ts"
@@ -395,10 +398,20 @@ export function ticketCheckoutFormStateCreate(inputs: {
 
     try {
       for (const item of inputs.items()) {
+        const currentDraft = ticketCartDraftLoad()
+        const updatedDraft = ticketCartDraftAddOrUpdate(currentDraft, item.cart)
+        ticketCartDraftSave(updatedDraft)
+
         const checkoutKey = ticketCheckoutKeyCreate()
         const returnUrl = ticketCheckoutReturnUrlCreate(appOrigin.data, checkoutKey)
         if (!returnUrl.success) {
           errorMessage.set(returnUrl.errorMessage)
+          isSubmitting.set(false)
+          return
+        }
+        const cancelUrl = ticketCheckoutCancelUrlCreate(appOrigin.data, item.event.id)
+        if (!cancelUrl.success) {
+          errorMessage.set(cancelUrl.errorMessage)
           isSubmitting.set(false)
           return
         }
@@ -409,7 +422,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
           eventRevision: item.event.eventRevision ?? 1,
           tickets: ticketCheckoutTicketsCreate(item.cart, validatedParticipantNames.data),
           successUrl: returnUrl.data,
-          cancelUrl: returnUrl.data,
+          cancelUrl: cancelUrl.data,
           locale: "de",
           customer: {
             email: validated.data.email,
@@ -484,7 +497,6 @@ export function ticketCheckoutFormStateCreate(inputs: {
       return
     }
 
-    ticketCartDraftSave([])
     isSubmitting.set(false)
     if (redirectUrl) {
       window.location.assign(redirectUrl)

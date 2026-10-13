@@ -4,6 +4,9 @@ import { onCleanup, onMount } from "solid-js"
 import { eventorenAuthContextUse } from "../auth/ui/eventorenAuthContextUse.ts"
 import type { TicketOrderAccessRecord } from "./TicketOrderAccessRecord.ts"
 import type { TicketOrderProjection } from "./TicketOrderProjection.ts"
+import { ticketCartDraftLoad } from "./ticketCartDraftLoad.ts"
+import { ticketCartDraftPaidEventsRemove } from "./ticketCartDraftPaidEventsRemove.ts"
+import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
 import { ticketOrderAccessStorageLoad } from "./ticketOrderAccessStorageLoad.ts"
 import { ticketOrderGet } from "./ticketOrderGet.ts"
 import { ticketPaymentReconcile } from "./ticketPaymentReconcile.ts"
@@ -86,6 +89,19 @@ export function ticketOrderStatusPageStateCreate(inputs: {
       }
       if (refreshedOrders.length > 0) orders.set(refreshedOrders)
     }
+
+    const currentOrders = orders.get()
+    const paidEventKeys = currentOrders
+      .filter((order) => order.paymentStatus === "paid" || Boolean(order.ticketsIssuedAt))
+      .map((order) => order.eventKey)
+    if (paidEventKeys.length > 0) {
+      const currentDraft = ticketCartDraftLoad()
+      const remainingDraft = ticketCartDraftPaidEventsRemove(currentDraft, paidEventKeys)
+      if (remainingDraft.length !== currentDraft.length) {
+        ticketCartDraftSave(remainingDraft)
+      }
+    }
+
     if (showFeedback) isRefreshing.set(false)
     else isRefreshingSilently.set(false)
   }
