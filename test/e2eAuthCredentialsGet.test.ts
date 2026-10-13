@@ -46,9 +46,9 @@ describe("E2E auth credentials", () => {
 
       expect(result).toEqual({ success: true, data: { username: "local-admin", password: "local-password" } })
       expect(commandEnvironments).toHaveLength(3)
-      expect(commandEnvironments[0].XDG_CONFIG_HOME).toBe("/nonstandard/config")
-      expect(commandEnvironments[1].XDG_CONFIG_HOME).toBeUndefined()
-      expect(commandEnvironments[2].XDG_CONFIG_HOME).toBeUndefined()
+      expect(commandEnvironments[0]?.XDG_CONFIG_HOME).toBe("/nonstandard/config")
+      expect(commandEnvironments[1]?.XDG_CONFIG_HOME).toBeUndefined()
+      expect(commandEnvironments[2]?.XDG_CONFIG_HOME).toBeUndefined()
     } finally {
       if (previousXdgConfigHome === undefined) delete process.env.XDG_CONFIG_HOME
       else process.env.XDG_CONFIG_HOME = previousXdgConfigHome
