@@ -87,6 +87,22 @@ export const ticketTables = {
     createdAt: v.string(),
     updatedAt: v.string(),
     checkoutCreatedAt: v.optional(v.string()),
+    checkoutCompletedAt: v.optional(v.string()),
+    paymentMethodType: v.optional(v.string()),
+    stripePaymentIntentStatus: v.optional(
+      v.union(
+        v.literal("requires_payment_method"),
+        v.literal("requires_confirmation"),
+        v.literal("requires_action"),
+        v.literal("processing"),
+        v.literal("requires_capture"),
+        v.literal("canceled"),
+        v.literal("succeeded"),
+      ),
+    ),
+    // Durable allocation marker: reservations became sold and all ticket rows were inserted.
+    // Independent of settlement; older paid orders need no backfill.
+    ticketsIssuedAt: v.optional(v.string()),
     paidAt: v.optional(v.string()),
     releasedAt: v.optional(v.string()),
     checkoutAttemptLeaseUntil: v.optional(v.number()),

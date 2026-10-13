@@ -212,6 +212,8 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
         tags: [],
         status: "published",
         catalogVersion: 7,
+        eventRevision: 2,
+        allowedStripePaymentMethods: ["sepa_debit", "card", "sepa_debit"],
         tiers: [
           {
             tierKey: "standard",
@@ -256,6 +258,13 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
     },
   })
   expect(requests[0]?.init?.signal).toBeInstanceOf(AbortSignal)
+  expect(JSON.parse(String(requests[0]?.init?.body)).events[0]).toMatchObject({
+    eventRevision: 2,
+    allowedStripePaymentMethods: ["card", "sepa_debit"],
+  })
+  expect(checkout.success && checkout.data).not.toHaveProperty("checkoutCompletedAt")
+  expect(status.success && status.data.kind === "status" && status.data.data).not.toHaveProperty("cancellation")
+  expect(JSON.parse(String(requests[1]?.init?.body))).not.toHaveProperty("allowedStripePaymentMethods")
   expect(JSON.parse(String(requests[1]?.init?.body))).toMatchObject({
     organizationId: "eventoren-test",
     paymentReference: "payment_checkoutkey123456789012345678901234",
@@ -271,6 +280,82 @@ test("adapts catalog, checkout, status, and expiration through the packaged Bill
   expect(requests[5]?.url).toContain("/ticket-checkout/payment_checkoutkey123456789012345678901234/payment-details?")
   expect(requests[5]?.url).toContain("organizationId=eventoren-test")
   expect(requests[5]?.url).toContain("orderReference=order_123abc")
+})
+
+test.each(["payment_failed", "sepa_disputed"] as const)(
+  "forwards verified lifecycle fields and %s cancellation through create, status and expiration",
+  async (reason) => {
+    environmentSet()
+    const paymentReference = checkoutInput().paymentReference
+    const cancellation = {
+      reason,
+      cancelledAt: "2026-10-13T08:00:00.000Z",
+      organizationId: "eventoren-test",
+      eventKey: "event-1",
+      orderReference: "billing-order-1",
+      paymentReference,
+      stripeMode: "test",
+      paymentMethodType: "sepa_debit",
+      stripeEventId: "evt_outcome",
+      stripeSessionId: "cs_session",
+      stripePaymentIntentId: "pi_payment",
+      stripeEventType: reason === "payment_failed" ? "checkout.session.async_payment_failed" : "charge.dispute.created",
+      stripeChargeId: reason === "payment_failed" ? null : "ch_charge",
+      stripeDisputeId: reason === "payment_failed" ? null : "dp_dispute",
+    }
+    const lifecycle = {
+      checkoutCompletedAt: "2026-10-12T08:00:00.000Z",
+      paymentMethodType: "sepa_debit",
+      stripePaymentIntentStatus: "processing",
+      cancellation,
+    }
+    const config = billingEventorenClient.configRead({
+      fetcher: async (input) => {
+        const response = new URL(String(input)).pathname.endsWith("/ticket-checkout")
+          ? checkoutResponse(paymentReference)
+          : statusResponse(paymentReference)
+        const payload = await response.json()
+        return Response.json({ ...payload, data: { ...payload.data, ...lifecycle } }, { status: response.status })
+      },
+    })
+    expect(config.success).toBe(true)
+    if (!config.success) return
+
+    expect(await billingEventorenClient.ticketCheckoutCreate(config.data, checkoutInput())).toMatchObject({
+      success: true,
+      data: lifecycle,
+    })
+    for (const result of [
+      await billingEventorenClient.statusGet(config.data, paymentReference),
+      await billingEventorenClient.ticketCheckoutExpire(config.data, paymentReference),
+    ]) {
+      expect(result).toMatchObject({
+        success: true,
+        data: { kind: "status", data: { ...lifecycle, payment: "pending" } },
+      })
+    }
+  },
+)
+
+test("nullable lifecycle evidence stays null rather than becoming issuance evidence", async () => {
+  environmentSet()
+  const lifecycle = {
+    checkoutCompletedAt: null,
+    paymentMethodType: null,
+    stripePaymentIntentStatus: null,
+    cancellation: null,
+  }
+  const config = billingEventorenClient.configRead({
+    fetcher: async () => {
+      const payload = await checkoutResponse(checkoutInput().paymentReference).json()
+      return Response.json({ ...payload, data: { ...payload.data, ...lifecycle } })
+    },
+  })
+  if (!config.success) throw new Error(config.errorMessage)
+  expect(await billingEventorenClient.ticketCheckoutCreate(config.data, checkoutInput())).toMatchObject({
+    success: true,
+    data: lifecycle,
+  })
 })
 
 test("preserves 404 semantics and normalizes Billing transport errors", async () => {

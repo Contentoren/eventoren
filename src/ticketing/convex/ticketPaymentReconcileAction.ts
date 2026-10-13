@@ -50,6 +50,18 @@ export const ticketPaymentReconcileAction = action({
       payment: statusResult.data.data.payment,
       bookingNumber: statusResult.data.data.bookingNumber ?? undefined,
       bookingReference: statusResult.data.data.bookingReference ?? undefined,
+      ...(statusResult.data.data.checkoutCompletedAt !== undefined
+        ? { checkoutCompletedAt: statusResult.data.data.checkoutCompletedAt }
+        : {}),
+      ...(statusResult.data.data.paymentMethodType !== undefined
+        ? { paymentMethodType: statusResult.data.data.paymentMethodType }
+        : {}),
+      ...(statusResult.data.data.stripePaymentIntentStatus !== undefined
+        ? { stripePaymentIntentStatus: statusResult.data.data.stripePaymentIntentStatus }
+        : {}),
+      ...(statusResult.data.data.cancellation !== undefined
+        ? { cancellation: statusResult.data.data.cancellation }
+        : {}),
     })
     if (!applied.success) return applied
     return createResult(applied.data)

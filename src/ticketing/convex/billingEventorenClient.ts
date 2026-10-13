@@ -114,6 +114,14 @@ export const billingEventorenClient = {
       paymentReference: result.data.paymentReference,
       orderReference: result.data.orderReference,
       stripeMode: result.data.stripeMode,
+      ...(result.data.checkoutCompletedAt !== undefined
+        ? { checkoutCompletedAt: result.data.checkoutCompletedAt }
+        : {}),
+      ...(result.data.paymentMethodType !== undefined ? { paymentMethodType: result.data.paymentMethodType } : {}),
+      ...(result.data.stripePaymentIntentStatus !== undefined
+        ? { stripePaymentIntentStatus: result.data.stripePaymentIntentStatus }
+        : {}),
+      ...(result.data.cancellation !== undefined ? { cancellation: result.data.cancellation } : {}),
       status: "checkout_created",
       url: result.data.url,
     })

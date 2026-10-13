@@ -78,6 +78,18 @@ export const ticketReservationExpireMutation = internalMutation({
         paid: false,
       })
 
+    // A processing debit is no longer an unfinished Checkout. The original reservation
+    // timer must not expire it, even when the rollout gate is disabled again.
+    if (order.ticketsIssuedAt !== undefined && order.paymentStatus === "pending" && ticketCount.data > 0)
+      return createResult({
+        orderId: order._id,
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        ticketCount: ticketCount.data,
+        expired: false,
+        released: false,
+        paid: false,
+      })
     if (ticketCount.data !== 0) return createResultError(op, "An unpaid order already has issued tickets")
     const now = new Date().toISOString()
     const attempt = await ctx.db

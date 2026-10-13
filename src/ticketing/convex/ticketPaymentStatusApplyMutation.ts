@@ -1,18 +1,52 @@
 import { v } from "convex/values"
 import { internal } from "#convex/_generated/api.js"
-import type { Doc, Id } from "#convex/_generated/dataModel.js"
+import type { Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
-import { ticketAccessDigestCreate } from "./ticketAccessDigestCreate.js"
 import { ticketFulfillmentWorkEnsure } from "./ticketFulfillmentWorkEnsure.js"
 import { ticketIssuedCountRead } from "./ticketIssuedCountRead.js"
 import { ticketOrderAccessCapabilityEnsure } from "./ticketOrderAccessCapabilityEnsure.js"
 import { ticketReservationsRelease } from "./ticketReservationsRelease.js"
 import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
 import { ticketActivationCodeLifecycleApply } from "./ticketActivationCodeLifecycleApply.js"
+import { ticketOrderTicketsIssue } from "./ticketOrderTicketsIssue.js"
 
 const paymentStatusValidator = v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"))
+const cancellationValidator = v.union(
+  v.object({
+    cancelledAt: v.string(),
+    organizationId: v.string(),
+    eventKey: v.string(),
+    orderReference: v.string(),
+    paymentReference: v.string(),
+    stripeMode: v.union(v.literal("live"), v.literal("test")),
+    paymentMethodType: v.literal("sepa_debit"),
+    stripeEventId: v.string(),
+    stripeSessionId: v.string(),
+    stripePaymentIntentId: v.string(),
+    reason: v.literal("payment_failed"),
+    stripeEventType: v.literal("checkout.session.async_payment_failed"),
+    stripeChargeId: v.union(v.string(), v.null()),
+    stripeDisputeId: v.null(),
+  }),
+  v.object({
+    cancelledAt: v.string(),
+    organizationId: v.string(),
+    eventKey: v.string(),
+    orderReference: v.string(),
+    paymentReference: v.string(),
+    stripeMode: v.union(v.literal("live"), v.literal("test")),
+    paymentMethodType: v.literal("sepa_debit"),
+    stripeEventId: v.string(),
+    stripeSessionId: v.string(),
+    stripePaymentIntentId: v.string(),
+    reason: v.literal("sepa_disputed"),
+    stripeEventType: v.literal("charge.dispute.created"),
+    stripeChargeId: v.string(),
+    stripeDisputeId: v.string(),
+  }),
+)
 
 export const ticketPaymentStatusApplyMutation = internalMutation({
   args: {
@@ -23,6 +57,21 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
     payment: paymentStatusValidator,
     bookingNumber: v.optional(v.number()),
     bookingReference: v.optional(v.string()),
+    checkoutCompletedAt: v.optional(v.union(v.string(), v.null())),
+    paymentMethodType: v.optional(v.union(v.string(), v.null())),
+    stripePaymentIntentStatus: v.optional(
+      v.union(
+        v.literal("requires_payment_method"),
+        v.literal("requires_confirmation"),
+        v.literal("requires_action"),
+        v.literal("processing"),
+        v.literal("requires_capture"),
+        v.literal("canceled"),
+        v.literal("succeeded"),
+        v.null(),
+      ),
+    ),
+    cancellation: v.optional(v.union(cancellationValidator, v.null())),
   },
   handler: async (
     ctx,
@@ -56,6 +105,27 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
     const now = new Date().toISOString()
     const bookingNumber = Number.isSafeInteger(args.bookingNumber) ? args.bookingNumber : undefined
     const bookingReference = args.bookingReference?.trim() ? args.bookingReference : undefined
+    const lifecycle = {
+      checkoutCompletedAt: order.checkoutCompletedAt ?? args.checkoutCompletedAt ?? undefined,
+      paymentMethodType: args.paymentMethodType ?? order.paymentMethodType,
+      // Stale completion must not downgrade settled PaymentIntent evidence.
+      stripePaymentIntentStatus:
+        order.paymentStatus === "paid"
+          ? order.stripePaymentIntentStatus
+          : (args.stripePaymentIntentStatus ?? order.stripePaymentIntentStatus),
+    }
+    // Eligibility must arrive jointly in THIS trusted status response. Never assemble
+    // partial/stale observations, infer completion from a redirect, or accept bank instructions.
+    const earlyIssuanceEligible =
+      process.env.EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED === "true" &&
+      args.payment === "pending" &&
+      order.paymentStatus === "pending" &&
+      typeof args.checkoutCompletedAt === "string" &&
+      /^\d{4}-\d{2}-\d{2}T/u.test(args.checkoutCompletedAt) &&
+      Number.isFinite(Date.parse(args.checkoutCompletedAt)) &&
+      args.paymentMethodType === "sepa_debit" &&
+      args.stripePaymentIntentStatus === "processing" &&
+      args.cancellation == null
     if (args.payment === "pending") {
       if (
         order.status === "failed" ||
@@ -69,7 +139,17 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
           paymentStatus: order.paymentStatus,
           ticketCount: ticketCount.data,
         })
+      let issuedCount = ticketCount.data
+      if (earlyIssuanceEligible) {
+        const activationCodes = await ticketActivationCodeLifecyclePlan(ctx, order, "consume")
+        if (!activationCodes.success) return activationCodes
+        const issuance = await ticketOrderTicketsIssue(ctx, order, issuedCount, activationCodes.data, now)
+        if (!issuance.success) return issuance
+        if (issuance.data.inventoryConflict) return createResultError(op, "Processing SEPA inventory is unavailable")
+        issuedCount = issuance.data.ticketCount
+      }
       await ctx.db.patch("ticketOrders", order._id, {
+        ...lifecycle,
         billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
         lastPaymentCheckAt: now,
         checkoutAttemptLeaseUntil: undefined,
@@ -90,7 +170,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         orderId: order._id,
         status: order.status,
         paymentStatus: order.paymentStatus,
-        ticketCount: ticketCount.data,
+        ticketCount: issuedCount,
       })
     }
 
@@ -151,6 +231,7 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         return createResultError(op, "A fulfilled order no longer owns its activation code")
       const capability = await ticketOrderAccessCapabilityEnsure(ctx, order._id)
       if (!capability.success) return capability
+      await ctx.db.patch("ticketOrders", order._id, lifecycle)
       await ticketOrderBookingDetailsBackfill(ctx, order._id, order, { bookingNumber, bookingReference }, now)
       await ticketFulfillmentWorkScheduleIfEligible(
         ctx,
@@ -197,60 +278,9 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       })
     }
 
-    // Checkout creates one line/reservation per unique tier with per-product
-    // limits; the per-order read collects the whole set so legitimate orders
-    // above ten are never truncated.
-    const reservations = await ctx.db
-      .query("ticketReservations")
-      .withIndex("orderId", (q) => q.eq("orderId", order._id))
-      .collect()
-    const activeReservations = reservations.filter((reservation) => reservation.status === "active")
-    const lines = await ctx.db
-      .query("ticketOrderLines")
-      .withIndex("orderId", (q) => q.eq("orderId", order._id))
-      .collect()
-    if (
-      reservations.some((reservation) => !Number.isSafeInteger(reservation.quantity) || reservation.quantity < 1) ||
-      lines.some((line) => !Number.isSafeInteger(line.quantity) || line.quantity < 1)
-    )
-      return createResultError(op, "Order lines or reservations exceed the order maximum")
-    if (
-      lines.length === 0 ||
-      reservations.length !== lines.length ||
-      activeReservations.length !== lines.length ||
-      new Set(lines.map((line) => line.tierId)).size !== lines.length ||
-      new Set(activeReservations.map((reservation) => reservation.tierId)).size !== activeReservations.length ||
-      lines.some(
-        (line) =>
-          !activeReservations.some(
-            (reservation) => reservation.tierId === line.tierId && reservation.quantity === line.quantity,
-          ),
-      )
-    )
-      return createResultError(op, "Paid inventory reservation is incomplete")
-    if (ticketCount.data !== 0) return createResultError(op, "An unpaid order already has issued tickets")
-    const participantNamesByTier = new Map(
-      activeReservations.map((reservation) => [reservation.tierId, reservation.participantNamesJson]),
-    )
-
-    let hasCapacityConflict = false
-    const tiers = new Map<Id<"catalogTicketTiers">, Doc<"catalogTicketTiers">>()
-    for (const reservation of activeReservations) {
-      const tier = await ctx.db.get("catalogTicketTiers", reservation.tierId)
-      if (
-        !tier ||
-        !Number.isSafeInteger(tier.reserved) ||
-        tier.reserved < reservation.quantity ||
-        !Number.isSafeInteger(tier.sold) ||
-        tier.sold < 0 ||
-        !Number.isSafeInteger(tier.capacity) ||
-        tier.capacity < 0
-      )
-        return createResultError(op, "Paid inventory reservation is corrupt")
-      tiers.set(tier._id, tier)
-      if (tier.sold + reservation.quantity > tier.capacity) hasCapacityConflict = true
-    }
-    if (hasCapacityConflict || activationCodes.data.hasOwnershipConflict) {
+    const issuance = await ticketOrderTicketsIssue(ctx, order, ticketCount.data, activationCodes.data, now)
+    if (!issuance.success) return issuance
+    if (issuance.data.inventoryConflict) {
       const release = await ticketReservationsRelease(ctx, order._id, now, "consume")
       if (!release.success) return release
       await ctx.db.patch("ticketOrders", order._id, {
@@ -278,68 +308,14 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       })
     }
 
-    // Preflight every fallible Result operation before inventory/ticket writes (Result errors commit writes).
-    const delivery = await ctx.db
-      .query("ticketOrderDeliveries")
-      .withIndex("orderId", (q) => q.eq("orderId", order._id))
-      .first()
-    const accessToken =
-      delivery?.accessTokenSnapshot ??
-      `${crypto.randomUUID().replaceAll("-", "")}${crypto.randomUUID().replaceAll("-", "")}`
-    const accessDigest = await ticketAccessDigestCreate(accessToken)
-    if (!accessDigest.success) return accessDigest
-    const codes = new Set<string>()
-    for (let index = 0; index < lines.reduce((total, line) => total + line.quantity, 0); index += 1) {
-      const code = await ticketIssuedCodeCreate(ctx, codes)
-      if (!code.success) return code
-      codes.add(code.data)
-    }
-    await ticketActivationCodeLifecycleApply(ctx, activationCodes.data, now)
-    for (const reservation of activeReservations) {
-      const tier = tiers.get(reservation.tierId)!
-      await ctx.db.patch("catalogTicketTiers", tier._id, {
-        reserved: tier.reserved - reservation.quantity,
-        sold: tier.sold + reservation.quantity,
-      })
-      await ctx.db.patch("ticketReservations", reservation._id, { status: "consumed" })
-    }
-    const ticketCodes = [...codes]
-    let sequence = 0
-    for (const line of lines.sort((left, right) => left.tierKey.localeCompare(right.tierKey))) {
-      const participantNames =
-        participantNamesRead(line.participantNamesJson) ?? participantNamesRead(participantNamesByTier.get(line.tierId))
-      for (let index = 0; index < line.quantity; index += 1) {
-        sequence += 1
-        await ctx.db.insert("ticketIssued", {
-          orderId: order._id,
-          sequence,
-          ownerUserId: order.ownerUserId,
-          guestAccessDigest: order.guestAccessDigest,
-          code: ticketCodes[sequence - 1]!,
-          eventKey: order.eventKey,
-          eventTitle: order.eventTitle,
-          eventStartsAt: order.eventStartsAt,
-          eventDoorsAt: order.eventDoorsAt,
-          venue: order.venue,
-          city: order.city,
-          address: order.address,
-          tierKey: line.tierKey,
-          tierName: line.tierName,
-          priceCents: line.priceCents,
-          feeCents: line.feeCents,
-          ...(participantNames?.[index] !== undefined ? { participantName: participantNames[index] } : {}),
-          issuedAt: now,
-        })
-      }
-    }
     await ctx.db.patch("ticketOrders", order._id, {
+      ...lifecycle,
       status: "paid",
       paymentStatus: "paid",
       billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
       bookingNumber: order.bookingNumber ?? bookingNumber,
       bookingReference: order.bookingReference ?? bookingReference,
       paidAt: now,
-      emailAccessDigest: accessDigest.data,
       lastPaymentCheckAt: now,
       checkoutAttemptLeaseUntil: undefined,
       updatedAt: now,
@@ -350,31 +326,15 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       lastCheckedAt: now,
       updatedAt: now,
     })
-    if (!delivery)
-      await ctx.db.insert("ticketOrderDeliveries", {
-        orderId: order._id,
-        accessTokenSnapshot: accessToken,
-        createdAt: now,
-        updatedAt: now,
-      })
     await ticketFulfillmentWorkScheduleIfEligible(ctx, order._id, order.fulfillmentEligible, args.billingOrderReference)
-    return createResult({ orderId: order._id, status: "paid", paymentStatus: "paid", ticketCount: sequence })
+    return createResult({
+      orderId: order._id,
+      status: "paid",
+      paymentStatus: "paid",
+      ticketCount: issuance.data.ticketCount,
+    })
   },
 })
-
-async function ticketIssuedCodeCreate(ctx: MutationCtx, plannedCodes: ReadonlySet<string>): PromiseResult<string> {
-  const op = "ticketIssuedCodeCreate"
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const code = `TKT-${crypto.randomUUID().replaceAll("-", "").slice(0, 20).toUpperCase()}`
-    if (plannedCodes.has(code)) continue
-    const existing = await ctx.db
-      .query("ticketIssued")
-      .withIndex("code", (q) => q.eq("code", code))
-      .first()
-    if (!existing) return createResult(code)
-  }
-  return createResultError(op, "Could not generate a unique ticket code")
-}
 
 async function ticketFulfillmentWorkScheduleIfEligible(
   ctx: MutationCtx,
@@ -399,16 +359,4 @@ async function ticketOrderBookingDetailsBackfill(
   const bookingReference = order.bookingReference ?? args.bookingReference
   if (bookingNumber === order.bookingNumber && bookingReference === order.bookingReference) return
   await ctx.db.patch("ticketOrders", orderId, { bookingNumber, bookingReference, updatedAt: now })
-}
-
-function participantNamesRead(value: string | undefined): readonly string[] | undefined {
-  if (value === undefined) return undefined
-  try {
-    const parsed: unknown = JSON.parse(value)
-    if (!Array.isArray(parsed) || parsed.some((name) => typeof name !== "string" || name.trim().length === 0))
-      return undefined
-    return parsed
-  } catch {
-    return undefined
-  }
 }

@@ -82,9 +82,15 @@ export async function ticketActivationCodeLifecyclePlan(
               .collect()
       if (
         !chargedOrder ||
-        chargedOrder.paymentStatus !== "paid" ||
+        (chargedOrder.paymentStatus !== "paid" && chargedOrder.ticketsIssuedAt === undefined) ||
         chargedOrder.eventKey !== code.eventKey ||
-        (chargedOrder.status !== "paid" && chargedOrder.status !== "paid_inventory_conflict") ||
+        (chargedOrder.status !== "paid" &&
+          chargedOrder.status !== "paid_inventory_conflict" &&
+          !(
+            chargedOrder.paymentStatus === "pending" &&
+            chargedOrder.ticketsIssuedAt !== undefined &&
+            (chargedOrder.status === "reserved" || chargedOrder.status === "checkout_created")
+          )) ||
         chargedLines.filter((candidate) => candidate.activationCodeId === code._id && candidate.tierId === code.tierId)
           .length !== 1 ||
         charged.tierId !== code.tierId ||
@@ -131,7 +137,9 @@ export async function ticketActivationCodeLifecyclePlan(
           (ownership[0]!.status !== "reserved" ||
             owner.paymentStatus !== "pending" ||
             (owner.status !== "reserved" && owner.status !== "checkout_created"))) ||
-        (code.status === "consumed" && (ownership[0]!.status !== "consumed" || owner.paymentStatus !== "paid"))
+        (code.status === "consumed" &&
+          (ownership[0]!.status !== "consumed" ||
+            (owner.paymentStatus !== "paid" && owner.ticketsIssuedAt === undefined)))
       )
         return createResultError(op, "The activation code ownership history is corrupt")
     }
@@ -139,7 +147,7 @@ export async function ticketActivationCodeLifecyclePlan(
     const owned = code.orderId === order._id
     if (history.status === "reserved" && (!owned || code.status !== "reserved"))
       return createResultError(op, "The activation code active reservation is corrupt")
-    if (history.status === "consumed" && order.paymentStatus !== "paid")
+    if (history.status === "consumed" && order.paymentStatus !== "paid" && order.ticketsIssuedAt === undefined)
       return createResultError(op, "The activation code paid reservation is corrupt")
     if (disposition === "release") {
       if (history.status !== "reserved") continue

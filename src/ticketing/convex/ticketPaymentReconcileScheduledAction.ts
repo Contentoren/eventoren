@@ -112,6 +112,12 @@ export const ticketPaymentReconcileScheduledAction = internalAction({
         payment: payment.payment,
         bookingNumber: payment.bookingNumber ?? undefined,
         bookingReference: payment.bookingReference ?? undefined,
+        ...(payment.checkoutCompletedAt !== undefined ? { checkoutCompletedAt: payment.checkoutCompletedAt } : {}),
+        ...(payment.paymentMethodType !== undefined ? { paymentMethodType: payment.paymentMethodType } : {}),
+        ...(payment.stripePaymentIntentStatus !== undefined
+          ? { stripePaymentIntentStatus: payment.stripePaymentIntentStatus }
+          : {}),
+        ...(payment.cancellation !== undefined ? { cancellation: payment.cancellation } : {}),
       })
       if (!applied.success) {
         const recorded = await ctx.runMutation(internal.ticketing.ticketPaymentReconcileFailureMutation, {

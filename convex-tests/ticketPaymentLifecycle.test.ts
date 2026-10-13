@@ -18,6 +18,7 @@ type Harness = Awaited<ReturnType<typeof checkoutCreate>>
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.unstubAllEnvs()
   vi.useRealTimers()
 })
 
@@ -198,6 +199,94 @@ async function distractorsInsert({ t, correlation }: Harness) {
     return firstOrderId!
   })
 }
+
+test("processing SEPA stays unissued while the readiness gate is disabled", async () => {
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "false")
+  const h = await checkoutCreate([2])
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+      ...h.correlation,
+      payment: "pending",
+      checkoutCompletedAt: now,
+      paymentMethodType: "sepa_debit",
+      stripePaymentIntentStatus: "processing",
+    }),
+  ).toMatchObject({ success: true, data: { paymentStatus: "pending", ticketCount: 0 } })
+  const state = await stateRead(h)
+  expect(state.order?.ticketsIssuedAt).toBeUndefined()
+  expect(state.tiers[0]).toMatchObject({ reserved: 2, sold: 0 })
+  expect(state.work).toHaveLength(0)
+})
+
+test("partial completion evidence never combines across responses to issue pending tickets", async () => {
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "true")
+  const h = await checkoutCreate([2])
+  for (const evidence of [
+    { checkoutCompletedAt: now, paymentMethodType: "sepa_debit" },
+    { stripePaymentIntentStatus: "processing" as const },
+    {
+      checkoutCompletedAt: now,
+      paymentMethodType: "customer_balance",
+      stripePaymentIntentStatus: "processing" as const,
+    },
+    {
+      checkoutCompletedAt: "invalid",
+      paymentMethodType: "sepa_debit",
+      stripePaymentIntentStatus: "processing" as const,
+    },
+  ])
+    expect(
+      await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+        ...h.correlation,
+        payment: "pending",
+        ...evidence,
+      }),
+    ).toMatchObject({ success: true, data: { ticketCount: 0 } })
+  expect((await stateRead(h)).tickets).toHaveLength(0)
+})
+
+test("early-issued SEPA survives expiry and settles without allocating or delivering twice", async () => {
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "true")
+  const h = await checkoutCreate([2])
+  const processing = {
+    ...h.correlation,
+    payment: "pending" as const,
+    checkoutCompletedAt: now,
+    paymentMethodType: "sepa_debit",
+    stripePaymentIntentStatus: "processing" as const,
+  }
+  expect(await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)).toMatchObject({
+    success: true,
+    data: { paymentStatus: "pending", ticketCount: 2 },
+  })
+  const issued = await stateRead(h)
+  expect(issued.order?.paidAt).toBeUndefined()
+  expect(issued.order?.ticketsIssuedAt).toBeDefined()
+  expect(issued.tiers[0]).toMatchObject({ reserved: 0, sold: 2 })
+  expect(issued.work).toHaveLength(0)
+  expect(await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)).toMatchObject({
+    success: true,
+    data: { ticketCount: 2 },
+  })
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "false")
+  expect(
+    await h.t.mutation(internal.ticketing.ticketReservationExpireMutation, { ...h.correlation, reason: "Expired" }),
+  ).toMatchObject({ success: true, data: { expired: false, released: false, ticketCount: 2 } })
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+      ...h.correlation,
+      payment: "paid",
+      stripePaymentIntentStatus: "succeeded",
+    }),
+  ).toMatchObject({ success: true, data: { paymentStatus: "paid", ticketCount: 2 } })
+  await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)
+  const settled = await stateRead(h)
+  expect(settled.order?.stripePaymentIntentStatus).toBe("succeeded")
+  expect(settled.tickets).toEqual(issued.tickets)
+  expect(settled.tiers).toEqual(issued.tiers)
+  expect(settled.deliveries).toEqual(issued.deliveries)
+  expect(settled.work).toHaveLength(1)
+})
 
 test.each([{ quantities: Array.from({ length: ticketMaxPerOrder }, () => 1) }, { quantities: [ticketMaxPerOrder] }])(
   "maximum legitimate order issues every ticket, preserves fulfillment totals and ignores stale/duplicate events: %j",
