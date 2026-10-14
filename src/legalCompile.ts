@@ -8,7 +8,7 @@ const legalPages = [
   { key: "impressum", sourcePath: "src/legal/impressum.md" },
   { key: "datenschutz", sourcePath: "src/legal/datenschutz.md" },
   { key: "terms", sourcePath: "src/legal/terms.md" },
-  { key: "privacy", sourcePath: "src/legal/privacy.md" },
+  { key: "privacy", sourcePath: "src/legal/datenschutz.md" },
 ] as const
 const outputPath = join(process.cwd(), "src", "lib", "legalHtml.ts")
 
