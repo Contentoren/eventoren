@@ -80,6 +80,8 @@ export type TicketOrderProjection = {
     readonly feeCents: number
     readonly participantName?: string
     readonly cancelled?: boolean
+    readonly appleWalletPassUrl?: string
+    readonly googleWalletSaveUrl?: string
     readonly issuedAt: string
   }[]
 }

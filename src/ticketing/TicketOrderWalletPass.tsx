@@ -2,8 +2,11 @@ import { For, Show } from "solid-js"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { UiBadge } from "../ui/UiBadge.tsx"
 import { UiButton } from "../ui/UiButton.tsx"
+import { TicketAppleWalletButton } from "./TicketAppleWalletButton.tsx"
+import { TicketGoogleWalletButton } from "./TicketGoogleWalletButton.tsx"
 import type { TicketOrderProjection } from "./TicketOrderProjection.ts"
 import { TicketQrCode } from "./TicketQrCode.tsx"
+import { TicketWalletDialog } from "./TicketWalletDialog.tsx"
 import { ticketOrderWalletPassStateCreate } from "./ticketOrderWalletPassStateCreate.ts"
 
 export function TicketOrderWalletPass(props: { order: TicketOrderProjection }) {
@@ -92,17 +95,24 @@ export function TicketOrderWalletPass(props: { order: TicketOrderProjection }) {
                       <p class="max-w-sm text-center text-xs leading-relaxed text-content-muted">
                         Zeige diesen Code am Einlass vor. Gib ihn nicht an andere Personen weiter.
                       </p>
-                      <UiButton
-                        variant="secondary"
-                        class="print:hidden"
-                        onClick={() => {
-                          if (typeof window !== "undefined") {
-                            window.print()
-                          }
-                        }}
-                      >
-                        Ticket drucken
-                      </UiButton>
+                      <div class="flex flex-wrap items-center justify-center gap-space-2 print:hidden">
+                        <UiButton
+                          variant="secondary"
+                          onClick={() => {
+                            if (typeof window !== "undefined") {
+                              window.print()
+                            }
+                          }}
+                        >
+                          Ticket drucken
+                        </UiButton>
+                        <Show when={state.isAppleWalletAvailable(ticket)}>
+                          <TicketAppleWalletButton onClick={() => state.openAppleWallet(ticket)} />
+                        </Show>
+                        <Show when={state.isGoogleWalletAvailable(ticket)}>
+                          <TicketGoogleWalletButton onClick={() => state.openGoogleWallet(ticket)} />
+                        </Show>
+                      </div>
                     </div>
                   </Show>
                 </section>
@@ -111,6 +121,13 @@ export function TicketOrderWalletPass(props: { order: TicketOrderProjection }) {
           </div>
         </Show>
       </div>
+
+      <TicketWalletDialog
+        walletType={state.selectedWalletType}
+        ticket={state.selectedTicket}
+        eventTitle={() => state.order().eventTitle}
+        onClose={state.closeWalletDialog}
+      />
     </CardWrapper>
   )
 }

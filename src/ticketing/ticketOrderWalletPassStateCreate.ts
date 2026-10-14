@@ -1,3 +1,6 @@
+import { createSignal } from "solid-js"
+import { envAppleWalletEnabled } from "#src/app/env/public/envAppleWalletEnabled.ts"
+import { envGoogleWalletEnabled } from "#src/app/env/public/envGoogleWalletEnabled.ts"
 import { eventDateFormat } from "../events/eventDateFormat.ts"
 import { eventTimeFormat } from "../events/eventTimeFormat.ts"
 import type { UiBadge } from "../ui/UiBadge.tsx"
@@ -5,6 +8,24 @@ import type { TicketOrderProjection } from "./TicketOrderProjection.ts"
 import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 
 export function ticketOrderWalletPassStateCreate(inputs: { order: () => TicketOrderProjection }) {
+  const [selectedWalletType, setSelectedWalletType] = createSignal<"apple" | "google" | null>(null)
+  const [selectedTicket, setSelectedTicket] = createSignal<TicketOrderProjection["tickets"][number] | null>(null)
+
+  const openAppleWallet = (ticket: TicketOrderProjection["tickets"][number]) => {
+    setSelectedWalletType("apple")
+    setSelectedTicket(ticket)
+  }
+
+  const openGoogleWallet = (ticket: TicketOrderProjection["tickets"][number]) => {
+    setSelectedWalletType("google")
+    setSelectedTicket(ticket)
+  }
+
+  const closeWalletDialog = () => {
+    setSelectedWalletType(null)
+    setSelectedTicket(null)
+  }
+
   const statusLabel = () => {
     if (inputs.order().cancellation) return "Storniert"
     if (inputs.order().status === "paid_inventory_conflict") return "Prüfung erforderlich"
@@ -65,5 +86,14 @@ export function ticketOrderWalletPassStateCreate(inputs: { order: () => TicketOr
     statusTone,
     participantName,
     ticketsUnavailableMessage,
+    selectedWalletType,
+    selectedTicket,
+    openAppleWallet,
+    openGoogleWallet,
+    closeWalletDialog,
+    isAppleWalletAvailable: (ticket: TicketOrderProjection["tickets"][number]) =>
+      envAppleWalletEnabled() || Boolean(ticket.appleWalletPassUrl),
+    isGoogleWalletAvailable: (ticket: TicketOrderProjection["tickets"][number]) =>
+      envGoogleWalletEnabled() || Boolean(ticket.googleWalletSaveUrl),
   }
 }
