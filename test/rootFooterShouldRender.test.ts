@@ -12,6 +12,7 @@ const siteFrameRouteIds = [
   "/impressum",
   "/admin",
   "/sign-in",
+  "/support",
   "/organizer",
   "/organizer_/event/$eventId",
   "/demo/events",

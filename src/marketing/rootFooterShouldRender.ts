@@ -10,6 +10,7 @@ const siteFrameRouteIds = new Set([
   "/checkout",
   "/datenschutz",
   "/kontakt",
+  "/support",
   "/warenkorb",
   "/events/$eventId",
   "/impressum",

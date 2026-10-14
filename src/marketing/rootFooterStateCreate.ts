@@ -13,6 +13,7 @@ export function rootFooterStateCreate() {
 }
 
 function demoRootFooterHref(href: string) {
+  if (href === "/support") return href
   if (href === "/impressum") return "/demo/impressum"
   if (href === "/datenschutz") return "/demo/datenschutz"
   if (href === "/terms") return "/demo/terms"

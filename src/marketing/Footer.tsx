@@ -7,7 +7,7 @@ export function Footer(props: { readonly linkHref?: (href: string) => string } =
         {label}
       </a>
     ) : (
-      <Link to={href as "/impressum" | "/datenschutz" | "/terms" | "/privacy"} class={className}>
+      <Link to={href as "/impressum" | "/datenschutz" | "/terms" | "/privacy" | "/support"} class={className}>
         {label}
       </Link>
     )
@@ -19,6 +19,7 @@ export function Footer(props: { readonly linkHref?: (href: string) => string } =
         {link("/datenschutz", "Datenschutz")}
         {link("/terms", "AGB")}
         {link("/privacy", "Datenschutzerklärung")}
+        {link("/support", "Support")}
       </nav>
     </footer>
   )

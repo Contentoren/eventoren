@@ -12,7 +12,7 @@ export function SiteFooter(props: { readonly linkHref?: (href: string) => string
       </Link>
     ) : (
       <Link
-        to={href as "/impressum" | "/agb" | "/datenschutz" | "/kontakt"}
+        to={href as "/impressum" | "/agb" | "/datenschutz" | "/kontakt" | "/support"}
         class="focus-ring rounded-control transition-colors hover:text-content"
       >
         {label}
@@ -23,11 +23,12 @@ export function SiteFooter(props: { readonly linkHref?: (href: string) => string
     <footer class="relative z-10 border-t border-border-subtle bg-surface">
       <div class="mx-auto flex max-w-6xl flex-col items-center justify-center gap-3 px-6 py-8 text-center text-sm text-content-muted sm:flex-row">
         <p>© Eventoren</p>
-        <nav class="flex gap-4" aria-label="Rechtliche Informationen">
+        <nav class="flex flex-wrap justify-center gap-4" aria-label="Rechtliche Informationen">
           {link("/impressum", "Impressum")}
           {link("/agb", "AGB")}
           {link("/datenschutz", "Datenschutz")}
           {link("/kontakt", "Kontakt", "transition-colors hover:text-content")}
+          {link("/support", "Support")}
         </nav>
       </div>
     </footer>

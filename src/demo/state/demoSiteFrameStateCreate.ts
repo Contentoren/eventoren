@@ -32,6 +32,7 @@ function demoSiteNavHref(link: SiteHeaderNavLink) {
 }
 
 function demoSiteFooterHref(href: string) {
+  if (href === "/support") return href
   if (href === "/agb") return "/demo/agb"
   if (href === "/kontakt") return "/demo/contact"
   return `/demo${href}`

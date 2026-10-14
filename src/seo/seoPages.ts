@@ -44,6 +44,14 @@ export const seoPages = [
     jsonLdType: "ContactPage",
   },
   {
+    path: "/support",
+    title: "Support | Eventoren",
+    description: "Hilfe zu Eventoren, Tickets und Buchungen: Kontakt per E-Mail, Telefon oder Kontaktformular.",
+    changefreq: "monthly",
+    priority: 0.7,
+    jsonLdType: "ContactPage",
+  },
+  {
     path: "/impressum",
     title: "Impressum | Eventoren",
     description: "Impressum und Anbieterkennzeichnung von Eventoren.",
