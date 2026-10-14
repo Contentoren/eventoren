@@ -10,9 +10,10 @@ export function ticketContactDraftSave(draft: TicketCheckoutFormDraft | null, re
   try {
     if ((!rememberDraft || draft === null) && typeof localStorage !== "undefined")
       localStorage.removeItem(ticketContactDraftKey)
-    if ((rememberDraft || draft === null) && typeof sessionStorage !== "undefined")
-      sessionStorage.removeItem(ticketContactDraftKey)
-    if (draft === null) return createResult(null)
+    if (draft === null) {
+      if (typeof sessionStorage !== "undefined") sessionStorage.removeItem(ticketContactDraftKey)
+      return createResult(null)
+    }
 
     const storage = rememberDraft
       ? typeof localStorage === "undefined"
@@ -21,7 +22,8 @@ export function ticketContactDraftSave(draft: TicketCheckoutFormDraft | null, re
       : typeof sessionStorage === "undefined"
         ? undefined
         : sessionStorage
-    storage?.setItem(
+    if (!storage) return createResult(null)
+    storage.setItem(
       ticketContactDraftKey,
       JSON.stringify({
         contact: draft.contact,
@@ -30,6 +32,7 @@ export function ticketContactDraftSave(draft: TicketCheckoutFormDraft | null, re
         rememberDraft,
       }),
     )
+    if (rememberDraft && typeof sessionStorage !== "undefined") sessionStorage.removeItem(ticketContactDraftKey)
   } catch (error) {
     return createResultError(op, "Entwurf konnte nicht gespeichert werden.", error)
   }

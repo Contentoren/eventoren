@@ -108,6 +108,7 @@ export function checkoutPageStateCreate(input: {
 
   const groups = createMemo(() => items())
   const isReady = createMemo(() => cartLoaded.get() && catalogLoaded.get())
+  const itemsReady = createMemo(() => isReady() && catalog.get().success)
   const hasItems = createMemo(() => items().length > 0)
   const errorMessage = createMemo(() => {
     const text = ticketCheckoutText()
@@ -124,5 +125,5 @@ export function checkoutPageStateCreate(input: {
   })
   const fallbackPath = createMemo<"/" | "/warenkorb">(() => (search().event?.trim() ? "/" : "/warenkorb"))
 
-  return { items, groups, isReady, hasItems, errorMessage, fallbackPath }
+  return { items, groups, isReady, itemsReady, hasItems, errorMessage, fallbackPath }
 }

@@ -66,6 +66,7 @@ function ticketContactFieldInvalid(field: (typeof ticketContactRequiredFields)[n
 
 export function ticketCheckoutFormStateCreate(inputs: {
   items: () => readonly CheckoutItem[]
+  itemsReady?: () => boolean
   appOrigin: () => Result<string>
 }): TicketCheckoutFormState {
   const navigate = useNavigate()
@@ -101,7 +102,10 @@ export function ticketCheckoutFormStateCreate(inputs: {
 
   const draftSnapshot = () => ({
     contact: contact.get(),
-    participantNames: ticketParticipantNamesAlign(participantNames.get(), inputs.items()),
+    participantNames:
+      inputs.itemsReady?.() === false
+        ? participantNames.get()
+        : ticketParticipantNamesAlign(participantNames.get(), inputs.items()),
     documentSetRevision: ticketCheckoutLegalDocumentRevision,
   })
 
@@ -168,7 +172,11 @@ export function ticketCheckoutFormStateCreate(inputs: {
     const draft = ticketContactDraftLoad()
     if (draft.success) {
       contact.set(draft.data.contact)
-      participantNames.set(ticketParticipantNamesAlign(draft.data.participantNames, inputs.items()))
+      participantNames.set(
+        inputs.itemsReady?.() === false
+          ? draft.data.participantNames
+          : ticketParticipantNamesAlign(draft.data.participantNames, inputs.items()),
+      )
       rememberDraft.set(draft.data.rememberDraft)
     }
     hydrated.set(true)
@@ -216,7 +224,8 @@ export function ticketCheckoutFormStateCreate(inputs: {
   )
 
   createEffect(
-    on(inputs.items, (items) => {
+    on([inputs.items, () => inputs.itemsReady?.() ?? true], ([items, ready]) => {
+      if (!ready) return
       participantNames.set(ticketParticipantNamesAlign(participantNames.get(), items))
       persistDraft()
       if (!submitAttempted.get()) return

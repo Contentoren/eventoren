@@ -1,5 +1,4 @@
 import * as v from "valibot"
-import type { TicketCheckoutFormDraft } from "./TicketCheckoutFormDraft.ts"
 import { ticketCheckoutLegalDocumentRevision } from "./ticketCheckoutLegalDocumentRevision.ts"
 import { ticketContactEmpty } from "./ticketContactEmpty.ts"
 
@@ -35,6 +34,4 @@ export const ticketContactDraftStoredSchema = v.object({
   rememberDraft: v.optional(v.boolean(), false),
 })
 
-export type TicketContactDraftStored = TicketCheckoutFormDraft & {
-  rememberDraft: boolean
-}
+export type TicketContactDraftStored = v.InferOutput<typeof ticketContactDraftStoredSchema>

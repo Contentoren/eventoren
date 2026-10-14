@@ -160,6 +160,31 @@ test("remembers a draft across sessions only after an explicit choice", () => {
   expect(ticketContactDraftLoad()).toEqual({ success: true, data: rememberedDraft })
 })
 
+test("does not recover a session-only draft after the tab session is cleared", () => {
+  ticketContactDraftSave(formDraft)
+  storage.clear()
+  expect(ticketContactDraftLoad()).toMatchObject({
+    success: true,
+    data: { contact: { firstName: "", email: "" }, participantNames: {}, rememberDraft: false },
+  })
+  expect(localStorageMock.getItem(ticketContactDraftKey)).toBeNull()
+})
+
+test("keeps the session draft if saving the explicit remember choice fails", () => {
+  ticketContactDraftSave(formDraft)
+  Object.defineProperty(globalThis, "localStorage", {
+    configurable: true,
+    value: {
+      setItem: () => {
+        throw new Error("quota exceeded")
+      },
+    },
+  })
+  expect(ticketContactDraftSave(formDraft, true).success).toBe(false)
+  expect(storage.getItem(ticketContactDraftKey)).toBe(JSON.stringify(formDraft))
+  expect(ticketContactDraftLoad()).toEqual({ success: true, data: formDraft })
+})
+
 test("moves an old local draft to the session without assuming a remember choice", () => {
   localStorageMock.setItem(
     ticketContactDraftKey,
@@ -197,6 +222,8 @@ test("never serializes consent fields supplied by a legacy draft", () => {
   const legacyDraft = { ...formDraft, termsAccepted: true, privacyAcknowledged: true, legalAccepted: true }
   expect(ticketContactDraftSave(legacyDraft).success).toBe(true)
   expect(storage.getItem(ticketContactDraftKey)).toBe(JSON.stringify(formDraft))
+  expect(ticketContactDraftSave(legacyDraft, true).success).toBe(true)
+  expect(localStorageMock.getItem(ticketContactDraftKey)).toBe(JSON.stringify({ ...formDraft, rememberDraft: true }))
 })
 
 test("loads legacy contact-only drafts without carrying the old combined consent forward", () => {
@@ -309,6 +336,43 @@ test("retains participant values by event, tier, and ticket index while dropping
   )
 
   expect(aligned).toEqual({ eventA: { standard: ["Ada", "Grace", ""] }, eventB: { standard: [""] } })
+})
+
+test("preserves participant edits while catalog items are loading and aligns them once ready", () => {
+  let items: ReturnType<Parameters<typeof ticketCheckoutFormStateCreate>[0]["items"]> = [
+    {
+      event: { id: "event", tiers: [{ id: "standard", name: "Standard" }] },
+      cart: { lines: [{ tierId: "standard", quantity: 1 }] },
+    },
+  ] as never
+  let ready = true
+  createRoot((dispose) => {
+    try {
+      const state = ticketCheckoutFormStateCreate({
+        items: () => items,
+        itemsReady: () => ready,
+        appOrigin: () => ({ success: true, data: "https://eventoren.test" }),
+      })
+      state.participantNameChange("event", "standard", 0, "Grace")
+      items = []
+      ready = false
+      state.contactFieldChange("firstName", "Ada")
+      checkoutWindow.runTimers()
+      checkoutWindow.idleCallbacks.shift()?.callback()
+      expect(ticketContactDraftLoad()).toMatchObject({
+        success: true,
+        data: { participantNames: { event: { standard: ["Grace"] } } },
+      })
+
+      ready = true
+      state.contactFieldChange("lastName", "Lovelace")
+      checkoutWindow.runTimers()
+      checkoutWindow.idleCallbacks.shift()?.callback()
+      expect(ticketContactDraftLoad()).toMatchObject({ success: true, data: { participantNames: {} } })
+    } finally {
+      dispose()
+    }
+  })
 })
 
 test("debounces contact edits while keeping checked consent only in the current form", () => {

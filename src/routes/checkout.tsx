@@ -84,7 +84,11 @@ function CheckoutPage() {
 
 function CheckoutFormPage(props: { appOrigin: ReturnType<typeof envBaseUrlAppResult> }) {
   const state = checkoutPageStateCreate({ getCatalogEvents: (eventKeys) => getCatalogEvents({ data: eventKeys }) })
-  const formState = ticketCheckoutFormStateCreate({ items: state.items, appOrigin: () => props.appOrigin })
+  const formState = ticketCheckoutFormStateCreate({
+    items: state.items,
+    itemsReady: state.itemsReady,
+    appOrigin: () => props.appOrigin,
+  })
   const text = ticketCheckoutText
   return (
     <SiteFrame>
