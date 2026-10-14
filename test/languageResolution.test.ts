@@ -1,23 +1,27 @@
 import { expect, test } from "bun:test"
 import { language, languageDefault } from "../src/app/i18n/language.ts"
 import { languageFromBrowser } from "../src/app/i18n/languageFromBrowser.ts"
-import { languageLoadFromLocalStorage } from "../src/app/i18n/languageSignal.ts"
+import { languageSignal } from "../src/app/i18n/languageSignal.ts"
 
 test("uses German as the default UI language", () => {
   expect(languageDefault).toBe(language.de)
 })
 
-test("resolves a stale persisted language to German", () => {
-  const previousLocalStorage = globalThis.localStorage
+test("keeps the language in memory without accessing browser storage", () => {
+  const previousLocalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage")
   Object.defineProperty(globalThis, "localStorage", {
     configurable: true,
-    value: { getItem: () => "en" },
+    get: () => {
+      throw new Error("language must not access browser storage")
+    },
   })
 
   try {
-    expect(languageLoadFromLocalStorage()).toMatchObject({ success: true, data: language.de })
+    languageSignal.set(language.de)
+    expect(languageSignal.get()).toBe(language.de)
   } finally {
-    Object.defineProperty(globalThis, "localStorage", { configurable: true, value: previousLocalStorage })
+    if (previousLocalStorage) Object.defineProperty(globalThis, "localStorage", previousLocalStorage)
+    else Reflect.deleteProperty(globalThis, "localStorage")
   }
 })
 
