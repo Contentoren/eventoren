@@ -15,6 +15,7 @@ export const Route = createFileRoute("/demo/agb")({
       title={demoStaticPages.legal.agb.title}
       html={demoStaticPages.legal.agb.html}
       frame={DemoAgbFrame}
+      homeHref="/demo"
     />
   ),
 })
