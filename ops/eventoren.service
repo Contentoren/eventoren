@@ -6,8 +6,9 @@ After=network-online.target
 Type=simple
 WorkingDirectory=/home/leo/projects/eventoren
 Environment=PATH=%h/.local/bin:%h/.bun/bin:/usr/local/bin:/usr/bin:/bin
+Environment=TZ=Europe/Berlin
 Nice=10
-ExecStart=/usr/bin/env bun run dev
+ExecStart=/usr/bin/env TZ=Europe/Berlin bun run dev
 Restart=always
 RestartSec=5
 Environment=NODE_ENV=development

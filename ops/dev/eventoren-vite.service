@@ -19,7 +19,8 @@ Environment=VITE_CONVEX_SITE_URL=https://eventoren-api.leonardomora.de
 Environment=CONVEX_SITE_URL=https://eventoren-api.leonardomora.de
 Environment=CONVEX_SELF_HOSTED_URL=https://eventoren-convex.leonardomora.de
 Environment=NODE_ENV=development
-ExecStart=%h/.bun/bin/bun run dev -- --host 127.0.0.1 --port ${PREVIEW_WEB_PORT}
+Environment=TZ=Europe/Berlin
+ExecStart=/usr/bin/env TZ=Europe/Berlin %h/.bun/bin/bun run dev -- --host 127.0.0.1 --port ${PREVIEW_WEB_PORT}
 Restart=always
 RestartSec=5
 NoNewPrivileges=true
