@@ -1,6 +1,8 @@
 import { parse } from "dotenv"
 
-// Validate against a directly declared parser compatible with Convex's dotenv parser.
+// Use the directly declared dotenv dependency's default, Convex-compatible parser.
+// stdin is UTF-8 key\0value\0 pairs; NUL is framing, not a value character.
+
 function envPayloadEncode(input: string) {
   const op = "envPayloadEncode"
   const fail = (errorMessage: string) => ({ success: false as const, op, errorMessage })
@@ -18,10 +20,10 @@ function envPayloadEncode(input: string) {
 
   const lines: string[] = []
   for (const [key, value] of values) {
-    const candidates = [`'${value}'`, `\`${value}\``, `"${value}"`, value]
+    const candidates = [`'${value}'`, `\`${value}\``, `"${value}"`, `"${value.replace(/\r/g, "\\r")}"`, value]
     const encoded = candidates.find((candidate) => {
       const parsed = parse(`${key}=${candidate}\n`)
-      return Object.keys(parsed).length === 1 && parsed[key] === value
+      return Object.keys(parsed).length === 1 && Object.hasOwn(parsed, key) && parsed[key] === value
     })
     if (encoded === undefined) return fail(`Cannot encode environment key exactly: ${key}`)
     lines.push(`${key}=${encoded}\n`)
@@ -29,7 +31,10 @@ function envPayloadEncode(input: string) {
 
   const payload = lines.join("")
   const parsed = parse(payload)
-  if (Object.keys(parsed).length !== values.size || [...values].some(([key, value]) => parsed[key] !== value)) {
+  if (
+    Object.keys(parsed).length !== values.size ||
+    [...values].some(([key, value]) => !Object.hasOwn(parsed, key) || parsed[key] !== value)
+  ) {
     return fail("Environment payload failed exact round-trip validation")
   }
   return { success: true as const, data: payload }
@@ -37,7 +42,7 @@ function envPayloadEncode(input: string) {
 
 let input: string
 try {
-  input = await Bun.stdin.text()
+  input = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(await Bun.stdin.arrayBuffer())
 } catch {
   console.error("error: Cannot read environment pairs")
   process.exit(1)

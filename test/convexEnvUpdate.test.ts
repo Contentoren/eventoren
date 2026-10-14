@@ -265,26 +265,32 @@ test("production missing, invalid and failing synthetic config sources stop befo
 })
 
 test("production config credential failure stops before later valid assignments, lookup, encoder, or Convex", () => {
-  const fixture = fixtureCreate("VALUE=synthetic-local-secret\n", "production")
-  const validConfig = readFileSync(fixture.config, "utf8")
-  writeFileSync(
-    fixture.config,
-    [
-      "echo synthetic-source-secret",
-      "echo synthetic-source-secret >&2",
-      'ASSETS_TOKEN="$(printf synthetic-credential-secret >&2; exit 17)"',
-      validConfig,
-    ].join("\n"),
-  )
-  const result = fixture.run()
-  expect(result.code).toBe(3)
-  for (const secret of ["synthetic-source-secret", "synthetic-credential-secret", "synthetic-local-secret"]) {
-    expect(result.output).not.toContain(secret)
+  for (const failure of ["false", 'ASSETS_TOKEN="$(printf synthetic-credential-secret >&2; exit 17)"']) {
+    const fixture = fixtureCreate("VALUE=synthetic-local-secret\n", "production")
+    const validConfig = readFileSync(fixture.config, "utf8")
+    writeFileSync(
+      fixture.config,
+      [
+        "echo synthetic-source-secret",
+        "echo synthetic-source-secret >&2",
+        failure,
+        validConfig,
+        'printf later-success > "$HOME/later-success"',
+        "true",
+      ].join("\n"),
+    )
+    const result = fixture.run()
+    expect(result.code).toBe(3)
+    expect(result.output).toBe("error: unable to load assets-service CLI config\n")
+    for (const secret of ["synthetic-source-secret", "synthetic-credential-secret", "synthetic-local-secret"]) {
+      expect(result.output).not.toContain(secret)
+    }
+    expect(existsSync(join(fixture.dir, "home/later-success"))).toBe(false)
+    expect(fixture.records()).toEqual([])
+    expect(existsSync(join(fixture.dir, "arguments"))).toBe(false)
+    expect(existsSync(join(fixture.dir, "events"))).toBe(false)
+    fixture.clean()
   }
-  expect(fixture.records()).toEqual([])
-  expect(existsSync(join(fixture.dir, "arguments"))).toBe(false)
-  expect(existsSync(join(fixture.dir, "events"))).toBe(false)
-  fixture.clean()
 })
 
 test("production lookup failure is secret-safe and cannot partially upload local values", () => {
@@ -338,16 +344,14 @@ test("encoder validates complete stdin before output, including multiline and ma
   const helper = join(root, "ops/convex/envPayloadEncode.ts")
   const encode = (input: string) =>
     Bun.spawnSync([process.execPath, helper], { stdin: Buffer.from(input), cwd: "/tmp/opencode" })
-  const valid = encode("MULTILINE\0line one\nline two\0LITERAL\0\\n\\r\0")
+  const valid = encode("MULTILINE\0line one\nline two\0LITERAL\0\\n\\r\0CRLF\0a\r\nb\0")
   expect(valid.exitCode).toBe(0)
-  expect(parse(valid.stdout.toString())).toEqual({ MULTILINE: "line one\nline two", LITERAL: String.raw`\n\r` })
-  for (const input of [
-    "KEY\0value",
-    "KEY\0",
-    "INVALID-KEY\0value\0",
-    "GOOD\0valid\0BAD\0 a'`\"#secret \0",
-    "CRLF\0a\r\nb\0",
-  ]) {
+  expect(parse(valid.stdout.toString())).toEqual({
+    MULTILINE: "line one\nline two",
+    LITERAL: String.raw`\n\r`,
+    CRLF: "a\r\nb",
+  })
+  for (const input of ["KEY\0value", "KEY\0", "INVALID-KEY\0value\0", "GOOD\0valid\0BAD\0 a'`\"#secret \0"]) {
     const invalid = encode(input)
     expect(invalid.exitCode).not.toBe(0)
     expect(invalid.stdout.toString()).toBe("")

@@ -62,10 +62,13 @@ if [[ "$ENV_NAME" == "production" ]]; then
 
   # The assets CLI config is private and already has the approved service identity.
   # Its project ID is a CLI selector, so resolve the service UUID from the authenticated API.
-  if ! source "$ASSETS_CLI_ENV_FILE" >/dev/null 2>&1; then
-    echo "error: unable to load assets-service CLI config" >&2
-    exit 3
-  fi
+  # Keep source outside conditionals so errexit applies to every config command.
+  exec {ASSETS_CONFIG_ERROR_FD}>&2
+  trap 'echo "error: unable to load assets-service CLI config" >&"$ASSETS_CONFIG_ERROR_FD"; exit 3' ERR
+  source "$ASSETS_CLI_ENV_FILE" >/dev/null 2>&1
+  trap - ERR
+  exec {ASSETS_CONFIG_ERROR_FD}>&-
+  unset ASSETS_CONFIG_ERROR_FD
   if [[ -z "${ASSETS_API_URL:-}" || -z "${ASSETS_PROJECT:-}" || -z "${ASSETS_TOKEN:-}" || "${ASSETS_ENVIRONMENT:-}" != "production" ]]; then
     echo "error: assets-service CLI config must identify the production project and credential" >&2
     exit 3
