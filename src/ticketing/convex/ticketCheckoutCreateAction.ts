@@ -232,7 +232,10 @@ export const ticketCheckoutCreateAction = action({
         documentSetRevision: args.legalContext.documentSetRevision,
       },
     })
-    if (!billingResult.success) return billingResult
+    if (!billingResult.success) {
+      console.error(op, "Billing session creation failed:", billingResult.errorMessage)
+      return billingResult
+    }
     if (
       billingResult.data.paymentReference !== paymentReference ||
       billingResult.data.stripeMode !== config.data.stripeMode
@@ -274,6 +277,7 @@ function checkoutUrlsCanonicalize(
       return createResultError(op, "Checkout return URLs must use the configured Eventoren origin")
     return createResult({ successUrl: success, cancelUrl: cancel })
   } catch (error) {
+    console.warn(op, error)
     return createResultError(op, "Checkout return URLs are invalid", String(error))
   }
 }

@@ -9,5 +9,5 @@ export function createErrorAndLogWarn(
   const err = createResultError(op, errorMessage, errorData)
   console.warn(op, err)
   if (statusCode) err.statusCode = statusCode
-  return createResultError(op, errorMessage, errorData)
+  return err
 }

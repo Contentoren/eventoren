@@ -19,6 +19,7 @@ export function mutationCreate<Mutation extends FunctionReference<"mutation">>(
     try {
       return await client.mutation(mutation, { ...args, token } as FunctionArgs<Mutation>)
     } catch (error) {
+      console.error(op, error)
       return createResultError(op, error instanceof Error ? error.message : String(error))
     }
   }

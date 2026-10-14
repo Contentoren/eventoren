@@ -47,6 +47,7 @@ export function queryCreate<Query extends FunctionReference<"query">>(
         },
         (error) => {
           if (currentSubscriptionId !== subscriptionId) return
+          console.error(op, error)
           setResult(createResultError(op, error.message))
         },
       )

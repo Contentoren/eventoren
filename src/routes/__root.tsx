@@ -65,7 +65,8 @@ function isDemoPath(pathname: string) {
   return pathname === "/demo" || pathname.startsWith("/demo/")
 }
 
-function RootErrorPage() {
+function RootErrorPage(props: { error?: unknown }) {
+  console.error("RootErrorPage caught route error:", props.error)
   return (
     <ErrorPage title="Etwas ist schiefgelaufen" subtitle="Bitte versuchen Sie es später erneut.">
       <ErrorPageActions>
