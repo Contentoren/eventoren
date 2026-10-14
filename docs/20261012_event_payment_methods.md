@@ -17,7 +17,7 @@ Repositories:
 - Eventoren backend (Convex) and frontend (Cloudflare Pages) are deployed and verified.
 - Authenticated cancellation callback delivery (`POST /eventoren/payment-outcomes`) is configured, authenticated, and verified.
 - Early SEPA ticket issuance is enabled in production (`EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED="true"`).
-- Production E2E test suite (`bun run test:e2e`) passes against production (`https://eventoren.de`) with verified cleanup.
+- Production ticket purchase, email delivery, and provider cleanup are not verified by `bun run test:e2e`; its ticket guard refuses live-mode checkout. The current invocation also includes a native-auth lifecycle that writes a draft event, so use `E2E_TARGET=production bunx rstest run --config e2e/rstest.config.ts` for authorized read-only SSO verification. The ticket lifecycle runs only on the guarded development target (`bun run test:e2e:dev`) with Stripe test mode; production live checkout remains prohibited for E2E. See `docs/ticket_e2e_run.md` for checkpoint and cleanup requirements.
 
 ## Agreed behavior
 
