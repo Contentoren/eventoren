@@ -80,6 +80,7 @@ export function demoCheckoutFormStateCreate(inputs: {
   const invalidRequiredFields = createSignalObject<readonly TicketRequiredFieldKey[]>([])
   const termsAccepted = createSignalObject(false)
   const privacyAcknowledged = createSignalObject(false)
+  const rememberDraft = createSignalObject(false)
   const completedOrders = createSignalObject<readonly TicketOrderProjection[]>([])
   onMount(() => hydrated.set(true))
   const items = createMemo<readonly DemoCheckoutItem[]>(() =>
@@ -128,6 +129,10 @@ export function demoCheckoutFormStateCreate(inputs: {
   const privacyAcknowledgementChange = (accepted: boolean) => {
     privacyAcknowledged.set(accepted)
     errorMessage.set("")
+  }
+
+  const rememberDraftChange = (remember: boolean) => {
+    rememberDraft.set(remember)
   }
 
   const legalAcceptanceChange = (accepted: boolean) => {
@@ -345,12 +350,14 @@ export function demoCheckoutFormStateCreate(inputs: {
     totalLabel: () => ticketPriceFormat(total().totalCents),
     termsAccepted: termsAccepted.get,
     privacyAcknowledged: privacyAcknowledged.get,
+    rememberDraft: rememberDraft.get,
     legalAccepted: () => termsAccepted.get() && privacyAcknowledged.get(),
     participantNames: participantNames.get,
     participantFields,
     isFieldInvalid: (key: TicketRequiredFieldKey) => invalidRequiredFields.get().includes(key),
     termsAcceptanceChange,
     privacyAcknowledgementChange,
+    rememberDraftChange,
     legalAcceptanceChange,
     contactFieldChange,
     participantNameChange,

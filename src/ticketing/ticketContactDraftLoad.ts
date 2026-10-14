@@ -1,27 +1,24 @@
 import { createResult } from "../ui/createResult.ts"
 import { createResultError } from "../ui/createResultError.ts"
 import type { Result } from "../ui/Result.ts"
-import type { TicketCheckoutFormDraft } from "./TicketCheckoutFormDraft.ts"
-import type { TicketContact } from "./TicketContact.ts"
+import * as v from "valibot"
 import { ticketCheckoutLegalDocumentRevision } from "./ticketCheckoutLegalDocumentRevision.ts"
 import { ticketContactDraftKey } from "./ticketContactDraftKey.ts"
 import { ticketContactDraftSave } from "./ticketContactDraftSave.ts"
+import { type TicketContactDraftStored, ticketContactDraftStoredSchema } from "./ticketContactDraftStoredSchema.ts"
 import { ticketContactEmpty } from "./ticketContactEmpty.ts"
 
 const op = "ticketContactDraftLoad"
 
-export function ticketContactDraftLoad(): Result<TicketCheckoutFormDraft> {
-  if (typeof localStorage === "undefined") {
-    return createResult({
-      contact: ticketContactEmpty(),
-      participantNames: {},
-      documentSetRevision: ticketCheckoutLegalDocumentRevision,
-    })
-  }
-
+export function ticketContactDraftLoad(): Result<TicketContactDraftStored> {
   let raw: string | null = null
+  let fromLocalStorage = false
   try {
-    raw = localStorage.getItem(ticketContactDraftKey)
+    if (typeof sessionStorage !== "undefined") raw = sessionStorage.getItem(ticketContactDraftKey)
+    if (raw === null && typeof localStorage !== "undefined") {
+      raw = localStorage.getItem(ticketContactDraftKey)
+      fromLocalStorage = raw !== null
+    }
   } catch (error) {
     return createResultError(op, "Entwurf konnte nicht gelesen werden.", error)
   }
@@ -30,6 +27,7 @@ export function ticketContactDraftLoad(): Result<TicketCheckoutFormDraft> {
       contact: ticketContactEmpty(),
       participantNames: {},
       documentSetRevision: ticketCheckoutLegalDocumentRevision,
+      rememberDraft: false,
     })
 
   let parsed: unknown = null
@@ -40,40 +38,23 @@ export function ticketContactDraftLoad(): Result<TicketCheckoutFormDraft> {
   }
   if (typeof parsed !== "object" || parsed === null) return createResultError(op, "Entwurf ist kein Objekt.", parsed)
 
-  const candidate = parsed as Partial<TicketContact & TicketCheckoutFormDraft>
-  const contactCandidate = candidate.contact ?? candidate
-  const participantNames: Record<string, Record<string, readonly string[]>> = {}
-  if (typeof candidate.participantNames === "object" && candidate.participantNames !== null) {
-    for (const [eventId, eventNames] of Object.entries(candidate.participantNames)) {
-      if (typeof eventNames !== "object" || eventNames === null) continue
-      const validTiers: Record<string, readonly string[]> = {}
-      for (const [tierId, names] of Object.entries(eventNames)) {
-        if (Array.isArray(names)) validTiers[tierId] = names.map((name) => (typeof name === "string" ? name : ""))
-      }
-      participantNames[eventId] = validTiers
-    }
-  }
-  const draft: TicketCheckoutFormDraft = {
-    contact: {
-      firstName: typeof contactCandidate.firstName === "string" ? contactCandidate.firstName : "",
-      lastName: typeof contactCandidate.lastName === "string" ? contactCandidate.lastName : "",
-      email: typeof contactCandidate.email === "string" ? contactCandidate.email : "",
-      billingKind: contactCandidate.billingKind === "company" ? "company" : "person",
-      companyName: typeof contactCandidate.companyName === "string" ? contactCandidate.companyName : "",
-      companyExtra: typeof contactCandidate.companyExtra === "string" ? contactCandidate.companyExtra : "",
-      taxId: typeof contactCandidate.taxId === "string" ? contactCandidate.taxId : "",
-      address: typeof contactCandidate.address === "string" ? contactCandidate.address : "",
-      addressLine2: typeof contactCandidate.addressLine2 === "string" ? contactCandidate.addressLine2 : "",
-      postalCode: typeof contactCandidate.postalCode === "string" ? contactCandidate.postalCode : "",
-      city: typeof contactCandidate.city === "string" ? contactCandidate.city : "",
-      country: typeof contactCandidate.country === "string" ? contactCandidate.country : "",
-      phone: typeof contactCandidate.phone === "string" ? contactCandidate.phone : "",
-    },
-    participantNames,
+  const candidate = parsed as Record<string, unknown>
+  const validated = v.safeParse(ticketContactDraftStoredSchema, {
+    ...candidate,
+    contact: candidate.contact ?? candidate,
     documentSetRevision: ticketCheckoutLegalDocumentRevision,
-  }
-  // Remove legacy consent from storage without making checkout depend on a successful save.
-  if ("termsAccepted" in candidate || "privacyAcknowledged" in candidate || "legalAccepted" in candidate)
-    ticketContactDraftSave(draft)
+    rememberDraft: fromLocalStorage && candidate.rememberDraft === true,
+  })
+  if (!validated.success) return createResultError(op, v.summarize(validated.issues), parsed)
+
+  const draft = validated.output
+  // Old local drafts do not constitute a request to remember details across sessions.
+  if (
+    (fromLocalStorage && !draft.rememberDraft) ||
+    "termsAccepted" in candidate ||
+    "privacyAcknowledged" in candidate ||
+    "legalAccepted" in candidate
+  )
+    ticketContactDraftSave(draft, draft.rememberDraft)
   return createResult(draft)
 }

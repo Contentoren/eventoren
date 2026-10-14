@@ -17,6 +17,7 @@ export type TicketCheckoutFormState = {
   totalLabel: Accessor<string>
   termsAccepted: Accessor<boolean>
   privacyAcknowledged: Accessor<boolean>
+  rememberDraft: Accessor<boolean>
   participantNames: Accessor<TicketParticipantNames>
   isFieldInvalid: (key: TicketRequiredFieldKey) => boolean
   participantFields: Accessor<
@@ -32,6 +33,7 @@ export type TicketCheckoutFormState = {
   >
   termsAcceptanceChange: (accepted: boolean) => void
   privacyAcknowledgementChange: (accepted: boolean) => void
+  rememberDraftChange: (remember: boolean) => void
   contactFieldChange: (field: keyof TicketContact, value: string) => void
   participantNameChange: (eventId: string, tierId: string, ticketIndex: number, value: string) => void
   confirmPayment: () => Promise<void>

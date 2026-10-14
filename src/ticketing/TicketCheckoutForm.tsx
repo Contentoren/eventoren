@@ -1,4 +1,5 @@
 import { For, Index, Show } from "solid-js"
+import { Checkbox } from "#ui/input/check/Checkbox.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import type { EventItem } from "../events/EventItem.ts"
 import { UiButton } from "../ui/UiButton.tsx"
@@ -445,6 +446,21 @@ export function TicketCheckoutForm(props: {
                   </div>
                 </section>
               </Show>
+
+              <section class="flex flex-col gap-space-2 border-t border-border-subtle pt-space-4">
+                <Checkbox
+                  id="checkout-remember-draft"
+                  aria-describedby="checkout-remember-draft-hint"
+                  checked={state.rememberDraft()}
+                  onChange={state.rememberDraftChange}
+                >
+                  Kontaktdaten und Teilnehmernamen auf diesem Gerät über die Sitzung hinaus merken
+                </Checkbox>
+                <p id="checkout-remember-draft-hint" class="text-sm text-content-muted">
+                  Ohne diese Auswahl bleiben deine Eingaben nur für die Sitzung in diesem Tab gespeichert. Beim Abwählen
+                  wird der dauerhaft gespeicherte Entwurf gelöscht.
+                </p>
+              </section>
 
               <section class="flex flex-col gap-space-4 border-t border-border-subtle pt-space-4">
                 <label

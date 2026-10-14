@@ -80,6 +80,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
   const invalidRequiredFields = createSignalObject<readonly TicketRequiredFieldKey[]>([])
   const termsAccepted = createSignalObject(false)
   const privacyAcknowledged = createSignalObject(false)
+  const rememberDraft = createSignalObject(false)
   const participantNames = createSignalObject<TicketParticipantNames>(ticketParticipantNamesAlign({}, inputs.items()))
 
   let debounceTimer: number | undefined
@@ -109,8 +110,9 @@ export function ticketCheckoutFormStateCreate(inputs: {
     if (!hydrated.get() && !draftChanged) return
     cancelScheduledSave()
     const snapshot = draftSnapshot()
+    const remember = rememberDraft.get()
     if (immediate) {
-      ticketContactDraftSave(snapshot)
+      ticketContactDraftSave(snapshot, remember)
       return
     }
     const generation = saveGeneration
@@ -121,7 +123,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
       const save = () => {
         if (generation !== saveGeneration) return
         cancelIdleSave = undefined
-        ticketContactDraftSave(snapshot)
+        ticketContactDraftSave(snapshot, remember)
       }
       if (typeof idleWindow.requestIdleCallback === "function") {
         const idleId = idleWindow.requestIdleCallback(save, { timeout: 1000 })
@@ -144,7 +146,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
   const flushDraft = () => {
     if (typeof window === "undefined") return
     cancelScheduledSave()
-    ticketContactDraftSave(draftSnapshot())
+    ticketContactDraftSave(draftSnapshot(), rememberDraft.get())
   }
 
   const legalConsentReset = () => {
@@ -167,6 +169,7 @@ export function ticketCheckoutFormStateCreate(inputs: {
     if (draft.success) {
       contact.set(draft.data.contact)
       participantNames.set(ticketParticipantNamesAlign(draft.data.participantNames, inputs.items()))
+      rememberDraft.set(draft.data.rememberDraft)
     }
     hydrated.set(true)
     window.addEventListener("pagehide", handlePageHide)
@@ -266,6 +269,13 @@ export function ticketCheckoutFormStateCreate(inputs: {
   const privacyAcknowledgementChange = (accepted: boolean) => {
     privacyAcknowledged.set(accepted)
     errorMessage.set("")
+  }
+
+  const rememberDraftChange = (remember: boolean) => {
+    rememberDraft.set(remember)
+    draftChanged = true
+    // Withdrawing the choice removes the local copy immediately, including pending saves.
+    persistDraft(!remember)
   }
 
   const participantNameChange = (eventId: string, tierId: string, ticketIndex: number, value: string) => {
@@ -521,11 +531,13 @@ export function ticketCheckoutFormStateCreate(inputs: {
     totalLabel,
     termsAccepted: termsAccepted.get,
     privacyAcknowledged: privacyAcknowledged.get,
+    rememberDraft: rememberDraft.get,
     participantNames: participantNames.get,
     participantFields,
     isFieldInvalid: (key) => invalidRequiredFields.get().includes(key),
     termsAcceptanceChange,
     privacyAcknowledgementChange,
+    rememberDraftChange,
     contactFieldChange,
     participantNameChange,
     confirmPayment,

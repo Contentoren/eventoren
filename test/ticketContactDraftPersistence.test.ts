@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, mock, test } from "bun:test"
 import { createRoot } from "solid-js"
-import type { TicketCheckoutFormDraft } from "../src/ticketing/TicketCheckoutFormDraft.ts"
+import type { TicketContactDraftStored } from "../src/ticketing/ticketContactDraftStoredSchema.ts"
 import { ticketCheckoutLegalDocumentRevision } from "../src/ticketing/ticketCheckoutLegalDocumentRevision.ts"
 import { ticketContactDraftKey } from "../src/ticketing/ticketContactDraftKey.ts"
 import { ticketContactDraftLoad } from "../src/ticketing/ticketContactDraftLoad.ts"
@@ -88,8 +88,10 @@ class CheckoutWindow {
 }
 
 const previousLocalStorage = Object.getOwnPropertyDescriptor(globalThis, "localStorage")
+const previousSessionStorage = Object.getOwnPropertyDescriptor(globalThis, "sessionStorage")
 const previousWindow = Object.getOwnPropertyDescriptor(globalThis, "window")
 let storage: MemoryStorage
+let localStorageMock: MemoryStorage
 let checkoutWindow: CheckoutWindow
 
 mock.module("@tanstack/solid-router", () => ({
@@ -105,19 +107,23 @@ const { ticketCheckoutFormStateCreate } = await import("../src/ticketing/ticketC
 
 beforeEach(() => {
   storage = new MemoryStorage()
+  localStorageMock = new MemoryStorage()
   checkoutWindow = new CheckoutWindow()
-  Object.defineProperty(globalThis, "localStorage", { configurable: true, value: storage })
+  Object.defineProperty(globalThis, "localStorage", { configurable: true, value: localStorageMock })
+  Object.defineProperty(globalThis, "sessionStorage", { configurable: true, value: storage })
   Object.defineProperty(globalThis, "window", { configurable: true, value: checkoutWindow })
 })
 
 afterEach(() => {
   if (previousLocalStorage) Object.defineProperty(globalThis, "localStorage", previousLocalStorage)
   else Reflect.deleteProperty(globalThis, "localStorage")
+  if (previousSessionStorage) Object.defineProperty(globalThis, "sessionStorage", previousSessionStorage)
+  else Reflect.deleteProperty(globalThis, "sessionStorage")
   if (previousWindow) Object.defineProperty(globalThis, "window", previousWindow)
   else Reflect.deleteProperty(globalThis, "window")
 })
 
-const formDraft: TicketCheckoutFormDraft = {
+const formDraft: TicketContactDraftStored = {
   contact: {
     firstName: "Ada",
     lastName: "Lovelace",
@@ -135,13 +141,56 @@ const formDraft: TicketCheckoutFormDraft = {
   },
   participantNames: { event: { standard: ["Grace"] } },
   documentSetRevision: ticketCheckoutLegalDocumentRevision,
+  rememberDraft: false,
 }
 
-test("saves and loads contact details and participant names without consent", () => {
+test("saves contact details and participant names only in the tab session by default", () => {
   expect(ticketContactDraftSave(formDraft).success).toBe(true)
 
   expect(storage.getItem(ticketContactDraftKey)).toBe(JSON.stringify(formDraft))
+  expect(localStorageMock.getItem(ticketContactDraftKey)).toBeNull()
   expect(ticketContactDraftLoad()).toEqual({ success: true, data: formDraft })
+})
+
+test("remembers a draft across sessions only after an explicit choice", () => {
+  expect(ticketContactDraftSave(formDraft, true).success).toBe(true)
+  const rememberedDraft = { ...formDraft, rememberDraft: true }
+  expect(localStorageMock.getItem(ticketContactDraftKey)).toBe(JSON.stringify(rememberedDraft))
+  expect(storage.getItem(ticketContactDraftKey)).toBeNull()
+  expect(ticketContactDraftLoad()).toEqual({ success: true, data: rememberedDraft })
+})
+
+test("moves an old local draft to the session without assuming a remember choice", () => {
+  localStorageMock.setItem(
+    ticketContactDraftKey,
+    JSON.stringify({
+      contact: formDraft.contact,
+      participantNames: formDraft.participantNames,
+      documentSetRevision: formDraft.documentSetRevision,
+      termsAccepted: true,
+      privacyAcknowledged: true,
+    }),
+  )
+
+  expect(ticketContactDraftLoad()).toEqual({ success: true, data: formDraft })
+  expect(localStorageMock.getItem(ticketContactDraftKey)).toBeNull()
+  expect(storage.getItem(ticketContactDraftKey)).toBe(JSON.stringify(formDraft))
+})
+
+test("unchecking remember keeps the current draft in the session and deletes its local copy", () => {
+  ticketContactDraftSave(formDraft, true)
+  expect(ticketContactDraftSave(formDraft).success).toBe(true)
+  expect(localStorageMock.getItem(ticketContactDraftKey)).toBeNull()
+  expect(storage.getItem(ticketContactDraftKey)).toBe(JSON.stringify(formDraft))
+  expect(ticketContactDraftLoad()).toEqual({ success: true, data: formDraft })
+})
+
+test("clearing a draft removes it from both browser stores", () => {
+  storage.setItem(ticketContactDraftKey, JSON.stringify(formDraft))
+  localStorageMock.setItem(ticketContactDraftKey, JSON.stringify({ ...formDraft, rememberDraft: true }))
+  expect(ticketContactDraftSave(null).success).toBe(true)
+  expect(storage.getItem(ticketContactDraftKey)).toBeNull()
+  expect(localStorageMock.getItem(ticketContactDraftKey)).toBeNull()
 })
 
 test("never serializes consent fields supplied by a legacy draft", () => {
@@ -177,6 +226,7 @@ test("loads legacy contact-only drafts without carrying the old combined consent
     },
     participantNames: {},
     documentSetRevision: ticketCheckoutLegalDocumentRevision,
+    rememberDraft: false,
   })
 })
 
@@ -223,16 +273,18 @@ test("handles malformed JSON and malformed fields without throwing", () => {
       },
       participantNames: { event: { standard: ["Grace", ""] } },
       documentSetRevision: ticketCheckoutLegalDocumentRevision,
+      rememberDraft: false,
     },
   })
 })
 
 test("treats unavailable and throwing storage as non-fatal", () => {
   Object.defineProperty(globalThis, "localStorage", { configurable: true, value: undefined })
+  Object.defineProperty(globalThis, "sessionStorage", { configurable: true, value: undefined })
   expect(ticketContactDraftLoad().success).toBe(true)
   expect(ticketContactDraftSave(formDraft).success).toBe(true)
 
-  Object.defineProperty(globalThis, "localStorage", {
+  Object.defineProperty(globalThis, "sessionStorage", {
     configurable: true,
     value: {
       getItem: () => {
@@ -317,6 +369,62 @@ test("checking consent alone does not schedule or write a draft save", () => {
       checkoutWindow.runTimers()
       expect(checkoutWindow.idleCallbacks).toHaveLength(0)
       expect(storage.getItem(ticketContactDraftKey)).toBe(storedDraft)
+    } finally {
+      dispose()
+    }
+  })
+})
+
+test("the optional remember checkbox saves locally and can be withdrawn without losing edits", () => {
+  createRoot((dispose) => {
+    try {
+      const state = ticketCheckoutFormStateCreate({
+        items: () => [],
+        appOrigin: () => ({ success: true, data: "https://eventoren.test" }),
+      })
+      expect(state.rememberDraft()).toBe(false)
+      state.contactFieldChange("email", "ada@example.test")
+      state.rememberDraftChange(true)
+      checkoutWindow.runTimers()
+      checkoutWindow.idleCallbacks.shift()?.callback()
+      expect(state.rememberDraft()).toBe(true)
+      expect(JSON.parse(localStorageMock.getItem(ticketContactDraftKey)!)).toMatchObject({
+        contact: { email: "ada@example.test" },
+        rememberDraft: true,
+      })
+      expect(storage.getItem(ticketContactDraftKey)).toBeNull()
+
+      state.rememberDraftChange(false)
+      expect(localStorageMock.getItem(ticketContactDraftKey)).toBeNull()
+      expect(JSON.parse(storage.getItem(ticketContactDraftKey)!)).toMatchObject({
+        contact: { email: "ada@example.test" },
+        rememberDraft: false,
+      })
+    } finally {
+      dispose()
+    }
+  })
+})
+
+test("withdrawing remember cancels a pending local save even if its stale callback runs", () => {
+  createRoot((dispose) => {
+    try {
+      const state = ticketCheckoutFormStateCreate({
+        items: () => [],
+        appOrigin: () => ({ success: true, data: "https://eventoren.test" }),
+      })
+      state.contactFieldChange("firstName", "Ada")
+      state.rememberDraftChange(true)
+      checkoutWindow.runTimers()
+      const staleCallback = checkoutWindow.idleCallbacks[0]?.callback
+      expect(staleCallback).toBeDefined()
+      state.rememberDraftChange(false)
+      staleCallback?.()
+      expect(localStorageMock.getItem(ticketContactDraftKey)).toBeNull()
+      expect(ticketContactDraftLoad()).toMatchObject({
+        success: true,
+        data: { contact: { firstName: "Ada" }, rememberDraft: false },
+      })
     } finally {
       dispose()
     }
