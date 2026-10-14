@@ -1,4 +1,5 @@
 import { SignJWT } from "jose"
+import { authSecretRead } from "#src/auth/authSecretRead.ts"
 import { tokenValidDurationInDays } from "./tokenValidDurationInDays.js"
 
 export async function createToken(
@@ -7,9 +8,9 @@ export async function createToken(
   payload?: Record<string, string>,
   expiresInDays = tokenValidDurationInDays,
 ): Promise<string> {
-  const op = "createToken"
-  if (!secretSalt) return ""
-  const encodedSecret = new TextEncoder().encode(secretSalt)
+  const secret = authSecretRead(secretSalt)
+  if (!secret) return ""
+  const encodedSecret = new TextEncoder().encode(secret)
   const alg = "HS256"
   const jwt = await new SignJWT(payload)
     .setProtectedHeader({ alg })

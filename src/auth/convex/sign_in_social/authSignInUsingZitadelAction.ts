@@ -2,6 +2,7 @@ import { jwtVerify } from "jose"
 import { internal } from "#convex/_generated/api.js"
 import { action } from "#convex/_generated/server.js"
 import { createResultError, type PromiseResult } from "#result"
+import { envAuthSecretResult } from "#src/app/env/private/envAuthSecretResult.ts"
 import type { UserSession } from "#src/auth/model/UserSession.ts"
 import {
   type CommonAuthProvider,
@@ -19,10 +20,11 @@ export const authSignInUsingZitadelAction = action({
 })
 
 async function roleSyncProofVerify(providerInfo: CommonAuthProvider): Promise<boolean> {
-  const secret = process.env.AUTH_SECRET?.trim()
-  if (!secret || secret.startsWith("replace-with-") || !providerInfo.zitadelRoleSyncProof) return false
+  const secret = envAuthSecretResult()
+  if (!secret.success || !providerInfo.zitadelRoleSyncProof) return false
   try {
-    const verified = await jwtVerify(providerInfo.zitadelRoleSyncProof, new TextEncoder().encode(secret), {
+    const verified = await jwtVerify(providerInfo.zitadelRoleSyncProof, new TextEncoder().encode(secret.data), {
+      algorithms: ["HS256"],
       issuer: "eventoren-zitadel-role-sync",
       audience: "eventoren-auth",
     })

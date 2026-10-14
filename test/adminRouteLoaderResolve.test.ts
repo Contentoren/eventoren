@@ -150,6 +150,23 @@ describe("admin route authorization", () => {
     })
   })
 
+  test("redirects to sign-in when Convex rejects the session after the server admin check", async () => {
+    const returnTo = "/admin?tab=events"
+    let redirectTarget: { to: string; search?: Record<string, string> } | undefined
+    await expect(
+      adminRouteLoaderResolve({
+        returnTo,
+        getAdminAccess: async () => createResult(sampleUserProfile("admin")),
+        getCatalogEvents: async () => ({ success: false as const, errorMessage: "Anmeldung erforderlich" }),
+        redirect: (opts) => {
+          redirectTarget = opts
+          return new Error("REDIRECT_TRIGGERED")
+        },
+      }),
+    ).rejects.toThrow("REDIRECT_TRIGGERED")
+    expect(redirectTarget).toEqual({ to: "/sign-in", search: { returnTo } })
+  })
+
   test("provides explicit German access-denied copy with admin role requirement", () => {
     const text = adminRouteText()
 

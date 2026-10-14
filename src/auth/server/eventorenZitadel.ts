@@ -1,6 +1,7 @@
 import { ConvexHttpClient } from "convex/browser"
 import { api } from "#convex/_generated/api.js"
 import type { PromiseResult } from "#result"
+import { envAuthSecretResult } from "#src/app/env/private/envAuthSecretResult.ts"
 import type { UserSession } from "#src/auth/model/UserSession.ts"
 import { convexUrlGet } from "#src/server/convexUrlGet.ts"
 import { eventorenSessionCookie } from "./eventorenSessionCookie.ts"
@@ -155,8 +156,8 @@ function loginErrorResponse(request: Request, message: string, status: number): 
 function configuration(): ZitadelConfiguration | undefined {
   const clientId = process.env.ZITADEL_CLIENT_ID?.trim()
   const clientSecret = process.env.ZITADEL_CLIENT_SECRET?.trim()
-  const authSecret = process.env.AUTH_SECRET?.trim()
-  if (!clientId || !clientSecret || !authSecret || authSecret.startsWith("replace-with-")) return undefined
+  const authSecret = envAuthSecretResult()
+  if (!clientId || !clientSecret || !authSecret.success) return undefined
 
   const appOrigin = originRead(process.env.PUBLIC_BASE_URL_APP?.trim())
   if (!appOrigin) return undefined

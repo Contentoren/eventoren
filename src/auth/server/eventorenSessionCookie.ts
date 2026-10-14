@@ -1,3 +1,5 @@
+import { envAuthSecretResult } from "#src/app/env/private/envAuthSecretResult.ts"
+
 const sessionCookieName = "eventoren-session"
 const loginCookieName = "eventoren-zitadel-login"
 const loginCookieMaxAgeSeconds = 600
@@ -82,11 +84,11 @@ async function signedPayloadRead(signed: string | undefined): Promise<string | u
 }
 
 async function sign(value: string): Promise<string> {
-  const secret = process.env.AUTH_SECRET?.trim()
-  if (!secret || secret.startsWith("replace-with-")) return ""
+  const secret = envAuthSecretResult()
+  if (!secret.success) return ""
   const key = await crypto.subtle.importKey(
     "raw",
-    new TextEncoder().encode(secret),
+    new TextEncoder().encode(secret.data),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],

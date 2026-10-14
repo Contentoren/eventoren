@@ -1,13 +1,14 @@
 import { SignJWT } from "jose"
+import { envAuthSecretResult } from "#src/app/env/private/envAuthSecretResult.ts"
 import type { CommonAuthProvider } from "./social_identity_providers/CommonAuthProvider.ts"
 
 export async function zitadelRoleSyncProofCreate(
   provider: CommonAuthProvider,
   organizationId?: string,
 ): Promise<string | undefined> {
-  const secret = process.env.AUTH_SECRET?.trim()
-  if (!secret || secret.startsWith("replace-with-")) return undefined
-  const key = new TextEncoder().encode(secret)
+  const secret = envAuthSecretResult()
+  if (!secret.success) return undefined
+  const key = new TextEncoder().encode(secret.data)
   return new SignJWT({ provider, organizationId: organizationId ?? null })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuer("eventoren-zitadel-role-sync")

@@ -9,12 +9,12 @@ export async function authActionResult<T extends { token: string }, R>(
 ): PromiseResult<R> {
   const op = "authActionResult"
   if (!args.token) {
-    return createResultError(op, "missing token")
+    return createResultError(op, "Anmeldung erforderlich")
   }
   const verifiedResult = await verifyTokenResult(args.token)
   if (!verifiedResult.success) {
     console.info(verifiedResult)
-    return verifiedResult
+    return createResultError(op, "Anmeldung erforderlich")
   }
   const { token, ...data } = args
   return fn(ctx, data)

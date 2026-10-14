@@ -11,7 +11,9 @@ export type AdminRouteLoaderData<TEventsResult = unknown> =
       readonly isServerAuthorized: true
     }
 
-export async function adminRouteLoaderResolve<TEventsResult>(inputs: {
+export async function adminRouteLoaderResolve<
+  TEventsResult extends { readonly success: boolean; readonly errorMessage?: string },
+>(inputs: {
   readonly returnTo: string
   readonly getAdminAccess: () => Promise<Result<UserProfile>>
   readonly getCatalogEvents: () => Promise<TEventsResult>
@@ -25,6 +27,9 @@ export async function adminRouteLoaderResolve<TEventsResult>(inputs: {
     throw inputs.redirect({ to: "/sign-in", search: { returnTo: inputs.returnTo } })
   }
   const eventsResult = await inputs.getCatalogEvents()
+  if (!eventsResult.success && eventsResult.errorMessage === "Anmeldung erforderlich") {
+    throw inputs.redirect({ to: "/sign-in", search: { returnTo: inputs.returnTo } })
+  }
   return {
     authorized: true,
     eventsResult,

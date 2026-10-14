@@ -6,10 +6,10 @@ import { verifyTokenResult } from "#src/auth/server/jwt_token/verifyTokenResult.
 
 export async function authTokenSessionResolve(ctx: QueryCtx | MutationCtx, token: string): PromiseResult<DecodedToken> {
   const op = "authTokenSessionResolve"
-  if (!token) return createResultError(op, "missing token")
+  if (!token) return createResultError(op, "Anmeldung erforderlich")
 
   const verified = await verifyTokenResult(token)
-  if (!verified.success) return verified
+  if (!verified.success) return createResultError(op, "Anmeldung erforderlich")
   const userId = verified.data.sub as IdUser
   const now = new Date().toISOString()
   const session = await ctx.db
@@ -23,10 +23,10 @@ export async function authTokenSessionResolve(ctx: QueryCtx | MutationCtx, token
     session.deletedAt ||
     verified.data.exp * 1000 <= Date.now()
   ) {
-    return createResultError(op, "Authentication session is no longer valid")
+    return createResultError(op, "Anmeldung erforderlich")
   }
 
   const user = await ctx.db.get("users", userId)
-  if (!user || user.deletedAt) return createResultError(op, "User not found")
+  if (!user || user.deletedAt) return createResultError(op, "Anmeldung erforderlich")
   return verified
 }
