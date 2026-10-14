@@ -160,9 +160,10 @@ export async function e2eInvocationRun(
     // payment with no intent retries the SAME hosted session URL; paid
     // adopts success; every other payment state retains. Other
     // payment-adjacent started steps still require their existing Stripe proof
-    // and reconcile separately. Publication/checkin stay blocked until their
-    // appropriate proof lands.
-    if (checkpoint.ticket?.status === "started" && ["publication", "checkin"].includes(checkpoint.ticket.step)) {
+    // and reconcile separately. Publication stays blocked. Check-in now adopts
+    // only a read-only exact ticket/order/QR/history proof in its child; it
+    // never repeats a started mutation.
+    if (checkpoint.ticket?.status === "started" && checkpoint.ticket.step === "publication") {
       console.error(
         `Ticket ${checkpoint.ticket.step} for ${checkpoint.runId} has uncertain external effects; reconcile before rerunning`,
       )

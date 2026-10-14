@@ -14,6 +14,7 @@ import { ticketPurchasePaymentStep } from "./ticketPurchasePaymentStep.ts"
 import { ticketPurchasePdfStep } from "./ticketPurchasePdfStep.ts"
 import { ticketPurchaseProductStep } from "./ticketPurchaseProductStep.ts"
 import { ticketPurchasePublicationStep } from "./ticketPurchasePublicationStep.ts"
+import { ticketPurchaseStepRun } from "./ticketPurchaseStepRun.ts"
 
 const environment = e2eEnvironmentRead(process.env)
 if (!environment.success) throw new Error(environment.errorMessage)
@@ -40,10 +41,11 @@ test("creates, sells, delivers, opens, and checks in a paid ticket once", { time
     await ticketPurchaseCheckoutStep(context)
     await ticketPurchasePaymentStep(context)
     await ticketPurchaseDeliveryStep(context)
-    await ticketPurchasePdfStep(context)
+    const code = await ticketPurchasePdfStep(context)
     await ticketPurchaseAccessStep(context)
-    await ticketPurchaseCheckinStep(context)
+    await ticketPurchaseCheckinStep(context, code)
     await ticketPurchaseDuplicateStep(context)
+    await ticketPurchaseStepRun(context, "done", true, async () => {})
   } catch (error) {
     primaryError = error
     hasPrimaryError = true

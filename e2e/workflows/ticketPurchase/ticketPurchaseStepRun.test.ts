@@ -10,6 +10,59 @@ import { ticketPurchasePaymentStep } from "./ticketPurchasePaymentStep.ts"
 import { ticketPurchaseStepRun } from "./ticketPurchaseStepRun.ts"
 
 describe("ticket purchase stage persistence", () => {
+  it("adopts a proven started check-in without replay and reaches the done cleanup barrier", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-step-test-"))
+    const runId = "abc-12345678-1234-1234-1234-123456789abc"
+    try {
+      const context = {
+        directory,
+        checkpoint: {
+          version: 1,
+          target: "development",
+          baseUrl: "https://eventoren.leonardomora.de",
+          runId,
+          createdAt: 1_000_000,
+          phase: "ticket-unreconciled",
+          ticket: {
+            step: "checkin",
+            status: "started",
+            eventKey: `ticket-e2e-${runId}`,
+            eventTitle: `Ticket E2E ${runId}`,
+            participantName: `E2E Participant ${runId}`,
+            mailSince: 1_000_000,
+          },
+        },
+      } as TicketPurchaseContext
+      expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+      let writes = 0
+      const action = async (completed: boolean) => {
+        if (!completed) writes += 1
+      }
+      await expect(
+        ticketPurchaseStepRun(context, "checkin", false, action, async () => {
+          throw new Error("Proof unavailable")
+        }),
+      ).rejects.toThrow("Proof unavailable")
+      await expect(ticketPurchaseStepRun(context, "checkin", false, action, async () => ({}))).rejects.toThrow(
+        "ticket evidence missing",
+      )
+      expect(context.checkpoint.ticket.status).toBe("started")
+      expect(writes).toBe(0)
+      await ticketPurchaseStepRun(context, "checkin", false, action, async () => ({ ticketId: "proven-ticket" }))
+      expect(context.checkpoint.ticket).toMatchObject({
+        step: "checkin",
+        status: "completed",
+        ticketId: "proven-ticket",
+      })
+      expect(writes).toBe(0)
+      await ticketPurchaseStepRun(context, "duplicate", true, async () => {})
+      await ticketPurchaseStepRun(context, "done", true, async () => {})
+      expect(context.checkpoint.ticket).toMatchObject({ step: "done", status: "completed", ticketId: "proven-ticket" })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
   it("records the exact checkout session and order before completion and never repeats a started payment", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-step-test-"))
     try {

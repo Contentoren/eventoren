@@ -26,6 +26,7 @@ export async function ticketPurchaseStepRun(
   step: Ticket["step"],
   readOnly: boolean,
   action: (completed: boolean, record: (evidence: Partial<Ticket>) => Promise<void>) => Promise<void>,
+  startedReconcile?: () => Promise<Partial<Ticket>>,
 ): Promise<void> {
   const position = steps.indexOf(step)
   const current = steps.indexOf(context.checkpoint.ticket.step)
@@ -37,20 +38,6 @@ export async function ticketPurchaseStepRun(
     throw new Error(`Cannot advance ticket workflow to ${step}; preceding step is uncertain`)
   }
   const completed = current === position && context.checkpoint.ticket.status === "completed"
-  // The event and product steps reconcile their own uncertain writes with an
-  // exact-marker admin proof inside ticketPurchaseEventStep and
-  // ticketPurchaseProductStep (adopt the proven own row, or create once on
-  // positively authorized absence). Every other uncertain write stays blocked
-  // here and must reconcile via its existing proof.
-  if (
-    current === position &&
-    context.checkpoint.ticket.status === "started" &&
-    !readOnly &&
-    step !== "event" &&
-    step !== "product"
-  ) {
-    throw new Error(`Ticket ${step} has an uncertain external effect; reconcile the exact run before retrying`)
-  }
   const record = async (evidence: Partial<Ticket>) => {
     const stored = await e2eCheckpointLoad(context.directory, context.checkpoint)
     if (!stored.success || !stored.data || !isDeepStrictEqual(stored.data, context.checkpoint)) {
@@ -63,6 +50,28 @@ export async function ticketPurchaseStepRun(
     const saved = await e2eCheckpointSave(context.directory, next)
     if (!saved.success) throw new Error(saved.errorMessage)
     context.checkpoint = next as TicketPurchaseContext["checkpoint"]
+  }
+  // Check-in can only adopt an already persisted exact-ticket outcome. Its
+  // proof callback never repeats the mutation; other uncertain writes remain
+  // blocked (event/product retain their own exact-marker proof paths).
+  if (
+    current === position &&
+    context.checkpoint.ticket.status === "started" &&
+    !readOnly &&
+    step !== "event" &&
+    step !== "product"
+  ) {
+    if (step !== "checkin" || !startedReconcile)
+      throw new Error(`Ticket ${step} has an uncertain external effect; reconcile the exact run before retrying`)
+    const evidence = await startedReconcile()
+    if (
+      !evidence.ticketId ||
+      (context.checkpoint.ticket.ticketId && context.checkpoint.ticket.ticketId !== evidence.ticketId)
+    )
+      throw new Error("Exact check-in ticket evidence missing or changed; checkpoint retained")
+    await record({ ticketId: evidence.ticketId, status: "completed" })
+    await action(true, async () => {})
+    return
   }
   if (current < position) await record({})
   await action(completed, completed ? async () => {} : record)

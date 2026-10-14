@@ -11,6 +11,7 @@ export default defineConfig({
     "e2e/auth/*.test.ts",
     "e2e/workflows/eventorenE2eReturnUrlMatches.test.ts",
     "e2e/workflows/ticketPurchase/ticketPurchasePaymentProofCheck.test.ts",
+    "e2e/workflows/ticketPurchase/ticketPurchaseCheckinProofCheck.test.ts",
     "e2e/workflows/ticketPurchase/ticketPurchasePaymentStep.test.ts",
     "e2e/workflows/ticketPurchase/ticketPurchaseStepRun.test.ts",
     "e2e/workflows/nativeAuth/nativeAuthLifecycleCheckpoint.test.ts",
