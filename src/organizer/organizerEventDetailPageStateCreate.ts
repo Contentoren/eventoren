@@ -393,7 +393,11 @@ export function organizerEventDetailPageStateCreate(inputs: {
     new Intl.NumberFormat(locale(), { style: "currency", currency: "EUR" }).format(priceCents / 100)
   const dateTime = (value: string | null) => {
     if (!value) return text().unknown
-    return new Intl.DateTimeFormat(locale(), { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
+    return new Intl.DateTimeFormat(locale(), {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Europe/Berlin",
+    }).format(new Date(value))
   }
   const elapsed = (milliseconds: number | null) => {
     if (milliseconds === null) return text().unknown

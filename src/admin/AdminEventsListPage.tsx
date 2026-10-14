@@ -44,9 +44,11 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
       <p class="min-w-0 text-sm text-content">
         <span class={tile ? "text-content-muted" : "text-content-muted xl:hidden"}>Datum: </span>
         {event.startsAt
-          ? new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" }).format(
-              new Date(event.startsAt),
-            )
+          ? new Intl.DateTimeFormat("de-DE", {
+              dateStyle: "medium",
+              timeStyle: "short",
+              timeZone: "Europe/Berlin",
+            }).format(new Date(event.startsAt))
           : "Termin offen"}
       </p>
       <p class="min-w-0 truncate text-sm text-content-muted">

@@ -3,7 +3,6 @@ import { createRoot } from "solid-js"
 import { adminCatalogPageStateCreate } from "../src/admin/adminCatalogPageStateCreate.ts"
 import { adminTicketProductsFormStateCreate } from "../src/admin/adminTicketProductsFormStateCreate.ts"
 import type { AdminEventItem } from "../src/admin/AdminEventItem.ts"
-import { adminDateTimeIsoFromLocal } from "../src/admin/adminDateTimeIsoFromLocal.ts"
 
 describe("admin ticket products form state", () => {
   test("new tiers inherit event times and datetime-local changes round-trip through ISO", async () => {
@@ -47,9 +46,9 @@ describe("admin ticket products form state", () => {
           doorsAt: event.doorsAt,
           endsAt: event.endsAt,
         })
-        expect(form.startsAt()).toBe("2026-10-01T18:00")
+        expect(form.startsAt()).toBe("2026-10-01T20:00")
         form.startsAtChange("2026-10-03T19:30")
-        expect(catalog.tierDraft().startsAt).toBe(adminDateTimeIsoFromLocal("2026-10-03T19:30") ?? "")
+        expect(catalog.tierDraft().startsAt).toBe("2026-10-03T17:30:00.000Z")
         form.selectTier({
           id: "saved-ticket",
           name: "Saved ticket",
@@ -138,11 +137,11 @@ describe("admin ticket products form state", () => {
           {
             additionalDoorsAt: [
               {
-                startsAt: adminDateTimeIsoFromLocal("2026-10-01T17:00")!,
-                endsAt: adminDateTimeIsoFromLocal("2026-10-01T18:00")!,
+                startsAt: "2026-10-01T15:00:00.000Z",
+                endsAt: "2026-10-01T16:00:00.000Z",
               },
             ],
-            doorsAt: adminDateTimeIsoFromLocal("2026-10-01T18:00")!,
+            doorsAt: "2026-10-01T16:00:00.000Z",
           },
         ])
       } finally {
@@ -169,24 +168,24 @@ describe("admin ticket products form state", () => {
         form.additionalDoorsAtEndChange(0, "2026-10-01T18:00")
         form.additionalDoorsAtEndChange(0, "")
         expect(catalog.tierDraft().additionalDoorsAt[0]).toEqual({
-          startsAt: "2026-10-01T17:00:00.000Z",
+          startsAt: "2026-10-01T15:00:00.000Z",
           endsAt: "",
         })
         form.additionalDoorsAtEndChange(0, "2026-02-30T18:00")
         expect(catalog.tierDraft().additionalDoorsAt[0]).toEqual({
-          startsAt: "2026-10-01T17:00:00.000Z",
+          startsAt: "2026-10-01T15:00:00.000Z",
           endsAt: "",
         })
         form.additionalDoorsAtEndChange(0, "2026-10-01T18:00")
         form.additionalDoorsAtChange(0, "")
         expect(catalog.tierDraft().additionalDoorsAt[0]).toEqual({
           startsAt: "",
-          endsAt: "2026-10-01T18:00:00.000Z",
+          endsAt: "2026-10-01T16:00:00.000Z",
         })
         form.additionalDoorsAtChange(0, "2026-02-30T17:00")
         expect(catalog.tierDraft().additionalDoorsAt[0]).toEqual({
           startsAt: "",
-          endsAt: "2026-10-01T18:00:00.000Z",
+          endsAt: "2026-10-01T16:00:00.000Z",
         })
         expect(form.validationMessage()).toBe("Bitte gib ein gültiges Datum mit Uhrzeit ein.")
       } finally {
@@ -214,7 +213,7 @@ describe("admin ticket products form state", () => {
           available: 0,
           additionalDoorsAt: [{ startsAt: "2026-10-01T17:00:00.000Z", endsAt: "" }],
         })
-        expect(form.additionalDoorsAt()).toEqual([{ startsAt: "2026-10-01T17:00", endsAt: "" }])
+        expect(form.additionalDoorsAt()).toEqual([{ startsAt: "2026-10-01T19:00", endsAt: "" }])
         expect(form.priceEuro.get()).toBe("0,00")
         expect(form.feeEuro.get()).toBe("0,00")
       } finally {

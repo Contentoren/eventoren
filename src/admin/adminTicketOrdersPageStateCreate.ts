@@ -19,7 +19,11 @@ import { adminTicketOrderBookingReference } from "./adminTicketOrderBookingRefer
 import { eventorenAuthContext } from "#src/auth/ui/eventorenAuthContext.ts"
 
 const pageSize = 50
-const dateFormatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" })
+const dateFormatter = new Intl.DateTimeFormat("de-DE", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Europe/Berlin",
+})
 
 export function adminTicketOrdersPageStateCreate(
   inputs: {

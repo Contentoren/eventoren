@@ -42,11 +42,15 @@ describe("organizer event detail state", () => {
       expect(state.errorMessage()).toBe("")
       expect(state.currency(123_456)).toContain("1.234,56")
       expect(state.currency(123_456)).toContain("€")
-      expect(state.dateTime("2026-09-18T14:05:00.000Z")).toContain("18.09.2026")
+      expect(state.dateTime("2026-09-18T14:05:00.000Z")).toBe("18.09.2026, 16:05")
       const checkedInAt = state.selectedTicket()?.checkedInAt
       if (!checkedInAt) throw new Error("successful check-in must provide a timestamp")
       expect(state.dateTime(checkedInAt)).toBe(
-        new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" }).format(new Date(checkedInAt)),
+        new Intl.DateTimeFormat("de-DE", {
+          dateStyle: "medium",
+          timeStyle: "short",
+          timeZone: "Europe/Berlin",
+        }).format(new Date(checkedInAt)),
       )
       expect(state.dateTime(checkedInAt)).toMatch(/\d{1,2}:\d{2}/)
       expect(state.elapsed(125_000)).toBe("2 Min. 5 Sek.")

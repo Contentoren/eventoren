@@ -64,7 +64,9 @@ export function ScannerHelperManagement(props: { readonly code: string }) {
               />
             </label>
             <p class="text-sm text-content-muted">
-              Spätestens {new Date(state.context()?.expiresAt ?? 0).toLocaleString("de-DE")}; maximal ein Jahr ab jetzt.
+              Spätestens{" "}
+              {new Date(state.context()?.expiresAt ?? 0).toLocaleString("de-DE", { timeZone: "Europe/Berlin" })};
+              maximal ein Jahr ab jetzt.
             </p>
             <Button type="submit" disabled={state.pending()}>
               {state.pending() ? "Bitte warten …" : "Helferlink erstellen"}
@@ -93,7 +95,9 @@ export function ScannerHelperManagement(props: { readonly code: string }) {
                   .map((key) => state.context()?.events.find((event) => event.eventKey === key)?.title ?? key)
                   .join(", ")}
               </p>
-              <p class="text-sm">Ablauf: {new Date(helper.expiresAt).toLocaleString("de-DE")}</p>
+              <p class="text-sm">
+                Ablauf: {new Date(helper.expiresAt).toLocaleString("de-DE", { timeZone: "Europe/Berlin" })}
+              </p>
               <Show
                 when={helper.revokedAt || helper.expiresAt <= Date.now()}
                 fallback={

@@ -13,7 +13,11 @@ import { demoCatalogEvents } from "../fixtures/demoCatalogEvents.ts"
 import type { DemoFlowContextValue } from "./demoFlowContext.ts"
 import { demoFlowContextUse } from "./demoFlowContextUse.ts"
 
-const dateFormatter = new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" })
+const dateFormatter = new Intl.DateTimeFormat("de-DE", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Europe/Berlin",
+})
 
 export function demoAdminTicketOrdersPageStateCreate(inputs?: {
   readonly flow?: DemoFlowContextValue

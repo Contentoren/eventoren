@@ -103,10 +103,12 @@ test("demo organizer copy, legal fixtures, and member dates are German", () => {
 
   const state = demoAdminMemberManagementStateCreate()
   const date = new Date("2026-02-03T16:05:00.000Z")
-  expect(state.invitationFormat(date.toISOString())).toBe(
-    new Intl.DateTimeFormat("de-DE", { dateStyle: "medium", timeStyle: "short" }).format(date),
-  )
+  expect(state.invitationFormat(date.toISOString())).toBe("03.02.2026, 17:05")
   expect(state.invitationFormat(date.toISOString())).not.toBe(
-    new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "short" }).format(date),
+    new Intl.DateTimeFormat("en-GB", {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "Europe/Berlin",
+    }).format(date),
   )
 })

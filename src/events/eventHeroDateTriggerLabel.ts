@@ -1,4 +1,9 @@
-const formatter = new Intl.DateTimeFormat("de-DE", { weekday: "short", day: "2-digit", month: "short" })
+const formatter = new Intl.DateTimeFormat("de-DE", {
+  weekday: "short",
+  day: "2-digit",
+  month: "short",
+  timeZone: "Europe/Berlin",
+})
 
 export function eventHeroDateTriggerLabel(isoDate: string): string {
   const parsed = new Date(isoDate)

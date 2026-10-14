@@ -106,7 +106,7 @@ export function AdminScannerLinksPage(props: {
                   .map((key) => state.publishedEvents().find((event) => event.id === key)?.title ?? key)
                   .join(", ")}
               </p>
-              <p>Ablauf: {new Date(link.expiresAt).toLocaleString("de-DE")}</p>
+              <p>Ablauf: {new Date(link.expiresAt).toLocaleString("de-DE", { timeZone: "Europe/Berlin" })}</p>
               <Show
                 when={link.revokedAt || link.expiresAt <= Date.now()}
                 fallback={<ScannerLinkShareControls href={scannerLinkListHrefCreate(link.code)} name={link.name} />}
@@ -205,7 +205,7 @@ export function AdminScannerLinksPage(props: {
                         .map((key) => state.publishedEvents().find((event) => event.id === key)?.title ?? key)
                         .join(", ")}
                     </p>
-                    <p>Ablauf: {new Date(helper.expiresAt).toLocaleString("de-DE")}</p>
+                    <p>Ablauf: {new Date(helper.expiresAt).toLocaleString("de-DE", { timeZone: "Europe/Berlin" })}</p>
                     <Show
                       when={
                         parent.revokedAt ||

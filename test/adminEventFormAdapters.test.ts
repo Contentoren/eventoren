@@ -17,6 +17,19 @@ describe("admin event form adapters", () => {
     expect(adminDateTimeIsoFromLocal(localValue)).toBe(new Date(iso).toISOString())
   })
 
+  test("displays Berlin time and saves UTC regardless of the runtime timezone", () => {
+    expect(adminDateTimeLocalFromIso("2026-06-24T16:00:00.000Z")).toBe("2026-06-24T18:00")
+    expect(adminDateTimeIsoFromLocal("2026-06-24T18:00")).toBe("2026-06-24T16:00:00.000Z")
+    expect(adminDateTimeLocalFromIso("2026-12-24T16:00:00.000Z")).toBe("2026-12-24T17:00")
+    expect(adminDateTimeIsoFromLocal("2026-12-24T17:00")).toBe("2026-12-24T16:00:00.000Z")
+  })
+
+  test("rejects nonexistent Berlin summer-time input and preserves empty controls", () => {
+    expect(adminDateTimeIsoFromLocal("2026-03-29T02:30")).toBeNull()
+    expect(adminDateTimeIsoFromLocal("")).toBe("")
+    expect(adminDateTimeLocalFromIso("")).toBe("")
+  })
+
   test("serializes decimal comma, decimal point and zero as integer cents", () => {
     expect(adminEuroToCents("25,00")).toBe(2500)
     expect(adminEuroToCents("25,01")).toBe(2501)

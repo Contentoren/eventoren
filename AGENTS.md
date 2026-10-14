@@ -1,1 +1,2 @@
 - Reuse the components from `./ui` via `#ui/...` imports instead of writing custom ones.
+- Display timestamps and interpret datetime inputs explicitly in `Europe/Berlin` on all application and public pages, regardless of browser or server timezone. Persist instants in UTC and preserve date-only calendar values. Convex's internal runtime must remain UTC.
