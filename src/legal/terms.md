@@ -75,7 +75,7 @@ Alle auf der Plattform ausgewiesenen Preise sind Endpreise in Euro (EUR) und bei
 Die Zahlung erfolgt über die im Bestellprozess zur Verfügung gestellten Zahlungsmethoden (z. B. Kreditkarte, Apple Pay, Google Pay, PayPal, Klarna, Sofortüberweisung oder SEPA-Lastschrift). Die technische Abwicklung kann über externe, zertifizierte Zahlungsdienstleister erfolgen.
 
 **5.3 Zahlungsverzug, Rücklastschriften und Ticketsperre**  
-- Scheitert der Zahlungseinzug aus Gründen, die der Kunde zu vertreten hat (z. B. unzureichende Kontodeckung, unberechtigte Rücklastschrift, Rückbuchung oder fehlerhafte Angaben), ist der Kunde verpflichtet, Eventoren bzw. dem Veranstalter die dadurch entstandenen Bankgebühren sowie eine pauschale Bearbeitungsgebühr zu erstatten. Dem Kunden bleibt der Nachweis vorbehalten, dass kein oder ein wesentlich geringerer Schaden entstanden ist.
+- Scheitert der Zahlungseinzug (insbesondere bei SEPA-Lastschrift) aus Gründen, die der Kunde zu vertreten hat (z. B. unzureichende Kontodeckung, unberechtigter Widerspruch, Rückbuchung oder fehlerhafte Kontoangaben), ist der Kunde verpflichtet, Eventoren bzw. dem Veranstalter die dadurch entstandenen Bank- und Rücklastschriftgebühren in Form einer Pauschale von 4,00 € zu erstatten. Dem Kunden bleibt der Nachweis gestattet, dass kein oder ein wesentlich geringerer Schaden entstanden ist. Weitergehende gesetzliche Schadensersatzansprüche bleiben unberührt.
 - Eventoren ist in diesem Fall berechtigt, das Ticket unverzüglich mit sofortiger Wirkung digital zu sperren, die Einlassberechtigung zu entziehen und die Bestellung kostenpflichtig zu stornieren.
 
 **5.4 Gesetzlicher Ausschluss des Widerrufsrechts**  
