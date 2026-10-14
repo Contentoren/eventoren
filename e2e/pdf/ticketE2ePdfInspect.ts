@@ -16,7 +16,7 @@ const execFile = promisify(execFileCallback)
 
 export async function ticketE2ePdfInspect(pdf: Uint8Array): Promise<{
   text: string
-  pages: { page: number; text: string; qrPayload?: string }[]
+  pages: { page: number; text: string; qrPayload?: string; qrPayloads: string[] }[]
   decodedQrPayloads: string[]
 }> {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-pdf-"))
@@ -37,8 +37,8 @@ export async function ticketE2ePdfInspect(pdf: Uint8Array): Promise<{
     const pages = await Promise.all(
       pageFiles.map(async (filename, index) => {
         const raster = ppmRgbParse(await readFile(join(directory, filename)))
-        const qrPayload = ticketE2ePdfQrDecode(raster)
-        return { page: index + 1, text: textPages[index]?.trim() ?? "", qrPayload }
+        const qrPayloads = ticketE2ePdfQrDecode(raster)
+        return { page: index + 1, text: textPages[index]?.trim() ?? "", qrPayload: qrPayloads[0], qrPayloads }
       }),
     )
     return {
@@ -47,21 +47,16 @@ export async function ticketE2ePdfInspect(pdf: Uint8Array): Promise<{
         .filter(Boolean)
         .join("\n\n"),
       pages,
-      decodedQrPayloads: [...new Set(pages.flatMap((page) => (page.qrPayload ? [page.qrPayload] : [])))],
+      decodedQrPayloads: [...new Set(pages.flatMap((page) => page.qrPayloads))],
     }
   } finally {
     await rm(directory, { recursive: true, force: true })
   }
 }
 
-function ticketE2ePdfQrDecode(raster: { width: number; height: number; rgb: Int32Array }): string | undefined {
+function ticketE2ePdfQrDecode(raster: { width: number; height: number; rgb: Int32Array }): string[] {
   const reader = new MultiFormatReader()
   const source = new RGBLuminanceSource(raster.rgb, raster.width, raster.height)
-  // The delivered A4 ticket has a 58mm QR in the upper-right column. Isolate it
-  // from the text/table: ZXing's finder detector can mis-sample this crisp vector
-  // QR (FormatException), while PURE_BARCODE reads the actual rasterized modules.
-  const qrSize = Math.floor(raster.width * 0.29)
-  const ticketQr = source.crop(Math.floor(raster.width * 0.64), Math.floor(raster.height * 0.06), qrSize, qrSize)
   const pureHints = new Map<DecodeHintType, unknown>([
     [DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]],
     [DecodeHintType.TRY_HARDER, true],
@@ -71,8 +66,33 @@ function ticketE2ePdfQrDecode(raster: { width: number; height: number; rgb: Int3
     [DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]],
     [DecodeHintType.TRY_HARDER, true],
   ])
+  // The current A4 template places four 90 x 133.5mm cards on one page.
+  // Isolate each 31mm QR from the surrounding
+  // text. PURE_BARCODE avoids finder mis-sampling of rasterized vector QRs.
+  // Trim 2mm of its 3.75mm quiet zone: neighboring long detail values can
+  // otherwise enter the crop and corrupt PURE_BARCODE's black-pixel bounds.
+  const cardPayloads: string[] = []
+  for (const row of [0, 1]) {
+    for (const column of [0, 1]) {
+      const left = Math.floor(((65.5 + column * 96) / 210) * raster.width)
+      const top = Math.floor(((20 + row * 139.5) / 297) * raster.height)
+      const width = Math.ceil((27 / 210) * raster.width)
+      const height = Math.ceil((27 / 297) * raster.height)
+      if (left + width > raster.width || top + height > raster.height) continue
+      const region = source.crop(left, top, width, height)
+      try {
+        cardPayloads.push(reader.decode(new BinaryBitmap(new HybridBinarizer(region)), pureHints).getText())
+      } catch {
+        // Empty card slots and older ticket layouts have no QR in this crop.
+      }
+    }
+  }
+  if (cardPayloads.length) return [...new Set(cardPayloads)]
+  // Retain decoding for the previous single-ticket 58mm QR layout.
+  const qrSize = Math.floor(raster.width * 0.29)
+  const ticketQr = source.crop(Math.floor(raster.width * 0.64), Math.floor(raster.height * 0.06), qrSize, qrSize)
   try {
-    return reader.decode(new BinaryBitmap(new HybridBinarizer(ticketQr)), pureHints).getText()
+    return [reader.decode(new BinaryBitmap(new HybridBinarizer(ticketQr)), pureHints).getText()]
   } catch {
     // Other PDFs can place the QR elsewhere; keep searching the raster.
   }
@@ -93,12 +113,12 @@ function ticketE2ePdfQrDecode(raster: { width: number; height: number; rgb: Int3
   ]
   for (const region of regions) {
     try {
-      return reader.decode(new BinaryBitmap(new HybridBinarizer(region)), searchHints).getText()
+      return [reader.decode(new BinaryBitmap(new HybridBinarizer(region)), searchHints).getText()]
     } catch {
       // A page or region may have no QR; try the remaining raster regions.
     }
   }
-  return undefined
+  return []
 }
 
 function ppmRgbParse(bytes: Buffer): { width: number; height: number; rgb: Int32Array } {
