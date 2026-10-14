@@ -830,6 +830,50 @@ test("canonicalizes same-origin checkout return URLs before persistence", async 
   })
 })
 
+test("canonicalizes www checkout return URLs to the configured Eventoren origin", async () => {
+  environmentSet()
+  billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey743456789012345678901234"),
+    successUrl: "https://www.eventoren.test/checkout/success",
+    cancelUrl: "https://eventoren.test/checkout/cancel",
+  })
+
+  expect(result.success).toBe(true)
+  const orders = await t.run(async (ctx) => ctx.db.query("ticketOrders").collect())
+  expect(JSON.parse(orders[0]?.checkoutContextJson ?? "{}")).toMatchObject({
+    successUrl: "https://eventoren.test/checkout/success",
+    cancelUrl: "https://eventoren.test/checkout/cancel",
+  })
+})
+
+test("canonicalizes relative checkout return URLs to the configured Eventoren origin", async () => {
+  environmentSet()
+  billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+
+  const result = await t.action(api.ticketing.ticketCheckoutCreateAction, {
+    ...checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey753456789012345678901234"),
+    successUrl: "/checkout/success?result=paid#complete",
+    cancelUrl: "/checkout/cancel",
+  })
+
+  expect(result.success).toBe(true)
+  const orders = await t.run(async (ctx) => ctx.db.query("ticketOrders").collect())
+  expect(JSON.parse(orders[0]?.checkoutContextJson ?? "{}")).toMatchObject({
+    successUrl: "https://eventoren.test/checkout/success?result=paid#complete",
+    cancelUrl: "https://eventoren.test/checkout/cancel",
+  })
+})
+
 test("does not release a still-payable pending session, then issues exactly once after Billing paid", async () => {
   environmentSet()
   const billing = billingMock("pending")

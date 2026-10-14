@@ -283,7 +283,16 @@ function checkoutUrlsCanonicalize(
 }
 
 function checkoutUrlCanonicalize(value: string, expectedOrigin: string): string | undefined {
-  const url = new URL(value)
-  if (url.origin !== expectedOrigin) return undefined
-  return new URL(`${url.pathname}${url.search}${url.hash}`, expectedOrigin).toString()
+  try {
+    const expectedUrl = new URL(expectedOrigin)
+    const url = new URL(value, expectedOrigin)
+    const sameOrigin = url.origin === expectedOrigin
+    const sameSiteWwwVariant =
+      url.protocol === expectedUrl.protocol &&
+      (url.hostname === `www.${expectedUrl.hostname}` || `www.${url.hostname}` === expectedUrl.hostname)
+    if (!sameOrigin && !sameSiteWwwVariant) return undefined
+    return new URL(`${url.pathname}${url.search}${url.hash}`, expectedOrigin).toString()
+  } catch {
+    return undefined
+  }
 }
