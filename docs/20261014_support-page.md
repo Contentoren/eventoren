@@ -21,7 +21,7 @@ Provide a publicly accessible `/support` URL suitable for Stripe customer-suppor
 - Task 1: Project exploration and public website contact verification complete.
 - Task 2: Implementation complete.
 - Task 3: Static checks, independent review, targeted regression coverage, and desktop/mobile browser verification complete.
-- Task 4: Commit/push in progress; production frontend deployment pending.
+- Task 4: Feature committed and pushed; production frontend deployed and live support page verified.
 
 ## Current context
 - Working directory: `/home/leo/projects/eventoren`; initial branch `main` and working tree clean.
@@ -32,3 +32,5 @@ Provide a publicly accessible `/support` URL suitable for Stripe customer-suppor
 - `/support` uses the requested email, the published telephone `+49 30 58849210`, the operator postal address, and a link to the existing contact form. Existing contact-page and imprint email addresses remain unchanged.
 - Public footer integration includes root-footer suppression and demo footer destination handling to preserve existing layout behavior.
 - Existing footer regression coverage includes `/support` among the public SiteFrame routes.
+- Production support URL: `https://eventoren.de/support`.
+- Production deployment uses the committed support revision only; unrelated concurrent working-tree edits remain preserved and were excluded from deployment.
