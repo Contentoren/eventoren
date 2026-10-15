@@ -1,4 +1,6 @@
+import { mdiChevronDown } from "@adaptive-ds/mdi/mdiChevronDown.js"
 import { Key } from "@solid-primitives/keyed"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 import { classesDisabledDirectly } from "#ui/classes/classesDisabledDirectly.js"
 import type { SelectSingleNativeTexts } from "#ui/input/select/SelectSingleNativeTexts.js"
 import { selectSingleNativeTextDefault } from "#ui/input/select/SelectSingleNativeTexts.js"
@@ -29,26 +31,35 @@ export function SelectSingleNative(p: SelectSingleNativeProps) {
   const texts = p.texts ?? selectSingleNativeTextDefault
 
   return (
-    <select
-      id={p.id}
-      class={classArr(
-        "block w-full p-2.5",
-        "text-content", // text
-        "placeholder:text-muted-foreground", // text placeholder
-        "bg-surface-muted", // bg
-        "rounded-lg border border-input", // border
-        "focus:ring-ring focus:border-ring",
-        p.disabled && classesDisabledDirectly,
-        p.class,
-      )}
-      value={p.valueSignal.get()}
-      onChange={(e) => onChange(e, p)}
-      disabled={p.disabled}
-    >
-      <Key each={p.getOptions()} by={(item) => item} fallback={<NoItems texts={texts} />}>
-        {(getItem) => <SelectItem itemValue={getItem()} valueText={p.valueText} />}
-      </Key>
-    </select>
+    <div class="relative w-full min-w-0">
+      <select
+        id={p.id}
+        class={classArr(
+          "block w-full appearance-none p-2.5 pr-10",
+          "text-content", // text
+          "placeholder:text-muted-foreground", // text placeholder
+          "bg-surface-muted", // bg
+          "rounded-lg border border-input", // border
+          "focus:ring-ring focus:border-ring",
+          p.disabled && classesDisabledDirectly,
+          p.class,
+        )}
+        value={p.valueSignal.get()}
+        onChange={(e) => onChange(e, p)}
+        disabled={p.disabled}
+      >
+        <Key each={p.getOptions()} by={(item) => item} fallback={<NoItems texts={texts} />}>
+          {(getItem) => <SelectItem itemValue={getItem()} valueText={p.valueText} />}
+        </Key>
+      </select>
+      <Icon
+        path={mdiChevronDown}
+        class={classArr(
+          "pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-content",
+          p.disabled && "opacity-70",
+        )}
+      />
+    </div>
   )
 }
 
