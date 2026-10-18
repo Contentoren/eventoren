@@ -1,2 +1,3 @@
 - Reuse the components from `./ui` via `#ui/...` imports instead of writing custom ones.
 - Display timestamps and interpret datetime inputs explicitly in `Europe/Berlin` on all application and public pages, regardless of browser or server timezone. Persist instants in UTC and preserve date-only calendar values. Convex's internal runtime must remain UTC.
+- New features must be exposed by default via webui using Convex live query functions (not http endpoints) for real time updates, cli, hono http api, and client api ts library export, plus mcp when it exists; reuse the same valibot schemas (or thin derived wrappers for surface-specific coercion) for DRY; deviations must be noted with reason.
