@@ -28,6 +28,9 @@ test("demo shell and navigation copy stays German regardless of app language", (
     "groupCustomerTitle",
     "groupCustomerDescription",
     "groupCustomerEntry",
+    "groupPlatformTitle",
+    "groupPlatformDescription",
+    "groupPlatformEntry",
     "groupAdminTitle",
     "groupAdminDescription",
     "groupAdminEntry",
@@ -36,6 +39,7 @@ test("demo shell and navigation copy stays German regardless of app language", (
     "groupSharedEntry",
     "quickEntriesTitle",
     "quickEntryCustomer",
+    "quickEntryPlatform",
     "quickEntryAdmin",
     "quickEntryScanner",
   ] as const

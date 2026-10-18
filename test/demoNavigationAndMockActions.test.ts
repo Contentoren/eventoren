@@ -12,14 +12,16 @@ import { demoOrderStatusPageStateCreate } from "../src/demo/state/demoOrderStatu
 import { demoOrderHistoryPageStateCreate } from "../src/demo/state/demoOrderHistoryPageStateCreate.ts"
 
 describe("demo shared admin navigation", () => {
-  test("shared admin demo nav exposes all 5 admin destinations", () => {
+  test("shared admin demo nav exposes all admin destinations", () => {
     const state = demoAdminNavStateCreate({ pathname: () => "/demo/admin/events" })
     const items = state.items()
 
-    expect(items).toHaveLength(5)
+    expect(items).toHaveLength(7)
     expect(items.map((item) => item.href)).toEqual([
       "/demo/admin/orders",
       "/demo/admin/events",
+      "/demo/admin/organisationen",
+      "/demo/admin/auszahlungen",
       "/demo/admin/organizers",
       "/demo/admin/members",
       "/demo/admin/organizer",
@@ -27,6 +29,8 @@ describe("demo shared admin navigation", () => {
     expect(items.map((item) => item.label)).toEqual([
       "Bestellungen",
       "Events",
+      "Organisationen",
+      "Auszahlungen",
       "Veranstalter",
       "Mitglieder",
       "Ticket-Scanner",
@@ -42,6 +46,9 @@ describe("demo shared admin navigation", () => {
       { pathname: "/demo/admin/events-error", activeHref: "/demo/admin/events" },
       { pathname: "/demo/admin/events-unauthorized", activeHref: "/demo/admin/events" },
       { pathname: "/demo/admin/organizers", activeHref: "/demo/admin/organizers" },
+      { pathname: "/demo/admin/organisationen", activeHref: "/demo/admin/organisationen" },
+      { pathname: "/demo/admin/organisationen/org-lindenhof", activeHref: "/demo/admin/organisationen" },
+      { pathname: "/demo/admin/auszahlungen", activeHref: "/demo/admin/auszahlungen" },
       { pathname: "/demo/admin/members", activeHref: "/demo/admin/members" },
       { pathname: "/demo/admin/organizer", activeHref: "/demo/admin/organizer" },
       { pathname: "/demo/admin/organizer/event/xyz", activeHref: "/demo/admin/organizer" },

@@ -1,5 +1,6 @@
 import { useMatches } from "@tanstack/solid-router"
 import { useLocation } from "@tanstack/solid-router"
+import { demoRouteShellFullscreenRead } from "../demo/state/demoRouteShellStateCreate.ts"
 import { rootFooterShouldRender } from "./rootFooterShouldRender.ts"
 
 export function rootFooterStateCreate() {
@@ -7,7 +8,7 @@ export function rootFooterStateCreate() {
   const location = useLocation()
 
   return {
-    shouldRender: () => rootFooterShouldRender(matches()),
+    shouldRender: () => rootFooterShouldRender(matches()) && !demoRouteShellFullscreenRead(location().pathname),
     linkHref: () => (location().pathname.startsWith("/demo") ? demoRootFooterHref : undefined),
   }
 }

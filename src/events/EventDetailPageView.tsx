@@ -1,4 +1,5 @@
 import type { Accessor, JSX } from "solid-js"
+import { Show } from "solid-js"
 import type { TicketCart } from "../ticketing/TicketCart.ts"
 import { TicketCartSummary } from "../ticketing/TicketCartSummary.tsx"
 import { TicketStickyCta } from "../ticketing/TicketStickyCta.tsx"
@@ -7,7 +8,9 @@ import { UiContainer } from "../ui/UiContainer.tsx"
 import { EventDetailBanner } from "./EventDetailBanner.tsx"
 import { EventDetailHeader } from "./EventDetailHeader.tsx"
 import { EventDetailInfo } from "./EventDetailInfo.tsx"
+import type { EventFaqItem } from "./EventFaqItem.ts"
 import type { EventItem } from "./EventItem.ts"
+import type { EventScheduleItem } from "./EventScheduleItem.ts"
 
 export function EventDetailPageView(props: {
   event: EventItem
@@ -19,6 +22,12 @@ export function EventDetailPageView(props: {
     goToCheckout: () => void
   }
   breadcrumb?: JSX.Element
+  description?: JSX.Element
+  faqs?: readonly EventFaqItem[]
+  schedule?: readonly EventScheduleItem[]
+  organizerCard?: JSX.Element
+  notice?: JSX.Element
+  ticketsFooter?: JSX.Element
 }) {
   return (
     <main id="content" tabindex="-1" data-hydrated={props.state.hydrated?.() ? "true" : undefined}>
@@ -28,13 +37,22 @@ export function EventDetailPageView(props: {
       />
 
       <UiContainer class="flex flex-col gap-space-7 pt-space-3 pb-28 sm:py-space-7 lg:pb-space-7">
+        <Show when={props.notice}>{(notice) => <div role="status">{notice()}</div>}</Show>
         {props.breadcrumb}
         <EventDetailHeader event={props.event} />
 
         <div class="grid gap-space-7 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div class="flex flex-col gap-space-7">
             <TicketTierSelector event={props.event} cart={props.state.cart()} onCartChange={props.state.applyCart} />
-            <EventDetailInfo event={props.event} />
+            {props.ticketsFooter}
+            <EventDetailInfo
+              event={props.event}
+              description={props.description}
+              faqs={props.faqs}
+              schedule={props.schedule}
+            >
+              {props.organizerCard}
+            </EventDetailInfo>
           </div>
 
           <div class="lg:sticky lg:top-24 lg:self-start">

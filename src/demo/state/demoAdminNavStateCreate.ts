@@ -1,4 +1,5 @@
 import { mdiAccountGroupOutline } from "@adaptive-ds/mdi/mdiAccountGroupOutline.js"
+import { mdiBankTransfer } from "@adaptive-ds/mdi/mdiBankTransfer.js"
 import { mdiBarcodeScan } from "@adaptive-ds/mdi/mdiBarcodeScan.js"
 import { mdiCalendarOutline } from "@adaptive-ds/mdi/mdiCalendarOutline.js"
 import { mdiDomain } from "@adaptive-ds/mdi/mdiDomain.js"
@@ -25,6 +26,18 @@ export function demoAdminNavStateCreate(inputs: { readonly pathname: () => strin
           current === "/demo/admin/events-empty" ||
           current === "/demo/admin/events-error" ||
           current === "/demo/admin/events-unauthorized",
+      },
+      {
+        href: "/demo/admin/organisationen",
+        label: "Organisationen",
+        icon: mdiDomain,
+        active: current === "/demo/admin/organisationen" || current.startsWith("/demo/admin/organisationen/"),
+      },
+      {
+        href: "/demo/admin/auszahlungen",
+        label: "Auszahlungen",
+        icon: mdiBankTransfer,
+        active: current === "/demo/admin/auszahlungen" || current.startsWith("/demo/admin/auszahlungen/"),
       },
       {
         href: "/demo/admin/organizers",

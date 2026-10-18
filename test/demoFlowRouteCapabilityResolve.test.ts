@@ -104,6 +104,34 @@ test("demoFlowRouteCapabilityResolve marks static/client routes as non-data-load
   }
 })
 
+test("demoFlowRouteCapabilityResolve marks new platform routes as static", () => {
+  const platformRoutes = [
+    "/demo/dashboard",
+    "/demo/dashboard/events",
+    "/demo/dashboard/events/ev-jazz-wein",
+    "/demo/dashboard/events/ev-indie-night/einlass",
+    "/demo/dashboard/events/neu",
+    "/demo/onboarding",
+    "/demo/kasse/ev-indie-night",
+    "/demo/abendkasse/ev-indie-night",
+    "/demo/ui-kit-basis",
+    "/demo/ui-kit-dash",
+    "/demo/customer/veranstalter/kulturhaus-lindenhof",
+    "/demo/customer/veranstalter/kulturhaus-lindenhof/jazz-und-wein",
+    "/demo/customer/konto",
+    "/demo/admin/organisationen",
+    "/demo/admin/organisationen/org-lindenhof",
+    "/demo/admin/auszahlungen",
+  ]
+
+  for (const route of platformRoutes) {
+    const cap = demoFlowRouteCapabilityResolve(route)
+    expect(cap.isDataLoading).toBe(false)
+    expect(cap.supportedStates).toEqual([])
+    expect(cap.defaultState).toBe("loaded")
+  }
+})
+
 test("demoFlowRouteCapabilityResolve keeps legacy redirect defaults aligned", () => {
   const aliases = [
     ["/demo/events-empty", "/demo/customer/events-empty"],

@@ -9,6 +9,7 @@ export function demoRouteShellStateCreate() {
   const location = useLocation()
   const pathname = () => location().pathname
   const isDirectory = () => pathname() === "/demo" || pathname() === "/demo/"
+  const isFullscreen = () => demoRouteShellFullscreenRead(pathname())
   const currentId = () => {
     if (pathname() === "/demo/customer/events/missing") return "event-detail-missing"
     if (pathname().startsWith("/demo/customer/events/")) return "event-detail"
@@ -27,5 +28,18 @@ export function demoRouteShellStateCreate() {
   const search = () => location().searchStr
   const frame = demoSiteFrameStateCreate({ sessionRole, cartQuantity })
 
-  return { isDirectory, currentId, frame, pathname, search }
+  return { isDirectory, isFullscreen, currentId, frame, pathname, search }
+}
+
+export function demoRouteShellFullscreenRead(pathname: string) {
+  return (
+    demoRouteShellFullscreenSegmentRead("/demo/dashboard", pathname) ||
+    demoRouteShellFullscreenSegmentRead("/demo/onboarding", pathname) ||
+    demoRouteShellFullscreenSegmentRead("/demo/kasse", pathname) ||
+    demoRouteShellFullscreenSegmentRead("/demo/abendkasse", pathname)
+  )
+}
+
+function demoRouteShellFullscreenSegmentRead(prefix: string, pathname: string) {
+  return pathname === prefix || pathname.startsWith(`${prefix}/`)
 }

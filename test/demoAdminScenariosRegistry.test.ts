@@ -59,7 +59,48 @@ describe("demo scenarios registry and routing", () => {
     expect(adminUnauthorized?.path).toBe("/demo/admin/events-unauthorized")
   })
 
-  test("new admin routes resolve to 4-state data-loading capability", () => {
+  test("new platform scenarios exist with German copy", () => {
+    const platformDashboard = demoScenarios.find((s) => s.id === "platform-dashboard")
+    expect(platformDashboard).toBeDefined()
+    if (!platformDashboard) return
+    expect(platformDashboard.path).toBe("/demo/dashboard")
+    expect(platformDashboard.title).toBe("Veranstalter-Dashboard")
+    expect(demoScenarioText(platformDashboard).title).toBe("Veranstalter-Dashboard")
+
+    const account = demoScenarios.find((s) => s.id === "customer-account")
+    expect(account).toBeDefined()
+    if (!account) return
+    expect(account.path).toBe("/demo/customer/konto")
+    expect(account.title).toBe("Kundenkonto")
+
+    const orgs = demoScenarios.find((s) => s.id === "admin-orgs")
+    expect(orgs).toBeDefined()
+    if (!orgs) return
+    expect(orgs.path).toBe("/demo/admin/organisationen")
+    expect(orgs.title).toBe("Organisationen")
+
+    const payouts = demoScenarios.find((s) => s.id === "admin-payouts")
+    expect(payouts).toBeDefined()
+    if (!payouts) return
+    expect(payouts.path).toBe("/demo/admin/auszahlungen")
+    expect(payouts.title).toBe("Auszahlungen")
+  })
+
+  test("new platform admin routes resolve to static capability", () => {
+    const routes = [
+      "/demo/admin/organisationen",
+      "/demo/admin/organisationen/org-lindenhof",
+      "/demo/admin/auszahlungen",
+    ]
+    for (const route of routes) {
+      const capability = demoFlowRouteCapabilityResolve(route)
+      expect(capability.isDataLoading).toBe(false)
+      expect(capability.defaultState).toBe("loaded")
+      expect(capability.supportedStates).toEqual([])
+    }
+  })
+
+  test("existing new admin routes resolve to 4-state data-loading capability", () => {
     const routes = ["/demo/admin/orders", "/demo/admin/members", "/demo/admin/organizers"]
     for (const route of routes) {
       const capability = demoFlowRouteCapabilityResolve(route)

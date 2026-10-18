@@ -1,5 +1,6 @@
 import { Outlet } from "@tanstack/solid-router"
 import { Show } from "solid-js"
+import { Toaster } from "#ui/interactive/toast/Toaster.jsx"
 import { demoRouteShellStateCreate } from "../state/demoRouteShellStateCreate.ts"
 import { DemoControls } from "./DemoControls.tsx"
 import { DemoFlowProvider } from "./DemoFlowProvider.tsx"
@@ -12,14 +13,17 @@ export function DemoRouteShell() {
 
   return (
     <DemoFlowProvider pathname={state.pathname} search={state.search}>
+      <Toaster />
       <Show
         when={state.isDirectory()}
         fallback={
-          <SiteFrame header={state.frame.header} footerLinkHref={state.frame.footerLinkHref}>
-            <DemoNavbarControls />
-            <DemoControls currentId={state.currentId} />
-            <Outlet />
-          </SiteFrame>
+          <Show when={!state.isFullscreen()} fallback={<Outlet />}>
+            <SiteFrame header={state.frame.header} footerLinkHref={state.frame.footerLinkHref}>
+              <DemoNavbarControls />
+              <DemoControls currentId={state.currentId} />
+              <Outlet />
+            </SiteFrame>
+          </Show>
         }
       >
         <DemoShell currentId="directory">

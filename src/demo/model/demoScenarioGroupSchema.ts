@@ -2,7 +2,7 @@ import * as v from "valibot"
 import { demoScenarioSchema } from "./demoScenarioSchema.js"
 
 export const demoScenarioGroupSchema = v.strictObject({
-  id: v.picklist(["customer", "admin", "shared"]),
+  id: v.picklist(["customer", "platform", "admin", "shared"]),
   title: v.pipe(v.string(), v.minLength(1)),
   description: v.pipe(v.string(), v.minLength(1)),
   entryPath: v.pipe(v.string(), v.minLength(1)),

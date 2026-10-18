@@ -26,9 +26,13 @@ type DemoTextKey =
   | "controlsTitle"
   | "controlsClose"
   | "controlsDirectory"
+  | "controlsResetDemo"
   | "groupCustomerTitle"
   | "groupCustomerDescription"
   | "groupCustomerEntry"
+  | "groupPlatformTitle"
+  | "groupPlatformDescription"
+  | "groupPlatformEntry"
   | "groupAdminTitle"
   | "groupAdminDescription"
   | "groupAdminEntry"
@@ -37,6 +41,7 @@ type DemoTextKey =
   | "groupSharedEntry"
   | "quickEntriesTitle"
   | "quickEntryCustomer"
+  | "quickEntryPlatform"
   | "quickEntryAdmin"
   | "quickEntryScanner"
 
@@ -61,9 +66,13 @@ const texts: Record<DemoUiTextKey, string> = {
   controlsTitle: "Demo-Navigation",
   controlsClose: "Schließen",
   controlsDirectory: "Zum Demo-Verzeichnis",
+  controlsResetDemo: "Plattform-Demo zurücksetzen",
   groupCustomerTitle: "Kunden",
   groupCustomerDescription: "Ticketkauf, Evententdeckung, Warenkorb, Kasse und persönliche Bestellhistorie.",
   groupCustomerEntry: "Zum Eventkatalog",
+  groupPlatformTitle: "Veranstalter-Plattform",
+  groupPlatformDescription: "Dashboard, Onboarding, Kassenmodus und Abendkasse für Veranstalter.",
+  groupPlatformEntry: "Zum Veranstalter-Dashboard",
   groupAdminTitle: "Administration (inkl. Ticket-Scan)",
   groupAdminDescription: "Eventkatalogverwaltung, Bestellungen, Mitgliederverwaltung und Einlasskontrolle.",
   groupAdminEntry: "Zur Katalogverwaltung",
@@ -72,6 +81,7 @@ const texts: Record<DemoUiTextKey, string> = {
   groupSharedEntry: "Zu Kontakt & FAQ",
   quickEntriesTitle: "Direkte Einstiege",
   quickEntryCustomer: "Kunden-Flow",
+  quickEntryPlatform: "Veranstalter-Dashboard",
   quickEntryAdmin: "Administration",
   quickEntryScanner: "Ticket-Scanner",
 }

@@ -67,6 +67,54 @@ const scenarioTexts: Partial<Record<DemoScenario["id"], DemoScenarioCopy>> = {
     title: "Bestellstatus-Fehler",
     detail: "Fehler beim Laden des Produktionszustands anzeigen",
   },
+  "platform-dashboard": {
+    title: "Veranstalter-Dashboard",
+    detail: "Übersicht, Events, Bestellungen und Finanzen",
+  },
+  "platform-event": {
+    title: "Event verwalten",
+    detail: "Tickets, Codes, Bestellungen und Abrechnung",
+  },
+  "platform-live": {
+    title: "Live-Einlass",
+    detail: "Check-ins und abgelehnte Scans in Echtzeit",
+  },
+  "platform-wizard": {
+    title: "Event erstellen",
+    detail: "Assistent in drei Schritten",
+  },
+  "platform-onboarding": {
+    title: "Veranstalter-Onboarding",
+    detail: "Registrierung, Organisation, Angaben und Verträge",
+  },
+  "platform-box-office": {
+    title: "Kassenmodus",
+    detail: "Abendkasse am Eingang mit QR-Zahlung",
+  },
+  "platform-box-office-guest": {
+    title: "Abendkasse (Gast)",
+    detail: "Ticketkauf am eigenen Handy",
+  },
+  "customer-organizer-profile": {
+    title: "Veranstalterprofil",
+    detail: "Öffentliches Profil mit Events und Social Links",
+  },
+  "customer-organizer-event": {
+    title: "Event-Vorschau",
+    detail: "Eventseite aus Dashboard-Daten",
+  },
+  "customer-account": {
+    title: "Kundenkonto",
+    detail: "Tickets, Bestellungen und Profil",
+  },
+  "admin-orgs": {
+    title: "Organisationen",
+    detail: "Veranstalter freigeben, Gebühren und Steuern",
+  },
+  "admin-payouts": {
+    title: "Auszahlungen",
+    detail: "Auszahlungen nach Eventende",
+  },
   admin: {
     title: "Katalogverwaltung",
     detail: "Event bearbeiten, Ticketprodukte aktualisieren und lokale Änderungen veröffentlichen",

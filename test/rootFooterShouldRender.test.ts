@@ -84,6 +84,35 @@ test("root footer is omitted for every SiteFrame-owned route", () => {
   }
 })
 
+test("root footer is omitted for every nested demo route id", () => {
+  const nestedDemoRouteIds = [
+    "/demo/customer_/konto",
+    "/demo/customer_/veranstalter_/$orgSlug",
+    "/demo/customer_/veranstalter_/$orgSlug_/$eventSlug",
+    "/demo/admin_/organisationen",
+    "/demo/admin_/organisationen_/$orgId",
+    "/demo/admin_/auszahlungen",
+    "/demo/admin_/veranstalter",
+    "/demo/admin_/mitglieder",
+    "/demo/ui-kit-basis",
+    "/demo/ui-kit-dash",
+    "/demo/ui-kit-dash-bausteine",
+    "/demo/ui-kit-diagramme",
+    "/demo/ui-kit-eingaben",
+    "/demo/ui-kit-menues",
+    "/demo/ui-kit-overlays",
+    "/demo/ui-kit-tabelle",
+    "/demo/some-future-page",
+  ] as const
+  for (const routeId of nestedDemoRouteIds) {
+    expect(rootFooterShouldRender([{ routeId, status: "success" }])).toBe(false)
+  }
+})
+
+test("root footer remains for the demo directory", () => {
+  expect(rootFooterShouldRender([{ routeId: "/demo", status: "success" }])).toBe(true)
+})
+
 test("root footer remains for root-only routes", () => {
   expect(rootFooterShouldRender([{ routeId: "/privacy", status: "success" }])).toBe(true)
   expect(rootFooterShouldRender([{ routeId: "/terms", status: "success" }])).toBe(true)

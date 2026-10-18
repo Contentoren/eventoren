@@ -10,6 +10,11 @@ export function demoDirectoryStateCreate() {
       badge: "Kunden",
     },
     {
+      title: demoText("quickEntryPlatform"),
+      path: "/demo/dashboard",
+      badge: "Veranstalter",
+    },
+    {
       title: demoText("quickEntryAdmin"),
       path: "/demo/admin/events",
       badge: "Admin",

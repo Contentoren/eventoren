@@ -7,7 +7,7 @@ export type DemoFlowRouteCapability = {
   readonly defaultState: DemoFlowState
 }
 
-const staticRoutes = new Set([
+const staticRoutePaths = [
   "/demo",
   "/demo/customer/cart",
   "/demo/customer/cart-empty",
@@ -23,7 +23,27 @@ const staticRoutes = new Set([
   "/demo/abiball-2027",
   "/demo/admin/events/new",
   "/demo/admin/events-unauthorized",
-])
+]
+
+const staticRoutePrefixes = [
+  "/demo/dashboard",
+  "/demo/onboarding",
+  "/demo/kasse",
+  "/demo/abendkasse",
+  "/demo/customer/veranstalter",
+  "/demo/customer/konto",
+  "/demo/admin/organisationen",
+  "/demo/admin/auszahlungen",
+]
+
+const staticRoutes = new Set(staticRoutePaths)
+
+function demoFlowRouteStaticRead(normalized: string) {
+  if (staticRoutes.has(normalized)) return true
+  if (normalized.startsWith("/demo/ratgeber") || normalized.startsWith("/demo/auth")) return true
+  if (normalized.startsWith("/demo/ui-kit-")) return true
+  return staticRoutePrefixes.some((prefix) => normalized === prefix || normalized.startsWith(`${prefix}/`))
+}
 
 const legacyRouteAliases = new Map([
   ["/demo/events", "/demo/customer/events"],
@@ -76,7 +96,7 @@ export function demoFlowRouteCapabilityResolve(pathname: string): DemoFlowRouteC
     }
   }
 
-  if (staticRoutes.has(normalized) || normalized.startsWith("/demo/ratgeber") || normalized.startsWith("/demo/auth")) {
+  if (demoFlowRouteStaticRead(normalized)) {
     return {
       isDataLoading: false,
       supportedStates: [],

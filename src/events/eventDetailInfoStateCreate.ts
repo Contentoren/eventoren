@@ -8,7 +8,11 @@ import { eventHighlightsGet } from "./eventHighlightsGet.ts"
 import { eventInclusionsGet } from "./eventInclusionsGet.ts"
 import { eventScheduleGet } from "./eventScheduleGet.ts"
 
-export function eventDetailInfoStateCreate(inputs: { event: () => EventItem }) {
+export function eventDetailInfoStateCreate(inputs: {
+  event: () => EventItem
+  faqs?: () => readonly EventFaqItem[] | undefined
+  schedule?: () => readonly EventScheduleItem[] | undefined
+}) {
   const [expandedHighlights, setExpandedHighlights] = createSignal<readonly number[]>([])
   const [expandedFaqIds, setExpandedFaqIds] = createSignal<readonly string[]>([])
   const [isInclusionsExpanded, setIsInclusionsExpanded] = createSignal(true)
@@ -22,9 +26,11 @@ export function eventDetailInfoStateCreate(inputs: { event: () => EventItem }) {
   const hasInclusions = createMemo(() => inclusions().length > 0)
   const exclusions = createMemo<readonly string[]>(() => eventExclusionsGet(inputs.event()))
   const hasExclusions = createMemo(() => exclusions().length > 0)
-  const schedule = createMemo<readonly EventScheduleItem[]>(() => eventScheduleGet(inputs.event()))
+  const schedule = createMemo<readonly EventScheduleItem[]>(
+    () => inputs.schedule?.() ?? eventScheduleGet(inputs.event()),
+  )
   const hasSchedule = createMemo(() => schedule().length > 0)
-  const faqs = createMemo<readonly EventFaqItem[]>(() => eventFaqsGet(inputs.event()))
+  const faqs = createMemo<readonly EventFaqItem[]>(() => inputs.faqs?.() ?? eventFaqsGet(inputs.event()))
   const hasFaqs = createMemo(() => faqs().length > 0)
 
   const isHighlightExpanded = (index: number) => expandedHighlights().includes(index)

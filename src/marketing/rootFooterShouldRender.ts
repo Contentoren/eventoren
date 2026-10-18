@@ -81,8 +81,18 @@ const siteFrameRouteIds = new Set([
   "/demo/abiball-2027",
 ])
 
+// Every page under the /demo layout renders inside the DemoRouteShell
+// SiteFrame (except the /demo directory itself, which uses DemoShell, and
+// fullscreen demo routes, which hide the root footer by pathname in
+// rootFooterStateCreate). Suppress the root footer for any nested demo
+// route id so new demo pages do not need to be enumerated here.
+function rootFooterIsSiteFrameRoute(routeId: string) {
+  if (siteFrameRouteIds.has(routeId)) return true
+  return routeId.startsWith("/demo/") && routeId !== "/demo/"
+}
+
 export function rootFooterShouldRender(matches: readonly RootFooterMatch[]) {
   return !matches.some(
-    (match) => siteFrameRouteIds.has(match.routeId) || match.status === "notFound" || match._notFound === true,
+    (match) => rootFooterIsSiteFrameRoute(match.routeId) || match.status === "notFound" || match._notFound === true,
   )
 }

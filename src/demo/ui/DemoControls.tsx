@@ -1,7 +1,9 @@
 import { Link } from "@tanstack/solid-router"
+import { mdiRestore } from "@adaptive-ds/mdi/mdiRestore.js"
 import { For, Show } from "solid-js"
 import { Portal } from "solid-js/web"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 import { demoScenarioText } from "../model/demoScenarioText.ts"
 import { demoControlsStateCreate } from "../state/demoControlsStateCreate.ts"
 
@@ -78,6 +80,16 @@ export function DemoControls(props: { readonly currentId: string | (() => string
                         </Link>
                       )}
                     </For>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      class="focus-ring flex items-center justify-start gap-space-2 rounded-control px-space-3 py-space-1.5 text-xs font-medium text-brand-accent hover:bg-surface-muted"
+                      onClick={state.resetDemo}
+                    >
+                      <Icon path={mdiRestore} class="size-4" />
+                      {state.resetDemoText()}
+                    </Button>
                   </div>
                 </div>
 

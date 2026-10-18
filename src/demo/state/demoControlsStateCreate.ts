@@ -2,7 +2,11 @@ import { createSignalObject } from "#ui/utils/createSignalObject.ts"
 import { demoScenarioGroupListGet } from "../model/demoScenarioGroupListGet.ts"
 import { demoText } from "../model/demoText.ts"
 
-export function demoControlsStateCreate(input?: { readonly currentId?: () => string }) {
+export function demoControlsStateCreate(input?: {
+  readonly currentId?: () => string
+  readonly location?: { reload: () => void }
+  readonly reset?: () => void
+}) {
   const open = createSignalObject(false)
   const hidden = demoControlsHiddenRead()
   const groups = () => demoScenarioGroupListGet()
@@ -12,6 +16,11 @@ export function demoControlsStateCreate(input?: { readonly currentId?: () => str
       title: demoText("quickEntryCustomer"),
       path: "/demo/customer/events",
       badge: "Kunden",
+    },
+    {
+      title: demoText("quickEntryPlatform"),
+      path: "/demo/dashboard",
+      badge: "Veranstalter",
     },
     {
       title: demoText("quickEntryAdmin"),
@@ -30,6 +39,24 @@ export function demoControlsStateCreate(input?: { readonly currentId?: () => str
     return input.currentId() === id
   }
 
+  const resetDemo = () => {
+    const reload = () => {
+      const location = input?.location ?? (typeof window !== "undefined" ? window.location : undefined)
+      location?.reload()
+    }
+    if (input?.reset) {
+      input.reset()
+      reload()
+      return
+    }
+    // Dynamisch, damit Demo-Seiten ohne Dashboard-Store kein statisches Gewicht tragen.
+    // dashStoreReset() schreibt synchron, daher läuft reload() erst nach dem Reset.
+    void import("../../dash/store/dashStoreReset.ts").then((module) => {
+      module.dashStoreReset()
+      reload()
+    })
+  }
+
   return {
     open: open.get,
     hidden,
@@ -43,6 +70,8 @@ export function demoControlsStateCreate(input?: { readonly currentId?: () => str
     closeText: () => demoText("controlsClose"),
     directoryText: () => demoText("controlsDirectory"),
     quickEntriesTitle: () => demoText("quickEntriesTitle"),
+    resetDemoText: () => demoText("controlsResetDemo"),
+    resetDemo,
   }
 }
 

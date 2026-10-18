@@ -9,9 +9,23 @@ export function demoScenarioGroupListGet(
   const filtered = scenarios.filter((scenario) => scenario.id !== "directory")
 
   const customerScenarios = filtered.filter((scenario) => scenario.path.startsWith("/demo/customer/"))
-  const adminScenarios = filtered.filter((scenario) => scenario.path.startsWith("/demo/admin/"))
+  const platformScenarios = filtered.filter(
+    (scenario) =>
+      scenario.path === "/demo/dashboard" ||
+      scenario.path.startsWith("/demo/dashboard/") ||
+      scenario.path === "/demo/onboarding" ||
+      scenario.path.startsWith("/demo/kasse/") ||
+      scenario.path.startsWith("/demo/abendkasse/"),
+  )
+  const sharedCustomerPlatformAdminExcluded = new Set([
+    ...customerScenarios.map((scenario) => scenario.id),
+    ...platformScenarios.map((scenario) => scenario.id),
+  ])
+  const adminScenarios = filtered.filter(
+    (scenario) => scenario.path.startsWith("/demo/admin/") && !sharedCustomerPlatformAdminExcluded.has(scenario.id),
+  )
   const sharedScenarios = filtered.filter(
-    (scenario) => !scenario.path.startsWith("/demo/customer/") && !scenario.path.startsWith("/demo/admin/"),
+    (scenario) => !sharedCustomerPlatformAdminExcluded.has(scenario.id) && !scenario.path.startsWith("/demo/admin/"),
   )
 
   return [
@@ -22,6 +36,14 @@ export function demoScenarioGroupListGet(
       entryPath: "/demo/customer/events",
       entryLabel: demoText("groupCustomerEntry"),
       scenarios: customerScenarios,
+    },
+    {
+      id: "platform",
+      title: demoText("groupPlatformTitle"),
+      description: demoText("groupPlatformDescription"),
+      entryPath: "/demo/dashboard",
+      entryLabel: demoText("groupPlatformEntry"),
+      scenarios: platformScenarios,
     },
     {
       id: "admin",

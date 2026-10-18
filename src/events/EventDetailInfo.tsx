@@ -1,11 +1,23 @@
 import { For, type JSX, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { classArr } from "../ui/classArr.ts"
+import type { EventFaqItem } from "./EventFaqItem.ts"
 import type { EventItem } from "./EventItem.ts"
+import type { EventScheduleItem } from "./EventScheduleItem.ts"
 import { eventDetailInfoStateCreate } from "./eventDetailInfoStateCreate.ts"
 
-export function EventDetailInfo(props: { event: EventItem; children?: JSX.Element }) {
-  const state = eventDetailInfoStateCreate({ event: () => props.event })
+export function EventDetailInfo(props: {
+  event: EventItem
+  children?: JSX.Element
+  description?: JSX.Element
+  faqs?: readonly EventFaqItem[]
+  schedule?: readonly EventScheduleItem[]
+}) {
+  const state = eventDetailInfoStateCreate({
+    event: () => props.event,
+    faqs: () => props.faqs,
+    schedule: () => props.schedule,
+  })
 
   return (
     <div class="flex flex-col gap-space-7">
@@ -13,7 +25,14 @@ export function EventDetailInfo(props: { event: EventItem; children?: JSX.Elemen
         <h2 id="event-description" class="text-xl font-semibold text-content">
           Über dieses Event
         </h2>
-        <p class="whitespace-pre-line text-base leading-relaxed text-content-muted">{state.description()}</p>
+        <Show
+          when={props.description}
+          fallback={
+            <p class="whitespace-pre-line text-base leading-relaxed text-content-muted">{state.description()}</p>
+          }
+        >
+          {(description) => <div class="text-base leading-relaxed text-content-muted">{description()}</div>}
+        </Show>
 
         <Show when={state.hasHighlights()}>
           <div class="flex flex-col gap-space-3 pt-space-2">
