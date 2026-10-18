@@ -13,6 +13,7 @@ import { dashStateGet } from "../../store/dashStateGet.ts"
 import { dashEventCreateFromWizard } from "../../store/actions/wizard/dashEventCreateFromWizard.ts"
 import { dashTemplateToWizard, type DashWizardTicketDraft } from "../../store/actions/wizard/dashTemplateToWizard.ts"
 import { dashWizardDraftCreate, dashWizardDraftSchema } from "../../store/actions/wizard/dashWizardDraft.ts"
+import { dashWizardEndDefault } from "./model/dashWizardEndDefault.ts"
 
 const wizardStorageKey = "eventoren-demo-wizard"
 
@@ -396,6 +397,14 @@ export function dashWizardPageStateCreate(inputs: {
     void navigate({ to: "/demo/dashboard/events" })
   }
 
+  const setStartsAt = (iso: string | null) => {
+    startsAt.set(iso)
+    // Ende leer oder ≤ Beginn → Beginn + 3 h; ein späteres Ende bleibt; Einlass bleibt leer.
+    const nextEnd = dashWizardEndDefault({ startsAt: iso, endsAt: endsAt.get() })
+    if (nextEnd !== endsAt.get()) endsAt.set(nextEnd)
+    markDirty()
+  }
+
   const setTitle = (value: string) => {
     title.set(value)
     if (!imageAltTouched.get()) imageAlt.set(value)
@@ -569,6 +578,7 @@ export function dashWizardPageStateCreate(inputs: {
     ticketErrors,
     basisValid,
     ticketsValid,
+    setStartsAt,
     setTitle,
     updateTicket,
     addTicketRow,

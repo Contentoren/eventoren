@@ -92,10 +92,7 @@ export function DashWizardStepBasis(p: { state: DashWizardPageState }) {
                 <DashDateTimeInput
                   id="wizard-starts"
                   valueIso={state.startsAt.get()}
-                  onChange={(iso) => {
-                    state.startsAt.set(iso)
-                    state.markDirty()
-                  }}
+                  onChange={(iso) => state.setStartsAt(iso)}
                   invalid={errors().startsAt !== undefined}
                 />
               </DashField>
