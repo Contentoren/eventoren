@@ -1,6 +1,6 @@
 # Veranstalter-Dashboard – interaktive Demo
 
-Status: umgesetzt (A–E4). Offen sind nur Commits und Deploy (E5/E6).
+Status: fertig und live auf https://eventoren.de/demo/dashboard (Commit `697bc5d`, Pages-Deployment `d4c6e0ba`, 19.10.2026).
 
 ## Ziel
 
@@ -1320,4 +1320,5 @@ Für alle Aufgaben gilt:
 - [x] E4b Abschluss-Checks (Format, Typen, Regeln, Tests, Baseline) · [x] E4c (A11y der Kassenkacheln) · [x] AGENTS.md wiederhergestellt
 - [x] E4a Produktions-Build (`bun run build` grün, SSR-Check ok, lokaler Pages-Smoke-Test 200). Offen: `shared-ui:check` in `DashKasseView.tsx` (E3-F2 behebt das), ein Chunk mit 518 kB (`organizerEventDetailPageStateCreate`).
 - [x] E3 (6/6 Szenarien bestanden) · [x] E3-F1 (Reset-Wettlauf zwischen Tabs, Marker `resetAt`) · [x] E3-F2 (Kasse bei verdecktem Tab, Assistent Ende = Beginn + 3 h)
+- [x] E5 Commits (`e47efc2`, `0070d86`, `6ced820`, `c87c4ac`, `7e64d97`, `697bc5d`, gepusht nach origin/main) · [x] E6 Frontend-Deploy Produktion (alle Live-Seiten 200)
 - [x] E0 · [x] E0b · [x] E1 (E1a + E1b) · E2: [x] A1 · [x] A2 · [x] A3 · [x] D · [x] E · [x] F · [x] G · [x] B · [x] B2 · [x] C · [x] H · [x] I · [x] J · [x] K · [x] L · [x] M · [x] N · [ ] E2 · [ ] E3 · [ ] E4 · [ ] E5 · [ ] E6
