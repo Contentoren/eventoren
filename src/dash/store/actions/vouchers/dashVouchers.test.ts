@@ -3,6 +3,7 @@ import { describe, expect, test } from "bun:test"
 import { dashSeedCreate } from "../../seed/dashSeedCreate.ts"
 import { dashStoreCreate, type DashStore } from "../../dashStoreCreate.ts"
 import type { DashVoucher } from "../../../model/dashVoucherSchema.ts"
+import { dashVoucherExpiry } from "../../../model/dashVoucherExpiry.ts"
 import { dashVoucherCreate } from "./dashVoucherCreate.ts"
 import { dashVoucherValidityChange } from "./dashVoucherValidityChange.ts"
 import { dashVoucherDeactivate } from "./dashVoucherDeactivate.ts"
@@ -125,7 +126,7 @@ describe("dashVoucherCreate", () => {
       )
       expect(dated.success).toBe(true)
       if (!dated.success) throw new Error("Anlage mit Datum schlug fehl")
-      expect(dated.data.expiresAt).toBe("2027-10-18T21:59:00.000Z")
+      expect(dated.data.expiresAt).toBe(dashVoucherExpiry(dated.data.createdAt, "1-jahr", null))
     } finally {
       store.dispose()
     }

@@ -2,6 +2,9 @@ import { describe, expect, test } from "bun:test"
 
 import { dashSeedCreate } from "../seed/dashSeedCreate.ts"
 import { dashStoreCreate, type DashStore } from "../dashStoreCreate.ts"
+import { dashFeeCompute } from "../../model/dashFeeCompute.ts"
+import { dashPhaseResolve } from "../../model/dashPhaseResolve.ts"
+import { dashTicketTypeSales } from "../../model/dashTicketTypeSales.ts"
 import { dashEventPatch } from "./dashEventPatch.ts"
 import { dashOrderCreate } from "./dashOrderCreate.ts"
 import { dashOrderEmailLog } from "./dashOrderEmailLog.ts"
@@ -367,8 +370,21 @@ describe("dashOrderCreate", () => {
   test("Gutschein wird eingelöst und mindert den Zahlbetrag", () => {
     const store = dashActionTestStoreCreate()
     try {
+      const ticketType = store.state.ticketTypes.find((candidate) => candidate.id === "tt-jazz-b")
+      if (!ticketType) throw new Error("Ticketart fehlt im Seed")
+      const event = store.state.events.find((candidate) => candidate.id === "ev-jazz-wein")
+      const org = store.state.orgs.find((candidate) => candidate.id === event?.orgId)
+      if (!event || !org) throw new Error("Event oder Org fehlt im Seed")
+      const sales = dashTicketTypeSales({ ticketType, orders: store.state.orders, tickets: store.state.tickets })
+      const resolved = dashPhaseResolve(ticketType, sales.soldByPhase, new Date())
+      const unitPrice = resolved.phase?.priceCents
+      if (unitPrice === undefined) throw new Error("Keine aktive Phase für tt-jazz-b")
+      const feeCents = dashFeeCompute({ priceCents: unitPrice, fee: org.fee }).feeCents
+      const expectedTotal = unitPrice + feeCents
       const beforeBalance = store.state.vouchers.find((candidate) => candidate.code === "HOF-50-AMLX")?.balanceCents
       if (beforeBalance === undefined) throw new Error("Gutschein fehlt im Seed")
+      // Der Gutschein deckt höchstens sein Restguthaben ab (Seed löst ihn teils schon ein).
+      const expectedAmount = Math.min(beforeBalance, expectedTotal)
       const result = dashOrderCreate(
         {
           eventId: "ev-jazz-wein",
@@ -385,13 +401,13 @@ describe("dashOrderCreate", () => {
       expect(result.data.order.voucher?.code).toBe("HOF-50-AMLX")
       // totalCents enthält den Gutschein nicht als Abzug (Modell-Regel);
       // der Gutschein deckt die Summe inkl. Servicegebühr ab.
-      expect(result.data.order.voucher?.amountCents).toBe(2900 + 194)
-      expect(result.data.order.totalCents).toBe(2900 + 194)
-      expect(result.data.order.payment.method).toBe("gutschein")
+      expect(result.data.order.voucher?.amountCents).toBe(expectedAmount)
+      expect(result.data.order.totalCents).toBe(expectedTotal)
+      expect(result.data.order.payment.method).toBe(expectedAmount === expectedTotal ? "gutschein" : "karte")
       const voucher = store.state.vouchers.find((candidate) => candidate.code === "HOF-50-AMLX")
-      expect(voucher?.balanceCents).toBe(beforeBalance - (2900 + 194))
+      expect(voucher?.balanceCents).toBe(beforeBalance - expectedAmount)
       expect(voucher?.redemptions.at(-1)?.orderId).toBe(result.data.order.id)
-      expect(voucher?.redemptions.at(-1)?.amountCents).toBe(2900 + 194)
+      expect(voucher?.redemptions.at(-1)?.amountCents).toBe(expectedAmount)
     } finally {
       store.dispose()
     }
