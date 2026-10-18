@@ -89,11 +89,49 @@ export function dashKasseStateCreate(inputs: {
     inputs.onSaleIdChange?.(id)
   }
 
+  // Erfolgs-Reset: Der 4-s-Timer läuft erst, wenn der Tab sichtbar ist – sonst wartet
+  // die Kasse auf `visibilitychange` → sichtbar. Tippen setzt sofort zurück.
+  let successTimer: number | null = null
+  let successVisibleHandler: (() => void) | null = null
+
+  const clearSuccessTimer = () => {
+    if (typeof window !== "undefined" && successTimer !== null) window.clearTimeout(successTimer)
+    successTimer = null
+    if (typeof document !== "undefined" && successVisibleHandler) {
+      document.removeEventListener("visibilitychange", successVisibleHandler)
+      successVisibleHandler = null
+    }
+  }
+
   const resetSelection = () => {
+    clearSuccessTimer()
     quantities.set({})
     setSaleId(null)
     error.set(null)
     success.set(false)
+  }
+
+  const scheduleSuccessReset = () => {
+    if (typeof window === "undefined" || typeof document === "undefined") return
+    clearSuccessTimer()
+    const start = () => {
+      clearSuccessTimer()
+      successTimer = window.setTimeout(() => resetSelection(), 4000)
+    }
+    if (document.visibilityState === "visible") {
+      start()
+    } else {
+      successVisibleHandler = () => {
+        if (document.visibilityState === "visible") start()
+      }
+      document.addEventListener("visibilitychange", successVisibleHandler)
+    }
+  }
+
+  const markPaid = () => {
+    if (success.get()) return
+    success.set(true)
+    scheduleSuccessReset()
   }
 
   const lines = () =>
@@ -182,8 +220,7 @@ export function dashKasseStateCreate(inputs: {
     if (!id || success.get()) return
     const current = dashStateGet().boxOfficeSales.find((candidate) => candidate.id === id)
     if (current?.status === "bezahlt") {
-      success.set(true)
-      window.setTimeout(() => resetSelection(), 4000)
+      markPaid()
     } else if (current?.status === "abgebrochen") {
       resetSelection()
     } else if (!current) {
@@ -197,6 +234,7 @@ export function dashKasseStateCreate(inputs: {
   // Erfolg einmal zeigen, sonst (abgebrochen/unbekannt) → Param entfernen.
   onMount(() => {
     if (typeof window === "undefined") return
+    onCleanup(() => clearSuccessTimer())
     if (pendingSaleId) {
       const restored = dashStateGet().boxOfficeSales.find(
         (candidate) => candidate.id === pendingSaleId && candidate.eventId === inputs.eventId(),
@@ -205,8 +243,7 @@ export function dashKasseStateCreate(inputs: {
         inputs.onSaleIdChange?.(null)
       } else if (restored.status === "bezahlt") {
         saleId.set(pendingSaleId)
-        success.set(true)
-        window.setTimeout(() => resetSelection(), 4000)
+        markPaid()
       } else {
         saleId.set(pendingSaleId)
       }
@@ -215,7 +252,7 @@ export function dashKasseStateCreate(inputs: {
       const id = saleId.get()
       if (!id || success.get()) return
       const current = dashStateGet().boxOfficeSales.find((candidate) => candidate.id === id)
-      if (current?.status === "bezahlt") success.set(true)
+      if (current?.status === "bezahlt") markPaid()
       else if (!current || current.status === "abgebrochen") resetSelection()
     }, 1000)
     onCleanup(() => window.clearInterval(interval))
@@ -244,6 +281,7 @@ export function dashKasseStateCreate(inputs: {
     cancelSale,
     dismissError,
     resetSelection,
+    advanceFromSuccess: resetSelection,
   }
 }
 

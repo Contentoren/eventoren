@@ -78,24 +78,26 @@ export function DashKasseView(p: { state: DashKasseState; eventId: string }) {
                     <div class="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       <For each={state.tiles()}>
                         {(tile) => (
-                          <article
-                            class="flex min-h-44 cursor-pointer flex-col justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-5 transition-colors hover:border-emerald-400/50 hover:bg-white/10"
-                            onClick={() => state.addOne(tile.type.id)}
-                            aria-label={`${tile.type.name} wählen`}
-                          >
-                            <div>
-                              <h2 class="text-lg font-semibold">{tile.type.name}</h2>
-                              <p class="mt-1 text-2xl font-bold tabular-nums">{dashCentsFormat(tile.unitPriceCents)}</p>
-                              <p class="mt-1 text-sm text-white/60">
+                          <article class="flex min-h-44 flex-col justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 p-5 transition-colors hover:border-emerald-400/50 hover:bg-white/10">
+                            <Button
+                              variant="none"
+                              size="none"
+                              onClick={() => state.addOne(tile.type.id)}
+                              disabled={tile.soldOut}
+                              aria-label={`${tile.type.name} hinzufügen`}
+                              class="flex w-full flex-col items-start justify-start gap-0 p-0 text-left"
+                            >
+                              <span class="text-lg font-semibold">{tile.type.name}</span>
+                              <span class="mt-1 block text-2xl font-bold tabular-nums">
+                                {dashCentsFormat(tile.unitPriceCents)}
+                              </span>
+                              <span class="mt-1 block text-sm text-white/60">
                                 <Show when={!tile.soldOut} fallback="Ausverkauft">
                                   Noch {tile.available} verfügbar
                                 </Show>
-                              </p>
-                            </div>
-                            <div
-                              class="flex items-center justify-between gap-2"
-                              onClick={(event) => event.stopPropagation()}
-                            >
+                              </span>
+                            </Button>
+                            <div class="flex items-center justify-between gap-2">
                               <Button
                                 variant="outline"
                                 class="size-14 border-white/20 text-xl text-white hover:bg-white/10"
@@ -198,19 +200,27 @@ export function DashKasseView(p: { state: DashKasseState; eventId: string }) {
         }
       >
         {(sale) => (
-          <div
-            class="flex min-h-dvh flex-col items-center justify-center gap-4 bg-emerald-600 px-6 py-16 text-center text-white"
-            aria-live="assertive"
-            role="status"
+          <Button
+            variant="none"
+            size="none"
+            type="button"
+            onClick={state.advanceFromSuccess}
+            aria-label="Weiter zur Auswahl"
+            class="flex min-h-dvh w-full cursor-pointer flex-col items-center justify-center gap-4 bg-emerald-600 px-6 py-16 text-center text-white"
           >
-            <Icon path={mdiCheckCircle} class="size-20" />
-            <h1 class="text-3xl font-bold sm:text-4xl">Bezahlt ✓</h1>
-            <p class="text-lg">
-              {sale().lines.reduce((sum, line) => sum + line.quantity, 0)}{" "}
-              {sale().lines.reduce((sum, line) => sum + line.quantity, 0) === 1 ? "Ticket" : "Tickets"} · eingecheckt
-            </p>
-            <p class="text-white/80">{dashCentsFormat(sale().totalCents)}</p>
-          </div>
+            <span role="status" aria-live="assertive" class="flex flex-col items-center gap-4">
+              <Icon path={mdiCheckCircle} class="size-20" />
+              <span class="text-3xl font-bold sm:text-4xl">Bezahlt ✓</span>
+              <span class="text-lg">
+                {sale().lines.reduce((sum, line) => sum + line.quantity, 0)}{" "}
+                {sale().lines.reduce((sum, line) => sum + line.quantity, 0) === 1 ? "Ticket" : "Tickets"} · eingecheckt
+              </span>
+              <span class="text-white/80">{dashCentsFormat(sale().totalCents)}</span>
+              <span class="mt-2 inline-flex h-12 items-center rounded-control bg-white px-6 text-base font-semibold text-emerald-700">
+                Weiter
+              </span>
+            </span>
+          </Button>
         )}
       </Show>
     </div>
