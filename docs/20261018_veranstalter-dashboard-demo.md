@@ -1,6 +1,6 @@
 # Veranstalter-Dashboard – interaktive Demo
 
-Status: Plan erstellt, Umsetzung noch nicht gestartet.
+Status: umgesetzt (A–E4). Offen sind nur Commits und Deploy (E5/E6).
 
 ## Ziel
 
@@ -75,9 +75,7 @@ Status: Plan erstellt, Umsetzung noch nicht gestartet.
 - **Gutscheine – Laufzeit einstellbar:**
   - Standard je Organisation unter Einstellungen → Gutscheine.
   - Je Gutschein beim Erstellen wählbar und später änderbar: 1 Jahr · 2 Jahre · 3 Jahre zum Jahresende (Standard) · Unbegrenzt · Eigenes Datum.
-- **AGENTS.md:**
-  - Der Eintrag „New features must be exposed by default via webui using Convex live query functions …“ ist während dieser Arbeit entfernt und wird in E4 wiederhergestellt. Die Originalzeile liegt in `/tmp/opencode/agents-md-removed-line.txt`.
-  - Für diese Demo gilt: nur Oberfläche und lokaler Store, später austauschbar über Selektoren und Aktionen.
+- **AGENTS.md:** Der Eintrag „New features must be exposed by default via webui using Convex live query functions …“ war während der Arbeit entfernt und ist wiederhergestellt. Für diese Demo gilt: nur Oberfläche und lokaler Store, später austauschbar über Selektoren und Aktionen.
 - **Änderungen an produktivem Code (alle rückwärtskompatibel):**
   - Optionale Props an `EventDetailPageView` (`description`, `faqs`, `schedule`, `organizerCard`, `notice`, `ticketsFooter`) und `EventDetailInfo` (D24).
   - Root-Footer im Vollbild und auf Demo-Unterseiten ausgeblendet (F1, F2).
@@ -1277,7 +1275,8 @@ Für alle Aufgaben gilt:
 - **E5 Commits:** Skill `commits`: Änderungen in mehrere konventionelle Commits aufteilen (ohne die fremden API-Key-Dateien), dann pushen.
 - **E6 Deploy:**
   - Produktion `eventoren.de` (Cloudflare Pages `eventoren`, SSR-Worker), ohne CI.
-  - Weg ist `bun run deploy`, bei einer reinen Frontend-Änderung nur der Frontend-Teil (`frontend:deploy:production`), sofern das Backend auf dem Stand von `main` ist.
+  - Weg: nur Frontend (`bun run frontend:deploy:production`). Die Vorprüfung ergab, dass sich seit dem letzten Produktions-Deploy (`1759e54`) unter `convex/` nichts geändert hat: kein Schema, keine neuen exportierten Funktionen, kein Frontend-Code ruft neue Backend-Funktionen auf. Die Demo läuft rein im Browser.
+  - Die API-Key-Dateien (`src/auth/convex/apiKey/*`) sind mit `66cdcd0` in `main` gelandet. Sie sind in `convex/` nicht verdrahtet, und die Tabelle `authApiKeys` fehlt. Ein späterer Backend-Deploy ist erst sinnvoll, wenn das vollständig ist.
   - Danach `/demo/dashboard`, `/demo` und eine öffentliche Seite live prüfen.
 
 ## Status
@@ -1318,4 +1317,7 @@ Für alle Aufgaben gilt:
     - Das Prozentfeld bekommt das Suffix „%“.
     - Die Uhrzeit-Auswahl in `DashDateTimeInput` wird in schmalen Spalten abgeschnitten („Uhr:“). Spalten im Sheet untereinander statt nebeneinander anordnen, wenn die Breite nicht reicht.
   - Search-Params: TanStack liest Werte als JSON, `?schritt=2` wird also zur Zahl. Alle Parser für `schritt`, `zeitraum` und die Dialog-Flags müssen Zahl und String annehmen. Beim Navigieren werden Zahlen gesetzt, damit die URLs lesbar bleiben (`?schritt=2` statt `?schritt=%222%22`). Betrifft Assistent, Onboarding, Übersicht und die Dialog-Flags (E2).
-- [x] E0 · [x] E0b · [x] E1 (E1a + E1b) · E2: [x] A1 · [x] A2 · [x] A3 · [x] D · [x] E · [x] F · [x] G · [x] B · [x] B2 · [x] C · [x] H · [x] I · [x] J · [x] K · [x] L · [x] M · [ ] N (Gutschein-Tests zeitabhängig) · [ ] E2 · [ ] E3 · [ ] E4 · [ ] E5 · [ ] E6
+- [x] E4b Abschluss-Checks (Format, Typen, Regeln, Tests, Baseline) · [x] E4c (A11y der Kassenkacheln) · [x] AGENTS.md wiederhergestellt
+- [x] E4a Produktions-Build (`bun run build` grün, SSR-Check ok, lokaler Pages-Smoke-Test 200). Offen: `shared-ui:check` in `DashKasseView.tsx` (E3-F2 behebt das), ein Chunk mit 518 kB (`organizerEventDetailPageStateCreate`).
+- [x] E3 (6/6 Szenarien bestanden) · [x] E3-F1 (Reset-Wettlauf zwischen Tabs, Marker `resetAt`) · [x] E3-F2 (Kasse bei verdecktem Tab, Assistent Ende = Beginn + 3 h)
+- [x] E0 · [x] E0b · [x] E1 (E1a + E1b) · E2: [x] A1 · [x] A2 · [x] A3 · [x] D · [x] E · [x] F · [x] G · [x] B · [x] B2 · [x] C · [x] H · [x] I · [x] J · [x] K · [x] L · [x] M · [x] N · [ ] E2 · [ ] E3 · [ ] E4 · [ ] E5 · [ ] E6
