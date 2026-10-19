@@ -157,8 +157,8 @@ test("submitting search restarts pagination while preserving the event and ignor
   })
 })
 
-test("calculates available tickets count and labels for all and filtered events", () => {
-  createRoot((dispose) => {
+test("calculates available tickets count and labels for all and filtered events", async () => {
+  await createRoot(async (dispose) => {
     const mockEvents = [
       {
         id: "ev-1",
@@ -204,12 +204,49 @@ test("calculates available tickets count and labels for all and filtered events"
     expect(state.availableTicketsForOrder(orderUnknown)).toBeUndefined()
     expect(state.availableTicketsLabelForOrder(orderUnknown)).toBeUndefined()
 
-    // orderToggle opens and closes
-    state.orderToggle("ord-1")
+    // orderOpen opens and orderClose closes
+    await state.orderOpen("ord-1")
     expect(state.selectedOrderId()).toBe("ord-1")
-    state.orderToggle("ord-1")
+    state.orderClose()
     expect(state.selectedOrderId()).toBeNull()
 
+    dispose()
+  })
+})
+
+test("orders query requests 25 items initially and loads 25 more per step", async () => {
+  await createRoot(async (dispose) => {
+    const pending: ((value: { success: true; data: AdminTicketOrderListPage }) => void)[] = []
+    const calls: { paginationOpts: { cursor: string | null; numItems: number } }[] = []
+    const state = adminTicketOrdersPageStateCreate({
+      list: (input) => {
+        calls.push(input)
+        return new Promise((resolve) => pending.push(resolve))
+      },
+    })
+    const first = state.loadMore()
+    expect(calls[0]?.paginationOpts).toMatchObject({ cursor: null, numItems: 25 })
+    pending[0]?.({
+      success: true,
+      data: {
+        page: [{ id: "first" } as AdminTicketOrderListPage["page"][number]],
+        continueCursor: "next",
+        isDone: false,
+      },
+    })
+    await first
+    const second = state.loadMore()
+    expect(calls[1]?.paginationOpts).toMatchObject({ cursor: "next", numItems: 25 })
+    pending[1]?.({
+      success: true,
+      data: {
+        page: [{ id: "second" } as AdminTicketOrderListPage["page"][number]],
+        continueCursor: "end",
+        isDone: true,
+      },
+    })
+    await second
+    expect(state.orders().map((order) => order.id)).toEqual(["first", "second"])
     dispose()
   })
 })

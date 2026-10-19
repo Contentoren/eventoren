@@ -25,7 +25,7 @@ import {
 import { adminTicketOrdersStatusCounts } from "./adminTicketOrdersStatusCounts.ts"
 import { eventorenAuthContext } from "#src/auth/ui/eventorenAuthContext.ts"
 
-const pageSize = 50
+const pageSize = 25
 const dateFormatter = new Intl.DateTimeFormat("de-DE", {
   dateStyle: "medium",
   timeStyle: "short",
@@ -97,7 +97,7 @@ export function adminTicketOrdersPageStateCreate(
       return
     }
     // Convex permits one paginated read per query. Follow empty matching pages with
-    // separate bounded requests, so a search does not stop at the first 50 orders.
+    // separate bounded requests, so a search does not stop at the first 25 orders.
     for (let scannedPages = 0; scannedPages < 10; scannedPages++) {
       const result = await list({
         eventKey: eventSignal.get() || undefined,

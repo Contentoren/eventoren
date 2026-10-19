@@ -9,4 +9,4 @@ export const adminTicketOrdersColumnWidthsMin: readonly [
   number,
   number,
   number,
-] = [110, 120, 160, 96, 72, 72, 96, 96, 96, 110]
+] = [80, 96, 120, 64, 64, 56, 72, 80, 80, 110]

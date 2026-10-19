@@ -211,7 +211,7 @@ export function AdminTicketOrdersPage(props?: {
           </p>
         </div>
       </Show>
-      <div class={tile ? "absolute right-3 top-3" : "flex items-center gap-1"}>
+      <div class={tile ? "absolute right-3 top-3" : "flex min-w-0 flex-wrap items-center gap-1"}>
         <Show when={!tile}>
           <span class="text-sm text-content-muted xl:hidden">Status:</span>
         </Show>
@@ -367,7 +367,7 @@ export function AdminTicketOrdersPage(props?: {
             >
               <div class="overflow-x-auto" style={{ "--admin-orders-cols": columnWidths.gridTemplate() }}>
                 <Show when={viewPreference?.view() !== "tiles"}>
-                  <div class="hidden items-center bg-surface-muted/40 text-xs font-semibold tracking-wide text-content-muted dark:bg-slate-800/40 xl:flex xl:w-max xl:min-w-full">
+                  <div class="hidden items-center bg-surface-muted/40 text-xs font-semibold tracking-wide text-content-muted dark:bg-slate-800/40 xl:flex xl:min-w-full">
                     <div
                       ref={(element) => {
                         headerGrid = element
@@ -452,7 +452,7 @@ export function AdminTicketOrdersPage(props?: {
                   class={
                     viewPreference?.view() === "tiles"
                       ? "grid gap-4 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-3"
-                      : "xl:w-max xl:min-w-full"
+                      : "xl:min-w-full"
                   }
                 >
                   <For each={state.orders()}>
@@ -461,7 +461,7 @@ export function AdminTicketOrdersPage(props?: {
                         <Show
                           when={viewPreference?.view() === "tiles"}
                           fallback={
-                            <div class="flex items-center transition-colors hover:bg-surface-muted/60 xl:w-max xl:min-w-full">
+                            <div class="flex items-center transition-colors hover:bg-surface-muted/60 xl:min-w-full">
                               <div
                                 role="button"
                                 tabindex="0"

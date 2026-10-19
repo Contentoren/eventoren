@@ -10,7 +10,7 @@ test("measured desktop columns become pixel widths", () => {
 })
 
 test("measured columns respect minimums and maximums", () => {
-  const px = adminTicketOrdersColumnWidthsMeasuredToPx([10, 20, 30, 40, 50, 60, 70, 80, 90, 5000])
+  const px = adminTicketOrdersColumnWidthsMeasuredToPx([10, 20, 30, 40, 50, 55, 70, 75, 79, 5000])
   expect(px).not.toBeNull()
   expect([...(px ?? [])].slice(0, 9)).toEqual([...adminTicketOrdersColumnWidthsMin].slice(0, 9))
   expect(px?.[9]).toBe(adminTicketOrdersColumnWidthsMax)
