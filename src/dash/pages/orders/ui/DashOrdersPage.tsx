@@ -158,7 +158,9 @@ export function DashOrdersPage(p: DashOrdersPageProps) {
       row[5] ?? 0,
       row[6] ?? 0,
       String(row[7] ?? ""),
-      String(row[8] ?? ""),
+      row[8] ?? 0,
+      String(row[9] ?? ""),
+      String(row[10] ?? ""),
     ])
     const orgName = org()?.name ?? "Export"
     return dashTableExport({
@@ -174,6 +176,8 @@ export function DashOrdersPage(p: DashOrdersPageProps) {
         { header: "Event" },
         { header: "Tickets", align: "right" },
         { header: "Betrag", align: "right" },
+        { header: "Gutschein-Code" },
+        { header: "Gutschein-Betrag", align: "right" },
         { header: "Zahlart" },
         { header: "Status" },
       ],

@@ -21,6 +21,7 @@ import { DashStatusPill } from "../../../ui/status/DashStatusPill.tsx"
 import { DashRelativeTime } from "../../../ui/time/DashRelativeTime.tsx"
 import type { DashOrderListRow } from "../model/dashOrderListFilter.ts"
 import { dashPaymentMethodLabel } from "../model/dashPaymentMethodLabel.ts"
+import { DashOrderVoucherBadge } from "./DashOrderVoucherBadge.tsx"
 import { DashOrderBuyerDialog } from "./actions/DashOrderBuyerDialog.tsx"
 import { DashOrderCancelDialog } from "./actions/DashOrderCancelDialog.tsx"
 import { DashOrderRefundDialog } from "./actions/DashOrderRefundDialog.tsx"
@@ -101,6 +102,16 @@ export function DashOrdersList(p: DashOrdersListProps) {
         sortValue: (row) => row.order.totalCents,
       },
       {
+        id: "gutschein",
+        header: "Gutschein",
+        align: "center",
+        cell: (row) => (
+          <Show when={row.order.voucher}>{(snapshot) => <DashOrderVoucherBadge voucher={snapshot()} />}</Show>
+        ),
+        sortValue: (row) => row.order.voucher?.code ?? null,
+        hideBelow: "md",
+      },
+      {
         id: "method",
         header: "Zahlart",
         cell: (row) => (
@@ -161,7 +172,10 @@ export function DashOrdersList(p: DashOrdersListProps) {
         mobileCard={(row) => (
           <div class="flex flex-col gap-1 text-sm">
             <div class="flex items-center justify-between gap-2">
-              <span class="font-mono text-[13px]">{row.order.number}</span>
+              <span class="flex min-w-0 items-center gap-1.5">
+                <span class="truncate font-mono text-[13px]">{row.order.number}</span>
+                <Show when={row.order.voucher}>{(snapshot) => <DashOrderVoucherBadge voucher={snapshot()} />}</Show>
+              </span>
               <DashStatusPill kind="order" value={row.order.status} />
             </div>
             <div class="truncate font-medium">{row.buyerName}</div>

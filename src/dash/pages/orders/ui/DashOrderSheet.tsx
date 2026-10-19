@@ -26,6 +26,7 @@ import { dashOrderTimelineCreate } from "../model/dashOrderTimelineCreate.ts"
 import { dashPaymentMethodLabel } from "../model/dashPaymentMethodLabel.ts"
 import { DashOrderNotesSection } from "./actions/DashOrderNotesSection.tsx"
 import type { DashOrderNotesState } from "./actions/dashOrderNotesStateCreate.ts"
+import { DashOrderVoucherBadge } from "./DashOrderVoucherBadge.tsx"
 
 export interface DashOrderSheetActions {
   resend: (order: DashOrder) => void
@@ -108,7 +109,7 @@ export function DashOrderSheet(p: DashOrderSheetProps) {
               class="h-9 px-3 text-sm"
               onClick={() => p.actions?.invoice?.(p.order)}
             >
-              Rechnung
+              Rechnung (PDF)
             </ButtonIcon>
           </Show>
           <Show when={p.actions?.refund}>
@@ -231,8 +232,11 @@ export function DashOrderSheet(p: DashOrderSheetProps) {
             </Show>
             <Show when={p.order.voucher}>
               {(voucher) => (
-                <div class="flex items-baseline justify-between gap-3">
-                  <dt class="min-w-0 text-content-muted">Gutschein ({voucher().code})</dt>
+                <div class="flex items-center justify-between gap-3">
+                  <dt class="flex min-w-0 items-center gap-1 text-content-muted">
+                    <span class="truncate">Gutschein ({voucher().code})</span>
+                    <DashOrderVoucherBadge voucher={voucher()} />
+                  </dt>
                   <dd class="shrink-0 tabular-nums">
                     <DashMoney cents={-voucher().amountCents} signed />
                   </dd>

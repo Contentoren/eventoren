@@ -107,6 +107,8 @@ export function dashOrderListFilter(input: DashOrderListFilterInput): DashOrderL
     row.eventTitle,
     row.ticketCount,
     Math.round((row.order.totalCents / 100) * 100) / 100,
+    row.order.voucher?.code ?? null,
+    row.order.voucher ? Math.round((row.order.voucher.amountCents / 100) * 100) / 100 : null,
     methodLabel[row.order.payment.method] ?? row.order.payment.method,
     statusLabel[row.order.status] ?? row.order.status,
   ])

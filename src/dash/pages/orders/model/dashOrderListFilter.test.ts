@@ -113,6 +113,24 @@ describe("dashOrderListFilter", () => {
       expect(statuses.has(expected)).toBe(true)
     }
     expect(seedResult.exportRows.length).toBe(seedResult.rows.length)
-    expect(seedResult.exportRows[0]?.length).toBe(9)
+    expect(seedResult.exportRows[0]?.length).toBe(11)
+  })
+
+  test("Export enthält Gutschein-Code und Gutschein-Betrag", () => {
+    const state = dashSeedCreate(seedNow)
+    const orders = [
+      orderFixture({
+        id: "o-1",
+        number: "EV-1",
+        voucher: { voucherId: "v-1", code: "XMAS-10", amountCents: 1000 },
+      }),
+      orderFixture({ id: "o-2", number: "EV-2", voucher: null }),
+    ]
+    const result = dashOrderListFilter({ ...base, orders, events: state.events })
+    const byId = new Map(result.exportRows.map((row) => [row[0], row]))
+    expect(byId.get("EV-1")?.[7]).toBe("XMAS-10")
+    expect(byId.get("EV-1")?.[8]).toBe(10)
+    expect(byId.get("EV-2")?.[7]).toBeNull()
+    expect(byId.get("EV-2")?.[8]).toBeNull()
   })
 })
