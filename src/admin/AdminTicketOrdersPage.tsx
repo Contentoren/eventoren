@@ -133,7 +133,7 @@ export function AdminTicketOrdersPage(props?: {
   const orderDetails = (order: AdminTicketOrderSummary, tile: boolean) => (
     <>
       <div class="min-w-0">
-        <p class="truncate text-sm font-medium text-content" title={state.bookingReference(order)}>
+        <p class="truncate text-[13px] font-medium text-content" title={state.bookingReference(order)}>
           <Show when={state.bookingReference(order)} fallback={order.paymentReference}>
             {(reference) => (tile ? <>Nummer: {reference()}</> : reference())}
           </Show>
@@ -144,7 +144,7 @@ export function AdminTicketOrdersPage(props?: {
           </p>
         </Show>
       </div>
-      <div class="min-w-0 space-y-0.5 text-sm text-content-muted">
+      <div class="min-w-0 text-sm text-content-muted">
         <p class="truncate font-medium text-content">{state.customerName(order)}</p>
         <p class="truncate text-xs" title={order.customerEmail}>
           {order.customerEmail}
@@ -159,7 +159,7 @@ export function AdminTicketOrdersPage(props?: {
         </Show>
       </div>
       <div class="min-w-0">
-        <h2 class="truncate text-base font-semibold tracking-tight text-content">
+        <h2 class="truncate text-sm font-semibold tracking-tight text-content">
           <Link
             to="/events/$eventId"
             params={{ eventId: order.eventKey }}
@@ -195,13 +195,13 @@ export function AdminTicketOrdersPage(props?: {
         </time>
       </p>
       <Show when={!tile}>
-        <p class="hidden min-w-0 text-sm text-content lg:block">
+        <p class="hidden min-w-0 text-xs text-content lg:block">
           <span class="text-content-muted xl:hidden">Eventdatum: </span>
           {state.dateFormat(state.eventForOrder(order)?.startsAt ?? order.eventStartsAt)}
         </p>
       </Show>
       <Show when={tile}>
-        <p class="min-w-0 text-sm text-content">
+        <p class="min-w-0 text-xs text-content">
           <span class="text-content-muted">Eventdatum: </span>
           {state.dateFormat(state.eventForOrder(order)?.startsAt ?? order.eventStartsAt)}
         </p>
@@ -213,7 +213,7 @@ export function AdminTicketOrdersPage(props?: {
       </Show>
       <div class={tile ? "absolute right-3 top-3" : "flex min-w-0 flex-wrap items-center gap-1"}>
         <Show when={!tile}>
-          <span class="text-sm text-content-muted xl:hidden">Status:</span>
+          <span class="text-xs text-content-muted xl:hidden">Status:</span>
         </Show>
         <UiBadge tone={state.paymentTone(order.paymentStatus, order)} class="ring-0">
           {state.paymentLabel(order.paymentStatus, order)}
@@ -250,20 +250,21 @@ export function AdminTicketOrdersPage(props?: {
         </header>
 
         <div class="min-w-0 overflow-hidden rounded-xl bg-surface shadow-lg shadow-slate-900/10 dark:shadow-black/30">
-          <div class="grid gap-3 bg-surface-muted/60 p-4 dark:bg-slate-800/60 sm:grid-cols-[minmax(0,1fr)_12rem] sm:items-center sm:p-5">
+          <div class="grid gap-2 bg-surface-muted/60 p-3 dark:bg-slate-800/60 sm:grid-cols-[minmax(0,1fr)_12rem] sm:items-center">
             <form class="flex min-w-0 flex-col gap-2 sm:flex-row" onSubmit={state.searchSubmit} role="search">
               <Input
                 type="search"
                 aria-label="Bestellungen suchen"
                 placeholder="Bestellnummer, E-Mail oder Name suchen …"
-                class="min-h-11 min-w-0 w-full flex-1 rounded-lg border-0 bg-surface shadow-sm shadow-slate-900/5 dark:bg-slate-900/80 dark:shadow-black/20"
+                class="h-9 min-w-0 w-full flex-1 rounded-md border-0 bg-surface text-sm shadow-sm shadow-slate-900/5 dark:bg-slate-900/80 dark:shadow-black/20"
                 value={state.searchInput.get()}
                 onInput={(event) => state.searchInput.set(event.currentTarget.value)}
               />
               <Button
                 type="submit"
                 variant="outline"
-                class="min-h-11 w-full rounded-lg border-0 bg-surface shadow-sm shadow-slate-900/5 dark:bg-slate-700 dark:shadow-black/20 sm:w-auto"
+                size="sm"
+                class="h-9 w-full rounded-md border-0 bg-surface text-sm shadow-sm shadow-slate-900/5 dark:bg-slate-700 dark:shadow-black/20 sm:w-auto"
               >
                 Suchen
               </Button>
@@ -274,7 +275,7 @@ export function AdminTicketOrdersPage(props?: {
                 variant: "none",
                 size: "none",
                 class:
-                  "min-h-11 w-full min-w-0 justify-start truncate rounded-lg border-0 bg-surface p-2.5 text-sm text-content shadow-sm shadow-slate-900/5 dark:bg-slate-900/80 dark:shadow-black/20 focus-visible:ring-2 focus-visible:ring-ring",
+                  "h-9 w-full min-w-0 justify-start truncate rounded-md border-0 bg-surface p-2 text-sm text-content shadow-sm shadow-slate-900/5 dark:bg-slate-900/80 dark:shadow-black/20 focus-visible:ring-2 focus-visible:ring-ring",
                 innerClass: "min-w-64",
                 type: "button",
               }}
@@ -288,7 +289,7 @@ export function AdminTicketOrdersPage(props?: {
               listOptionClass="w-full"
             />
           </div>
-          <div class="flex flex-wrap gap-1.5 px-4 pb-4 sm:px-5" role="group" aria-label="Status filtern">
+          <div class="flex flex-wrap gap-1.5 px-3 pb-3" role="group" aria-label="Status filtern">
             {(["alle", ...adminTicketOrderStatusKeyOrder] as const).map((filter) => (
               <FilterChip
                 active={state.statusFilter.get() === filter}
@@ -299,7 +300,7 @@ export function AdminTicketOrdersPage(props?: {
               </FilterChip>
             ))}
           </div>
-          <div class="flex flex-wrap gap-2 px-4 pb-4 sm:px-5">
+          <div class="flex flex-wrap gap-2 px-3 pb-3">
             <Button
               variant="outline"
               size="sm"
@@ -372,7 +373,7 @@ export function AdminTicketOrdersPage(props?: {
                       ref={(element) => {
                         headerGrid = element
                       }}
-                      class="grid min-w-0 flex-1 grid-cols-[var(--admin-orders-cols)] gap-2 px-5 py-3.5"
+                      class="grid min-w-0 flex-1 grid-cols-[var(--admin-orders-cols)] gap-2 px-3 py-2"
                     >
                       <For each={adminTicketOrdersColumnLabels}>
                         {(label, index) => {
@@ -451,7 +452,7 @@ export function AdminTicketOrdersPage(props?: {
                 <ul
                   class={
                     viewPreference?.view() === "tiles"
-                      ? "grid gap-4 p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-3"
+                      ? "grid gap-2 p-2 sm:grid-cols-2 sm:p-3 xl:grid-cols-3"
                       : "xl:min-w-full"
                   }
                 >
@@ -466,7 +467,7 @@ export function AdminTicketOrdersPage(props?: {
                                 role="button"
                                 tabindex="0"
                                 aria-label={`Bestellung ${order.id} Details anzeigen`}
-                                class="grid min-w-0 flex-1 cursor-pointer gap-2.5 px-4 py-5 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring sm:px-5 xl:grid-cols-[var(--admin-orders-cols)] xl:items-center"
+                                class="grid min-w-0 flex-1 cursor-pointer gap-1.5 px-3 py-2 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring xl:grid-cols-[var(--admin-orders-cols)] xl:items-center"
                                 onClick={() => void state.orderOpen(order.id)}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter" || e.key === " ") {
@@ -486,7 +487,7 @@ export function AdminTicketOrdersPage(props?: {
                               role="button"
                               tabindex="0"
                               aria-label={`Bestellung ${order.id} Details anzeigen`}
-                              class="grid cursor-pointer gap-3 rounded-xl p-4 pt-12 transition-colors hover:bg-surface-muted/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                              class="grid cursor-pointer gap-1.5 rounded-lg p-3 pt-11 text-sm transition-colors hover:bg-surface-muted/60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                               onClick={() => void state.orderOpen(order.id)}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" || e.key === " ") {
