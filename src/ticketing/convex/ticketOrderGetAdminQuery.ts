@@ -51,6 +51,13 @@ export const ticketOrderGetAdminQuery = query({
         ticketsIssuedAt: order.ticketsIssuedAt ?? null,
         paymentMethodType: order.paymentMethodType ?? null,
         cancellation: order.cancellation ?? null,
+        voucher: order.voucher
+          ? {
+              voucherId: order.voucher.voucherId ?? undefined,
+              code: order.voucher.code,
+              amountCents: order.voucher.amountCents,
+            }
+          : null,
         lines: lines.map((line) => ({
           tierName: line.tierName,
           quantity: line.quantity,

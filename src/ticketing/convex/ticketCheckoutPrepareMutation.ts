@@ -379,6 +379,23 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     if (subtotalCents + feeCents < 1) return createResultError(op, "The selected tickets are not payable")
     const now = new Date().toISOString()
     const expiresAt = Date.now() + 15 * 60 * 1000
+    // TODO(voucher-write): no voucher/discount redemption flow exists anywhere in real
+    // checkout (prepare-mutation args, create-action args, TicketCheckoutCreateInput, the
+    // billing eventorenTicketCheckoutCreateRequestSchema contract, and
+    // ticketCheckoutContextCanonicalize all have no voucher/discount/coupon field; the
+    // per-ticket `activationCode` is tier access gating, not a discount). The
+    // `ticketOrders.voucher` snapshot (ticketOrderVoucherValidator in ticketTables.ts)
+    // therefore stays empty until such a flow exists. When wiring it: (1) add
+    // `voucher: v.optional(v.object({ voucherId: v.optional(v.string()), code: v.string(),
+    // amountCents: v.number() }))` to this mutation's args; (2) NEVER trust a
+    // client-supplied amountCents — validate the code server-side against a voucher
+    // entity/ledger (which does not exist yet) and compute the redeemed amount there,
+    // capped at subtotalCents + feeCents, subtracting it from totalCents; (3) write it
+    // here as `...(args.voucher !== undefined ? { voucher: args.voucher } : {})`;
+    // (4) propagate the code upstream through ticketCheckoutCreateAction args +
+    // TicketCheckoutCreateInput (+ billing contract if billing settles discounts) and
+    // include it in ticketCheckoutContextCanonicalize so checkout-key replay detects
+    // voucher changes.
     const orderId = await ctx.db.insert("ticketOrders", {
       checkoutKey: args.checkoutKey,
       ownerUserId: args.ownerUserId,

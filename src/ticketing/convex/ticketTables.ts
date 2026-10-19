@@ -22,6 +22,15 @@ const ticketPaymentStatusValidator = v.union(
 
 const ticketReservationStatusValidator = v.union(v.literal("active"), v.literal("released"), v.literal("consumed"))
 
+// Snapshot of a voucher/discount consumed on this order (code + redeemed amount only;
+// no balance/status — there is no admin voucher entity). Mirrors the demo seed shape
+// in src/dash/store/seed/dashSeedOrdersApply.ts (~L526).
+const ticketOrderVoucherValidator = v.object({
+  voucherId: v.optional(v.string()),
+  code: v.string(),
+  amountCents: v.number(),
+})
+
 const ticketFulfillmentWorkStatusValidator = v.union(
   v.literal("pending"),
   v.literal("preparing"),
@@ -107,6 +116,7 @@ export const ticketTables = {
     stripeSessionId: v.optional(v.string()),
     stripePaymentIntentId: v.optional(v.string()),
     cancellation: v.optional(ticketPaymentCancellationValidator),
+    voucher: v.optional(ticketOrderVoucherValidator),
     paidAt: v.optional(v.string()),
     releasedAt: v.optional(v.string()),
     checkoutAttemptLeaseUntil: v.optional(v.number()),

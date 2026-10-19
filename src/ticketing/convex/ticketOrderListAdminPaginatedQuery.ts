@@ -74,11 +74,22 @@ export const ticketOrderListAdminPaginatedQuery = query({
       }
       const page = await ordersPage()
       const matches = search ? page.page.filter((order) => adminTicketOrderSearchMatches(order, search)) : page.page
+      // Lines live in ticketOrderLines (orderId index); the order doc itself
+      // carries no count. Sum quantities per order so the Tickets column reads
+      // from the summary directly (same per-order pattern as getAdmin).
+      const linesByOrder = await Promise.all(
+        matches.map((order) =>
+          authorizedCtx.db
+            .query("ticketOrderLines")
+            .withIndex("orderId", (q) => q.eq("orderId", order._id))
+            .collect(),
+        ),
+      )
 
       return createResult({
         ...page,
         page: matches.map(
-          (order): AdminTicketOrderSummary => ({
+          (order, index): AdminTicketOrderSummary => ({
             id: order._id,
             customerEmail: order.customerEmail,
             customerFamilyName: order.customerFamilyName,
@@ -100,6 +111,14 @@ export const ticketOrderListAdminPaginatedQuery = query({
             ticketsIssuedAt: order.ticketsIssuedAt,
             paymentMethodType: order.paymentMethodType,
             cancellation: order.cancellation,
+            ticketCount: (linesByOrder[index] ?? []).reduce((sum, line) => sum + line.quantity, 0),
+            voucher: order.voucher
+              ? {
+                  ...(order.voucher.voucherId !== undefined ? { voucherId: order.voucher.voucherId } : {}),
+                  code: order.voucher.code,
+                  amountCents: order.voucher.amountCents,
+                }
+              : undefined,
           }),
         ),
       })
