@@ -197,12 +197,5 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
     orderClose: () => {
       selectedOrderId.set(null)
     },
-    orderToggle: (orderId: string) => {
-      if (selectedOrderId.get() === orderId) {
-        selectedOrderId.set(null)
-      } else {
-        selectedOrderId.set(orderId)
-      }
-    },
   }
 }
