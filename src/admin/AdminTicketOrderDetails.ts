@@ -1,4 +1,5 @@
 import type { EventorenTicketPaymentDetailsResponse } from "billing/contracts/eventorenTicketPaymentDetailsResponseSchema"
+import type { AdminTicketOrderVoucher } from "./AdminTicketOrderSummary.ts"
 import type { TicketPaymentCancellation } from "../ticketing/TicketPaymentCancellation.ts"
 
 export type AdminTicketOrderDetails = {
@@ -33,6 +34,7 @@ export type AdminTicketOrderDetails = {
   readonly ticketsIssuedAt?: string | null
   readonly paymentMethodType?: string | null
   readonly cancellation?: TicketPaymentCancellation | null
+  readonly voucher?: AdminTicketOrderVoucher | null
   readonly lines: readonly {
     readonly tierName: string
     readonly quantity: number

@@ -19,7 +19,7 @@ function memoryStorage() {
   }
 }
 
-const valid: AdminTicketOrdersColumnWidths = [220, 180, 150, 120, 120, 90, 140]
+const valid: AdminTicketOrdersColumnWidths = [180, 220, 260, 120, 90, 80, 120, 120, 120, 140]
 
 test("reset removes the stored widths and restores the default grid", () => {
   const storage = memoryStorage()

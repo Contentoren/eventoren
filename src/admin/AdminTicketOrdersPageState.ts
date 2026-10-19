@@ -1,7 +1,9 @@
 import type { Accessor } from "solid-js"
-import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
-import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
 import type { AdminEventItem } from "./AdminEventItem.ts"
+import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
+import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
+import type { AdminTicketOrderStatusFilter } from "./adminTicketOrderStatusKey.ts"
+import type { AdminTicketOrdersSortBy, AdminTicketOrdersSortOrder } from "./adminTicketOrdersSort.ts"
 
 export type AdminTicketOrdersPageState = {
   readonly customerName: (order: AdminTicketOrderSummary) => string
@@ -11,6 +13,15 @@ export type AdminTicketOrdersPageState = {
   readonly isLoading: Accessor<boolean>
   readonly loadMore: () => Promise<void>
   readonly orders: Accessor<readonly AdminTicketOrderSummary[]>
+  readonly baseOrders: Accessor<readonly AdminTicketOrderSummary[]>
+  readonly sortBy: Accessor<AdminTicketOrdersSortBy>
+  readonly sortOrder: Accessor<AdminTicketOrdersSortOrder>
+  readonly sortToggle: (sortBy: AdminTicketOrdersSortBy) => void
+  readonly statusFilter: {
+    readonly get: () => AdminTicketOrderStatusFilter
+    readonly set: (status: AdminTicketOrderStatusFilter) => void
+  }
+  readonly statusCounts: Accessor<Record<AdminTicketOrderStatusFilter, number>>
   readonly eventSignal: { readonly get: () => string; readonly set: (event: string) => void }
   readonly searchInput: { readonly get: () => string; readonly set: (value: string) => void }
   readonly searchQuery: Accessor<string>
@@ -35,7 +46,6 @@ export type AdminTicketOrdersPageState = {
   readonly detailsLoading: Accessor<boolean>
   readonly orderOpen: (orderId: string) => Promise<void>
   readonly orderClose: () => void
-  readonly orderToggle: (orderId: string) => void
   readonly availableTicketsCount: Accessor<number>
   readonly availableTicketsLabel: Accessor<string>
   readonly availableTicketsForOrder: (order: AdminTicketOrderSummary) => number | undefined

@@ -11,6 +11,26 @@ export function adminTicketOrderDetailsPanelStateCreate(inputs: { readonly order
 
   return {
     bookingReference: () => adminTicketOrderBookingReference(inputs.order()),
+    ticketTotal: () => inputs.order().lines.reduce((sum, line) => sum + line.quantity, 0),
+    timeline: () => {
+      const order = inputs.order()
+      const entries: { readonly at: string; readonly title: string; readonly detail?: string }[] = [
+        { at: order.createdAt, title: "Bestellt" },
+      ]
+      if (order.ticketsIssuedAt) entries.push({ at: order.ticketsIssuedAt, title: "Tickets ausgestellt" })
+      if (order.paymentStatus === "paid" && order.updatedAt !== order.createdAt)
+        entries.push({ at: order.updatedAt, title: "Bezahlt" })
+      if (order.cancellation)
+        entries.push({
+          at: order.cancellation.cancelledAt,
+          title:
+            order.cancellation.reason === "sepa_disputed"
+              ? "Storniert (SEPA-Rücklastschrift)"
+              : "Storniert (Zahlung fehlgeschlagen)",
+          detail: order.cancellation.paymentReference,
+        })
+      return entries.sort((a, b) => a.at.localeCompare(b.at))
+    },
     address,
     billingContact,
     charge,

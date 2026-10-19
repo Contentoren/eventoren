@@ -1,1 +1,1 @@
-export const adminTicketOrdersColumnWidthsStorageKey = "eventoren.admin-ticket-orders-column-widths.v1"
+export const adminTicketOrdersColumnWidthsStorageKey = "eventoren.admin-ticket-orders-column-widths.v3"

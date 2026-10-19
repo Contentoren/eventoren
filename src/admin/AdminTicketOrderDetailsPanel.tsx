@@ -1,203 +1,216 @@
-import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
-import { Button } from "#ui/interactive/button/Button.jsx"
-import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
+import { CopyButton } from "#ui/interactive/copy/CopyButton.jsx"
 import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
+import { AdminOrderVoucherBadge } from "./AdminOrderVoucherBadge.tsx"
 import { adminTicketOrderDetailsPanelStateCreate } from "./adminTicketOrderDetailsPanelStateCreate.ts"
+import { adminTicketOrderPaymentMethodLabel } from "./adminTicketOrderPaymentMethodLabel.ts"
 
 export function AdminTicketOrderDetailsPanel(props: {
   readonly order: AdminTicketOrderDetails
-  readonly close: () => void
   readonly dateFormat: (date: string) => string
   readonly priceFormat: (cents: number) => string
 }) {
   const state = adminTicketOrderDetailsPanelStateCreate({ order: () => props.order })
 
   return (
-    <CardWrapper class="flex flex-col gap-6" aria-label={`Bestelldetails ${props.order.id}`}>
-      <header class="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p class="text-xs font-semibold uppercase tracking-wide text-content-muted">Bestelldetails</p>
-          <h2 class="mt-1 text-xl font-semibold text-content">
-            <Link
-              to="/events/$eventId"
-              params={{ eventId: props.order.eventKey }}
-              class="hover:underline focus-visible:underline"
-            >
-              {props.order.eventTitle}
-            </Link>
-          </h2>
-          <p class="text-sm text-content-muted">Bestellt am {props.dateFormat(props.order.createdAt)}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={props.close}>
-          Schließen
-        </Button>
-      </header>
+    <div class="flex flex-col gap-6" aria-label={`Bestelldetails ${props.order.id}`}>
+      <div class="flex flex-wrap items-baseline justify-between gap-2 rounded-control border border-border-subtle bg-surface-muted px-4 py-3">
+        <div class="text-xs text-content-muted">Bestellt {props.dateFormat(props.order.createdAt)}</div>
+        <div class="text-2xl font-semibold tabular-nums">{props.priceFormat(props.order.totalCents)}</div>
+      </div>
 
-      <section aria-labelledby="order-local-heading" class="flex flex-col gap-5 border-t border-border pt-5">
-        <h3 id="order-local-heading" class="text-lg font-semibold text-content">
-          Bestellungsinfo von unserer Webseite
-        </h3>
-        <div class="grid gap-6 md:grid-cols-2">
-          <div class="flex min-w-0 flex-col gap-2 break-words text-sm">
-            <h4 class="font-semibold text-content">Bestellung und Zahlung</h4>
-            <Show when={state.bookingReference()}>
-              {(reference) => <p class="text-base font-semibold text-content">Bestellnummer: {reference()}</p>}
-            </Show>
-            <p>Bestellstatus: {state.localStatusLabel(props.order.orderStatus)}</p>
-            <p>Zahlungsstatus: {state.localStatusLabel(props.order.paymentStatus)}</p>
-            <Show when={props.order.ticketsIssuedAt}>
-              <p>Tickets ausgestellt: {props.dateFormat(props.order.ticketsIssuedAt!)}</p>
-            </Show>
-            <Show when={props.order.cancellation}>
-              <p class="font-semibold text-danger">
-                Storniert (
-                {props.order.cancellation!.reason === "sepa_disputed"
-                  ? "SEPA-Rücklastschrift"
-                  : "Zahlung fehlgeschlagen"}
-                ): {props.dateFormat(props.order.cancellation!.cancelledAt)}
+      <section aria-label="Käufer">
+        <h2 class="text-sm font-semibold">Käufer</h2>
+        <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+          <span class="font-medium">
+            {[props.order.customerGivenName, props.order.customerFamilyName].filter(Boolean).join(" ") ||
+              "Nicht vorhanden"}
+          </span>
+          <span class="text-content-muted">{props.order.customerEmail || "Nicht vorhanden"}</span>
+          <Show when={props.order.customerEmail}>
+            <CopyButton value={props.order.customerEmail} size="sm" />
+          </Show>
+        </div>
+        <dl class="mt-2 flex flex-col gap-1 text-sm">
+          <div class="flex flex-wrap gap-x-2">
+            <dt class="text-content-muted">Telefon:</dt>
+            <dd>{props.order.customerPhone || "Nicht vorhanden"}</dd>
+          </div>
+          <div class="flex flex-wrap gap-x-2">
+            <dt class="text-content-muted">Adresse:</dt>
+            <dd class="break-words">{props.order.customerAddress || "Nicht vorhanden"}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section aria-label="Tickets">
+        <h2 class="text-sm font-semibold">Tickets · {state.ticketTotal()}</h2>
+        <ul class="mt-2 flex flex-col gap-2">
+          <For
+            each={props.order.lines}
+            fallback={<p class="text-sm text-content-muted">Keine Positionen vorhanden.</p>}
+          >
+            {(line) => (
+              <li class="rounded-control border border-border-subtle px-3 py-2 text-sm">
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                  <span class="font-medium">
+                    {line.quantity} × {line.tierName}
+                  </span>
+                  <span class="tabular-nums">{props.priceFormat(line.priceCents + line.feeCents)} pro Ticket</span>
+                </div>
+              </li>
+            )}
+          </For>
+        </ul>
+      </section>
+
+      <section aria-label="Zahlung">
+        <h2 class="text-sm font-semibold">Zahlung</h2>
+        <dl class="mt-2 flex flex-col gap-1 text-sm">
+          <For each={props.order.lines}>
+            {(line) => (
+              <div class="flex items-baseline justify-between gap-3">
+                <dt class="min-w-0 text-content-muted">
+                  {line.quantity} × {line.tierName}
+                </dt>
+                <dd class="shrink-0 tabular-nums">{props.priceFormat(line.priceCents * line.quantity)}</dd>
+              </div>
+            )}
+          </For>
+          <Show when={props.order.voucher}>
+            {(voucher) => (
+              <div class="flex items-center justify-between gap-3">
+                <dt class="flex min-w-0 items-center gap-1 text-content-muted">
+                  <span class="truncate">Gutschein ({voucher().code})</span>
+                  <AdminOrderVoucherBadge voucher={voucher()} />
+                </dt>
+                <dd class="shrink-0 tabular-nums">−{props.priceFormat(voucher().amountCents)}</dd>
+              </div>
+            )}
+          </Show>
+          <Show when={props.order.feeCents > 0}>
+            <div class="flex items-baseline justify-between gap-3">
+              <dt class="min-w-0 text-content-muted">Gebühren</dt>
+              <dd class="shrink-0 tabular-nums">{props.priceFormat(props.order.feeCents)}</dd>
+            </div>
+          </Show>
+          <div class="flex items-baseline justify-between gap-3 border-t border-border-subtle pt-1 font-semibold">
+            <dt>Summe</dt>
+            <dd class="tabular-nums">{props.priceFormat(props.order.totalCents)}</dd>
+          </div>
+        </dl>
+        <dl class="mt-2 flex flex-col gap-1 text-sm">
+          <div class="flex flex-wrap gap-x-2">
+            <dt class="text-content-muted">Zahlart:</dt>
+            <dd>
+              {state.charge()?.paymentMethod?.type ?? adminTicketOrderPaymentMethodLabel(props.order.paymentMethodType)}
+            </dd>
+          </div>
+          <div class="flex flex-wrap gap-x-2">
+            <dt class="text-content-muted">Rechnung:</dt>
+            <dd class="break-all">{props.order.billingOrderReference ?? "Nicht vorhanden"}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section aria-label="Verlauf">
+        <h2 class="text-sm font-semibold">Verlauf</h2>
+        <ol class="mt-2 flex flex-col">
+          <For each={state.timeline()}>
+            {(entry, index) => (
+              <li class="relative flex gap-3 pb-4 last:pb-0">
+                <Show when={index() < state.timeline().length - 1}>
+                  <span aria-hidden="true" class="absolute top-4 left-[5px] h-full w-px bg-border-subtle" />
+                </Show>
+                <span
+                  aria-hidden="true"
+                  class="mt-1.5 size-[11px] shrink-0 rounded-full border-2 border-brand bg-surface"
+                />
+                <div class="min-w-0 text-sm">
+                  <p class="font-medium">{entry.title}</p>
+                  <Show when={entry.detail}>{(detail) => <p class="truncate text-content-muted">{detail()}</p>}</Show>
+                  <p class="text-xs text-content-muted">{props.dateFormat(entry.at)}</p>
+                </div>
+              </li>
+            )}
+          </For>
+        </ol>
+      </section>
+
+      <details class="rounded-control border border-border-subtle px-3 py-2 text-sm">
+        <summary class="cursor-pointer font-semibold">Stripe-Details</summary>
+        <div class="mt-2 flex min-w-0 flex-col gap-2 break-words text-sm">
+          <Show
+            when={state.stripe()}
+            fallback={
+              <p class="text-content-muted">
+                {props.order.stripeError
+                  ? `Stripe-Details nicht verfügbar: ${props.order.stripeError}`
+                  : "Für diese Bestellung liegen keine Stripe-Details vor."}
+              </p>
+            }
+          >
+            <p>Stripe-Modus: {state.stripe()?.stripeMode === "live" ? "Live" : "Test"}</p>
+            <p>Zahlungsart: {state.charge()?.paymentMethod?.type ?? "Nicht verfügbar"}</p>
+            <p>Karte: {state.cardLabel()}</p>
+            <p>
+              Stripe-Betrag:{" "}
+              {state.charge()
+                ? state.amountFormat(state.charge()!.amountCents, state.charge()!.currency)
+                : state.session()?.amountTotalCents !== null &&
+                    state.session()?.amountTotalCents !== undefined &&
+                    state.session()?.currency
+                  ? state.amountFormat(state.session()!.amountTotalCents!, state.session()!.currency!)
+                  : "Nicht verfügbar"}
+            </p>
+            <p>
+              Stripe-Status: {state.stripeStatusLabel(state.charge()?.status ?? state.session()?.paymentStatus)}{" "}
+              {state.session()?.status ? `· Sitzung ${state.session()?.status}` : ""}
+            </p>
+            <p>
+              Stripe-Kontakt: {state.stripeContact()?.name || "Nicht verfügbar"} ·{" "}
+              {state.stripeContact()?.email || "Nicht verfügbar"} · {state.stripeContact()?.phone || "Nicht verfügbar"}
+            </p>
+            <p>
+              Stripe-Rechnungsname und Kontakt: {state.billingContact()?.name || "Nicht verfügbar"} ·{" "}
+              {state.billingContact()?.email || "Nicht verfügbar"} ·{" "}
+              {state.billingContact()?.phone || "Nicht verfügbar"}
+            </p>
+            <p>
+              Stripe-Rechnungsadresse:{" "}
+              {state.address()
+                ? [
+                    state.address()?.line1,
+                    state.address()?.line2,
+                    state.address()?.city,
+                    state.address()?.state,
+                    state.address()?.postalCode,
+                    state.address()?.country,
+                  ]
+                    .filter(Boolean)
+                    .join(", ")
+                : "Nicht verfügbar"}
+            </p>
+            <Show when={state.charge()?.receiptUrl}>
+              <p>
+                <a
+                  class="text-link underline"
+                  href={state.charge()?.receiptUrl ?? undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Stripe-Beleg öffnen
+                </a>
               </p>
             </Show>
-            <p>
-              Zahlungsreferenz: <span class="break-all">{props.order.paymentReference}</span>
-            </p>
-            <p>
-              Bestellreferenz: <span class="break-all">{props.order.billingOrderReference ?? "Nicht vorhanden"}</span>
-            </p>
-            <p>Zwischensumme: {props.priceFormat(props.order.subtotalCents)}</p>
-            <p>Gebühren: {props.priceFormat(props.order.feeCents)}</p>
-            <p class="font-semibold">Gesamt: {props.priceFormat(props.order.totalCents)}</p>
-          </div>
-          <div class="flex min-w-0 flex-col gap-2 break-words text-sm">
-            <h4 class="font-semibold text-content">Kontakt</h4>
-            <p>
-              Name:{" "}
-              {[props.order.customerGivenName, props.order.customerFamilyName].filter(Boolean).join(" ") ||
-                "Nicht vorhanden"}
-            </p>
-            <p>E-Mail: {props.order.customerEmail || "Nicht vorhanden"}</p>
-            <p>Telefon: {props.order.customerPhone || "Nicht vorhanden"}</p>
-            <p>Adresse: {props.order.customerAddress || "Nicht vorhanden"}</p>
-          </div>
-          <div class="flex min-w-0 flex-col gap-2 break-words text-sm">
-            <h4 class="font-semibold text-content">Veranstaltung</h4>
-            <p>
-              <Link
-                to="/events/$eventId"
-                params={{ eventId: props.order.eventKey }}
-                class="font-medium text-brand-accent hover:underline"
-              >
-                {props.order.eventTitle}
-              </Link>
-              {props.order.eventSubtitle ? ` · ${props.order.eventSubtitle}` : ""}
-            </p>
-            <p class="text-xs text-content-muted">
-              Event-ID:{" "}
-              <Link
-                to="/events/$eventId"
-                params={{ eventId: props.order.eventKey }}
-                class="font-mono underline hover:text-content"
-              >
-                {props.order.eventKey}
-              </Link>
-            </p>
-            <p>
-              {props.dateFormat(props.order.eventStartsAt)} – {props.dateFormat(props.order.eventEndsAt)} · Einlass{" "}
-              {props.dateFormat(props.order.eventDoorsAt)}
-            </p>
-            <p>
-              {props.order.venue}, {props.order.city} · {props.order.eventAddress}
-            </p>
-          </div>
-          <div class="flex min-w-0 flex-col gap-2 break-words text-sm">
-            <h4 class="font-semibold text-content">Positionen</h4>
-            <For each={props.order.lines} fallback={<p class="text-content-muted">Keine Positionen vorhanden.</p>}>
-              {(line) => (
-                <p>
-                  {line.quantity} × {line.tierName} — {props.priceFormat(line.priceCents + line.feeCents)} pro Ticket
-                </p>
-              )}
-            </For>
-          </div>
+            <Show when={props.order.stripeError}>
+              <p role="status" class="text-content-muted">
+                Einige Zahlungsdetails konnten nicht geladen werden: {props.order.stripeError}
+              </p>
+            </Show>
+          </Show>
         </div>
-      </section>
-
-      <section
-        aria-labelledby="order-stripe-heading"
-        class="flex min-w-0 flex-col gap-2 break-words border-t border-border pt-5 text-sm"
-      >
-        <h3 id="order-stripe-heading" class="mb-3 text-lg font-semibold text-content">
-          Von Stripe empfangene Daten
-        </h3>
-        <Show
-          when={state.stripe()}
-          fallback={
-            <p class="text-content-muted">
-              {props.order.stripeError
-                ? `Stripe-Details nicht verfügbar: ${props.order.stripeError}`
-                : "Für diese Bestellung liegen keine Stripe-Details vor."}
-            </p>
-          }
-        >
-          <p>Stripe-Modus: {state.stripe()?.stripeMode === "live" ? "Live" : "Test"}</p>
-          <p>Zahlungsart: {state.charge()?.paymentMethod?.type ?? "Nicht verfügbar"}</p>
-          <p>Karte: {state.cardLabel()}</p>
-          <p>
-            Stripe-Betrag:{" "}
-            {state.charge()
-              ? state.amountFormat(state.charge()!.amountCents, state.charge()!.currency)
-              : state.session()?.amountTotalCents !== null &&
-                  state.session()?.amountTotalCents !== undefined &&
-                  state.session()?.currency
-                ? state.amountFormat(state.session()!.amountTotalCents!, state.session()!.currency!)
-                : "Nicht verfügbar"}
-          </p>
-          <p>
-            Stripe-Status: {state.stripeStatusLabel(state.charge()?.status ?? state.session()?.paymentStatus)}{" "}
-            {state.session()?.status ? `· Sitzung ${state.session()?.status}` : ""}
-          </p>
-          <p>
-            Stripe-Kontakt: {state.stripeContact()?.name || "Nicht verfügbar"} ·{" "}
-            {state.stripeContact()?.email || "Nicht verfügbar"} · {state.stripeContact()?.phone || "Nicht verfügbar"}
-          </p>
-          <p>
-            Stripe-Rechnungsname und Kontakt: {state.billingContact()?.name || "Nicht verfügbar"} ·{" "}
-            {state.billingContact()?.email || "Nicht verfügbar"} · {state.billingContact()?.phone || "Nicht verfügbar"}
-          </p>
-          <p>
-            Stripe-Rechnungsadresse:{" "}
-            {state.address()
-              ? [
-                  state.address()?.line1,
-                  state.address()?.line2,
-                  state.address()?.city,
-                  state.address()?.state,
-                  state.address()?.postalCode,
-                  state.address()?.country,
-                ]
-                  .filter(Boolean)
-                  .join(", ")
-              : "Nicht verfügbar"}
-          </p>
-          <Show when={state.charge()?.receiptUrl}>
-            <p>
-              <a
-                class="text-link underline"
-                href={state.charge()?.receiptUrl ?? undefined}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Stripe-Beleg öffnen
-              </a>
-            </p>
-          </Show>
-          <Show when={props.order.stripeError}>
-            <p role="status" class="text-content-muted">
-              Einige Zahlungsdetails konnten nicht geladen werden: {props.order.stripeError}
-            </p>
-          </Show>
-        </Show>
-      </section>
-    </CardWrapper>
+      </details>
+    </div>
   )
 }

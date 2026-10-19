@@ -39,7 +39,7 @@ function dragTarget() {
   }
 }
 
-const measured = [220.4, 180.6, 150, 120, 120, 90, 140]
+const measured = [180.4, 220.6, 260, 120, 90, 80, 120, 120, 120, 140]
 
 test("empty storage starts with the default fraction grid", () => {
   createRoot((dispose) => {
@@ -58,12 +58,12 @@ test("pointer drag measures all columns first and persists the resized widths", 
     const columns = adminTicketOrdersColumnWidthsStateCreate({ dragTarget: target, storage })
 
     columns.columnDragStart(0, 100, measured)
-    expect(columns.columnWidths()).toEqual([220, 181, 150, 120, 120, 90, 140])
+    expect(columns.columnWidths()).toEqual([180, 221, 260, 120, 90, 80, 120, 120, 120, 140])
 
     target.emit("pointermove", 130)
-    expect(columns.columnWidths()?.[0]).toBe(250)
+    expect(columns.columnWidths()?.[0]).toBe(210)
     expect(columns.hasCustomWidths()).toBe(true)
-    expect(adminTicketOrdersColumnWidthsStorageLoad(storage)?.[0]).toBe(250)
+    expect(adminTicketOrdersColumnWidthsStorageLoad(storage)?.[0]).toBe(210)
 
     target.emit("pointerup", 130)
     dispose()
@@ -74,11 +74,11 @@ test("arrow keys measure first and move the focused column by one step", () => {
   createRoot((dispose) => {
     const columns = adminTicketOrdersColumnWidthsStateCreate({ storage: memoryStorage() })
     columns.columnKeyResize(1, "ArrowRight", measured)
-    expect(columns.columnWidths()).toEqual([220, 197, 150, 120, 120, 90, 140])
+    expect(columns.columnWidths()).toEqual([180, 237, 260, 120, 90, 80, 120, 120, 120, 140])
     columns.columnKeyResize(1, "ArrowLeft", measured)
-    expect(columns.columnWidths()?.[1]).toBe(181)
+    expect(columns.columnWidths()?.[1]).toBe(221)
     columns.columnKeyResize(1, "Enter", measured)
-    expect(columns.columnWidths()?.[1]).toBe(181)
+    expect(columns.columnWidths()?.[1]).toBe(221)
     dispose()
   })
 })
@@ -89,6 +89,10 @@ test("invalid measurements keep the default grid instead of starting a resize", 
     columns.columnDragStart(0, 100, [220, 180, 150])
     expect(columns.columnWidths()).toBeNull()
     columns.columnKeyResize(0, "ArrowRight", [220, 180, 150])
+    expect(columns.columnWidths()).toBeNull()
+    columns.columnDragStart(0, 100, [...measured, 10])
+    expect(columns.columnWidths()).toBeNull()
+    columns.columnKeyResize(0, "ArrowRight", [...measured, 10])
     expect(columns.columnWidths()).toBeNull()
     dispose()
   })
@@ -115,7 +119,7 @@ test("reset clears the stored widths and restores the default grid", () => {
     columns.columnKeyResize(0, "ArrowRight", measured)
     expect(columns.hasCustomWidths()).toBe(true)
 
-    const stored: AdminTicketOrdersColumnWidths = [220, 181, 150, 120, 120, 90, 140]
+    const stored: AdminTicketOrdersColumnWidths = [180, 221, 260, 120, 90, 80, 120, 120, 120, 140]
     storage.entries.set(adminTicketOrdersColumnWidthsStorageKey, JSON.stringify(stored))
     const reloaded = adminTicketOrdersColumnWidthsStateCreate({ storage })
     expect(reloaded.columnWidths()).toEqual([...stored])

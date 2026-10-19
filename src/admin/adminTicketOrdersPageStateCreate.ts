@@ -16,6 +16,13 @@ import type { AdminTicketOrderBillingDetails } from "./AdminTicketOrderBillingDe
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
 import type { adminTicketOrdersList } from "./adminTicketOrdersList.ts"
 import { adminTicketOrderBookingReference } from "./adminTicketOrderBookingReference.ts"
+import { adminTicketOrderStatusKey, type AdminTicketOrderStatusFilter } from "./adminTicketOrderStatusKey.ts"
+import {
+  adminTicketOrdersSort,
+  type AdminTicketOrdersSortBy,
+  type AdminTicketOrdersSortOrder,
+} from "./adminTicketOrdersSort.ts"
+import { adminTicketOrdersStatusCounts } from "./adminTicketOrdersStatusCounts.ts"
 import { eventorenAuthContext } from "#src/auth/ui/eventorenAuthContext.ts"
 
 const pageSize = 50
@@ -43,6 +50,9 @@ export function adminTicketOrdersPageStateCreate(
   const searchSignal = inputs.searchSignal ?? defaultSearch
   const searchInput = createSignalObject(searchSignal.get())
   const orders = createSignalObject<readonly AdminTicketOrderSummary[]>([])
+  const sortBy = createSignalObject<AdminTicketOrdersSortBy>("datum")
+  const sortOrder = createSignalObject<AdminTicketOrdersSortOrder>("desc")
+  const statusFilter = createSignalObject<AdminTicketOrderStatusFilter>("alle")
   const cursor = createSignalObject<string | null>(null)
   const isDone = createSignalObject(false)
   const isLoading = createSignalObject(false)
@@ -228,13 +238,25 @@ export function adminTicketOrdersPageStateCreate(
     detailsLoading.set(false)
   }
 
-  const orderToggle = (orderId: string) => {
-    if (selectedOrderId.get() === orderId) {
-      orderClose()
+  const sortToggle = (next: AdminTicketOrdersSortBy) => {
+    if (sortBy.get() === next) {
+      sortOrder.set(sortOrder.get() === "asc" ? "desc" : "asc")
       return
     }
-    void orderOpen(orderId)
+    sortBy.set(next)
+    sortOrder.set(next === "datum" ? "desc" : "asc")
   }
+
+  const baseOrders = () => orders.get()
+
+  const filteredSortedOrders = () => {
+    const filter = statusFilter.get()
+    const filtered =
+      filter === "alle" ? baseOrders() : baseOrders().filter((order) => adminTicketOrderStatusKey(order) === filter)
+    return adminTicketOrdersSort(filtered, sortBy.get(), sortOrder.get())
+  }
+
+  const statusCounts = () => adminTicketOrdersStatusCounts(baseOrders())
 
   const availableTicketsCount = () => {
     const allEvents = inputs.events?.() ?? []
@@ -304,7 +326,13 @@ export function adminTicketOrdersPageStateCreate(
       }
       await pageLoad()
     },
-    orders: orders.get,
+    orders: filteredSortedOrders,
+    baseOrders,
+    sortBy: sortBy.get,
+    sortOrder: sortOrder.get,
+    sortToggle,
+    statusFilter,
+    statusCounts,
     eventSignal,
     searchInput,
     searchQuery: searchSignal.get,
@@ -350,7 +378,6 @@ export function adminTicketOrdersPageStateCreate(
     detailsLoading: detailsLoading.get,
     orderOpen,
     orderClose,
-    orderToggle,
   }
 }
 

@@ -18,7 +18,7 @@ function memoryStorage() {
   }
 }
 
-const valid: AdminTicketOrdersColumnWidths = [220, 180, 150, 120, 120, 90, 140]
+const valid: AdminTicketOrdersColumnWidths = [180, 220, 260, 120, 90, 80, 120, 120, 120, 140]
 
 test("empty storage loads no custom widths", () => {
   expect(adminTicketOrdersColumnWidthsStorageLoad(memoryStorage())).toBeNull()
@@ -34,12 +34,13 @@ test("invalid stored values fall back to no custom widths", () => {
   const raws = [
     "{not-json",
     "[220,180,150]",
-    "[220,180,150,120,120,90,140,10]",
-    "[220,180,150,120,120,90,-5]",
-    "[220,180,150,120,120,90,null]",
-    '["220","180","150","120","120","90","140"]',
-    "[220,180,150,120,120,10,140]",
-    '{"widths":[220,180,150,120,120,90,140]}',
+    "[180,220,260,120,90,80,120,120,120]",
+    "[180,220,260,120,90,80,120,120,120,140,10]",
+    "[180,220,260,120,90,80,120,120,120,-5]",
+    "[180,220,260,120,90,80,120,120,120,null]",
+    '["180","220","260","120","90","80","120","120","120","140"]',
+    "[180,220,260,120,90,80,10,120,120,140]",
+    '{"widths":[180,220,260,120,90,80,120,120,120,140]}',
   ]
   for (const raw of raws) {
     const storage = memoryStorage()

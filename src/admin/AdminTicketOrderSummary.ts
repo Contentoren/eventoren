@@ -1,5 +1,11 @@
 import type { TicketPaymentCancellation } from "../ticketing/TicketPaymentCancellation.ts"
 
+export type AdminTicketOrderVoucher = {
+  readonly voucherId?: string
+  readonly code: string
+  readonly amountCents: number
+}
+
 export type AdminTicketOrderSummary = {
   readonly id: string
   readonly customerEmail: string
@@ -29,4 +35,6 @@ export type AdminTicketOrderSummary = {
   readonly ticketsIssuedAt?: string
   readonly paymentMethodType?: string
   readonly cancellation?: TicketPaymentCancellation
+  readonly ticketCount?: number
+  readonly voucher?: AdminTicketOrderVoucher | null
 }

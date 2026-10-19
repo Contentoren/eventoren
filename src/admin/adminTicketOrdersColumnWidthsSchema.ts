@@ -10,6 +10,9 @@ export const adminTicketOrdersColumnWidthsSchema = v.strictTuple([
   columnWidth,
   columnWidth,
   columnWidth,
+  columnWidth,
+  columnWidth,
+  columnWidth,
 ])
 
 export type AdminTicketOrdersColumnWidths = v.InferOutput<typeof adminTicketOrdersColumnWidthsSchema>
