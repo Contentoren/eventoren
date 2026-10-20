@@ -1,7 +1,9 @@
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
 import { adminTicketOrderBookingReference } from "./adminTicketOrderBookingReference.ts"
+import { adminTicketOrderStatusKey } from "./adminTicketOrderStatusKey.ts"
+import { adminTicketOrderStatusLabel } from "./adminTicketOrderStatusLabel.ts"
 
-export type AdminTicketOrdersSortBy = "nummer" | "kaeufer" | "betrag" | "gutschein" | "datum"
+export type AdminTicketOrdersSortBy = "nummer" | "kaeufer" | "betrag" | "gutschein" | "datum" | "status"
 
 export type AdminTicketOrdersSortOrder = "asc" | "desc"
 
@@ -15,6 +17,8 @@ type AdminTicketOrderSortSource = Pick<
   | "bookingReference"
   | "bookingNumber"
   | "paymentStatus"
+  | "ticketsIssuedAt"
+  | "cancellation"
   | "stripeMode"
   | "totalCents"
   | "createdAt"
@@ -41,6 +45,11 @@ function adminTicketOrdersCompare(
 ): number {
   if (sortBy === "betrag") return a.totalCents - b.totalCents
   if (sortBy === "datum") return Date.parse(a.createdAt) - Date.parse(b.createdAt)
+  if (sortBy === "status")
+    return adminTicketOrderStatusLabel(adminTicketOrderStatusKey(a)).localeCompare(
+      adminTicketOrderStatusLabel(adminTicketOrderStatusKey(b)),
+      "de-DE",
+    )
   if (sortBy === "kaeufer") return adminTicketOrdersSortBuyer(a).localeCompare(adminTicketOrdersSortBuyer(b), "de-DE")
   if (sortBy === "gutschein")
     return adminTicketOrdersSortVoucher(a).localeCompare(adminTicketOrdersSortVoucher(b), "de-DE")

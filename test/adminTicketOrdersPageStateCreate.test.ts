@@ -11,6 +11,163 @@ const { convexClientContext } = await import("../src/utils/convex_client/convexC
 const { adminTicketOrdersPageStateCreate } = await import("../src/admin/adminTicketOrdersPageStateCreate.ts")
 mock.restore()
 
+test("order totals include every event page and follow status, search and event filters", async () => {
+  await createRoot(async (dispose) => {
+    const order = (
+      id: string,
+      ticketCount: number,
+      totalCents: number,
+      paymentStatus: "paid" | "pending" | "failed" | "expired",
+    ) =>
+      ({
+        id,
+        ticketCount,
+        totalCents,
+        paymentStatus,
+        status: paymentStatus === "paid" ? "paid" : "reserved",
+      }) as AdminTicketOrderListPage["page"][number]
+    const state = adminTicketOrdersPageStateCreate({
+      list: async ({ eventKey, search, paginationOpts }) => ({
+        success: true,
+        data: {
+          page:
+            eventKey === "other"
+              ? [order("other", 1, 1250, "paid")]
+              : search
+                ? [order("search", 3, 4500, "paid")]
+                : paginationOpts.cursor
+                  ? [
+                      order("pending", 4, 6000, "pending"),
+                      order("failed", 5, 7500, "failed"),
+                      order("expired", 3, 4500, "expired"),
+                    ]
+                  : [order("paid", 2, 3000, "paid")],
+          continueCursor: "next",
+          isDone: eventKey === "other" || Boolean(search) || Boolean(paginationOpts.cursor),
+        },
+      }),
+    })
+    try {
+      expect(state.totals()).toEqual({ ticketCount: 0, totalCents: 0 })
+      state.eventSignal.set("abiball")
+      await state.loadMore()
+      expect(state.totals()).toEqual({ ticketCount: 6, totalCents: 21000 })
+      state.statusFilter.set("fehlgeschlagen")
+      expect(state.totals()).toEqual({ ticketCount: 0, totalCents: 7500 })
+      state.statusFilter.set("abgelaufen")
+      expect(state.totals()).toEqual({ ticketCount: 0, totalCents: 4500 })
+      state.statusFilter.set("bezahlt")
+      expect(state.totals()).toEqual({ ticketCount: 2, totalCents: 3000 })
+      state.statusFilter.set("alle")
+      state.searchInput.set("search")
+      state.searchSubmit()
+      await Promise.resolve()
+      expect(state.totals()).toEqual({ ticketCount: 3, totalCents: 4500 })
+      state.eventSignal.set("other")
+      state.reload()
+      await Promise.resolve()
+      expect(state.totals()).toEqual({ ticketCount: 1, totalCents: 1250 })
+    } finally {
+      dispose()
+    }
+  })
+})
+
+test("event orders load all live pages only after clicking the list button and reset when changing events", () => {
+  let dispose = () => {}
+  let state!: ReturnType<typeof adminTicketOrdersPageStateCreate>
+  const calls: { args: Record<string, any>; update: (value: any) => void; unsubscribed: boolean }[] = []
+  createRoot((rootDispose) => {
+    dispose = rootDispose
+    const [event, setEvent] = createSignal("")
+    getOwner()!.context = {
+      [eventorenAuthContext.id]: { token: () => "admin", ready: () => true },
+      [convexClientContext.id]: {
+        onUpdate: (_query: unknown, args: Record<string, any>, update: (value: any) => void) => {
+          const call = { args, update, unsubscribed: false }
+          calls.push(call)
+          return () => {
+            call.unsubscribed = true
+          }
+        },
+      },
+    }
+    createRenderEffect(() =>
+      untrack(() => {
+        state = adminTicketOrdersPageStateCreate({
+          useNativeQueries: true,
+          eventSignal: { get: event, set: setEvent },
+        })
+      }),
+    )
+  })
+  try {
+    calls[0]!.update({ success: true, data: { page: [{ id: "all" }], continueCursor: "next", isDone: false } })
+    expect(calls).toHaveLength(1)
+    state.eventSignal.set("abiball")
+    for (let page = 0; page < 12; page++) {
+      const call = calls.at(-1)!
+      expect(call.args.eventKey).toBe("abiball")
+      expect(call.args.paginationOpts.numItems).toBe(25)
+      call.update({
+        success: true,
+        data: {
+          page: [{ id: `order-${page}` }],
+          continueCursor: `cursor-${page}`,
+          isDone: page === 11,
+        },
+      })
+      if (page === 0) {
+        expect(calls).toHaveLength(2)
+        expect(state.orders()).toHaveLength(1)
+        void state.loadMore()
+      }
+    }
+    expect(state.orders()).toHaveLength(12)
+    expect(state.isDone()).toBe(true)
+    const previous = calls.at(-1)!
+    state.eventSignal.set("other")
+    expect(previous.unsubscribed).toBe(true)
+    expect(calls.at(-1)!.args.eventKey).toBe("other")
+    expect(state.orders()).toEqual([])
+  } finally {
+    dispose()
+  }
+})
+
+test("the list button loads all remaining event pages, including more than ten pages", async () => {
+  await createRoot(async (dispose) => {
+    let page = 0
+    const state = adminTicketOrdersPageStateCreate({
+      list: async ({ eventKey, paginationOpts }) => {
+        expect(eventKey).toBe("abiball")
+        expect(paginationOpts.cursor).toBe(page ? String(page) : null)
+        page++
+        return {
+          success: true,
+          data: {
+            page: [{ id: `order-${page}` } as AdminTicketOrderListPage["page"][number]],
+            continueCursor: String(page),
+            isDone: page === 12,
+          },
+        }
+      },
+    })
+    try {
+      state.eventSignal.set("abiball")
+      state.reload()
+      await Promise.resolve()
+      expect(state.orders()).toHaveLength(1)
+      expect(page).toBe(1)
+      await state.loadMore()
+      expect(state.orders()).toHaveLength(12)
+      expect(state.isDone()).toBe(true)
+    } finally {
+      dispose()
+    }
+  })
+})
+
 test("native details load order B after closing A, including cached subscription results in a provider", async () => {
   let dispose: () => void = () => undefined
   let state!: ReturnType<typeof adminTicketOrdersPageStateCreate>

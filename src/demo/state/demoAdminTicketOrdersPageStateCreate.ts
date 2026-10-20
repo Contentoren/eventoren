@@ -1,5 +1,7 @@
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { AdminEventItem } from "../../admin/AdminEventItem.ts"
+import { adminEventTicketCapacities } from "../../admin/adminEventTicketCapacities.ts"
+import { adminTicketOrderBookedTicketCount } from "../../admin/adminTicketOrderBookedTicketCount.ts"
 import type { AdminTicketOrderSummary } from "../../admin/AdminTicketOrderSummary.ts"
 import type { AdminTicketOrdersPageState } from "../../admin/AdminTicketOrdersPageState.ts"
 import { adminTicketOrderBookingReference } from "../../admin/adminTicketOrderBookingReference.ts"
@@ -84,6 +86,15 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
     isLoading,
     loadMore,
     orders,
+    ticketCapacities: () => adminEventTicketCapacities(events(), selectedEvent.get()),
+    totals: () =>
+      orders().reduce(
+        (sum, order) => ({
+          ticketCount: sum.ticketCount + adminTicketOrderBookedTicketCount(order),
+          totalCents: sum.totalCents + order.totalCents,
+        }),
+        { ticketCount: 0, totalCents: 0 },
+      ),
     eventSignal: selectedEvent,
     searchInput,
     searchQuery: searchQuery.get,

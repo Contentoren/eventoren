@@ -50,6 +50,7 @@ const adminTicketOrdersSortableColumns: Record<string, AdminTicketOrdersSortBy> 
   Betrag: "betrag",
   Gutschein: "gutschein",
   Datum: "datum",
+  Status: "status",
 }
 
 function adminTicketOrdersSortAria(sortOrder: "asc" | "desc"): "ascending" | "descending" {
@@ -367,6 +368,35 @@ export function AdminTicketOrdersPage(props?: {
               }
             >
               <div class="overflow-x-auto" style={{ "--admin-orders-cols": columnWidths.gridTemplate() }}>
+                <div class="flex items-center bg-surface-muted/60 text-sm font-semibold text-content dark:bg-slate-800/60">
+                  <div
+                    aria-label="Summe der ausgewählten Bestellungen"
+                    class={
+                      viewPreference?.view() === "tiles"
+                        ? "flex flex-1 flex-wrap items-center gap-x-6 gap-y-2 px-3 py-3"
+                        : "grid min-w-0 flex-1 gap-2 px-3 py-3 sm:grid-cols-3 xl:grid-cols-[var(--admin-orders-cols)]"
+                    }
+                  >
+                    <p class={viewPreference?.view() === "tiles" ? "" : "xl:col-span-3"}>
+                      {state.isDone() ? "Gesamtsumme" : "Zwischensumme (geladen)"}
+                    </p>
+                    <p>
+                      <span class="font-normal text-content-muted">Tickets: </span>
+                      {state.ticketCountFormat(state.totals().ticketCount)}
+                      <For each={state.ticketCapacities()}>
+                        {(event) => <> von {state.ticketCountFormat(event.ticketCount)}</>}
+                      </For>{" "}
+                      gebucht
+                    </p>
+                    <p>
+                      <span class="font-normal text-content-muted">Betrag: </span>
+                      {state.priceFormat(state.totals().totalCents)}
+                    </p>
+                  </div>
+                  <Show when={viewPreference?.view() !== "tiles"}>
+                    <span aria-hidden="true" class="hidden w-9 shrink-0 xl:block" />
+                  </Show>
+                </div>
                 <Show when={viewPreference?.view() !== "tiles"}>
                   <div class="hidden items-center bg-surface-muted/40 text-xs font-semibold tracking-wide text-content-muted dark:bg-slate-800/40 xl:flex xl:min-w-full">
                     <div
@@ -517,9 +547,11 @@ export function AdminTicketOrdersPage(props?: {
               disabled={state.isLoading()}
               onClick={() => void state.loadMore()}
             >
-              {state.searchQuery() && !state.orders().length
-                ? "Weitere Bestellungen durchsuchen"
-                : "Weitere Bestellungen laden"}
+              {state.eventSignal.get()
+                ? "Alle Bestellungen anzeigen"
+                : state.searchQuery() && !state.orders().length
+                  ? "Weitere Bestellungen durchsuchen"
+                  : "Weitere Bestellungen laden"}
             </Button>
           </div>
         </Show>
