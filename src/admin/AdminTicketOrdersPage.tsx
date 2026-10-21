@@ -6,7 +6,6 @@ import { mdiUnfoldMoreHorizontal } from "@adaptive-ds/mdi/mdiUnfoldMoreHorizonta
 import type { JSX } from "solid-js"
 import { For, Show } from "solid-js"
 import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
-import { FilterChip } from "#ui/interactive/chip/FilterChip.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { SelectSingle } from "#ui/input/select/SelectSingle.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
@@ -19,9 +18,7 @@ import { adminActivationCodeBlobDownload } from "./adminActivationCodeBlobDownlo
 import { AdminOrderVoucherBadge } from "./AdminOrderVoucherBadge.tsx"
 import { AdminTicketOrderDrawer } from "./AdminTicketOrderDrawer.tsx"
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
-import type { AdminTicketOrderStatusFilter } from "./adminTicketOrderStatusKey.ts"
-import { adminTicketOrderStatusKeyOrder } from "./adminTicketOrderStatusKey.ts"
-import { adminTicketOrderStatusLabel } from "./adminTicketOrderStatusLabel.ts"
+import { AdminTicketOrderStatusFilterSelect } from "./AdminTicketOrderStatusFilterSelect.tsx"
 import { adminTicketOrderPaymentMethodLabel } from "./adminTicketOrderPaymentMethodLabel.ts"
 import type { AdminTicketOrdersSortBy } from "./adminTicketOrdersSort.ts"
 import { adminTicketOrdersCsvFormat } from "./adminTicketOrdersCsvFormat.ts"
@@ -241,12 +238,24 @@ export function AdminTicketOrdersPage(props?: {
               {state.availableTicketsLabel()}
             </p>
           </div>
-          <div class="flex items-center gap-2 rounded-xl bg-surface-muted/70 px-4 py-2.5 text-sm shadow-sm shadow-slate-900/5 dark:bg-slate-800/70 dark:shadow-black/20">
-            <span class="text-content-muted">Zum Kauf verfügbar:</span>
-            <span class="font-semibold text-content">
-              {state.ticketCountFormat(state.availableTicketsCount())}{" "}
-              {state.availableTicketsCount() === 1 ? "Ticket" : "Tickets"}
-            </span>
+          <div class="flex flex-wrap items-center gap-3">
+            <div
+              aria-label="Summe der ausgewählten Bestellungen"
+              class="flex flex-wrap items-center gap-x-6 gap-y-2 rounded-xl bg-surface-muted/70 px-4 py-2.5 text-sm shadow-sm shadow-slate-900/5 dark:bg-slate-800/70 dark:shadow-black/20"
+            >
+              <p class="font-semibold text-content">{state.isDone() ? "Gesamtsumme" : "Zwischensumme (geladen)"}</p>
+              <p class="font-semibold text-content">
+                <span class="font-normal text-content-muted">Tickets: </span>
+                {state.ticketCountFormat(state.totals().ticketCount)}
+                {" von "}
+                {state.ticketCountFormat(state.ticketCapacities().reduce((sum, event) => sum + event.ticketCount, 0))}{" "}
+                gebucht
+              </p>
+              <p class="font-semibold text-content">
+                <span class="font-normal text-content-muted">Betrag: </span>
+                {state.priceFormat(state.totals().totalCents)}
+              </p>
+            </div>
           </div>
         </header>
 
@@ -290,16 +299,8 @@ export function AdminTicketOrdersPage(props?: {
               listOptionClass="w-full"
             />
           </div>
-          <div class="flex flex-wrap gap-1.5 px-3 pb-3" role="group" aria-label="Status filtern">
-            {(["alle", ...adminTicketOrderStatusKeyOrder] as const).map((filter) => (
-              <FilterChip
-                active={state.statusFilter.get() === filter}
-                onClick={() => state.statusFilter.set(filter)}
-                count={state.statusCounts()[filter]}
-              >
-                {adminTicketOrderStatusLabel(filter)}
-              </FilterChip>
-            ))}
+          <div class={viewPreference?.view() === "tiles" ? "px-3 pb-3" : "px-3 pb-3 xl:hidden"}>
+            <AdminTicketOrderStatusFilterSelect state={state} />
           </div>
           <div class="flex flex-wrap gap-2 px-3 pb-3">
             <Button
@@ -368,35 +369,6 @@ export function AdminTicketOrdersPage(props?: {
               }
             >
               <div class="overflow-x-auto" style={{ "--admin-orders-cols": columnWidths.gridTemplate() }}>
-                <div class="flex items-center bg-surface-muted/60 text-sm font-semibold text-content dark:bg-slate-800/60">
-                  <div
-                    aria-label="Summe der ausgewählten Bestellungen"
-                    class={
-                      viewPreference?.view() === "tiles"
-                        ? "flex flex-1 flex-wrap items-center gap-x-6 gap-y-2 px-3 py-3"
-                        : "grid min-w-0 flex-1 gap-2 px-3 py-3 sm:grid-cols-3 xl:grid-cols-[var(--admin-orders-cols)]"
-                    }
-                  >
-                    <p class={viewPreference?.view() === "tiles" ? "" : "xl:col-span-3"}>
-                      {state.isDone() ? "Gesamtsumme" : "Zwischensumme (geladen)"}
-                    </p>
-                    <p>
-                      <span class="font-normal text-content-muted">Tickets: </span>
-                      {state.ticketCountFormat(state.totals().ticketCount)}
-                      <For each={state.ticketCapacities()}>
-                        {(event) => <> von {state.ticketCountFormat(event.ticketCount)}</>}
-                      </For>{" "}
-                      gebucht
-                    </p>
-                    <p>
-                      <span class="font-normal text-content-muted">Betrag: </span>
-                      {state.priceFormat(state.totals().totalCents)}
-                    </p>
-                  </div>
-                  <Show when={viewPreference?.view() !== "tiles"}>
-                    <span aria-hidden="true" class="hidden w-9 shrink-0 xl:block" />
-                  </Show>
-                </div>
                 <Show when={viewPreference?.view() !== "tiles"}>
                   <div class="hidden items-center bg-surface-muted/40 text-xs font-semibold tracking-wide text-content-muted dark:bg-slate-800/40 xl:flex xl:min-w-full">
                     <div
@@ -409,7 +381,10 @@ export function AdminTicketOrdersPage(props?: {
                         {(label, index) => {
                           const sortBy = () => adminTicketOrdersSortableColumns[label]
                           return (
-                            <span class="relative min-w-0 truncate pr-4">
+                            <span class="relative flex min-w-0 items-center gap-1 pr-4">
+                              <Show when={label === "Status"}>
+                                <AdminTicketOrderStatusFilterSelect state={state} compact />
+                              </Show>
                               <Show when={sortBy()} fallback={<span>{label}</span>}>
                                 {(key) => (
                                   <button
@@ -422,7 +397,9 @@ export function AdminTicketOrdersPage(props?: {
                                     onClick={() => state.sortToggle(key())}
                                     class="inline-flex max-w-full items-center gap-1 rounded-sm hover:text-content focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                                   >
-                                    <span class="truncate">{label}</span>
+                                    <Show when={label !== "Status"}>
+                                      <span class="truncate">{label}</span>
+                                    </Show>
                                     <Icon
                                       path={
                                         state.sortBy() === key()
