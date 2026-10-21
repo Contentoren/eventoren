@@ -21,6 +21,11 @@ export const organizerDashboardOrderTables = {
       v.literal("note_deleted"),
       v.literal("buyer_contact_updated"),
       v.literal("participant_updated"),
+      v.literal("refund_requested"),
+      v.literal("refund_status_checked"),
+      v.literal("invoice_status_checked"),
+      v.literal("invoice_resent"),
+      v.literal("invoice_pdf_downloaded"),
     ),
   }).index("orderIdAndAt", ["orderId", "at"]),
 } as const
