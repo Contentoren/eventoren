@@ -100,21 +100,32 @@ export function organizerDashboardTeamStateCreate(inputs: {
   const roleSeed = createSignalObject<string | null>(null)
   let scopeGeneration = 0
   let dialogGeneration = 0
-  let previousScope: string | undefined
+  let previousOrgId: string | undefined
+  let previousCouldManage: boolean | undefined
   createRenderEffect(() => {
-    const scope = JSON.stringify([inputs.orgId(), inputs.canManage()])
+    const orgId = inputs.orgId()
+    const canManage = inputs.canManage()
     untrack(() => {
       scopeGeneration += 1
-      inviteEmail.set("")
-      inviteRole.set("eventmanager")
-      roleSelection.set("")
-      roleSeed.set(null)
-      error.set(null)
-      message.set(null)
-      submitting.set(false)
-      // Preserve an initial deep link, but never carry a dialog to a new org.
-      if (previousScope !== undefined && previousScope !== scope) inputs.closeDialog()
-      previousScope = scope
+      // A live context reload briefly drops both values to unknown; that must
+      // never look like leaving the org or losing the permission.
+      const orgChanged = previousOrgId !== undefined && orgId !== undefined && previousOrgId !== orgId
+      const manageLost = previousCouldManage === true && canManage !== true && orgId !== undefined
+      if (orgChanged) {
+        inviteEmail.set("")
+        inviteRole.set("eventmanager")
+        roleSelection.set("")
+        roleSeed.set(null)
+        error.set(null)
+        message.set(null)
+        submitting.set(false)
+      }
+      // Preserve an initial deep link, and never close a dialog merely because
+      // permissions finished loading: only a new org or a lost team permission
+      // may close it.
+      if (orgChanged || manageLost) inputs.closeDialog()
+      previousOrgId = orgId
+      previousCouldManage = canManage
     })
   })
   createRenderEffect(() => {

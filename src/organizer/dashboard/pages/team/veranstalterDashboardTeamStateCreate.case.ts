@@ -45,9 +45,9 @@ function invitationCreate(org: string) {
     createdAt: "2026-01-01T00:00:00.000Z",
   }
 }
-function harnessCreate(initialDialog: Dialog | undefined = "rolle") {
+function harnessCreate(initialDialog: Dialog | undefined = "rolle", initialCanManage = true) {
   const orgId = createSignalObject<string | undefined>("A")
-  const canManage = createSignalObject(true)
+  const canManage = createSignalObject(initialCanManage)
   const dialog = createSignalObject<Dialog | undefined>(initialDialog)
   const memberId = createSignalObject<string | undefined>("member-A")
   const calls: Call[] = []
@@ -223,6 +223,44 @@ test("organization transitions clear invitation drafts, feedback, selections and
     expect(h.calls).toHaveLength(0)
     h.orgId.set(undefined)
     expect(h.state.canSubmitRole()).toBe(false)
+  } finally {
+    h.dispose()
+  }
+})
+
+test("a dialog opened while permissions load survives the grant", () => {
+  const h = harnessCreate("einladen", false)
+  try {
+    expect(h.dialog.get()).toBe("einladen")
+    h.state.openInviteDialog()
+    h.canManage.set(true)
+    expect(h.dialog.get()).toBe("einladen")
+  } finally {
+    h.dispose()
+  }
+})
+
+test("losing the team permission closes an open dialog", () => {
+  const h = harnessCreate("einladen")
+  try {
+    h.state.openInviteDialog()
+    expect(h.dialog.get()).toBe("einladen")
+    h.canManage.set(false)
+    expect(h.dialog.get()).toBeUndefined()
+  } finally {
+    h.dispose()
+  }
+})
+
+test("a context reload that briefly drops the org does not close an open dialog", () => {
+  const h = harnessCreate("einladen")
+  try {
+    h.state.openInviteDialog()
+    expect(h.dialog.get()).toBe("einladen")
+    h.orgId.set(undefined)
+    expect(h.dialog.get()).toBe("einladen")
+    h.orgId.set("A")
+    expect(h.dialog.get()).toBe("einladen")
   } finally {
     h.dispose()
   }

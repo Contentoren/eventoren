@@ -39,7 +39,12 @@ export const organizerDashboardGuestTicketSendMutation = mutation({
         checkoutKey: `gaesteliste-${guest._id}-${now}`,
         customerEmail: guest.email ?? "",
         customerGivenName: guest.name,
-        contactSnapshotJson: JSON.stringify({ channel: "gaesteliste", guestId: String(guest._id) }),
+        contactSnapshotJson: JSON.stringify({
+        channel: "gaesteliste",
+        guestId: String(guest._id),
+        email: guest.email ?? "",
+        givenName: guest.name,
+      }),
         eventKey: event.eventKey,
         eventTitle: event.title,
         eventSubtitle: event.subtitle,

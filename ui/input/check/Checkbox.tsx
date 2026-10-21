@@ -59,7 +59,7 @@ export function Checkbox(p: CheckboxProps) {
         id={s.id ? `${s.id}-label` : undefined}
         for={s.id}
         class={classMerge(
-          "cursor-pointer", // interaction
+          "block cursor-pointer", // interaction: full-row target incl. wrapped-line gaps
           s.disabled && classesDisabledDirectly, // disabled state
         )}
         onClick={(e) => {

@@ -13,6 +13,6 @@ if (process.env[caseFlag] === "1") {
     })
     const output = result.stdout.toString() + result.stderr.toString()
     expect(result.exitCode, output).toBe(0)
-    expect(output).toMatch(/\b16 pass\b/)
+    expect(output).toMatch(/\b19 pass\b/)
   })
 }

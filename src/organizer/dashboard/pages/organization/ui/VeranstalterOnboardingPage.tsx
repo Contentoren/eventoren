@@ -155,11 +155,19 @@ export function VeranstalterOnboardingPage() {
           <OrganizerContractLinks />
           <fieldset class="flex flex-col gap-2 rounded-xl bg-warning-soft px-4 py-3">
             <legend class="px-1 text-sm font-semibold text-warning">Ausdrückliche Zustimmung zu Vertragsmustern</legend>
-            <Checkbox checked={state.termsAccepted.get()} onChange={state.termsAccepted.set}>
+            <Checkbox
+              id="onboarding-terms-accept"
+              checked={state.termsAccepted.get()}
+              onChange={state.termsAccepted.set}
+            >
               Ich stimme den oben verlinkten Muster-Veranstalter-AGB in der angegebenen Revision für meine Organisation
               zu.
             </Checkbox>
-            <Checkbox checked={state.dpaAccepted.get()} onChange={state.dpaAccepted.set}>
+            <Checkbox
+              id="onboarding-dpa-accept"
+              checked={state.dpaAccepted.get()}
+              onChange={state.dpaAccepted.set}
+            >
               Ich stimme der oben verlinkten Muster-AVV in der angegebenen Revision für meine Organisation zu.
             </Checkbox>
           </fieldset>

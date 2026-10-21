@@ -2,6 +2,7 @@ import { convexTest } from "convex-test"
 import { expect, test } from "vitest"
 import type { Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
+import { adminTicketOrderSearchMatches } from "#src/admin/adminTicketOrderSearchMatches.ts"
 import { organizerDashboardGuestReferences } from "#src/organizer/dashboard/api/organizerDashboardGuestReferences.ts"
 import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 
@@ -180,6 +181,12 @@ test("ticket send creates a free gaesteliste order and check-in state is durable
   expect(stored.order?.totalCents).toBe(0)
   expect(stored.order?.status).toBe("paid")
   expect(JSON.parse(stored.order?.checkoutContextJson ?? "{}").channel).toBe("gaesteliste")
+  if (!stored.order) throw new Error("guest order missing")
+  const snapshot = JSON.parse(stored.order.contactSnapshotJson ?? "{}")
+  expect(snapshot.channel).toBe("gaesteliste")
+  expect(snapshot.givenName).toBe("Mara")
+  expect(snapshot.email).toBe(stored.order.customerEmail)
+  expect(adminTicketOrderSearchMatches(stored.order, "mara")).toBe(true)
   expect(stored.tickets).toHaveLength(2)
   const again = await s.t.mutation(guestApi.organizerDashboardGuests.organizerDashboardGuestTicketSendMutation, {
     token: s.tokens.inhaber,
