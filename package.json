@@ -16,7 +16,7 @@
     "assets:process": "bun run ./src/app/assets/assetsProcess.ts",
     "assets:process:init": "bun run ./src/app/assets/assetsProcess.ts -- --resync",
     "preview": "vite preview",
-    "test": "bun test --path-ignore-patterns='**/{convex-tests,e2e}/**' --max-concurrency=1 --pass-with-no-tests",
+    "test": "bun test --isolate --path-ignore-patterns='**/{convex-tests,e2e}/**' --max-concurrency=1 --pass-with-no-tests",
     "test:e2e": "bun e2e/config/e2eInvocationMain.ts production",
     "test:e2e:dev": "bun e2e/config/e2eInvocationMain.ts development",
     "test:e2e:ticket": "bun e2e/config/e2eInvocationMain.ts development",
