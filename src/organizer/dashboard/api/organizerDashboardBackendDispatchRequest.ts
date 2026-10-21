@@ -58,6 +58,42 @@ export function organizerDashboardBackendDispatchRequest(
     }
     case "payout-record":
       return backend.payoutRecord({ token, ...request.args })
+    case "payout-status-update":
+      return backend.payoutStatusUpdate({ token, ...request.args })
+    case "phase-list":
+      return backend.phaseList({ token, ...request.args })
+    case "phase-upsert":
+      return backend.phaseUpsert({ token, ...request.args })
+    case "phase-archive":
+      return backend.phaseArchive({ token, ...request.args })
+    case "code-list": {
+      const { numItems, cursor, endCursor, ...filter } = request.args
+      return backend.codeList({
+        token,
+        ...filter,
+        paginationOpts: organizerDashboardPaginationOptsCreate({ numItems, cursor, endCursor }),
+      })
+    }
+    case "code-create":
+      return backend.codeCreate({ token, ...request.args })
+    case "code-update":
+      return backend.codeUpdate({ token, ...request.args })
+    case "code-delete":
+      return backend.codeDelete({ token, ...request.args })
+    case "voucher-list": {
+      const { numItems, cursor, endCursor, ...filter } = request.args
+      return backend.voucherList({
+        token,
+        ...filter,
+        paginationOpts: organizerDashboardPaginationOptsCreate({ numItems, cursor, endCursor }),
+      })
+    }
+    case "voucher-issue":
+      return backend.voucherIssue({ token, ...request.args })
+    case "voucher-redeem":
+      return backend.voucherRedeem({ token, ...request.args })
+    case "voucher-deactivate":
+      return backend.voucherDeactivate({ token, ...request.args })
     case "order-get":
       return backend.orderGet({ token, ...request.args })
     case "order-note-create":

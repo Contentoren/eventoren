@@ -50,6 +50,7 @@ export function veranstalterDashboardFinanzenPageStateCreate(inputs: {
     }
   })
   const payoutRun = mutationCreate(api.organizerDashboardFinance.organizerDashboardPayoutRecordMutation)
+  const payoutStatusRun = mutationCreate(api.organizerDashboardFinance.organizerDashboardPayoutStatusUpdateMutation)
   const amount = createSignalObject("")
   const note = createSignalObject("")
   const message = createSignalObject("")
@@ -89,11 +90,31 @@ export function veranstalterDashboardFinanzenPageStateCreate(inputs: {
   }
 
   const selectedEvent = () => inputs.search().event
+  const markPayoutPaid = async (payoutId: string) => {
+    const orgId = page.orgId()
+    if (!orgId || busy.get() || !canRead()) return
+    busy.set(true)
+    try {
+      const result = await payoutStatusRun({
+        orgId: orgId as Id<"orgs">,
+        payoutId: payoutId as Id<"organizerDashboardPayouts">,
+        status: "ausgezahlt",
+      })
+      message.set(
+        result && typeof result === "object" && "success" in result && result.success
+          ? "Auszahlung als ausgezahlt vermerkt."
+          : "Vermerk fehlgeschlagen.",
+      )
+    } finally {
+      busy.set(false)
+    }
+  }
   return {
     page,
     canRead,
     overview,
     payouts,
+    markPayoutPaid,
     amount: amount.get,
     setAmount: amount.set,
     note: note.get,

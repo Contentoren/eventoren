@@ -21,6 +21,7 @@ import { organizerDashboardTeamInviteSchema } from "#src/organizer/dashboard/tea
 import { organizerDashboardTeamMemberRemoveSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamMemberRemoveSchema.ts"
 import { organizerDashboardTeamRoleUpdateSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamRoleUpdateSchema.ts"
 import { organizerDashboardFinanceInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardFinanceInputSchemas.ts"
+import { organizerDashboardPricingInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardPricingInputSchemas.ts"
 import { organizerDashboardOrderInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardOrderInputSchemas.ts"
 import type { ApiClientResult } from "./apiClient.js"
 
@@ -31,6 +32,11 @@ type OrganizerDashboardOrderClientMethod<Ref, Schema extends v.GenericSchema> = 
 
 type OrganizerDashboardFinanceRef = typeof api.organizerDashboardFinance
 type OrganizerDashboardFinanceClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type OrganizerDashboardPricingRef = typeof api.organizerDashboardPricing
+type OrganizerDashboardPricingClientMethod<Ref, Schema extends v.GenericSchema> = (
   args: v.InferInput<Schema>,
 ) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
 
@@ -154,6 +160,54 @@ export type OrganizerDashboardClient = {
   readonly payoutRecord: OrganizerDashboardFinanceClientMethod<
     OrganizerDashboardFinanceRef["organizerDashboardPayoutRecordMutation"],
     typeof organizerDashboardFinanceInputSchemas.payoutRecord
+  >
+  readonly payoutStatusUpdate: OrganizerDashboardFinanceClientMethod<
+    OrganizerDashboardFinanceRef["organizerDashboardPayoutStatusUpdateMutation"],
+    typeof organizerDashboardPricingInputSchemas.payoutStatusUpdate
+  >
+  readonly phaseList: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardPhaseListQuery"],
+    typeof organizerDashboardPricingInputSchemas.phaseList
+  >
+  readonly phaseUpsert: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardPhaseUpsertMutation"],
+    typeof organizerDashboardPricingInputSchemas.phaseUpsert
+  >
+  readonly phaseArchive: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardPhaseArchiveMutation"],
+    typeof organizerDashboardPricingInputSchemas.phaseArchive
+  >
+  readonly codeList: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardCodeListQuery"],
+    typeof organizerDashboardPricingInputSchemas.codeList
+  >
+  readonly codeCreate: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardCodeCreateMutation"],
+    typeof organizerDashboardPricingInputSchemas.codeCreate
+  >
+  readonly codeUpdate: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardCodeUpdateMutation"],
+    typeof organizerDashboardPricingInputSchemas.codeUpdate
+  >
+  readonly codeDelete: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardCodeDeleteMutation"],
+    typeof organizerDashboardPricingInputSchemas.codeDelete
+  >
+  readonly voucherList: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardVoucherListQuery"],
+    typeof organizerDashboardPricingInputSchemas.voucherList
+  >
+  readonly voucherIssue: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardVoucherIssueMutation"],
+    typeof organizerDashboardPricingInputSchemas.voucherIssue
+  >
+  readonly voucherRedeem: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardVoucherRedeemMutation"],
+    typeof organizerDashboardPricingInputSchemas.voucherRedeem
+  >
+  readonly voucherDeactivate: OrganizerDashboardPricingClientMethod<
+    OrganizerDashboardPricingRef["organizerDashboardVoucherDeactivateMutation"],
+    typeof organizerDashboardPricingInputSchemas.voucherDeactivate
   >
   readonly teamMemberList: OrganizerDashboardTeamClientMethod<
     OrganizerDashboardTeamRef["organizerDashboardTeamMemberListQuery"],
@@ -727,6 +781,241 @@ export function organizerDashboardClientCreate(inputs: {
       try {
         const response = await inputs.client.mutation(
           api.organizerDashboardFinance.organizerDashboardPayoutRecordMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    payoutStatusUpdate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.payoutStatusUpdate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardFinance.organizerDashboardPayoutStatusUpdateMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    phaseList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.phaseList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(api.organizerDashboardPricing.organizerDashboardPhaseListQuery, {
+          ...validated.output,
+          token: credential.token,
+          orgId: validated.output.orgId as Id<"orgs">,
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    phaseUpsert: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.phaseUpsert, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardPricing.organizerDashboardPhaseUpsertMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    phaseArchive: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.phaseArchive, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardPricing.organizerDashboardPhaseArchiveMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    codeList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.codeList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      const { orgId, numItems, cursor, endCursor, ...filter } = validated.output
+      try {
+        const response = await inputs.client.query(api.organizerDashboardPricing.organizerDashboardCodeListQuery, {
+          token: credential.token,
+          orgId: orgId as Id<"orgs">,
+          ...filter,
+          paginationOpts: { numItems, cursor: cursor ?? null, ...(endCursor != null ? { endCursor } : {}) },
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    codeCreate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.codeCreate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardPricing.organizerDashboardCodeCreateMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    codeUpdate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.codeUpdate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardPricing.organizerDashboardCodeUpdateMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    codeDelete: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.codeDelete, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardPricing.organizerDashboardCodeDeleteMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    voucherList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.voucherList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      const { orgId, numItems, cursor, endCursor, ...filter } = validated.output
+      try {
+        const response = await inputs.client.query(api.organizerDashboardPricing.organizerDashboardVoucherListQuery, {
+          token: credential.token,
+          orgId: orgId as Id<"orgs">,
+          ...filter,
+          paginationOpts: { numItems, cursor: cursor ?? null, ...(endCursor != null ? { endCursor } : {}) },
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    voucherIssue: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.voucherIssue, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardPricing.organizerDashboardVoucherIssueMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    voucherRedeem: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.voucherRedeem, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardPricing.organizerDashboardVoucherRedeemMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    voucherDeactivate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardPricingInputSchemas.voucherDeactivate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardPricing.organizerDashboardVoucherDeactivateMutation,
           {
             ...validated.output,
             token: credential.token,

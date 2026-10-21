@@ -10,6 +10,7 @@ import { organizerContractTables } from "#src/organizer/dashboard/contracts/orga
 import { organizerDashboardTables } from "#src/organizer/dashboard/convex/organizerDashboardTables.ts"
 import { organizerDashboardFinanceTables } from "#src/organizer/dashboard/finance/convex/organizerDashboardFinanceTables.ts"
 import { organizerDashboardOrderTables } from "#src/organizer/dashboard/orders/convex/organizerDashboardOrderTables.ts"
+import { organizerDashboardPricingTables } from "#src/organizer/dashboard/pricing/organizerDashboardPricingTables.ts"
 import { organizerDashboardTeamTables } from "#src/organizer/dashboard/team/organizerDashboardTeamTables.ts"
 import { ticketTables } from "#src/ticketing/convex/ticketTables.ts"
 
@@ -25,6 +26,7 @@ const schema = defineSchema({
   ...organizerDashboardTables,
   ...organizerDashboardFinanceTables,
   ...organizerDashboardOrderTables,
+  ...organizerDashboardPricingTables,
   ...organizerDashboardTeamTables,
   ...organizerContractTables,
 })

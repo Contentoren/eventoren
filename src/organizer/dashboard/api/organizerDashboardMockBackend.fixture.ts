@@ -193,6 +193,54 @@ export function organizerDashboardMockBackendCreate(behavior?: Partial<Organizer
         record("payout-record", args)
         return behavior?.payoutRecord?.(args) ?? createResult({ payoutId: "payout_test" })
       },
+      payoutStatusUpdate: async (args) => {
+        record("payout-status-update", args)
+        return behavior?.payoutStatusUpdate?.(args) ?? createResult({ payoutId: "payout_test" })
+      },
+      phaseList: async (args) => {
+        record("phase-list", args)
+        return behavior?.phaseList?.(args) ?? createResult([])
+      },
+      phaseUpsert: async (args) => {
+        record("phase-upsert", args)
+        return behavior?.phaseUpsert?.(args) ?? createResult({ phaseId: "phase_test" })
+      },
+      phaseArchive: async (args) => {
+        record("phase-archive", args)
+        return behavior?.phaseArchive?.(args) ?? createResult({ phaseId: "phase_test" })
+      },
+      codeList: async (args) => {
+        record("code-list", args)
+        return behavior?.codeList?.(args) ?? createResult({ page: [], isDone: true, continueCursor: "" })
+      },
+      codeCreate: async (args) => {
+        record("code-create", args)
+        return behavior?.codeCreate?.(args) ?? createResult({ codes: ["TEST-CODE"] })
+      },
+      codeUpdate: async (args) => {
+        record("code-update", args)
+        return behavior?.codeUpdate?.(args) ?? createResult({ codeId: "code_test" })
+      },
+      codeDelete: async (args) => {
+        record("code-delete", args)
+        return behavior?.codeDelete?.(args) ?? createResult({ codeId: "code_test" })
+      },
+      voucherList: async (args) => {
+        record("voucher-list", args)
+        return behavior?.voucherList?.(args) ?? createResult({ page: [], isDone: true, continueCursor: "" })
+      },
+      voucherIssue: async (args) => {
+        record("voucher-issue", args)
+        return behavior?.voucherIssue?.(args) ?? createResult({ voucherId: "voucher_test", code: "TEST" })
+      },
+      voucherRedeem: async (args) => {
+        record("voucher-redeem", args)
+        return behavior?.voucherRedeem?.(args) ?? createResult({ voucherId: "voucher_test", balanceCents: 0 })
+      },
+      voucherDeactivate: async (args) => {
+        record("voucher-deactivate", args)
+        return behavior?.voucherDeactivate?.(args) ?? createResult({ voucherId: "voucher_test" })
+      },
     },
   }
 }
