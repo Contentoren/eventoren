@@ -89,6 +89,31 @@ export function VeranstalterDashboardEventDetailPage(p: {
               </nav>
             </Show>
 
+            <Show when={state.canEnter() || state.canUseBoxOffice()}>
+              <nav aria-label="Einlass und Abendkasse" class="flex flex-wrap gap-4 text-sm">
+                <Show when={state.canEnter()}>
+                  <Link
+                    to="/veranstalter/events/$eventKey/einlass"
+                    params={{ eventKey: event().eventKey }}
+                    search={{ org: p.orgParam }}
+                    class="underline"
+                  >
+                    Einlass
+                  </Link>
+                </Show>
+                <Show when={state.canUseBoxOffice()}>
+                  <Link
+                    to="/veranstalter/events/$eventKey/abendkasse"
+                    params={{ eventKey: event().eventKey }}
+                    search={{ org: p.orgParam }}
+                    class="underline"
+                  >
+                    Abendkasse
+                  </Link>
+                </Show>
+              </nav>
+            </Show>
+
             <Show when={state.failure()}>
               {(message) => (
                 <p role="alert" class="rounded-md border border-input px-3 py-2 text-sm text-content">

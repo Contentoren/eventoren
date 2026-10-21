@@ -262,6 +262,7 @@ export const ticketTables = {
     .index("orderIdAndSequence", ["orderId", "sequence"])
     .index("code", ["code"])
     .index("eventKeyAndSequenceAndCode", ["eventKey", "sequence", "code"])
+    .index("eventKey", ["eventKey"])
     .index("ownerUserId", ["ownerUserId"]),
 
   ticketCheckInHistory: defineTable({
