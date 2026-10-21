@@ -109,4 +109,19 @@ export const authTables = {
     //
     .index("emailCodePurposeConsumedAt", ["email", "code", "purpose", "consumedAt"])
     .index("userId", ["userId"]),
+
+  authApiKeys: defineTable({
+    userId: vIdUser,
+    name: v.string(),
+    digest: v.string(),
+    previewFirst3: v.string(),
+    previewLast3: v.string(),
+    createdAt: v.string(),
+    expiresAt: v.optional(v.string()),
+    revokedAt: v.optional(v.string()),
+    expiredAt: v.optional(v.string()),
+  })
+    //
+    .index("userId", ["userId"])
+    .index("digest", ["digest"]),
 } as const

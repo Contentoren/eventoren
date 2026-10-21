@@ -13,6 +13,10 @@ export type AdminTicketOrdersPageState = {
   readonly isLoading: Accessor<boolean>
   readonly loadMore: () => Promise<void>
   readonly orders: Accessor<readonly AdminTicketOrderSummary[]>
+  readonly totals: Accessor<{ readonly ticketCount: number; readonly totalCents: number }>
+  readonly ticketCapacities: Accessor<
+    readonly { readonly id: string; readonly title: string; readonly ticketCount: number }[]
+  >
   readonly baseOrders: Accessor<readonly AdminTicketOrderSummary[]>
   readonly sortBy: Accessor<AdminTicketOrdersSortBy>
   readonly sortOrder: Accessor<AdminTicketOrdersSortOrder>

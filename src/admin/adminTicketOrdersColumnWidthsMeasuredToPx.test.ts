@@ -5,7 +5,7 @@ import { adminTicketOrdersColumnWidthsMin } from "./adminTicketOrdersColumnWidth
 
 test("measured desktop columns become pixel widths", () => {
   expect(adminTicketOrdersColumnWidthsMeasuredToPx([180.4, 220.6, 260, 120, 90, 80, 120, 120, 120, 140])).toEqual([
-    180, 221, 260, 120, 90, 80, 120, 120, 120, 140,
+    180, 221, 260, 120, 90, 112, 120, 120, 120, 140,
   ])
 })
 

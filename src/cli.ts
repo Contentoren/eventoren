@@ -3,7 +3,6 @@
 import { cliVersionMetadataRender } from "./cliVersionMetadata.js"
 import { organizerDashboardRequestMaxBytes } from "./organizer/dashboard/api/organizerDashboardRequestMaxBytes.ts"
 
-const commandName = "eventoren"
 const cliArguments = Bun.argv.slice(2)
 const versionVerbose = cliVersionVerboseRead(cliArguments)
 
@@ -81,10 +80,8 @@ if (versionVerbose !== undefined) {
   })
   if (exitCode !== 0) process.exit(exitCode)
 } else {
-  const apiClient = (await import("./client/apiClient.js")).apiClientCreate()
-  if (Bun.argv.includes("--help")) {
-    console.log(`Usage: ${commandName}`)
-  }
+  const { eventorenCliRun } = await import("./cli/eventorenCliRun.js")
+  process.exit(await eventorenCliRun(cliArguments))
 }
 
 function cliVersionVerboseRead(argumentsList: readonly string[]): boolean | undefined {

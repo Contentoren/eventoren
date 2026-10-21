@@ -58,7 +58,7 @@ test("pointer drag measures all columns first and persists the resized widths", 
     const columns = adminTicketOrdersColumnWidthsStateCreate({ dragTarget: target, storage })
 
     columns.columnDragStart(0, 100, measured)
-    expect(columns.columnWidths()).toEqual([180, 221, 260, 120, 90, 80, 120, 120, 120, 140])
+    expect(columns.columnWidths()).toEqual([180, 221, 260, 120, 90, 112, 120, 120, 120, 140])
 
     target.emit("pointermove", 130)
     expect(columns.columnWidths()?.[0]).toBe(210)
@@ -74,7 +74,7 @@ test("arrow keys measure first and move the focused column by one step", () => {
   createRoot((dispose) => {
     const columns = adminTicketOrdersColumnWidthsStateCreate({ storage: memoryStorage() })
     columns.columnKeyResize(1, "ArrowRight", measured)
-    expect(columns.columnWidths()).toEqual([180, 237, 260, 120, 90, 80, 120, 120, 120, 140])
+    expect(columns.columnWidths()).toEqual([180, 237, 260, 120, 90, 112, 120, 120, 120, 140])
     columns.columnKeyResize(1, "ArrowLeft", measured)
     expect(columns.columnWidths()?.[1]).toBe(221)
     columns.columnKeyResize(1, "Enter", measured)

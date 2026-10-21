@@ -1,4 +1,4 @@
-import { createEffect, on, onMount, untrack, useContext } from "solid-js"
+import { createEffect, createMemo, on, onMount, untrack, useContext } from "solid-js"
 import { api } from "#convex/_generated/api.js"
 import type { Id } from "#convex/_generated/dataModel.js"
 import type { FunctionReference, PaginationOptions } from "convex/server"
@@ -11,6 +11,8 @@ import { eventListAvailableTicketsCount } from "../events/eventListAvailableTick
 import { ticketCountFormat } from "../ticketing/ticketCountFormat.ts"
 import { ticketPriceFormat } from "../ticketing/ticketPriceFormat.ts"
 import type { AdminEventItem } from "./AdminEventItem.ts"
+import { adminEventTicketCapacities } from "./adminEventTicketCapacities.ts"
+import { adminTicketOrderBookedTicketCount } from "./adminTicketOrderBookedTicketCount.ts"
 import type { AdminTicketOrderDetails } from "./AdminTicketOrderDetails.ts"
 import type { AdminTicketOrderBillingDetails } from "./AdminTicketOrderBillingDetails.ts"
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
@@ -56,6 +58,7 @@ export function adminTicketOrdersPageStateCreate(
   const cursor = createSignalObject<string | null>(null)
   const isDone = createSignalObject(false)
   const isLoading = createSignalObject(false)
+  const loadAllRequested = createSignalObject(false)
   const errorMessage = createSignalObject("")
   const details = createSignalObject<AdminTicketOrderDetails | null>(null)
   const selectedOrderId = createSignalObject<string | null>(null)
@@ -98,7 +101,7 @@ export function adminTicketOrdersPageStateCreate(
     }
     // Convex permits one paginated read per query. Follow empty matching pages with
     // separate bounded requests, so a search does not stop at the first 25 orders.
-    for (let scannedPages = 0; scannedPages < 10; scannedPages++) {
+    for (let scannedPages = 0; loadAllRequested.get() || scannedPages < 10; scannedPages++) {
       const result = await list({
         eventKey: eventSignal.get() || undefined,
         search: searchSignal.get().trim() || undefined,
@@ -113,7 +116,8 @@ export function adminTicketOrdersPageStateCreate(
       orders.set([...orders.get(), ...result.data.page.filter((order) => !knownIds.has(order.id))])
       cursor.set(result.data.continueCursor)
       isDone.set(result.data.isDone)
-      if (result.data.page.length || result.data.isDone || !searchSignal.get().trim()) break
+      if (result.data.isDone) break
+      if (!loadAllRequested.get() && (result.data.page.length || !searchSignal.get().trim())) break
     }
     isLoading.set(false)
   }
@@ -134,11 +138,17 @@ export function adminTicketOrdersPageStateCreate(
     orders.set(result.data)
     isDone.set(nativeList?.isDone() ?? false)
     isLoading.set(nativeList?.isLoading() ?? false)
-    if (!result.data.length && !nativeList?.isDone() && searchSignal.get().trim()) nativeList?.loadMore()
+    if (
+      !nativeList?.isLoading() &&
+      !nativeList?.isDone() &&
+      (loadAllRequested.get() || (!result.data.length && searchSignal.get().trim()))
+    )
+      nativeList?.loadMore()
   })
 
   const reload = () => {
     listRequest++
+    loadAllRequested.set(false)
     orderClose()
     orders.set([])
     cursor.set(null)
@@ -258,6 +268,16 @@ export function adminTicketOrdersPageStateCreate(
 
   const statusCounts = () => adminTicketOrdersStatusCounts(baseOrders())
 
+  const totals = createMemo(() =>
+    filteredSortedOrders().reduce(
+      (sum, order) => ({
+        ticketCount: sum.ticketCount + adminTicketOrderBookedTicketCount(order),
+        totalCents: sum.totalCents + order.totalCents,
+      }),
+      { ticketCount: 0, totalCents: 0 },
+    ),
+  )
+
   const availableTicketsCount = () => {
     const allEvents = inputs.events?.() ?? []
     const selected = eventSignal.get()
@@ -303,6 +323,7 @@ export function adminTicketOrdersPageStateCreate(
     if (token === activeToken) return
     activeToken = token
     listRequest++
+    loadAllRequested.set(false)
     orderClose()
     orders.set([])
     cursor.set(null)
@@ -320,6 +341,7 @@ export function adminTicketOrdersPageStateCreate(
     isDone: isDone.get,
     isLoading: isLoading.get,
     loadMore: async () => {
+      if (eventSignal.get()) loadAllRequested.set(true)
       if (inputs.useNativeQueries && !list) {
         nativeList?.loadMore()
         return
@@ -327,6 +349,8 @@ export function adminTicketOrdersPageStateCreate(
       await pageLoad()
     },
     orders: filteredSortedOrders,
+    totals,
+    ticketCapacities: () => adminEventTicketCapacities(inputs.events?.() ?? [], eventSignal.get()),
     baseOrders,
     sortBy: sortBy.get,
     sortOrder: sortOrder.get,

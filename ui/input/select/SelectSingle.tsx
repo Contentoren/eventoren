@@ -59,7 +59,9 @@ export function SelectSingle(p: SelectSingleProps) {
         aria-haspopup="listbox"
         aria-label={getTriggerLabel(p, texts)}
         buttonChildren={
-          <TriggerValue valueSignal={p.valueSignal} valueText={p.valueText} renderItem={p.renderItem} texts={texts} />
+          p.buttonProps.buttonChildren ?? (
+            <TriggerValue valueSignal={p.valueSignal} valueText={p.valueText} renderItem={p.renderItem} texts={texts} />
+          )
         }
         disabled={p.disabled}
       >

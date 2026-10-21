@@ -1,4 +1,5 @@
 import { mdiAccountOutline } from "@adaptive-ds/mdi/mdiAccountOutline.js"
+import { mdiKeyOutline } from "@adaptive-ds/mdi/mdiKeyOutline.js"
 import { mdiLogout } from "@adaptive-ds/mdi/mdiLogout.js"
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
@@ -79,6 +80,14 @@ export function AdminSidebarContent(props: {
                       showText
                       class="min-h-11 w-full justify-center rounded-control bg-surface-base/80 px-2.5 dark:bg-slate-800/60"
                     />
+                    <Link
+                      to="/organizer/api-keys"
+                      onClick={props.state.profileClose}
+                      class="focus-ring flex min-h-11 w-full items-center justify-center gap-2 rounded-control bg-surface-base/80 px-2.5 text-sm font-medium dark:bg-slate-800/60"
+                    >
+                      <Icon path={mdiKeyOutline} class="size-5" />
+                      API-Schlüssel
+                    </Link>
                     {props.showListViewControl !== false && (
                       <AdminListViewControl preference={props.state.listViewPreference} />
                     )}

@@ -1,11 +1,15 @@
 import { httpRouter } from "convex/server"
 import { addHttpRoutesAuth } from "#src/auth/convex/addHttpRoutesAuth.ts"
+import { apiKeyHttpRoutesAdd } from "#src/auth/convex/apiKey/apiKeyHttpRoutesAdd.ts"
+import { addHttpRoutesMcp } from "#src/mcp/addHttpRoutesMcp.ts"
 import { catalogImageUploadHttpAction } from "#src/catalog/convex/catalogImageUploadHttpAction.ts"
 import { ticketPaymentOutcomeHttpAction } from "#src/ticketing/convex/ticketPaymentOutcomeHttpAction.ts"
 
 const http = httpRouter()
 
 addHttpRoutesAuth(http)
+apiKeyHttpRoutesAdd(http)
+addHttpRoutesMcp(http)
 http.route({ path: "/api/catalog/image-upload", method: "POST", handler: catalogImageUploadHttpAction })
 http.route({ path: "/eventoren/payment-outcomes", method: "POST", handler: ticketPaymentOutcomeHttpAction })
 

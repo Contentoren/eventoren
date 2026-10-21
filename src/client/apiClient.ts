@@ -1,6 +1,7 @@
 import { ConvexHttpClient } from "convex/browser"
 import { api } from "#convex/_generated/api.js"
 import { convexUrlGet } from "../app/url/convexUrlGet.js"
+import type { ApiKeyExpiryPreset } from "../auth/model/apiKeyExpiryPreset.js"
 import type { EventItem } from "../events/EventItem.js"
 import type { EventTicketTier } from "../events/EventTicketTier.js"
 
@@ -114,3 +115,113 @@ export const apiClient = apiClientCreate
 
 export { organizerDashboardClientCreate } from "./organizerDashboardClientCreate.js"
 export type { OrganizerDashboardClient } from "./organizerDashboardClientCreate.js"
+export async function apiClientApiKeyList(
+  token: string,
+  client: ConvexHttpClient = apiClientCreate(),
+): Promise<ApiClientResult<readonly unknown[]>> {
+  try {
+    const data = await client.query(api.auth.apiKeyListQuery, {
+      token,
+      paginationOpts: { numItems: 100, cursor: null },
+    })
+    if (!data.success) return { success: false, error: { status: 401, message: data.errorMessage } }
+    return { success: true, data: (data.data as { readonly page: readonly unknown[] }).page }
+  } catch (error) {
+    return { success: false, error: { status: 503, message: apiClientErrorMessageGet(error) } }
+  }
+}
+
+export async function apiClientApiKeyCreate(
+  input: { readonly token: string; readonly name: string; readonly expiryPreset?: ApiKeyExpiryPreset },
+  client: ConvexHttpClient = apiClientCreate(),
+): Promise<ApiClientResult<{ readonly id: string; readonly credential: string }>> {
+  try {
+    const data = await client.mutation(api.auth.apiKeyCreateMutation, {
+      token: input.token,
+      name: input.name,
+      ...(input.expiryPreset === undefined ? {} : { expiryPreset: input.expiryPreset }),
+    })
+    if (!data.success) return { success: false, error: { status: 400, message: data.errorMessage } }
+    return { success: true, data: data.data as { readonly id: string; readonly credential: string } }
+  } catch (error) {
+    return { success: false, error: { status: 503, message: apiClientErrorMessageGet(error) } }
+  }
+}
+
+export async function apiClientApiKeyRename(
+  input: { readonly token: string; readonly id: string; readonly name: string },
+  client: ConvexHttpClient = apiClientCreate(),
+): Promise<ApiClientResult<null>> {
+  try {
+    const data = await client.mutation(api.auth.apiKeyRenameMutation, {
+      token: input.token,
+      id: input.id as never,
+      name: input.name,
+    })
+    if (!data.success) return { success: false, error: { status: 400, message: data.errorMessage } }
+    return { success: true, data: null }
+  } catch (error) {
+    return { success: false, error: { status: 503, message: apiClientErrorMessageGet(error) } }
+  }
+}
+
+export async function apiClientApiKeyRevoke(
+  input: { readonly token: string; readonly id: string },
+  client: ConvexHttpClient = apiClientCreate(),
+): Promise<ApiClientResult<null>> {
+  try {
+    const data = await client.mutation(api.auth.apiKeyRevokeMutation, {
+      token: input.token,
+      id: input.id as never,
+    })
+    if (!data.success) return { success: false, error: { status: 400, message: data.errorMessage } }
+    return { success: true, data: null }
+  } catch (error) {
+    return { success: false, error: { status: 503, message: apiClientErrorMessageGet(error) } }
+  }
+}
+
+export async function apiClientApiKeyRotate(
+  input: { readonly token: string; readonly id: string },
+  client: ConvexHttpClient = apiClientCreate(),
+): Promise<ApiClientResult<{ readonly id: string; readonly credential: string }>> {
+  try {
+    const data = await client.mutation(api.auth.apiKeyRotateMutation, {
+      token: input.token,
+      id: input.id as never,
+    })
+    if (!data.success) return { success: false, error: { status: 400, message: data.errorMessage } }
+    return { success: true, data: data.data as { readonly id: string; readonly credential: string } }
+  } catch (error) {
+    return { success: false, error: { status: 503, message: apiClientErrorMessageGet(error) } }
+  }
+}
+
+export async function apiClientOrganizerEventList(
+  token: string,
+  client: ConvexHttpClient = apiClientCreate(),
+): Promise<ApiClientResult<readonly unknown[]>> {
+  try {
+    const data = await client.query(api.organizer.organizerEventListQuery, {
+      token,
+      paginationOpts: { numItems: 100, cursor: null },
+    })
+    if (!data.success) return { success: false, error: { status: 401, message: data.errorMessage } }
+    return { success: true, data: (data.data as { readonly page: readonly unknown[] }).page }
+  } catch (error) {
+    return { success: false, error: { status: 503, message: apiClientErrorMessageGet(error) } }
+  }
+}
+
+export async function apiClientTicketOrderListMine(
+  token: string,
+  client: ConvexHttpClient = apiClientCreate(),
+): Promise<ApiClientResult<unknown>> {
+  try {
+    const data = await client.query(api.ticketing.ticketOrderListMineQuery, { token })
+    if (!data.success) return { success: false, error: { status: 401, message: data.errorMessage } }
+    return { success: true, data: data.data }
+  } catch (error) {
+    return { success: false, error: { status: 503, message: apiClientErrorMessageGet(error) } }
+  }
+}

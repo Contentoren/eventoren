@@ -34,6 +34,58 @@ function orderFixture(partial: {
 }
 
 describe("adminTicketOrdersSort", () => {
+  test("sortiert Status auf- und absteigend nach angezeigtem deutschen Status", () => {
+    const orders = [
+      { ...orderFixture({ id: "offen" }), paymentStatus: "pending" as const },
+      { ...orderFixture({ id: "bezahlt" }) },
+      {
+        ...orderFixture({ id: "storniert" }),
+        cancellation: {
+          cancelledAt: "2026-10-18T12:00:00.000Z",
+          organizationId: "org_test",
+          eventKey: "event_test",
+          orderReference: "order_test",
+          paymentReference: "pi_storniert",
+          stripeMode: "test" as const,
+          paymentMethodType: "sepa_debit" as const,
+          stripeEventId: "evt_test",
+          stripeSessionId: "cs_test",
+          stripePaymentIntentId: "pi_storniert",
+          reason: "payment_failed" as const,
+          stripeEventType: "checkout.session.async_payment_failed" as const,
+          stripeChargeId: null,
+          stripeDisputeId: null,
+        },
+      },
+      {
+        ...orderFixture({ id: "sepa" }),
+        paymentStatus: "pending" as const,
+        ticketsIssuedAt: "2026-10-18T10:00:00.000Z",
+      },
+      { ...orderFixture({ id: "abgelaufen" }), paymentStatus: "expired" as const },
+      { ...orderFixture({ id: "fehlgeschlagen" }), paymentStatus: "failed" as const },
+      { ...orderFixture({ id: "bezahlt-2" }) },
+    ]
+    expect(adminTicketOrdersSort(orders, "status", "asc").map((order) => order.id)).toEqual([
+      "abgelaufen",
+      "bezahlt",
+      "bezahlt-2",
+      "fehlgeschlagen",
+      "offen",
+      "sepa",
+      "storniert",
+    ])
+    expect(adminTicketOrdersSort(orders, "status", "desc").map((order) => order.id)).toEqual([
+      "storniert",
+      "sepa",
+      "offen",
+      "fehlgeschlagen",
+      "bezahlt",
+      "bezahlt-2",
+      "abgelaufen",
+    ])
+  })
+
   test("sortiert Nummer nach Buchungsnummer, sonst Zahlungsreferenz", () => {
     const orders = [
       orderFixture({ id: "b", paymentReference: "pi_9" }),
