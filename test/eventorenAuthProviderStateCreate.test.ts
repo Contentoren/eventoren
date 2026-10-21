@@ -196,9 +196,11 @@ test("a newer refresh wins when concurrent session reads resolve out of order", 
   })
 
   try {
+    const bootstrapping = state.bootstrap()
     const initialResolve = reads[0]
-    if (!initialResolve) throw new Error("Expected the automatic bootstrap read to be pending")
+    if (!initialResolve) throw new Error("Expected the bootstrap read to be pending")
     initialResolve(createResult<EventorenBrowserSession | null>(null))
+    await bootstrapping
 
     const olderRefresh = state.context.refresh()
     const newerRefresh = state.context.refresh()
