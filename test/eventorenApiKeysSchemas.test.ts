@@ -10,9 +10,9 @@ import { apiKeyRotateInputSchema } from "#src/auth/model/apiKeyRotateInputSchema
 describe("api-key input schemas", () => {
   test("create requires a name and accepts an expiry preset", () => {
     expect(va.safeParse(apiKeyCreateInputSchema, { token: "t", name: "cli" }).success).toBe(true)
-    expect(
-      va.safeParse(apiKeyCreateInputSchema, { token: "t", name: "cli", expiryPreset: "1-month" }).success,
-    ).toBe(true)
+    expect(va.safeParse(apiKeyCreateInputSchema, { token: "t", name: "cli", expiryPreset: "1-month" }).success).toBe(
+      true,
+    )
     expect(va.safeParse(apiKeyCreateInputSchema, { token: "t" }).success).toBe(false)
     expect(va.safeParse(apiKeyNameSchema, "").success).toBe(false)
     expect(va.safeParse(apiKeyNameSchema, "  cli  ").output).toBe("cli")

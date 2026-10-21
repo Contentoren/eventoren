@@ -22,12 +22,15 @@ export function EventorenApiKeysPage() {
       <header>
         <h1 class="text-3xl font-bold">API-Schlüssel</h1>
         <p class="mt-2 max-w-2xl text-sm text-content-muted">
-          API-Schlüssel authentifizieren CLI-, MCP- und Server-API-Aufrufe in Ihrem Namen. Ein Geheimnis wird nur
-          einmal angezeigt.
+          API-Schlüssel authentifizieren CLI-, MCP- und Server-API-Aufrufe in Ihrem Namen. Ein Geheimnis wird nur einmal
+          angezeigt.
         </p>
       </header>
 
-      <section aria-label="API-Schlüssel erstellen" class="rounded-control border border-border bg-surface p-6 shadow-sm">
+      <section
+        aria-label="API-Schlüssel erstellen"
+        class="rounded-control border border-border bg-surface p-6 shadow-sm"
+      >
         <h2 class="text-xl font-semibold">API-Schlüssel erstellen</h2>
         <form onSubmit={state.createKey} class="mt-4 flex flex-col gap-4">
           <label class="flex max-w-xs flex-col gap-1 text-sm font-medium">
@@ -151,9 +154,7 @@ export function EventorenApiKeysPage() {
           </For>
         </ul>
         <div class="mt-4 flex items-center gap-3 text-sm">
-          <span class="text-content-muted">
-            Seite {state.pageNumber()}
-          </span>
+          <span class="text-content-muted">Seite {state.pageNumber()}</span>
           <Button variant={buttonVariant.ghost} disabled={!state.hasNext()} onClick={state.next}>
             Weitere laden
           </Button>

@@ -83,10 +83,10 @@ export function apiKeyHttpRoutesAdd(http: HttpRouter): HttpRouter {
       })
     }
     if (parsed.output.paginationOpts.numItems > keyListMaxPageSize) {
-      return new Response(
-        jsonStringifyPretty(createResultError(op, "numItems must be between 1 and 100")),
-        { status: 400, headers: errorHeaders },
-      )
+      return new Response(jsonStringifyPretty(createResultError(op, "numItems must be between 1 and 100")), {
+        status: 400,
+        headers: errorHeaders,
+      })
     }
     const result = await ctx.runQuery(api.auth.apiKeyListQuery, parsed.output)
     return new Response(jsonStringifyPretty(result), {
@@ -128,7 +128,10 @@ export function apiKeyHttpRoutesAdd(http: HttpRouter): HttpRouter {
         headers: errorHeaders,
       })
     }
-    const result = await ctx.runMutation(api.auth.apiKeyRenameMutation, { ...parsed.output, id: parsed.output.id as Id<"authApiKeys"> })
+    const result = await ctx.runMutation(api.auth.apiKeyRenameMutation, {
+      ...parsed.output,
+      id: parsed.output.id as Id<"authApiKeys">,
+    })
     return new Response(jsonStringifyPretty(result), {
       status: result.success ? 200 : 400,
       headers: result.success ? successHeaders : errorHeaders,
@@ -148,7 +151,10 @@ export function apiKeyHttpRoutesAdd(http: HttpRouter): HttpRouter {
         headers: errorHeaders,
       })
     }
-    const result = await ctx.runMutation(api.auth.apiKeyRevokeMutation, { ...parsed.output, id: parsed.output.id as Id<"authApiKeys"> })
+    const result = await ctx.runMutation(api.auth.apiKeyRevokeMutation, {
+      ...parsed.output,
+      id: parsed.output.id as Id<"authApiKeys">,
+    })
     return new Response(jsonStringifyPretty(result), {
       status: result.success ? 200 : 400,
       headers: result.success ? successHeaders : errorHeaders,
@@ -168,7 +174,10 @@ export function apiKeyHttpRoutesAdd(http: HttpRouter): HttpRouter {
         headers: errorHeaders,
       })
     }
-    const result = await ctx.runMutation(api.auth.apiKeyRotateMutation, { ...parsed.output, id: parsed.output.id as Id<"authApiKeys"> })
+    const result = await ctx.runMutation(api.auth.apiKeyRotateMutation, {
+      ...parsed.output,
+      id: parsed.output.id as Id<"authApiKeys">,
+    })
     return new Response(jsonStringifyPretty(result), {
       status: result.success ? 200 : 400,
       headers: result.success ? successHeaders : errorHeaders,

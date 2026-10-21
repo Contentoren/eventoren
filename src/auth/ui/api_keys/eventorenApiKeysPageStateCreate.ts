@@ -38,8 +38,7 @@ export function eventorenApiKeysPageStateCreate() {
   const listError = () => {
     const aggregate = pages.result()
     if (!aggregate) return ""
-    if (aggregate.success === false)
-      return aggregate.errorMessage ?? "Die API-Schlüssel konnten nicht geladen werden."
+    if (aggregate.success === false) return aggregate.errorMessage ?? "Die API-Schlüssel konnten nicht geladen werden."
     const parsed = a.safeParse(a.array(apiKeyListItemSchema), aggregate.data)
     if (!parsed.success) return "Die API-Schlüssel konnten nicht geladen werden."
     return ""
