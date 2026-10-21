@@ -3,9 +3,14 @@ import type { AdminEventItem } from "../../admin/AdminEventItem.ts"
 import { adminEventTicketCapacities } from "../../admin/adminEventTicketCapacities.ts"
 import { adminTicketOrderBookedTicketCount } from "../../admin/adminTicketOrderBookedTicketCount.ts"
 import type { AdminTicketOrderSummary } from "../../admin/AdminTicketOrderSummary.ts"
+import type { AdminTicketOrderStatusFilter } from "../../admin/adminTicketOrderStatusKey.ts"
+import { adminTicketOrderStatusKey } from "../../admin/adminTicketOrderStatusKey.ts"
 import type { AdminTicketOrdersPageState } from "../../admin/AdminTicketOrdersPageState.ts"
 import { adminTicketOrderBookingReference } from "../../admin/adminTicketOrderBookingReference.ts"
 import { adminTicketOrderSearchMatches } from "../../admin/adminTicketOrderSearchMatches.ts"
+import type { AdminTicketOrdersSortBy, AdminTicketOrdersSortOrder } from "../../admin/adminTicketOrdersSort.ts"
+import { adminTicketOrdersSort } from "../../admin/adminTicketOrdersSort.ts"
+import { adminTicketOrdersStatusCounts } from "../../admin/adminTicketOrdersStatusCounts.ts"
 import { eventAvailableTicketsCount } from "../../events/eventAvailableTicketsCount.ts"
 import { eventListAvailableTicketsCount } from "../../events/eventListAvailableTicketsCount.ts"
 import { ticketCountFormat } from "../../ticketing/ticketCountFormat.ts"
@@ -44,15 +49,28 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
   const isError = () => (hasFlow() ? flow.isError() : Boolean(baseErrorMessage.get()))
   const isEmpty = () => (hasFlow() ? flow.isEmpty() : false)
 
+  const sortBy = createSignalObject<AdminTicketOrdersSortBy>("datum")
+  const sortOrder = createSignalObject<AdminTicketOrdersSortOrder>("desc")
+  const statusFilter = createSignalObject<AdminTicketOrderStatusFilter>("alle")
+  const sortToggle = (next: AdminTicketOrdersSortBy) => {
+    if (sortBy.get() === next) {
+      sortOrder.set(sortOrder.get() === "asc" ? "desc" : "asc")
+      return
+    }
+    sortBy.set(next)
+    sortOrder.set(next === "datum" ? "desc" : "asc")
+  }
+
   const orders = () => {
     if (isLoading() || isError() || isEmpty()) return []
-    return ordersSignal
-      .get()
-      .filter(
-        (order) =>
-          (!selectedEvent.get() || order.eventKey === selectedEvent.get()) &&
-          adminTicketOrderSearchMatches(order, searchQuery.get()),
-      )
+    const filter = statusFilter.get()
+    const filtered = ordersSignal.get().filter(
+      (order) =>
+        (!selectedEvent.get() || order.eventKey === selectedEvent.get()) &&
+        (filter === "alle" || adminTicketOrderStatusKey(order) === filter) &&
+        adminTicketOrderSearchMatches(order, searchQuery.get()),
+    )
+    return adminTicketOrdersSort(filtered, sortBy.get(), sortOrder.get())
   }
 
   const errorMessage = () => {
@@ -86,6 +104,12 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
     isLoading,
     loadMore,
     orders,
+    baseOrders: ordersSignal.get,
+    sortBy: sortBy.get,
+    sortOrder: sortOrder.get,
+    sortToggle,
+    statusFilter,
+    statusCounts: () => adminTicketOrdersStatusCounts(ordersSignal.get()),
     ticketCapacities: () => adminEventTicketCapacities(events(), selectedEvent.get()),
     totals: () =>
       orders().reduce(
