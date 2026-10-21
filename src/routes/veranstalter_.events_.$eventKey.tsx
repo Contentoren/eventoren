@@ -81,7 +81,11 @@ function VeranstalterDashboardEventDetailRoute() {
   })
   return (
     <VeranstalterDashboardPageFrame state={page.shell}>
-      <VeranstalterDashboardEventDetailPage state={detail} orgParam={search().org} />
+      <VeranstalterDashboardEventDetailPage
+        state={detail}
+        orgParam={search().org}
+        canCheckIn={() => page.shell.activeOrganization()?.permissions.includes("einlass.nutzen") ?? false}
+      />
     </VeranstalterDashboardPageFrame>
   )
 }

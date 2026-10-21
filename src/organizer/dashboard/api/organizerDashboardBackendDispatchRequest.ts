@@ -310,5 +310,21 @@ export function organizerDashboardBackendDispatchRequest(
         ...(request.args.cursor !== undefined && request.args.cursor !== null ? { cursor: request.args.cursor } : {}),
         ...(request.args.pageSize !== undefined ? { pageSize: request.args.pageSize } : {}),
       })
+    case "overview-get":
+      return backend.overviewGet({ token, ...request.args })
+    case "event-stats-get":
+      return backend.eventStatsGet({ token, ...request.args })
+    case "export-list": {
+      const { numItems, cursor, endCursor, ...filter } = request.args
+      return backend.exportList({
+        token,
+        ...filter,
+        paginationOpts: organizerDashboardPaginationOptsCreate({ numItems, cursor, endCursor }),
+      })
+    }
+    case "public-profile-get":
+      return backend.publicProfileGet({ ...request.args })
+    case "public-event-get":
+      return backend.publicEventGet({ ...request.args })
   }
 }

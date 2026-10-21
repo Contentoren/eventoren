@@ -12,15 +12,36 @@ import { Sheet } from "#ui/interactive/sheet/Sheet.jsx"
 import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
 import { Icon } from "#ui/static/icon/Icon.jsx"
 import { VeranstalterDashboardLoadingState } from "../../ui/VeranstalterDashboardLoadingState.tsx"
+import { veranstalterDashboardExportStateCreate } from "../../exports/veranstalterDashboardExportStateCreate.ts"
+import { VeranstalterDashboardExportSection } from "../../exports/ui/VeranstalterDashboardExportSection.tsx"
 import type { VeranstalterDashboardEventDetailState } from "./veranstalterDashboardEventDetailStateCreate.ts"
 import { veranstalterDashboardEventStatusMeta } from "./veranstalterDashboardEventStatusMeta.ts"
 
-/** Live event detail: draft patch form, tier sheet, publish/archive lifecycle. */
+/** Live event detail: draft patch form, tier sheet, publish/archive lifecycle, permission-filtered exports. */
 export function VeranstalterDashboardEventDetailPage(p: {
   readonly state: VeranstalterDashboardEventDetailState
   readonly orgParam: string | undefined
+  readonly canCheckIn?: () => boolean
 }) {
   const state = p.state
+  const exportState = veranstalterDashboardExportStateCreate({
+    orgId: () => p.orgParam,
+    eventKey: () => state.detail()?.eventKey,
+    event: () => {
+      const detail = state.detail()
+      if (!detail) return undefined
+      return {
+        title: detail.title,
+        description: detail.description,
+        startsAt: detail.startsAt,
+        endsAt: detail.endsAt,
+        venue: detail.venue,
+        city: detail.city,
+      }
+    },
+    canReadOrders: state.canReadOrders,
+    canCheckIn: p.canCheckIn ?? state.canReadParticipants,
+  })
   return (
     <section aria-labelledby="veranstalter-event-detail" class="flex max-w-3xl flex-col gap-4">
       <Show when={state.detail() === undefined && !state.detailError()}>
@@ -87,6 +108,10 @@ export function VeranstalterDashboardEventDetailPage(p: {
                   </Link>
                 </Show>
               </nav>
+            </Show>
+
+            <Show when={state.canReadOrders() || (p.canCheckIn ?? state.canReadParticipants())}>
+              <VeranstalterDashboardExportSection state={exportState} />
             </Show>
 
             <Show when={state.failure()}>

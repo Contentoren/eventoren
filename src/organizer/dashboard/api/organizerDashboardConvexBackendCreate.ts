@@ -272,6 +272,29 @@ export type OrganizerDashboardHttpBackend = {
     readonly cursor?: string | null
     readonly pageSize?: number
   }) => Promise<Result<unknown>>
+  readonly overviewGet: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey?: string
+    readonly fromDay?: string
+    readonly toDay?: string
+    readonly range?: "7" | "30" | "365"
+  }) => Promise<Result<unknown>>
+  readonly eventStatsGet: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey: string
+  }) => Promise<Result<unknown>>
+  readonly exportList: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey: string
+    readonly kind: "teilnehmer" | "bestellungen" | "checkins"
+    readonly search?: string
+    readonly paginationOpts: OrganizerDashboardPaginationOpts
+  }) => Promise<Result<unknown>>
+  readonly publicProfileGet: (args: { readonly orgSlug: string }) => Promise<Result<unknown>>
+  readonly publicEventGet: (args: { readonly orgSlug: string; readonly eventKey: string }) => Promise<Result<unknown>>
 }
 
 /**
@@ -820,5 +843,29 @@ export function organizerDashboardConvexBackendCreate(client: ConvexHttpClient):
         ...(args.cursor !== undefined && args.cursor !== null ? { cursor: args.cursor } : {}),
         ...(args.pageSize !== undefined ? { pageSize: args.pageSize } : {}),
       }),
+    overviewGet: (args) =>
+      client.query(api.organizerDashboardOverview.organizerDashboardOverviewQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    eventStatsGet: (args) =>
+      client.query(api.organizerDashboardOverview.organizerDashboardEventStatsQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    exportList: (args) =>
+      client.query(api.organizerDashboardExports.organizerDashboardExportListQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        paginationOpts: {
+          numItems: args.paginationOpts.numItems,
+          cursor: args.paginationOpts.cursor,
+          ...(args.paginationOpts.endCursor != null ? { endCursor: args.paginationOpts.endCursor } : {}),
+        },
+      }),
+    publicProfileGet: (args) =>
+      client.query(api.organizerDashboardPublic.organizerDashboardPublicProfileQuery, { ...args }),
+    publicEventGet: (args) =>
+      client.query(api.organizerDashboardPublic.organizerDashboardPublicEventQuery, { ...args }),
   }
 }

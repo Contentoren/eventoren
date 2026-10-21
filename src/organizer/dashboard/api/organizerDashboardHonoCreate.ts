@@ -18,9 +18,9 @@ const transportMessage = "Backend transport failed"
 
 /**
  * Hono app for POST /api/veranstalter. One JSON operation per request from an
- * explicit allowlist (covering foundation, profile, orders, events,
- * admin, migration, contracts, team, finance, pricing, guests, and
- * messages); arbitrary Convex function names are never
+ * explicit allowlist (covering foundation, profile, orders, events, admin,
+ * migration, contracts, team, finance, pricing, guests, messages, overview,
+ * exports, and public); arbitrary Convex function names are never
  * accepted. Auth is Authorization Bearer only (RFC 7235 case-insensitive
  * scheme); the credential never appears in logs or error bodies.
  *

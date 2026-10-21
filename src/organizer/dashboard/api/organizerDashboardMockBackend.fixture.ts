@@ -320,6 +320,26 @@ export function organizerDashboardMockBackendCreate(behavior?: Partial<Organizer
         record("message-reminder-update", args)
         return behavior?.messageReminderUpdate?.(args) ?? createResult({ updated: true })
       },
+      overviewGet: async (args) => {
+        record("overview-get", args)
+        return behavior?.overviewGet?.(args) ?? createResult({ orgId: args.orgId, series: [] })
+      },
+      eventStatsGet: async (args) => {
+        record("event-stats-get", args)
+        return behavior?.eventStatsGet?.(args) ?? createResult({ eventKey: args.eventKey, byTier: [] })
+      },
+      exportList: async (args) => {
+        record("export-list", args)
+        return behavior?.exportList?.(args) ?? createResult({ header: [], rows: [], isDone: true, continueCursor: "" })
+      },
+      publicProfileGet: async (args) => {
+        record("public-profile-get", args)
+        return behavior?.publicProfileGet?.(args) ?? createResult({ slug: args.orgSlug, events: [] })
+      },
+      publicEventGet: async (args) => {
+        record("public-event-get", args)
+        return behavior?.publicEventGet?.(args) ?? createResult({ orgSlug: args.orgSlug, tiers: [] })
+      },
     },
   }
 }
