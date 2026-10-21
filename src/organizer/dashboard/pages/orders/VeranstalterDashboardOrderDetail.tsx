@@ -118,7 +118,9 @@ export function VeranstalterDashboardOrderDetail(p: { state: VeranstalterDashboa
                     name="participantName"
                     aria-label={`Teilnehmername Ticket ${ticket.sequence}`}
                     value={p.state.holderDraft(ticket.ticketId)?.participantName ?? ticket.participantName}
-                    onInput={(event) => p.state.holderChange(ticket.ticketId, "participantName", event.currentTarget.value)}
+                    onInput={(event) =>
+                      p.state.holderChange(ticket.ticketId, "participantName", event.currentTarget.value)
+                    }
                     maxLength={240}
                     disabled={!p.state.canEdit() || p.state.busy()}
                   />
@@ -127,7 +129,9 @@ export function VeranstalterDashboardOrderDetail(p: { state: VeranstalterDashboa
                     type="email"
                     aria-label={`Teilnehmer-E-Mail Ticket ${ticket.sequence}`}
                     value={p.state.holderDraft(ticket.ticketId)?.participantEmail ?? ticket.participantEmail}
-                    onInput={(event) => p.state.holderChange(ticket.ticketId, "participantEmail", event.currentTarget.value)}
+                    onInput={(event) =>
+                      p.state.holderChange(ticket.ticketId, "participantEmail", event.currentTarget.value)
+                    }
                     maxLength={254}
                     disabled={!p.state.canEdit() || p.state.busy()}
                   />

@@ -105,8 +105,20 @@ function harness(participants = false) {
     )
   }
   return {
-    state, mutations, search, token, eventKey, subs, calls, push, context, dispose, pending,
-    deferMutations: () => { deferMutations = true },
+    state,
+    mutations,
+    search,
+    token,
+    eventKey,
+    subs,
+    calls,
+    push,
+    context,
+    dispose,
+    pending,
+    deferMutations: () => {
+      deferMutations = true
+    },
   }
 }
 function detailData(orderId = "order-a", email = "a@example.org"): OrganizerDashboardOrderDetail {
@@ -172,9 +184,12 @@ test("same-order live DTO replacement preserves dirty participant fields and rec
     refresh.tickets[0]!.checkedInAt = "2026-10-02T10:00:00.000Z"
     h.push("organizerDashboardOrderGetQuery", refresh)
     expect(h.state.holderDraft("ticket-a")).toEqual({
-      participantName: "Unsaved Name", participantEmail: "unsaved@example.org",
+      participantName: "Unsaved Name",
+      participantEmail: "unsaved@example.org",
     })
-  } finally { h.dispose() }
+  } finally {
+    h.dispose()
+  }
 })
 
 test("participant drafts reset on order changes, ticket removal and edit permission loss", () => {
@@ -202,7 +217,9 @@ test("participant drafts reset on order changes, ticket removal and edit permiss
     expect(h.state.holderDraft("ticket-a")?.participantName).toBe("After permission regain")
     h.state.sheetClose()
     expect(h.state.holderDraft("ticket-a")).toBeUndefined()
-  } finally { h.dispose() }
+  } finally {
+    h.dispose()
+  }
 })
 
 test("participant save snapshots only current ticket state and never reads an old native form", async () => {
@@ -216,18 +233,25 @@ test("participant save snapshots only current ticket state and never reads an ol
     expect(h.calls).toHaveLength(0)
     h.state.holderSubmit("ticket-a", {
       preventDefault() {},
-      get currentTarget() { throw new Error("Detached native form must not be read") },
+      get currentTarget() {
+        throw new Error("Detached native form must not be read")
+      },
     } as unknown as SubmitEvent)
     expect(h.calls[0]?.args).toMatchObject({
-      orgId: "A", orderId: "order-a", ticketId: "ticket-a",
-      participantName: "Captured Name", participantEmail: "captured@example.org",
+      orgId: "A",
+      orderId: "order-a",
+      ticketId: "ticket-a",
+      participantName: "Captured Name",
+      participantEmail: "captured@example.org",
     })
     h.state.holderChange("ticket-a", "participantName", "Newer draft")
     h.pending[0]!.resolve(createResult({}))
     await tick()
     h.push("organizerDashboardOrderGetQuery", detailWithTickets("order-a", "Captured Name", "captured@example.org"))
     expect(h.state.holderDraft("ticket-a")?.participantName).toBe("Newer draft")
-  } finally { h.dispose() }
+  } finally {
+    h.dispose()
+  }
 })
 
 test("pristine contact follows live values while deliberate form edits survive refreshes", () => {
@@ -239,7 +263,9 @@ test("pristine contact follows live values while deliberate form edits survive r
     h.state.contactChange("givenName", "Deliberate draft")
     h.push("organizerDashboardOrderGetQuery", detailData("order-a", "newer@example.org"))
     expect(h.state.contact()).toMatchObject({ givenName: "Deliberate draft", email: "live@example.org" })
-  } finally { h.dispose() }
+  } finally {
+    h.dispose()
+  }
 })
 
 test("event context changes clear forms and pending; mismatched detail cannot be edited", async () => {
@@ -268,23 +294,34 @@ test("event context changes clear forms and pending; mismatched detail cannot be
     h.pending[0]!.resolve(createResult({}))
     await tick()
     expect(h.state.message()).toBe("")
-  } finally { h.dispose() }
+  } finally {
+    h.dispose()
+  }
 })
 
 const mutationActions = [
-  { name: "contact", submit: (h: ReturnType<typeof harness>) => {
-    h.state.contactChange("email", "saved@example.org")
-    h.state.contactSubmit(submitEvent)
-  } },
-  { name: "note create", submit: (h: ReturnType<typeof harness>) => {
-    h.state.noteChange("captured note")
-    h.state.noteSubmit(submitEvent)
-  } },
+  {
+    name: "contact",
+    submit: (h: ReturnType<typeof harness>) => {
+      h.state.contactChange("email", "saved@example.org")
+      h.state.contactSubmit(submitEvent)
+    },
+  },
+  {
+    name: "note create",
+    submit: (h: ReturnType<typeof harness>) => {
+      h.state.noteChange("captured note")
+      h.state.noteSubmit(submitEvent)
+    },
+  },
   { name: "note delete", submit: (h: ReturnType<typeof harness>) => h.state.noteDelete("note-a") },
-  { name: "participant", submit: (h: ReturnType<typeof harness>) => {
-    h.state.holderChange("ticket-a", "participantName", "Captured")
-    h.state.holderSubmit("ticket-a", submitEvent)
-  } },
+  {
+    name: "participant",
+    submit: (h: ReturnType<typeof harness>) => {
+      h.state.holderChange("ticket-a", "participantName", "Captured")
+      h.state.holderSubmit("ticket-a", submitEvent)
+    },
+  },
 ]
 for (const action of mutationActions) {
   for (const success of [true, false]) {
@@ -309,7 +346,9 @@ for (const action of mutationActions) {
         // but never a success/error message or a form-reset instruction.
         h.push("organizerDashboardOrderGetQuery", detailData("order-a", "saved@example.org"))
         expect(h.state.contact().email).toBe("saved@example.org")
-      } finally { h.dispose() }
+      } finally {
+        h.dispose()
+      }
     })
   }
   test(`${action.name}: stale completion/finally cannot release B or a newer pending A request`, async () => {
@@ -337,7 +376,9 @@ for (const action of mutationActions) {
       await tick()
       expect(h.state.busy()).toBe(false)
       expect(h.state.message()).toContain("Gespeichert")
-    } finally { h.dispose() }
+    } finally {
+      h.dispose()
+    }
   })
 }
 

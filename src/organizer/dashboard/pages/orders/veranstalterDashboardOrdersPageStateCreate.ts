@@ -66,9 +66,14 @@ export function veranstalterDashboardOrdersPageStateCreate(inputs: {
   const detailData = createMemo(() => {
     const r = detail()
     if (
-      !r?.success || r.data.orderId !== inputs.search().order || !page.orgId() ||
-      inputs.search().sheet !== "order" || !canRead() || inputs.participants
-    ) return undefined
+      !r?.success ||
+      r.data.orderId !== inputs.search().order ||
+      !page.orgId() ||
+      inputs.search().sheet !== "order" ||
+      !canRead() ||
+      inputs.participants
+    )
+      return undefined
     if (inputs.eventKey() && r.data.eventKey !== inputs.eventKey()) return undefined
     return r.data
   })
@@ -93,8 +98,14 @@ export function veranstalterDashboardOrdersPageStateCreate(inputs: {
     const data = detailData()
     const editable = canEdit()
     const next = JSON.stringify([
-      inputs.search().org, page.orgId(), inputs.search().order, inputs.eventKey(),
-      inputs.search().sheet, canRead(), editable, !!data,
+      inputs.search().org,
+      page.orgId(),
+      inputs.search().order,
+      inputs.eventKey(),
+      inputs.search().sheet,
+      canRead(),
+      editable,
+      !!data,
     ])
     // Only live scope/data are dependencies, never the drafts we reconcile.
     untrack(() => {
@@ -123,10 +134,15 @@ export function veranstalterDashboardOrdersPageStateCreate(inputs: {
       const reconciled = new Map<string, ParticipantDraft>()
       for (const ticket of data.tickets) {
         const draft = previous.get(ticket.ticketId)
-        reconciled.set(ticket.ticketId, draft?.dirty ? draft : {
-          value: { participantName: ticket.participantName, participantEmail: ticket.participantEmail },
-          dirty: false,
-        })
+        reconciled.set(
+          ticket.ticketId,
+          draft?.dirty
+            ? draft
+            : {
+                value: { participantName: ticket.participantName, participantEmail: ticket.participantEmail },
+                dirty: false,
+              },
+        )
       }
       // Removed tickets lose their drafts, even if dirty.
       holderDrafts.set(reconciled)
@@ -221,9 +237,12 @@ export function veranstalterDashboardOrdersPageStateCreate(inputs: {
       event.preventDefault()
       const input = { ...contact.get() }
       const revision = contactRevision
-      void run((org, order) => mutations.updateBuyerContact(org, order, input), () => {
-        if (contactRevision === revision) contactDirty = false
-      })
+      void run(
+        (org, order) => mutations.updateBuyerContact(org, order, input),
+        () => {
+          if (contactRevision === revision) contactDirty = false
+        },
+      )
     },
     note: note.get,
     noteChange: (value: string) => {
@@ -234,7 +253,9 @@ export function veranstalterDashboardOrdersPageStateCreate(inputs: {
       const text = note.get()
       void run(
         (org, order) => mutations.createNote(org, order, text),
-        () => { if (note.get() === text) note.set("") }, 
+        () => {
+          if (note.get() === text) note.set("")
+        },
       )
     },
     noteDelete: (noteId: string) => void run((org, order) => mutations.deleteNote(org, order, noteId)),
@@ -242,9 +263,12 @@ export function veranstalterDashboardOrdersPageStateCreate(inputs: {
     holderChange: (ticketId: string, field: "participantName" | "participantEmail", value: string) => {
       const draft = holderDrafts.get().get(ticketId)
       if (!canEdit() || !detailData()?.tickets.some((ticket) => ticket.ticketId === ticketId) || !draft) return
-      holderDrafts.set(new Map(holderDrafts.get()).set(ticketId, {
-        value: { ...draft.value, [field]: value }, dirty: true,
-      }))
+      holderDrafts.set(
+        new Map(holderDrafts.get()).set(ticketId, {
+          value: { ...draft.value, [field]: value },
+          dirty: true,
+        }),
+      )
     },
     holderSubmit: (ticketId: string, event: SubmitEvent) => {
       event.preventDefault()
@@ -252,11 +276,14 @@ export function veranstalterDashboardOrdersPageStateCreate(inputs: {
       if (!draft || !detailData()?.tickets.some((ticket) => ticket.ticketId === ticketId)) return
       // Capture only this current target; detached forms are never a data source.
       const update = { ...draft.value }
-      void run((org, order) => mutations.updateParticipant(org, order, ticketId, update), () => {
-        const current = holderDrafts.get().get(ticketId)
-        if (current !== draft) return
-        holderDrafts.set(new Map(holderDrafts.get()).set(ticketId, { ...current, dirty: false }))
-      })
+      void run(
+        (org, order) => mutations.updateParticipant(org, order, ticketId, update),
+        () => {
+          const current = holderDrafts.get().get(ticketId)
+          if (current !== draft) return
+          holderDrafts.set(new Map(holderDrafts.get()).set(ticketId, { ...current, dirty: false }))
+        },
+      )
     },
     busy: busy.get,
     message: message.get,
