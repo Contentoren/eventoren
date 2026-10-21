@@ -4,12 +4,12 @@
 
 Configure these variables on the Convex deployment that handles uploads; they must not be exposed through `VITE_*`, frontend bundles, source files, or checked-in environment files:
 
-| Variable | Purpose |
-| --- | --- |
-| `ASSETS_SERVICE_API_URL` | Assets-service HTTP API origin; client endpoints are under `/api/v1`. |
-| `ASSETS_SERVICE_PROJECT_ID` | Eventoren assets-service project ID. |
-| `ASSETS_SERVICE_ENVIRONMENT` | Target assets-service environment (`development` or `production`). |
-| `ASSETS_SERVICE_ACCESS_TOKEN` | Server-only bearer with upload and output-set permissions. |
+| Variable                      | Purpose                                                               |
+| ----------------------------- | --------------------------------------------------------------------- |
+| `ASSETS_SERVICE_API_URL`      | Assets-service HTTP API origin; client endpoints are under `/api/v1`. |
+| `ASSETS_SERVICE_PROJECT_ID`   | Eventoren assets-service project ID.                                  |
+| `ASSETS_SERVICE_ENVIRONMENT`  | Target assets-service environment (`development` or `production`).    |
+| `ASSETS_SERVICE_ACCESS_TOKEN` | Server-only bearer with upload and output-set permissions.            |
 
 The `convex:env:upload` scripts provision these values from the existing private assets CLI configuration. Keep that configuration only on the provisioning host. Missing settings cause uploads to fail closed.
 

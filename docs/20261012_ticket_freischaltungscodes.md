@@ -1,6 +1,7 @@
 # Ticketprodukt-Freischaltungscodes
 
 ## Ziel und verbindliche Entscheidungen
+
 - Pro Ticketprodukt schaltbare Pflicht für automatisch generierte, global eindeutige achtstellige Codes aus Großbuchstaben und Ziffern. Bestehende Produkte bleiben ohne Codepflicht, bis ein Administrator diese aktiviert.
 - Öffentliche Eventseite: Codefeld unmittelbar neben dem Minus-Button; bei aktivierter Pflicht ist Erhöhen erst nach serverseitiger Validierung erlaubt. Ohne Pflicht verschwindet das Feld. Backend-Prüfung bleibt unabhängig davon zwingend.
 - Ein Code erlaubt mehrere Tickets seines einen Produkts innerhalb genau einer Bestellung. Ausschließlich die vorhandene Einstellung `maxPerOrder` begrenzt die Menge zusätzlich zum Bestand. Keine zusätzliche Code-Mengenbegrenzung und keine Produktumbenennung.
@@ -10,8 +11,8 @@
 - Code bleibt mit der Bestellung nachvollziehbar, einschließlich Gastkäufen. Idempotenz berücksichtigt normalisierte Codes; parallele Käufe dürfen einen Code nicht mehrfach beanspruchen.
 
 ## Umsetzung
-Vorhandene Convex-Transaktionen, Session-/Admin-Autorisierung und `#ui/...`-Komponenten verwenden. Bestehende Bibliotheken bevorzugen, keine unnötigen Abhängigkeiten. TS/TSX-Code-Style-Skill beachten. Keine geheimen Codes in öffentlicher Katalogprojektion, URLs oder Logs. Generierte Downloads sind dynamische Geschäftsdaten, keine dauerhaft gespeicherten Projektassets.
 
+Vorhandene Convex-Transaktionen, Session-/Admin-Autorisierung und `#ui/...`-Komponenten verwenden. Bestehende Bibliotheken bevorzugen, keine unnötigen Abhängigkeiten. TS/TSX-Code-Style-Skill beachten. Keine geheimen Codes in öffentlicher Katalogprojektion, URLs oder Logs. Generierte Downloads sind dynamische Geschäftsdaten, keine dauerhaft gespeicherten Projektassets.
 1. Produktkonfiguration: optionales `activationCodeRequired`, Admin-Schalter, Drafts/Adapter/Projektionen; Legacy-Verhalten erhalten.
 2. Codebestand und Admin-Verwaltung: Schema, autorisierte Generierung/Listung, öffentliche minimale Validierungsantwort, Tab und Verwaltung. Global eindeutige Codes und transaktionale Nummerierung.
 3. Bestellung und Zahlungslebenszyklus: Code-Input/Idempotenz, atomare Reservierung, Verbrauch/Freigabe einschließlich Spätzahlung und Fehlerpfaden. Gezielte Convex-Tests für parallele Verwendung und Zahlung.
@@ -20,11 +21,13 @@ Vorhandene Convex-Transaktionen, Session-/Admin-Autorisierung und `#ui/...`-Komp
 6. Abschlussprüfung: fokussierte Regressionen, Type-/Build-Prüfung nach vorhandenen Scripts, echte Browserprüfung Admin und öffentlich einschließlich Mobilansicht. Keine echten Zahlungen oder Änderungen am genannten Live-Event zu Testzwecken ohne ausdrücklichen Auftrag.
 
 ## Prüfstrategie
+
 - Enge Unit-/Convex-Testauswahl je Schritt; nicht bei jedem Schritt komplette Tests oder E2E ausführen.
 - Belegen: Toggle an/aus; gültig/ungültig/falsches Produkt; mehrere Tickets pro Code; unverändertes `maxPerOrder`; gleichzeitige Reservierungen; Idempotenz; bezahlt/verbraucht; endgültiger Fehler/Freigabe; unbekannte Zahlung/keine Freigabe; Erstattung/keine Wiederverwendung; Exporte mit korrekten Spalten und Headern.
 - Browserprüfung ausschließlich durch Browser-Subagent, abschließend auf isolierten Testdaten. Produktionsbereitstellung nur anhand bestehender Projektkonventionen, keine destruktiven Datenänderungen.
 
 ## Aktueller Kontext
+
 - Öffentliche Menge: `TicketTierSelector.tsx`, `ticketTierSelectorStateCreate.ts`.
 - Admin: `AdminTicketProductsForm.tsx`, `AdminEventTabs.tsx`, `AdminEventDetailPage.tsx` und zugehörige State-/Search-Adapter.
 - Backend: `catalogTables.ts`, `ticketTables.ts`, `ticketCheckoutPrepareMutation.ts`, `ticketPaymentStatusApplyMutation.ts`, Reservation-/Reconcile-Funktionen.
@@ -32,6 +35,7 @@ Vorhandene Convex-Transaktionen, Session-/Admin-Autorisierung und `#ui/...`-Komp
 - Vorbestehende fremde Änderungen nicht überschreiben: `docs/20261012_bestellungen_spaltenbreiten.md`, `test/adminTicketOrdersPageStateCreate.test.ts`, `.vitest/json/output.json`, `docs/20261012_event_payment_methods.md`.
 
 ## Status
+
 - Erkundung abgeschlossen; fachliche Anforderungen geklärt.
 - Schritte 1–6 abgeschlossen. Adminverwaltung, Exporte, öffentlicher Ablauf und Warenkorb-Codeprüfung einschließlich Mobilansicht sind abgenommen; technische Abschlussprüfung abgeschlossen. Bereitstellung bleibt auf die Vorschau beschränkt, Produktion und Live-Event unverändert.
 - Browser-Adminzugang zur Vorschau ist eingerichtet; aktuelle private Testsession: `/tmp/opencode/eventoren-activation-codes-auth.json`. Isolierte Testveranstaltung: `qa-activation-codes-20261012`, Familie `ticket-1` (Codepflicht an, max. 3), Standard `ticket-2` (Codepflicht aus); private Fixture-Metadaten inklusive Testcodes: `/tmp/opencode/eventoren-activation-codes-fixture.json`. Browserkäufe enden vor dem Erstellen einer Zahlung; Zahlungsübergänge werden automatisiert im Backend geprüft. Browseraufgaben ausschließlich an Browser-Subagenten delegieren.
