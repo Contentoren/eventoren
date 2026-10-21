@@ -71,7 +71,12 @@ export function mcpReadToolDefinitions(ctx: ActionCtx, token: string): McpToolDe
       description: "List published public events with an optional filter.",
       inputSchema: catalogEventListMcpInput,
       run: async (toolArgs: {
-        filter?: { query: string; location: string; category: string; timeWindow: "alle" | "heute" | "wochenende" | "monat" }
+        filter?: {
+          query: string
+          location: string
+          category: string
+          timeWindow: "alle" | "heute" | "wochenende" | "monat"
+        }
         paginationOpts?: { numItems?: number; cursor?: string | null }
       }) => {
         const result = await ctx.runQuery(api.catalog.catalogEventListPublishedPageQuery, {
