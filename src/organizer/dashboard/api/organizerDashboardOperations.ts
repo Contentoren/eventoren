@@ -1,8 +1,9 @@
 /**
  * Explicit allowlist of organizer dashboard interface operations. Every
  * entry maps 1:1 to a current Convex function in convex/organizerDashboard*.ts
- * (foundation 3, profile 1, events 8, admin 6, migration 3, contracts 1, team 9, orders 7,
- * finance 5, pricing 11 = 54 total). Arbitrary Convex function names are never accepted by the HTTP, CLI,
+ * or convex/customerAccount.ts (foundation 3, profile 1, events 8, admin 6, migration 3,
+ * contracts 1, team 9, orders 7, finance 5, pricing 11, admission 6, box-office 6,
+ * account 5 = 70 total). Arbitrary Convex function names are never accepted by the HTTP, CLI,
  * or TS client layers; adding a backend function requires an explicit entry
  * here plus request-parse, backend, Hono, client, and CLI wiring.
  */
@@ -61,6 +62,23 @@ export const organizerDashboardOperations = [
   "migration-plan",
   "migration-apply",
   "migration-backfill",
+  "admission-stats",
+  "admission-checkin",
+  "admission-checkin-revoke",
+  "admission-scanner-link-list",
+  "admission-scanner-link-create",
+  "admission-scanner-link-revoke",
+  "boxoffice-sale-create",
+  "boxoffice-sale-get",
+  "boxoffice-sale-list",
+  "boxoffice-sale-cancel",
+  "boxoffice-sale-test-pay",
+  "boxoffice-sale-complete",
+  "account-ticket-list",
+  "account-order-list",
+  "account-order-get",
+  "account-profile-get",
+  "account-profile-update",
 ] as const
 
 export type OrganizerDashboardOperation = (typeof organizerDashboardOperations)[number]

@@ -104,6 +104,50 @@ export function organizerDashboardBackendDispatchRequest(
       return backend.orderBuyerContactUpdate({ token, ...request.args })
     case "order-participant-update":
       return backend.orderParticipantUpdate({ token, ...request.args })
+    case "admission-stats":
+      return backend.admissionStats({ token, ...request.args })
+    case "admission-checkin":
+      return backend.admissionCheckin({ token, ...request.args })
+    case "admission-checkin-revoke":
+      return backend.admissionCheckinRevoke({ token, ...request.args })
+    case "admission-scanner-link-list":
+      return backend.admissionScannerLinkList({ token, ...request.args })
+    case "admission-scanner-link-create":
+      return backend.admissionScannerLinkCreate({ token, ...request.args })
+    case "admission-scanner-link-revoke":
+      return backend.admissionScannerLinkRevoke({ token, ...request.args })
+    case "boxoffice-sale-create":
+      return backend.boxofficeSaleCreate({ token, ...request.args })
+    case "boxoffice-sale-get":
+      return backend.boxofficeSaleGet({ token, ...request.args })
+    case "boxoffice-sale-list":
+      return backend.boxofficeSaleList({ token, ...request.args })
+    case "boxoffice-sale-cancel":
+      return backend.boxofficeSaleCancel({ token, ...request.args })
+    case "boxoffice-sale-test-pay":
+      return backend.boxofficeSaleTestPay({ token, ...request.args })
+    case "boxoffice-sale-complete":
+      return backend.boxofficeSaleComplete({ token, ...request.args })
+    case "account-ticket-list": {
+      const { numItems, cursor, endCursor } = request.args
+      return backend.accountTicketList({
+        token,
+        paginationOpts: organizerDashboardPaginationOptsCreate({ numItems, cursor, endCursor }),
+      })
+    }
+    case "account-order-list": {
+      const { numItems, cursor, endCursor } = request.args
+      return backend.accountOrderList({
+        token,
+        paginationOpts: organizerDashboardPaginationOptsCreate({ numItems, cursor, endCursor }),
+      })
+    }
+    case "account-order-get":
+      return backend.accountOrderGet({ token, ...request.args })
+    case "account-profile-get":
+      return backend.accountProfileGet({ token })
+    case "account-profile-update":
+      return backend.accountProfileUpdate({ token, ...request.args })
     case "team-member-list":
       return backend.teamMemberList({
         token,
