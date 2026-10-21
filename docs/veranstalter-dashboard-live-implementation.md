@@ -418,3 +418,71 @@ seine Erweiterung in einem eigenen Worktree ist vom Nutzer genehmigt und in Arbe
 Rabatt-/Gutschein-Preise brauchen ebenfalls abgestimmte echte Billing-Quotes,
 keine ausschließlich lokale Betragsrechnung. Fehlende Funktionen bleiben offen,
 statt als Simulation oder vermeintlich fertige Live-Plattform ausgeliefert zu werden.
+
+## Fortsetzung 21.10.2026 (nachmittags): Worktree-Split, Merges, Build grün
+
+Vom Nutzer ausdrücklich freigegeben: getrennte Feature-Worktrees, Merges und
+— wenn abnahmereif — Merge nach `main`. Kein Push, kein Deploy, keine
+Produktionsmutation.
+
+- Checkpoint `8c00c49` (`wip(veranstalter-dashboard): checkpoint live slice
+  before per-feature worktree split`) sichert den gesamten WIP-Stand; danach
+  drei Feature-Worktrees/Branches ab derselben Basis:
+  `feature/veranstalter-team`, `feature/veranstalter-orders`,
+  `feature/veranstalter-pricing-finance`. Vorheriger Secret-Scan der neuen
+  Dateien ohne Treffer. `.env.local` und Rehearsal-Artefakte bleiben privat
+  außerhalb von Git.
+- Ein früherer geteilter Workflow ohne Isolation wurde gestoppt, bevor er
+  schreiben konnte; ein Neustart mit Isolation scheiterte an fehlender
+  Worktree-Isolation. Deshalb jetzt echte Git-Worktrees statt Isolation.
+- Worker-Ergebnisse (jeweils eigener Worktree, eigene Branch, kein Push):
+  - **Billing** (`billing/feature-eventoren-organizer-billing`,
+    Commit `a6959c7`, 68 Dateien): echte Rechnungs-/Erstattungs-/Resend-
+    Fähigkeiten mit 8 gezielten Fixes + Regressionstests (0039-Resend-FK,
+    abgelaufene Invoice-Claims, Purchase-/Mode-Verknüpfung, Resend-Replay,
+    stale SMTP-Claims, PDF-Pfadvalidierung, fehlendes Live-PDF,
+    Download-Dateiname). Bleibt im Billing-Repo, wird nie nach Eventoren
+    gemergt. Uncommitted Rehearsal-Harness-Dreck wurde nicht angefasst.
+  - **Team** (`feature/veranstalter-team`): alle 8 Befunde bereits an der
+    Basis `8c00c49` mit providerbasierten Regressionstests belegt; keine
+    Änderung nötig, keine Commits. Kein Merge erforderlich.
+  - **Orders** (`feature/veranstalter-orders`, Commit `731981b`): Slice an
+    der Basis vollständig verifiziert; nur Repo-`format`-Drift auf 3 Dateien
+    korrigiert (reine Reflow, keine Logik).
+  - **Pricing/Finance** (`feature/veranstalter-pricing-finance`, Commits
+    `160490c`, `dce899d`, `6560987`, `564ad06`): Preisphasen (Zeit/Kontingent-
+    Auto-Wechsel), Rabatt-/Zugangscodes (einzeln + bulk, versteckte Arten),
+    Gutscheine (Ausgabe, atomare Einlösung, Deaktivierung, Berlin-
+    Laufzeitenden), Auszahlung `vorgemerkt→ausgezahlt`, 12 neue
+    allowlistete Operationen (42→54) mit Hono-/CLI-/TS-Client-Parität, Live-
+    UI `/veranstalter/events/$eventKey/preise` und `/veranstalter/gutscheine`,
+    Finanzseite mit Mark-as-paid und Settlement-CSV-Zeilenfix. Keine
+    simulierten Zahlungen (Ledgers; Geld bewegt sich außerhalb).
+- Merges nach `feature/veranstalter-dashboard`: `fbcb298` (orders),
+  `6fe8c87` (pricing) — beide sauber, keine Konflikte, keine Marker.
+  Fix `39154fc`: `VeranstalterDashboardFinanzenPage` nutzt jetzt den
+  geteilten `Button` (ghost) statt rohem `<button>`; `shared-ui:check`
+  meldet nur noch den vorbestehenden `AdminTicketOrdersPage`-Treffer.
+- Verifikation auf dem gemergten Stand (alle mit sauberer Umgebung):
+  Convex-`tsc` grün; 8 Convex-Suites **103 pass / 0 fail** (Pricing-Slice,
+  Pricing, Finance, Orders, Foundation, AuthorizationEdge, Team, Events);
+  15 Unit-Dateien **334 pass / 0 fail**; App-`tsc` ohne Diagnose in allen
+  gemergten Dashboard-/Routen-Dateien; `webappBoundaryCheck` grün; Biome
+  ohne Befund in den angefassten Dateien.
+- **Build grün**: `bun run build` läuft vollständig durch (Client/Server-
+  Bundles, Boundary, Cloudflare-Worker, SSR). Eine Störung wurde als
+  Fremdartefakt belegt und entfernt: eine ungetrackte, gitignorierte
+  `vite.config.js` (heute 14:20 von Tooling erzeugt) beschattete
+  `vite.config.ts` und zog `import.meta.env`-Zugriffe in das
+  Config-Bundle; nach dem Löschen baut derselbe Stand. Main-Kontrollbuild
+  (`b89bd04`) war parallel grün; Bundle-Vergleich beider Config-Bundles
+  als Beleg gesichert (`/tmp/vc-captured.mjs` vs. `/tmp/vc-main.mjs`).
+- Aus dem gemergten Stand folgt **kein Main-Merge**: Die Matrix bleibt
+  offen (nächste Runde läuft in eigenen Worktrees): Gästelisten,
+  Nachrichten/Versand/Erinnerung, aggregierte Kennzahlen/Exporte,
+  öffentliche Eventseite + Veranstalterprofil aus Live-Daten,
+  Veranstalter-seitige Erstattungs-/Rechnungs-/Resend-Verdrahtung
+  (Billing-Seite fertig, Dashboard-Seite offen), Reaktivitätsfixes,
+  Live-Einlass, Kasse, Kundenkonto, Onboarding-/Vertrags-Browserabnahme
+  und vollständiges E2E. Bis dahin bleibt alles auf
+  `feature/veranstalter-dashboard`.
