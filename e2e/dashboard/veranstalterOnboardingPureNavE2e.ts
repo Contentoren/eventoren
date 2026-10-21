@@ -20,7 +20,9 @@ import { createResult, createResultError, type Result } from "#result"
  * outside this driver via the staged rehearsalFixtureEnsure mutation only.
  */
 
-export const PURE_NAV_LOCAL_FRONT_BASE = "http://127.0.0.1:13557" as const
+// Rehearsal loopback: the runtime.env-backed vite frontend (fixture sessions
+// authenticate here; the plain :13557 frontend runs without rehearsal env).
+export const PURE_NAV_LOCAL_FRONT_BASE = "http://127.0.0.1:13558" as const
 const LOCAL_REHEARSAL_BACKEND_BASE = "http://127.0.0.1:13470" as const
 const ARTIFACT_ROOT = "/tmp/eventoren-dashboard-verification" as const
 const FIXTURE_EXTRA_PATH = join(homedir(), ".local/state/eventoren/local-rehearsal/staging/fixture-tokens-purenav.json")
@@ -236,6 +238,17 @@ function fillOrgForm(
   agentBrowser(session, ["fill", "#onboarding-iban", SYNTHETIC_TEST_IBAN], handle, `${tag}-fill-iban`)
   agentBrowser(session, ["fill", "#onboarding-holder", `${input.name} Kontoinhaber`], handle, `${tag}-fill-holder`)
   // Explicit acceptance of the current template documents; backend checks revisions.
+  // Consent sits below the fold in short viewports; centering both rows keeps
+  // the text-locator clicks hittable instead of landing outside the viewport.
+  agentBrowser(
+    session,
+    [
+      "eval",
+      "(() => { for (const id of ['onboarding-terms-accept', 'onboarding-dpa-accept']) document.getElementById(id)?.scrollIntoView({ block: 'center' }); return 'scrolled'; })()",
+    ],
+    handle,
+    `${tag}-consent-scroll`,
+  )
   agentBrowser(
     session,
     ["find", "text", "Ich stimme den oben verlinkten Muster-Veranstalter-AGB", "click"],

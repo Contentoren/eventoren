@@ -16,7 +16,9 @@ import { createResult, createResultError, type Result } from "#result"
  * production interaction.
  */
 
-export const VERANSTALTER_ONBOARDING_LOCAL_FRONT_BASE = "http://127.0.0.1:13557" as const
+// Rehearsal loopback: the runtime.env-backed vite frontend (fixture sessions
+// authenticate here; the plain :13557 frontend runs without rehearsal env).
+export const VERANSTALTER_ONBOARDING_LOCAL_FRONT_BASE = "http://127.0.0.1:13558" as const
 const LOCAL_REHEARSAL_BACKEND_BASE = "http://127.0.0.1:13470" as const
 const ARTIFACT_ROOT = "/tmp/eventoren-dashboard-verification" as const
 const FIXTURE_TOKENS_PATH = join(homedir(), ".local/state/eventoren/local-rehearsal/staging/fixture-tokens.json")
@@ -322,6 +324,17 @@ export async function veranstalterOnboardingLocalE2eRun(): Promise<Result<Verans
     agentBrowser(ownerSession, ["fill", "#onboarding-holder", `${orgName} Kontoinhaber`], handle, "owner-fill-holder")
     // Explicit acceptance of the current template documents; backend checks revisions.
     agentBrowser(ownerSession, ["snapshot", "-i"], handle, "owner-consent-snapshot")
+    // Consent sits below the fold in short viewports; centering both rows keeps
+    // the text-locator clicks hittable instead of landing outside the viewport.
+    agentBrowser(
+      ownerSession,
+      [
+        "eval",
+        "(() => { for (const id of ['onboarding-terms-accept', 'onboarding-dpa-accept']) document.getElementById(id)?.scrollIntoView({ block: 'center' }); return 'scrolled'; })()",
+      ],
+      handle,
+      "owner-consent-scroll",
+    )
     agentBrowser(
       ownerSession,
       ["find", "text", "Ich stimme den oben verlinkten Muster-Veranstalter-AGB", "click"],
