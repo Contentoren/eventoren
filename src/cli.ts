@@ -2,17 +2,14 @@
 
 import { cliVersionMetadataRender } from "./cliVersionMetadata.js"
 
-const commandName = "eventoren"
 const cliArguments = Bun.argv.slice(2)
 const versionVerbose = cliVersionVerboseRead(cliArguments)
 
 if (versionVerbose !== undefined) {
   process.stdout.write(cliVersionMetadataRender(versionVerbose))
 } else {
-  const apiClient = (await import("./client/apiClient.js")).apiClientCreate()
-  if (Bun.argv.includes("--help")) {
-    console.log(`Usage: ${commandName}`)
-  }
+  const { eventorenCliRun } = await import("./cli/eventorenCliRun.js")
+  process.exit(await eventorenCliRun(cliArguments))
 }
 
 function cliVersionVerboseRead(argumentsList: readonly string[]): boolean | undefined {

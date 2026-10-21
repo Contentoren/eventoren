@@ -96,6 +96,7 @@
     "@adaptive-ds/website-content-pipeline": "0.7.1",
     "@corvu/dialog": "^0.2.4",
     "@corvu/popover": "^0.2.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@solid-primitives/keyed": "^1.5.3",
     "@solid-primitives/scheduled": "^1.5.3",
     "@tanstack/router-core": "1.171.38",
