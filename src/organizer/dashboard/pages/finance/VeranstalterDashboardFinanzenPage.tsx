@@ -18,7 +18,18 @@ export function VeranstalterDashboardFinanzenPage(p: {
   const downloadCsv = () => {
     const data = state.overview()
     if (!data || !("success" in data) || !data.success) return
-    const csv = organizerDashboardFinanceCsvCreate(data.data.events)
+    const csv = organizerDashboardFinanceCsvCreate(
+      data.data.events.map((event) => ({
+        eventKey: event.eventKey,
+        eventTitle: event.title,
+        paidOrders: event.paidOrders,
+        tickets: event.tickets,
+        grossCents: event.grossCents,
+        feeCents: event.feeCents,
+        disputeCents: event.disputeCents,
+        payoutCents: event.payoutCents,
+      })),
+    )
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }))
     const anchor = document.createElement("a")
     anchor.href = url
@@ -163,6 +174,7 @@ export function VeranstalterDashboardFinanzenPage(p: {
                       <th>Betrag</th>
                       <th>Status</th>
                       <th>Vermerkt</th>
+                      <th>Aktion</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -173,6 +185,17 @@ export function VeranstalterDashboardFinanzenPage(p: {
                           <td>{veranstalterDashboardFinanzenMoneyFormat(payout.amountCents)}</td>
                           <td>{payout.status}</td>
                           <td>{veranstalterDashboardFinanzenTimeFormat(payout.decidedAt)}</td>
+                          <td>
+                            <Show when={payout.status === "vorgemerkt"}>
+                              <Button
+                                type="button"
+                                onClick={() => void state.markPayoutPaid(String(payout.payoutId))}
+                                disabled={state.busy()}
+                              >
+                                Als ausgezahlt vermerken
+                              </Button>
+                            </Show>
+                          </td>
                         </tr>
                       )}
                     </For>
