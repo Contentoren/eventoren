@@ -1,7 +1,7 @@
 import * as a from "valibot"
 import { v } from "convex/values"
 import { mutation } from "#convex/_generated/server.js"
-import { createResult, createResultError, type PromiseResult } from "#result"
+import { createResult, createResultError, type PromiseResult, type Result } from "#result"
 import { organizerDashboardAuthorize } from "#src/organizer/dashboard/convex/organizerDashboardAuthorize.ts"
 import { organizerDashboardCodeGenerate } from "#src/organizer/dashboard/pricing/organizerDashboardCodeGenerate.ts"
 import { organizerDashboardCodeNormalize } from "#src/organizer/dashboard/pricing/organizerDashboardCodeNormalize.ts"
@@ -28,7 +28,7 @@ function organizerDashboardCodeBusinessCheck(args: {
   readonly discountType: "prozent" | "betrag" | undefined
   readonly discountValue: number | undefined
   readonly tierKeys: readonly string[]
-}): PromiseResult<null> {
+}): Result<null> {
   if (args.kind === "rabatt") {
     if (args.discountType === undefined || args.discountValue === undefined) {
       return createResultError(args.op, "Rabatt braucht Art und Wert")
@@ -133,7 +133,7 @@ export const organizerDashboardCodeCreateMutation = mutation({
           discountValue: input.discountValue,
           tierKeys: input.tierKeys ?? [],
         })
-        if (!business.success) return business
+        if (!business.success) return createResultError(op, business.errorMessage)
         const scope = await organizerDashboardPricingEventScopeGet(ctx, orgId, input.eventKey, op)
         if (!scope.success) return scope
         const resolvedTierKeys = input.tierKeys ?? []

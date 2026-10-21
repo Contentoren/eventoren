@@ -40,6 +40,22 @@ export type OrganizerDashboardHttpBackend = {
   readonly settlementGet: (args: OrganizerDashboardTeamBackendArgs<"settlement-get">) => Promise<Result<unknown>>
   readonly payoutList: (args: OrganizerDashboardTeamBackendPageArgs<"payout-list">) => Promise<Result<unknown>>
   readonly payoutRecord: (args: OrganizerDashboardTeamBackendArgs<"payout-record">) => Promise<Result<unknown>>
+  readonly payoutStatusUpdate: (
+    args: OrganizerDashboardTeamBackendArgs<"payout-status-update">,
+  ) => Promise<Result<unknown>>
+  readonly phaseList: (args: OrganizerDashboardTeamBackendArgs<"phase-list">) => Promise<Result<unknown>>
+  readonly phaseUpsert: (args: OrganizerDashboardTeamBackendArgs<"phase-upsert">) => Promise<Result<unknown>>
+  readonly phaseArchive: (args: OrganizerDashboardTeamBackendArgs<"phase-archive">) => Promise<Result<unknown>>
+  readonly codeList: (args: OrganizerDashboardTeamBackendPageArgs<"code-list">) => Promise<Result<unknown>>
+  readonly codeCreate: (args: OrganizerDashboardTeamBackendArgs<"code-create">) => Promise<Result<unknown>>
+  readonly codeUpdate: (args: OrganizerDashboardTeamBackendArgs<"code-update">) => Promise<Result<unknown>>
+  readonly codeDelete: (args: OrganizerDashboardTeamBackendArgs<"code-delete">) => Promise<Result<unknown>>
+  readonly voucherList: (args: OrganizerDashboardTeamBackendPageArgs<"voucher-list">) => Promise<Result<unknown>>
+  readonly voucherIssue: (args: OrganizerDashboardTeamBackendArgs<"voucher-issue">) => Promise<Result<unknown>>
+  readonly voucherRedeem: (args: OrganizerDashboardTeamBackendArgs<"voucher-redeem">) => Promise<Result<unknown>>
+  readonly voucherDeactivate: (
+    args: OrganizerDashboardTeamBackendArgs<"voucher-deactivate">,
+  ) => Promise<Result<unknown>>
   readonly teamMemberList: (args: OrganizerDashboardTeamBackendPageArgs<"team-member-list">) => Promise<Result<unknown>>
   readonly teamInvitationList: (
     args: OrganizerDashboardTeamBackendPageArgs<"team-invitation-list">,
@@ -315,6 +331,81 @@ export function organizerDashboardConvexBackendCreate(client: ConvexHttpClient):
       client.mutation(api.organizerDashboardFinance.organizerDashboardPayoutRecordMutation, {
         ...args,
         orgId: args.orgId as Id<"orgs">,
+      }),
+    payoutStatusUpdate: (args) =>
+      client.mutation(api.organizerDashboardFinance.organizerDashboardPayoutStatusUpdateMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        payoutId: args.payoutId as Id<"organizerDashboardPayouts">,
+      }),
+    phaseList: (args) =>
+      client.query(api.organizerDashboardPricing.organizerDashboardPhaseListQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    phaseUpsert: (args) =>
+      client.mutation(api.organizerDashboardPricing.organizerDashboardPhaseUpsertMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    phaseArchive: (args) =>
+      client.mutation(api.organizerDashboardPricing.organizerDashboardPhaseArchiveMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        phaseId: args.phaseId as Id<"organizerDashboardPricePhases">,
+      }),
+    codeList: (args) =>
+      client.query(api.organizerDashboardPricing.organizerDashboardCodeListQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        paginationOpts: {
+          numItems: args.paginationOpts.numItems,
+          cursor: args.paginationOpts.cursor,
+          ...(args.paginationOpts.endCursor != null ? { endCursor: args.paginationOpts.endCursor } : {}),
+        },
+      }),
+    codeCreate: (args) =>
+      client.mutation(api.organizerDashboardPricing.organizerDashboardCodeCreateMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    codeUpdate: (args) =>
+      client.mutation(api.organizerDashboardPricing.organizerDashboardCodeUpdateMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        codeId: args.codeId as Id<"organizerDashboardCodes">,
+      }),
+    codeDelete: (args) =>
+      client.mutation(api.organizerDashboardPricing.organizerDashboardCodeDeleteMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        codeId: args.codeId as Id<"organizerDashboardCodes">,
+      }),
+    voucherList: (args) =>
+      client.query(api.organizerDashboardPricing.organizerDashboardVoucherListQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        paginationOpts: {
+          numItems: args.paginationOpts.numItems,
+          cursor: args.paginationOpts.cursor,
+          ...(args.paginationOpts.endCursor != null ? { endCursor: args.paginationOpts.endCursor } : {}),
+        },
+      }),
+    voucherIssue: (args) =>
+      client.mutation(api.organizerDashboardPricing.organizerDashboardVoucherIssueMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    voucherRedeem: (args) =>
+      client.mutation(api.organizerDashboardPricing.organizerDashboardVoucherRedeemMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    voucherDeactivate: (args) =>
+      client.mutation(api.organizerDashboardPricing.organizerDashboardVoucherDeactivateMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        voucherId: args.voucherId as Id<"organizerDashboardVouchers">,
       }),
     teamMemberList: (args) =>
       client.query(organizerDashboardTeamReferences.organizerDashboardTeamMemberListQuery, {

@@ -20,6 +20,7 @@ import { organizerDashboardTeamMemberRemoveSchema } from "../team/organizerDashb
 import { organizerDashboardTeamRoleUpdateSchema } from "../team/organizerDashboardTeamRoleUpdateSchema.ts"
 import { type OrganizerDashboardOperation, organizerDashboardOperationSet } from "./organizerDashboardOperations.ts"
 import { organizerDashboardFinanceInputSchemas } from "./organizerDashboardFinanceInputSchemas.ts"
+import { organizerDashboardPricingInputSchemas } from "./organizerDashboardPricingInputSchemas.ts"
 import { organizerDashboardOrderInputSchemas } from "./organizerDashboardOrderInputSchemas.ts"
 
 const organizerDashboardRequestOrgIdSchema = v.pipe(v.string(), v.trim(), v.nonEmpty("Cannot be empty"))
@@ -348,6 +349,54 @@ const organizerDashboardPayoutRecordRequestSchema = v.strictObject({
   operation: v.literal("payout-record"),
   ...organizerDashboardFinanceInputSchemas.payoutRecord.entries,
 })
+const organizerDashboardPayoutStatusUpdateRequestSchema = v.strictObject({
+  operation: v.literal("payout-status-update"),
+  ...organizerDashboardPricingInputSchemas.payoutStatusUpdate.entries,
+})
+const organizerDashboardPhaseListRequestSchema = v.strictObject({
+  operation: v.literal("phase-list"),
+  ...organizerDashboardPricingInputSchemas.phaseList.entries,
+})
+const organizerDashboardPhaseUpsertRequestSchema = v.strictObject({
+  operation: v.literal("phase-upsert"),
+  ...organizerDashboardPricingInputSchemas.phaseUpsert.entries,
+})
+const organizerDashboardPhaseArchiveRequestSchema = v.strictObject({
+  operation: v.literal("phase-archive"),
+  ...organizerDashboardPricingInputSchemas.phaseArchive.entries,
+})
+const organizerDashboardCodeListRequestSchema = v.strictObject({
+  operation: v.literal("code-list"),
+  ...organizerDashboardPricingInputSchemas.codeList.entries,
+})
+const organizerDashboardCodeCreateRequestSchema = v.strictObject({
+  operation: v.literal("code-create"),
+  ...organizerDashboardPricingInputSchemas.codeCreate.entries,
+})
+const organizerDashboardCodeUpdateRequestSchema = v.strictObject({
+  operation: v.literal("code-update"),
+  ...organizerDashboardPricingInputSchemas.codeUpdate.entries,
+})
+const organizerDashboardCodeDeleteRequestSchema = v.strictObject({
+  operation: v.literal("code-delete"),
+  ...organizerDashboardPricingInputSchemas.codeDelete.entries,
+})
+const organizerDashboardVoucherListRequestSchema = v.strictObject({
+  operation: v.literal("voucher-list"),
+  ...organizerDashboardPricingInputSchemas.voucherList.entries,
+})
+const organizerDashboardVoucherIssueRequestSchema = v.strictObject({
+  operation: v.literal("voucher-issue"),
+  ...organizerDashboardPricingInputSchemas.voucherIssue.entries,
+})
+const organizerDashboardVoucherRedeemRequestSchema = v.strictObject({
+  operation: v.literal("voucher-redeem"),
+  ...organizerDashboardPricingInputSchemas.voucherRedeem.entries,
+})
+const organizerDashboardVoucherDeactivateRequestSchema = v.strictObject({
+  operation: v.literal("voucher-deactivate"),
+  ...organizerDashboardPricingInputSchemas.voucherDeactivate.entries,
+})
 
 const organizerDashboardRequestSchema = v.variant("operation", [
   organizerDashboardOrderListRequestSchema,
@@ -361,6 +410,18 @@ const organizerDashboardRequestSchema = v.variant("operation", [
   organizerDashboardSettlementGetRequestSchema,
   organizerDashboardPayoutListRequestSchema,
   organizerDashboardPayoutRecordRequestSchema,
+  organizerDashboardPayoutStatusUpdateRequestSchema,
+  organizerDashboardPhaseListRequestSchema,
+  organizerDashboardPhaseUpsertRequestSchema,
+  organizerDashboardPhaseArchiveRequestSchema,
+  organizerDashboardCodeListRequestSchema,
+  organizerDashboardCodeCreateRequestSchema,
+  organizerDashboardCodeUpdateRequestSchema,
+  organizerDashboardCodeDeleteRequestSchema,
+  organizerDashboardVoucherListRequestSchema,
+  organizerDashboardVoucherIssueRequestSchema,
+  organizerDashboardVoucherRedeemRequestSchema,
+  organizerDashboardVoucherDeactivateRequestSchema,
   organizerDashboardContextRequestSchema,
   organizerDashboardCreateRequestSchema,
   organizerDashboardUpdateRequestSchema,
@@ -445,6 +506,54 @@ export type OrganizerDashboardRequest =
   | OrganizerDashboardRequestOf<
       "payout-record",
       OrganizerDashboardRequestArgs<typeof organizerDashboardPayoutRecordRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "payout-status-update",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardPayoutStatusUpdateRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "phase-list",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardPhaseListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "phase-upsert",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardPhaseUpsertRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "phase-archive",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardPhaseArchiveRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "code-list",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardCodeListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "code-create",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardCodeCreateRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "code-update",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardCodeUpdateRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "code-delete",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardCodeDeleteRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "voucher-list",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardVoucherListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "voucher-issue",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardVoucherIssueRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "voucher-redeem",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardVoucherRedeemRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "voucher-deactivate",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardVoucherDeactivateRequestSchema>
     >
   | OrganizerDashboardRequestOf<
       "team-member-list",
@@ -629,6 +738,54 @@ export function organizerDashboardRequestParse(body: unknown): Result<OrganizerD
   if (output.operation === "payout-record") {
     const { operation: payoutRecordOperation, ...payoutRecordArgs } = output
     return createResult({ operation: payoutRecordOperation, args: payoutRecordArgs })
+  }
+  if (output.operation === "payout-status-update") {
+    const { operation: payoutStatusUpdateOperation, ...payoutStatusUpdateArgs } = output
+    return createResult({ operation: payoutStatusUpdateOperation, args: payoutStatusUpdateArgs })
+  }
+  if (output.operation === "phase-list") {
+    const { operation: phaseListOperation, ...phaseListArgs } = output
+    return createResult({ operation: phaseListOperation, args: phaseListArgs })
+  }
+  if (output.operation === "phase-upsert") {
+    const { operation: phaseUpsertOperation, ...phaseUpsertArgs } = output
+    return createResult({ operation: phaseUpsertOperation, args: phaseUpsertArgs })
+  }
+  if (output.operation === "phase-archive") {
+    const { operation: phaseArchiveOperation, ...phaseArchiveArgs } = output
+    return createResult({ operation: phaseArchiveOperation, args: phaseArchiveArgs })
+  }
+  if (output.operation === "code-list") {
+    const { operation: codeListOperation, ...codeListArgs } = output
+    return createResult({ operation: codeListOperation, args: codeListArgs })
+  }
+  if (output.operation === "code-create") {
+    const { operation: codeCreateOperation, ...codeCreateArgs } = output
+    return createResult({ operation: codeCreateOperation, args: codeCreateArgs })
+  }
+  if (output.operation === "code-update") {
+    const { operation: codeUpdateOperation, ...codeUpdateArgs } = output
+    return createResult({ operation: codeUpdateOperation, args: codeUpdateArgs })
+  }
+  if (output.operation === "code-delete") {
+    const { operation: codeDeleteOperation, ...codeDeleteArgs } = output
+    return createResult({ operation: codeDeleteOperation, args: codeDeleteArgs })
+  }
+  if (output.operation === "voucher-list") {
+    const { operation: voucherListOperation, ...voucherListArgs } = output
+    return createResult({ operation: voucherListOperation, args: voucherListArgs })
+  }
+  if (output.operation === "voucher-issue") {
+    const { operation: voucherIssueOperation, ...voucherIssueArgs } = output
+    return createResult({ operation: voucherIssueOperation, args: voucherIssueArgs })
+  }
+  if (output.operation === "voucher-redeem") {
+    const { operation: voucherRedeemOperation, ...voucherRedeemArgs } = output
+    return createResult({ operation: voucherRedeemOperation, args: voucherRedeemArgs })
+  }
+  if (output.operation === "voucher-deactivate") {
+    const { operation: voucherDeactivateOperation, ...voucherDeactivateArgs } = output
+    return createResult({ operation: voucherDeactivateOperation, args: voucherDeactivateArgs })
   }
   if (output.operation === "team-member-list") {
     const { operation, ...args } = output
