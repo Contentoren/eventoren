@@ -5,6 +5,8 @@ import type { Result } from "#result"
 import type { CatalogEventFaqs } from "#src/catalog/catalogEventFaqsSchema.ts"
 import type { CatalogEventSchedule } from "#src/catalog/catalogEventScheduleSchema.ts"
 import type { OrganizerDashboardRequest } from "./organizerDashboardRequestParse.ts"
+import { organizerDashboardGuestReferences } from "./organizerDashboardGuestReferences.ts"
+import { organizerDashboardMessageReferences } from "./organizerDashboardMessageReferences.ts"
 import { organizerDashboardTeamReferences } from "./organizerDashboardTeamReferences.ts"
 
 type OrganizerDashboardTeamBackendArgs<Operation extends OrganizerDashboardRequest["operation"]> = {
@@ -74,6 +76,31 @@ export type OrganizerDashboardHttpBackend = {
   ) => Promise<Result<unknown>>
   readonly teamInvitationAccept: (
     args: OrganizerDashboardTeamBackendArgs<"team-invitation-accept">,
+  ) => Promise<Result<unknown>>
+  readonly guestQuotaList: (args: OrganizerDashboardTeamBackendArgs<"guest-quota-list">) => Promise<Result<unknown>>
+  readonly guestQuotaUpsert: (args: OrganizerDashboardTeamBackendArgs<"guest-quota-upsert">) => Promise<Result<unknown>>
+  readonly guestQuotaDelete: (args: OrganizerDashboardTeamBackendArgs<"guest-quota-delete">) => Promise<Result<unknown>>
+  readonly guestList: (args: OrganizerDashboardTeamBackendArgs<"guest-list">) => Promise<Result<unknown>>
+  readonly guestUpsert: (args: OrganizerDashboardTeamBackendArgs<"guest-upsert">) => Promise<Result<unknown>>
+  readonly guestDelete: (args: OrganizerDashboardTeamBackendArgs<"guest-delete">) => Promise<Result<unknown>>
+  readonly guestTicketSend: (args: OrganizerDashboardTeamBackendArgs<"guest-ticket-send">) => Promise<Result<unknown>>
+  readonly guestCheckIn: (args: OrganizerDashboardTeamBackendArgs<"guest-check-in">) => Promise<Result<unknown>>
+  readonly guestCheckInUndo: (
+    args: OrganizerDashboardTeamBackendArgs<"guest-check-in-undo">,
+  ) => Promise<Result<unknown>>
+  readonly messageList: (args: OrganizerDashboardTeamBackendArgs<"message-list">) => Promise<Result<unknown>>
+  readonly messageGet: (args: OrganizerDashboardTeamBackendArgs<"message-get">) => Promise<Result<unknown>>
+  readonly messageCreate: (args: OrganizerDashboardTeamBackendArgs<"message-create">) => Promise<Result<unknown>>
+  readonly messageUpdate: (args: OrganizerDashboardTeamBackendArgs<"message-update">) => Promise<Result<unknown>>
+  readonly messageSchedule: (args: OrganizerDashboardTeamBackendArgs<"message-schedule">) => Promise<Result<unknown>>
+  readonly messageSend: (args: OrganizerDashboardTeamBackendArgs<"message-send">) => Promise<Result<unknown>>
+  readonly messageDelete: (args: OrganizerDashboardTeamBackendArgs<"message-delete">) => Promise<Result<unknown>>
+  readonly messageIcsGet: (args: OrganizerDashboardTeamBackendArgs<"message-ics-get">) => Promise<Result<unknown>>
+  readonly messageReminderGet: (
+    args: OrganizerDashboardTeamBackendArgs<"message-reminder-get">,
+  ) => Promise<Result<unknown>>
+  readonly messageReminderUpdate: (
+    args: OrganizerDashboardTeamBackendArgs<"message-reminder-update">,
   ) => Promise<Result<unknown>>
   readonly contextQuery: (args: { readonly token: string; readonly orgId?: string }) => Promise<Result<unknown>>
   readonly organizationCreate: (args: {
@@ -452,6 +479,117 @@ export function organizerDashboardConvexBackendCreate(client: ConvexHttpClient):
       client.mutation(organizerDashboardTeamReferences.organizerDashboardTeamInvitationAcceptMutation, {
         ...args,
         invitationId: args.invitationId as Id<"organizerDashboardTeamInvitations">,
+      }),
+    guestQuotaList: (args) =>
+      client.query(organizerDashboardGuestReferences.organizerDashboardGuestQuotaListQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    guestQuotaUpsert: (args) => {
+      const { quotaId, ...rest } = args
+      return client.mutation(organizerDashboardGuestReferences.organizerDashboardGuestQuotaUpsertMutation, {
+        ...rest,
+        orgId: args.orgId as Id<"orgs">,
+        ...(quotaId !== undefined ? { quotaId: quotaId as Id<"organizerDashboardGuestQuotas"> } : {}),
+      })
+    },
+    guestQuotaDelete: (args) =>
+      client.mutation(organizerDashboardGuestReferences.organizerDashboardGuestQuotaDeleteMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        quotaId: args.quotaId as Id<"organizerDashboardGuestQuotas">,
+      }),
+    guestList: (args) =>
+      client.query(organizerDashboardGuestReferences.organizerDashboardGuestListQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    guestUpsert: (args) => {
+      const { guestId, ...rest } = args
+      return client.mutation(organizerDashboardGuestReferences.organizerDashboardGuestUpsertMutation, {
+        ...rest,
+        orgId: args.orgId as Id<"orgs">,
+        ...(guestId !== undefined ? { guestId: guestId as Id<"organizerDashboardGuests"> } : {}),
+      })
+    },
+    guestDelete: (args) =>
+      client.mutation(organizerDashboardGuestReferences.organizerDashboardGuestDeleteMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        guestId: args.guestId as Id<"organizerDashboardGuests">,
+      }),
+    guestTicketSend: (args) =>
+      client.mutation(organizerDashboardGuestReferences.organizerDashboardGuestTicketSendMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        guestId: args.guestId as Id<"organizerDashboardGuests">,
+      }),
+    guestCheckIn: (args) =>
+      client.mutation(organizerDashboardGuestReferences.organizerDashboardGuestCheckInMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        guestId: args.guestId as Id<"organizerDashboardGuests">,
+      }),
+    guestCheckInUndo: (args) =>
+      client.mutation(organizerDashboardGuestReferences.organizerDashboardGuestCheckInUndoMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        guestId: args.guestId as Id<"organizerDashboardGuests">,
+      }),
+    messageList: (args) =>
+      client.query(organizerDashboardMessageReferences.organizerDashboardMessageListQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    messageGet: (args) =>
+      client.query(organizerDashboardMessageReferences.organizerDashboardMessageGetQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        messageId: args.messageId as Id<"organizerDashboardMessages">,
+      }),
+    messageCreate: (args) =>
+      client.mutation(organizerDashboardMessageReferences.organizerDashboardMessageCreateMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    messageUpdate: (args) =>
+      client.mutation(organizerDashboardMessageReferences.organizerDashboardMessageUpdateMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        messageId: args.messageId as Id<"organizerDashboardMessages">,
+      }),
+    messageSchedule: (args) =>
+      client.mutation(organizerDashboardMessageReferences.organizerDashboardMessageScheduleMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        messageId: args.messageId as Id<"organizerDashboardMessages">,
+      }),
+    messageSend: (args) =>
+      client.mutation(organizerDashboardMessageReferences.organizerDashboardMessageSendMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        messageId: args.messageId as Id<"organizerDashboardMessages">,
+      }),
+    messageDelete: (args) =>
+      client.mutation(organizerDashboardMessageReferences.organizerDashboardMessageDeleteMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        messageId: args.messageId as Id<"organizerDashboardMessages">,
+      }),
+    messageIcsGet: (args) =>
+      client.query(organizerDashboardMessageReferences.organizerDashboardMessageIcsGetQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    messageReminderGet: (args) =>
+      client.query(organizerDashboardMessageReferences.organizerDashboardMessageReminderGetQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    messageReminderUpdate: (args) =>
+      client.mutation(organizerDashboardMessageReferences.organizerDashboardMessageReminderUpdateMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
       }),
     contextQuery: (args) =>
       client.query(api.organizerDashboard.organizerDashboardContextQuery, {

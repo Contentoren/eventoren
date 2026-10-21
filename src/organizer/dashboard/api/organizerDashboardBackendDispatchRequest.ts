@@ -104,6 +104,44 @@ export function organizerDashboardBackendDispatchRequest(
       return backend.orderBuyerContactUpdate({ token, ...request.args })
     case "order-participant-update":
       return backend.orderParticipantUpdate({ token, ...request.args })
+    case "guest-quota-list":
+      return backend.guestQuotaList({ token, ...request.args })
+    case "guest-quota-upsert":
+      return backend.guestQuotaUpsert({ token, ...request.args })
+    case "guest-quota-delete":
+      return backend.guestQuotaDelete({ token, ...request.args })
+    case "guest-list":
+      return backend.guestList({ token, ...request.args })
+    case "guest-upsert":
+      return backend.guestUpsert({ token, ...request.args })
+    case "guest-delete":
+      return backend.guestDelete({ token, ...request.args })
+    case "guest-ticket-send":
+      return backend.guestTicketSend({ token, ...request.args })
+    case "guest-check-in":
+      return backend.guestCheckIn({ token, ...request.args })
+    case "guest-check-in-undo":
+      return backend.guestCheckInUndo({ token, ...request.args })
+    case "message-list":
+      return backend.messageList({ token, ...request.args })
+    case "message-get":
+      return backend.messageGet({ token, ...request.args })
+    case "message-create":
+      return backend.messageCreate({ token, ...request.args })
+    case "message-update":
+      return backend.messageUpdate({ token, ...request.args })
+    case "message-schedule":
+      return backend.messageSchedule({ token, ...request.args })
+    case "message-send":
+      return backend.messageSend({ token, ...request.args })
+    case "message-delete":
+      return backend.messageDelete({ token, ...request.args })
+    case "message-ics-get":
+      return backend.messageIcsGet({ token, ...request.args })
+    case "message-reminder-get":
+      return backend.messageReminderGet({ token, ...request.args })
+    case "message-reminder-update":
+      return backend.messageReminderUpdate({ token, ...request.args })
     case "team-member-list":
       return backend.teamMemberList({
         token,

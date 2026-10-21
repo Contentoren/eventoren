@@ -21,6 +21,10 @@ import { organizerDashboardTeamInviteSchema } from "#src/organizer/dashboard/tea
 import { organizerDashboardTeamMemberRemoveSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamMemberRemoveSchema.ts"
 import { organizerDashboardTeamRoleUpdateSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamRoleUpdateSchema.ts"
 import { organizerDashboardFinanceInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardFinanceInputSchemas.ts"
+import { organizerDashboardGuestReferences } from "#src/organizer/dashboard/api/organizerDashboardGuestReferences.ts"
+import { organizerDashboardGuestInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardGuestInputSchemas.ts"
+import { organizerDashboardMessageInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardMessageInputSchemas.ts"
+import { organizerDashboardMessageReferences } from "#src/organizer/dashboard/api/organizerDashboardMessageReferences.ts"
 import { organizerDashboardPricingInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardPricingInputSchemas.ts"
 import { organizerDashboardOrderInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardOrderInputSchemas.ts"
 import type { ApiClientResult } from "./apiClient.js"
@@ -37,6 +41,16 @@ type OrganizerDashboardFinanceClientMethod<Ref, Schema extends v.GenericSchema> 
 
 type OrganizerDashboardPricingRef = typeof api.organizerDashboardPricing
 type OrganizerDashboardPricingClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type OrganizerDashboardGuestRef = typeof organizerDashboardGuestReferences
+type OrganizerDashboardGuestClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type OrganizerDashboardMessageRef = typeof organizerDashboardMessageReferences
+type OrganizerDashboardMessageClientMethod<Ref, Schema extends v.GenericSchema> = (
   args: v.InferInput<Schema>,
 ) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
 
@@ -244,6 +258,82 @@ export type OrganizerDashboardClient = {
   readonly teamInvitationAccept: OrganizerDashboardTeamClientMethod<
     OrganizerDashboardTeamRef["organizerDashboardTeamInvitationAcceptMutation"],
     typeof organizerDashboardClientTeamInvitationAcceptSchema
+  >
+  readonly guestQuotaList: OrganizerDashboardGuestClientMethod<
+    OrganizerDashboardGuestRef["organizerDashboardGuestQuotaListQuery"],
+    typeof organizerDashboardGuestInputSchemas.quotaList
+  >
+  readonly guestQuotaUpsert: OrganizerDashboardGuestClientMethod<
+    OrganizerDashboardGuestRef["organizerDashboardGuestQuotaUpsertMutation"],
+    typeof organizerDashboardGuestInputSchemas.quotaUpsert
+  >
+  readonly guestQuotaDelete: OrganizerDashboardGuestClientMethod<
+    OrganizerDashboardGuestRef["organizerDashboardGuestQuotaDeleteMutation"],
+    typeof organizerDashboardGuestInputSchemas.quotaDelete
+  >
+  readonly guestList: OrganizerDashboardGuestClientMethod<
+    OrganizerDashboardGuestRef["organizerDashboardGuestListQuery"],
+    typeof organizerDashboardGuestInputSchemas.guestList
+  >
+  readonly guestUpsert: OrganizerDashboardGuestClientMethod<
+    OrganizerDashboardGuestRef["organizerDashboardGuestUpsertMutation"],
+    typeof organizerDashboardGuestInputSchemas.guestUpsert
+  >
+  readonly guestDelete: OrganizerDashboardGuestClientMethod<
+    OrganizerDashboardGuestRef["organizerDashboardGuestDeleteMutation"],
+    typeof organizerDashboardGuestInputSchemas.guestDelete
+  >
+  readonly guestTicketSend: OrganizerDashboardGuestClientMethod<
+    OrganizerDashboardGuestRef["organizerDashboardGuestTicketSendMutation"],
+    typeof organizerDashboardGuestInputSchemas.guestTicketSend
+  >
+  readonly guestCheckIn: OrganizerDashboardGuestClientMethod<
+    OrganizerDashboardGuestRef["organizerDashboardGuestCheckInMutation"],
+    typeof organizerDashboardGuestInputSchemas.guestCheckIn
+  >
+  readonly guestCheckInUndo: OrganizerDashboardGuestClientMethod<
+    OrganizerDashboardGuestRef["organizerDashboardGuestCheckInUndoMutation"],
+    typeof organizerDashboardGuestInputSchemas.guestCheckInUndo
+  >
+  readonly messageList: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageListQuery"],
+    typeof organizerDashboardMessageInputSchemas.messageList
+  >
+  readonly messageGet: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageGetQuery"],
+    typeof organizerDashboardMessageInputSchemas.messageGet
+  >
+  readonly messageCreate: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageCreateMutation"],
+    typeof organizerDashboardMessageInputSchemas.messageCreate
+  >
+  readonly messageUpdate: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageUpdateMutation"],
+    typeof organizerDashboardMessageInputSchemas.messageUpdate
+  >
+  readonly messageSchedule: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageScheduleMutation"],
+    typeof organizerDashboardMessageInputSchemas.messageSchedule
+  >
+  readonly messageSend: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageSendMutation"],
+    typeof organizerDashboardMessageInputSchemas.messageSend
+  >
+  readonly messageDelete: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageDeleteMutation"],
+    typeof organizerDashboardMessageInputSchemas.messageDelete
+  >
+  readonly messageIcsGet: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageIcsGetQuery"],
+    typeof organizerDashboardMessageInputSchemas.messageIcsGet
+  >
+  readonly messageReminderGet: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageReminderGetQuery"],
+    typeof organizerDashboardMessageInputSchemas.messageReminderGet
+  >
+  readonly messageReminderUpdate: OrganizerDashboardMessageClientMethod<
+    OrganizerDashboardMessageRef["organizerDashboardMessageReminderUpdateMutation"],
+    typeof organizerDashboardMessageInputSchemas.messageReminderUpdate
   >
   readonly contextGet: (args: {
     readonly orgId?: string
@@ -1206,6 +1296,373 @@ export function organizerDashboardClientCreate(inputs: {
             token: credential.token,
             invitationId: validated.output.invitationId as Id<"organizerDashboardTeamInvitations">,
           },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    guestQuotaList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardGuestInputSchemas.quotaList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(
+          organizerDashboardGuestReferences.organizerDashboardGuestQuotaListQuery,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    guestQuotaUpsert: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardGuestInputSchemas.quotaUpsert, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      const { quotaId, ...fields } = validated.output
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardGuestReferences.organizerDashboardGuestQuotaUpsertMutation,
+          {
+            ...fields,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            ...(quotaId !== undefined ? { quotaId: quotaId as Id<"organizerDashboardGuestQuotas"> } : {}),
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    guestQuotaDelete: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardGuestInputSchemas.quotaDelete, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardGuestReferences.organizerDashboardGuestQuotaDeleteMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            quotaId: validated.output.quotaId as Id<"organizerDashboardGuestQuotas">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    guestList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardGuestInputSchemas.guestList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(organizerDashboardGuestReferences.organizerDashboardGuestListQuery, {
+          ...validated.output,
+          token: credential.token,
+          orgId: validated.output.orgId as Id<"orgs">,
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    guestUpsert: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardGuestInputSchemas.guestUpsert, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      const { guestId, ...fields } = validated.output
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardGuestReferences.organizerDashboardGuestUpsertMutation,
+          {
+            ...fields,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            ...(guestId !== undefined ? { guestId: guestId as Id<"organizerDashboardGuests"> } : {}),
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    guestDelete: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardGuestInputSchemas.guestDelete, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardGuestReferences.organizerDashboardGuestDeleteMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            guestId: validated.output.guestId as Id<"organizerDashboardGuests">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    guestTicketSend: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardGuestInputSchemas.guestTicketSend, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardGuestReferences.organizerDashboardGuestTicketSendMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            guestId: validated.output.guestId as Id<"organizerDashboardGuests">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    guestCheckIn: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardGuestInputSchemas.guestCheckIn, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardGuestReferences.organizerDashboardGuestCheckInMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            guestId: validated.output.guestId as Id<"organizerDashboardGuests">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    guestCheckInUndo: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardGuestInputSchemas.guestCheckInUndo, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardGuestReferences.organizerDashboardGuestCheckInUndoMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            guestId: validated.output.guestId as Id<"organizerDashboardGuests">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(
+          organizerDashboardMessageReferences.organizerDashboardMessageListQuery,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageGet: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(
+          organizerDashboardMessageReferences.organizerDashboardMessageGetQuery,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            messageId: validated.output.messageId as Id<"organizerDashboardMessages">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageCreate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageCreate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardMessageReferences.organizerDashboardMessageCreateMutation,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageUpdate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageUpdate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardMessageReferences.organizerDashboardMessageUpdateMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            messageId: validated.output.messageId as Id<"organizerDashboardMessages">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageSchedule: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageSchedule, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardMessageReferences.organizerDashboardMessageScheduleMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            messageId: validated.output.messageId as Id<"organizerDashboardMessages">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageSend: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageSend, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardMessageReferences.organizerDashboardMessageSendMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            messageId: validated.output.messageId as Id<"organizerDashboardMessages">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageDelete: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageDelete, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardMessageReferences.organizerDashboardMessageDeleteMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            messageId: validated.output.messageId as Id<"organizerDashboardMessages">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageIcsGet: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageIcsGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(
+          organizerDashboardMessageReferences.organizerDashboardMessageIcsGetQuery,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageReminderGet: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageReminderGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(
+          organizerDashboardMessageReferences.organizerDashboardMessageReminderGetQuery,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    messageReminderUpdate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardMessageInputSchemas.messageReminderUpdate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          organizerDashboardMessageReferences.organizerDashboardMessageReminderUpdateMutation,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
         )
         if (response.success) return { success: true, data: response.data }
         return { success: false, error: backendFailure(response) }

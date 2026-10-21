@@ -241,8 +241,91 @@ export function organizerDashboardMockBackendCreate(behavior?: Partial<Organizer
         record("voucher-deactivate", args)
         return behavior?.voucherDeactivate?.(args) ?? createResult({ voucherId: "voucher_test" })
       },
+      guestQuotaList: async (args) => {
+        record("guest-quota-list", args)
+        return behavior?.guestQuotaList?.(args) ?? createResult({ quotas: [] })
+      },
+      guestQuotaUpsert: async (args) => {
+        record("guest-quota-upsert", args)
+        return behavior?.guestQuotaUpsert?.(args) ?? createResult({ quotaId: "quota_test" })
+      },
+      guestQuotaDelete: async (args) => {
+        record("guest-quota-delete", args)
+        return behavior?.guestQuotaDelete?.(args) ?? createResult({ deleted: true })
+      },
+      guestList: async (args) => {
+        record("guest-list", args)
+        return behavior?.guestList?.(args) ?? createResult({ guests: [] })
+      },
+      guestUpsert: async (args) => {
+        record("guest-upsert", args)
+        return behavior?.guestUpsert?.(args) ?? createResult({ guestId: "guest_test" })
+      },
+      guestDelete: async (args) => {
+        record("guest-delete", args)
+        return behavior?.guestDelete?.(args) ?? createResult({ deleted: true })
+      },
+      guestTicketSend: async (args) => {
+        record("guest-ticket-send", args)
+        return behavior?.guestTicketSend?.(args) ?? createResult({ orderId: "order_test", tickets: 1 })
+      },
+      guestCheckIn: async (args) => {
+        record("guest-check-in", args)
+        return behavior?.guestCheckIn?.(args) ?? createResult({ checkedInAt: nowIso() })
+      },
+      guestCheckInUndo: async (args) => {
+        record("guest-check-in-undo", args)
+        return behavior?.guestCheckInUndo?.(args) ?? createResult({ undone: true })
+      },
+      messageList: async (args) => {
+        record("message-list", args)
+        return behavior?.messageList?.(args) ?? createResult({ messages: [] })
+      },
+      messageGet: async (args) => {
+        record("message-get", args)
+        return behavior?.messageGet?.(args) ?? createResult({ message: null })
+      },
+      messageCreate: async (args) => {
+        record("message-create", args)
+        return behavior?.messageCreate?.(args) ?? createResult({ messageId: "message_test", recipientCount: 0 })
+      },
+      messageUpdate: async (args) => {
+        record("message-update", args)
+        return behavior?.messageUpdate?.(args) ?? createResult({ messageId: "message_test", recipientCount: 0 })
+      },
+      messageSchedule: async (args) => {
+        record("message-schedule", args)
+        return behavior?.messageSchedule?.(args) ?? createResult({ messageId: "message_test" })
+      },
+      messageSend: async (args) => {
+        record("message-send", args)
+        return behavior?.messageSend?.(args) ?? createResult({ messageId: "message_test", deliveryState: "queued" })
+      },
+      messageDelete: async (args) => {
+        record("message-delete", args)
+        return behavior?.messageDelete?.(args) ?? createResult({ deleted: true })
+      },
+      messageIcsGet: async (args) => {
+        record("message-ics-get", args)
+        return behavior?.messageIcsGet?.(args) ?? createResult({ ics: "", filename: "erinnerung.ics" })
+      },
+      messageReminderGet: async (args) => {
+        record("message-reminder-get", args)
+        return (
+          behavior?.messageReminderGet?.(args) ??
+          createResult({ reminder: { enabled: true, hoursBefore: 24, directions: "", calendar: true, sentAt: null } })
+        )
+      },
+      messageReminderUpdate: async (args) => {
+        record("message-reminder-update", args)
+        return behavior?.messageReminderUpdate?.(args) ?? createResult({ updated: true })
+      },
     },
   }
+}
+
+function nowIso(): string {
+  return new Date().toISOString()
 }
 
 export type OrganizerDashboardMockBackend = ReturnType<typeof organizerDashboardMockBackendCreate>
