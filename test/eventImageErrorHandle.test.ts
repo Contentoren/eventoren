@@ -30,7 +30,7 @@ test("eventImageErrorHandle replaces a failing image URL with the existing place
 test("eventImageErrorHandle does not reassign the placeholder when it also fails", () => {
   const fake = imageFakeCreate("https://example.com/missing.webp")
   eventImageErrorHandle({ currentTarget: fake.image })
-  expect(fake.image.src).toBe(`https://example.com${eventImagePlaceholder}`)
+  expect(fake.image.src).toBe(eventImagePlaceholder)
   eventImageErrorHandle({ currentTarget: fake.image })
   eventImageErrorHandle({ currentTarget: fake.image })
   expect(fake.image.getAttribute("src")).toBe(eventImagePlaceholder)

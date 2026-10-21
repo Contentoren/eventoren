@@ -5,8 +5,9 @@ import { eventImagePlaceholder } from "../src/events/eventImagePlaceholder.ts"
 
 const require = createRequire(import.meta.url)
 // Use the existing vite-plugin-solid Babel toolchain, offline: no server or global module mocks.
-const { transformSync } = require("@babel/core")
-const solidPreset = require("babel-preset-solid")
+const viteSolidRequire = createRequire(import.meta.resolveSync("vite-plugin-solid"))
+const { transformSync } = viteSolidRequire("@babel/core")
+const solidPreset = viteSolidRequire("babel-preset-solid")
 let render: typeof import("./eventImageViewsRender.fixture.ts").eventImageViewsRender
 
 beforeAll(async () => {

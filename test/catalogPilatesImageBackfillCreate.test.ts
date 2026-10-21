@@ -2,7 +2,7 @@ import { expect, test } from "bun:test"
 import { catalogPilatesImageBackfillCreate } from "../src/catalog/convex/catalogPilatesImageBackfillCreate.ts"
 
 const blank = { eventKey: "pilates-christmas-event-2027-final", imageUrl: " \t", imageAlt: "" }
-const baseUrl = "https://assets-service-public.contentoren.de/eventoren/public/images/pilates/"
+const baseUrl = "https://assets.eventoren.de/production/public/images/pilates/"
 
 test("the Pilates repair uses published managed detail and thumbnail URLs and managed alt text", () => {
   expect(catalogPilatesImageBackfillCreate(blank)).toEqual({

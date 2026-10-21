@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test"
 import { imageList } from "../src/app/assets/imageList.ts"
 
-const defaultBaseUrl = "https://assets-service-public.contentoren.de/eventoren/public"
+const defaultBaseUrl = "https://assets.eventoren.de/production/public"
 const image = imageList.eventoren_logo_light2
 
 async function urlImageLoad(production: boolean, publicBaseUrl?: string) {
@@ -26,19 +26,19 @@ async function urlImageLoad(production: boolean, publicBaseUrl?: string) {
 for (const prod of [false, true]) {
   const mode = prod ? "production" : "development"
 
-  test(`managed images use the default CDN while raw paths retain ${mode} behavior`, async () => {
+  test(`managed images use the canonical CDN in ${mode}`, async () => {
     const urlImage = await urlImageLoad(prod)
 
     expect(urlImage(image)).toBe(`${defaultBaseUrl}/${image.path}`)
     expect(urlImage({ path: `/${image.path}/` })).toBe(`${defaultBaseUrl}/${image.path}`)
-    expect(urlImage(`/${image.path}/`)).toBe(`${prod ? defaultBaseUrl : ""}/${image.path}`)
+    expect(urlImage(`/${image.path}/`)).toBe(`${defaultBaseUrl}/${image.path}`)
   })
 
   test(`managed images honor the trimmed CDN override in ${mode}`, async () => {
     const urlImage = await urlImageLoad(prod, "  https://example.com/assets///  ")
 
-    expect(urlImage(image)).toBe(`https://example.com/assets/${image.path}`)
-    expect(urlImage(image.path)).toBe(`${prod ? "https://example.com/assets" : ""}/${image.path}`)
+    expect(urlImage(image)).toBe(`https://example.com/assets/production/public/${image.path}`)
+    expect(urlImage(image.path)).toBe(`https://example.com/assets/production/public/${image.path}`)
   })
 
   test(`blank CDN overrides fall back to the default CDN in ${mode}`, async () => {

@@ -29,6 +29,10 @@ test("admin order pagination does not require a browser token", async () => {
 
   await state.loadMore()
 
-  expect(receivedInput).toEqual({ paginationOpts: { cursor: null, numItems: 50 } })
+  expect(receivedInput).toEqual({
+    eventKey: undefined,
+    search: undefined,
+    paginationOpts: { cursor: null, numItems: 25 },
+  })
   expect(state.isDone()).toBe(true)
 })

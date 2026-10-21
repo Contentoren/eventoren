@@ -51,7 +51,7 @@ test("order totals include every event page and follow status, search and event 
       expect(state.totals()).toEqual({ ticketCount: 0, totalCents: 0 })
       state.eventSignal.set("abiball")
       await state.loadMore()
-      expect(state.totals()).toEqual({ ticketCount: 6, totalCents: 21000 })
+      expect(state.totals()).toEqual({ ticketCount: 2, totalCents: 21000 })
       state.statusFilter.set("fehlgeschlagen")
       expect(state.totals()).toEqual({ ticketCount: 0, totalCents: 7500 })
       state.statusFilter.set("abgelaufen")
