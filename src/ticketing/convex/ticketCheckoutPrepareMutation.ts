@@ -11,6 +11,8 @@ import { eventBookingIsOpen } from "#src/events/eventBookingIsOpen.ts"
 import { ticketCheckoutContextCanonicalize } from "./ticketCheckoutContextCanonicalize.js"
 import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.js"
 import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
+import { ticketOrganizerSalesCheck } from "./ticketOrganizerSalesCheck.js"
+import { ticketOrderSalesCheck } from "./ticketOrderSalesCheck.js"
 
 const ticketSelectionValidator = v.object({
   tierKey: v.string(),
@@ -199,6 +201,14 @@ export const ticketCheckoutPrepareMutation = internalMutation({
         existing.status === "paid_inventory_conflict"
       )
         return createResultError(op, "The checkout is no longer retryable")
+      // Paid terminal replay stays ungated so settlement/fulfillment of money
+      // already accepted keeps working after a later org block. Unpaid replay
+      // returns a reusable pending context that could start a Billing charge,
+      // so it goes through the ownership gate before any code lifecycle work.
+      if (existing.status !== "paid") {
+        const replaySalesCheck = await ticketOrderSalesCheck(ctx, existing)
+        if (!replaySalesCheck.success) return replaySalesCheck
+      }
       const codes = await ticketActivationCodeLifecyclePlan(ctx, existing, "consume")
       if (!codes.success) return codes
       if (codes.data.hasOwnershipConflict)
@@ -262,6 +272,9 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     if (event.status !== "published") return createResultError(op, "The event is not available for checkout")
     if (args.eventRevision === undefined) return createResultError(op, "The event revision is required")
     if (args.eventRevision !== (event.eventRevision ?? 1)) return createResultError(op, "The event revision is stale")
+    // Ownership gate before any new reservation/order/inventory/code writes.
+    const salesCheck = await ticketOrganizerSalesCheck(ctx, event.orgId)
+    if (!salesCheck.success) return salesCheck
 
     const requestedSelections = [...args.tickets].sort((left, right) => left.tierKey.localeCompare(right.tierKey))
     const quantitiesByTier = new Map<
@@ -431,6 +444,8 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       feeCents,
       totalCents: subtotalCents + feeCents,
       checkoutContextJson: acceptedContextJson,
+      // Canonical ownership snapshot; never client-supplied.
+      ...(event.orgId !== undefined ? { orgId: event.orgId } : {}),
       paymentReference: args.paymentReference,
       stripeMode: args.stripeMode,
       fulfillmentEligible: args.fulfillmentEligible,

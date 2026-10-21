@@ -109,6 +109,12 @@ test("root footer is omitted for every nested demo route id", () => {
   }
 })
 
+test("root footer is omitted for the live organizer application and standalone nested routes", () => {
+  for (const routeId of ["/veranstalter", "/veranstalter/", "/veranstalter/events", "/veranstalter_/events/neu"])
+    expect(rootFooterShouldRender([{ routeId, status: "success" }])).toBe(false)
+  expect(rootFooterShouldRender([{ routeId: "/veranstaltern", status: "success" }])).toBe(true)
+})
+
 test("root footer remains for the demo directory", () => {
   expect(rootFooterShouldRender([{ routeId: "/demo", status: "success" }])).toBe(true)
 })

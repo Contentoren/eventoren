@@ -87,6 +87,7 @@ test("ticketOrderProjectionCreate projects issued valid pending tickets awaiting
       query: (table: string) => ({
         withIndex: (_index: string, _filter: unknown) => ({
           collect: async () => (table === "ticketOrderLines" ? mockLines : table === "ticketIssued" ? mockTickets : []),
+          take: async () => (table === "catalogEvents" ? [{ eventKey: "evt_1", status: "published" }] : []),
         }),
       }),
     },
@@ -98,6 +99,7 @@ test("ticketOrderProjectionCreate projects issued valid pending tickets awaiting
   if (!result?.success) return
 
   const projection = result.data
+  expect(projection.checkoutUrl).toBe(mockOrder.checkoutUrl)
   expect(projection.paymentStatus).toBe("pending")
   expect(projection.ticketsIssuedAt).toBe("2026-10-12T10:05:00.000Z")
   expect(projection.paymentMethodType).toBe("sepa_debit")

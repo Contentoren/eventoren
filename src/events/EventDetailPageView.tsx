@@ -48,8 +48,8 @@ export function EventDetailPageView(props: {
             <EventDetailInfo
               event={props.event}
               description={props.description}
-              faqs={props.faqs}
-              schedule={props.schedule}
+              faqs={props.faqs ?? props.event.faqs}
+              schedule={props.schedule ?? props.event.schedule}
             >
               {props.organizerCard}
             </EventDetailInfo>

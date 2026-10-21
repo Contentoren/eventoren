@@ -1,0 +1,56 @@
+/**
+ * Explicit allowlist of organizer dashboard interface operations. Every
+ * entry maps 1:1 to a current Convex function in convex/organizerDashboard*.ts
+ * (foundation 3, profile 1, events 8, admin 6, migration 3, contracts 1, team 9, orders 7,
+ * finance 4 = 42 total). Arbitrary Convex function names are never accepted by the HTTP, CLI,
+ * or TS client layers; adding a backend function requires an explicit entry
+ * here plus request-parse, backend, Hono, client, and CLI wiring.
+ */
+export const organizerDashboardOperations = [
+  "context",
+  "create",
+  "update",
+  "contracts-accept",
+  "organization-get",
+  "team-member-list",
+  "team-invitation-list",
+  "team-invite",
+  "team-role-update",
+  "team-member-remove",
+  "team-invitation-revoke",
+  "team-invitation-resend",
+  "team-invitation-inbox",
+  "team-invitation-accept",
+  "order-list",
+  "order-get",
+  "order-note-create",
+  "order-note-delete",
+  "order-buyer-contact-update",
+  "order-participant-update",
+  "order-participant-list",
+  "finance-overview",
+  "settlement-get",
+  "payout-list",
+  "payout-record",
+  "event-list",
+  "event-get",
+  "event-create",
+  "event-update",
+  "event-publish",
+  "event-archive",
+  "tier-upsert",
+  "tier-archive",
+  "admin-list",
+  "admin-detail",
+  "admin-configure",
+  "admin-approve",
+  "admin-block",
+  "admin-unblock",
+  "migration-plan",
+  "migration-apply",
+  "migration-backfill",
+] as const
+
+export type OrganizerDashboardOperation = (typeof organizerDashboardOperations)[number]
+
+export const organizerDashboardOperationSet: ReadonlySet<string> = new Set<string>(organizerDashboardOperations)

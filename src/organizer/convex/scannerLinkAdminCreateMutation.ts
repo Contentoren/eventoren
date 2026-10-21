@@ -3,6 +3,7 @@ import { mutation } from "#convex/_generated/server.js"
 import { createResult, type PromiseResult } from "#result"
 import type { Id } from "#convex/_generated/dataModel.js"
 import { authMutationTokenToUserId } from "#src/utils/convex_backend/authMutationTokenToUserId.ts"
+import { organizerDashboardMigrationScannerSnapshotCreate } from "#src/organizer/dashboard/migration/organizerDashboardMigrationScannerScope.ts"
 import { scannerLinkAdminAuthorizeFn } from "./scannerLinkAdminAuthorizeFn.js"
 import { scannerLinkCodeCreate } from "./scannerLinkCodeCreate.js"
 import { scannerLinkInputValidate } from "./scannerLinkInputValidate.js"
@@ -15,11 +16,17 @@ export const scannerLinkAdminCreateMutation = mutation({
       if (!admin.success) return admin
       const validated = await scannerLinkInputValidate(authorizedCtx.db, input)
       if (!validated.success) return validated
+      const snapshot = await organizerDashboardMigrationScannerSnapshotCreate(
+        authorizedCtx.db,
+        validated.data.eventKeys,
+      )
+      if (!snapshot.success) return snapshot
       const code = scannerLinkCodeCreate()
       const id = await authorizedCtx.db.insert("scannerLinks", {
         ...validated.data,
         code,
         role: "organizer",
+        eventOrgIds: snapshot.data,
         createdByUserId: userId,
         createdAt: Date.now(),
       })

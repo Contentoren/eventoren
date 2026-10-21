@@ -111,3 +111,6 @@ export async function apiClientCatalogEventGetPublished(
 }
 
 export const apiClient = apiClientCreate
+
+export { organizerDashboardClientCreate } from "./organizerDashboardClientCreate.js"
+export type { OrganizerDashboardClient } from "./organizerDashboardClientCreate.js"

@@ -11,6 +11,8 @@ export const speculationRules = JSON.stringify({
                 { href_matches: "/admin/*" },
                 { href_matches: "/organizer" },
                 { href_matches: "/organizer/*" },
+                { href_matches: "/veranstalter" },
+                { href_matches: "/veranstalter/*" },
                 { href_matches: "/scanner/*" },
                 { href_matches: "/bestellungen" },
                 { href_matches: "/checkout" },

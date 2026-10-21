@@ -3,6 +3,10 @@ import { mutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import type { Id } from "#convex/_generated/dataModel.js"
 import { authMutationTokenToUserId } from "#src/utils/convex_backend/authMutationTokenToUserId.ts"
+import {
+  organizerDashboardMigrationScannerParentSnapshotAllowed,
+  organizerDashboardMigrationScannerSnapshotCreate,
+} from "#src/organizer/dashboard/migration/organizerDashboardMigrationScannerScope.ts"
 import { scannerLinkAdminAuthorizeFn } from "./scannerLinkAdminAuthorizeFn.js"
 import { scannerLinkCodeCreate } from "./scannerLinkCodeCreate.js"
 import { scannerLinkInputValidate } from "./scannerLinkInputValidate.js"
@@ -28,11 +32,29 @@ export const scannerLinkAdminHelperCreateMutation = mutation({
       }
       const validated = await scannerLinkInputValidate(authorizedCtx.db, input, parent.eventKeys, parent.expiresAt)
       if (!validated.success) return validated
+      const snapshot = await organizerDashboardMigrationScannerSnapshotCreate(
+        authorizedCtx.db,
+        validated.data.eventKeys,
+      )
+      if (!snapshot.success) return snapshot
+      if (
+        !organizerDashboardMigrationScannerParentSnapshotAllowed({
+          eventKeys: validated.data.eventKeys,
+          canonical: snapshot.data,
+          parentSnapshot: parent.eventOrgIds,
+        })
+      ) {
+        return createResultError(
+          "scannerLinkAdminHelperCreateMutation",
+          "Organizer link snapshot does not cover these events",
+        )
+      }
       const code = scannerLinkCodeCreate()
       const id = await authorizedCtx.db.insert("scannerLinks", {
         ...validated.data,
         code,
         role: "helper",
+        eventOrgIds: snapshot.data,
         parentId,
         createdByUserId: userId,
         createdAt: Date.now(),

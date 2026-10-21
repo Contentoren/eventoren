@@ -23,7 +23,7 @@ export const organizerTicketCheckInResetMutation = mutation({
   handler: async (ctx, args): PromiseResult<OrganizerTicketCheckInResetResult> =>
     authMutationTokenToUserId(ctx, args, async (mutationCtx, { userId }) => {
       const op = "organizerTicketCheckInResetMutation"
-      const resolved = await organizerTicketCheckInTicketResolve(mutationCtx, userId, args, op)
+      const resolved = await organizerTicketCheckInTicketResolve(mutationCtx, userId, args, op, "einlass.nutzen")
       if (!resolved.success) return resolved
 
       const { event, order, ticket, user } = resolved.data

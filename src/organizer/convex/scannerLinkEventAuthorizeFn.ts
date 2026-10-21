@@ -1,5 +1,6 @@
 import type { MutationCtx, QueryCtx } from "#convex/_generated/server.js"
 import { createResultError } from "#result"
+import { organizerDashboardMigrationScannerOwnershipAllowed } from "#src/organizer/dashboard/migration/organizerDashboardMigrationScannerScope.ts"
 import { scannerLinkAuthorizeFn } from "./scannerLinkAuthorizeFn.js"
 
 /** Ticket endpoints must use this with their ticket's event key on every request. */
@@ -16,5 +17,17 @@ export async function scannerLinkEventAuthorizeFn(ctx: MutationCtx | QueryCtx, c
   if (!event || event.deletedAt || event.status !== "published") {
     return createResultError("scannerLinkEventAuthorizeFn", "Event unavailable")
   }
+  const link = authorization.data
+  const isHelper = link.role === "helper"
+  const parentSnapshot =
+    isHelper && link.parentId ? ((await ctx.db.get("scannerLinks", link.parentId))?.eventOrgIds ?? undefined) : undefined
+  const owned = organizerDashboardMigrationScannerOwnershipAllowed({
+    eventKey,
+    canonicalOrgId: event.orgId,
+    linkSnapshot: link.eventOrgIds,
+    parentSnapshot,
+    isHelper,
+  })
+  if (!owned) return createResultError("scannerLinkEventAuthorizeFn", "Link unavailable")
   return authorization
 }

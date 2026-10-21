@@ -2,6 +2,7 @@ import type { DatabaseReader } from "#convex/_generated/server.js"
 import type { Doc, Id } from "#convex/_generated/dataModel.js"
 import { createResult, type PromiseResult } from "#result"
 import type { IdUser } from "#src/auth/convex/IdUser.ts"
+import type { OrganizerDashboardPermission } from "#src/organizer/dashboard/model/organizerDashboardPermissionSchema.ts"
 import { organizerAuthorizeFn } from "./organizerAuthorizeFn.js"
 import { organizerTicketCheckInErrorCreate } from "./organizerTicketCheckInErrorCreate.js"
 import { organizerTicketCheckInTargetResolve } from "./organizerTicketCheckInTargetResolve.js"
@@ -11,6 +12,7 @@ export async function organizerTicketCheckInTicketResolve(
   userId: IdUser,
   target: { eventKey: string; ticketCode?: string; ticketId?: Id<"ticketIssued"> },
   op: string,
+  permission?: OrganizerDashboardPermission,
 ): PromiseResult<{
   user: Doc<"users">
   event: Doc<"catalogEvents">
@@ -28,7 +30,7 @@ export async function organizerTicketCheckInTicketResolve(
     return organizerTicketCheckInErrorCreate(op, "organizer.check-in.event-not-found", "The event was not found", {
       eventKey: target.eventKey,
     })
-  const eventAuthorization = await organizerAuthorizeFn(ctx, userId, event.startsAt)
+  const eventAuthorization = await organizerAuthorizeFn(ctx, userId, event.startsAt, event.orgId, permission)
   if (!eventAuthorization.success)
     return organizerTicketCheckInErrorCreate(op, "organizer.check-in.unauthorized", eventAuthorization.errorMessage, {
       eventKey: target.eventKey,

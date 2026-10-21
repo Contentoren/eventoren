@@ -18,7 +18,7 @@ export const organizerEventGetQuery = query({
         .unique()
       if (!event) return createResultError("organizerEventGetQuery", "The event was not found")
 
-      const eventAuthorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt)
+      const eventAuthorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt, event.orgId)
       if (!eventAuthorization.success) return eventAuthorization
 
       return createResult(organizerEventProjectionCreate(event))

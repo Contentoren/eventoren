@@ -87,6 +87,9 @@ const siteFrameRouteIds = new Set([
 // rootFooterStateCreate). Suppress the root footer for any nested demo
 // route id so new demo pages do not need to be enumerated here.
 function rootFooterIsSiteFrameRoute(routeId: string) {
+  // The live organizer dashboard owns its full-screen application frame.
+  if (routeId === "/veranstalter" || routeId.startsWith("/veranstalter/") || routeId.startsWith("/veranstalter_/"))
+    return true
   if (siteFrameRouteIds.has(routeId)) return true
   return routeId.startsWith("/demo/") && routeId !== "/demo/"
 }
