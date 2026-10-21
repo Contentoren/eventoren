@@ -20,8 +20,32 @@ import { organizerDashboardTeamMemberRemoveSchema } from "../team/organizerDashb
 import { organizerDashboardTeamRoleUpdateSchema } from "../team/organizerDashboardTeamRoleUpdateSchema.ts"
 import { type OrganizerDashboardOperation, organizerDashboardOperationSet } from "./organizerDashboardOperations.ts"
 import { organizerDashboardFinanceInputSchemas } from "./organizerDashboardFinanceInputSchemas.ts"
+import { organizerDashboardGuestInputSchemas } from "./organizerDashboardGuestInputSchemas.ts"
+import { organizerDashboardMessageInputSchemas } from "./organizerDashboardMessageInputSchemas.ts"
 import { organizerDashboardPricingInputSchemas } from "./organizerDashboardPricingInputSchemas.ts"
 import { organizerDashboardOrderInputSchemas } from "./organizerDashboardOrderInputSchemas.ts"
+
+const organizerDashboardGuestMessageOperationSet: ReadonlySet<string> = new Set([
+  "guest-quota-list",
+  "guest-quota-upsert",
+  "guest-quota-delete",
+  "guest-list",
+  "guest-upsert",
+  "guest-delete",
+  "guest-ticket-send",
+  "guest-check-in",
+  "guest-check-in-undo",
+  "message-list",
+  "message-get",
+  "message-create",
+  "message-update",
+  "message-schedule",
+  "message-send",
+  "message-delete",
+  "message-ics-get",
+  "message-reminder-get",
+  "message-reminder-update",
+])
 
 const organizerDashboardRequestOrgIdSchema = v.pipe(v.string(), v.trim(), v.nonEmpty("Cannot be empty"))
 
@@ -398,6 +422,83 @@ const organizerDashboardVoucherDeactivateRequestSchema = v.strictObject({
   ...organizerDashboardPricingInputSchemas.voucherDeactivate.entries,
 })
 
+const organizerDashboardGuestQuotaListRequestSchema = v.strictObject({
+  operation: v.literal("guest-quota-list"),
+  ...organizerDashboardGuestInputSchemas.quotaList.entries,
+})
+const organizerDashboardGuestQuotaUpsertRequestSchema = v.strictObject({
+  operation: v.literal("guest-quota-upsert"),
+  ...organizerDashboardGuestInputSchemas.quotaUpsert.entries,
+})
+const organizerDashboardGuestQuotaDeleteRequestSchema = v.strictObject({
+  operation: v.literal("guest-quota-delete"),
+  ...organizerDashboardGuestInputSchemas.quotaDelete.entries,
+})
+const organizerDashboardGuestListRequestSchema = v.strictObject({
+  operation: v.literal("guest-list"),
+  ...organizerDashboardGuestInputSchemas.guestList.entries,
+})
+const organizerDashboardGuestUpsertRequestSchema = v.strictObject({
+  operation: v.literal("guest-upsert"),
+  ...organizerDashboardGuestInputSchemas.guestUpsert.entries,
+})
+const organizerDashboardGuestDeleteRequestSchema = v.strictObject({
+  operation: v.literal("guest-delete"),
+  ...organizerDashboardGuestInputSchemas.guestDelete.entries,
+})
+const organizerDashboardGuestTicketSendRequestSchema = v.strictObject({
+  operation: v.literal("guest-ticket-send"),
+  ...organizerDashboardGuestInputSchemas.guestTicketSend.entries,
+})
+const organizerDashboardGuestCheckInRequestSchema = v.strictObject({
+  operation: v.literal("guest-check-in"),
+  ...organizerDashboardGuestInputSchemas.guestCheckIn.entries,
+})
+const organizerDashboardGuestCheckInUndoRequestSchema = v.strictObject({
+  operation: v.literal("guest-check-in-undo"),
+  ...organizerDashboardGuestInputSchemas.guestCheckInUndo.entries,
+})
+const organizerDashboardMessageListRequestSchema = v.strictObject({
+  operation: v.literal("message-list"),
+  ...organizerDashboardMessageInputSchemas.messageList.entries,
+})
+const organizerDashboardMessageGetRequestSchema = v.strictObject({
+  operation: v.literal("message-get"),
+  ...organizerDashboardMessageInputSchemas.messageGet.entries,
+})
+const organizerDashboardMessageCreateRequestSchema = v.strictObject({
+  operation: v.literal("message-create"),
+  ...organizerDashboardMessageInputSchemas.messageCreate.entries,
+})
+const organizerDashboardMessageUpdateRequestSchema = v.strictObject({
+  operation: v.literal("message-update"),
+  ...organizerDashboardMessageInputSchemas.messageUpdate.entries,
+})
+const organizerDashboardMessageScheduleRequestSchema = v.strictObject({
+  operation: v.literal("message-schedule"),
+  ...organizerDashboardMessageInputSchemas.messageSchedule.entries,
+})
+const organizerDashboardMessageSendRequestSchema = v.strictObject({
+  operation: v.literal("message-send"),
+  ...organizerDashboardMessageInputSchemas.messageSend.entries,
+})
+const organizerDashboardMessageDeleteRequestSchema = v.strictObject({
+  operation: v.literal("message-delete"),
+  ...organizerDashboardMessageInputSchemas.messageDelete.entries,
+})
+const organizerDashboardMessageIcsGetRequestSchema = v.strictObject({
+  operation: v.literal("message-ics-get"),
+  ...organizerDashboardMessageInputSchemas.messageIcsGet.entries,
+})
+const organizerDashboardMessageReminderGetRequestSchema = v.strictObject({
+  operation: v.literal("message-reminder-get"),
+  ...organizerDashboardMessageInputSchemas.messageReminderGet.entries,
+})
+const organizerDashboardMessageReminderUpdateRequestSchema = v.strictObject({
+  operation: v.literal("message-reminder-update"),
+  ...organizerDashboardMessageInputSchemas.messageReminderUpdate.entries,
+})
+
 const organizerDashboardRequestSchema = v.variant("operation", [
   organizerDashboardOrderListRequestSchema,
   organizerDashboardOrderGetRequestSchema,
@@ -453,6 +554,25 @@ const organizerDashboardRequestSchema = v.variant("operation", [
   organizerDashboardMigrationPlanRequestSchema,
   organizerDashboardMigrationApplyRequestSchema,
   organizerDashboardMigrationBackfillRequestSchema,
+  organizerDashboardGuestQuotaListRequestSchema,
+  organizerDashboardGuestQuotaUpsertRequestSchema,
+  organizerDashboardGuestQuotaDeleteRequestSchema,
+  organizerDashboardGuestListRequestSchema,
+  organizerDashboardGuestUpsertRequestSchema,
+  organizerDashboardGuestDeleteRequestSchema,
+  organizerDashboardGuestTicketSendRequestSchema,
+  organizerDashboardGuestCheckInRequestSchema,
+  organizerDashboardGuestCheckInUndoRequestSchema,
+  organizerDashboardMessageListRequestSchema,
+  organizerDashboardMessageGetRequestSchema,
+  organizerDashboardMessageCreateRequestSchema,
+  organizerDashboardMessageUpdateRequestSchema,
+  organizerDashboardMessageScheduleRequestSchema,
+  organizerDashboardMessageSendRequestSchema,
+  organizerDashboardMessageDeleteRequestSchema,
+  organizerDashboardMessageIcsGetRequestSchema,
+  organizerDashboardMessageReminderGetRequestSchema,
+  organizerDashboardMessageReminderUpdateRequestSchema,
 ])
 
 type OrganizerDashboardRequestOf<TOperation extends OrganizerDashboardOperation, TArgs> = {
@@ -669,6 +789,82 @@ export type OrganizerDashboardRequest =
   | OrganizerDashboardRequestOf<
       "migration-backfill",
       OrganizerDashboardRequestArgs<typeof organizerDashboardMigrationBackfillRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "guest-quota-list",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardGuestQuotaListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "guest-quota-upsert",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardGuestQuotaUpsertRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "guest-quota-delete",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardGuestQuotaDeleteRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "guest-list",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardGuestListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "guest-upsert",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardGuestUpsertRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "guest-delete",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardGuestDeleteRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "guest-ticket-send",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardGuestTicketSendRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "guest-check-in",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardGuestCheckInRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "guest-check-in-undo",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardGuestCheckInUndoRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-list",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-get",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageGetRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-create",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageCreateRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-update",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageUpdateRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-schedule",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageScheduleRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-send",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageSendRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-delete",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageDeleteRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-ics-get",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageIcsGetRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-reminder-get",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageReminderGetRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "message-reminder-update",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardMessageReminderUpdateRequestSchema>
     >
 
 /**
@@ -950,6 +1146,15 @@ export function organizerDashboardRequestParse(body: unknown): Result<OrganizerD
   if (output.operation === "migration-backfill") {
     const { operation: migrationBackfillOperation, ...migrationBackfillArgs } = output
     return createResult({ operation: migrationBackfillOperation, args: migrationBackfillArgs })
+  }
+  if (organizerDashboardGuestMessageOperationSet.has(output.operation)) {
+    // The body already passed the variant schema and the operation is in the
+    // guest/message set, so splitting off the operation yields exactly the
+    // matching Request member. The cast goes through unknown because
+    // valibot's optional modifiers make the two spellings opaque to the
+    // checker; the runtime shape is verified by the passing suite.
+    const { operation, ...args } = output
+    return createResult({ operation, args } as unknown as OrganizerDashboardRequest)
   }
   return createResultError(op, "Unknown operation", "unknown-operation")
 }
