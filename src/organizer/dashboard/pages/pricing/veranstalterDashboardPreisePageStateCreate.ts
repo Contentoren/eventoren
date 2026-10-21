@@ -1,4 +1,4 @@
-import { createMemo } from "solid-js"
+import { createMemo, createRenderEffect, untrack } from "solid-js"
 import { api } from "#convex/_generated/api.js"
 import type { Id } from "#convex/_generated/dataModel.js"
 import { adminEventReleaseDateTimeToIso } from "#src/admin/adminEventReleaseDateTimeToIso.ts"
@@ -77,6 +77,39 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
   const bulkPrefix = createSignalObject("")
   const bulkCount = createSignalObject("10")
 
+  // Tariff drafts are keyed by the full event scope (org+event), never by
+  // tier key alone: switching events/orgs resets every draft so values from
+  // one event can never leak into another (A→B→A safe). Late mutation
+  // answers from a previous scope are ignored via tariffGeneration.
+  let tariffScopeKey = ""
+  let tariffGeneration = 0
+  const resetTariffDrafts = () => {
+    phaseTier.set(inputs.search().tier ?? "")
+    phaseName.set("")
+    phasePrice.set("")
+    phaseEndsAt.set("")
+    phaseQuota.set("")
+    codeKind.set(inputs.search().art ?? "rabatt")
+    codeValue.set("")
+    codeDiscountType.set("prozent")
+    codeDiscountValue.set("")
+    codeTiers.set("")
+    codeMaxTickets.set("")
+    bulkPrefix.set("")
+    bulkCount.set("10")
+  }
+  createRenderEffect(() => {
+    const next = JSON.stringify([inputs.search().org, page.orgId(), inputs.eventKey()])
+    untrack(() => {
+      if (next === tariffScopeKey) return
+      tariffScopeKey = next
+      tariffGeneration++
+      busy.set(false)
+      message.set("")
+      resetTariffDrafts()
+    })
+  })
+
   const guard = (allowed: boolean): boolean => {
     if (allowed) return true
     message.set("Keine Berechtigung für diesen Bereich.")
@@ -86,6 +119,8 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
   const createPhase = async (event: SubmitEvent) => {
     event.preventDefault()
     const orgId = page.orgId()
+    const eventKey = inputs.eventKey()
+    const gate = tariffGeneration
     if (!orgId || busy.get() || !guard(canTickets())) return
     const priceCents = veranstalterDashboardPreiseEuroToCents(phasePrice.get())
     const tierKey = phaseTier.get().trim()
@@ -104,7 +139,7 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
     }
     busy.set(true)
     try {
-      const result = await mutations.upsertPhase(orgId, inputs.eventKey(), {
+      const result = await mutations.upsertPhase(orgId, eventKey, {
         tierKey,
         name: phaseName.get().trim(),
         priceCents,
@@ -113,6 +148,7 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
           ? { quota: veranstalterDashboardPreiseIntOrUndefined(phaseQuota.get(), 1) as number }
           : {}),
       })
+      if (gate !== tariffGeneration) return
       if (result && typeof result === "object" && "success" in result && result.success) {
         phaseName.set("")
         phasePrice.set("")
@@ -123,29 +159,33 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
         message.set("Preisphase konnte nicht gespeichert werden.")
       }
     } finally {
-      busy.set(false)
+      if (gate === tariffGeneration) busy.set(false)
     }
   }
 
   const archivePhase = async (phaseId: string) => {
     const orgId = page.orgId()
+    const gate = tariffGeneration
     if (!orgId || busy.get() || !guard(canTickets())) return
     busy.set(true)
     try {
       const result = await mutations.archivePhase(orgId, phaseId)
+      if (gate !== tariffGeneration) return
       message.set(
         result && typeof result === "object" && "success" in result && result.success
           ? "Preisphase archiviert."
           : "Archivieren fehlgeschlagen.",
       )
     } finally {
-      busy.set(false)
+      if (gate === tariffGeneration) busy.set(false)
     }
   }
 
   const createCode = async (event: SubmitEvent) => {
     event.preventDefault()
     const orgId = page.orgId()
+    const eventKey = inputs.eventKey()
+    const gate = tariffGeneration
     if (!orgId || busy.get() || !guard(canCodes())) return
     const kind = codeKind.get() === "zugang" ? ("zugang" as const) : ("rabatt" as const)
     const tierKeys = veranstalterDashboardPreiseTierKeys(codeTiers.get())
@@ -174,7 +214,7 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
     }
     busy.set(true)
     try {
-      const result = await mutations.createCode(orgId, inputs.eventKey(), {
+      const result = await mutations.createCode(orgId, eventKey, {
         kind,
         ...(codeValue.get().trim() ? { code: codeValue.get().trim() } : {}),
         ...(discountType ? { discountType } : {}),
@@ -184,6 +224,7 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
           ? { maxTickets: veranstalterDashboardPreiseIntOrUndefined(codeMaxTickets.get(), 1) as number }
           : {}),
       })
+      if (gate !== tariffGeneration) return
       if (result && typeof result === "object" && "success" in result && result.success) {
         codeValue.set("")
         codeDiscountValue.set("")
@@ -194,13 +235,15 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
         message.set("Code konnte nicht gespeichert werden.")
       }
     } finally {
-      busy.set(false)
+      if (gate === tariffGeneration) busy.set(false)
     }
   }
 
   const createBulkCodes = async (event: SubmitEvent) => {
     event.preventDefault()
     const orgId = page.orgId()
+    const eventKey = inputs.eventKey()
+    const gate = tariffGeneration
     if (!orgId || busy.get() || !guard(canCodes())) return
     const count = veranstalterDashboardPreiseIntOrUndefined(bulkCount.get(), 1)
     if (count === undefined || count > 500) {
@@ -214,51 +257,56 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
     }
     busy.set(true)
     try {
-      const result = await mutations.createCode(orgId, inputs.eventKey(), {
+      const result = await mutations.createCode(orgId, eventKey, {
         kind: codeKind.get() === "zugang" ? ("zugang" as const) : ("rabatt" as const),
         ...(bulkPrefix.get().trim() ? { prefix: bulkPrefix.get().trim() } : {}),
         count,
         ...(tierKeys.length > 0 ? { tierKeys } : {}),
       })
+      if (gate !== tariffGeneration) return
       if (result && typeof result === "object" && "success" in result && result.success) {
         message.set(`${(result.data as { codes: string[] }).codes.length} Codes erstellt.`)
       } else {
         message.set("Massenerstellung fehlgeschlagen.")
       }
     } finally {
-      busy.set(false)
+      if (gate === tariffGeneration) busy.set(false)
     }
   }
 
   const toggleCode = async (codeId: string, active: boolean) => {
     const orgId = page.orgId()
+    const gate = tariffGeneration
     if (!orgId || busy.get() || !guard(canCodes())) return
     busy.set(true)
     try {
       const result = await mutations.updateCode(orgId, codeId, { active: !active })
+      if (gate !== tariffGeneration) return
       message.set(
         result && typeof result === "object" && "success" in result && result.success
           ? "Code umgeschaltet."
           : "Umschalten fehlgeschlagen.",
       )
     } finally {
-      busy.set(false)
+      if (gate === tariffGeneration) busy.set(false)
     }
   }
 
   const deleteCode = async (codeId: string) => {
     const orgId = page.orgId()
+    const gate = tariffGeneration
     if (!orgId || busy.get() || !guard(canCodes())) return
     busy.set(true)
     try {
       const result = await mutations.deleteCode(orgId, codeId)
+      if (gate !== tariffGeneration) return
       message.set(
         result && typeof result === "object" && "success" in result && result.success
           ? "Code gelöscht."
           : "Löschen fehlgeschlagen (benutzte Codes bleiben erhalten).",
       )
     } finally {
-      busy.set(false)
+      if (gate === tariffGeneration) busy.set(false)
     }
   }
 
