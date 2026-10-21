@@ -20,6 +20,7 @@ import { organizerDashboardTeamMemberRemoveSchema } from "../team/organizerDashb
 import { organizerDashboardTeamRoleUpdateSchema } from "../team/organizerDashboardTeamRoleUpdateSchema.ts"
 import { type OrganizerDashboardOperation, organizerDashboardOperationSet } from "./organizerDashboardOperations.ts"
 import { organizerDashboardExportInputSchemas } from "./organizerDashboardExportInputSchemas.ts"
+import { organizerDashboardBillingInputSchemas } from "./organizerDashboardBillingInputSchemas.ts"
 import { organizerDashboardFinanceInputSchemas } from "./organizerDashboardFinanceInputSchemas.ts"
 import { organizerDashboardGuestInputSchemas } from "./organizerDashboardGuestInputSchemas.ts"
 import { organizerDashboardMessageInputSchemas } from "./organizerDashboardMessageInputSchemas.ts"
@@ -360,6 +361,27 @@ const organizerDashboardOrderParticipantListRequestSchema = v.strictObject({
   ...organizerDashboardOrderInputSchemas.orderParticipantList.entries,
 })
 
+const organizerDashboardBillingRefundRequestSchema = v.strictObject({
+  operation: v.literal("order-refund-request"),
+  ...organizerDashboardBillingInputSchemas.billingRefundRequest.entries,
+})
+const organizerDashboardBillingRefundStatusSchema = v.strictObject({
+  operation: v.literal("order-refund-status"),
+  ...organizerDashboardBillingInputSchemas.billingRefundStatus.entries,
+})
+const organizerDashboardBillingInvoiceStatusSchema = v.strictObject({
+  operation: v.literal("order-invoice-status"),
+  ...organizerDashboardBillingInputSchemas.billingInvoiceStatus.entries,
+})
+const organizerDashboardBillingInvoicePdfSchema = v.strictObject({
+  operation: v.literal("order-invoice-pdf"),
+  ...organizerDashboardBillingInputSchemas.billingInvoicePdf.entries,
+})
+const organizerDashboardBillingInvoiceResendSchema = v.strictObject({
+  operation: v.literal("order-invoice-resend"),
+  ...organizerDashboardBillingInputSchemas.billingInvoiceResend.entries,
+})
+
 const organizerDashboardFinanceOverviewRequestSchema = v.strictObject({
   operation: v.literal("finance-overview"),
   ...organizerDashboardFinanceInputSchemas.financeOverview.entries,
@@ -523,6 +545,11 @@ const organizerDashboardPublicEventGetRequestSchema = v.strictObject({
 })
 
 const organizerDashboardRequestSchema = v.variant("operation", [
+  organizerDashboardBillingRefundRequestSchema,
+  organizerDashboardBillingRefundStatusSchema,
+  organizerDashboardBillingInvoiceStatusSchema,
+  organizerDashboardBillingInvoicePdfSchema,
+  organizerDashboardBillingInvoiceResendSchema,
   organizerDashboardOrderListRequestSchema,
   organizerDashboardOrderGetRequestSchema,
   organizerDashboardOrderNoteCreateRequestSchema,
@@ -611,6 +638,26 @@ type OrganizerDashboardRequestOf<TOperation extends OrganizerDashboardOperation,
 type OrganizerDashboardRequestArgs<TSchema extends v.GenericSchema> = Omit<v.InferOutput<TSchema>, "operation">
 
 export type OrganizerDashboardRequest =
+  | OrganizerDashboardRequestOf<
+      "order-refund-request",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBillingRefundRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "order-refund-status",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBillingRefundStatusSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "order-invoice-status",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBillingInvoiceStatusSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "order-invoice-pdf",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBillingInvoicePdfSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "order-invoice-resend",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBillingInvoiceResendSchema>
+    >
   | OrganizerDashboardRequestOf<
       "order-list",
       OrganizerDashboardRequestArgs<typeof organizerDashboardOrderListRequestSchema>
@@ -939,6 +986,26 @@ export function organizerDashboardRequestParse(body: unknown): Result<OrganizerD
     return createResultError(op, v.summarize(parsed.issues), "invalid-body")
   }
   const output = parsed.output
+  if (output.operation === "order-refund-request") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "order-refund-status") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "order-invoice-status") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "order-invoice-pdf") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "order-invoice-resend") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
   if (output.operation === "order-list") {
     const { operation, ...args } = output
     return createResult({ operation, args })
