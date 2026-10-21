@@ -108,9 +108,9 @@ export function VeranstalterDashboardFinanzenPage(p: {
                         {(event) => (
                           <tr>
                             <td>
-                              <button type="button" onClick={() => state.selectEvent(event.eventKey)}>
+                              <Button variant="ghost" onClick={() => state.selectEvent(event.eventKey)}>
                                 {event.title}
-                              </button>
+                              </Button>
                             </td>
                             <td>{event.paidOrders}</td>
                             <td>
