@@ -91,7 +91,10 @@ describe("organizerDashboardBillingConfigRead", () => {
 describe("organizer dashboard billing transport", () => {
   test("invoice status uses the exact billing path, auth, and scope query", async () => {
     const seen: { url: string; init: RequestInit }[] = []
-    const result = await organizerDashboardBillingInvoiceStatusGet(config, scope, (async (url: string | URL | Request, init?: RequestInit) => {
+    const result = await organizerDashboardBillingInvoiceStatusGet(config, scope, (async (
+      url: string | URL | Request,
+      init?: RequestInit,
+    ) => {
       seen.push({ url: String(url), init: init ?? {} })
       return jsonResponse(invoiceBody)
     }) as unknown as typeof fetch)
@@ -107,7 +110,10 @@ describe("organizer dashboard billing transport", () => {
 
   test("invoice status refuses a mismatched projection", async () => {
     const result = await organizerDashboardBillingInvoiceStatusGet(config, scope, (async () =>
-      jsonResponse({ ...invoiceBody, data: { ...invoiceBody.data, orderReference: "order_OTHER" } })) as unknown as typeof fetch)
+      jsonResponse({
+        ...invoiceBody,
+        data: { ...invoiceBody.data, orderReference: "order_OTHER" },
+      })) as unknown as typeof fetch)
     expect(result.success).toBe(false)
   })
 
@@ -132,7 +138,10 @@ describe("organizer dashboard billing transport", () => {
       config,
       scope,
       (async () =>
-        new Response(bytes, { status: 200, headers: { "content-type": "application/pdf" } })) as unknown as typeof fetch,
+        new Response(bytes, {
+          status: 200,
+          headers: { "content-type": "application/pdf" },
+        })) as unknown as typeof fetch,
     )
     expect(ok).toEqual({ success: true, data: bytes })
 
@@ -155,7 +164,8 @@ describe("organizer dashboard billing transport", () => {
     const html = await organizerDashboardBillingInvoicePdfGet(
       config,
       scope,
-      (async () => new Response("<html>", { status: 200, headers: { "content-type": "text/html" } })) as unknown as typeof fetch,
+      (async () =>
+        new Response("<html>", { status: 200, headers: { "content-type": "text/html" } })) as unknown as typeof fetch,
     )
     expect(html.success).toBe(false)
   })
@@ -230,7 +240,8 @@ describe("organizer dashboard billing transport", () => {
         amountCents: 500,
         reason: "Doppelte Buchung",
       },
-      (async () => jsonResponse({ ...refundBody, data: { ...refundBody.data, amountCents: 600 } })) as unknown as typeof fetch,
+      (async () =>
+        jsonResponse({ ...refundBody, data: { ...refundBody.data, amountCents: 600 } })) as unknown as typeof fetch,
     )
     expect(result.success).toBe(false)
   })

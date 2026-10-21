@@ -486,3 +486,70 @@ Produktionsmutation.
   Live-Einlass, Kasse, Kundenkonto, Onboarding-/Vertrags-Browserabnahme
   und vollständiges E2E. Bis dahin bleibt alles auf
   `feature/veranstalter-dashboard`.
+
+## Fortsetzung 21.10.2026 (abends): Runde 2 gemergt, Build grün
+
+Vier weitere Feature-Worktrees ab `502e931`, je eigene Branch, kein Push.
+Alle vier Worker meldeten COMPLETE mit beobachteten Testzahlen:
+
+- **Gäste/Nachrichten** (`feature/veranstalter-guests-messages`, `2a7cd67`):
+  Gästeliste mit Kontingenten/Begleitpersonen/Freikarten, Nachrichten mit
+  Empfängerfilter/Planung/24-h-Erinnerung + ICS; ehrliche Zustellung
+  (`queued/sending/sent/failed/skipped`, außerhalb Produktion `skipped`).
+  419 Bun- + 78 Convex-Tests grün.
+- **Kennzahlen/Exporte/Public** (`feature/veranstalter-overview-exports`,
+  6 Commits): Org-/Event-KPIs mit Berlin-Buckets, berechtigungsgefilterte
+  CSV/XLSX/PDF/ICS-Exporte, tokenfreie Public-Queries + Routen
+  `/veranstalter-p/$orgSlug[/$eventKey]`, KPI-Sektion mit 7/30/365-Umschalter.
+  474 Bun- + 47 Convex-Tests grün.
+- **Billing-Verdrahtung** (`feature/veranstalter-billing-wiring`,
+  `d3e4bd2` + `a4ebcf7`): 5 Operationen (Refund-Request/Status, Invoice-
+  Status/PDF/Resend) gegen den echten Billing-Dienst via dünnem typisiertem
+  Transport; ehrliche Zustände, Idempotenz, Audit-Zeilen, Hono-/CLI-/
+  TS-Client-Parität. Billing-Checkout nur lesend genutzt.
+- **Einlass/Kasse/Konto** (`feature/veranstalter-admission`, 4 Commits):
+  Live-Einlass mit Ablehnungsgründen, Scanner-Links, Kassenmodus + Gastkauf
+  mit atomarem Check-in, Kundenkonto; alle vier Reaktivitätsfixes
+  (A-B-A-Antworten, Bank-Redaktion, Tarif-Drafts je Eventscope, veraltete
+  FAQ-Fehler) mit providerbasierten Regressionen. 515 Unit- + 120 Slice- +
+  68 Parity-Tests grün; eigene Full-Convex-Bilanz 562 pass / 13 fail mit
+  Stash-Vergleich gegen die Basis als vorbestehend belegt.
+
+Merges nach `feature/veranstalter-dashboard` in der Reihenfolge Gäste →
+Exporte → Billing → Einlass (`6b31cd5`, `acc7259`, `40e3405`, `3f348de`);
+Registry-Union 54 → 78 → 83 → 100 Operationen. Erwartete
+Allowlist-Konflikte (Operations, RequestParse, BackendDispatch,
+ConvexBackend, Mock, Hono, Client, EventDetailPage) manuell vereint;
+drei geteilte Abschlusszeilen-Muster (`})`, `>`, `</Show>`) ergänzt.
+Parent-seitige Korrekturen nach den Merges:
+
+- Vier `ticketId`-Übergaben (Client + ConvexBackend, Check-in/Revoke)
+  auf `as Id<"ticketIssued"> | undefined` gestellt (Mutation verlangt Id).
+- Billing-Testtypisierung: Fetch-Mocks als `as unknown as typeof fetch`
+  mit expliziten `(input: string | URL | Request, init?: RequestInit)`-
+  Parametern; Fixtures per `as const` literalisiert; Parity-`clientCall`
+  gibt `unknown` zurück (fünf unterschiedliche DTO-Formen). Diese Fehler
+  bestanden bereits auf dem Wiring-Branch; die dortige „null Fehler“-
+  Aussage war unvollständig.
+- `bun run convex codegen` (Parent-Aufgabe) nach den Merges erneut
+  ausgeführt; `convex/_generated` bleibt gitignoriert.
+- Registrierungszähler im Operations-Kommentar korrigiert (Admission-
+  Branch zählte 70 statt 71; vereint 100).
+
+Verifikation auf dem vollständig gemergten Stand:
+
+- `bun test src/organizer` **695 pass / 0 fail** (47 Dateien),
+  `src/customer` 3 pass, API-Suites **529–541 pass / 0 fail**.
+- Convex-`tsc` grün; App-`tsc` ohne Diagnose in allen Dashboard-/Client-/
+  Billing-/Konto-Dateien.
+- Voller Convex-Lauf: **584 pass / 13 fail**, exakt die vier
+  vorbestehenden Dateien (`scannerLinks`, `scannerLinkTickets`,
+  `catalogImageUpload`, `catalogPilatesImageBackfill`).
+- `shared-ui:check` nur vorbestehender Admin-Treffer, `boundary` grün,
+  Biome + `git diff --check` sauber.
+- `bun run build` vollständig grün (Bundles, Boundary, SSR-Worker).
+
+Offen vor einem Main-Merge: Browser-/E2E-Abnahme des gemergten Standes
+(Auth-, Mobil-, Dark-Szenarien), Live-Versand via Mailprovider und
+Cron-Lieferung (bleibt `skipped`/Testmodus), Lexware (ausdrücklich nicht
+integriert). Kein Push, kein Deploy, keine Produktionsmutation.
