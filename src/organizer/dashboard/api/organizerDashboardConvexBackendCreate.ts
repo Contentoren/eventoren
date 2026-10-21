@@ -298,6 +298,11 @@ export type OrganizerDashboardHttpBackend = {
     readonly orgId: string
     readonly eventKey: string
   }) => Promise<Result<unknown>>
+  readonly admissionStats: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey: string
+  }) => Promise<Result<unknown>>
   readonly exportList: (args: {
     readonly token: string
     readonly orgId: string
@@ -308,6 +313,88 @@ export type OrganizerDashboardHttpBackend = {
   }) => Promise<Result<unknown>>
   readonly publicProfileGet: (args: { readonly orgSlug: string }) => Promise<Result<unknown>>
   readonly publicEventGet: (args: { readonly orgSlug: string; readonly eventKey: string }) => Promise<Result<unknown>>
+  readonly admissionCheckin: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey: string
+    readonly entrance: string
+    readonly ticketCode?: string
+    readonly ticketId?: string
+  }) => Promise<Result<unknown>>
+  readonly admissionCheckinRevoke: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey: string
+    readonly entrance: string
+    readonly ticketCode?: string
+    readonly ticketId?: string
+  }) => Promise<Result<unknown>>
+  readonly admissionScannerLinkList: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey: string
+  }) => Promise<Result<unknown>>
+  readonly admissionScannerLinkCreate: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey: string
+    readonly label: string
+    readonly entrance?: string
+    readonly expiresAt: number
+  }) => Promise<Result<unknown>>
+  readonly admissionScannerLinkRevoke: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly linkId: string
+  }) => Promise<Result<unknown>>
+  readonly boxofficeSaleCreate: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey: string
+    readonly tierKey: string
+    readonly quantity: number
+    readonly unitPriceCents?: number
+    readonly buyerEmail?: string
+    readonly testHarness?: boolean
+  }) => Promise<Result<unknown>>
+  readonly boxofficeSaleGet: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly saleId: string
+  }) => Promise<Result<unknown>>
+  readonly boxofficeSaleList: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly eventKey: string
+  }) => Promise<Result<unknown>>
+  readonly boxofficeSaleCancel: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly saleId: string
+  }) => Promise<Result<unknown>>
+  readonly boxofficeSaleTestPay: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly saleId: string
+    readonly testHarness: true
+  }) => Promise<Result<unknown>>
+  readonly boxofficeSaleComplete: (args: {
+    readonly token: string
+    readonly orgId: string
+    readonly saleId: string
+    readonly orderId: string
+  }) => Promise<Result<unknown>>
+  readonly accountTicketList: (args: {
+    readonly token: string
+    readonly paginationOpts: OrganizerDashboardPaginationOpts
+  }) => Promise<Result<unknown>>
+  readonly accountOrderList: (args: {
+    readonly token: string
+    readonly paginationOpts: OrganizerDashboardPaginationOpts
+  }) => Promise<Result<unknown>>
+  readonly accountOrderGet: (args: { readonly token: string; readonly orderId: string }) => Promise<Result<unknown>>
+  readonly accountProfileGet: (args: { readonly token: string }) => Promise<Result<unknown>>
+  readonly accountProfileUpdate: (args: { readonly token: string; readonly name: string }) => Promise<Result<unknown>>
 }
 
 /**
@@ -399,6 +486,101 @@ export function organizerDashboardConvexBackendCreate(client: ConvexHttpClient):
         ...args,
         orgId: args.orgId as Id<"orgs">,
         orderId: args.orderId as Id<"ticketOrders">,
+      }),
+    admissionStats: (args) =>
+      client.query(api.organizerDashboardAdmission.organizerDashboardAdmissionStatsQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    admissionCheckin: (args) =>
+      client.mutation(api.organizerDashboardAdmission.organizerDashboardAdmissionCheckInMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        ticketId: args.ticketId as Id<"ticketIssued"> | undefined,
+      }),
+    admissionCheckinRevoke: (args) =>
+      client.mutation(api.organizerDashboardAdmission.organizerDashboardAdmissionCheckInRevokeMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        ticketId: args.ticketId as Id<"ticketIssued"> | undefined,
+      }),
+    admissionScannerLinkList: (args) =>
+      client.query(api.organizerDashboardAdmission.organizerDashboardAdmissionScannerLinkListQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    admissionScannerLinkCreate: (args) =>
+      client.mutation(api.organizerDashboardAdmission.organizerDashboardAdmissionScannerLinkCreateMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    admissionScannerLinkRevoke: (args) =>
+      client.mutation(api.organizerDashboardAdmission.organizerDashboardAdmissionScannerLinkRevokeMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        linkId: args.linkId as Id<"scannerLinks">,
+      }),
+    boxofficeSaleCreate: (args) =>
+      client.mutation(api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleCreateMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    boxofficeSaleGet: (args) =>
+      client.query(api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleGetQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        saleId: args.saleId as Id<"organizerDashboardBoxOfficeSales">,
+      }),
+    boxofficeSaleList: (args) =>
+      client.query(api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleListQuery, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    boxofficeSaleCancel: (args) =>
+      client.mutation(api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleCancelMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        saleId: args.saleId as Id<"organizerDashboardBoxOfficeSales">,
+      }),
+    boxofficeSaleTestPay: (args) =>
+      client.mutation(api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleTestPayMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    boxofficeSaleComplete: (args) =>
+      client.mutation(api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleCompleteMutation, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+      }),
+    accountTicketList: (args) =>
+      client.query(api.customerAccount.customerAccountTicketListQuery, {
+        token: args.token,
+        paginationOpts: {
+          numItems: args.paginationOpts.numItems,
+          cursor: args.paginationOpts.cursor,
+          ...(args.paginationOpts.endCursor != null ? { endCursor: args.paginationOpts.endCursor } : {}),
+        },
+      }),
+    accountOrderList: (args) =>
+      client.query(api.customerAccount.customerAccountOrderListQuery, {
+        token: args.token,
+        paginationOpts: {
+          numItems: args.paginationOpts.numItems,
+          cursor: args.paginationOpts.cursor,
+          ...(args.paginationOpts.endCursor != null ? { endCursor: args.paginationOpts.endCursor } : {}),
+        },
+      }),
+    accountOrderGet: (args) =>
+      client.query(api.customerAccount.customerAccountOrderGetQuery, {
+        token: args.token,
+        orderId: args.orderId as Id<"ticketOrders">,
+      }),
+    accountProfileGet: (args) =>
+      client.query(api.customerAccount.customerAccountProfileGetQuery, { token: args.token }),
+    accountProfileUpdate: (args) =>
+      client.mutation(api.customerAccount.customerAccountProfileUpdateMutation, {
+        token: args.token,
+        name: args.name,
       }),
     financeOverview: (args) =>
       client.query(api.organizerDashboardFinance.organizerDashboardFinanceOverviewQuery, {

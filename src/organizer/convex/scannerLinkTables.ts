@@ -15,6 +15,9 @@ export const scannerLinkTables = {
     eventOrgIds: v.optional(v.record(v.string(), v.union(v.id("orgs"), v.null()))),
     createdByUserId: v.optional(vIdUser),
     parentId: v.optional(v.id("scannerLinks")),
+    // Optional entrance label for dashboard-created helper links (e.g.
+    // "Haupteingang"). Display only; authorization still covers eventKeys.
+    entrance: v.optional(v.string()),
     expiresAt: v.number(),
     revokedAt: v.optional(v.number()),
     createdAt: v.number(),

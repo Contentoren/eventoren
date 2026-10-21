@@ -91,6 +91,9 @@ export function veranstalterDashboardEventDetailStateCreate(inputs: {
   /** Order/participant discoverability for read/entry roles; defaults to hidden. */
   readonly canReadOrders?: () => boolean
   readonly canReadParticipants?: () => boolean
+  /** Admission/box-office discoverability for entry/cash-desk roles; defaults to hidden. */
+  readonly canEnter?: () => boolean
+  readonly canUseBoxOffice?: () => boolean
   readonly openTier: (tierKey: string) => void
   readonly closeTier: () => void
   readonly openConfirm: (confirm: VeranstalterDashboardEventDetailConfirm) => void
@@ -514,6 +517,8 @@ export function veranstalterDashboardEventDetailStateCreate(inputs: {
     canManageTiers: inputs.canManageTiers,
     canReadOrders: inputs.canReadOrders ?? (() => false),
     canReadParticipants: inputs.canReadParticipants ?? (() => false),
+    canEnter: inputs.canEnter ?? (() => false),
+    canUseBoxOffice: inputs.canUseBoxOffice ?? (() => false),
     openTier: inputs.openTier,
     closeTier: () => {
       seededFor = null

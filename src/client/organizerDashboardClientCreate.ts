@@ -31,6 +31,9 @@ import { organizerDashboardOverviewInputSchemas } from "#src/organizer/dashboard
 import { organizerDashboardPublicInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardPublicInputSchemas.ts"
 import { organizerDashboardPricingInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardPricingInputSchemas.ts"
 import { organizerDashboardOrderInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardOrderInputSchemas.ts"
+import { organizerDashboardAdmissionInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardAdmissionInputSchemas.ts"
+import { organizerDashboardBoxOfficeInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardBoxOfficeInputSchemas.ts"
+import { customerAccountInputSchemas } from "#src/organizer/dashboard/api/customerAccountInputSchemas.ts"
 import type { ApiClientResult } from "./apiClient.js"
 
 type OrganizerDashboardOrderRef = typeof api.organizerDashboardOrders
@@ -75,6 +78,21 @@ type OrganizerDashboardExportsClientMethod<Ref, Schema extends v.GenericSchema> 
 
 type OrganizerDashboardPublicRef = typeof api.organizerDashboardPublic
 type OrganizerDashboardPublicClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type OrganizerDashboardAdmissionRef = typeof api.organizerDashboardAdmission
+type OrganizerDashboardAdmissionClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type OrganizerDashboardBoxOfficeRef = typeof api.organizerDashboardBoxOffice
+type OrganizerDashboardBoxOfficeClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type CustomerAccountRef = typeof api.customerAccount
+type CustomerAccountClientMethod<Ref, Schema extends v.GenericSchema> = (
   args: v.InferInput<Schema>,
 ) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
 
@@ -207,6 +225,74 @@ export type OrganizerDashboardClient = {
   readonly orderInvoiceResend: OrganizerDashboardBillingClientMethod<
     OrganizerDashboardBillingRef["organizerDashboardOrderInvoiceResendAction"],
     typeof organizerDashboardBillingInputSchemas.billingInvoiceResend
+  >
+  readonly admissionStats: OrganizerDashboardAdmissionClientMethod<
+    OrganizerDashboardAdmissionRef["organizerDashboardAdmissionStatsQuery"],
+    typeof organizerDashboardAdmissionInputSchemas.admissionStats
+  >
+  readonly admissionCheckin: OrganizerDashboardAdmissionClientMethod<
+    OrganizerDashboardAdmissionRef["organizerDashboardAdmissionCheckInMutation"],
+    typeof organizerDashboardAdmissionInputSchemas.admissionCheckin
+  >
+  readonly admissionCheckinRevoke: OrganizerDashboardAdmissionClientMethod<
+    OrganizerDashboardAdmissionRef["organizerDashboardAdmissionCheckInRevokeMutation"],
+    typeof organizerDashboardAdmissionInputSchemas.admissionCheckinRevoke
+  >
+  readonly admissionScannerLinkList: OrganizerDashboardAdmissionClientMethod<
+    OrganizerDashboardAdmissionRef["organizerDashboardAdmissionScannerLinkListQuery"],
+    typeof organizerDashboardAdmissionInputSchemas.admissionScannerLinkList
+  >
+  readonly admissionScannerLinkCreate: OrganizerDashboardAdmissionClientMethod<
+    OrganizerDashboardAdmissionRef["organizerDashboardAdmissionScannerLinkCreateMutation"],
+    typeof organizerDashboardAdmissionInputSchemas.admissionScannerLinkCreate
+  >
+  readonly admissionScannerLinkRevoke: OrganizerDashboardAdmissionClientMethod<
+    OrganizerDashboardAdmissionRef["organizerDashboardAdmissionScannerLinkRevokeMutation"],
+    typeof organizerDashboardAdmissionInputSchemas.admissionScannerLinkRevoke
+  >
+  readonly boxofficeSaleCreate: OrganizerDashboardBoxOfficeClientMethod<
+    OrganizerDashboardBoxOfficeRef["organizerDashboardBoxOfficeSaleCreateMutation"],
+    typeof organizerDashboardBoxOfficeInputSchemas.boxofficeSaleCreate
+  >
+  readonly boxofficeSaleGet: OrganizerDashboardBoxOfficeClientMethod<
+    OrganizerDashboardBoxOfficeRef["organizerDashboardBoxOfficeSaleGetQuery"],
+    typeof organizerDashboardBoxOfficeInputSchemas.boxofficeSaleGet
+  >
+  readonly boxofficeSaleList: OrganizerDashboardBoxOfficeClientMethod<
+    OrganizerDashboardBoxOfficeRef["organizerDashboardBoxOfficeSaleListQuery"],
+    typeof organizerDashboardBoxOfficeInputSchemas.boxofficeSaleList
+  >
+  readonly boxofficeSaleCancel: OrganizerDashboardBoxOfficeClientMethod<
+    OrganizerDashboardBoxOfficeRef["organizerDashboardBoxOfficeSaleCancelMutation"],
+    typeof organizerDashboardBoxOfficeInputSchemas.boxofficeSaleCancel
+  >
+  readonly boxofficeSaleTestPay: OrganizerDashboardBoxOfficeClientMethod<
+    OrganizerDashboardBoxOfficeRef["organizerDashboardBoxOfficeSaleTestPayMutation"],
+    typeof organizerDashboardBoxOfficeInputSchemas.boxofficeSaleTestPay
+  >
+  readonly boxofficeSaleComplete: OrganizerDashboardBoxOfficeClientMethod<
+    OrganizerDashboardBoxOfficeRef["organizerDashboardBoxOfficeSaleCompleteMutation"],
+    typeof organizerDashboardBoxOfficeInputSchemas.boxofficeSaleComplete
+  >
+  readonly accountTicketList: CustomerAccountClientMethod<
+    CustomerAccountRef["customerAccountTicketListQuery"],
+    typeof customerAccountInputSchemas.accountTicketList
+  >
+  readonly accountOrderList: CustomerAccountClientMethod<
+    CustomerAccountRef["customerAccountOrderListQuery"],
+    typeof customerAccountInputSchemas.accountOrderList
+  >
+  readonly accountOrderGet: CustomerAccountClientMethod<
+    CustomerAccountRef["customerAccountOrderGetQuery"],
+    typeof customerAccountInputSchemas.accountOrderGet
+  >
+  readonly accountProfileGet: CustomerAccountClientMethod<
+    CustomerAccountRef["customerAccountProfileGetQuery"],
+    typeof customerAccountInputSchemas.accountProfileGet
+  >
+  readonly accountProfileUpdate: CustomerAccountClientMethod<
+    CustomerAccountRef["customerAccountProfileUpdateMutation"],
+    typeof customerAccountInputSchemas.accountProfileUpdate
   >
   readonly financeOverview: OrganizerDashboardFinanceClientMethod<
     OrganizerDashboardFinanceRef["organizerDashboardFinanceOverviewQuery"],
@@ -975,6 +1061,305 @@ export function organizerDashboardClientCreate(inputs: {
             orderId: validated.output.orderId as Id<"ticketOrders">,
           },
         )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+
+    admissionStats: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardAdmissionInputSchemas.admissionStats, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(
+          api.organizerDashboardAdmission.organizerDashboardAdmissionStatsQuery,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    admissionCheckin: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardAdmissionInputSchemas.admissionCheckin, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardAdmission.organizerDashboardAdmissionCheckInMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            ticketId: validated.output.ticketId as Id<"ticketIssued"> | undefined,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    admissionCheckinRevoke: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardAdmissionInputSchemas.admissionCheckinRevoke, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardAdmission.organizerDashboardAdmissionCheckInRevokeMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            ticketId: validated.output.ticketId as Id<"ticketIssued"> | undefined,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    admissionScannerLinkList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardAdmissionInputSchemas.admissionScannerLinkList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(
+          api.organizerDashboardAdmission.organizerDashboardAdmissionScannerLinkListQuery,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    admissionScannerLinkCreate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardAdmissionInputSchemas.admissionScannerLinkCreate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardAdmission.organizerDashboardAdmissionScannerLinkCreateMutation,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    admissionScannerLinkRevoke: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardAdmissionInputSchemas.admissionScannerLinkRevoke, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardAdmission.organizerDashboardAdmissionScannerLinkRevokeMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            linkId: validated.output.linkId as Id<"scannerLinks">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    boxofficeSaleCreate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBoxOfficeInputSchemas.boxofficeSaleCreate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleCreateMutation,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    boxofficeSaleGet: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBoxOfficeInputSchemas.boxofficeSaleGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(
+          api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleGetQuery,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            saleId: validated.output.saleId as Id<"organizerDashboardBoxOfficeSales">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    boxofficeSaleList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBoxOfficeInputSchemas.boxofficeSaleList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(
+          api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleListQuery,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    boxofficeSaleCancel: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBoxOfficeInputSchemas.boxofficeSaleCancel, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleCancelMutation,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            saleId: validated.output.saleId as Id<"organizerDashboardBoxOfficeSales">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    boxofficeSaleTestPay: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBoxOfficeInputSchemas.boxofficeSaleTestPay, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleTestPayMutation,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    boxofficeSaleComplete: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBoxOfficeInputSchemas.boxofficeSaleComplete, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(
+          api.organizerDashboardBoxOffice.organizerDashboardBoxOfficeSaleCompleteMutation,
+          { ...validated.output, token: credential.token, orgId: validated.output.orgId as Id<"orgs"> },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    accountTicketList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(customerAccountInputSchemas.accountTicketList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      const { numItems, cursor, endCursor } = validated.output
+      try {
+        const response = await inputs.client.query(api.customerAccount.customerAccountTicketListQuery, {
+          token: credential.token,
+          paginationOpts: { numItems, cursor: cursor ?? null, ...(endCursor != null ? { endCursor } : {}) },
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    accountOrderList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(customerAccountInputSchemas.accountOrderList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      const { numItems, cursor, endCursor } = validated.output
+      try {
+        const response = await inputs.client.query(api.customerAccount.customerAccountOrderListQuery, {
+          token: credential.token,
+          paginationOpts: { numItems, cursor: cursor ?? null, ...(endCursor != null ? { endCursor } : {}) },
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    accountOrderGet: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(customerAccountInputSchemas.accountOrderGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(api.customerAccount.customerAccountOrderGetQuery, {
+          token: credential.token,
+          orderId: validated.output.orderId as Id<"ticketOrders">,
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    accountProfileGet: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(customerAccountInputSchemas.accountProfileGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(api.customerAccount.customerAccountProfileGetQuery, {
+          token: credential.token,
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    accountProfileUpdate: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(customerAccountInputSchemas.accountProfileUpdate, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.mutation(api.customerAccount.customerAccountProfileUpdateMutation, {
+          token: credential.token,
+          name: validated.output.name,
+        })
         if (response.success) return { success: true, data: response.data }
         return { success: false, error: backendFailure(response) }
       } catch {

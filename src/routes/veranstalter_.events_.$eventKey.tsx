@@ -51,6 +51,8 @@ function VeranstalterDashboardEventDetailRoute() {
     canReadParticipants: () =>
       (page.shell.activeOrganization()?.permissions.includes("bestellungen.sehen") ?? false) ||
       (page.shell.activeOrganization()?.permissions.includes("einlass.nutzen") ?? false),
+    canEnter: () => page.shell.activeOrganization()?.permissions.includes("einlass.nutzen") ?? false,
+    canUseBoxOffice: () => page.shell.activeOrganization()?.permissions.includes("abendkasse.nutzen") ?? false,
     openTier: (tierKey) =>
       void navigate({
         to: "/veranstalter/events/$eventKey",

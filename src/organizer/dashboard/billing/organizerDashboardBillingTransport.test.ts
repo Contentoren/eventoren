@@ -31,7 +31,7 @@ const refundBody = {
     createdAt: "2026-10-21T10:00:00.000Z",
     updatedAt: "2026-10-21T10:00:00.000Z",
   },
-}
+} as const
 
 const invoiceBody = {
   success: true,
@@ -46,7 +46,7 @@ const invoiceBody = {
     emailSentAt: "2026-10-21T10:00:00.000Z",
     updatedAt: "2026-10-21T10:00:00.000Z",
   },
-}
+} as const
 
 describe("organizerDashboardBillingConfigRead", () => {
   test("rejects incomplete configuration without leaking values", () => {
@@ -91,10 +91,10 @@ describe("organizerDashboardBillingConfigRead", () => {
 describe("organizer dashboard billing transport", () => {
   test("invoice status uses the exact billing path, auth, and scope query", async () => {
     const seen: { url: string; init: RequestInit }[] = []
-    const result = await organizerDashboardBillingInvoiceStatusGet(config, scope, (async (url, init) => {
+    const result = await organizerDashboardBillingInvoiceStatusGet(config, scope, (async (url: string | URL | Request, init?: RequestInit) => {
       seen.push({ url: String(url), init: init ?? {} })
       return jsonResponse(invoiceBody)
-    }) as typeof fetch)
+    }) as unknown as typeof fetch)
     expect(result).toEqual({ success: true, data: invoiceBody.data })
     expect(seen).toHaveLength(1)
     expect(seen[0]?.url).toBe(
@@ -107,7 +107,7 @@ describe("organizer dashboard billing transport", () => {
 
   test("invoice status refuses a mismatched projection", async () => {
     const result = await organizerDashboardBillingInvoiceStatusGet(config, scope, (async () =>
-      jsonResponse({ ...invoiceBody, data: { ...invoiceBody.data, orderReference: "order_OTHER" } })) as typeof fetch)
+      jsonResponse({ ...invoiceBody, data: { ...invoiceBody.data, orderReference: "order_OTHER" } })) as unknown as typeof fetch)
     expect(result.success).toBe(false)
   })
 
@@ -116,7 +116,7 @@ describe("organizer dashboard billing transport", () => {
       const result = await organizerDashboardBillingInvoiceStatusGet(
         config,
         scope,
-        (async () => new Response("nope", { status })) as typeof fetch,
+        (async () => new Response("nope", { status })) as unknown as typeof fetch,
       )
       expect(result.success).toBe(false)
       if (!result.success) {
@@ -132,14 +132,14 @@ describe("organizer dashboard billing transport", () => {
       config,
       scope,
       (async () =>
-        new Response(bytes, { status: 200, headers: { "content-type": "application/pdf" } })) as typeof fetch,
+        new Response(bytes, { status: 200, headers: { "content-type": "application/pdf" } })) as unknown as typeof fetch,
     )
     expect(ok).toEqual({ success: true, data: bytes })
 
     const notFound = await organizerDashboardBillingInvoicePdfGet(
       config,
       scope,
-      (async () => new Response("missing", { status: 404 })) as typeof fetch,
+      (async () => new Response("missing", { status: 404 })) as unknown as typeof fetch,
     )
     expect(notFound.success).toBe(false)
     if (!notFound.success) expect(notFound.errorMessage).toContain("No invoice is available")
@@ -147,7 +147,7 @@ describe("organizer dashboard billing transport", () => {
     const draft = await organizerDashboardBillingInvoicePdfGet(
       config,
       scope,
-      (async () => new Response("draft", { status: 409 })) as typeof fetch,
+      (async () => new Response("draft", { status: 409 })) as unknown as typeof fetch,
     )
     expect(draft.success).toBe(false)
     if (!draft.success) expect(draft.errorMessage).toContain("No invoice PDF is available")
@@ -155,7 +155,7 @@ describe("organizer dashboard billing transport", () => {
     const html = await organizerDashboardBillingInvoicePdfGet(
       config,
       scope,
-      (async () => new Response("<html>", { status: 200, headers: { "content-type": "text/html" } })) as typeof fetch,
+      (async () => new Response("<html>", { status: 200, headers: { "content-type": "text/html" } })) as unknown as typeof fetch,
     )
     expect(html.success).toBe(false)
   })
@@ -165,10 +165,10 @@ describe("organizer dashboard billing transport", () => {
     const result = await organizerDashboardBillingInvoiceResend(
       config,
       { ...scope, idempotencyKey: "resend_1" },
-      (async (url, init) => {
+      (async (url: string | URL | Request, init?: RequestInit) => {
         seen.push({ url: String(url), init: init ?? {} })
         return jsonResponse(invoiceBody)
-      }) as typeof fetch,
+      }) as unknown as typeof fetch,
     )
     expect(result).toEqual({ success: true, data: invoiceBody.data })
     expect(seen[0]?.url).toBe(
@@ -196,10 +196,10 @@ describe("organizer dashboard billing transport", () => {
         amountCents: 500,
         reason: "Doppelte Buchung",
       },
-      (async (url, init) => {
+      (async (url: string | URL | Request, init?: RequestInit) => {
         seen.push({ url: String(url), init: init ?? {} })
         return jsonResponse(refundBody)
-      }) as typeof fetch,
+      }) as unknown as typeof fetch,
     )
     expect(result).toEqual({ success: true, data: refundBody.data })
     expect(seen[0]?.url).toBe(
@@ -230,7 +230,7 @@ describe("organizer dashboard billing transport", () => {
         amountCents: 500,
         reason: "Doppelte Buchung",
       },
-      (async () => jsonResponse({ ...refundBody, data: { ...refundBody.data, amountCents: 600 } })) as typeof fetch,
+      (async () => jsonResponse({ ...refundBody, data: { ...refundBody.data, amountCents: 600 } })) as unknown as typeof fetch,
     )
     expect(result.success).toBe(false)
   })
@@ -240,10 +240,10 @@ describe("organizer dashboard billing transport", () => {
     const result = await organizerDashboardBillingRefundStatusGet(
       config,
       { ...scope, refundReference: "refund_1" },
-      (async (url) => {
+      (async (url: string | URL | Request) => {
         seen.push(String(url))
         return jsonResponse(refundBody)
-      }) as typeof fetch,
+      }) as unknown as typeof fetch,
     )
     expect(result).toEqual({ success: true, data: refundBody.data })
     expect(seen[0]).toBe(
@@ -254,7 +254,7 @@ describe("organizer dashboard billing transport", () => {
   test("network failures never leak the credential", async () => {
     const failing = (async () => {
       throw new Error("connection refused for secret-credential")
-    }) as typeof fetch
+    }) as unknown as typeof fetch
     for (const result of [
       await organizerDashboardBillingInvoiceStatusGet(config, scope, failing),
       await organizerDashboardBillingRefundStatusGet(config, { ...scope, refundReference: "refund_1" }, failing),

@@ -34,6 +34,38 @@ export {
   type OrganizerDashboardOrderNoteText,
 } from "./organizer/dashboard/orders/model/organizerDashboardOrderNoteTextSchema.js"
 export {
+  organizerDashboardAdmissionEntranceSchema,
+  type OrganizerDashboardAdmissionEntrance,
+} from "./organizer/dashboard/admission/model/organizerDashboardAdmissionEntranceSchema.js"
+export {
+  organizerDashboardAdmissionScanResultSchema,
+  type OrganizerDashboardAdmissionScanResult,
+} from "./organizer/dashboard/admission/model/organizerDashboardAdmissionScanResultSchema.js"
+export {
+  organizerDashboardAdmissionCheckInSchema,
+  type OrganizerDashboardAdmissionCheckIn,
+} from "./organizer/dashboard/admission/model/organizerDashboardAdmissionCheckInSchema.js"
+export {
+  organizerDashboardAdmissionScannerLinkSchema,
+  type OrganizerDashboardAdmissionScannerLink,
+} from "./organizer/dashboard/admission/model/organizerDashboardAdmissionScannerLinkSchema.js"
+export {
+  organizerDashboardBoxOfficeSaleCreateSchema,
+  type OrganizerDashboardBoxOfficeSaleCreate,
+} from "./organizer/dashboard/boxoffice/model/organizerDashboardBoxOfficeSaleCreateSchema.js"
+export {
+  organizerDashboardBoxOfficeSaleTestPaySchema,
+  type OrganizerDashboardBoxOfficeSaleTestPay,
+} from "./organizer/dashboard/boxoffice/model/organizerDashboardBoxOfficeSaleTestPaySchema.js"
+export {
+  organizerDashboardBoxOfficeSaleCompleteSchema,
+  type OrganizerDashboardBoxOfficeSaleComplete,
+} from "./organizer/dashboard/boxoffice/model/organizerDashboardBoxOfficeSaleCompleteSchema.js"
+export {
+  customerAccountProfileUpdateSchema,
+  type CustomerAccountProfileUpdate,
+} from "./customer/account/model/customerAccountProfileUpdateSchema.js"
+export {
   organizerDashboardBerlinDaySchema,
   type OrganizerDashboardBerlinDay,
   organizerDashboardFinanceOverviewFilterSchema,

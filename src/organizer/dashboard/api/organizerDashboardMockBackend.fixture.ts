@@ -65,6 +65,83 @@ export function organizerDashboardMockBackendCreate(behavior?: Partial<Organizer
         record("order-invoice-resend", args)
         return behavior?.orderInvoiceResend?.(args) ?? createResult({ delivery: "pending" })
       },
+      admissionStats: async (args) => {
+        record("admission-stats", args)
+        return (
+          behavior?.admissionStats?.(args) ??
+          createResult({
+            eventKey: args.eventKey,
+            byTier: [],
+            byEntrance: [],
+            rejected: [],
+            totals: { sold: 0, checkedIn: 0, rejected: 0 },
+          })
+        )
+      },
+      admissionCheckin: async (args) => {
+        record("admission-checkin", args)
+        return behavior?.admissionCheckin?.(args) ?? createResult({ status: "checked-in" })
+      },
+      admissionCheckinRevoke: async (args) => {
+        record("admission-checkin-revoke", args)
+        return behavior?.admissionCheckinRevoke?.(args) ?? createResult({ status: "reset" })
+      },
+      admissionScannerLinkList: async (args) => {
+        record("admission-scanner-link-list", args)
+        return behavior?.admissionScannerLinkList?.(args) ?? createResult({ links: [] })
+      },
+      admissionScannerLinkCreate: async (args) => {
+        record("admission-scanner-link-create", args)
+        return behavior?.admissionScannerLinkCreate?.(args) ?? createResult({ linkId: "link_test" })
+      },
+      admissionScannerLinkRevoke: async (args) => {
+        record("admission-scanner-link-revoke", args)
+        return behavior?.admissionScannerLinkRevoke?.(args) ?? createResult({ linkId: args.linkId })
+      },
+      boxofficeSaleCreate: async (args) => {
+        record("boxoffice-sale-create", args)
+        return behavior?.boxofficeSaleCreate?.(args) ?? createResult({ saleId: "sale_test", status: "wartet" })
+      },
+      boxofficeSaleGet: async (args) => {
+        record("boxoffice-sale-get", args)
+        return behavior?.boxofficeSaleGet?.(args) ?? createResult({ saleId: args.saleId, status: "wartet" })
+      },
+      boxofficeSaleList: async (args) => {
+        record("boxoffice-sale-list", args)
+        return behavior?.boxofficeSaleList?.(args) ?? createResult({ sales: [] })
+      },
+      boxofficeSaleCancel: async (args) => {
+        record("boxoffice-sale-cancel", args)
+        return behavior?.boxofficeSaleCancel?.(args) ?? createResult({ saleId: args.saleId, status: "abgebrochen" })
+      },
+      boxofficeSaleTestPay: async (args) => {
+        record("boxoffice-sale-test-pay", args)
+        return behavior?.boxofficeSaleTestPay?.(args) ?? createResult({ saleId: args.saleId, status: "bezahlt" })
+      },
+      boxofficeSaleComplete: async (args) => {
+        record("boxoffice-sale-complete", args)
+        return behavior?.boxofficeSaleComplete?.(args) ?? createResult({ checkedIn: 0 })
+      },
+      accountTicketList: async (args) => {
+        record("account-ticket-list", args)
+        return behavior?.accountTicketList?.(args) ?? createResult({ page: [], isDone: true, continueCursor: "" })
+      },
+      accountOrderList: async (args) => {
+        record("account-order-list", args)
+        return behavior?.accountOrderList?.(args) ?? createResult({ page: [], isDone: true, continueCursor: "" })
+      },
+      accountOrderGet: async (args) => {
+        record("account-order-get", args)
+        return behavior?.accountOrderGet?.(args) ?? createResult({ orderId: args.orderId })
+      },
+      accountProfileGet: async (args) => {
+        record("account-profile-get", args)
+        return behavior?.accountProfileGet?.(args) ?? createResult({ name: "Test", email: null })
+      },
+      accountProfileUpdate: async (args) => {
+        record("account-profile-update", args)
+        return behavior?.accountProfileUpdate?.(args) ?? createResult({ name: args.name, email: null })
+      },
       teamMemberList: async (args) => {
         record("team-member-list", args)
         return behavior?.teamMemberList?.(args) ?? createResult({ page: [], isDone: true, continueCursor: "" })

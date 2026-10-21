@@ -28,6 +28,9 @@ import { organizerDashboardOverviewInputSchemas } from "./organizerDashboardOver
 import { organizerDashboardPublicInputSchemas } from "./organizerDashboardPublicInputSchemas.ts"
 import { organizerDashboardPricingInputSchemas } from "./organizerDashboardPricingInputSchemas.ts"
 import { organizerDashboardOrderInputSchemas } from "./organizerDashboardOrderInputSchemas.ts"
+import { organizerDashboardAdmissionInputSchemas } from "./organizerDashboardAdmissionInputSchemas.ts"
+import { organizerDashboardBoxOfficeInputSchemas } from "./organizerDashboardBoxOfficeInputSchemas.ts"
+import { customerAccountInputSchemas } from "./customerAccountInputSchemas.ts"
 
 const organizerDashboardGuestMessageOperationSet: ReadonlySet<string> = new Set([
   "guest-quota-list",
@@ -543,6 +546,74 @@ const organizerDashboardPublicEventGetRequestSchema = v.strictObject({
   operation: v.literal("public-event-get"),
   ...organizerDashboardPublicInputSchemas.publicEventGet.entries,
 })
+const organizerDashboardAdmissionStatsRequestSchema = v.strictObject({
+  operation: v.literal("admission-stats"),
+  ...organizerDashboardAdmissionInputSchemas.admissionStats.entries,
+})
+const organizerDashboardAdmissionCheckinRequestSchema = v.strictObject({
+  operation: v.literal("admission-checkin"),
+  ...organizerDashboardAdmissionInputSchemas.admissionCheckin.entries,
+})
+const organizerDashboardAdmissionCheckinRevokeRequestSchema = v.strictObject({
+  operation: v.literal("admission-checkin-revoke"),
+  ...organizerDashboardAdmissionInputSchemas.admissionCheckinRevoke.entries,
+})
+const organizerDashboardAdmissionScannerLinkListRequestSchema = v.strictObject({
+  operation: v.literal("admission-scanner-link-list"),
+  ...organizerDashboardAdmissionInputSchemas.admissionScannerLinkList.entries,
+})
+const organizerDashboardAdmissionScannerLinkCreateRequestSchema = v.strictObject({
+  operation: v.literal("admission-scanner-link-create"),
+  ...organizerDashboardAdmissionInputSchemas.admissionScannerLinkCreate.entries,
+})
+const organizerDashboardAdmissionScannerLinkRevokeRequestSchema = v.strictObject({
+  operation: v.literal("admission-scanner-link-revoke"),
+  ...organizerDashboardAdmissionInputSchemas.admissionScannerLinkRevoke.entries,
+})
+const organizerDashboardBoxofficeSaleCreateRequestSchema = v.strictObject({
+  operation: v.literal("boxoffice-sale-create"),
+  ...organizerDashboardBoxOfficeInputSchemas.boxofficeSaleCreate.entries,
+})
+const organizerDashboardBoxofficeSaleGetRequestSchema = v.strictObject({
+  operation: v.literal("boxoffice-sale-get"),
+  ...organizerDashboardBoxOfficeInputSchemas.boxofficeSaleGet.entries,
+})
+const organizerDashboardBoxofficeSaleListRequestSchema = v.strictObject({
+  operation: v.literal("boxoffice-sale-list"),
+  ...organizerDashboardBoxOfficeInputSchemas.boxofficeSaleList.entries,
+})
+const organizerDashboardBoxofficeSaleCancelRequestSchema = v.strictObject({
+  operation: v.literal("boxoffice-sale-cancel"),
+  ...organizerDashboardBoxOfficeInputSchemas.boxofficeSaleCancel.entries,
+})
+const organizerDashboardBoxofficeSaleTestPayRequestSchema = v.strictObject({
+  operation: v.literal("boxoffice-sale-test-pay"),
+  ...organizerDashboardBoxOfficeInputSchemas.boxofficeSaleTestPay.entries,
+})
+const organizerDashboardBoxofficeSaleCompleteRequestSchema = v.strictObject({
+  operation: v.literal("boxoffice-sale-complete"),
+  ...organizerDashboardBoxOfficeInputSchemas.boxofficeSaleComplete.entries,
+})
+const customerAccountTicketListRequestSchema = v.strictObject({
+  operation: v.literal("account-ticket-list"),
+  ...customerAccountInputSchemas.accountTicketList.entries,
+})
+const customerAccountOrderListRequestSchema = v.strictObject({
+  operation: v.literal("account-order-list"),
+  ...customerAccountInputSchemas.accountOrderList.entries,
+})
+const customerAccountOrderGetRequestSchema = v.strictObject({
+  operation: v.literal("account-order-get"),
+  ...customerAccountInputSchemas.accountOrderGet.entries,
+})
+const customerAccountProfileGetRequestSchema = v.strictObject({
+  operation: v.literal("account-profile-get"),
+  ...customerAccountInputSchemas.accountProfileGet.entries,
+})
+const customerAccountProfileUpdateRequestSchema = v.strictObject({
+  operation: v.literal("account-profile-update"),
+  ...customerAccountInputSchemas.accountProfileUpdate.entries,
+})
 
 const organizerDashboardRequestSchema = v.variant("operation", [
   organizerDashboardBillingRefundRequestSchema,
@@ -573,6 +644,23 @@ const organizerDashboardRequestSchema = v.variant("operation", [
   organizerDashboardVoucherIssueRequestSchema,
   organizerDashboardVoucherRedeemRequestSchema,
   organizerDashboardVoucherDeactivateRequestSchema,
+  organizerDashboardAdmissionStatsRequestSchema,
+  organizerDashboardAdmissionCheckinRequestSchema,
+  organizerDashboardAdmissionCheckinRevokeRequestSchema,
+  organizerDashboardAdmissionScannerLinkListRequestSchema,
+  organizerDashboardAdmissionScannerLinkCreateRequestSchema,
+  organizerDashboardAdmissionScannerLinkRevokeRequestSchema,
+  organizerDashboardBoxofficeSaleCreateRequestSchema,
+  organizerDashboardBoxofficeSaleGetRequestSchema,
+  organizerDashboardBoxofficeSaleListRequestSchema,
+  organizerDashboardBoxofficeSaleCancelRequestSchema,
+  organizerDashboardBoxofficeSaleTestPayRequestSchema,
+  organizerDashboardBoxofficeSaleCompleteRequestSchema,
+  customerAccountTicketListRequestSchema,
+  customerAccountOrderListRequestSchema,
+  customerAccountOrderGetRequestSchema,
+  customerAccountProfileGetRequestSchema,
+  customerAccountProfileUpdateRequestSchema,
   organizerDashboardContextRequestSchema,
   organizerDashboardCreateRequestSchema,
   organizerDashboardUpdateRequestSchema,
@@ -961,6 +1049,74 @@ export type OrganizerDashboardRequest =
       "public-event-get",
       OrganizerDashboardRequestArgs<typeof organizerDashboardPublicEventGetRequestSchema>
     >
+  | OrganizerDashboardRequestOf<
+      "admission-stats",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardAdmissionStatsRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "admission-checkin",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardAdmissionCheckinRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "admission-checkin-revoke",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardAdmissionCheckinRevokeRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "admission-scanner-link-list",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardAdmissionScannerLinkListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "admission-scanner-link-create",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardAdmissionScannerLinkCreateRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "admission-scanner-link-revoke",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardAdmissionScannerLinkRevokeRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "boxoffice-sale-create",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBoxofficeSaleCreateRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "boxoffice-sale-get",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBoxofficeSaleGetRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "boxoffice-sale-list",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBoxofficeSaleListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "boxoffice-sale-cancel",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBoxofficeSaleCancelRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "boxoffice-sale-test-pay",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBoxofficeSaleTestPayRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "boxoffice-sale-complete",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardBoxofficeSaleCompleteRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "account-ticket-list",
+      OrganizerDashboardRequestArgs<typeof customerAccountTicketListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "account-order-list",
+      OrganizerDashboardRequestArgs<typeof customerAccountOrderListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "account-order-get",
+      OrganizerDashboardRequestArgs<typeof customerAccountOrderGetRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "account-profile-get",
+      OrganizerDashboardRequestArgs<typeof customerAccountProfileGetRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "account-profile-update",
+      OrganizerDashboardRequestArgs<typeof customerAccountProfileUpdateRequestSchema>
+    >
 
 /**
  * Validates one interface-layer request body against the same shared model
@@ -1031,6 +1187,74 @@ export function organizerDashboardRequestParse(body: unknown): Result<OrganizerD
     return createResult({ operation, args })
   }
   if (output.operation === "order-participant-list") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "admission-stats") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "admission-checkin") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "admission-checkin-revoke") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "admission-scanner-link-list") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "admission-scanner-link-create") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "admission-scanner-link-revoke") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "boxoffice-sale-create") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "boxoffice-sale-get") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "boxoffice-sale-list") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "boxoffice-sale-cancel") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "boxoffice-sale-test-pay") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "boxoffice-sale-complete") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "account-ticket-list") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "account-order-list") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "account-order-get") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "account-profile-get") {
+    const { operation, ...args } = output
+    return createResult({ operation, args })
+  }
+  if (output.operation === "account-profile-update") {
     const { operation, ...args } = output
     return createResult({ operation, args })
   }

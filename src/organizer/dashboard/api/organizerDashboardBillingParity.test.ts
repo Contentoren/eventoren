@@ -95,7 +95,7 @@ function sdkCreate(response: Result<unknown> | "throw" = createResult(data)) {
 function clientCall(sdk: ReturnType<typeof sdkCreate>, method: BillingCase["method"], args: unknown, auth = true) {
   return organizerDashboardClientCreate({ client: sdk.client, token: () => (auth ? ` ${credential} ` : " ") })[method](
     args as never,
-  )
+  ) as unknown
 }
 function httpCall(sdk: ReturnType<typeof sdkCreate>, operation: string, args: object, auth = true) {
   return organizerDashboardHonoCreate(sdk.backend).request("/api/veranstalter", {

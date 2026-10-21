@@ -113,6 +113,30 @@ export function VeranstalterDashboardEventDetailPage(p: {
             <Show when={state.canReadOrders() || (p.canCheckIn ?? state.canReadParticipants())}>
               <VeranstalterDashboardExportSection state={exportState} />
             </Show>
+            <Show when={state.canEnter() || state.canUseBoxOffice()}>
+              <nav aria-label="Einlass und Abendkasse" class="flex flex-wrap gap-4 text-sm">
+                <Show when={state.canEnter()}>
+                  <Link
+                    to="/veranstalter/events/$eventKey/einlass"
+                    params={{ eventKey: event().eventKey }}
+                    search={{ org: p.orgParam }}
+                    class="underline"
+                  >
+                    Einlass
+                  </Link>
+                </Show>
+                <Show when={state.canUseBoxOffice()}>
+                  <Link
+                    to="/veranstalter/events/$eventKey/abendkasse"
+                    params={{ eventKey: event().eventKey }}
+                    search={{ org: p.orgParam }}
+                    class="underline"
+                  >
+                    Abendkasse
+                  </Link>
+                </Show>
+              </nav>
+            </Show>
 
             <Show when={state.failure()}>
               {(message) => (
