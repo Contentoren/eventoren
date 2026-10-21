@@ -1,12 +1,17 @@
 import { expect, mock, test } from "bun:test"
-import { createRoot, createSignal, getOwner } from "solid-js"
 import { createResult } from "../src/ui/createResult.ts"
 import type { TicketOrderListPage } from "../src/ticketing/TicketOrderListPage.ts"
 import type { TicketOrderProjection } from "../src/ticketing/TicketOrderProjection.ts"
 import type { TicketOrderSummary } from "../src/ticketing/TicketOrderSummary.ts"
-import { ticketOrderHistoryPageStateCreate } from "../src/ticketing/ticketOrderHistoryPageStateCreate.ts"
-import { eventorenAuthContext } from "../src/auth/ui/eventorenAuthContext.ts"
-import { convexClientContext } from "../src/utils/convex_client/convexClientContext.ts"
+
+const solidJsClientPath = "solid-js/dist/solid.js"
+const solid = (await import(solidJsClientPath)) as unknown as typeof import("solid-js")
+mock.module("solid-js", () => solid)
+const { createRoot, createSignal, getOwner } = solid
+const { ticketOrderHistoryPageStateCreate } = await import("../src/ticketing/ticketOrderHistoryPageStateCreate.ts")
+const { eventorenAuthContext } = await import("../src/auth/ui/eventorenAuthContext.ts")
+const { convexClientContext } = await import("../src/utils/convex_client/convexClientContext.ts")
+mock.restore()
 
 const summaryCreate = (id: string): TicketOrderSummary => ({
   id,

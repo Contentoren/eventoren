@@ -1,12 +1,17 @@
-import { describe, expect, test } from "bun:test"
-import { createRoot } from "solid-js"
-import { language } from "../src/app/i18n/language.ts"
-import { languageSignal } from "../src/app/i18n/languageSignal.ts"
-import { demoOrganizerDataSourceCreate } from "../src/demo/fixtures/demoOrganizerDataSourceCreate.ts"
-import { demoOrganizerTickets } from "../src/demo/fixtures/demoOrganizerTickets.ts"
+import { describe, expect, mock, test } from "bun:test"
 import type { OrganizerDataSource } from "../src/organizer/OrganizerDataSource.ts"
-import { organizerEventDetailPageStateCreate } from "../src/organizer/organizerEventDetailPageStateCreate.ts"
-import { organizerTextGet } from "../src/organizer/organizerTextGet.ts"
+
+const solidJsClientPath = "solid-js/dist/solid.js"
+const solid = (await import(solidJsClientPath)) as unknown as typeof import("solid-js")
+mock.module("solid-js", () => solid)
+const { createRoot } = solid
+const { language } = await import("../src/app/i18n/language.ts")
+const { languageSignal } = await import("../src/app/i18n/languageSignal.ts")
+const { demoOrganizerDataSourceCreate } = await import("../src/demo/fixtures/demoOrganizerDataSourceCreate.ts")
+const { demoOrganizerTickets } = await import("../src/demo/fixtures/demoOrganizerTickets.ts")
+const { organizerEventDetailPageStateCreate } = await import("../src/organizer/organizerEventDetailPageStateCreate.ts")
+const { organizerTextGet } = await import("../src/organizer/organizerTextGet.ts")
+mock.restore()
 
 describe("organizer event detail state", () => {
   test("keeps action messages reactive and clears camera errors after a manual success", async () => {
