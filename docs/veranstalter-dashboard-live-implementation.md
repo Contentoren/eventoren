@@ -553,3 +553,84 @@ Offen vor einem Main-Merge: Browser-/E2E-Abnahme des gemergten Standes
 (Auth-, Mobil-, Dark-Szenarien), Live-Versand via Mailprovider und
 Cron-Lieferung (bleibt `skipped`/Testmodus), Lexware (ausdrücklich nicht
 integriert). Kein Push, kein Deploy, keine Produktionsmutation.
+
+## Fortsetzung 21.10.2026 (spät): Abnahme-Fixes, Main-Merge, E2E grün
+
+Browser-/E2E-Abnahme des gemergten Standes fand vier Befunde; drei
+behoben und verifiziert, einer als vorbestehend belegt (außerhalb des
+Slices, nicht angefasst):
+
+- **Consent-Checkboxen** (`ui/input/check/Checkbox.tsx`): Label auf
+  `block` gestellt (volle Zeile inkl. umbrochener Lücken klickbar) plus
+  explizite Ids `onboarding-terms-accept`/`onboarding-dpa-accept`. Der
+  E2E-Treiber klickte zusätzlich ins Leere, weil die zweite Zeile in
+  kurzen Viewports unterhalb des Falzes liegt (`elementFromPoint`
+  → `null` per DOM-Probe): Treiber scrollt beide Zeilen jetzt per
+  `scrollIntoView({block:'center'})` vor den Text-Klicks. Danach
+  **onboarding-E2E PASS** und **purenav-E2E PASS**.
+- **Team-Dialoge** (`veranstalterDashboardTeamStateCreate.ts`): Scope-Effekt
+  schloss Dialoge, weil der Kontext beim Navigieren transient `orgId`
+  → `undefined` und `canManage` → `false` liefert. Effekt ignoriert
+  jetzt Übergänge ins Unbekannte (weder Org-Wechsel noch
+  Rechteverlust), schließt aber weiter bei echtem Wechsel/Verlust.
+  Manuell verifiziert: „Einladen“ hält `?dialog=einladen`, Einladung
+  wird angelegt und erscheint unter „Offene Einladungen“.
+  Regressionen im Case-Test (Dialog überlebt Rechte-Grant, schließt
+  bei echtem Entzug, überlebt transienten Org-Drop).
+- **Gast-Bestellung in Admin-Suche**: Gast-Bestellungen schrieben nur
+  `{channel, guestId}` ins `contactSnapshotJson`; die Admin-Suche
+  filtert aber über den **Suchindex auf `contactSnapshotJson`**
+  (`ticketOrderListAdminPaginatedQuery.ts`) — ohne Namen/E-Mail im
+  Snapshot erreicht die Zeile den Matcher nie. Mutation schreibt jetzt
+  zusätzlich `email`/`givenName`. Convex-Test beweist
+  `adminTicketOrderSearchMatches(stored.order, "mara") === true` auf
+  gespeicherter Bestellung. Browser: Fehlschlag auf
+  Vor-Fix-Daten reproduziert („mara“/Titel suchen 0 Treffer — Titel ist
+  korrekt kein Suchfeld); neue Gast-Bestellung braucht ein Event der
+  Fixture-Orgs (Wintergala/Abiball stammen aus Produktionskopie-Daten
+  fremder Orgs), daher vollständige Neu-Gast-Schleife im Browser noch
+  offen, Pfad per Unit-Test + Index-Pfad belegt.
+- **`/admin/scanner-links`** (`template is not a function`): Kette
+  byte-identisch zu Main (nur Schema-Felder kamen aus dem Branch);
+  Solid-Kontrollfluss-/Vendor-Problem außerhalb des Slices — nicht
+  angefasst. `scannerLinkTickets`-Projektion ebenfalls auf sauberem
+  Main reproduziert (alle 13 Convex-Fails vorbestehend).
+
+Main-Merge (`8998c26` Auth/API-Keys) in den Feature-Branch (`6fdfea0`,
+einziger Konflikt `src/client/apiClient.ts` als Union aufgelöst),
+danach zwei Fix-Commits (`38fd792` Abnahme-Fixes, `5450ebf` Demo-State:
+fehlende `baseOrders`/`sortBy`/`sortOrder`/`sortToggle`/`statusFilter`/
+`statusCounts` nachgezogen, stale Demo-Asserts auf neueste-zuerst
+korrigiert, neuer Demo-Test) plus Treiber-Fix (`afb9563`).
+
+Umgebung: Worktree-`node_modules` war stale (SDK-Transitive fehlten →
+13 falsche `ticketPaymentCancellation`-Fails); behoben per Symlink
+`worktrees/eventoren/pdf-generator → projects/pdf-generator`
+(außerhalb des Repos) + `bun install` im Worktree (272 Pakete).
+Danach Convex-Suite wieder exakt beim Basis-Stand.
+
+Verifikation auf dem Main-gemergten Stand:
+
+- App-`tsc` sauber (zuvor genau 1 Demo-Fehler, ebenfalls auf Main),
+  Convex-`tsc` sauber.
+- `bun test src/organizer src/customer`: **698 pass / 0 fail**.
+- Volle Unit-Suite: Branch-Fails ⊆ Main-Baseline (45 vs. 46 unique;
+  ein Main-Fail „document speculation“ besteht auf dem Branch —
+  vermutlich via Public-Routen behoben; zwei stale Demo-Asserts auf
+  dem Branch repariert, sonst keine einzige neue).
+- Convex-Vitest: **584 pass / 13 fail**, exakt die vier
+  vorbestehenden Dateien. `shared-ui:check`: nur vorbestehender
+  Admin-Treffer (identisch auf Main). Boundary grün, `bun run build`
+  grün inkl. SSR-Worker.
+- E2E (Rehearsal-Loopback `:13558` mit `runtime.env`; `:13557`
+  läuft ohne Rehearsal-Env und authentifiziert Fixture-Sessions
+  nicht — Treiber zeigen jetzt auf `:13558`): Onboarding **PASS**,
+  Purenav **PASS** (auf verhaltensidentischem Stand; Re-Run danach
+  verweigert der eigene Single-Use-Frische-Guard wegen der 2 Orgs aus
+  dem Passing-Run — kein Produktbefund).
+- Team-Einladung und Admin-Suche manuell im Browser nachvollzogen
+  (Dialog-Persistenz, Einladungsanlage, Suche auf Vor-Fix-Daten 0
+  Treffer wie erwartet).
+
+Kein Push, kein Deploy, keine Produktionsmutation. Billing-Worktree
+unberührt seit `a6959c7`.
