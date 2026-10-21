@@ -5,8 +5,8 @@ import { expect, test } from "vitest"
 import { api } from "../convex/_generated/api.js"
 import type { Doc } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
 import { scannerLinkEventAuthorizeFn } from "../src/organizer/convex/scannerLinkEventAuthorizeFn.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const authSecret = "scanner-links-test-secret"
@@ -51,7 +51,7 @@ async function setup() {
         updatedAt: new Date().toISOString(),
       }),
     )
-    tokens[role] = await createToken(id, authSecret)
+    tokens[role] = await testAuthSessionTokenCreate(t, id, authSecret)
   }
   await t.run(async (ctx) => {
     await ctx.db.insert("catalogEvents", eventInsert("one"))

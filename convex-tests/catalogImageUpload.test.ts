@@ -4,8 +4,8 @@ import { convexTest } from "convex-test"
 import { expect, test } from "vitest"
 import { api, internal } from "../convex/_generated/api.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
 import { catalogImageBytesValidate } from "../src/catalog/convex/catalogImageBytesValidate.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 import { catalogImageValidate } from "../src/catalog/convex/catalogImageValidate.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
@@ -21,7 +21,7 @@ async function userCreate(t: ReturnType<typeof convexTest>, role: "admin" | "use
       updatedAt: "2026-01-01",
     }),
   )
-  return createToken(id, secret)
+  return testAuthSessionTokenCreate(t, id, secret)
 }
 
 const input = { filename: "concert.png", mediaType: "image/png", byteSize: 8 }
@@ -139,6 +139,7 @@ test("upsert retains uploaded variants in admin projections and snapshots, then 
   const event = {
     token,
     eventKey: "image-event",
+    status: "published",
     title: "Event",
     subtitle: "",
     description: "",

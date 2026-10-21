@@ -5,7 +5,7 @@ import { expect, test } from "vitest"
 import { api } from "../convex/_generated/api.js"
 import type { Doc, Id } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const authSecret = "scanner-link-tickets-secret"
@@ -347,7 +347,7 @@ test("link identity and name survive public and authenticated history projection
   const userId = await t.run(async (ctx) => (await ctx.db.get(ids.parentId))?.createdByUserId)
   if (!userId) throw new Error("Missing fixture user")
   const authenticatedHistory = await t.query(api.organizer.organizerTicketCheckInHistoryPaginatedQuery, {
-    token: await createToken(userId, authSecret),
+    token: await testAuthSessionTokenCreate(t, userId, authSecret),
     eventKey: "one",
     ticketId: ids.firstId,
     cursor: null,

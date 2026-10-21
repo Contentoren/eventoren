@@ -5,7 +5,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest"
 import { api, internal } from "../convex/_generated/api.js"
 import type { Doc } from "../convex/_generated/dataModel.js"
 import schema from "../convex/schema.js"
-import { createToken } from "../src/auth/server/jwt_token/createToken.ts"
+import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const authSecret = "pilates-image-test-secret"
@@ -142,12 +142,12 @@ test("Pilates backfill previews without writes, repairs only its blank image, sy
   const repaired = after.events.find((event) => event._id === ids.eventId)!
   expect(repaired).toEqual({
     ...before.events.find((event) => event._id === ids.eventId),
-    imageUrl: "https://assets-service-public.contentoren.de/eventoren/public/images/pilates/detail_default_v1.avif",
+    imageUrl: "https://assets.eventoren.de/production/public/images/pilates/detail_default_v1.avif",
     imageVariants: {
       assetId: "asset-upload-edf48a71-81be-4699-9ed1-1db32db0a3da",
-      detail: "https://assets-service-public.contentoren.de/eventoren/public/images/pilates/detail_default_v1.avif",
-      card: "https://assets-service-public.contentoren.de/eventoren/public/images/pilates/card_default_v1.avif",
-      organizer: "https://assets-service-public.contentoren.de/eventoren/public/images/pilates/card_default_v1.avif",
+      detail: "https://assets.eventoren.de/production/public/images/pilates/detail_default_v1.avif",
+      card: "https://assets.eventoren.de/production/public/images/pilates/card_default_v1.avif",
+      organizer: "https://assets.eventoren.de/production/public/images/pilates/card_default_v1.avif",
     },
     imageAlt: "Pilates Christmas Event von Jennifer Kalus Hair Boutique und Flora Bonn mit Weihnachtsbaum",
     catalogVersion: 8,
@@ -158,7 +158,7 @@ test("Pilates backfill previews without writes, repairs only its blank image, sy
   expect(after.snapshots).toMatchObject([{ version: 8, status: "building" }])
   expect(after.scheduled).toHaveLength(1)
   expect(after.scheduled[0]).toMatchObject({ name: "catalog:catalogSyncPushAction", args: [{ requestedVersion: 8 }] })
-  const token = await createToken(ids.userId, authSecret)
+  const token = await testAuthSessionTokenCreate(t, ids.userId, authSecret)
   await projectionsExpect(t, token, {
     imageUrl: repaired.imageUrl,
     imageVariants: repaired.imageVariants!,
@@ -215,7 +215,7 @@ test("Pilates backfill does not create an absent record or accept a non-admin au
 test("saving new Pilates image metadata persists into public and organizer list/detail projections", async () => {
   const t = convexTest(schema, modules)
   const ids = await fixtureCreate(t)
-  const token = await createToken(ids.userId, authSecret)
+  const token = await testAuthSessionTokenCreate(t, ids.userId, authSecret)
   const { catalogVersion: _, eventRevision: __, createdAt: ___, updatedAt: ____, ...input } = eventInsert()
   const saved = await t.mutation(api.catalog.catalogEventUpsertMutation, { ...input, ...savedImage, token })
   expect(saved.success).toBe(true)
