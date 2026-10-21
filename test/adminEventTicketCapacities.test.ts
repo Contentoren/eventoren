@@ -3,7 +3,7 @@ import type { AdminEventItem } from "../src/admin/AdminEventItem.ts"
 import { adminEventTicketCapacities } from "../src/admin/adminEventTicketCapacities.ts"
 import { demoCatalogEvents } from "../src/demo/fixtures/demoCatalogEvents.ts"
 
-test("original ticket capacity is hidden for all events and sums tiers only for the selected event", () => {
+test("maximum ticket capacity sums tiers for the selected event or all events", () => {
   const fixtures = [
     {
       id: "first",
@@ -29,7 +29,10 @@ test("original ticket capacity is hidden for all events and sums tiers only for 
     })),
   }))
 
-  expect(adminEventTicketCapacities(events, "")).toEqual([])
+  expect(adminEventTicketCapacities(events, "")).toEqual([
+    { id: "first", title: "Erste Fahrt", ticketCount: 150 },
+    { id: "second", title: "Zweite Fahrt", ticketCount: 80 },
+  ])
   expect(adminEventTicketCapacities(events, "first")).toEqual([{ id: "first", title: "Erste Fahrt", ticketCount: 150 }])
   expect(adminEventTicketCapacities(events, "second")).toEqual([
     { id: "second", title: "Zweite Fahrt", ticketCount: 80 },

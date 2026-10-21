@@ -1,14 +1,8 @@
 import type { AdminTicketOrderSummary } from "./AdminTicketOrderSummary.ts"
+import { adminTicketOrderStatusKey } from "./adminTicketOrderStatusKey.ts"
 
 export function adminTicketOrderBookedTicketCount(order: AdminTicketOrderSummary): number {
-  if (
-    order.cancellation ||
-    order.paymentStatus === "failed" ||
-    order.paymentStatus === "expired" ||
-    order.status === "failed" ||
-    order.status === "expired" ||
-    order.status === "released"
-  )
-    return 0
+  const status = adminTicketOrderStatusKey(order)
+  if (status !== "bezahlt" && status !== "sepa") return 0
   return order.ticketCount ?? 0
 }

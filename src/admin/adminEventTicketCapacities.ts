@@ -1,9 +1,8 @@
 import type { AdminEventItem } from "./AdminEventItem.ts"
 
 export function adminEventTicketCapacities(events: readonly AdminEventItem[], eventKey: string) {
-  if (!eventKey) return []
   return events
-    .filter((event) => event.id === eventKey)
+    .filter((event) => !eventKey || event.id === eventKey)
     .map((event) => ({
       id: event.id,
       title: event.title,
