@@ -19,7 +19,10 @@ import { organizerDashboardTeamInviteSchema } from "../team/organizerDashboardTe
 import { organizerDashboardTeamMemberRemoveSchema } from "../team/organizerDashboardTeamMemberRemoveSchema.ts"
 import { organizerDashboardTeamRoleUpdateSchema } from "../team/organizerDashboardTeamRoleUpdateSchema.ts"
 import { type OrganizerDashboardOperation, organizerDashboardOperationSet } from "./organizerDashboardOperations.ts"
+import { organizerDashboardExportInputSchemas } from "./organizerDashboardExportInputSchemas.ts"
 import { organizerDashboardFinanceInputSchemas } from "./organizerDashboardFinanceInputSchemas.ts"
+import { organizerDashboardOverviewInputSchemas } from "./organizerDashboardOverviewInputSchemas.ts"
+import { organizerDashboardPublicInputSchemas } from "./organizerDashboardPublicInputSchemas.ts"
 import { organizerDashboardPricingInputSchemas } from "./organizerDashboardPricingInputSchemas.ts"
 import { organizerDashboardOrderInputSchemas } from "./organizerDashboardOrderInputSchemas.ts"
 
@@ -398,6 +401,27 @@ const organizerDashboardVoucherDeactivateRequestSchema = v.strictObject({
   ...organizerDashboardPricingInputSchemas.voucherDeactivate.entries,
 })
 
+const organizerDashboardOverviewGetRequestSchema = v.strictObject({
+  operation: v.literal("overview-get"),
+  ...organizerDashboardOverviewInputSchemas.overviewGet.entries,
+})
+const organizerDashboardEventStatsGetRequestSchema = v.strictObject({
+  operation: v.literal("event-stats-get"),
+  ...organizerDashboardOverviewInputSchemas.eventStatsGet.entries,
+})
+const organizerDashboardExportListRequestSchema = v.strictObject({
+  operation: v.literal("export-list"),
+  ...organizerDashboardExportInputSchemas.exportList.entries,
+})
+const organizerDashboardPublicProfileGetRequestSchema = v.strictObject({
+  operation: v.literal("public-profile-get"),
+  ...organizerDashboardPublicInputSchemas.publicProfileGet.entries,
+})
+const organizerDashboardPublicEventGetRequestSchema = v.strictObject({
+  operation: v.literal("public-event-get"),
+  ...organizerDashboardPublicInputSchemas.publicEventGet.entries,
+})
+
 const organizerDashboardRequestSchema = v.variant("operation", [
   organizerDashboardOrderListRequestSchema,
   organizerDashboardOrderGetRequestSchema,
@@ -453,6 +477,11 @@ const organizerDashboardRequestSchema = v.variant("operation", [
   organizerDashboardMigrationPlanRequestSchema,
   organizerDashboardMigrationApplyRequestSchema,
   organizerDashboardMigrationBackfillRequestSchema,
+  organizerDashboardOverviewGetRequestSchema,
+  organizerDashboardEventStatsGetRequestSchema,
+  organizerDashboardExportListRequestSchema,
+  organizerDashboardPublicProfileGetRequestSchema,
+  organizerDashboardPublicEventGetRequestSchema,
 ])
 
 type OrganizerDashboardRequestOf<TOperation extends OrganizerDashboardOperation, TArgs> = {
@@ -669,6 +698,26 @@ export type OrganizerDashboardRequest =
   | OrganizerDashboardRequestOf<
       "migration-backfill",
       OrganizerDashboardRequestArgs<typeof organizerDashboardMigrationBackfillRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "overview-get",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardOverviewGetRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "event-stats-get",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardEventStatsGetRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "export-list",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardExportListRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "public-profile-get",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardPublicProfileGetRequestSchema>
+    >
+  | OrganizerDashboardRequestOf<
+      "public-event-get",
+      OrganizerDashboardRequestArgs<typeof organizerDashboardPublicEventGetRequestSchema>
     >
 
 /**
@@ -950,6 +999,26 @@ export function organizerDashboardRequestParse(body: unknown): Result<OrganizerD
   if (output.operation === "migration-backfill") {
     const { operation: migrationBackfillOperation, ...migrationBackfillArgs } = output
     return createResult({ operation: migrationBackfillOperation, args: migrationBackfillArgs })
+  }
+  if (output.operation === "overview-get") {
+    const { operation: overviewGetOperation, ...overviewGetArgs } = output
+    return createResult({ operation: overviewGetOperation, args: overviewGetArgs })
+  }
+  if (output.operation === "event-stats-get") {
+    const { operation: eventStatsGetOperation, ...eventStatsGetArgs } = output
+    return createResult({ operation: eventStatsGetOperation, args: eventStatsGetArgs })
+  }
+  if (output.operation === "export-list") {
+    const { operation: exportListOperation, ...exportListArgs } = output
+    return createResult({ operation: exportListOperation, args: exportListArgs })
+  }
+  if (output.operation === "public-profile-get") {
+    const { operation: publicProfileGetOperation, ...publicProfileGetArgs } = output
+    return createResult({ operation: publicProfileGetOperation, args: publicProfileGetArgs })
+  }
+  if (output.operation === "public-event-get") {
+    const { operation: publicEventGetOperation, ...publicEventGetArgs } = output
+    return createResult({ operation: publicEventGetOperation, args: publicEventGetArgs })
   }
   return createResultError(op, "Unknown operation", "unknown-operation")
 }

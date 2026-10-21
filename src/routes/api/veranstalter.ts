@@ -5,9 +5,10 @@ import { organizerDashboardHonoCreate } from "#src/organizer/dashboard/api/organ
 import { convexUrlGet } from "#src/server/convexUrlGet.ts"
 
 /**
- * POST /api/veranstalter: authenticated JSON access to the 42 organizer
+ * POST /api/veranstalter: authenticated JSON access to the 59 organizer
  * dashboard backend operations (foundation, profile, events, admin,
- * migration, contracts, team, orders, finance) via a Hono app with an
+ * migration, contracts, team, orders, finance, pricing, overview, exports,
+ * public) via a Hono app with an
  * explicit operation allowlist. Auth is Authorization Bearer only.
  *
  * Deviation note: AGENTS.md asks for webui live query, CLI, Hono HTTP API,

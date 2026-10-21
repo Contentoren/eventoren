@@ -20,7 +20,10 @@ import { organizerDashboardTeamInvitationActionSchema } from "#src/organizer/das
 import { organizerDashboardTeamInviteSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamInviteSchema.ts"
 import { organizerDashboardTeamMemberRemoveSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamMemberRemoveSchema.ts"
 import { organizerDashboardTeamRoleUpdateSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamRoleUpdateSchema.ts"
+import { organizerDashboardExportInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardExportInputSchemas.ts"
 import { organizerDashboardFinanceInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardFinanceInputSchemas.ts"
+import { organizerDashboardOverviewInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardOverviewInputSchemas.ts"
+import { organizerDashboardPublicInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardPublicInputSchemas.ts"
 import { organizerDashboardPricingInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardPricingInputSchemas.ts"
 import { organizerDashboardOrderInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardOrderInputSchemas.ts"
 import type { ApiClientResult } from "./apiClient.js"
@@ -37,6 +40,21 @@ type OrganizerDashboardFinanceClientMethod<Ref, Schema extends v.GenericSchema> 
 
 type OrganizerDashboardPricingRef = typeof api.organizerDashboardPricing
 type OrganizerDashboardPricingClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type OrganizerDashboardOverviewRef = typeof api.organizerDashboardOverview
+type OrganizerDashboardOverviewClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type OrganizerDashboardExportsRef = typeof api.organizerDashboardExports
+type OrganizerDashboardExportsClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type OrganizerDashboardPublicRef = typeof api.organizerDashboardPublic
+type OrganizerDashboardPublicClientMethod<Ref, Schema extends v.GenericSchema> = (
   args: v.InferInput<Schema>,
 ) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
 
@@ -87,6 +105,11 @@ type OrganizerDashboardMigrationApplyRef =
   typeof api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation
 type OrganizerDashboardMigrationBackfillRef =
   typeof api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation
+type OrganizerDashboardOverviewGetRef = OrganizerDashboardOverviewRef["organizerDashboardOverviewQuery"]
+type OrganizerDashboardEventStatsGetRef = OrganizerDashboardOverviewRef["organizerDashboardEventStatsQuery"]
+type OrganizerDashboardExportListRef = OrganizerDashboardExportsRef["organizerDashboardExportListQuery"]
+type OrganizerDashboardPublicProfileGetRef = OrganizerDashboardPublicRef["organizerDashboardPublicProfileQuery"]
+type OrganizerDashboardPublicEventGetRef = OrganizerDashboardPublicRef["organizerDashboardPublicEventQuery"]
 
 type OrganizerDashboardContextQueryArgs = OrganizerDashboardContextQueryRef["_args"]
 type OrganizerDashboardOrganizationCreateArgs = OrganizerDashboardOrganizationCreateRef["_args"]
@@ -336,6 +359,26 @@ export type OrganizerDashboardClient = {
   readonly migrationBackfill: (
     args: Omit<OrganizerDashboardMigrationBackfillArgs, "token">,
   ) => Promise<ApiClientResult<OrganizerDashboardData<OrganizerDashboardMigrationBackfillRef>>>
+  readonly overviewGet: OrganizerDashboardOverviewClientMethod<
+    OrganizerDashboardOverviewGetRef,
+    typeof organizerDashboardOverviewInputSchemas.overviewGet
+  >
+  readonly eventStatsGet: OrganizerDashboardOverviewClientMethod<
+    OrganizerDashboardEventStatsGetRef,
+    typeof organizerDashboardOverviewInputSchemas.eventStatsGet
+  >
+  readonly exportList: OrganizerDashboardExportsClientMethod<
+    OrganizerDashboardExportListRef,
+    typeof organizerDashboardExportInputSchemas.exportList
+  >
+  readonly publicProfileGet: OrganizerDashboardPublicClientMethod<
+    OrganizerDashboardPublicProfileGetRef,
+    typeof organizerDashboardPublicInputSchemas.publicProfileGet
+  >
+  readonly publicEventGet: OrganizerDashboardPublicClientMethod<
+    OrganizerDashboardPublicEventGetRef,
+    typeof organizerDashboardPublicInputSchemas.publicEventGet
+  >
 }
 
 const organizerDashboardClientOrgIdSchema = v.pipe(v.string(), v.trim(), v.nonEmpty("Cannot be empty"))
@@ -1678,6 +1721,85 @@ export function organizerDashboardClientCreate(inputs: {
             ...(validated.output.pageSize !== undefined ? { pageSize: validated.output.pageSize } : {}),
           } as OrganizerDashboardMigrationBackfillArgs,
         )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    overviewGet: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardOverviewInputSchemas.overviewGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(api.organizerDashboardOverview.organizerDashboardOverviewQuery, {
+          ...validated.output,
+          token: credential.token,
+          orgId: validated.output.orgId as Id<"orgs">,
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    eventStatsGet: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardOverviewInputSchemas.eventStatsGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(api.organizerDashboardOverview.organizerDashboardEventStatsQuery, {
+          ...validated.output,
+          token: credential.token,
+          orgId: validated.output.orgId as Id<"orgs">,
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    exportList: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardExportInputSchemas.exportList, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      const { orgId, numItems, cursor, endCursor, ...filter } = validated.output
+      try {
+        const response = await inputs.client.query(api.organizerDashboardExports.organizerDashboardExportListQuery, {
+          token: credential.token,
+          orgId: orgId as Id<"orgs">,
+          ...filter,
+          paginationOpts: { numItems, cursor: cursor ?? null, ...(endCursor != null ? { endCursor } : {}) },
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    publicProfileGet: async (args) => {
+      const validated = v.safeParse(organizerDashboardPublicInputSchemas.publicProfileGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(api.organizerDashboardPublic.organizerDashboardPublicProfileQuery, {
+          ...validated.output,
+        })
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    publicEventGet: async (args) => {
+      const validated = v.safeParse(organizerDashboardPublicInputSchemas.publicEventGet, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.query(api.organizerDashboardPublic.organizerDashboardPublicEventQuery, {
+          ...validated.output,
+        })
         if (response.success) return { success: true, data: response.data }
         return { success: false, error: backendFailure(response) }
       } catch {
