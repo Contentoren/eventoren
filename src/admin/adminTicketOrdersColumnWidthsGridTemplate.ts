@@ -4,7 +4,9 @@ import type { AdminTicketOrdersColumnWidths } from "./adminTicketOrdersColumnWid
 
 export function adminTicketOrdersColumnWidthsGridTemplate(widths: AdminTicketOrdersColumnWidths | null): string {
   if (widths === null) {
-    return adminTicketOrdersColumnWidthsDefault.map((fraction) => `minmax(0,${fraction}fr)`).join(" ")
+    return adminTicketOrdersColumnWidthsDefault
+      .map((fraction, index) => `minmax(${adminTicketOrdersColumnWidthsMin[index]}px,${fraction}fr)`)
+      .join(" ")
   }
 
   return widths
