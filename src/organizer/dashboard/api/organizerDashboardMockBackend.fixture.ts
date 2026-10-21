@@ -45,6 +45,26 @@ export function organizerDashboardMockBackendCreate(behavior?: Partial<Organizer
         record("order-participant-list", args)
         return behavior?.orderParticipantList?.(args) ?? createResult({ page: [], isDone: true, continueCursor: "" })
       },
+      orderRefundRequest: async (args) => {
+        record("order-refund-request", args)
+        return behavior?.orderRefundRequest?.(args) ?? createResult({ refundReference: "refund_test" })
+      },
+      orderRefundStatus: async (args) => {
+        record("order-refund-status", args)
+        return behavior?.orderRefundStatus?.(args) ?? createResult({ refundReference: "refund_test" })
+      },
+      orderInvoiceStatus: async (args) => {
+        record("order-invoice-status", args)
+        return behavior?.orderInvoiceStatus?.(args) ?? createResult({ readiness: "pending" })
+      },
+      orderInvoicePdf: async (args) => {
+        record("order-invoice-pdf", args)
+        return behavior?.orderInvoicePdf?.(args) ?? createResult({ pdfBase64: "", byteLength: 0 })
+      },
+      orderInvoiceResend: async (args) => {
+        record("order-invoice-resend", args)
+        return behavior?.orderInvoiceResend?.(args) ?? createResult({ delivery: "pending" })
+      },
       teamMemberList: async (args) => {
         record("team-member-list", args)
         return behavior?.teamMemberList?.(args) ?? createResult({ page: [], isDone: true, continueCursor: "" })

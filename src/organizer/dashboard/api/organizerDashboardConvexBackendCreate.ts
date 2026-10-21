@@ -36,6 +36,19 @@ export type OrganizerDashboardHttpBackend = {
   readonly orderParticipantList: (
     args: OrganizerDashboardTeamBackendPageArgs<"order-participant-list">,
   ) => Promise<Result<unknown>>
+  readonly orderRefundRequest: (
+    args: OrganizerDashboardTeamBackendArgs<"order-refund-request">,
+  ) => Promise<Result<unknown>>
+  readonly orderRefundStatus: (
+    args: OrganizerDashboardTeamBackendArgs<"order-refund-status">,
+  ) => Promise<Result<unknown>>
+  readonly orderInvoiceStatus: (
+    args: OrganizerDashboardTeamBackendArgs<"order-invoice-status">,
+  ) => Promise<Result<unknown>>
+  readonly orderInvoicePdf: (args: OrganizerDashboardTeamBackendArgs<"order-invoice-pdf">) => Promise<Result<unknown>>
+  readonly orderInvoiceResend: (
+    args: OrganizerDashboardTeamBackendArgs<"order-invoice-resend">,
+  ) => Promise<Result<unknown>>
   readonly financeOverview: (args: OrganizerDashboardTeamBackendArgs<"finance-overview">) => Promise<Result<unknown>>
   readonly settlementGet: (args: OrganizerDashboardTeamBackendArgs<"settlement-get">) => Promise<Result<unknown>>
   readonly payoutList: (args: OrganizerDashboardTeamBackendPageArgs<"payout-list">) => Promise<Result<unknown>>
@@ -306,6 +319,36 @@ export function organizerDashboardConvexBackendCreate(client: ConvexHttpClient):
           cursor: args.paginationOpts.cursor,
           ...(args.paginationOpts.endCursor != null ? { endCursor: args.paginationOpts.endCursor } : {}),
         },
+      }),
+    orderRefundRequest: (args) =>
+      client.action(api.organizerDashboardBilling.organizerDashboardOrderRefundRequestAction, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        orderId: args.orderId as Id<"ticketOrders">,
+      }),
+    orderRefundStatus: (args) =>
+      client.action(api.organizerDashboardBilling.organizerDashboardOrderRefundStatusAction, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        orderId: args.orderId as Id<"ticketOrders">,
+      }),
+    orderInvoiceStatus: (args) =>
+      client.action(api.organizerDashboardBilling.organizerDashboardOrderInvoiceStatusAction, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        orderId: args.orderId as Id<"ticketOrders">,
+      }),
+    orderInvoicePdf: (args) =>
+      client.action(api.organizerDashboardBilling.organizerDashboardOrderInvoicePdfAction, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        orderId: args.orderId as Id<"ticketOrders">,
+      }),
+    orderInvoiceResend: (args) =>
+      client.action(api.organizerDashboardBilling.organizerDashboardOrderInvoiceResendAction, {
+        ...args,
+        orgId: args.orgId as Id<"orgs">,
+        orderId: args.orderId as Id<"ticketOrders">,
       }),
     financeOverview: (args) =>
       client.query(api.organizerDashboardFinance.organizerDashboardFinanceOverviewQuery, {

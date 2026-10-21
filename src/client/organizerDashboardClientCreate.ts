@@ -20,6 +20,7 @@ import { organizerDashboardTeamInvitationActionSchema } from "#src/organizer/das
 import { organizerDashboardTeamInviteSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamInviteSchema.ts"
 import { organizerDashboardTeamMemberRemoveSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamMemberRemoveSchema.ts"
 import { organizerDashboardTeamRoleUpdateSchema } from "#src/organizer/dashboard/team/organizerDashboardTeamRoleUpdateSchema.ts"
+import { organizerDashboardBillingInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardBillingInputSchemas.ts"
 import { organizerDashboardFinanceInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardFinanceInputSchemas.ts"
 import { organizerDashboardPricingInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardPricingInputSchemas.ts"
 import { organizerDashboardOrderInputSchemas } from "#src/organizer/dashboard/api/organizerDashboardOrderInputSchemas.ts"
@@ -27,6 +28,11 @@ import type { ApiClientResult } from "./apiClient.js"
 
 type OrganizerDashboardOrderRef = typeof api.organizerDashboardOrders
 type OrganizerDashboardOrderClientMethod<Ref, Schema extends v.GenericSchema> = (
+  args: v.InferInput<Schema>,
+) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
+
+type OrganizerDashboardBillingRef = typeof api.organizerDashboardBilling
+type OrganizerDashboardBillingClientMethod<Ref, Schema extends v.GenericSchema> = (
   args: v.InferInput<Schema>,
 ) => Promise<ApiClientResult<OrganizerDashboardData<Ref>>>
 
@@ -144,6 +150,26 @@ export type OrganizerDashboardClient = {
   readonly orderParticipantList: OrganizerDashboardOrderClientMethod<
     OrganizerDashboardOrderRef["organizerDashboardOrderParticipantListQuery"],
     typeof organizerDashboardOrderInputSchemas.orderParticipantList
+  >
+  readonly orderRefundRequest: OrganizerDashboardBillingClientMethod<
+    OrganizerDashboardBillingRef["organizerDashboardOrderRefundRequestAction"],
+    typeof organizerDashboardBillingInputSchemas.billingRefundRequest
+  >
+  readonly orderRefundStatus: OrganizerDashboardBillingClientMethod<
+    OrganizerDashboardBillingRef["organizerDashboardOrderRefundStatusAction"],
+    typeof organizerDashboardBillingInputSchemas.billingRefundStatus
+  >
+  readonly orderInvoiceStatus: OrganizerDashboardBillingClientMethod<
+    OrganizerDashboardBillingRef["organizerDashboardOrderInvoiceStatusAction"],
+    typeof organizerDashboardBillingInputSchemas.billingInvoiceStatus
+  >
+  readonly orderInvoicePdf: OrganizerDashboardBillingClientMethod<
+    OrganizerDashboardBillingRef["organizerDashboardOrderInvoicePdfAction"],
+    typeof organizerDashboardBillingInputSchemas.billingInvoicePdf
+  >
+  readonly orderInvoiceResend: OrganizerDashboardBillingClientMethod<
+    OrganizerDashboardBillingRef["organizerDashboardOrderInvoiceResendAction"],
+    typeof organizerDashboardBillingInputSchemas.billingInvoiceResend
   >
   readonly financeOverview: OrganizerDashboardFinanceClientMethod<
     OrganizerDashboardFinanceRef["organizerDashboardFinanceOverviewQuery"],
@@ -709,6 +735,111 @@ export function organizerDashboardClientCreate(inputs: {
             orgId: orgId as Id<"orgs">,
             ...filter,
             paginationOpts: { numItems, cursor: cursor ?? null, ...(endCursor != null ? { endCursor } : {}) },
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    orderRefundRequest: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBillingInputSchemas.billingRefundRequest, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.action(
+          api.organizerDashboardBilling.organizerDashboardOrderRefundRequestAction,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            orderId: validated.output.orderId as Id<"ticketOrders">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    orderRefundStatus: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBillingInputSchemas.billingRefundStatus, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.action(
+          api.organizerDashboardBilling.organizerDashboardOrderRefundStatusAction,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            orderId: validated.output.orderId as Id<"ticketOrders">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    orderInvoiceStatus: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBillingInputSchemas.billingInvoiceStatus, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.action(
+          api.organizerDashboardBilling.organizerDashboardOrderInvoiceStatusAction,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            orderId: validated.output.orderId as Id<"ticketOrders">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    orderInvoicePdf: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBillingInputSchemas.billingInvoicePdf, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.action(
+          api.organizerDashboardBilling.organizerDashboardOrderInvoicePdfAction,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            orderId: validated.output.orderId as Id<"ticketOrders">,
+          },
+        )
+        if (response.success) return { success: true, data: response.data }
+        return { success: false, error: backendFailure(response) }
+      } catch {
+        return { success: false, error: transportFailure() }
+      }
+    },
+    orderInvoiceResend: async (args) => {
+      const credential = credentialGet()
+      if (!credential.success) return { success: false, error: credential.error }
+      const validated = v.safeParse(organizerDashboardBillingInputSchemas.billingInvoiceResend, args)
+      if (!validated.success) return { success: false, error: invalidInput(v.summarize(validated.issues)) }
+      try {
+        const response = await inputs.client.action(
+          api.organizerDashboardBilling.organizerDashboardOrderInvoiceResendAction,
+          {
+            ...validated.output,
+            token: credential.token,
+            orgId: validated.output.orgId as Id<"orgs">,
+            orderId: validated.output.orderId as Id<"ticketOrders">,
           },
         )
         if (response.success) return { success: true, data: response.data }

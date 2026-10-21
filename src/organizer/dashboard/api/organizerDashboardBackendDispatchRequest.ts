@@ -44,6 +44,16 @@ export function organizerDashboardBackendDispatchRequest(
         paginationOpts: organizerDashboardPaginationOptsCreate({ numItems, cursor, endCursor }),
       })
     }
+    case "order-refund-request":
+      return backend.orderRefundRequest({ token, ...request.args })
+    case "order-refund-status":
+      return backend.orderRefundStatus({ token, ...request.args })
+    case "order-invoice-status":
+      return backend.orderInvoiceStatus({ token, ...request.args })
+    case "order-invoice-pdf":
+      return backend.orderInvoicePdf({ token, ...request.args })
+    case "order-invoice-resend":
+      return backend.orderInvoiceResend({ token, ...request.args })
     case "finance-overview":
       return backend.financeOverview({ token, ...request.args })
     case "settlement-get":
