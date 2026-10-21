@@ -24,4 +24,11 @@ crons.interval(
   {},
 )
 
+crons.interval(
+  "send due organizer messages and reminders",
+  { minutes: 15 },
+  internal.organizerDashboardMessages.organizerDashboardMessageDueSendMutation,
+  {},
+)
+
 export default crons

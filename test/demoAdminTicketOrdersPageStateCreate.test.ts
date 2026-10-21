@@ -31,7 +31,7 @@ describe("demoAdminTicketOrdersPageStateCreate", () => {
       expect(state.isLoading()).toBe(false)
       expect(state.errorMessage()).toBe("")
       expect(state.orders().length).toBe(demoAdminTicketOrders.length)
-      expect(state.orders()[0]?.id).toBe("admin-ord-001")
+      expect(state.orders()[0]?.id).toBe("admin-ord-006")
 
       // Loading state
       flow.setState("loading")
@@ -69,8 +69,8 @@ describe("demoAdminTicketOrdersPageStateCreate", () => {
       const firstOrder = state.orders()[0]
       expect(firstOrder).toBeDefined()
       if (!firstOrder) return
-      expect(state.customerName(firstOrder)).toBe("Sophie Schmidt")
-      expect(state.priceFormat(firstOrder.totalCents)).toContain("119")
+      expect(state.customerName(firstOrder)).toBe("Timo Koch")
+      expect(state.priceFormat(firstOrder.totalCents)).toContain("19")
       expect(state.paymentLabel("paid")).toBe("Bezahlt")
       expect(state.paymentLabel("pending")).toBe("Offen")
       expect(state.paymentLabel("failed")).toBe("Fehlgeschlagen")

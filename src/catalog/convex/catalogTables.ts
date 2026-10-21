@@ -1,6 +1,10 @@
 import { defineTable } from "convex/server"
 import { v } from "convex/values"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
+import * as a from "valibot"
+import { catalogEventFaqsSchema } from "../catalogEventFaqsSchema.ts"
+import { catalogEventScheduleSchema } from "../catalogEventScheduleSchema.ts"
+import { valibotFieldToConvexValidator } from "#src/utils/convex/valibotToConvex.ts"
 import { catalogAllowedStripePaymentMethodsValidator } from "./catalogAllowedStripePaymentMethodsValidator.ts"
 
 const catalogEventStatusValidator = v.union(v.literal("draft"), v.literal("published"), v.literal("archived"))
@@ -31,20 +35,31 @@ export const catalogTables = {
     ),
     imageAlt: v.string(),
     tags: v.array(v.string()),
+    faqs: valibotFieldToConvexValidator(a.optional(catalogEventFaqsSchema)),
+    schedule: valibotFieldToConvexValidator(a.optional(catalogEventScheduleSchema)),
     highlights: v.optional(v.array(v.object({ title: v.string(), description: v.string() }))),
     inclusions: v.optional(v.array(v.string())),
     exclusions: v.optional(v.array(v.string())),
     allowedStripePaymentMethods: v.optional(catalogAllowedStripePaymentMethodsValidator),
     status: catalogEventStatusValidator,
+    orgId: v.optional(v.id("orgs")),
     deletedAt: v.optional(v.string()),
     catalogVersion: v.number(),
     eventRevision: v.optional(v.number()),
     createdAt: v.string(),
     updatedAt: v.string(),
   })
+    // Stable orgId-only index for the fee repricing sweep: ordering within one
+    // org falls back to implicit creation time, which is immutable, so a date
+    // edit can never move an unvisited event behind a stored cursor. Do not
+    // replace this with an orgId+startsAt prefix: startsAt is mutable and its
+    // cursor can skip events whose dates move backwards mid-sweep.
     .index("eventKey", ["eventKey"])
     .index("startsAt", ["startsAt"])
-    .index("statusAndStartsAt", ["status", "startsAt"]),
+    .index("statusAndStartsAt", ["status", "startsAt"])
+    .index("orgId", ["orgId"])
+    .index("orgIdAndStartsAt", ["orgId", "startsAt"])
+    .index("orgIdAndStatusAndStartsAt", ["orgId", "status", "startsAt"]),
 
   catalogImageStages: defineTable({
     ownerId: vIdUser,

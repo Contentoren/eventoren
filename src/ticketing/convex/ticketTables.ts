@@ -61,6 +61,17 @@ export const ticketTables = {
     customerFamilyName: v.optional(v.string()),
     customerAddress: v.optional(v.string()),
     customerPhone: v.optional(v.string()),
+    // Operational contact only: never replaces invoice evidence or buyer access.
+    operationalContact: v.optional(
+      v.object({
+        givenName: v.optional(v.string()),
+        familyName: v.optional(v.string()),
+        email: v.optional(v.string()),
+        phone: v.optional(v.string()),
+        updatedAt: v.string(),
+        updatedByUserId: v.id("users"),
+      }),
+    ),
     contactSnapshotJson: v.string(),
     billingDetailsJson: v.optional(v.string()),
     eventKey: v.string(),
@@ -81,6 +92,9 @@ export const ticketTables = {
     feeCents: v.number(),
     totalCents: v.number(),
     checkoutContextJson: v.string(),
+    // Canonical snapshot of the owning org at reservation time (never
+    // client-supplied). Absent on unowned legacy events and legacy orders.
+    orgId: v.optional(v.id("orgs")),
     paymentReference: v.string(),
     stripeMode: v.union(v.literal("live"), v.literal("test")),
     fulfillmentEligible: v.optional(v.boolean()),
@@ -133,7 +147,9 @@ export const ticketTables = {
     .index("eventKeyAndBookingNumber", ["eventKey", "bookingNumber"])
     .searchIndex("contactSnapshotJson", { searchField: "contactSnapshotJson", filterFields: ["eventKey"] })
     .index("emailAccessDigest", ["emailAccessDigest"])
-    .index("ownerUserIdAndCreatedAt", ["ownerUserId", "createdAt"]),
+    .index("ownerUserIdAndCreatedAt", ["ownerUserId", "createdAt"])
+    .index("orgIdAndCreatedAt", ["orgId", "createdAt"])
+    .index("orgIdAndEventKeyAndCreatedAt", ["orgId", "eventKey", "createdAt"]),
 
   ticketOrderDeliveries: defineTable({
     orderId: v.id("ticketOrders"),
@@ -234,6 +250,8 @@ export const ticketTables = {
     priceCents: v.number(),
     feeCents: v.number(),
     participantName: v.optional(v.string()),
+    // Organizer-maintained label; no identity/access transfer or automatic mail.
+    participantEmail: v.optional(v.string()),
     cancelled: v.optional(v.boolean()),
     checkedInAt: v.optional(v.string()),
     checkedOutAt: v.optional(v.string()),
@@ -244,6 +262,7 @@ export const ticketTables = {
     .index("orderIdAndSequence", ["orderId", "sequence"])
     .index("code", ["code"])
     .index("eventKeyAndSequenceAndCode", ["eventKey", "sequence", "code"])
+    .index("eventKey", ["eventKey"])
     .index("ownerUserId", ["ownerUserId"]),
 
   ticketCheckInHistory: defineTable({

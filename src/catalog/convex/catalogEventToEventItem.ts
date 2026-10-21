@@ -48,6 +48,17 @@ export function catalogEventToEventItem(
     imageVariants: event.imageVariants,
     imageAlt: event.imageAlt,
     tags: event.tags,
+    ...(event.faqs === undefined ? {} : { faqs: event.faqs }),
+    ...(event.schedule === undefined
+      ? {}
+      : {
+          schedule: event.schedule.map(({ id, time, title, detail }) => ({
+            id,
+            marker: `${time} Uhr (Europe/Berlin)`,
+            title,
+            ...(detail === undefined ? {} : { detail }),
+          })),
+        }),
     highlights: event.highlights,
     inclusions: event.inclusions,
     exclusions: event.exclusions,

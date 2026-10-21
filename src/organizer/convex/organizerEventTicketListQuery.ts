@@ -53,7 +53,7 @@ export const organizerEventTicketListQuery = query({
         .unique()
       if (!event) return createResultError(op, "The event was not found")
 
-      const eventAuthorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt)
+      const eventAuthorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt, event.orgId)
       if (!eventAuthorization.success) return eventAuthorization
 
       const sourcePage = await queryCtx.db

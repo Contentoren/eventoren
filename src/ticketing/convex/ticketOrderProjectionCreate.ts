@@ -1,10 +1,16 @@
 import type { QueryCtx } from "#convex/_generated/server.js"
 import type { Id } from "#convex/_generated/dataModel.js"
 import { createResult } from "#result"
+import { ticketOrderSalesCheck } from "./ticketOrderSalesCheck.js"
 
 export async function ticketOrderProjectionCreate(ctx: QueryCtx, orderId: Id<"ticketOrders">) {
   const order = await ctx.db.get("ticketOrders", orderId)
   if (!order) return null
+  // Every buyer read surface shares this projection. A blocked unpaid order
+  // must not redisclose a pay URL through polling, even if remote expiry failed.
+  // Already accepted payments and their historical projection remain valid.
+  const checkoutAllowed =
+    !order.checkoutUrl || order.status === "paid" || (await ticketOrderSalesCheck(ctx, order)).success
   const lines = await ctx.db
     .query("ticketOrderLines")
     .withIndex("orderId", (q) => q.eq("orderId", orderId))
@@ -46,7 +52,7 @@ export async function ticketOrderProjectionCreate(ctx: QueryCtx, orderId: Id<"ti
     stripeMode: order.stripeMode,
     status: order.status,
     paymentStatus: order.paymentStatus,
-    checkoutUrl: order.checkoutUrl,
+    checkoutUrl: checkoutAllowed ? order.checkoutUrl : undefined,
     createdAt: order.createdAt,
     updatedAt: order.updatedAt,
     ticketsIssuedAt: order.ticketsIssuedAt,

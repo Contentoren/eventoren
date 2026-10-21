@@ -81,6 +81,13 @@ function valibotFieldToConvexValidatorUnknown(schema: UnknownSchema): Validator<
       return literalToConvex(schema.literal)
     case "enum":
       return enumToConvex(schema.enum)
+    case "picklist": {
+      if (!schema.options?.length) throw new Error("valibot-to-convex: picklist has no options")
+      const members = schema.options.map(literalToConvex)
+      const first = members[0]
+      if (!first) throw new Error("valibot-to-convex: picklist has no validator members")
+      return members.length === 1 ? first : v.union(...members)
+    }
     case "array":
       if (!schema.item) throw new Error("valibot-to-convex: array schema is missing `item`")
       return v.array(valibotFieldToConvexValidatorUnknownRequired(schema.item))
@@ -91,6 +98,7 @@ function valibotFieldToConvexValidatorUnknown(schema: UnknownSchema): Validator<
         valibotFieldToConvexValidatorUnknownRequired(schema.value),
       )
     case "object":
+    case "strict_object":
       if (!schema.entries) throw new Error("valibot-to-convex: object schema is missing `entries`")
       return v.object(valibotFieldsToConvexFields(schema.entries as SchemaRecord))
     case "optional":

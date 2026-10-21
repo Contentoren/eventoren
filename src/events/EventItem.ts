@@ -1,3 +1,5 @@
+import type { CatalogEventFaqItem } from "../catalog/catalogEventFaqItemSchema.ts"
+import type { EventScheduleItem } from "./EventScheduleItem.ts"
 import type { EventCategory } from "./EventCategory.ts"
 import type { EventTicketTier } from "./EventTicketTier.ts"
 import type { EventImageVariants } from "./EventImageVariants.ts"
@@ -24,6 +26,8 @@ export type EventItem = {
   imageVariants?: EventImageVariants
   imageAlt: string
   tags: readonly string[]
+  faqs?: readonly CatalogEventFaqItem[]
+  schedule?: readonly (EventScheduleItem & { id: string })[]
   highlights?: readonly EventHighlight[]
   inclusions?: readonly string[]
   exclusions?: readonly string[]

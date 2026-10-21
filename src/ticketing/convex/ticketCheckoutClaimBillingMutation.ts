@@ -1,6 +1,7 @@
 import { internalMutation } from "#convex/_generated/server.js"
 import { v } from "convex/values"
 import { createResult, createResultError, type PromiseResult } from "#result"
+import { ticketOrderSalesCheck } from "./ticketOrderSalesCheck.js"
 
 export const ticketCheckoutClaimBillingMutation = internalMutation({
   args: {
@@ -13,6 +14,11 @@ export const ticketCheckoutClaimBillingMutation = internalMutation({
     if (!order) return createResultError(op, "The order was not found")
     if (order.paymentReference !== args.paymentReference) return createResultError(op, "Payment reference mismatch")
     if (order.status !== "reserved") return createResultError(op, "The order is no longer awaiting Billing")
+    // Late ownership gate before any external Billing creation. Runs before
+    // the lease write so a blocked checkout takes no lock and leaves no
+    // trace beyond the untouched reservation.
+    const salesCheck = await ticketOrderSalesCheck(ctx, order)
+    if (!salesCheck.success) return salesCheck
     await ctx.db.patch("ticketOrders", order._id, {
       checkoutAttemptLeaseUntil: Date.now() + 2 * 60 * 1000,
       updatedAt: new Date().toISOString(),

@@ -24,7 +24,7 @@ export const organizerEventTicketGetQuery = query({
         .unique()
       if (!event) return createResultError("organizerEventTicketGetQuery", "The event was not found")
 
-      const eventAuthorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt)
+      const eventAuthorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt, event.orgId)
       if (!eventAuthorization.success) return eventAuthorization
 
       const ticket = await queryCtx.db.get("ticketIssued", args.ticketId)

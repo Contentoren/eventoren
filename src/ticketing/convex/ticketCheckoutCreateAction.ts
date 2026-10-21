@@ -193,18 +193,34 @@ export const ticketCheckoutCreateAction = action({
         fulfillmentEligible: prepared.data.fulfillmentEligible,
         replayed: true,
       })
-    if (prepared.data.status === "checkout_created" && prepared.data.checkoutUrl && prepared.data.billingOrderReference)
-      return createResult({
+    if (prepared.data.status === "checkout_created" && prepared.data.checkoutUrl && prepared.data.billingOrderReference) {
+      // Re-gate every pay-URL exposure through MarkCreated: Prepare's replay
+      // gate runs on the reservation-time snapshot org, while MarkCreated
+      // re-resolves the canonical event org. A block (or ownership drift)
+      // between the two must suppress the previously issued link.
+      const replayed = await ctx.runMutation(internal.ticketing.ticketCheckoutMarkCreatedMutation, {
         orderId: prepared.data.orderId,
-        paymentReference: prepared.data.paymentReference,
-        orderReference: prepared.data.billingOrderReference,
+        paymentReference,
+        billingOrderReference: prepared.data.billingOrderReference,
+        checkoutUrl: prepared.data.checkoutUrl,
+      })
+      if (!replayed.success) return replayed
+      const replayBlocked = await checkoutBlockedExpire(config.data, paymentReference, replayed.data, op)
+      if (replayBlocked) return replayBlocked
+      if (replayed.data.checkoutUrl === undefined)
+        return createResultError(op, "Billing returned an invalid response")
+      return createResult({
+        orderId: replayed.data.orderId,
+        paymentReference: replayed.data.paymentReference,
+        orderReference: replayed.data.billingOrderReference,
         stripeMode: prepared.data.stripeMode,
         status: "checkout_created" as const,
         paymentStatus: "pending" as const,
-        url: prepared.data.checkoutUrl,
+        url: replayed.data.checkoutUrl,
         fulfillmentEligible: prepared.data.fulfillmentEligible,
         replayed: true,
       })
+    }
     if (args.eventRevision === undefined) return createResultError(op, "The event revision is required")
 
     const claimed = await ctx.runMutation(internal.ticketing.ticketCheckoutClaimBillingMutation, {
@@ -249,6 +265,13 @@ export const ticketCheckoutCreateAction = action({
       checkoutUrl: billingResult.data.url,
     })
     if (!marked.success) return marked
+    // The Billing session already exists remotely here: its identifiers are
+    // persisted durably by MarkCreated even when blocked. Suppress the pay
+    // URL and best-effort expire the unpaid remote session instead.
+    const blocked = await checkoutBlockedExpire(config.data, paymentReference, marked.data, op)
+    if (blocked) return blocked
+    if (marked.data.checkoutUrl === undefined)
+      return createResultError(op, "Billing returned an invalid response")
     return createResult({
       orderId: marked.data.orderId,
       paymentReference: marked.data.paymentReference,
@@ -262,6 +285,32 @@ export const ticketCheckoutCreateAction = action({
     })
   },
 })
+
+/**
+ * Handles a MarkCreated outcome that persisted remote Billing identifiers
+ * while reporting `salesAllowed: false`. Best-effort expires the unpaid
+ * remote session (never a refund) and returns a blocking error without the
+ * pay URL. The expire outcome never fakes success: when the remote session
+ * is already processing/paid, or the expire call fails, the local order
+ * keeps its durable identifiers with a pending payment so reconciliation
+ * (and a later paid settlement, which stays ungated) can still correlate it.
+ *
+ * Residual window, stated honestly: an external Billing request sent before
+ * the block cannot be atomically undone, and a previously issued link stays
+ * usable until the expire lands. Paid money is always settled downstream.
+ */
+async function checkoutBlockedExpire(
+  config: Parameters<typeof billingEventorenClient.ticketCheckoutExpire>[0],
+  paymentReference: string,
+  marked: { salesAllowed: boolean },
+  op: string,
+): Promise<Result<never> | undefined> {
+  if (marked.salesAllowed) return undefined
+  const expire = await billingEventorenClient.ticketCheckoutExpire(config, paymentReference)
+  if (!expire.success)
+    console.error(op, "Blocked checkout expire failed; order stays reconcilable:", expire.errorMessage)
+  return createResultError(op, "Ticket sales are currently suspended for this event")
+}
 
 function checkoutUrlsCanonicalize(
   publicBaseUrl: string,
