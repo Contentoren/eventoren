@@ -88,7 +88,8 @@
   *,
   ::before,
   ::after,
-  ::backdrop {
+  ::backdrop,
+  ::file-selector-button {
     border-color: var(--color-border-subtle);
   }
 
