@@ -331,8 +331,10 @@ test("mixed fixture plus Pilates snapshot history deletes obsolete test-bearing 
   expect(await t.run((ctx) => ctx.db.get("catalogEvents", fixtureId))).toBeNull()
   expect(await t.run((ctx) => ctx.db.get("catalogEvents", pilatesId))).not.toBeNull()
   expect(await t.run((ctx) => ctx.db.get("catalogTicketTiers", pilatesTierId))).not.toBeNull()
-  expect(await t.run((ctx) => ctx.db.get("catalogEvents", foreignId))).not.toBeNull()
-  expect(await t.run((ctx) => ctx.db.get("catalogEvents", nearForeignId))).not.toBeNull()
+  // Generic test-titled and near-technical test-key events are previous-run
+  // test data and sweep with the fixture after the success barrier.
+  expect(await t.run((ctx) => ctx.db.get("catalogEvents", foreignId))).toBeNull()
+  expect(await t.run((ctx) => ctx.db.get("catalogEvents", nearForeignId))).toBeNull()
 
   const stillBearing = await drainSnapshotDiscovery(t, token)
   expect(stillBearing).toContain(1)
@@ -390,8 +392,8 @@ test("mixed fixture plus Pilates snapshot history deletes obsolete test-bearing 
   }
   const keys = events.map((event) => event.eventKey as string)
   expect(keys).toContain(pilatesKey)
-  expect(keys).toContain(foreignKey)
-  expect(keys).toContain(nearForeignKey)
+  expect(keys).not.toContain(foreignKey)
+  expect(keys).not.toContain(nearForeignKey)
   expect(keys).not.toContain(fixtureKey)
   expect(keys).not.toContain(technicalKey)
   expect(keys).not.toContain(readinessKey)

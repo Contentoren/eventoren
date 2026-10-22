@@ -507,7 +507,7 @@ test("drains multiple event and orphan-order pages with staleAfterMs 0 across cu
   expect(providerCandidates).toHaveLength(5)
   expect(
     (result.data as { historical: { retainedOutsideOwnership: string } }).historical.retainedOutsideOwnership,
-  ).toMatch(/generic test title alone/)
+  ).toMatch(/generic title with no e2e\/test marker/)
   expect((result.data as { historical: { orphanOrdersDeleted: number } }).historical.orphanOrdersDeleted).toBe(2)
 })
 

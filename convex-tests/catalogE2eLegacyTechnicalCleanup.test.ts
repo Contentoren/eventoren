@@ -265,7 +265,7 @@ test("native-auth archived draft sweeps recent with exclusive link deletion and 
   expect(resweep).toMatchObject({ success: true, data: { cleaned: [], skipped: [] } })
 })
 
-test("readiness draft sweeps recent with technical sync corroboration while uncorroborated rows are retained", async () => {
+test("readiness draft sweeps recent with technical sync corroboration while genuine rows are retained", async () => {
   const t = convexTest(schema, modules)
   process.env.AUTH_SECRET = secret
   const now = new Date().toISOString()
@@ -316,10 +316,13 @@ test("readiness draft sweeps recent with technical sync corroboration while unco
   })
   expect(retained.success).toBe(true)
   if (!retained.success) return
-  expect(retained.data.cleaned).toEqual([])
+  // Previous-run test-like drafts (test key shape plus "Test" title) sweep
+  // after the success barrier; the genuine festival keeps its exact legacy
+  // key but fails corroboration and stays skipped.
+  expect(retained.data.cleaned).toMatchObject([{ eventKey: "readiness-technical-draft-20260915", kind: "test-like" }])
   expect(retained.data.skipped.map((entry: { eventKey: string }) => entry.eventKey)).toContain(readinessKey)
   expect(await t2.run((ctx) => ctx.db.get("catalogEvents", genuineId))).not.toBeNull()
-  expect(await t2.run((ctx) => ctx.db.get("catalogEvents", similarId))).not.toBeNull()
+  expect(await t2.run((ctx) => ctx.db.get("catalogEvents", similarId))).toBeNull()
 })
 
 test("technical checkout deletes the live order graph while the genuine Pilates event stays untouched", async () => {
@@ -420,7 +423,7 @@ test("technical checkout deletes the live order graph while the genuine Pilates 
   expect(residual).toMatchObject({ orders: [], tickets: [] })
 })
 
-test("foreign and live ticket-e2e fixtures are refused while orphan scanner links are pruned", async () => {
+test("previous-run test-like fixtures sweep while genuine events stay and orphan scanner links are pruned", async () => {
   const t = convexTest(schema, modules)
   process.env.AUTH_SECRET = secret
   const now = new Date().toISOString()
@@ -460,14 +463,20 @@ test("foreign and live ticket-e2e fixtures are refused while orphan scanner link
   const swept = await t.mutation(api.catalog.catalogE2eHistoricalCleanupMutation, { token, staleAfterMs: 0 })
   expect(swept.success).toBe(true)
   if (!swept.success) return
-  expect(swept.data.cleaned).toEqual([])
+  // Fake native-auth drafts and generic test-titled events are previous-run
+  // test data and sweep after the success barrier; the genuine Pilates event
+  // has no test signal and stays.
+  expect(swept.data.cleaned).toMatchObject([
+    { eventKey: "native-auth-not-a-uuid", kind: "test-like" },
+    { eventKey: "some-test-event", kind: "test-like" },
+  ])
   expect(swept.data.orphanScannerLinksDeleted).toBe(1)
   expect(swept.data.orphanScannerLinksPruned).toBe(1)
   expect(await t.run((ctx) => ctx.db.get("scannerLinks", orphanExclusiveId))).toBeNull()
   expect(await t.run((ctx) => ctx.db.get("scannerLinks", orphanMixedId))).toMatchObject({ eventKeys: [pilatesKey] })
   expect(await t.run((ctx) => ctx.db.get("catalogEvents", pilatesId))).not.toBeNull()
-  expect(await t.run((ctx) => ctx.db.get("catalogEvents", fakeNativeId))).not.toBeNull()
-  expect(await t.run((ctx) => ctx.db.get("catalogEvents", plainTestId))).not.toBeNull()
+  expect(await t.run((ctx) => ctx.db.get("catalogEvents", fakeNativeId))).toBeNull()
+  expect(await t.run((ctx) => ctx.db.get("catalogEvents", plainTestId))).toBeNull()
 })
 
 test("technical checkout with live row shape deletes the full 8-order live graph despite an ordinary tier label", async () => {
@@ -615,7 +624,7 @@ test("technical checkout with live row shape deletes the full 8-order live graph
   expect(residual).toMatchObject({ orders: [], tickets: [] })
 })
 
-test("native-auth legacy single-marker and key-changed rows sweep while duplicates and near-foreign rows refuse", async () => {
+test("native-auth legacy single-marker and key-changed rows sweep; near-foreign rows refuse routine sweeps but clear after the success barrier", async () => {
   const t = convexTest(schema, modules)
   process.env.AUTH_SECRET = secret
   const now = new Date().toISOString()
@@ -720,7 +729,21 @@ test("native-auth legacy single-marker and key-changed rows sweep while duplicat
   const resweep = await t.mutation(api.catalog.catalogE2eHistoricalCleanupMutation, { token, staleAfterMs: 0 })
   expect(resweep.success).toBe(true)
   if (!resweep.success) return
-  expect(resweep.data.cleaned).toEqual([])
+  // Near-foreign native-auth drafts (duplicate titles, generic titles,
+  // manual runs, disagreed markers) are previous-run test data and clear
+  // after the success barrier; the genuine Pilates event stays.
+  expect(resweep.data.cleaned.map((entry: { eventKey: string }) => entry.eventKey).sort()).toEqual(
+    [
+      "native-auth-bbbbbbbb-5c21-469f-bc8b-fe721ec05ec0",
+      "native-auth-aaaaaaaa-5c21-469f-bc8b-fe721ec05ec0",
+      "native-auth-manual-run",
+      "native-auth-cccccccc-5c21-469f-bc8b-fe721ec05ec0",
+    ].sort(),
+  )
+  for (const entry of resweep.data.cleaned) expect(entry).toMatchObject({ kind: "test-like" })
+  expect(await t.run((ctx) => ctx.db.get("catalogEvents", pilatesId))).not.toBeNull()
+  for (const id of [duplicateTitleId, genericTitleId, uncorroboratedSingleId, disagreedDoubleId])
+    expect(await t.run((ctx) => ctx.db.get("catalogEvents", id))).toBeNull()
 })
 
 test("technical-checkout orphans with fictitious snapshots sweep in test and live modes while Pilates stays", async () => {

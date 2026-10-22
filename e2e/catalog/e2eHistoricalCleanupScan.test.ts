@@ -103,7 +103,22 @@ test("fails on skipped identifiable candidates while reporting generic titles as
   })
   expect(retained.success).toBe(true)
   if (!retained.success) throw new Error("expected success")
-  expect(retained.data.retainedOutsideOwnership).toMatch(/generic test title alone/)
+  expect(retained.data.retainedOutsideOwnership).toMatch(/generic title with no e2e\/test marker/)
+
+  const testLikeSkipped = await e2eHistoricalCleanupScan({
+    staleAfterMs: 0,
+    eventPage: async () => ({
+      success: true as const,
+      data: {
+        isDone: true,
+        scannedEvents: 1,
+        cleaned: [],
+        skipped: [{ eventKey: "Test Event E2E leftover", reason: "live revenue attached" }],
+      },
+    }),
+  })
+  expect(testLikeSkipped.success).toBe(false)
+  if (testLikeSkipped.success) throw new Error("expected failure")
 })
 
 test("fails closed when a mocked page result reports failure", async () => {
