@@ -91,8 +91,13 @@ export async function eventorenCliRun(argv: readonly string[]): Promise<number> 
     if (!token) return inputError("missing --token (or EVENTOREN_API_KEY)")
     return outputWrite(await apiClientTicketOrderListMine(token))
   }
+  if (scope === "convex-call") {
+    const { convexCallCliRun } = await import("./convexCallCliRun.js")
+    const target = [action, ...rest].filter((part): part is string => part !== undefined)
+    return convexCallCliRun({ argv: target })
+  }
   process.stdout.write(
-    "Usage: eventoren <command>\n\n  keys list [--token T]\n  keys create --name N [--expiry P] [--token T]\n  keys rename --id ID --name N [--token T]\n  keys revoke --id ID [--token T]\n  keys rotate --id ID [--token T]\n  organizer events [--token T]\n  orders mine [--token T]\n  version [--verbose]\n\nToken defaults to EVENTOREN_API_KEY; accepts a session token or API key.\n",
+    "Usage: eventoren <command>\n\n  keys list [--token T]\n  keys create --name N [--expiry P] [--token T]\n  keys rename --id ID --name N [--token T]\n  keys revoke --id ID [--token T]\n  keys rotate --id ID [--token T]\n  organizer events [--token T]\n  orders mine [--token T]\n  convex-call <module:function> [--env development|production] [--url U] [--token T] [--json J]\n  version [--verbose]\n\nToken defaults to EVENTOREN_API_KEY; accepts a session token or API key.\n",
   )
   return scope === undefined ? 0 : 1
 }

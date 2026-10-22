@@ -3,6 +3,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprot
 import { Server } from "@modelcontextprotocol/sdk/server/index.js"
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js"
 import type { ActionCtx } from "#convex/_generated/server.js"
+import { mcpConvexCallToolDefinitions } from "#src/mcp/mcpConvexCallToolRegister.ts"
 import { mcpReadToolDefinitions } from "#src/mcp/mcpReadToolsRegister.ts"
 import { mcpWriteToolDefinitions } from "#src/mcp/mcpWriteToolsRegister.ts"
 import type { McpToolDefinition } from "#src/mcp/mcpToolRegistry.ts"
@@ -35,6 +36,7 @@ function createMcpServer(ctx: ActionCtx, userId: string, token: string): Server 
     },
     ...mcpReadToolDefinitions(ctx, token),
     ...mcpWriteToolDefinitions(ctx, token),
+    ...mcpConvexCallToolDefinitions(ctx, token),
   ]
   const registered = mcpToolDefinitionsRegister(definitions)
 

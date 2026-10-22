@@ -6,6 +6,7 @@
       "!dist/**",
       "!convex/_generated/**",
       "!src/routeTree.gen.ts",
+      "!src/utils/convex_client/convexFunctionCatalog.ts",
       "!src/app/assets/documentList.ts",
       "!src/app/assets/fontList.ts",
       "!src/app/assets/imageList.ts",

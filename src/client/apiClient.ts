@@ -115,6 +115,8 @@ export const apiClient = apiClientCreate
 
 export { organizerDashboardClientCreate } from "./organizerDashboardClientCreate.js"
 export type { OrganizerDashboardClient } from "./organizerDashboardClientCreate.js"
+export { apiClientConvexCall } from "./apiClientConvexCall.js"
+export type { ApiClientConvexCallInput } from "./apiClientConvexCall.js"
 export async function apiClientApiKeyList(
   token: string,
   client: ConvexHttpClient = apiClientCreate(),
