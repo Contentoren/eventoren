@@ -63,6 +63,9 @@ export function adminCatalogPageStateCreate(inputs: {
   events: () => readonly AdminEventItem[]
   eventsLive?: () => readonly AdminEventItem[] | undefined
   eventsLoadError?: () => string
+  isLoading?: () => boolean
+  isDone?: () => boolean
+  eventsError?: () => string
   isServerAuthorized: () => boolean
   reloadEvents: () => Promise<
     | { readonly success: true; readonly data: readonly AdminEventItem[] }
@@ -114,6 +117,10 @@ export function adminCatalogPageStateCreate(inputs: {
     }
     const liveEvents = inputs.eventsLive?.()
     if (liveEvents) events.set(liveEvents)
+  })
+  createEffect(() => {
+    const liveError = inputs.eventsError?.()
+    if (liveError) errorMessage.set(liveError)
   })
   createEffect(() => {
     const result = inputs.categoryHiddenLive?.()
@@ -644,6 +651,9 @@ export function adminCatalogPageStateCreate(inputs: {
     eventDraftRevision: eventDraftRevision.get,
     tierDraft: tierDraft.get,
     isAuthorized,
+    isLoading: () => inputs.isLoading?.() ?? false,
+    isDone: () => inputs.isDone?.() ?? true,
+    eventsError: () => inputs.eventsError?.() ?? inputs.eventsLoadError?.() ?? "",
     errorMessage: errorMessage.get,
     successMessage: successMessage.get,
     isSaving: isSaving.get,
