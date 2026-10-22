@@ -1,7 +1,7 @@
 import { mdiCheckCircleOutline } from "@adaptive-ds/mdi/mdiCheckCircleOutline.js"
 import { mdiDomain } from "@adaptive-ds/mdi/mdiDomain.js"
 import { Show } from "solid-js"
-import { Button } from "#ui/interactive/button/Button.jsx"
+import { SegmentedControl } from "#ui/input/segmented/SegmentedControl.jsx"
 import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
 import { Icon } from "#ui/static/icon/Icon.jsx"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
@@ -42,21 +42,25 @@ export function VeranstalterDashboardOrganizationOverview(p: { readonly state: V
             {(description) => <p class="max-w-2xl text-sm text-content-muted">{description()}</p>}
           </Show>
           <Show when={p.state.activeOrganization()?.permissions.includes("umsatz.sehen") ?? false}>
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-content-muted">Zeitraum</span>
-              <Button type="button" onClick={() => range.set("7")}>
-                7 Tage
-              </Button>
-              <Button type="button" onClick={() => range.set("30")}>
-                30 Tage
-              </Button>
-              <Button type="button" onClick={() => range.set("365")}>
-                12 Monate
-              </Button>
-            </div>
-            <VeranstalterDashboardOverviewKpis state={kpis} />
+            <section aria-label="Kennzahlen" class="rounded-card border border-border-subtle bg-surface p-4 sm:p-5">
+              <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 class="text-sm font-semibold text-content">Kennzahlen</h2>
+                <SegmentedControl
+                  value={range.get()}
+                  onChange={(value) => range.set(value as "7" | "30" | "365")}
+                  options={[
+                    { value: "7", label: "7 Tage" },
+                    { value: "30", label: "30 Tage" },
+                    { value: "365", label: "12 Monate" },
+                  ]}
+                  ariaLabel="Zeitraum wählen"
+                  size="sm"
+                />
+              </div>
+              <VeranstalterDashboardOverviewKpis state={kpis} />
+            </section>
           </Show>
-          <dl class="grid gap-3 sm:grid-cols-3">
+          <dl class="grid gap-3 rounded-card border border-border-subtle bg-surface p-4 sm:grid-cols-3 sm:p-5">
             <div>
               <dt class="text-xs font-medium text-content-muted">Rolle</dt>
               <dd class="mt-0.5 flex items-center gap-1.5 text-sm font-medium text-content">
