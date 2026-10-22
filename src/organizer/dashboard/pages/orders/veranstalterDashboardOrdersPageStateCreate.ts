@@ -77,6 +77,13 @@ export function veranstalterDashboardOrdersPageStateCreate(inputs: {
     if (inputs.eventKey() && r.data.eventKey !== inputs.eventKey()) return undefined
     return r.data
   })
+  const detailErrorGet = (): string => {
+    const r = detail()
+    if (r && !r.success) return r.errorMessage
+    if (r?.success && inputs.eventKey() && r.data.eventKey !== inputs.eventKey())
+      return "Bestellung gehört zu einer anderen Veranstaltung."
+    return ""
+  }
   const draftQuery = createSignalObject(inputs.search().q ?? "")
   const status = createSignalObject<string>(inputs.search().status ?? "")
   const note = createSignalObject("")
@@ -219,13 +226,9 @@ export function veranstalterDashboardOrdersPageStateCreate(inputs: {
     sheetOpen: () => !inputs.participants && canRead() && inputs.search().sheet === "order" && !!inputs.search().order,
     sheetClose: () => inputs.changeSearch({ ...inputs.search(), order: undefined, sheet: undefined }),
     detail: detailData,
-    detailError: () => {
-      const r = detail()
-      if (r && !r.success) return r.errorMessage
-      if (r?.success && inputs.eventKey() && r.data.eventKey !== inputs.eventKey())
-        return "Bestellung gehört zu einer anderen Veranstaltung."
-      return ""
-    },
+    detailError: detailErrorGet,
+    detailLoading: () => detail() === undefined && detailErrorGet() === "",
+    detailNotFound: () => detailData() === undefined && detail() !== undefined && detailErrorGet() === "",
     contact: contact.get,
     contactChange: (field: "givenName" | "familyName" | "email" | "phone", value: string) => {
       if (!canEdit() || !detailData()) return
