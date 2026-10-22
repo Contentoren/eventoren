@@ -34,6 +34,22 @@ function convexUrlResolve(env) {
 }
 
 
+function posthogProxyFetch(request, targetOrigin, prefix) {
+  const requestUrl = new URL(request.url)
+  const targetUrl = new URL(targetOrigin + requestUrl.pathname.slice(prefix.length) + requestUrl.search)
+  const headers = new Headers(request.headers ?? {})
+  headers.delete("host")
+  headers.delete("cookie")
+  headers.delete("authorization")
+  return fetch(
+    new Request(targetUrl, {
+      method: request.method,
+      headers,
+      body: request.body,
+    }),
+  )
+}
+
 export default {
   async fetch(request, env) {
     runtimeEnvironmentApply(env)
@@ -47,6 +63,13 @@ export default {
 
     if (requestUrl.pathname === "/.well-known/ai-catalog.json") {
       return env.ASSETS.fetch(request)
+    }
+
+    if (requestUrl.pathname === "/ph-api" || requestUrl.pathname.startsWith("/ph-api/")) {
+      return posthogProxyFetch(request, "https://eu.i.posthog.com", "/ph-api")
+    }
+    if (requestUrl.pathname === "/ph-ui" || requestUrl.pathname.startsWith("/ph-ui/")) {
+      return posthogProxyFetch(request, "https://eu-assets.i.posthog.com", "/ph-ui")
     }
 
     const response = await server.fetch(request, { context: { convexUrl: convexUrlResolve(env) } })

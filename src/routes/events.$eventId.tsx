@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
-import { Show } from "solid-js"
+import { onMount, Show } from "solid-js"
+import { posthogInit } from "#src/app/analytics/posthogInit.ts"
 import { SiteFrame } from "../components/SiteFrame.tsx"
 import { EventDetailPageView } from "../events/EventDetailPageView.tsx"
 import { EventDetailUnavailableView } from "../events/EventDetailUnavailableView.tsx"
@@ -35,6 +36,9 @@ const getCatalogEvent = createServerFn({ method: "GET" })
 
 function EventDetailPage() {
   const result = Route.useLoaderData()
+  onMount(() => {
+    void posthogInit()
+  })
 
   return (
     <Show when={result().success ? result().data : undefined} fallback={<EventDetailUnavailableView />}>
