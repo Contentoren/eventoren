@@ -7,6 +7,9 @@ const ticketE2ePrefix = "ticket-e2e-"
 const readinessKey = "readiness-technical-draft-20260914"
 const technicalCheckoutKey = "technischer-checkout-test-keine-veranstaltung-e879ab05"
 const nativeAuthPattern = /^native-auth-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
+const e2eWordPattern = /\be2e\b/iu
+const ticketE2eTextPattern = /ticket[\s\-_]*e2e/iu
+const testTokenPattern = /(^|[\s\-_:])test($|[\s\-_:])/iu
 
 type HistoricalCleanedEntry = { eventKey: string; runId?: string; kind?: string }
 
@@ -44,10 +47,11 @@ type HistoricalPageControl = {
  * native-auth drafts including archived rows, the readiness draft and the
  * approved live technical-checkout graph) are all in scope. The caller repeats
  * with continueCursor until isDone; a truncated or stalled page fails and
- * retains the cleanup phase. Skipped identifiable candidates fail instead of
- * being silently left behind; rows without any E2E marker (for example a
- * generic test title alone) are reported as retained outside the ownership
- * classification, never deleted.
+ * retains the cleanup phase. Skipped identifiable candidates (exact markers
+ * and test-like keys) fail instead of being silently left behind; rows
+ * without any test-like marker (for example a generic title with no e2e/test
+ * signal) are reported as retained outside the ownership classification,
+ * never deleted.
  */
 export async function e2eHistoricalCleanupScan(input: {
   staleAfterMs: number
@@ -80,7 +84,7 @@ export async function e2eHistoricalCleanupScan(input: {
     cleaned,
     skipped,
     retainedOutsideOwnership:
-      "Events without an exact ticket-e2e run marker, native-auth attempt marker or approved legacy key (for example a generic test title alone) are outside the E2E ownership classification and are retained by design",
+      "Events without an exact ticket-e2e run marker, native-auth attempt marker, approved legacy key or test-like signal (for example a generic title with no e2e/test marker) are outside the E2E ownership classification and are retained by design",
     orphanPages: orphans?.data.pages ?? 0,
     scannedOrders: orphans?.data.scannedOrders ?? 0,
     orphanOrdersDeleted: orphans?.data.orphanOrdersDeleted ?? 0,
@@ -94,6 +98,12 @@ function e2eHistoricalIdentifiableKey(eventKey: string): boolean {
   if (eventKey === readinessKey) return true
   if (eventKey === technicalCheckoutKey) return true
   if (nativeAuthPattern.test(eventKey)) return true
+  // Previous-run test-like fixtures that the backend could not test-prove
+  // (for example live revenue attached) fail loudly for manual
+  // reconciliation instead of being silently left behind.
+  if (e2eWordPattern.test(eventKey)) return true
+  if (ticketE2eTextPattern.test(eventKey)) return true
+  if (testTokenPattern.test(eventKey)) return true
   return false
 }
 
