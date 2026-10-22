@@ -200,7 +200,7 @@ function e2eInvocationCleanupSessionBaseUrlResolve(raw: string): string | null {
 /**
  * Default fresh-SSO browser login using the actual Eventoren SSO/token
  * bootstrap: fresh context at `/sso?returnTo=%2Fadmin`, existing
- * `Continue with Zitadel` link, Zitadel login/password, actual
+ * `Weiter mit Zitadel` link, Zitadel login/password, actual
  * frontend `/admin`, then the exact new `eventoren-session` cookie plus the
  * in-memory `/api/session` token. Lazily imports playwright so offline unit
  * tests with an injected seam never open a browser.
@@ -231,7 +231,7 @@ async function e2eInvocationCleanupSessionBrowserLogin(input: {
     const destination = `${origin}/sso?returnTo=${encodeURIComponent("/admin")}`
     await page.goto(destination)
     if (new URL(page.url()).origin === origin) {
-      const signIn = page.getByRole("link", { name: /continue with zitadel/i })
+      const signIn = page.getByRole("link", { name: /weiter mit zitadel/i })
       await signIn.waitFor({ state: "visible", timeout: 60_000 })
       await Promise.all([page.waitForURL((url) => url.origin !== origin, { timeout: 60_000 }), signIn.click()])
     }

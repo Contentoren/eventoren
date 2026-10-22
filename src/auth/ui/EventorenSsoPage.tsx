@@ -49,7 +49,7 @@ export function EventorenSsoPage(props: {
           href={state.loginDestination()}
           class="w-full justify-center"
         >
-          {state.isPending() ? "Wird angemeldet …" : "Continue with Zitadel"}
+          {state.isPending() ? "Wird angemeldet …" : "Weiter mit Zitadel"}
         </LinkButtonExternal>
         <LinkButtonExternal
           variant={buttonVariant.filledIndigo}
@@ -57,7 +57,7 @@ export function EventorenSsoPage(props: {
           href={state.authworksLoginDestination()}
           class="w-full justify-center"
         >
-          {state.isPending() ? "Wird angemeldet …" : "Continue with Authworks"}
+          {state.isPending() ? "Wird angemeldet …" : "Weiter mit Authworks"}
         </LinkButtonExternal>
       </div>
 

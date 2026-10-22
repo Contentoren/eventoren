@@ -58,7 +58,7 @@ export async function eventorenE2eSignIn(page: Page, baseUrl: string, path: stri
   await page.goto(destination)
 
   if (new URL(page.url()).origin === baseOrigin) {
-    const signIn = page.getByRole("link", { name: /continue with zitadel/i })
+    const signIn = page.getByRole("link", { name: /weiter mit zitadel/i })
     await signIn.waitFor({ state: "visible", timeout: 60_000 })
     // Arm the navigation wait before the click; the SSO link immediately starts the provider redirect.
     await Promise.all([page.waitForURL((url) => url.origin !== baseOrigin, { timeout: 60_000 }), signIn.click()])

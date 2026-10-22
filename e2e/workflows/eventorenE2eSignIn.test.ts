@@ -139,7 +139,7 @@ describe("Eventoren E2E sign-in helper", () => {
       expect(signInUrl.pathname).toBe("/sso")
       expect(signInUrl.searchParams.get("returnTo")).toBe("/admin/events?view=upcoming#list")
       expect(
-        mock.roleQueries.some(({ role, name }) => role === "link" && (name as RegExp).test("Continue with Zitadel")),
+        mock.roleQueries.some(({ role, name }) => role === "link" && (name as RegExp).test("Weiter mit Zitadel")),
       ).toBe(true)
       expect(mock.roleQueries.some(({ role, name }) => role === "textbox" && (name as RegExp).test("Loginname"))).toBe(
         true,

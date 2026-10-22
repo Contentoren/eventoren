@@ -23,12 +23,12 @@ export const eventorenSsoAttemptRecord = (storage?: Storage): Result<EventorenSs
   try {
     const target = storage ?? (typeof globalThis.localStorage === "undefined" ? undefined : globalThis.localStorage)
     if (target === undefined) {
-      return createResultError(op, "localStorage is unavailable")
+      return createResultError(op, "Der lokale Speicher ist nicht verfügbar.")
     }
     target.setItem(eventorenSsoStorageKeys.attempts, JSON.stringify(nextAttempts))
   } catch (error) {
-    const message = error instanceof Error ? error.message : "The storage operation failed"
-    return createResultError(op, `Could not write localStorage: ${message}`)
+    const message = error instanceof Error ? error.message : "Der Speichervorgang ist fehlgeschlagen."
+    return createResultError(op, `Lokaler Speicher: ${message}`)
   }
 
   return createResult({ allowed: true, attempts: nextAttempts })

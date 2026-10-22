@@ -17,6 +17,6 @@ export async function ssoLandingVerify(page: Page, baseUrl: string): Promise<Res
 
   await page.goto(`${baseUrl}/sso`)
   await expect(page.getByRole("heading", { name: "Single Sign-On" })).toBeVisible()
-  await expect(page.getByRole("link", { name: /continue with zitadel/i })).toBeVisible()
+  await expect(page.getByRole("link", { name: /weiter mit zitadel/i })).toBeVisible()
   return callbacks
 }

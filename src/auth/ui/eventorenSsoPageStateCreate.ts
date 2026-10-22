@@ -62,7 +62,7 @@ export function eventorenSsoPageStateCreate(inputs: {
       return
     }
     if (!record.data.allowed) {
-      errorMessage.set("Automatic sign-in was paused after multiple attempts. Please sign in manually.")
+      errorMessage.set("Automatisches Anmelden wurde nach mehreren Versuchen pausiert. Bitte melde dich manuell an.")
       return
     }
 
@@ -87,7 +87,7 @@ export function eventorenSsoPageStateCreate(inputs: {
       return
     }
     if (!record.data.allowed) {
-      errorMessage.set("Automatic sign-in was paused after multiple attempts. Please sign in manually.")
+      errorMessage.set("Automatisches Anmelden wurde nach mehreren Versuchen pausiert. Bitte melde dich manuell an.")
       return
     }
 
