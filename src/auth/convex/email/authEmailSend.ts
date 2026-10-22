@@ -34,7 +34,7 @@ export async function authEmailSend(input: AuthEmailSendInput): PromiseResult<nu
   const secure = secureValue ? ["true", "ssl"].includes(secureValue.toLowerCase()) : port === 465
 
   const fromResult = authEmailFromAddressRead(process.env)
-  if (!fromResult.success) return createResultError(op, fromResult.error.message)
+  if (!fromResult.success) return createResultError(op, fromResult.errorMessage)
 
   try {
     const transport = nodemailer.createTransport({
