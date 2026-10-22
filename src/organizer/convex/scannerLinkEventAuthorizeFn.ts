@@ -20,7 +20,9 @@ export async function scannerLinkEventAuthorizeFn(ctx: MutationCtx | QueryCtx, c
   const link = authorization.data
   const isHelper = link.role === "helper"
   const parentSnapshot =
-    isHelper && link.parentId ? ((await ctx.db.get("scannerLinks", link.parentId))?.eventOrgIds ?? undefined) : undefined
+    isHelper && link.parentId
+      ? ((await ctx.db.get("scannerLinks", link.parentId))?.eventOrgIds ?? undefined)
+      : undefined
   const owned = organizerDashboardMigrationScannerOwnershipAllowed({
     eventKey,
     canonicalOrgId: event.orgId,

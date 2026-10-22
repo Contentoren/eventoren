@@ -64,12 +64,14 @@ export function demoAdminTicketOrdersPageStateCreate(inputs?: {
   const orders = () => {
     if (isLoading() || isError() || isEmpty()) return []
     const filter = statusFilter.get()
-    const filtered = ordersSignal.get().filter(
-      (order) =>
-        (!selectedEvent.get() || order.eventKey === selectedEvent.get()) &&
-        (filter === "alle" || adminTicketOrderStatusKey(order) === filter) &&
-        adminTicketOrderSearchMatches(order, searchQuery.get()),
-    )
+    const filtered = ordersSignal
+      .get()
+      .filter(
+        (order) =>
+          (!selectedEvent.get() || order.eventKey === selectedEvent.get()) &&
+          (filter === "alle" || adminTicketOrderStatusKey(order) === filter) &&
+          adminTicketOrderSearchMatches(order, searchQuery.get()),
+      )
     return adminTicketOrdersSort(filtered, sortBy.get(), sortOrder.get())
   }
 

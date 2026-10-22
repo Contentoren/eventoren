@@ -195,14 +195,8 @@ async function seed() {
     await ctx.db.insert("catalogEvents", eventInsert("owned-event", orgId))
     await ctx.db.insert("catalogEvents", eventInsert("unowned-event"))
     await ctx.db.insert("catalogEvents", eventInsert("blocked-event", blockedOrgId))
-    const ownedOrderId = await ctx.db.insert(
-      "ticketOrders",
-      paidOrderInsert("owned-event", "owned-order"),
-    )
-    const unownedOrderId = await ctx.db.insert(
-      "ticketOrders",
-      paidOrderInsert("unowned-event", "unowned-order"),
-    )
+    const ownedOrderId = await ctx.db.insert("ticketOrders", paidOrderInsert("owned-event", "owned-order"))
+    const unownedOrderId = await ctx.db.insert("ticketOrders", paidOrderInsert("unowned-event", "unowned-order"))
     const ownedTicketId = await ctx.db.insert("ticketIssued", {
       ...ticketInsert(ownedOrderId, "owned-event", "TKT-OWNED"),
     })
@@ -281,9 +275,7 @@ test("global admin keeps legacy access to owned and blocked events", async () =>
   })
   expect(list.success).toBe(true)
   if (!list.success) return
-  expect(eventKeys(list.data.page)).toEqual(
-    expect.arrayContaining(["owned-event", "unowned-event", "blocked-event"]),
-  )
+  expect(eventKeys(list.data.page)).toEqual(expect.arrayContaining(["owned-event", "unowned-event", "blocked-event"]))
 })
 
 test("owned check-in requires org membership with einlass permission", async () => {

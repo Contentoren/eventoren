@@ -28,10 +28,7 @@ export const scannerLinkHelperCreateMutation = mutation({
         parentSnapshot: parent.eventOrgIds,
       })
     ) {
-      return createResultError(
-        "scannerLinkHelperCreateMutation",
-        "Organizer link snapshot does not cover these events",
-      )
+      return createResultError("scannerLinkHelperCreateMutation", "Organizer link snapshot does not cover these events")
     }
     const helperCode = scannerLinkCodeCreate()
     const id = await ctx.db.insert("scannerLinks", {

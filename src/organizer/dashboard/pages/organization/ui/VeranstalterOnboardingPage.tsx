@@ -163,11 +163,7 @@ export function VeranstalterOnboardingPage() {
               Ich stimme den oben verlinkten Muster-Veranstalter-AGB in der angegebenen Revision für meine Organisation
               zu.
             </Checkbox>
-            <Checkbox
-              id="onboarding-dpa-accept"
-              checked={state.dpaAccepted.get()}
-              onChange={state.dpaAccepted.set}
-            >
+            <Checkbox id="onboarding-dpa-accept" checked={state.dpaAccepted.get()} onChange={state.dpaAccepted.set}>
               Ich stimme der oben verlinkten Muster-AVV in der angegebenen Revision für meine Organisation zu.
             </Checkbox>
           </fieldset>

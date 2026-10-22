@@ -225,9 +225,10 @@ describe("organizer dashboard public transport auth", () => {
   })
   test("TS client public methods need no credential", async () => {
     const sdk = sdkCreate()
-    expect(
-      (await clientCall(sdk, "publicProfileGet", { orgSlug: "kulturhaus-lindenhof" }, false)) as unknown,
-    ).toEqual({ success: true, data })
+    expect((await clientCall(sdk, "publicProfileGet", { orgSlug: "kulturhaus-lindenhof" }, false)) as unknown).toEqual({
+      success: true,
+      data,
+    })
     expect((await clientCall(sdk, "publicEventGet", { orgSlug: "x", eventKey: "y" }, false)) as unknown).toEqual({
       success: true,
       data,

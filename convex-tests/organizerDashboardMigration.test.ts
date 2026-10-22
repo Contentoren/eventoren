@@ -26,10 +26,7 @@ async function migrationUserInsert(
   )
 }
 
-async function migrationOrgInsert(
-  t: ReturnType<typeof convexTest>,
-  handle: string,
-): Promise<Id<"orgs">> {
+async function migrationOrgInsert(t: ReturnType<typeof convexTest>, handle: string): Promise<Id<"orgs">> {
   return await t.run(async (ctx) =>
     ctx.db.insert("orgs", {
       orgHandle: handle,
@@ -175,16 +172,18 @@ test("denies migration endpoints for untrusted global organizers", async () => {
   })
   expect(planned.success).toBe(false)
 
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    { token, orgInits: [], eventAssignments: [], roleAssignments: [] },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [],
+  })
   expect(applied.success).toBe(false)
 
-  const backfilled = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation,
-    { token, eventKey: "legacy-event" },
-  )
+  const backfilled = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation, {
+    token,
+    eventKey: "legacy-event",
+  })
   expect(backfilled.success).toBe(false)
 })
 
@@ -235,15 +234,12 @@ test("explicit manifest assigns org init event and role while preserving ids and
   const eventId = await migrationEventInsert(t, "legacy-event")
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [{ orgId, kind: "verein" }],
-      eventAssignments: [{ eventKey: "legacy-event", orgId }],
-      roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
-    },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [{ orgId, kind: "verein" }],
+    eventAssignments: [{ eventKey: "legacy-event", orgId }],
+    roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
+  })
   expect(applied.success).toBe(true)
   if (!applied.success) return
   expect(applied.data).toEqual({ orgsInitialized: 1, eventsAssigned: 1, rolesAssigned: 1, scannerLinksApproved: 0 })
@@ -284,15 +280,12 @@ test("invalid second assignment writes nothing at all", async () => {
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
   const auditsBefore = await migrationAuditCount(t)
 
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [{ orgId, kind: "verein" }],
-      eventAssignments: [{ eventKey: "untouched-event", orgId }],
-      roleAssignments: [{ userId: adminId, orgId, role: "unbekannt" }],
-    },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [{ orgId, kind: "verein" }],
+    eventAssignments: [{ eventKey: "untouched-event", orgId }],
+    roleAssignments: [{ userId: adminId, orgId, role: "unbekannt" }],
+  })
   expect(applied.success).toBe(false)
 
   const config = await t.run(async (ctx) =>
@@ -303,7 +296,10 @@ test("invalid second assignment writes nothing at all", async () => {
   )
   expect(config).toBeNull()
   const event = await t.run(async (ctx) =>
-    ctx.db.query("catalogEvents").withIndex("eventKey", (q) => q.eq("eventKey", "untouched-event")).unique(),
+    ctx.db
+      .query("catalogEvents")
+      .withIndex("eventKey", (q) => q.eq("eventKey", "untouched-event"))
+      .unique(),
   )
   expect(event?.orgId).toBeUndefined()
   expect(await migrationAuditCount(t)).toBe(auditsBefore)
@@ -319,30 +315,27 @@ test("never promotes members automatically and rejects assignments without membe
   await migrationEventInsert(t, "nopromote-event")
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const strangers = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [],
-      roleAssignments: [{ userId: strangerId, orgId, role: "einlass" }],
-    },
-  )
+  const strangers = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [{ userId: strangerId, orgId, role: "einlass" }],
+  })
   expect(strangers.success).toBe(false)
 
   const auditsBeforeEventsOnly = await migrationAuditCount(t)
-  const eventsOnly = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [{ eventKey: "nopromote-event", orgId }],
-      roleAssignments: [],
-    },
-  )
+  const eventsOnly = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [{ eventKey: "nopromote-event", orgId }],
+    roleAssignments: [],
+  })
   expect(eventsOnly.success).toBe(false)
   const untouched = await t.run(async (ctx) =>
-    ctx.db.query("catalogEvents").withIndex("eventKey", (q) => q.eq("eventKey", "nopromote-event")).unique(),
+    ctx.db
+      .query("catalogEvents")
+      .withIndex("eventKey", (q) => q.eq("eventKey", "nopromote-event"))
+      .unique(),
   )
   expect(untouched?.orgId).toBeUndefined()
   expect(await migrationAuditCount(t)).toBe(auditsBeforeEventsOnly)
@@ -372,18 +365,12 @@ test("repeated identical manifests change nothing and write no duplicate audits"
     roleAssignments: [{ userId: memberId, orgId, role: "inhaber" as const }],
   }
 
-  const first = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    manifest,
-  )
+  const first = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, manifest)
   expect(first.success).toBe(true)
   const auditsAfterFirst = await migrationAuditCount(t)
   expect(auditsAfterFirst).toBe(3)
 
-  const second = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    manifest,
-  )
+  const second = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, manifest)
   expect(second.success).toBe(true)
   if (!second.success) return
   expect(second.data).toEqual({ orgsInitialized: 0, eventsAssigned: 0, rolesAssigned: 0, scannerLinksApproved: 0 })
@@ -398,18 +385,18 @@ test("never transfers events owned by a different organization", async () => {
   await migrationEventInsert(t, "owned-event", { orgId: orgA })
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [{ eventKey: "owned-event", orgId: orgB }],
-      roleAssignments: [],
-    },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [{ eventKey: "owned-event", orgId: orgB }],
+    roleAssignments: [],
+  })
   expect(applied.success).toBe(false)
   const event = await t.run(async (ctx) =>
-    ctx.db.query("catalogEvents").withIndex("eventKey", (q) => q.eq("eventKey", "owned-event")).unique(),
+    ctx.db
+      .query("catalogEvents")
+      .withIndex("eventKey", (q) => q.eq("eventKey", "owned-event"))
+      .unique(),
   )
   expect(event?.orgId).toEqual(orgA)
 })
@@ -424,18 +411,18 @@ test("rejects ambiguous duplicate memberships and duplicate configs", async () =
   await migrationEventInsert(t, "dupe-event")
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [{ eventKey: "dupe-event", orgId }],
-      roleAssignments: [{ userId: memberId, orgId, role: "einlass" }],
-    },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [{ eventKey: "dupe-event", orgId }],
+    roleAssignments: [{ userId: memberId, orgId, role: "einlass" }],
+  })
   expect(applied.success).toBe(false)
   const event = await t.run(async (ctx) =>
-    ctx.db.query("catalogEvents").withIndex("eventKey", (q) => q.eq("eventKey", "dupe-event")).unique(),
+    ctx.db
+      .query("catalogEvents")
+      .withIndex("eventKey", (q) => q.eq("eventKey", "dupe-event"))
+      .unique(),
   )
   expect(event?.orgId).toBeUndefined()
 })
@@ -451,15 +438,12 @@ test("blocks downgrading the last remaining owner of owned events", async () => 
   await migrationEventInsert(t, "owned-by-org", { orgId })
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const blocked = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [],
-      roleAssignments: [{ userId: ownerId, orgId, role: "einlass" }],
-    },
-  )
+  const blocked = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [{ userId: ownerId, orgId, role: "einlass" }],
+  })
   expect(blocked.success).toBe(false)
   const stillOwner = await t.run(async (ctx) =>
     ctx.db
@@ -470,15 +454,12 @@ test("blocks downgrading the last remaining owner of owned events", async () => 
   expect(stillOwner?.organizerRole).toBe("inhaber")
 
   await migrationMemberInsert(t, secondId, orgId, "owned-org", { organizerRole: "inhaber" })
-  const allowed = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [],
-      roleAssignments: [{ userId: ownerId, orgId, role: "einlass" }],
-    },
-  )
+  const allowed = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [{ userId: ownerId, orgId, role: "einlass" }],
+  })
   expect(allowed.success).toBe(true)
 })
 
@@ -490,15 +471,12 @@ test("legacy configs without accepted contracts cannot be activated", async () =
   await migrationMemberInsert(t, memberId, orgId, "legacy-contract-org")
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [{ orgId, kind: "verein" }],
-      eventAssignments: [],
-      roleAssignments: [],
-    },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [{ orgId, kind: "verein" }],
+    eventAssignments: [],
+    roleAssignments: [],
+  })
   expect(applied.success).toBe(true)
 
   const approved = await t.mutation(api.organizerDashboardAdmin.organizerDashboardAdminApproveMutation, {
@@ -529,10 +507,12 @@ test("backfills order org snapshots across pages and repeats as noop", async () 
   let pages = 0
   let isDone = false
   while (!isDone) {
-    const result = await t.mutation(
-      api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation,
-      { token, eventKey: "backfill-event", ...(cursor ? { cursor } : {}), pageSize: 2 },
-    )
+    const result = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation, {
+      token,
+      eventKey: "backfill-event",
+      ...(cursor ? { cursor } : {}),
+      pageSize: 2,
+    })
     expect(result.success).toBe(true)
     if (!result.success) return
     pages += 1
@@ -561,10 +541,11 @@ test("backfills order org snapshots across pages and repeats as noop", async () 
   expect(paid?.paymentStatus).toBe("paid")
   expect(paid?.paidAt).toBe(now)
 
-  const rerun = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation,
-    { token, eventKey: "backfill-event", pageSize: 2 },
-  )
+  const rerun = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation, {
+    token,
+    eventKey: "backfill-event",
+    pageSize: 2,
+  })
   expect(rerun.success).toBe(true)
   if (!rerun.success) return
   expect(rerun.data.changed).toBe(0)
@@ -585,10 +566,11 @@ test("backfill rejects conflicting organization snapshots before page writes", a
   })
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const backfilled = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation,
-    { token, eventKey: "conflict-event", pageSize: 10 },
-  )
+  const backfilled = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation, {
+    token,
+    eventKey: "conflict-event",
+    pageSize: 10,
+  })
   expect(backfilled.success).toBe(false)
 
   const plain = await t.run(async (ctx) =>
@@ -606,9 +588,9 @@ test("backfill requires an owned event", async () => {
   await migrationEventInsert(t, "unowned-backfill-event")
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const backfilled = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation,
-    { token, eventKey: "unowned-backfill-event" },
-  )
+  const backfilled = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationBackfillMutation, {
+    token,
+    eventKey: "unowned-backfill-event",
+  })
   expect(backfilled.success).toBe(false)
 })

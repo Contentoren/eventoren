@@ -38,10 +38,7 @@ function eventInsert(eventKey: string): EventInsert {
   }
 }
 
-async function userInsert(
-  t: ReturnType<typeof convexTest>,
-  role: Doc<"users">["role"],
-): Promise<Id<"users">> {
+async function userInsert(t: ReturnType<typeof convexTest>, role: Doc<"users">["role"]): Promise<Id<"users">> {
   return await t.run(async (ctx) =>
     ctx.db.insert("users", {
       name: `scanner ownership ${role} ${Math.random().toString(36).slice(2)}`,
@@ -184,14 +181,19 @@ test("event-only target without config and owner writes nothing", async () => {
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
   const auditsBefore = (await auditNotes(t)).length
 
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    { token, orgInits: [], eventAssignments: [{ eventKey: "bare-event", orgId }], roleAssignments: [] },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [{ eventKey: "bare-event", orgId }],
+    roleAssignments: [],
+  })
   expect(applied.success).toBe(false)
 
   const event = await t.run(async (ctx) =>
-    ctx.db.query("catalogEvents").withIndex("eventKey", (q) => q.eq("eventKey", "bare-event")).unique(),
+    ctx.db
+      .query("catalogEvents")
+      .withIndex("eventKey", (q) => q.eq("eventKey", "bare-event"))
+      .unique(),
   )
   expect(event?.orgId).toBeUndefined()
   expect((await auditNotes(t)).length).toBe(auditsBefore)
@@ -206,15 +208,12 @@ test("init plus owner grant plus event assignment succeed in one chunk", async (
   await t.run(async (ctx) => ctx.db.insert("catalogEvents", eventInsert("chunk-event")))
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [{ orgId, kind: "verein" }],
-      eventAssignments: [{ eventKey: "chunk-event", orgId }],
-      roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
-    },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [{ orgId, kind: "verein" }],
+    eventAssignments: [{ eventKey: "chunk-event", orgId }],
+    roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
+  })
   expect(applied.success).toBe(true)
   if (!applied.success) return
   expect(applied.data).toEqual({ orgsInitialized: 1, eventsAssigned: 1, rolesAssigned: 1, scannerLinksApproved: 0 })
@@ -236,15 +235,12 @@ test("stale Bearer [REDACTED] is denied after migration and explicit parent plus
   const helperId = await legacyLinkInsert(t, helperCode, ["reapprove-event"], { parentId, expiresAt: pairExpiresAt })
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const assigned = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [{ orgId, kind: "verein" }],
-      eventAssignments: [{ eventKey: "reapprove-event", orgId }],
-      roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
-    },
-  )
+  const assigned = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [{ orgId, kind: "verein" }],
+    eventAssignments: [{ eventKey: "reapprove-event", orgId }],
+    roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
+  })
   expect(assigned.success).toBe(true)
 
   const staleParent = await t.mutation(api.scannerLinks.scannerLinkTicketCheckInMutation, {
@@ -267,19 +263,16 @@ test("stale Bearer [REDACTED] is denied after migration and explicit parent plus
   expect(staleList.data.map((event) => event.eventKey)).not.toContain("reapprove-event")
 
   const auditsBeforeApproval = (await auditNotes(t)).length
-  const approved = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [],
-      roleAssignments: [],
-      scannerLinkApprovals: [
-        { linkId: parentId, eventKey: "reapprove-event", orgId },
-        { linkId: helperId, eventKey: "reapprove-event", orgId },
-      ],
-    },
-  )
+  const approved = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [],
+    scannerLinkApprovals: [
+      { linkId: parentId, eventKey: "reapprove-event", orgId },
+      { linkId: helperId, eventKey: "reapprove-event", orgId },
+    ],
+  })
   expect(approved.success).toBe(true)
   if (!approved.success) return
   expect(approved.data).toEqual({ orgsInitialized: 0, eventsAssigned: 0, rolesAssigned: 0, scannerLinksApproved: 2 })
@@ -301,19 +294,16 @@ test("stale Bearer [REDACTED] is denied after migration and explicit parent plus
   })
   expect(restoredHelper.success).toBe(true)
 
-  const repeat = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [],
-      roleAssignments: [],
-      scannerLinkApprovals: [
-        { linkId: parentId, eventKey: "reapprove-event", orgId },
-        { linkId: helperId, eventKey: "reapprove-event", orgId },
-      ],
-    },
-  )
+  const repeat = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [],
+    scannerLinkApprovals: [
+      { linkId: parentId, eventKey: "reapprove-event", orgId },
+      { linkId: helperId, eventKey: "reapprove-event", orgId },
+    ],
+  })
   expect(repeat.success).toBe(true)
   if (!repeat.success) return
   expect(repeat.data).toEqual({ orgsInitialized: 0, eventsAssigned: 0, rolesAssigned: 0, scannerLinksApproved: 0 })
@@ -334,28 +324,22 @@ test("helper approval without parent approval writes nothing", async () => {
   const helperId = await legacyLinkInsert(t, helperCode, ["child-event"], { parentId, expiresAt: pairExpiresAt })
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const assigned = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [{ orgId, kind: "verein" }],
-      eventAssignments: [{ eventKey: "child-event", orgId }],
-      roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
-    },
-  )
+  const assigned = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [{ orgId, kind: "verein" }],
+    eventAssignments: [{ eventKey: "child-event", orgId }],
+    roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
+  })
   expect(assigned.success).toBe(true)
   const auditsBefore = (await auditNotes(t)).length
 
-  const approved = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [],
-      roleAssignments: [],
-      scannerLinkApprovals: [{ linkId: helperId, eventKey: "child-event", orgId }],
-    },
-  )
+  const approved = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [],
+    scannerLinkApprovals: [{ linkId: helperId, eventKey: "child-event", orgId }],
+  })
   expect(approved.success).toBe(false)
   expect(await linkSnapshot(t, helperId)).toBeNull()
   expect(await linkSnapshot(t, parentId)).toBeNull()
@@ -374,28 +358,22 @@ test("approval for a foreign organization and unknown link are rejected", async 
   const linkId = await legacyLinkInsert(t, code, ["home-event"])
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const assigned = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [{ orgId, kind: "verein" }],
-      eventAssignments: [{ eventKey: "home-event", orgId }],
-      roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
-    },
-  )
+  const assigned = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [{ orgId, kind: "verein" }],
+    eventAssignments: [{ eventKey: "home-event", orgId }],
+    roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
+  })
   expect(assigned.success).toBe(true)
   const auditsBefore = (await auditNotes(t)).length
 
-  const foreign = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [],
-      roleAssignments: [],
-      scannerLinkApprovals: [{ linkId, eventKey: "home-event", orgId: foreignOrg }],
-    },
-  )
+  const foreign = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [],
+    scannerLinkApprovals: [{ linkId, eventKey: "home-event", orgId: foreignOrg }],
+  })
   expect(foreign.success).toBe(false)
   expect(await linkSnapshot(t, linkId)).toBeNull()
 
@@ -414,16 +392,13 @@ test("approval for a foreign organization and unknown link are rejected", async 
     await ctx.db.delete(tempId)
     return tempId
   })
-  const unknown = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [],
-      eventAssignments: [],
-      roleAssignments: [],
-      scannerLinkApprovals: [{ linkId: missingLinkId, eventKey: "home-event", orgId }],
-    },
-  )
+  const unknown = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [],
+    scannerLinkApprovals: [{ linkId: missingLinkId, eventKey: "home-event", orgId }],
+  })
   expect(unknown.success).toBe(false)
   expect((await auditNotes(t)).length).toBe(auditsBefore)
 })
@@ -438,15 +413,12 @@ test("new admin links for owned events work without migration approval", async (
   await ticketSeed(t, "fresh-event", "TKT-FRESH")
   const token = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const assigned = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [{ orgId, kind: "verein" }],
-      eventAssignments: [{ eventKey: "fresh-event", orgId }],
-      roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
-    },
-  )
+  const assigned = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [{ orgId, kind: "verein" }],
+    eventAssignments: [{ eventKey: "fresh-event", orgId }],
+    roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
+  })
   expect(assigned.success).toBe(true)
 
   const created = await t.mutation(api.scannerLinks.scannerLinkAdminCreateMutation, {
@@ -487,16 +459,13 @@ test("unowned legacy links keep working and audits never carry capability codes"
   })
   expect(before.success).toBe(true)
 
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    {
-      token,
-      orgInits: [{ orgId, kind: "verein" }],
-      eventAssignments: [{ eventKey: "audit-event", orgId }],
-      roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
-      scannerLinkApprovals: [{ linkId, eventKey: "audit-event", orgId }],
-    },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [{ orgId, kind: "verein" }],
+    eventAssignments: [{ eventKey: "audit-event", orgId }],
+    roleAssignments: [{ userId: memberId, orgId, role: "inhaber" }],
+    scannerLinkApprovals: [{ linkId, eventKey: "audit-event", orgId }],
+  })
   expect(applied.success).toBe(true)
   if (!applied.success) return
   expect(applied.data).toEqual({ orgsInitialized: 1, eventsAssigned: 1, rolesAssigned: 1, scannerLinksApproved: 1 })
@@ -518,10 +487,13 @@ test("more than 25 total operations are rejected before any write", async () => 
   // The count guard runs before any validation, so repeating one pair still
   // exceeds the bound without needing 26 distinct links.
   const approvals = Array.from({ length: 26 }, () => ({ linkId, eventKey: "bound-event", orgId }))
-  const applied = await t.mutation(
-    api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation,
-    { token, orgInits: [], eventAssignments: [], roleAssignments: [], scannerLinkApprovals: approvals },
-  )
+  const applied = await t.mutation(api.organizerDashboardMigration.organizerDashboardMigrationApplyMutation, {
+    token,
+    orgInits: [],
+    eventAssignments: [],
+    roleAssignments: [],
+    scannerLinkApprovals: approvals,
+  })
   expect(applied.success).toBe(false)
   expect(await linkSnapshot(t, linkId)).toBeNull()
   expect((await auditNotes(t)).length).toBe(auditsBefore)

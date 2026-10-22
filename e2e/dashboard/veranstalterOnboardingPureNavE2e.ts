@@ -255,7 +255,12 @@ function fillOrgForm(
     handle,
     `${tag}-consent-first`,
   )
-  agentBrowser(session, ["find", "text", "Ich stimme der oben verlinkten Muster-AVV", "click"], handle, `${tag}-consent-second`)
+  agentBrowser(
+    session,
+    ["find", "text", "Ich stimme der oben verlinkten Muster-AVV", "click"],
+    handle,
+    `${tag}-consent-second`,
+  )
   const consentSnap = agentBrowser(session, ["snapshot", "-i"], handle, `${tag}-consent-verify`)
   const consentChecked = (consentSnap.match(/checked=true/g) ?? []).length
   if (consentChecked < 2)

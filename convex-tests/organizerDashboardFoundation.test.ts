@@ -193,21 +193,18 @@ test("creates an organization with linked core org, config, and inhaber membersh
   const userId = await foundationUserInsert(t)
   const token = await testAuthSessionTokenCreate(t, userId, authSecret)
 
-  const created = await t.mutation(
-    api.organizerDashboard.organizerDashboardOrganizationCreateMutation,
-    {
-      token,
-      name: "Neue Org",
-      slug: "neue-org",
-      kind: "verein",
-      iban: validIban,
-      bankHolder: "Neue Org e.V.",
-      termsRevision: organizerContractDocuments.terms.revision,
+  const created = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationCreateMutation, {
+    token,
+    name: "Neue Org",
+    slug: "neue-org",
+    kind: "verein",
+    iban: validIban,
+    bankHolder: "Neue Org e.V.",
+    termsRevision: organizerContractDocuments.terms.revision,
     dpaRevision: organizerContractDocuments.dpa.revision,
     termsAccepted: true,
-      dpaAccepted: true,
-    },
-  )
+    dpaAccepted: true,
+  })
   expect(created.success).toBe(true)
   if (!created.success) return
 
@@ -242,8 +239,7 @@ test("rejects creation without terms, with duplicate slug, or with invalid IBAN 
   const userId = await foundationUserInsert(t)
   await foundationOrgInsert(t, userId, "belegt-org")
   const token = await testAuthSessionTokenCreate(t, userId, authSecret)
-  const countOrgs = () =>
-    t.run(async (ctx) => (await ctx.db.query("orgs").take(1000)).length)
+  const countOrgs = () => t.run(async (ctx) => (await ctx.db.query("orgs").take(1000)).length)
   const before = await countOrgs()
 
   const base = {
@@ -256,20 +252,22 @@ test("rejects creation without terms, with duplicate slug, or with invalid IBAN 
     termsAccepted: true,
     dpaAccepted: true,
   } as const
-  const noTerms = await t.mutation(
-    api.organizerDashboard.organizerDashboardOrganizationCreateMutation,
-    { ...base, termsAccepted: false },
-  )
+  const noTerms = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationCreateMutation, {
+    ...base,
+    termsAccepted: false,
+  })
   expect(noTerms.success).toBe(false)
-  const duplicate = await t.mutation(
-    api.organizerDashboard.organizerDashboardOrganizationCreateMutation,
-    { ...base, slug: "belegt-org" },
-  )
+  const duplicate = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationCreateMutation, {
+    ...base,
+    slug: "belegt-org",
+  })
   expect(duplicate.success).toBe(false)
-  const badIban = await t.mutation(
-    api.organizerDashboard.organizerDashboardOrganizationCreateMutation,
-    { ...base, slug: "iban-org", iban: "DE00123456789012345678", bankHolder: "Holder" },
-  )
+  const badIban = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationCreateMutation, {
+    ...base,
+    slug: "iban-org",
+    iban: "DE00123456789012345678",
+    bankHolder: "Holder",
+  })
   expect(badIban.success).toBe(false)
   expect(await countOrgs()).toBe(before)
 })
@@ -325,28 +323,36 @@ test("lets owners edit profile and bank but blocks admin bank edits and failed w
   const ownerToken = await testAuthSessionTokenCreate(t, ownerId, authSecret)
   const adminToken = await testAuthSessionTokenCreate(t, adminId, authSecret)
 
-  const profileUpdated = await t.mutation(
-    api.organizerDashboard.organizerDashboardOrganizationUpdateMutation,
-    { token: ownerToken, orgId, name: "Aktualisierte Org", contactEmail: "hallo@example.org" },
-  )
+  const profileUpdated = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationUpdateMutation, {
+    token: ownerToken,
+    orgId,
+    name: "Aktualisierte Org",
+    contactEmail: "hallo@example.org",
+  })
   expect(profileUpdated.success).toBe(true)
 
-  const adminBank = await t.mutation(
-    api.organizerDashboard.organizerDashboardOrganizationUpdateMutation,
-    { token: adminToken, orgId, iban: validIban, bankHolder: "Admin" },
-  )
+  const adminBank = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationUpdateMutation, {
+    token: adminToken,
+    orgId,
+    iban: validIban,
+    bankHolder: "Admin",
+  })
   expect(adminBank.success).toBe(false)
 
-  const ownerBank = await t.mutation(
-    api.organizerDashboard.organizerDashboardOrganizationUpdateMutation,
-    { token: ownerToken, orgId, iban: validIban, bankHolder: "Aktualisiert" },
-  )
+  const ownerBank = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationUpdateMutation, {
+    token: ownerToken,
+    orgId,
+    iban: validIban,
+    bankHolder: "Aktualisiert",
+  })
   expect(ownerBank.success).toBe(true)
 
-  const invalid = await t.mutation(
-    api.organizerDashboard.organizerDashboardOrganizationUpdateMutation,
-    { token: ownerToken, orgId, iban: "DE00123456789012345678", bankHolder: "Holder" },
-  )
+  const invalid = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationUpdateMutation, {
+    token: ownerToken,
+    orgId,
+    iban: "DE00123456789012345678",
+    bankHolder: "Holder",
+  })
   expect(invalid.success).toBe(false)
 
   const config = await t.run(async (ctx) =>
@@ -389,7 +395,7 @@ test("requires pagination beyond one hundred memberships instead of truncating s
         profile: { name: slug, slug, kind: "verein" },
         tax: { status: "regel", defaultRateBps: 1900 },
         fee: { percentBps: 0, fixedCents: 0, payer: "kaeufer" },
-      configurationConfirmed: false,
+        configurationConfirmed: false,
         contracts: { termsAcceptedAt: now, dpaAcceptedAt: now },
         createdAt: now,
         updatedAt: now,

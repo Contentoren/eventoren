@@ -193,7 +193,11 @@ export const ticketCheckoutCreateAction = action({
         fulfillmentEligible: prepared.data.fulfillmentEligible,
         replayed: true,
       })
-    if (prepared.data.status === "checkout_created" && prepared.data.checkoutUrl && prepared.data.billingOrderReference) {
+    if (
+      prepared.data.status === "checkout_created" &&
+      prepared.data.checkoutUrl &&
+      prepared.data.billingOrderReference
+    ) {
       // Re-gate every pay-URL exposure through MarkCreated: Prepare's replay
       // gate runs on the reservation-time snapshot org, while MarkCreated
       // re-resolves the canonical event org. A block (or ownership drift)
@@ -207,8 +211,7 @@ export const ticketCheckoutCreateAction = action({
       if (!replayed.success) return replayed
       const replayBlocked = await checkoutBlockedExpire(config.data, paymentReference, replayed.data, op)
       if (replayBlocked) return replayBlocked
-      if (replayed.data.checkoutUrl === undefined)
-        return createResultError(op, "Billing returned an invalid response")
+      if (replayed.data.checkoutUrl === undefined) return createResultError(op, "Billing returned an invalid response")
       return createResult({
         orderId: replayed.data.orderId,
         paymentReference: replayed.data.paymentReference,
@@ -270,8 +273,7 @@ export const ticketCheckoutCreateAction = action({
     // URL and best-effort expire the unpaid remote session instead.
     const blocked = await checkoutBlockedExpire(config.data, paymentReference, marked.data, op)
     if (blocked) return blocked
-    if (marked.data.checkoutUrl === undefined)
-      return createResultError(op, "Billing returned an invalid response")
+    if (marked.data.checkoutUrl === undefined) return createResultError(op, "Billing returned an invalid response")
     return createResult({
       orderId: marked.data.orderId,
       paymentReference: marked.data.paymentReference,

@@ -148,7 +148,10 @@ async function inventoryRead(t: Seed["t"], seed: { tierId: Id<"catalogTicketTier
 
 test("a blocked organization denies a new checkout without inventory writes", async () => {
   const { t, ...seed } = await organizerSalesSeed({ orgStatus: "gesperrt" })
-  const result = await t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, prepareArgs("blocked-new", "blocked-new"))
+  const result = await t.mutation(
+    internal.ticketing.ticketCheckoutPrepareMutation,
+    prepareArgs("blocked-new", "blocked-new"),
+  )
   expect(result.success).toBe(false)
   const inventory = await inventoryRead(t, seed)
   expect(inventory.tier).toMatchObject({ reserved: 0, sold: 0 })
@@ -158,7 +161,10 @@ test("a blocked organization denies a new checkout without inventory writes", as
 
 test("an organization in review denies a new checkout", async () => {
   const { t, ...seed } = await organizerSalesSeed({ orgStatus: "pruefung" })
-  const result = await t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, prepareArgs("review-new", "review-new"))
+  const result = await t.mutation(
+    internal.ticketing.ticketCheckoutPrepareMutation,
+    prepareArgs("review-new", "review-new"),
+  )
   expect(result.success).toBe(false)
   const inventory = await inventoryRead(t, seed)
   expect(inventory.tier).toMatchObject({ reserved: 0, sold: 0 })
