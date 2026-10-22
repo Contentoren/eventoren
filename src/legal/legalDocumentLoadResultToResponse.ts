@@ -2,7 +2,7 @@ import type { legalDocumentLoadNameValidate } from "./legalDocumentLoadNameValid
 
 type LegalDocumentLoadError = Extract<ReturnType<typeof legalDocumentLoadNameValidate>, { success: false }>
 
-export function legalDocumentLoadResultToResponse(result: LegalDocumentLoadError): Response {
+export function legalDocumentLoadResultToResponse(result: LegalDocumentLoadError, requestId?: string): Response {
   const status = result.httpStatus
   return new Response(
     JSON.stringify({
@@ -11,6 +11,7 @@ export function legalDocumentLoadResultToResponse(result: LegalDocumentLoadError
         message: result.errorMessage,
         op: result.op,
         status,
+        requestId: requestId ?? crypto.randomUUID(),
         retryable: result.retryable,
         details: {},
       },
