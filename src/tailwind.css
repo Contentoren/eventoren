@@ -12,6 +12,7 @@
   --color-surface-inverted: #0f172a;
   --color-border-subtle: #cbd5e1;
   --color-border-strong: #64748b;
+  --color-border: var(--color-border-subtle);
   --color-input: var(--color-border-subtle);
   --color-ring: var(--color-brand-accent);
 
@@ -80,6 +81,15 @@
   html {
     background-color: var(--color-surface-base);
     scrollbar-gutter: stable;
+  }
+
+  /* Soft default border color (Tailwind v3 behavior): bare `border` renders
+     subtle instead of currentColor; explicit color utilities still win. */
+  *,
+  ::before,
+  ::after,
+  ::backdrop {
+    border-color: var(--color-border-subtle);
   }
 
   body {
