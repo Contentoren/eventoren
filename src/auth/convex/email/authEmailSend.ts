@@ -4,6 +4,7 @@ import nodemailer from "nodemailer"
 import * as a from "valibot"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { emailSchema } from "#src/utils/valibot/emailSchema.ts"
+import { authEmailFromAddressRead } from "./authEmailFromAddress.ts"
 
 type AuthEmailSendInput = {
   toEmail: string
@@ -32,6 +33,9 @@ export async function authEmailSend(input: AuthEmailSendInput): PromiseResult<nu
 
   const secure = secureValue ? ["true", "ssl"].includes(secureValue.toLowerCase()) : port === 465
 
+  const fromResult = authEmailFromAddressRead(process.env)
+  if (!fromResult.success) return createResultError(op, fromResult.error.message)
+
   try {
     const transport = nodemailer.createTransport({
       host,
@@ -45,7 +49,7 @@ export async function authEmailSend(input: AuthEmailSendInput): PromiseResult<nu
       auth: { user: username, pass: password },
     })
     await transport.sendMail({
-      from: { name: "Eventoren", address: "it@contentoren.de" },
+      from: { name: "Eventoren", address: fromResult.data },
       to: input.toName ? { name: input.toName, address: input.toEmail } : input.toEmail,
       subject: input.subject,
       html: input.html,
