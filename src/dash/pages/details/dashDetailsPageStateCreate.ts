@@ -119,7 +119,8 @@ export function dashDetailsPageStateCreate(inputs: { eventId: () => string }) {
     const attempt = (tries: number): void => {
       const target = document.getElementById(`details-${section}`)
       if (target) {
-        target.scrollIntoView({ behavior: "smooth", block: "start" })
+        const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+        target.scrollIntoView({ behavior, block: "start" })
         const focusable = target.querySelector<HTMLElement>("input, textarea, select, [tabindex]")
         focusable?.focus({ preventScroll: true })
         return

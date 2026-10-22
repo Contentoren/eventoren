@@ -58,7 +58,8 @@ export function eventHeroKnockoutStateCreate(inputs: {
     const target = document.getElementById(eventHeroResultsAnchorId)
     if (!target) return
 
-    target.scrollIntoView({ behavior: "smooth", block: "start" })
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+    target.scrollIntoView({ behavior, block: "start" })
   }
 
   const changeTerm = (value: string) => setTerm(value)
