@@ -1,9 +1,1 @@
-import { query } from "./_generated/server.js"
-
-export const publicProjectInfo = query({
-  args: {},
-  handler: async () => ({
-    projectName: "eventoren",
-    serverTimestamp: Date.now(),
-  }),
-})
+export { publicProjectInfoQuery as publicProjectInfo } from "#src/server/convex/publicProjectInfoQuery.ts"
