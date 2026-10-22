@@ -7,7 +7,7 @@ import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
 /** Empty view shown when the user belongs to no Veranstalter organisation. */
 export function VeranstalterDashboardEmptyState() {
   return (
-    <CardWrapper>
+    <CardWrapper class="rounded-card border-border-subtle shadow-none">
       <EmptyState
         icon={mdiDomain}
         title="Noch keine Organisation"

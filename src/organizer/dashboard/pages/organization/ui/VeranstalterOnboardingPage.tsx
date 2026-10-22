@@ -37,7 +37,7 @@ export function VeranstalterOnboardingPage() {
       </div>
       <Show when={state.createdSlug.get()}>
         {(slug) => (
-          <CardWrapper>
+          <CardWrapper class="rounded-card border-border-subtle shadow-none">
             <EmptyState
               icon={mdiDomainPlus}
               title="Organisation eingereicht"
@@ -51,7 +51,7 @@ export function VeranstalterOnboardingPage() {
           </CardWrapper>
         )}
       </Show>
-      <CardWrapper>
+      <CardWrapper class="rounded-card border-border-subtle shadow-none">
         <form
           class="flex flex-col gap-4 p-4 sm:p-6"
           onSubmit={(event) => {

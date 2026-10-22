@@ -29,7 +29,7 @@ export function VeranstalterDashboardInvitationsPage(props: {
       </header>
 
       <Show when={auth.ready() && auth.identity() === null}>
-        <CardWrapper>
+        <CardWrapper class="rounded-card border-border-subtle shadow-none">
           <p role="status" class="text-sm text-content-muted">
             Für deine Einladungen musst du angemeldet sein.
           </p>
@@ -42,7 +42,7 @@ export function VeranstalterDashboardInvitationsPage(props: {
       </Show>
 
       <Show when={auth.ready() && auth.identity() !== null}>
-        <CardWrapper>
+        <CardWrapper class="rounded-card border-border-subtle shadow-none">
           <p class="text-sm text-content-muted">
             Konto-E-Mail:{" "}
             <span class="font-medium text-content">{state.accountEmail() ?? "keine E-Mail-Adresse hinterlegt"}</span>
@@ -69,13 +69,13 @@ export function VeranstalterDashboardInvitationsPage(props: {
       </Show>
 
       <Show when={state.isLoading() && state.invitations().length === 0}>
-        <CardWrapper>
+        <CardWrapper class="rounded-card border-border-subtle shadow-none">
           <p class="text-sm text-content-muted">Wird geladen …</p>
         </CardWrapper>
       </Show>
 
       <Show when={state.isEmpty()}>
-        <CardWrapper>
+        <CardWrapper class="rounded-card border-border-subtle shadow-none">
           <p class="text-sm text-content-muted">Für dein Konto liegen keine offenen Einladungen vor.</p>
         </CardWrapper>
       </Show>
@@ -86,7 +86,9 @@ export function VeranstalterDashboardInvitationsPage(props: {
             <li>
               <CardWrapper
                 class={
-                  state.selectedInvitationId() === invitation.id ? "border-primary ring-1 ring-primary" : undefined
+                  state.selectedInvitationId() === invitation.id
+                    ? "border-primary ring-1 ring-primary"
+                    : "rounded-card border-border-subtle shadow-none"
                 }
               >
                 <div class="flex flex-col gap-3">

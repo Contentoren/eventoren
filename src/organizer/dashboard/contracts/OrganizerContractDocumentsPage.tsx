@@ -13,7 +13,7 @@ export function OrganizerContractDocumentsPage() {
       </p>
       <For each={[organizerContractDocuments.terms, organizerContractDocuments.dpa]}>
         {(document) => (
-          <CardWrapper>
+          <CardWrapper class="rounded-card border-border-subtle shadow-none">
             <article id={document.documentId} class="flex flex-col gap-4 p-6">
               <h2 class="text-xl font-semibold">{document.title}</h2>
               <p>
