@@ -58,14 +58,121 @@ function definitionBody(fileSource: string, exportName: string): string | null {
   return fileSource.slice(start, handlerIndex)
 }
 
+/** Split an export/import list entry into exported and local names. */
+function exportPair(raw: string): { exported: string; local: string } | null {
+  const withoutComment = raw
+    .split("\n")
+    .map((line) => line.replace(/\/\/.*$/, ""))
+    .join("\n")
+    .trim()
+  if (!withoutComment) return null
+  const parts = withoutComment.split(/\s+as\s+/).map((part) => part.trim())
+  if (parts.length === 2) {
+    if (!parts[0] || !parts[1]) return null
+    return { exported: parts[1] ?? "", local: parts[0] ?? "" }
+  }
+  const name = (parts[0] ?? "").trim()
+  if (!name) return null
+  return { exported: name, local: name }
+}
+
+/** Replace string/template literals and comments with spaces (length-preserving). */
+function maskStringsAndComments(source: string): string {
+  let out = ""
+  let index = 0
+  while (index < source.length) {
+    const char = source[index]
+    const next = source[index + 1]
+    if (char === "/" && next === "/") {
+      let end = index
+      while (end < source.length && source[end] !== "\n") end += 1
+      out += " ".repeat(end - index)
+      index = end
+      continue
+    }
+    if (char === "/" && next === "*") {
+      const close = source.indexOf("*/", index + 2)
+      const end = close === -1 ? source.length : close + 2
+      out += " ".repeat(end - index)
+      index = end
+      continue
+    }
+    if (char === "'" || char === '"' || char === "`") {
+      let end = index + 1
+      while (end < source.length) {
+        if (source[end] === "\\") {
+          end += 2
+          continue
+        }
+        if (source[end] === char) {
+          end += 1
+          break
+        }
+        end += 1
+      }
+      // Whole template literals (including ${...}) are masked: token fields
+      // never live inside interpolations, but braces there would corrupt
+      // balance counting.
+      out += " ".repeat(end - index)
+      index = end
+      continue
+    }
+    out += char
+    index += 1
+  }
+  return out
+}
+
+/** Strips a trailing depth-0 `satisfies Type` annotation from an RHS string. */
+export function stripSatisfiesSuffix(rhs: string): string {
+  let current = rhs.trimEnd()
+  for (;;) {
+    const masked = maskStringsAndComments(current)
+    const match = /\bsatisfies\b/g.exec(masked)
+    if (!match || match.index === undefined) return current
+    let depth = 0
+    let isTopLevel = true
+    for (let index = 0; index < match.index; index += 1) {
+      const char = masked[index]
+      if (char === "{" || char === "(" || char === "[") depth += 1
+      if (char === "}" || char === ")" || char === "]") depth -= 1
+    }
+    isTopLevel = depth === 0
+    if (!isTopLevel) return current
+    current = current.slice(0, match.index).trimEnd()
+  }
+}
+
+/**
+ * Remainder of an `export function NAME(` (or `function NAME(`) declaration.
+ * Bodies rarely resolve to a token shape and fall through to null, but
+ * matching them keeps identifier-following total over const and function
+ * declarations alike.
+ */
+function functionRhs(source: string, identifier: string): string | null {
+  const pattern = new RegExp(`(?:export\\s+function|function)\\s+${identifier}\\s*(?:<[^<>]*>)?\\(`).exec(source)
+  if (!pattern) return null
+  return stripSatisfiesSuffix(source.slice((pattern.index ?? 0) + pattern[0].length).trimStart())
+}
+
+/** A `const ID = RHS` (or `export const`) declaration, tolerating a type annotation. */
+function constRhs(source: string, identifier: string): string | null {
+  const pattern = new RegExp(`(?:const|export const)\\s+${identifier}(?:\\s*:[^=;]+)?\\s*=\\s*`).exec(source)
+  if (!pattern) return functionRhs(source, identifier)
+  return stripSatisfiesSuffix(source.slice((pattern.index ?? 0) + pattern[0].length).trimStart())
+}
+
 function balancedSlice(source: string, openIndex: number): string | null {
   const pairs: Record<string, string> = { "{": "}", "(": ")", "[": "]" }
   const open = source[openIndex]
   const close = pairs[open ?? ""]
   if (!open || !close) return null
+  // Match over a masked copy so braces inside strings, template literals and
+  // comments cannot corrupt depth counting; indices are length-preserving.
+  const masked = maskStringsAndComments(source)
   let depth = 0
-  for (let index = openIndex; index < source.length; index += 1) {
-    const char = source[index]
+  for (let index = openIndex; index < masked.length; index += 1) {
+    const char = masked[index]
     if (char === open) depth += 1
     if (char === close) {
       depth -= 1
@@ -76,69 +183,217 @@ function balancedSlice(source: string, openIndex: number): string | null {
 }
 
 /**
- * Best-effort token detection. Returns true when the args block declares a
- * `token` field, false when args are provably tokenless (empty or an explicit
- * Omit idiom), and null when the shape cannot be determined statically.
+ * Reports whether an args block declares a `token` field. Quoted keys
+ * (`"token":` / `'token':`) and optional keys (`token?:`) count; string
+ * values, template literals and comments mentioning `token:` are skipped.
  */
+export function convexCatalogTokenScan(block: string): boolean {
+  let index = 0
+  while (index < block.length) {
+    const char = block[index] ?? ""
+    if (char === "/" && block[index + 1] === "/") {
+      while (index < block.length && block[index] !== "\n") index += 1
+      continue
+    }
+    if (char === "/" && block[index + 1] === "*") {
+      const close = block.indexOf("*/", index + 2)
+      index = close === -1 ? block.length : close + 2
+      continue
+    }
+    const preceding = index === 0 ? "" : (block[index - 1] ?? "")
+    const isKeyContext = index === 0 || /[\s,{]/.test(preceding)
+    if (char === "'" || char === '"' || char === "`") {
+      let end = index + 1
+      while (end < block.length) {
+        if (block[end] === "\\") {
+          end += 2
+          continue
+        }
+        if (block[end] === char) break
+        end += 1
+      }
+      const key = block.slice(index + 1, end)
+      let after = end + 1
+      while (after < block.length && /\s/.test(block[after] ?? "")) after += 1
+      if (isKeyContext && key === "token" && block[after] === ":") return true
+      index = end + 1
+      continue
+    }
+    if (/[A-Za-z_$]/.test(char)) {
+      let end = index + 1
+      while (end < block.length && /[\w$]/.test(block[end] ?? "")) end += 1
+      const key = block.slice(index, end)
+      let after = end
+      while (after < block.length && /\s/.test(block[after] ?? "")) after += 1
+      if (block[after] === "?") {
+        let optionalEnd = after + 1
+        while (optionalEnd < block.length && /\s/.test(block[optionalEnd] ?? "")) optionalEnd += 1
+        if (isKeyContext && key === "token" && block[optionalEnd] === ":") return true
+      } else if (isKeyContext && key === "token" && block[after] === ":") {
+        return true
+      }
+      index = end
+      continue
+    }
+    index += 1
+  }
+  return false
+}
+
+export type ImportLoader = (fromFile: string, importPath: string) => { source: string; file: string } | null
+
+/**
+ * File loader resolving `#src/`, `./` and `../` imports against a repo root.
+ * Shared by catalog collection and unit tests.
+ */
+export function convexCatalogImportLoader(repoRoot: string): ImportLoader {
+  return (fromFile, importPath) => {
+    if (importPath.startsWith("#src/")) {
+      const file = `src/${importPath.slice("#src/".length)}`
+      const source = readFileOrNull(repoRoot, file)
+      return source === null ? null : { source, file: withTs(file) }
+    }
+    if (importPath.startsWith("./") || importPath.startsWith("../")) {
+      const fromDir = fromFile.includes("/") ? fromFile.slice(0, fromFile.lastIndexOf("/")) : ""
+      const segments = [...fromDir.split("/").filter(Boolean), ...importPath.split("/")]
+      const normalized: string[] = []
+      for (const segment of segments) {
+        if (segment === "." || segment === "") continue
+        if (segment === "..") normalized.pop()
+        else normalized.push(segment)
+      }
+      const file = normalized.join("/")
+      const source = readFileOrNull(repoRoot, file)
+      return source === null ? null : { source, file: withTs(file) }
+    }
+    return null
+  }
+}
+
+/**
+ * Token classification for a single args expression without imports. Used by
+ * the catalog walk (with a real loader) and by unit tests as synthetic
+ * probes for loader-independent shapes (Omit idioms, quoted keys,
+ * comments, strings, object-validator calls).
+ */
+export function convexCatalogTokenDetect(expression: string): boolean | null {
+  return argsExprAcceptsToken(expression, "", "", () => null, 6)
+}
+
+/**
+ * True when the expression itself is an `Omit<..., "token">` idiom. The
+ * `"token"` literal must sit inside the Omit's own angle brackets: validator
+ * files commonly contain a later `Omit<X, "token">` handler annotation, and
+ * an unscoped substring check would misfire on that trailing text (const RHS
+ * extraction returns the remainder of the file).
+ */
+function omitTokenIdiom(expression: string): boolean {
+  const masked = maskStringsAndComments(expression)
+  const start = /^Omit\s*</.exec(masked)
+  if (!start) return false
+  let depth = 0
+  for (let index = start[0].length - 1; index < masked.length; index += 1) {
+    const char = masked[index]
+    if (char === "<") depth += 1
+    else if (char === ">") {
+      if (masked[index - 1] === "=") continue // `=>` in function types
+      depth -= 1
+      if (depth === 0) {
+        // Only an exact-`token` string literal counts; prose inside a
+        // longer literal (e.g. "no token here") must not match. The check
+        // runs on the unmasked span because masking erases the quotes.
+        const span = expression.slice(0, index + 1)
+        for (const literal of span.matchAll(/"([^"]*)"|'([^']*)'/g)) {
+          if (literal[1] === "token" || literal[2] === "token") return true
+        }
+        return false
+      }
+    }
+  }
+  return false
+}
+
 function acceptsTokenDetect(
   definitionFileSource: string,
+  definitionFile: string,
   exportName: string,
-  loadImportedFile: (importPath: string) => string | null,
+  loadImportedFile: ImportLoader,
 ): boolean | null {
   const body = definitionBody(definitionFileSource, exportName)
   if (!body) return null
   const argsIndex = body.indexOf("args:")
   if (argsIndex === -1) return false
   const afterArgs = body.slice(argsIndex + "args:".length).trimStart()
-  if (afterArgs.startsWith("{}")) return false
-  if (afterArgs.includes("Omit<") && afterArgs.includes('"token"')) return false
-  if (afterArgs.startsWith("createTokenValidator(")) return true
-  if (afterArgs.startsWith("{") || afterArgs.startsWith("v.object(") || afterArgs.startsWith("vObject")) {
-    const openIndex = afterArgs.indexOf("{")
-    const block = balancedSlice(afterArgs, openIndex)
+  return argsExprAcceptsToken(afterArgs, definitionFileSource, definitionFile, loadImportedFile, 6)
+}
+
+/**
+ * Best-effort token detection. Returns true when the args block declares a
+ * `token` field (directly or via createTokenValidator), false when args are
+ * provably tokenless (empty, an explicit Omit idiom, or
+ * createUserIdValidator which adds only `userId`), and null when the shape
+ * cannot be determined statically.
+ *
+ * Validator identifiers are followed through `const` alias chains (local
+ * first, then imports) with a fuel limit so `args: groupCreateValidator`
+ * resolves through `groupCreateConvexValidator = v.object(fields)`.
+ */
+function argsExprAcceptsToken(
+  expression: string,
+  currentSource: string,
+  currentFile: string,
+  loadImportedFile: ImportLoader,
+  fuel: number,
+): boolean | null {
+  const trimmed = expression.trimStart()
+  if (trimmed.startsWith("{}")) return false
+  if (omitTokenIdiom(trimmed)) return false
+  if (/^createTokenValidator\s*\(/.test(trimmed)) return true
+  // createUserIdValidator adds a `userId` field (verified in
+  // src/utils/convex_backend/createUserIdValidator.ts), never a token.
+  if (/^createUserIdValidator\s*\(/.test(trimmed)) return false
+  if (trimmed.startsWith("{") || trimmed.startsWith("vObject")) {
+    const openIndex = trimmed.indexOf("{")
+    const block = balancedSlice(trimmed, openIndex)
     if (!block) return null
-    return /(^|[\s,{])token\s*:/.test(block)
+    return convexCatalogTokenScan(block)
   }
-  const identifier = /^[A-Za-z_$][\w$]*/.exec(afterArgs)?.[0]
-  if (!identifier) return null
-  const localFactoryPattern = new RegExp(
-    `(?:const|export const)\\s+${identifier}\\s*=\\s*createTokenValidator\\s*\\(`,
-  ).exec(definitionFileSource)
-  if (localFactoryPattern) return true
-  const localPattern = new RegExp(
-    `(?:const|export const)\\s+${identifier}\\s*=\\s*(v\\.object\\(\\s*\\{|createTokenValidator\\(\\s*\\{|\\{)`,
-  ).exec(definitionFileSource)
-  if (localPattern) {
-    if (localPattern[0].includes("createTokenValidator(")) return true
-    const blockStart = (localPattern.index ?? 0) + localPattern[0].length - 1
-    const block = balancedSlice(definitionFileSource, blockStart)
-    if (!block) return null
-    return /(^|[\s,{])token\s*:/.test(block)
+  // Object-validator calls (`v.object(`, `a.object(`, ...): inspect the
+  // inner fields expression with the same rules.
+  if (/^[\w$.]*[Oo]bject\s*\(/.test(trimmed)) {
+    const inner = balancedSlice(trimmed, trimmed.indexOf("("))
+    if (!inner) return null
+    if (fuel <= 0) return null
+    return argsExprAcceptsToken(inner.slice(1, -1), currentSource, currentFile, loadImportedFile, fuel - 1)
   }
-  for (const match of definitionFileSource.matchAll(/^import\s*\{([^}]*)\}\s*from\s*["']([^"']+)["']/gm)) {
-    const names = (match[1] ?? "").split(",").map((raw) =>
-      raw
-        .trim()
-        .split(/\s+as\s+/)
-        .pop()
-        ?.trim(),
-    )
-    if (!names.includes(identifier)) continue
-    const importedSource = loadImportedFile(match[2] ?? "")
-    if (!importedSource) return null
-    const importedFactoryPattern = new RegExp(
-      `(?:const|export const)\\s+${identifier}\\s*=\\s*createTokenValidator\\s*\\(`,
-    ).exec(importedSource)
-    if (importedFactoryPattern) return true
-    const importedPattern = new RegExp(
-      `(?:const|export const)\\s+${identifier}\\s*=\\s*(v\\.object\\(\\s*\\{|createTokenValidator\\(\\s*\\{|\\{)`,
-    ).exec(importedSource)
-    if (!importedPattern) return null
-    if (importedPattern[0].includes("createTokenValidator(")) return true
-    const blockStart = (importedPattern.index ?? 0) + importedPattern[0].length - 1
-    const block = balancedSlice(importedSource, blockStart)
-    if (!block) return null
-    return /(^|[\s,{])token\s*:/.test(block)
+  const identifier = /^[A-Za-z_$][\w$]*/.exec(trimmed)?.[0]
+  if (!identifier || fuel <= 0) return null
+  const rhs = constRhs(currentSource, identifier)
+  if (rhs) return argsExprAcceptsToken(rhs, currentSource, currentFile, loadImportedFile, fuel - 1)
+  const imported = importLocalSource(currentSource, currentFile, identifier, loadImportedFile)
+  if (!imported) return null
+  const importedRhs = constRhs(imported.source, imported.local)
+  if (!importedRhs) return null
+  return argsExprAcceptsToken(importedRhs, imported.source, imported.file, loadImportedFile, fuel - 1)
+}
+
+/** Resolve an imported identifier to the source file and its local name. */
+function importLocalSource(
+  currentSource: string,
+  currentFile: string,
+  identifier: string,
+  loadImportedFile: ImportLoader,
+): { source: string; local: string; file: string } | null {
+  for (const match of currentSource.matchAll(/^import\s*\{([^}]*)\}\s*from\s*["']([^"']+)["']/gm)) {
+    const pairs = (match[1] ?? "")
+      .split(",")
+      .map((raw) => exportPair(raw))
+      .filter((pair) => pair !== null)
+    const pair = pairs.find((candidate) => candidate.exported === identifier)
+    if (!pair) continue
+    const loaded = loadImportedFile(currentFile, match[2] ?? "")
+    if (!loaded) return null
+    return { source: loaded.source, local: pair.local, file: loaded.file }
   }
   return null
 }
@@ -218,28 +473,14 @@ export function convexFunctionCatalogCollect(repoRoot: string): CatalogEntry[] {
         return
       }
       const fileSource = readFileOrNull(repoRoot, fileRelative)
-      const definitionDir = fileRelative.includes("/") ? fileRelative.slice(0, fileRelative.lastIndexOf("/")) : ""
-      const loadImportedFile = (importPath: string): string | null => {
-        if (importPath.startsWith("#src/")) return readFileOrNull(repoRoot, `src/${importPath.slice("#src/".length)}`)
-        if (importPath.startsWith("./") || importPath.startsWith("../")) {
-          const segments = [...definitionDir.split("/").filter(Boolean), ...importPath.split("/")]
-          const normalized: string[] = []
-          for (const segment of segments) {
-            if (segment === "." || segment === "") continue
-            if (segment === "..") normalized.pop()
-            else normalized.push(segment)
-          }
-          return readFileOrNull(repoRoot, normalized.join("/"))
-        }
-        return null
-      }
+      const loadImportedFile = convexCatalogImportLoader(repoRoot)
       entries.push({
         module,
         name,
         file: withTs(fileRelative),
         kind,
         visibility: kind.startsWith("internal") ? "internal" : "public",
-        acceptsToken: fileSource ? acceptsTokenDetect(fileSource, name, loadImportedFile) : null,
+        acceptsToken: fileSource ? acceptsTokenDetect(fileSource, withTs(fileRelative), name, loadImportedFile) : null,
       })
     }
     for (const [name, target] of reexportTargets) {
@@ -259,7 +500,7 @@ export function convexFunctionCatalogCollect(repoRoot: string): CatalogEntry[] {
         file: `convex/${file}`,
         kind,
         visibility: kind.startsWith("internal") ? "internal" : "public",
-        acceptsToken: acceptsTokenDetect(fileSource, name, () => null),
+        acceptsToken: acceptsTokenDetect(fileSource, `convex/${file}`, name, () => null),
       })
     }
   }

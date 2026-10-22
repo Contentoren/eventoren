@@ -58,16 +58,16 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
     "userDeletionContinueInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
     "userEmailChange1RequestAction": { kind: "action", visibility: "public", acceptsToken: true },
     "userEmailChange1RequestInternalAction": { kind: "internalAction", visibility: "internal", acceptsToken: false },
-    "userEmailChange2ConfirmInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: null },
+    "userEmailChange2ConfirmInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
     "userEmailChange2ConfirmMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
     "userGetByUsernameQuery": { kind: "query", visibility: "public", acceptsToken: false },
     "userGetInternalQuery": { kind: "internalQuery", visibility: "internal", acceptsToken: false },
     "usernameAvailableQuery": { kind: "query", visibility: "public", acceptsToken: false },
     "userPasswordChange1RequestAction": { kind: "action", visibility: "public", acceptsToken: true },
     "userPasswordChange1RequestInternalAction": { kind: "internalAction", visibility: "internal", acceptsToken: false },
-    "userPasswordChange2ConfirmInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: null },
+    "userPasswordChange2ConfirmInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
     "userPasswordChange2ConfirmMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
-    "userProfileUpdateInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: null },
+    "userProfileUpdateInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
     "userProfileUpdateMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
 },
   "authEmail": {
@@ -122,7 +122,7 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
 },
   "org": {
     "getOrgMemberHandleAndRoleInternalQuery": { kind: "internalQuery", visibility: "internal", acceptsToken: false },
-    "orgCleanupIfEmptyInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: null },
+    "orgCleanupIfEmptyInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
 },
   "organizer": {
     "organizerEventGetQuery": { kind: "query", visibility: "public", acceptsToken: true },

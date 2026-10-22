@@ -1,6 +1,9 @@
 import { ConvexHttpClient } from "convex/browser"
+import * as a from "valibot"
 import { apiClientConvexCall } from "../client/apiClientConvexCall.js"
 import { organizerDashboardRequestMaxBytes } from "../organizer/dashboard/api/organizerDashboardRequestMaxBytes.js"
+import { cliConvexCallArgsSchema } from "../utils/convex_client/convexCallSchemas.js"
+import { convexFunctionReferenceParse } from "../utils/convex_client/convexFunctionCall.js"
 import { convexCallEnvFileLoad, convexCallUrlResolve } from "./convexCallEnvLoad.js"
 
 export type ConvexCallCliBackend = Pick<ConvexHttpClient, "query" | "mutation" | "action">
@@ -47,11 +50,9 @@ export async function convexCallCliRun(inputs: {
     stdout(usageText)
     return target === undefined ? 1 : 0
   }
-  const separator = target.indexOf(":")
-  if (separator === -1) return fail(`invalid function "${target}", expected <module:function>`)
-  const module = target.slice(0, separator)
-  const name = target.slice(separator + 1)
-  if (module.length === 0 || name.length === 0) return fail(`invalid function "${target}"`)
+  const parsedTarget = convexFunctionReferenceParse(target)
+  if (parsedTarget === undefined) return fail(`invalid function "${target}", expected <module:function>`)
+  const { module, name } = parsedTarget
 
   const envName = flagRead(rest, "env") ?? "development"
   if (envName !== "development" && envName !== "production") return fail(`invalid --env "${envName}"`)
@@ -73,7 +74,10 @@ export async function convexCallCliRun(inputs: {
       if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
         return fail("Request body must be a JSON object")
       }
-      args = parsed as Record<string, unknown>
+      // Thin coercion wrapper from the shared convex-call schemas: top-level
+      // string values that decode as JSON coerce to their value (`"25"`
+      // becomes `25`), while other values pass through as-is.
+      args = a.parse(cliConvexCallArgsSchema, parsed)
     } catch {
       return fail("Invalid JSON body")
     }

@@ -35,6 +35,21 @@ test("convexFunctionCatalog covers every convex module with totals", () => {
   }
 })
 
+test("convexFunctionCatalog leaves no public function with unknown token shape", () => {
+  for (const [module, functions] of Object.entries(convexFunctionCatalog)) {
+    for (const [name, entry] of Object.entries(functions)) {
+      expect(entry.visibility === "internal" || entry.acceptsToken !== null, `${module}:${name}`).toBe(true)
+    }
+  }
+})
+
+test("convexFunctionCatalog marks userId/internal validators as tokenless", () => {
+  expect(convexFunctionCatalog.auth?.userEmailChange2ConfirmInternalMutation?.acceptsToken).toBe(false)
+  expect(convexFunctionCatalog.auth?.userPasswordChange2ConfirmInternalMutation?.acceptsToken).toBe(false)
+  expect(convexFunctionCatalog.auth?.userProfileUpdateInternalMutation?.acceptsToken).toBe(false)
+  expect(convexFunctionCatalog.org?.orgCleanupIfEmptyInternalMutation?.acceptsToken).toBe(false)
+})
+
 test("convexFunctionCatalog spot-checks known functions", () => {
   expect(convexFunctionCatalog["catalog"]?.["catalogEventListPublishedPageQuery"]).toEqual({
     kind: "query",
