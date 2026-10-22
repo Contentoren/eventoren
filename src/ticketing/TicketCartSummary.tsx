@@ -6,6 +6,7 @@ import { UiCard } from "../ui/UiCard.tsx"
 import type { TicketCart } from "./TicketCart.ts"
 import { ticketCartSummaryStateCreate } from "./ticketCartSummaryStateCreate.ts"
 import { ticketCheckoutText } from "./ticketCheckoutText.ts"
+import { TicketPaymentBrandIcons } from "./TicketPaymentBrandIcons.tsx"
 
 export function TicketCartSummary(props: {
   event: EventItem
@@ -157,9 +158,7 @@ export function TicketCartSummary(props: {
 
         <div class="flex flex-col gap-space-3 rounded-control bg-surface-muted/50 p-space-3">
           <p class="text-xs font-medium text-content">{text().paymentMethods}</p>
-          <ul class="text-xs text-content-muted" aria-label={text().supportedPaymentMethods}>
-            <For each={state.paymentHints()}>{(label) => <li>{label}</li>}</For>
-          </ul>
+          <TicketPaymentBrandIcons brands={state.paymentBrands()} label={text().supportedPaymentMethods} />
           <p class="text-xs text-content-muted">Die verfügbaren Zahlungsmethoden werden im Checkout angezeigt.</p>
         </div>
       </section>
