@@ -180,7 +180,17 @@ export function VeranstalterDashboardOrdersPage(p: {
         <Show when={state.detailError()}>
           <p role="alert">{state.detailError()}</p>
         </Show>
-        <Show when={state.detail()} fallback={<p role="status">Bestellung wird geladen …</p>}>
+        <Show
+          when={state.detail()}
+          fallback={
+            <Show
+              when={state.detailLoading()}
+              fallback={<Show when={state.detailNotFound()}>Bestellung nicht gefunden.</Show>}
+            >
+              <p role="status">Bestellung wird geladen …</p>
+            </Show>
+          }
+        >
           <VeranstalterDashboardOrderDetail state={state} />
         </Show>
       </Sheet>

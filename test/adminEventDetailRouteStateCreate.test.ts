@@ -12,6 +12,6 @@ test("initialized event detail edits survive live refresh and route navigation w
   ])
   const output = `${stdout}\n${stderr}`
   expect(exitCode, output).toBe(0)
-  expect(output).toContain("2 pass")
+  expect(output).toContain("3 pass")
   expect(output).toContain("0 fail")
 })

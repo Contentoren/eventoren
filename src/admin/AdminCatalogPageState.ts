@@ -17,6 +17,8 @@ export type AdminCatalogPageState = {
   tierDraft: Accessor<AdminTierDraft>
   isAuthorized: Accessor<boolean>
   isLoading?: Accessor<boolean>
+  isDone?: Accessor<boolean>
+  eventsError?: Accessor<string>
   errorMessage: Accessor<string>
   successMessage: Accessor<string>
   isSaving: Accessor<boolean>

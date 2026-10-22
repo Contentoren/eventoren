@@ -460,3 +460,33 @@ test("native admin orders react to filters and discard accumulated rows when aut
     })
   })
 })
+
+test("order detail shows loading on first paint and surfaces load errors", async () => {
+  await createRoot(async (dispose) => {
+    try {
+      let resolveDetails!: (
+        result:
+          | { readonly success: true; readonly data: AdminTicketOrderDetails }
+          | { readonly success: false; readonly errorMessage: string },
+      ) => void
+      const state = adminTicketOrdersPageStateCreate({
+        list: async () => ({ success: true, data: { page: [], continueCursor: "", isDone: true } }),
+        getDetails: () =>
+          new Promise((resolve) => {
+            resolveDetails = resolve
+          }),
+      })
+      const opened = state.orderOpen("order-1")
+      expect(state.detailsLoading()).toBe(true)
+      expect(state.details()).toBeNull()
+      expect(state.detailsError()).toBe("")
+      resolveDetails({ success: false, errorMessage: "Bestelldetails konnten nicht geladen werden." })
+      await opened
+      expect(state.detailsLoading()).toBe(false)
+      expect(state.details()).toBeNull()
+      expect(state.detailsError()).toBe("Bestelldetails konnten nicht geladen werden.")
+    } finally {
+      dispose()
+    }
+  })
+})

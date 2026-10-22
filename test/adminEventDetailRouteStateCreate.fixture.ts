@@ -91,6 +91,51 @@ test("saves the latest local title after a live snapshot refresh without replaci
   })
 })
 
+test("a missing event resolves while paginating and confirms missing or error only once exhausted", async () => {
+  await createRoot(async (dispose) => {
+    try {
+      eventKey.set("missing")
+      const loading = createSignalObject(false)
+      const done = createSignalObject(false)
+      const failure = createSignalObject("")
+      catalog = adminCatalogPageStateCreate({
+        events: () => [],
+        eventsLive: () => undefined,
+        isLoading: loading.get,
+        isDone: done.get,
+        eventsError: failure.get,
+        isServerAuthorized: () => true,
+        reloadEvents: async () => createResult([]),
+      })
+      const detail = adminEventDetailRouteStateCreate()
+      await flush()
+      expect(detail.event()).toBeUndefined()
+      expect(detail.loadError()).toBe("")
+      // Page one has no match but more pages are pending: keep resolving, never confirm missing.
+      expect(detail.isResolving()).toBe(true)
+      expect(detail.notFound()).toBe(false)
+      loading.set(true)
+      await flush()
+      expect(detail.isResolving()).toBe(true)
+      expect(detail.notFound()).toBe(false)
+      // Exhausted without a match: confirm missing.
+      loading.set(false)
+      done.set(true)
+      await flush()
+      expect(detail.isResolving()).toBe(false)
+      expect(detail.notFound()).toBe(true)
+      // A load error surfaces instead of the missing card.
+      failure.set("Admin-Veranstaltungen werden geladen.")
+      await flush()
+      expect(detail.loadError()).toBe("Admin-Veranstaltungen werden geladen.")
+      expect(detail.isResolving()).toBe(false)
+      expect(detail.notFound()).toBe(false)
+    } finally {
+      dispose()
+    }
+  })
+})
+
 test("navigation initializes the destination draft from its event, not the outgoing new-form edit", async () => {
   await createRoot(async (dispose) => {
     try {

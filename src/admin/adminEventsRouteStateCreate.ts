@@ -45,6 +45,12 @@ export function adminEventsRouteStateCreate() {
   const hiddenCategoryListResultGet = () => hiddenCategoriesResult()
 
   return adminCatalogPageStateCreate({
+    isLoading: liveEvents.isLoading,
+    isDone: liveEvents.isDone,
+    eventsError: () => {
+      const result = liveEventsResult()
+      return result && !result.success ? result.errorMessage : ""
+    },
     events: () => {
       const result = eventsResultGet()
       return result?.success ? result.data : []

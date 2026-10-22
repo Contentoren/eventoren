@@ -299,6 +299,34 @@ test("event context changes clear forms and pending; mismatched detail cannot be
   }
 })
 
+test("order detail loading, error and confirmed-missing states stay distinct", () => {
+  const h = harness()
+  try {
+    h.context("A")
+    expect(h.state.sheetOpen()).toBe(true)
+    expect(h.state.detail()).toBeUndefined()
+    expect(h.state.detailError()).toBe("")
+    // First paint resolves: never confirm missing while the query is pending.
+    expect(h.state.detailLoading()).toBe(true)
+    expect(h.state.detailNotFound()).toBe(false)
+    // A stale DTO for another order confirms missing without an error.
+    h.push("organizerDashboardOrderGetQuery", detailData("order-other"))
+    expect(h.state.detail()).toBeUndefined()
+    expect(h.state.detailLoading()).toBe(false)
+    expect(h.state.detailError()).toBe("")
+    expect(h.state.detailNotFound()).toBe(true)
+    // A failed load surfaces the error and neither loading nor missing.
+    const sub = h.subs.findLast((entry) => entry.active && entry.name === "organizerDashboardOrderGetQuery")
+    sub?.push(createResultError("organizerDashboardOrderGetQuery", "Abruf fehlgeschlagen."))
+    expect(h.state.detailError()).toBe("Abruf fehlgeschlagen.")
+    expect(h.state.detailLoading()).toBe(false)
+    expect(h.state.detailNotFound()).toBe(false)
+    expect(h.state.detail()).toBeUndefined()
+  } finally {
+    h.dispose()
+  }
+})
+
 const mutationActions = [
   {
     name: "contact",
