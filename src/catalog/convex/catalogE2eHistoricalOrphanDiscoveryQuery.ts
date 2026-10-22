@@ -6,6 +6,7 @@ import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryToken
 import { catalogAdminAuthorizeFn } from "./catalogAdminAuthorizeFn.js"
 import { catalogE2eLegacyTechnicalCheckoutEventKey } from "./catalogE2eLegacyTechnicalCheckoutCheck.js"
 import { catalogE2eRunMarkerExtract } from "./catalogE2eRunMarkerExtract.js"
+import { catalogE2eTestLikeEventCheck } from "./catalogE2eTestLikeEventCheck.js"
 
 const orderPageSize = 100
 
@@ -18,15 +19,16 @@ export type CatalogE2eHistoricalOrphanDiscoveryResult = {
   scannedOrders: number
   isDone: boolean
   continueCursor: string | null
-  candidates: { eventKey: string; runId: string; kind: "ticket-e2e" | "technical-checkout" }[]
+  candidates: { eventKey: string; runId: string; kind: "ticket-e2e" | "technical-checkout" | "test-like" }[]
 }
 
 /**
  * Read-only pre-deletion inventory of orphaned E2E-marked orders whose catalog
- * event row is already gone. Covers stale ticket-e2e test orders and the exact
- * approved technical-checkout fixture (test and live provider modes; Stripe
- * history is never touched). Persist before any orphan-deletion mutation so a
- * lost mutation response cannot orphan provider evidence. Marker checks are
+ * event row is already gone. Covers stale ticket-e2e test orders, previous-run
+ * test-like orphans with drifted markers, and the exact approved
+ * technical-checkout fixture (test and live provider modes; Stripe history is
+ * never touched). Persist before any orphan-deletion mutation so a lost
+ * mutation response cannot orphan provider evidence. Marker checks are
  * intentionally permissive; exact ownership proof stays with the deletion
  * mutation and the provider reconcilers.
  */
@@ -53,10 +55,24 @@ async function catalogE2eHistoricalOrphanDiscoveryAuthorized(
       candidates.push({ eventKey: order.eventKey, runId: order.eventKey, kind: "technical-checkout" })
       continue
     }
-    if (order.customerGivenName !== "E2E" || order.stripeMode !== "test") continue
-    if (!order.customerFamilyName) continue
+    if (order.stripeMode !== "test") continue
+    if (order.customerGivenName !== "E2E" || !order.customerFamilyName) continue
     const runId = catalogE2eRunMarkerExtract(`ticket-e2e-${order.customerFamilyName}`)
-    if (!runId.success) continue
+    if (!runId.success) {
+      const testLike = catalogE2eTestLikeEventCheck({
+        eventKey: order.eventKey,
+        title: order.eventTitle,
+        organizer: order.organizer,
+      })
+      if (!testLike.success) continue
+      const testEvent = await ctx.db
+        .query("catalogEvents")
+        .withIndex("eventKey", (q) => q.eq("eventKey", order.eventKey))
+        .unique()
+      if (testEvent) continue
+      candidates.push({ eventKey: order.eventKey, runId: order.eventKey, kind: "test-like" })
+      continue
+    }
     if (order.eventKey !== `ticket-e2e-${runId.data}`) continue
     const event = await ctx.db
       .query("catalogEvents")

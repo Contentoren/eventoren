@@ -10,6 +10,8 @@ import {
   catalogE2eLegacyTechnicalCheckoutEventKey,
 } from "./catalogE2eLegacyTechnicalCheckoutCheck.js"
 import { catalogE2eRunMarkerExtract } from "./catalogE2eRunMarkerExtract.js"
+import { catalogE2eTestLikeEventCheck } from "./catalogE2eTestLikeEventCheck.js"
+import { catalogE2eTestLikeOrphanOrderDelete } from "./catalogE2eTestLikeOrphanOrderDelete.js"
 
 const defaultStaleAfterMs = 24 * 60 * 60_000
 const orderPageSize = 100
@@ -35,9 +37,12 @@ export type CatalogE2eHistoricalOrphanOrderCleanupResult = {
  * each approved exact technical-checkout orphan (test or live provider mode,
  * explicitly fictitious snapshot corroboration) is deleted with its lines,
  * payment attempts, deliveries, fulfillment work, reservations, issued tickets
- * and check-in history. One paginated order page per execution; the caller
- * repeats with continueCursor until isDone. Anything ambiguous, foreign or
- * live-provider outside the exact technical-checkout key is left untouched.
+ * and check-in history. After the success barrier (staleAfterMs 0) the same
+ * page additionally sweeps previous-run test-like orphans (test-mode Stripe,
+ * event-absent, test-like key/title) with relaxed line proof. One paginated
+ * order page per execution; the caller repeats with continueCursor until
+ * isDone. Anything ambiguous, foreign or live-provider outside the exact
+ * technical-checkout key is left untouched.
  * Stripe financial history is never refunded or deleted.
  */
 export const catalogE2eHistoricalOrphanOrderCleanupMutation = mutation({
@@ -88,13 +93,35 @@ async function catalogE2eHistoricalOrphanOrderCleanupAuthorized(
       continue
     if (!order.customerFamilyName) continue
     const runId = catalogE2eRunMarkerExtract(`ticket-e2e-${order.customerFamilyName}`)
-    if (!runId.success) continue
-    if (
-      order.eventKey !== `ticket-e2e-${runId.data}` ||
-      order.eventTitle !== `Ticket E2E ${runId.data}` ||
-      order.organizer !== `Eventoren Ticket E2E ${runId.data}`
-    )
+    const markerDrifted =
+      runId.success &&
+      (order.eventKey !== `ticket-e2e-${runId.data}` ||
+        order.eventTitle !== `Ticket E2E ${runId.data}` ||
+        order.organizer !== `Eventoren Ticket E2E ${runId.data}`)
+    if (!runId.success || markerDrifted) {
+      // Previous-run test-like orphans with drifted or unparseable markers
+      // are swept only after the success barrier and only with a test-proven
+      // child graph; routine sweeps leave them untouched.
+      if (staleAfterMs !== 0) continue
+      const testLike = catalogE2eTestLikeEventCheck({
+        eventKey: order.eventKey,
+        title: order.eventTitle,
+        organizer: order.organizer,
+      })
+      if (!testLike.success) continue
+      const testEvent = await ctx.db
+        .query("catalogEvents")
+        .withIndex("eventKey", (q) => q.eq("eventKey", order.eventKey))
+        .unique()
+      if (testEvent) continue
+      const testDeleted = await catalogE2eTestLikeOrphanOrderDelete(ctx, order)
+      if (!testDeleted.success) continue
+      orphanOrdersDeleted += 1
+      orphanTicketsDeleted += testDeleted.data
       continue
+    }
+    // Exact marker proof survived the drift check above; the strict delete
+    // re-verifies the tuple before removing the graph.
     const event = await ctx.db
       .query("catalogEvents")
       .withIndex("eventKey", (q) => q.eq("eventKey", order.eventKey))

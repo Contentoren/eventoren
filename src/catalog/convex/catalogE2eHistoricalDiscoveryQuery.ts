@@ -7,6 +7,7 @@ import { catalogAdminAuthorizeFn } from "./catalogAdminAuthorizeFn.js"
 import { catalogE2eLegacyReadinessEventKey } from "./catalogE2eLegacyReadinessCheck.js"
 import { catalogE2eLegacyTechnicalCheckoutEventKey } from "./catalogE2eLegacyTechnicalCheckoutCheck.js"
 import { catalogE2eRunMarkerExtract } from "./catalogE2eRunMarkerExtract.js"
+import { catalogE2eTestLikeEventCheck } from "./catalogE2eTestLikeEventCheck.js"
 
 const eventPageSize = 100
 const nativeAuthKeyPattern = /^native-auth-[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
@@ -24,7 +25,7 @@ export type CatalogE2eHistoricalDiscoveryResult = {
   candidates: {
     eventKey: string
     runId: string
-    kind: "ticket-e2e" | "native-auth" | "readiness" | "technical-checkout"
+    kind: "ticket-e2e" | "native-auth" | "readiness" | "technical-checkout" | "test-like"
   }[]
 }
 
@@ -35,8 +36,9 @@ export type CatalogE2eHistoricalDiscoveryResult = {
  * provider scans reuse this inventory even when the deletion receipt is lost.
  * Shape-only routing is intentionally permissive (exact keys and valid marker
  * shapes, including historical single-marker native-auth keys that carry the
- * run plus a UUID); ownership proof stays with the deletion mutation and the
- * provider reconcilers, never with this inventory.
+ * run plus a UUID, plus previous-run test-like fixtures with drifted markers
+ * or generic test text); ownership proof stays with the deletion mutation and
+ * the provider reconcilers, never with this inventory.
  */
 export const catalogE2eHistoricalDiscoveryQuery = query({
   args: argsValidator,
@@ -70,6 +72,19 @@ async function catalogE2eHistoricalDiscoveryAuthorized(
     }
     const marker = catalogE2eRunMarkerExtract(event.eventKey)
     if (marker.success) candidates.push({ eventKey: event.eventKey, runId: marker.data, kind: "ticket-e2e" })
+    else {
+      const testLike = catalogE2eTestLikeEventCheck({
+        eventKey: event.eventKey,
+        title: event.title,
+        organizer: event.organizer,
+      })
+      if (testLike.success)
+        candidates.push({
+          eventKey: event.eventKey,
+          runId: testLike.data.runId ?? event.eventKey,
+          kind: "test-like",
+        })
+    }
   }
   return createResult({
     scannedEvents: batch.page.length,

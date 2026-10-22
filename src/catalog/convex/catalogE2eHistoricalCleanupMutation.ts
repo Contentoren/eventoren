@@ -15,6 +15,8 @@ import { catalogE2eOwnedEventCheck } from "./catalogE2eOwnedEventCheck.js"
 import { catalogE2eOwnedGraphDelete } from "./catalogE2eOwnedGraphDelete.js"
 import { catalogE2eOwnedGraphProve } from "./catalogE2eOwnedGraphProve.js"
 import { catalogE2eRunMarkerExtract } from "./catalogE2eRunMarkerExtract.js"
+import { catalogE2eTestLikeEventCheck } from "./catalogE2eTestLikeEventCheck.js"
+import { catalogE2eTestLikeGraphProve } from "./catalogE2eTestLikeGraphProve.js"
 
 const defaultStaleAfterMs = 24 * 60 * 60_000
 const eventPageSize = 100
@@ -36,7 +38,7 @@ export type CatalogE2eHistoricalCleanupResult = {
   cleaned: {
     eventKey: string
     runId: string
-    kind: "ticket-e2e" | CatalogE2eLegacyTechnicalKind
+    kind: "ticket-e2e" | CatalogE2eLegacyTechnicalKind | "test-like"
     product: "absent" | "deleted"
     deletedOrders: number
     deletedTickets: number
@@ -69,7 +71,11 @@ export type CatalogE2eHistoricalCleanupResult = {
  * their owned graph, and approved legacy technical fixtures (native-auth run
  * events including archived rows, the synchronization-only readiness draft, and
  * the explicitly fictitious technical-checkout event) are swept regardless of
- * age. Each call processes one event page; the caller drains with
+ * age. After the success barrier (staleAfterMs 0) the same page additionally
+ * sweeps previous-run test-like fixtures that failed exact ownership:
+ * drifted run-marker titles/organizers and generic test-like text whose whole
+ * order graph is test-proven (test-mode Stripe only, no live revenue).
+ * Each call processes one event page; the caller drains with
  * continueCursor until isDone. Derived catalog sync snapshots/chunks are never
  * touched here: the standalone paged snapshot discovery/cleanup APIs are the
  * sole authoritative global collector (the old per-page bounded global sweep
@@ -99,6 +105,50 @@ async function catalogE2eHistoricalCleanupAuthorized(
   const now = Date.now()
   const cleaned: CatalogE2eHistoricalCleanupResult["cleaned"] = []
   const skipped: CatalogE2eHistoricalCleanupResult["skipped"] = []
+  const fullCleanup = staleAfterMs === 0
+  // Previous-run test data with drifted markers (renamed titles, generic
+  // test text, uncorroborated native-auth keys) is invisible to exact
+  // ownership. After the success barrier it is swept when its whole graph
+  // is test-proven. Returns true when the event was test-like and handled
+  // (cleaned or recorded as skipped); false leaves the caller disposition
+  // untouched. Exact legacy keys never fall through here: a failed legacy
+  // corroboration may guard genuine content and stays a refusal.
+  const testLikeSweep = async (event: Doc<"catalogEvents">): Promise<boolean> => {
+    if (!fullCleanup) return false
+    const testLike = catalogE2eTestLikeEventCheck({
+      eventKey: event.eventKey,
+      title: event.title,
+      organizer: event.organizer,
+    })
+    if (!testLike.success) return false
+    if (testLike.data.reason === "legacy-key") return false
+    const testProven = await catalogE2eTestLikeGraphProve(ctx, {
+      event,
+      runId: testLike.data.runId ?? event.eventKey,
+    })
+    if (!testProven.success) {
+      skipped.push({ eventKey: event.eventKey, reason: testProven.errorMessage })
+      return true
+    }
+    const testDeleted = await catalogE2eOwnedGraphDelete(ctx, args.userId, testProven.data)
+    if (!testDeleted.success) {
+      skipped.push({ eventKey: event.eventKey, reason: testDeleted.errorMessage })
+      return true
+    }
+    cleaned.push({
+      eventKey: event.eventKey,
+      runId: testProven.data.runId,
+      kind: "test-like",
+      product: testProven.data.tier ? "deleted" : "absent",
+      deletedOrders: testDeleted.data.deletedOrders,
+      deletedTickets: testDeleted.data.deletedTickets,
+      deletedCheckInHistory: testDeleted.data.deletedCheckInHistory,
+      deletedScannerLinks: testDeleted.data.deletedScannerLinks,
+      prunedScannerLinks: testDeleted.data.prunedScannerLinks,
+      paidHistory: testDeleted.data.paidHistory,
+    })
+    return true
+  }
   for (const event of batch.page) {
     const legacyKind = catalogE2eHistoricalLegacyKindFor(event)
     if (!legacyKind) {
@@ -107,7 +157,10 @@ async function catalogE2eHistoricalCleanupAuthorized(
         title: event.title,
         organizer: event.organizer,
       })
-      if (!owned.success) continue
+      if (!owned.success) {
+        await testLikeSweep(event)
+        continue
+      }
       if (now - event._creationTime < staleAfterMs) continue
       const proven = await catalogE2eOwnedGraphProve(ctx, {
         event,
@@ -138,6 +191,9 @@ async function catalogE2eHistoricalCleanupAuthorized(
     }
     const proven = await catalogE2eLegacyTechnicalGraphProve(ctx, { event, kind: legacyKind })
     if (!proven.success) {
+      // Exact legacy keys stay refusals even here (see testLikeSweep); only
+      // native-auth-shaped drafts fall through to the test-like sweep.
+      if (legacyKind === "native-auth" && (await testLikeSweep(event))) continue
       skipped.push({ eventKey: event.eventKey, reason: proven.errorMessage })
       continue
     }
