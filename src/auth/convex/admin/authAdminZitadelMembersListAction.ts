@@ -72,7 +72,7 @@ type AdminZitadelMember = {
   organizerInvitedAt?: string
   preferredLoginName?: string
   userName: string
-  zitadelRoles: readonly ("customer" | "organizer" | "admin")[]
+  zitadelRoles: readonly ("customer" | "organizer" | "admin" | "user")[]
   zitadelUserId: string
 }
 

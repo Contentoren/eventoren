@@ -16,5 +16,10 @@ export function zitadelRolesForOrganizationRead(
 }
 
 function isZitadelRole(value: string): value is ZitadelRole {
-  return value === zitadelRole.customer || value === zitadelRole.organizer || value === zitadelRole.admin
+  return (
+    value === zitadelRole.customer ||
+    value === zitadelRole.organizer ||
+    value === zitadelRole.admin ||
+    value === zitadelRole.user
+  )
 }

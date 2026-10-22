@@ -17,7 +17,7 @@ export async function adminZitadelOrganizerGrant(
     readonly organizerGranted: boolean
     readonly organizerInvitedAt?: string
     readonly operation: "grant" | "revoke"
-    readonly zitadelRoles: readonly ("customer" | "organizer" | "admin")[]
+    readonly zitadelRoles: readonly ("customer" | "organizer" | "admin" | "user")[]
     readonly zitadelUserId: string
   }>
 > {

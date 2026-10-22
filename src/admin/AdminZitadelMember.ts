@@ -7,6 +7,6 @@ export type AdminZitadelMember = {
   readonly organizerInvitedAt?: string
   readonly preferredLoginName?: string
   readonly userName: string
-  readonly zitadelRoles: readonly ("customer" | "organizer" | "admin")[]
+  readonly zitadelRoles: readonly ("customer" | "organizer" | "admin" | "user")[]
   readonly zitadelUserId: string
 }

@@ -43,5 +43,10 @@ test("convexFunctionCatalog spot-checks known functions", () => {
   })
   expect(convexFunctionCatalog["publicProjectInfo"]?.["publicProjectInfo"]?.kind).toBe("query")
   expect(convexFunctionCatalog["auth"]?.["apiKeyCreateMutation"]?.acceptsToken).toBe(true)
+  expect(convexFunctionCatalog["auth"]?.["authAdminZitadelRolesSetAction"]).toEqual({
+    kind: "action",
+    visibility: "public",
+    acceptsToken: true,
+  })
   expect(convexFunctionCatalog["auth"]?.["apiKeyExpireInternalMutation"]?.visibility).toBe("internal")
 })

@@ -42,5 +42,10 @@ function claimZitadelRoles(userInfo: Record<string, unknown>): ZitadelRole[] | u
 }
 
 function isZitadelRole(value: string): value is ZitadelRole {
-  return value === zitadelRole.customer || value === zitadelRole.organizer || value === zitadelRole.admin
+  return (
+    value === zitadelRole.customer ||
+    value === zitadelRole.organizer ||
+    value === zitadelRole.admin ||
+    value === zitadelRole.user
+  )
 }

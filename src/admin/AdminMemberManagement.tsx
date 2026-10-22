@@ -1,7 +1,7 @@
-import { mdiMinus } from "@adaptive-ds/mdi/mdiMinus.js"
-import { mdiPlus } from "@adaptive-ds/mdi/mdiPlus.js"
+import { mdiPencilOutline } from "@adaptive-ds/mdi/mdiPencilOutline.js"
 import { For, Show } from "solid-js"
 import { Dynamic } from "solid-js/web"
+import { CheckMultiple } from "#ui/input/check/CheckMultiple.jsx"
 import { CheckSingle } from "#ui/input/check/CheckSingle.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
@@ -9,6 +9,7 @@ import { Button } from "#ui/interactive/button/Button.jsx"
 import { ButtonIcon } from "#ui/interactive/button/ButtonIcon.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
+import { UiDialog } from "../ui/UiDialog.tsx"
 import { adminListViewPreferenceContextUse } from "../viewPreference/adminListViewPreferenceContextUse.ts"
 import type { AdminMemberManagementState } from "./AdminMemberManagementState.ts"
 
@@ -39,19 +40,17 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
       <ButtonIcon
         class="w-full lg:w-auto"
         variant="contrast"
-        icon={member.organizerGranted ? mdiMinus : mdiPlus}
+        icon={mdiPencilOutline}
         disabled={state.isUpdating(member.zitadelUserId)}
-        aria-label={`${member.organizerGranted ? state.text().revoke : state.text().grant}: ${member.displayName || member.userName}`}
-        onClick={() => void state.roleChange(member)}
+        aria-label={`${state.text().edit}: ${member.displayName || member.userName}`}
+        onClick={() => state.openEdit(member)}
       >
-        {state.isUpdating(member.zitadelUserId)
-          ? state.text().updating
-          : member.organizerGranted
-            ? state.text().revoke
-            : state.text().grant}
+        {state.isUpdating(member.zitadelUserId) ? state.text().updating : state.text().edit}
       </ButtonIcon>
     </>
   )
+
+  const editingMember = () => state.editingMember()
 
   return (
     <section aria-labelledby="admin-member-management-title" class="flex flex-col gap-5">
@@ -93,10 +92,8 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
                 id="admin-member-role-filter"
                 class="sm:pb-2 [.admin-workspace_&]:rounded-lg [.admin-workspace_&]:border-0 [.admin-workspace_&]:bg-surface-muted/60 dark:[.admin-workspace_&]:bg-slate-800/60"
                 valueSignal={state.roleFilter}
-                getOptions={() => ["all", "admin", "organizer"]}
-                valueText={(role) =>
-                  role === "all" ? "Alle" : role === "organizer" ? "Veranstalter" : state.text().roleName(role)
-                }
+                getOptions={() => ["all", ...state.availableRoles()]}
+                valueText={(role) => (role === "all" ? "Alle" : state.text().roleName(role))}
                 disallowDeselection
               />
             </fieldset>
@@ -186,6 +183,49 @@ export function AdminMemberManagement(props: { readonly state: AdminMemberManage
           </Show>
         </div>
       </Dynamic>
+
+      <Show when={editingMember()}>
+        {(member) => (
+          <UiDialog
+            open={true}
+            onClose={() => state.closeEdit()}
+            title={state.text().dialogTitle}
+            description={state.text().dialogDescription}
+          >
+            <div class="flex flex-col gap-5">
+              <p class="truncate text-sm font-semibold text-content">{member().displayName || member().userName}</p>
+              <fieldset>
+                <legend class="mb-2 text-xs font-semibold uppercase tracking-wide text-content-muted">
+                  {state.text().role}
+                </legend>
+                <CheckMultiple
+                  id="admin-member-roles-edit"
+                  valueSignal={state.draftRoles}
+                  getOptions={() => [...state.availableRoles()]}
+                  valueText={(role) => state.text().roleName(role)}
+                />
+              </fieldset>
+              <Show when={state.errorMessage()}>
+                <p role="alert" class="text-sm text-danger">
+                  {state.errorMessage()}
+                </p>
+              </Show>
+              <div class="flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => state.closeEdit()}>
+                  {state.text().cancel}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => void state.saveRoles()}
+                  disabled={state.isUpdating(member().zitadelUserId) || state.draftRoles.get().length === 0}
+                >
+                  {state.isUpdating(member().zitadelUserId) ? state.text().updating : state.text().save}
+                </Button>
+              </div>
+            </div>
+          </UiDialog>
+        )}
+      </Show>
     </section>
   )
 }

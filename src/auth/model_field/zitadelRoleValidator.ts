@@ -5,4 +5,5 @@ export const zitadelRoleValidator = v.union(
   v.literal(zitadelRole.customer),
   v.literal(zitadelRole.organizer),
   v.literal(zitadelRole.admin),
+  v.literal(zitadelRole.user),
 )

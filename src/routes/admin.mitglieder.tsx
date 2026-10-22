@@ -1,18 +1,28 @@
 import { createFileRoute } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
+import * as v from "valibot"
 import { AdminMemberManagement } from "../admin/AdminMemberManagement.tsx"
 import { adminMemberManagementStateCreate } from "../admin/adminMemberManagementStateCreate.ts"
+import { zitadelRole } from "../auth/model_field/zitadelRole.ts"
 import { adminZitadelMembersGet } from "../server/adminZitadelMembersGet.ts"
-import { adminZitadelOrganizerGrantFromSession } from "../server/adminZitadelOrganizerGrantFromSession.ts"
+import { adminZitadelRolesSetFromSession } from "../server/adminZitadelRolesSetFromSession.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 
 const getAdminMembers = createServerFn({ method: "GET" })
   .validator((input: { readonly limit?: number; readonly offset?: number; readonly search?: string }) => input)
   .handler(({ data }) => adminZitadelMembersGet(data))
 
-const changeAdminMemberRole = createServerFn({ method: "POST" })
-  .validator((input: { readonly operation: "grant" | "revoke"; readonly zitadelUserId: string }) => input)
-  .handler(({ data }) => adminZitadelOrganizerGrantFromSession(data))
+const rolesSchema = v.array(
+  v.picklist([zitadelRole.admin, zitadelRole.user, zitadelRole.organizer, zitadelRole.customer]),
+)
+
+const changeAdminMemberRoles = createServerFn({ method: "POST" })
+  .validator((input: { readonly roles: readonly string[]; readonly zitadelUserId: string }) => {
+    const parsed = v.safeParse(v.object({ roles: rolesSchema, zitadelUserId: v.string() }), input)
+    if (!parsed.success) throw new Error(v.summarize(parsed.issues))
+    return parsed.output
+  })
+  .handler(({ data }) => adminZitadelRolesSetFromSession(data))
 
 export const Route = createFileRoute("/admin/mitglieder")({
   component: AdminMembersRoute,
@@ -21,7 +31,7 @@ export const Route = createFileRoute("/admin/mitglieder")({
 function AdminMembersRoute() {
   const state = adminMemberManagementStateCreate({
     list: (input) => getAdminMembers({ data: { search: input.search } }),
-    roleChange: (input) => changeAdminMemberRole({ data: input }),
+    setRoles: (input) => changeAdminMemberRoles({ data: input }),
   })
 
   return (

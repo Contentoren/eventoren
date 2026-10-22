@@ -6,22 +6,25 @@ import { adminMemberManagementStateCreate } from "../src/admin/adminMemberManage
 import { adminOrganizerMembersPageStateCreate } from "../src/admin/adminOrganizerMembersPageStateCreate.ts"
 import { demoAdminMemberManagementStateCreate } from "../src/demo/state/demoAdminMemberManagementStateCreate.ts"
 
-test("shows only admin or organizer members for all and honors each role filter", async () => {
+test("shows members with any role for all and honors each role filter", async () => {
   const admin = memberCreate("admin-1", false, ["admin"])
   const organizer = memberCreate("organizer-1", true)
   const customer = memberCreate("customer-1", false)
+  const user = memberCreate("user-1", false, ["user"])
   const empty = memberCreate("empty-1", false, [])
   const state = adminMemberManagementStateCreate({
-    list: async () => createResult({ members: [admin, organizer, customer, empty], total: 4 }),
+    list: async () => createResult({ members: [admin, organizer, customer, user, empty], total: 5 }),
   })
 
   await state.reload()
 
-  expect(state.members()).toEqual([admin, organizer])
+  expect(state.members()).toEqual([admin, organizer, customer, user])
   state.roleFilter.set("admin")
   expect(state.members()).toEqual([admin])
   state.roleFilter.set("organizer")
   expect(state.members()).toEqual([organizer])
+  state.roleFilter.set("user")
+  expect(state.members()).toEqual([user])
 })
 
 test("initializes the role filter to all and search to empty before hydration despite URL parameters", () => {
@@ -49,14 +52,13 @@ test("initializes the role filter to all and search to empty before hydration de
   }
 })
 
-test.each(["admin", "organizer"] as const)(
+test.each(["admin", "organizer", "customer", "user"] as const)(
   "restores the %s URL role filter and search on mount before loading without rewriting history",
   async (role) => {
     const previousWindow = globalThis.window
     const href = `https://eventoren.test/admin/mitglieder?memberRole=${role}&memberSearch=testadmin`
     const replaceState = mock(() => {})
-    const admin = memberCreate("admin-1", false, ["admin"])
-    const organizer = memberCreate("organizer-1", true)
+    const target = memberCreate(`${role}-1`, role === "organizer", [role])
     let mount: (() => void) | undefined
     // Bun uses Solid's server runtime; capture the mount callback to run it explicitly.
     const mountSpy = spyOn(solid, "onMount").mockImplementation((callback) => {
@@ -72,7 +74,7 @@ test.each(["admin", "organizer"] as const)(
       expect(state.roleFilter.get()).toBe(role)
       expect(state.search()).toBe("testadmin")
       expect(input).toEqual({ search: "testadmin" })
-      return createResult({ members: [admin, organizer], total: 2 })
+      return createResult({ members: [target], total: 1 })
     })
 
     try {
@@ -92,7 +94,7 @@ test.each(["admin", "organizer"] as const)(
       await Promise.resolve()
 
       expect(state.hasLoaded()).toBe(true)
-      expect(state.members()).toEqual([role === "admin" ? admin : organizer])
+      expect(state.members()).toEqual([target])
       expect(replaceState).not.toHaveBeenCalled()
       expect(globalThis.window.location.href).toBe(href)
     } finally {
@@ -104,10 +106,14 @@ test.each(["admin", "organizer"] as const)(
   },
 )
 
-test("demo all filter excludes customer-only members", () => {
+test("demo all filter shows every member carrying at least one role", () => {
   const state = demoAdminMemberManagementStateCreate()
 
-  expect(state.members().map((member) => member.zitadelUserId)).toEqual(["demo-zitadel-mara", "demo-zitadel-support"])
+  expect(state.members().map((member) => member.zitadelUserId)).toEqual([
+    "demo-zitadel-mara",
+    "demo-zitadel-jonas",
+    "demo-zitadel-support",
+  ])
 })
 
 test("loads the member directory through the server session when the browser token is unavailable", async () => {
@@ -127,32 +133,38 @@ test("loads the member directory through the server session when the browser tok
   expect(state.total()).toBe(1)
 })
 
-test("changes member roles through the injected server action without a browser token", async () => {
+test("edits member roles through the injected set-roles action without a browser token", async () => {
   const member = memberCreate("member-1", false, ["admin"])
-  const operations: { operation: "grant" | "revoke"; zitadelUserId: string }[] = []
+  const calls: { readonly roles: readonly string[]; readonly zitadelUserId: string }[] = []
   const state = adminMemberManagementStateCreate({
     list: async () => createResult({ members: [member], total: 1 }),
-    roleChange: async (input) => {
-      operations.push(input)
-      const organizerGranted = input.operation === "grant"
+    setRoles: async (input) => {
+      calls.push(input)
+      const organizerGranted = input.roles.includes("organizer")
       return createResult({
+        eventorenUserId: "eventoren-member-1",
         organizerGranted,
-        operation: input.operation,
-        zitadelRoles: organizerGranted ? ["admin", "organizer"] : ["admin"],
+        organizerInvitedAt: organizerGranted ? "2026-10-22T00:00:00.000Z" : undefined,
+        roles: [...input.roles] as ("admin" | "organizer")[],
         zitadelUserId: input.zitadelUserId,
       })
     },
   })
 
   await state.reload()
-  await state.roleChange(member)
-  await state.roleChange({ ...member, organizerGranted: true })
+  state.openEdit(member)
 
-  expect(operations).toEqual([
-    { operation: "grant", zitadelUserId: "member-1" },
-    { operation: "revoke", zitadelUserId: "member-1" },
-  ])
-  expect(state.members()[0]?.organizerGranted).toBe(false)
+  expect(state.editingMember()).toEqual(member)
+  expect(state.draftRoles.get()).toEqual(["admin"])
+
+  state.draftRoles.set(["admin", "organizer"])
+  await state.saveRoles()
+
+  expect(calls).toEqual([{ roles: ["admin", "organizer"], zitadelUserId: "member-1" }])
+  expect(state.members()[0]?.zitadelRoles).toEqual(["admin", "organizer"])
+  expect(state.members()[0]?.organizerGranted).toBe(true)
+  expect(state.editingMember()).toBeUndefined()
+  expect(state.successMessage()).toBe(state.text().saved)
 })
 
 test("tracks initial loading and preserves member directory state on refresh", async () => {

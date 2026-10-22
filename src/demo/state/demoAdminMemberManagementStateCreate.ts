@@ -1,7 +1,9 @@
 import { createMemo } from "solid-js"
+import type { ZitadelRole } from "#src/auth/model_field/zitadelRole.ts"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { AdminMemberManagementState } from "../../admin/AdminMemberManagementState.ts"
 import type { AdminZitadelMember } from "../../admin/AdminZitadelMember.ts"
+import { adminAvailableRolesRead } from "../../admin/adminAvailableRoles.ts"
 import { adminMemberManagementText } from "../../admin/adminMemberManagementText.ts"
 import { demoAdminMembers } from "../fixtures/demoAdminMembers.ts"
 import type { DemoFlowContextValue } from "./demoFlowContext.ts"
@@ -22,8 +24,10 @@ export function demoAdminMemberManagementStateCreate(
 
   const baseMembers = createSignalObject<readonly AdminZitadelMember[]>(scenario === "empty" ? [] : demoAdminMembers)
   const search = createSignalObject("")
-  const roleFilter = createSignalObject<"all" | "admin" | "organizer">("all")
+  const roleFilter = createSignalObject<"all" | ZitadelRole>("all")
   const updatingMemberIds = createSignalObject<readonly string[]>([])
+  const editingMember = createSignalObject<AdminZitadelMember | undefined>(undefined)
+  const draftRoles = createSignalObject<ZitadelRole[]>([])
   const baseErrorMessage = createSignalObject(
     scenario === "error" ? "Die Mitglieder konnten nicht geladen werden." : "",
   )
@@ -39,12 +43,11 @@ export function demoAdminMemberManagementStateCreate(
   const members = () => {
     if (isLoading() || isError() || isEmpty()) return []
     const selected = roleFilter.get()
-    if (selected === "all") {
-      return baseMembers
-        .get()
-        .filter((member) => member.zitadelRoles.includes("admin") || member.zitadelRoles.includes("organizer"))
-    }
-    return baseMembers.get().filter((member) => member.zitadelRoles.includes(selected))
+    return baseMembers
+      .get()
+      .filter(
+        (member) => member.zitadelRoles.length > 0 && (selected === "all" || member.zitadelRoles.includes(selected)),
+      )
   }
 
   const total = () => members().length
@@ -88,15 +91,27 @@ export function demoAdminMemberManagementStateCreate(
   const searchChange = (value: string) => search.set(value)
   const searchSubmit = async () => reload()
 
-  const roleChange = async (member: AdminZitadelMember) => {
+  const openEdit = (member: AdminZitadelMember) => {
+    baseErrorMessage.set("")
+    successMessage.set("")
+    editingMember.set(member)
+    draftRoles.set([...member.zitadelRoles])
+  }
+
+  const closeEdit = () => {
+    editingMember.set(undefined)
+  }
+
+  const saveRoles = async () => {
+    const member = editingMember.get()
+    if (!member) return
+    const roles = [...new Set(draftRoles.get())]
+    if (roles.length === 0) return baseErrorMessage.set(text().emptyRoles)
     updatingMemberIds.set([...updatingMemberIds.get(), member.zitadelUserId])
     baseErrorMessage.set("")
     successMessage.set("")
     await Promise.resolve()
-    const organizerGranted = !member.organizerGranted
-    const zitadelRoles: AdminZitadelMember["zitadelRoles"] = organizerGranted
-      ? Array.from(new Set<"customer" | "organizer" | "admin">([...member.zitadelRoles, "organizer"]))
-      : member.zitadelRoles.filter((role) => role !== "organizer")
+    const organizerGranted = roles.includes("organizer")
     baseMembers.set(
       baseMembers.get().map((candidate) =>
         candidate.zitadelUserId === member.zitadelUserId
@@ -104,13 +119,14 @@ export function demoAdminMemberManagementStateCreate(
               ...candidate,
               eventorenRole: organizerGranted ? "organizer" : "customer",
               organizerGranted,
-              zitadelRoles,
+              zitadelRoles: roles,
             }
           : candidate,
       ),
     )
     updatingMemberIds.set(updatingMemberIds.get().filter((id) => id !== member.zitadelUserId))
-    successMessage.set(organizerGranted ? text().granted : text().revoked)
+    editingMember.set(undefined)
+    successMessage.set(text().saved)
   }
 
   const invitationFormat = (timestamp: string | undefined) => {
@@ -125,15 +141,20 @@ export function demoAdminMemberManagementStateCreate(
   }
 
   return {
+    availableRoles: () => adminAvailableRolesRead(baseMembers.get()),
+    closeEdit,
+    draftRoles,
+    editingMember: editingMember.get,
     errorMessage,
     hasLoaded,
     invitationFormat,
     isLoading,
     isUpdating: (zitadelUserId) => updatingMemberIds.get().includes(zitadelUserId),
     members,
+    openEdit,
     reload,
-    roleChange,
     roleFilter,
+    saveRoles,
     search: search.get,
     searchChange,
     searchSubmit,

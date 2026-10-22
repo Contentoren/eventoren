@@ -89,7 +89,7 @@ type AdminZitadelOrganizerGrantResult = {
   organizerGranted: boolean
   organizerInvitedAt?: string
   operation: "grant" | "revoke"
-  zitadelRoles: readonly ("customer" | "organizer" | "admin")[]
+  zitadelRoles: readonly ("customer" | "organizer" | "admin" | "user")[]
   zitadelUserId: string
 }
 

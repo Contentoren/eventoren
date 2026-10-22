@@ -30,6 +30,7 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
     "apiKeyRotateMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
     "authAdminZitadelMembersListAction": { kind: "action", visibility: "public", acceptsToken: true },
     "authAdminZitadelOrganizerGrantAction": { kind: "action", visibility: "public", acceptsToken: true },
+    "authAdminZitadelRolesSetAction": { kind: "action", visibility: "public", acceptsToken: true },
     "authCurrentUserByTokenInternalQuery": { kind: "internalQuery", visibility: "internal", acceptsToken: true },
     "authCurrentUserGetQuery": { kind: "query", visibility: "public", acceptsToken: true },
     "authLegacyDevUsersMigrateInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
@@ -352,12 +353,12 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
 
 export const convexFunctionCatalogTotals = {
   modules: 31,
-  functions: 266,
-  public: 187,
+  functions: 267,
+  public: 188,
   internal: 79,
   query: 84,
   mutation: 91,
-  action: 12,
+  action: 13,
   internalQuery: 16,
   internalMutation: 49,
   internalAction: 14,

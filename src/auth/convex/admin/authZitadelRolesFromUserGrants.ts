@@ -10,7 +10,12 @@ export function authZitadelRolesFromUserGrants(grants: readonly UserGrant[]): re
   for (const grant of grants) {
     if (grant.state !== "active") continue
     for (const roleKey of grant.roleKeys) {
-      if (roleKey === zitadelRole.customer || roleKey === zitadelRole.organizer || roleKey === zitadelRole.admin) {
+      if (
+        roleKey === zitadelRole.customer ||
+        roleKey === zitadelRole.organizer ||
+        roleKey === zitadelRole.admin ||
+        roleKey === zitadelRole.user
+      ) {
         roles.add(roleKey)
       }
     }
