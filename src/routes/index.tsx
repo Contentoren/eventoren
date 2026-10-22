@@ -32,7 +32,7 @@ export const Route = createFileRoute("/")({
     result: await (isServer ? getCatalogEvents({ data: filter }) : cataloguePublicPageFetch(filter)),
   }),
   head: () => ({
-    meta: seo.pageMeta({ title: siteName, description, path: "/" }),
+    meta: [...seo.pageMeta({ title: siteName, description, path: "/" }), { name: "robots", content: "index, follow" }],
     links: [seo.canonicalLink("/")],
   }),
   component: () => <HomePage initialPage={Route.useLoaderData()} />,

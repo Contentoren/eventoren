@@ -8,11 +8,14 @@ import { LegalPage } from "../marketing/LegalPage.js"
 export const Route = createFileRoute("/impressum")({
   loader: () => legal.htmlGet("impressum"),
   head: () => ({
-    meta: seo.pageMeta({
-      title: "Impressum",
-      description: "Gesetzliche Betreiberangaben und Kontaktinformationen dieser Website.",
-      path: "/impressum",
-    }),
+    meta: [
+      ...seo.pageMeta({
+        title: "Impressum",
+        description: "Gesetzliche Betreiberangaben und Kontaktinformationen dieser Website.",
+        path: "/impressum",
+      }),
+      { name: "robots", content: "index, follow" },
+    ],
     links: [
       { rel: "canonical", href: seo.canonicalLink("/impressum").href },
       { rel: "stylesheet", href: markdownCss },
