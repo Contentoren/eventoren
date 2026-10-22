@@ -310,12 +310,17 @@ export function veranstalterDashboardPreisePageStateCreate(inputs: {
     }
   }
 
+  const scopeError = (): string | null => {
+    const failed = [phases(), codes()].find((result) => result !== undefined && !result.success)
+    return failed !== undefined && !failed.success ? failed.errorMessage : null
+  }
   return {
     page,
     canTickets,
     canCodes,
     phases,
     codes,
+    scopeError,
     busy: busy.get,
     message: message.get,
     phaseTier,

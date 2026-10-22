@@ -50,7 +50,7 @@ export const organizerDashboardPhaseUpsertMutation = mutation({
           ...(soldCount !== undefined ? { soldCount } : {}),
           ...(sortOrder !== undefined ? { sortOrder } : {}),
         })
-        if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+        if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
         const input = parsed.output
         const scope = await organizerDashboardPricingEventScopeGet(ctx, orgId, input.eventKey, op, input.tierKey)
         if (!scope.success) return scope

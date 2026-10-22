@@ -58,7 +58,7 @@ export const organizerDashboardEventStatsQuery = query({
         orgId: String(orgId),
         eventKey,
       })
-      if (!filters.success) return createResultError(op, a.summarize(filters.issues))
+      if (!filters.success) return createResultError(op, filters.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const scope = await organizerDashboardFinanceEventScopeGet(ctx, orgId, filters.output.eventKey, op)
       if (!scope.success) return scope
       const event = scope.data.event

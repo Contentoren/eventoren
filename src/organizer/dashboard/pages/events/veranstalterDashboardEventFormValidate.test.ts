@@ -37,6 +37,31 @@ describe("veranstalterDashboardEventFormValidate rejects invalid base input", ()
   })
 })
 
+describe("veranstalterDashboardEventFormValidate speaks German", () => {
+  const englishPattern = /invalid|must be|expected|received|required|cannot|empty|missing|unknown/i
+  test("missing title explains in German", () => {
+    const result = veranstalterDashboardEventFormValidate({ ...validForm, title: "  " })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.errorMessage).toContain("Veranstaltungstitel")
+    expect(result.errorMessage).not.toMatch(englishPattern)
+  })
+
+  test("end before start explains in German", () => {
+    const result = veranstalterDashboardEventFormValidate({ ...validForm, endsAtLocal: "2027-06-01T19:00" })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.errorMessage).toBe("Das Ende muss nach dem Beginn liegen.")
+  })
+
+  test("impossible date explains in German", () => {
+    const result = veranstalterDashboardEventFormValidate({ ...validForm, startsAtLocal: "2027-02-30T20:00" })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.errorMessage).not.toMatch(englishPattern)
+  })
+})
+
 describe("veranstalterDashboardEventFormValidate converts Berlin wall time to UTC", () => {
   test("June CEST input persists as UTC instant", () => {
     const result = veranstalterDashboardEventFormValidate(validForm)

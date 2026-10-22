@@ -39,7 +39,7 @@ export const organizerDashboardBoxOfficeSaleTestPayMutation = mutation({
       const auth = await organizerDashboardAuthorize(mutationCtx, userId, orgId, "abendkasse.nutzen")
       if (!auth.success) return auth
       const parsed = a.safeParse(organizerDashboardBoxOfficeSaleTestPaySchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const saleId = parsed.output.saleId as Id<"organizerDashboardBoxOfficeSales">
       const sale = await mutationCtx.db.get("organizerDashboardBoxOfficeSales", saleId)
       if (!sale || String(sale.orgId) !== String(orgId)) {
@@ -55,7 +55,7 @@ export const organizerDashboardBoxOfficeSaleTestPayMutation = mutation({
         paidAt,
       })
       const updated = await mutationCtx.db.get("organizerDashboardBoxOfficeSales", sale._id)
-      if (!updated) return createResultError(op, "Sale disappeared")
+      if (!updated) return createResultError(op, "Kassenvorgang nicht gefunden.")
       return createResult(organizerDashboardBoxOfficeSaleRowCreate(updated))
     }),
 })
@@ -73,7 +73,7 @@ export const organizerDashboardBoxOfficeSaleCompleteMutation = mutation({
       const auth = await organizerDashboardAuthorize(mutationCtx, userId, orgId, "abendkasse.preise")
       if (!auth.success) return auth
       const parsed = a.safeParse(organizerDashboardBoxOfficeSaleCompleteSchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const sale = await mutationCtx.db.get(
         "organizerDashboardBoxOfficeSales",
         parsed.output.saleId as Id<"organizerDashboardBoxOfficeSales">,
@@ -126,7 +126,7 @@ export const organizerDashboardBoxOfficeSaleCompleteMutation = mutation({
         orderId: order._id,
       })
       const updated = await mutationCtx.db.get("organizerDashboardBoxOfficeSales", sale._id)
-      if (!updated) return createResultError(op, "Sale disappeared")
+      if (!updated) return createResultError(op, "Kassenvorgang nicht gefunden.")
       return createResult({ sale: organizerDashboardBoxOfficeSaleRowCreate(updated), checkedIn })
     }),
 })
@@ -150,7 +150,7 @@ export const organizerDashboardBoxOfficeSaleTestDevicePayMutation = mutation({
     const paidAt = new Date().toISOString()
     await ctx.db.patch("organizerDashboardBoxOfficeSales", sale._id, { status: "bezahlt", paidAt })
     const updated = await ctx.db.get("organizerDashboardBoxOfficeSales", sale._id)
-    if (!updated) return createResultError(op, "Sale disappeared")
+    if (!updated) return createResultError(op, "Kassenvorgang nicht gefunden.")
     return createResult(organizerDashboardBoxOfficeSaleRowCreate(updated))
   },
 })

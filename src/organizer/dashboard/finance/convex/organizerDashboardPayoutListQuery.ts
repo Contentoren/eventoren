@@ -46,7 +46,7 @@ export const organizerDashboardPayoutListQuery = query({
         ...(eventKey !== undefined ? { eventKey } : {}),
         ...(status !== undefined ? { status } : {}),
       })
-      if (!filters.success) return createResultError(op, a.summarize(filters.issues))
+      if (!filters.success) return createResultError(op, filters.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       if (!Number.isInteger(paginationOpts.numItems) || paginationOpts.numItems < 1 || paginationOpts.numItems > 50) {
         return createResultError(op, "Seitengröße muss 1 bis 50 sein")
       }

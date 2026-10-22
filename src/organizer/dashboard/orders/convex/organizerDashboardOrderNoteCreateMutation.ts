@@ -19,7 +19,7 @@ export const organizerDashboardOrderNoteCreateMutation = mutation({
       const scope = await organizerDashboardOrderScopeGet(ctx, orgId, orderId, op)
       if (!scope.success) return scope
       const parsed = a.safeParse(organizerDashboardOrderNoteTextSchema, text)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const at = new Date().toISOString()
       const eventKey = scope.data.order.eventKey
       const noteId = await ctx.db.insert("organizerDashboardOrderNotes", {

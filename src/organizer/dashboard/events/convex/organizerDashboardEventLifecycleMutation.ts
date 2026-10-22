@@ -30,22 +30,26 @@ function organizerDashboardEventPublishValidate(
   organizationStatus: string,
 ): Result<null> {
   const op = "organizerDashboardEventPublishMutation"
-  if (event.title.trim().length === 0) return createResultError(op, "Title is required for publishing")
+  if (event.title.trim().length === 0)
+    return createResultError(op, "Ein Titel ist für die Veröffentlichung erforderlich.")
   if (Number.isNaN(Date.parse(event.startsAt)) || Number.isNaN(Date.parse(event.endsAt))) {
-    return createResultError(op, "Start and end must be valid dates for publishing")
+    return createResultError(op, "Beginn und Ende müssen für die Veröffentlichung gültige Daten sein.")
   }
   if (Date.parse(event.endsAt) <= Date.parse(event.startsAt)) {
-    return createResultError(op, "End time must be after start time")
+    return createResultError(op, "Das Ende muss nach dem Beginn liegen.")
   }
   if (event.venue.trim().length === 0 || event.city.trim().length === 0) {
-    return createResultError(op, "Venue and city are required for publishing")
+    return createResultError(op, "Veranstaltungsort und Stadt sind für die Veröffentlichung erforderlich.")
   }
-  if (event.imageUrl.trim().length === 0) return createResultError(op, "Cover image is required for publishing")
+  if (event.imageUrl.trim().length === 0)
+    return createResultError(op, "Ein Titelbild ist für die Veröffentlichung erforderlich.")
   if (event.imageAlt.trim().length === 0) {
-    return createResultError(op, "Image alternative text is required for publishing")
+    return createResultError(op, "Ein Alternativtext zum Titelbild ist für die Veröffentlichung erforderlich.")
   }
-  if (tierActiveCount === 0) return createResultError(op, "At least one ticket tier is required for publishing")
-  if (organizationStatus !== "aktiv") return createResultError(op, "Organization must be active for publishing")
+  if (tierActiveCount === 0)
+    return createResultError(op, "Mindestens eine Ticketart ist für die Veröffentlichung erforderlich.")
+  if (organizationStatus !== "aktiv")
+    return createResultError(op, "Die Organisation muss für die Veröffentlichung aktiv sein.")
   return createResult(null)
 }
 
@@ -68,7 +72,8 @@ async function organizerDashboardEventPublishAuthorizedFn(
   if (!eventResult.success) return eventResult
   const event = eventResult.data
   if (event.status === "published") return createResult(organizerDashboardEventSummaryCreate(event))
-  if (event.status === "archived") return createResultError(op, "Archived events cannot be published again")
+  if (event.status === "archived")
+    return createResultError(op, "Archivierte Veranstaltungen können nicht erneut veröffentlicht werden.")
 
   const firstTier = await ctx.db
     .query("catalogTicketTiers")
@@ -91,7 +96,8 @@ async function organizerDashboardEventPublishAuthorizedFn(
     updatedAt: now,
   })
   const updated = await ctx.db.get("catalogEvents", event._id)
-  if (!updated) return createResultError(op, "Event not found after publishing")
+  if (!updated)
+    return createResultError(op, "Veranstaltung wurde veröffentlicht, konnte aber nicht erneut geladen werden.")
   return createResult(organizerDashboardEventSummaryCreate(updated))
 }
 
@@ -117,14 +123,17 @@ async function organizerDashboardEventArchiveAuthorizedFn(
     return createResult(organizerDashboardEventSummaryCreate(event))
   }
   const endsAt = Date.parse(event.endsAt)
-  if (!Number.isFinite(endsAt)) return createResultError(op, "Event end time is invalid")
+  if (!Number.isFinite(endsAt)) return createResultError(op, "Das Veranstaltungsende ist ungültig.")
   if (endsAt > Date.now()) {
     const issuedTicket = await ctx.db
       .query("ticketIssued")
       .withIndex("eventKeyAndSequenceAndCode", (q) => q.eq("eventKey", event.eventKey))
       .first()
     if (event.status !== "draft" || issuedTicket) {
-      return createResultError(op, "Upcoming or running events must be cancelled safely, not archived")
+      return createResultError(
+        op,
+        "Bevorstehende oder laufende Veranstaltungen müssen abgesagt, nicht archiviert werden.",
+      )
     }
   }
 
@@ -139,6 +148,6 @@ async function organizerDashboardEventArchiveAuthorizedFn(
     updatedAt: now,
   })
   const updated = await ctx.db.get("catalogEvents", event._id)
-  if (!updated) return createResultError(op, "Event not found after archiving")
+  if (!updated) return createResultError(op, "Veranstaltung wurde archiviert, konnte aber nicht erneut geladen werden.")
   return createResult(organizerDashboardEventSummaryCreate(updated))
 }

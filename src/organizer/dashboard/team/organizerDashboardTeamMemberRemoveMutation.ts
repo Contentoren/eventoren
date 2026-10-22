@@ -29,9 +29,9 @@ export const organizerDashboardTeamMemberRemoveMutation = mutation({
       if (!authorization.success) return authorization
 
       const member = await mutationCtx.db.get("orgMembers", memberId)
-      if (!member) return createResultError(op, "Member not found")
-      if (member.orgId !== orgId) return createResultError(op, "Member does not belong to this organization")
-      if (!member.organizerRole) return createResultError(op, "The member does not have a team role")
+      if (!member) return createResultError(op, "Mitglied nicht gefunden.")
+      if (member.orgId !== orgId) return createResultError(op, "Dieses Mitglied gehört nicht zu dieser Organisation.")
+      if (!member.organizerRole) return createResultError(op, "Dieses Mitglied hat keine Teamrolle.")
 
       const guard = organizerDashboardTeamRoleGuard({
         actorRole: authorization.data.role,
@@ -45,12 +45,12 @@ export const organizerDashboardTeamMemberRemoveMutation = mutation({
       if (member.organizerRole === "inhaber") {
         const probe = await organizerDashboardTeamOwnerProbe(mutationCtx, orgId, member._id)
         if (probe.budgetExhausted)
+          return createResultError(op, "Sicherheitsprüfung abgebrochen; bitte wende dich an den Support.")
+        if (!probe.anotherOwnerExists) {
           return createResultError(
             op,
-            "Owner safety check exceeded its 100-candidate budget; resolve stale owner memberships first",
+            "Die letzte Inhaberin bzw. der letzte Inhaber kann nicht entfernt werden; übertrage die Inhaberrolle zuerst auf eine andere Person.",
           )
-        if (!probe.anotherOwnerExists) {
-          return createResultError(op, "The last owner cannot be removed; grant the owner role to someone else first")
         }
       }
 
@@ -59,7 +59,7 @@ export const organizerDashboardTeamMemberRemoveMutation = mutation({
         updatedAt: new Date().toISOString(),
       })
       const updated = await mutationCtx.db.get("orgMembers", member._id)
-      if (!updated) return createResultError(op, "Member not found after the removal")
+      if (!updated) return createResultError(op, "Mitglied wurde entfernt, konnte aber nicht erneut geladen werden.")
       return createResult(await organizerDashboardTeamMemberCreate(mutationCtx, updated))
     }),
 })

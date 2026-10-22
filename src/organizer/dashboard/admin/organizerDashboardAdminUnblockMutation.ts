@@ -25,9 +25,9 @@ export const organizerDashboardAdminUnblockMutation = mutation({
         .query("organizerDashboardOrganizations")
         .withIndex("orgId", (q) => q.eq("orgId", orgId))
         .unique()
-      if (!organization) return createResultError(op, "Organization onboarding required")
+      if (!organization) return createResultError(op, "Bitte schließe zuerst das Veranstalter-Onboarding ab.")
       if (organization.status !== "gesperrt") {
-        return createResultError(op, "Only blocked organizations can be unblocked")
+        return createResultError(op, "Nur gesperrte Organisationen können entsperrt werden.")
       }
       if (parsed.output === "aktiv") {
         const readiness = organizerDashboardAdminActivationCheck(organization)

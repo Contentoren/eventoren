@@ -70,7 +70,7 @@ export const organizerDashboardOverviewQuery = query({
         orgId: String(orgId),
         ...(input as Omit<OrganizerDashboardOverviewFilter, "orgId">),
       })
-      if (!filters.success) return createResultError(op, a.summarize(filters.issues))
+      if (!filters.success) return createResultError(op, filters.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const nowIso = new Date().toISOString()
       const endDay = filters.output.toDay ?? organizerDashboardBerlinToday(nowIso)
       const windowDays = rangeDays[filters.output.range ?? "30"]

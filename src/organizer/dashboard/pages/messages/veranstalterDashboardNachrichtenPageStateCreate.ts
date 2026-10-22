@@ -62,5 +62,9 @@ export function veranstalterDashboardNachrichtenPageStateCreate(inputs: {
     const result = ics()
     return result && result.success ? result.data : undefined
   })
-  return { shell: page.shell, canSend, rows, reminderData, icsDownload, message, busy, run, mutations }
+  const scopeError = (): string | null => {
+    const failed = [messages(), reminder(), ics()].find((result) => result !== undefined && !result.success)
+    return failed !== undefined && !failed.success ? failed.errorMessage : null
+  }
+  return { shell: page.shell, canSend, rows, reminderData, icsDownload, message, busy, run, mutations, scopeError }
 }

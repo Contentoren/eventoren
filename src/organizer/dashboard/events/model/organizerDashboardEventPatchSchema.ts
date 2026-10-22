@@ -2,10 +2,12 @@ import * as v from "valibot"
 import { organizerDashboardEventCreateSchema } from "./organizerDashboardEventCreateSchema.ts"
 
 const organizerDashboardEventOptionalDateSchema = v.optional(
-  v.pipe(v.string(), v.isoTimestamp("Date must be a valid ISO date and time")),
+  v.pipe(v.string(), v.isoTimestamp("Bitte gib ein gültiges Datum mit Uhrzeit an (Europe/Berlin).")),
 )
 
-const organizerDashboardEventOptionalNonEmptySchema = v.optional(v.pipe(v.string(), v.minLength(1)))
+const organizerDashboardEventOptionalNonEmptySchema = v.optional(
+  v.pipe(v.string(), v.minLength(1, "Bitte ausfüllen, darf nicht leer sein.")),
+)
 
 export const organizerDashboardEventPatchSchema = v.object({
   title: organizerDashboardEventOptionalNonEmptySchema,
@@ -15,7 +17,9 @@ export const organizerDashboardEventPatchSchema = v.object({
   startsAt: organizerDashboardEventOptionalDateSchema,
   endsAt: organizerDashboardEventOptionalDateSchema,
   doorsAt: organizerDashboardEventOptionalDateSchema,
-  bookingOpensAt: v.optional(v.pipe(v.string(), v.isoTimestamp("BookingOpensAt must be a valid ISO date and time"))),
+  bookingOpensAt: v.optional(
+    v.pipe(v.string(), v.isoTimestamp("Bitte gib ein gültiges Datum mit Uhrzeit an (Europe/Berlin).")),
+  ),
   venue: organizerDashboardEventOptionalNonEmptySchema,
   city: organizerDashboardEventOptionalNonEmptySchema,
   address: v.optional(v.string()),

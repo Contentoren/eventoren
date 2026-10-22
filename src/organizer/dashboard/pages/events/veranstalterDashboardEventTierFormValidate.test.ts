@@ -36,6 +36,24 @@ describe("veranstalterDashboardEventTierFormValidate rejects invalid tier input"
   })
 })
 
+describe("veranstalterDashboardEventTierFormValidate speaks German", () => {
+  const englishPattern = /invalid|must be|expected|received|required|cannot|empty|missing|unknown/i
+  test("missing name explains in German", () => {
+    const result = veranstalterDashboardEventTierFormValidate({ ...validTier, name: " " })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.errorMessage).toContain("Tarifnamen")
+    expect(result.errorMessage).not.toMatch(englishPattern)
+  })
+
+  test("bad price explains in German", () => {
+    const result = veranstalterDashboardEventTierFormValidate({ ...validTier, priceEuros: "zwölf" })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.errorMessage).not.toMatch(englishPattern)
+  })
+})
+
 describe("veranstalterDashboardEventTierFormValidate converts euros to cents", () => {
   test("comma decimal becomes integer cents without fee", () => {
     const result = veranstalterDashboardEventTierFormValidate(validTier)

@@ -82,7 +82,7 @@ export const organizerDashboardExportListQuery = query({
         eventKey,
         kind,
       })
-      if (!filters.success) return createResultError(op, a.summarize(filters.issues))
+      if (!filters.success) return createResultError(op, filters.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, permissionFor[filters.output.kind])
       if (!auth.success) return auth
       const scope = await organizerDashboardFinanceEventScopeGet(ctx, orgId, filters.output.eventKey, op)

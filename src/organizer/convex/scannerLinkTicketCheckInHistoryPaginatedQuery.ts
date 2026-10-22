@@ -16,9 +16,9 @@ export const scannerLinkTicketCheckInHistoryPaginatedQuery = query({
     const allowed = await scannerLinkEventAuthorizeFn(ctx, args.code, args.eventKey)
     if (!allowed.success) return allowed
     const ticket = await ctx.db.get("ticketIssued", args.ticketId)
-    if (!ticket || ticket.eventKey !== args.eventKey) return createResultError(op, "Ticket unavailable")
+    if (!ticket || ticket.eventKey !== args.eventKey) return createResultError(op, "Ticket nicht verfügbar.")
     const order = await ctx.db.get("ticketOrders", ticket.orderId)
-    if (!order || order.eventKey !== args.eventKey) return createResultError(op, "Ticket unavailable")
+    if (!order || order.eventKey !== args.eventKey) return createResultError(op, "Ticket nicht verfügbar.")
     const cursor = scannerLinkHistoryCursorRead(args.cursor, allowed.data._id, ticket._id)
     if (!cursor.success) return cursor
     const history = await ctx.db
@@ -46,7 +46,7 @@ function scannerLinkHistoryCursorRead(cursor: string | null, linkId: string, tic
   try {
     parsed = JSON.parse(cursor)
   } catch {
-    return createResultError(op, "Invalid history cursor")
+    return createResultError(op, "Ungültiger Verlaufs-Seitenzeiger.")
   }
   if (
     typeof parsed !== "object" ||
@@ -60,6 +60,6 @@ function scannerLinkHistoryCursorRead(cursor: string | null, linkId: string, tic
     !("sourceCursor" in parsed) ||
     typeof parsed.sourceCursor !== "string"
   )
-    return createResultError(op, "History cursor does not match link or ticket")
+    return createResultError(op, "Der Verlaufs-Seitenzeiger passt nicht zu Link oder Ticket.")
   return createResult(parsed.sourceCursor)
 }

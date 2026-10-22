@@ -38,9 +38,9 @@ export const organizerDashboardOrderParticipantListQuery = query({
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId)
       if (!auth.success) return auth
       if (!auth.data.permissions.includes("bestellungen.sehen") && !auth.data.permissions.includes("einlass.nutzen"))
-        return createResultError(op, "Permission denied")
+        return createResultError(op, "Keine Berechtigung für diesen Bereich.")
       const parsed = a.safeParse(organizerDashboardOrderParticipantListFilterSchema, { eventKey, search: input })
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       // eventKey is a canonical key: do not silently trim it into another key.
       if (parsed.output.eventKey !== eventKey) return createResultError(op, "Ungültiger Eventschlüssel")
       const event = await organizerDashboardOrderEventScopeGet(ctx, orgId, eventKey, op)

@@ -13,7 +13,7 @@ export const organizerDashboardMessageDeliveryClaimMutation = internalMutation({
   handler: async (ctx, args): PromiseResult<OrganizerDashboardMessageDeliveryClaimResult> => {
     const op = "organizerDashboardMessageDeliveryClaimMutation"
     const message = await ctx.db.get("organizerDashboardMessages", args.messageId)
-    if (!message) return createResultError(op, "Message not found")
+    if (!message) return createResultError(op, "Nachricht nicht gefunden.")
     if (message.status === "gesendet" || message.deliveryState === "sent") {
       if (message.deliveryState === "queued") {
         await ctx.db.patch("organizerDashboardMessages", message._id, {

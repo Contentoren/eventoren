@@ -34,7 +34,7 @@ export const organizerDashboardPayoutStatusUpdateMutation = mutation({
         payoutId,
         status,
       })
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       let existing = null
       try {
         existing = await ctx.db.get(

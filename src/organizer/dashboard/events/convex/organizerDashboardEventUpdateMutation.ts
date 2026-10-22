@@ -39,7 +39,10 @@ async function organizerDashboardEventUpdateAuthorizedFn(
   if (!eventResult.success) return eventResult
   const event = eventResult.data
   if (event.status !== "draft") {
-    return createResultError(op, "Only draft events can be edited; published events use archive lifecycle")
+    return createResultError(
+      op,
+      "Nur Entwürfe können bearbeitet werden; veröffentlichte Veranstaltungen folgen dem Archivablauf.",
+    )
   }
 
   const parsed = await organizerDashboardEventPatchParse(args.input)
@@ -50,10 +53,10 @@ async function organizerDashboardEventUpdateAuthorizedFn(
   const endsAt = patch.endsAt ?? event.endsAt
   const doorsAt = patch.doorsAt ?? event.doorsAt
   if (Date.parse(endsAt) <= Date.parse(startsAt)) {
-    return createResultError(op, "End time must be after start time")
+    return createResultError(op, "Das Ende muss nach dem Beginn liegen.")
   }
   if (Date.parse(doorsAt) > Date.parse(startsAt)) {
-    return createResultError(op, "Admission time must not be after start time")
+    return createResultError(op, "Der Einlass darf nicht nach dem Beginn liegen.")
   }
 
   const now = new Date().toISOString()
@@ -114,6 +117,7 @@ async function organizerDashboardEventUpdateAuthorizedFn(
     updatedAt: now,
   })
   const updated = await ctx.db.get("catalogEvents", event._id)
-  if (!updated) return createResultError(op, "Event not found after update")
+  if (!updated)
+    return createResultError(op, "Veranstaltung wurde gespeichert, konnte aber nicht erneut geladen werden.")
   return createResult(organizerDashboardEventSummaryCreate(updated))
 }

@@ -34,7 +34,7 @@ export const organizerDashboardPayoutRecordMutation = mutation({
         amountCents,
         ...(note !== undefined ? { note } : {}),
       })
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const scope = await organizerDashboardFinanceEventScopeGet(ctx, orgId, parsed.output.eventKey, op)
       if (!scope.success) return scope
       const stats = await organizerDashboardFinanceEventStatsRead(ctx, orgId, scope.data.event)

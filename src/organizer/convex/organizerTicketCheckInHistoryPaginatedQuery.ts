@@ -28,7 +28,7 @@ export const organizerTicketCheckInHistoryPaginatedQuery = query({
       const resolved = await organizerTicketCheckInTicketResolve(queryCtx, userId, args, op)
       if (!resolved.success) return resolved
       const { ticket } = resolved.data
-      if (ticket._id !== args.ticketId) return createResultError(op, "The ticket was not found")
+      if (ticket._id !== args.ticketId) return createResultError(op, "Das Ticket wurde nicht gefunden.")
 
       const history = await queryCtx.db
         .query("ticketCheckInHistory")

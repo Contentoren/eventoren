@@ -20,28 +20,28 @@ export async function organizerDashboardAuthorize(
 }> {
   const op = "organizerDashboardAuthorize"
   const user = await ctx.db.get("users", userId)
-  if (!user || user.deletedAt) return createResultError(op, "User not found")
+  if (!user || user.deletedAt) return createResultError(op, "Benutzer nicht gefunden.")
   const memberships = await ctx.db
     .query("orgMembers")
     .withIndex("userIdOrgId", (q) => q.eq("userId", userId).eq("orgId", orgId))
     .take(2)
-  if (memberships.length > 1) return createResultError(op, "Organization membership is ambiguous")
+  if (memberships.length > 1) return createResultError(op, "Die Organisationsmitgliedschaft ist nicht eindeutig.")
   const membership = memberships[0]
-  if (!membership) return createResultError(op, "Organization membership required")
-  if (!membership.organizerRole) return createResultError(op, "Organizer role required")
+  if (!membership) return createResultError(op, "Eine Organisationsmitgliedschaft ist erforderlich.")
+  if (!membership.organizerRole) return createResultError(op, "Eine Veranstalterrolle ist erforderlich.")
   const role = v.safeParse(organizerDashboardRoleSchema, membership.organizerRole)
-  if (!role.success) return createResultError(op, "Unknown organizer role")
+  if (!role.success) return createResultError(op, "Unbekannte Veranstalterrolle.")
   const organization = await ctx.db
     .query("organizerDashboardOrganizations")
     .withIndex("orgId", (q) => q.eq("orgId", orgId))
     .unique()
-  if (!organization) return createResultError(op, "Organization onboarding required")
-  if (organization.status === "gesperrt") return createResultError(op, "Organization is blocked")
+  if (!organization) return createResultError(op, "Bitte schließe zuerst das Veranstalter-Onboarding ab.")
+  if (organization.status === "gesperrt") return createResultError(op, "Diese Organisation ist gesperrt.")
   const permissions = Array.from(organizerDashboardPermissionsGet(role.output))
   if (permission !== undefined && !permissions.includes(permission)) {
-    return createResultError(op, "Permission denied")
+    return createResultError(op, "Keine Berechtigung für diesen Bereich.")
   }
   const org = await ctx.db.get("orgs", orgId)
-  if (!org) return createResultError(op, "Organization not found")
+  if (!org) return createResultError(op, "Organisation nicht gefunden.")
   return createResult({ role: role.output, permissions, org, membership, organization })
 }

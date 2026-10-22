@@ -63,7 +63,7 @@ export const organizerDashboardFinanceOverviewQuery = query({
         ...(fromDay !== undefined ? { fromDay } : {}),
         ...(toDay !== undefined ? { toDay } : {}),
       })
-      if (!filters.success) return createResultError(op, a.summarize(filters.issues))
+      if (!filters.success) return createResultError(op, filters.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const nowIso = new Date().toISOString()
       const endDay = filters.output.toDay ?? organizerDashboardBerlinToday(nowIso)
       const startDay =

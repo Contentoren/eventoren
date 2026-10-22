@@ -32,7 +32,7 @@ export const organizerDashboardAdmissionScannerLinkCreateMutation = mutation({
       const auth = await organizerDashboardAuthorize(mutationCtx, userId, orgId, "tickets.bearbeiten")
       if (!auth.success) return auth
       const parsed = a.safeParse(organizerDashboardAdmissionScannerLinkSchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const { eventKey, label, entrance } = parsed.output
       const now = Date.now()
       if (!Number.isSafeInteger(input.expiresAt) || input.expiresAt <= now || input.expiresAt > now + maxDurationMs) {

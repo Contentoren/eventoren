@@ -27,7 +27,7 @@ export const organizerDashboardGuestUpsertMutation = mutation({
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, "gaesteliste.bearbeiten")
       if (!auth.success) return auth
       const parsed = a.safeParse(organizerDashboardGuestUpsertArgsSchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const quotaId = parsed.output.quotaId?.trim() ? parsed.output.quotaId.trim() : null
       let quotaDocId: Parameters<typeof organizerDashboardGuestScopeGet>[3] = null
       if (quotaId !== null) {

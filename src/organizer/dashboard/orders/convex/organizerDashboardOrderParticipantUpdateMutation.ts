@@ -32,7 +32,7 @@ export const organizerDashboardOrderParticipantUpdateMutation = mutation({
       if (!ticket || ticket.orderId !== orderId || ticket.eventKey !== scope.data.event.eventKey)
         return createResultError(op, "Ticket nicht verfügbar")
       const parsed = a.safeParse(organizerDashboardOrderParticipantUpdateSchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       if (!Object.values(parsed.output).some((value) => value !== undefined))
         return createResultError(op, "Keine Teilnehmeränderung angegeben")
       const patch = {

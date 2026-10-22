@@ -10,16 +10,17 @@ export async function organizerDashboardEventLoad(
   eventKey: string,
   includeArchived = false,
 ): PromiseResult<Doc<"catalogEvents">> {
-  if (eventKey.trim().length === 0) return createResultError(op, "Event key is required")
+  if (eventKey.trim().length === 0) return createResultError(op, "Ein Veranstaltungsschlüssel ist erforderlich.")
   const events = await ctx.db
     .query("catalogEvents")
     .withIndex("eventKey", (q) => q.eq("eventKey", eventKey))
     .take(2)
-  if (events.length > 1) return createResultError(op, "Event key is ambiguous")
+  if (events.length > 1) return createResultError(op, "Der Veranstaltungsschlüssel ist nicht eindeutig.")
   const event = events[0]
-  if (!event || (event.deletedAt !== undefined && !includeArchived)) return createResultError(op, "Event not found")
+  if (!event || (event.deletedAt !== undefined && !includeArchived))
+    return createResultError(op, "Veranstaltung nicht gefunden.")
   if (event.orgId === undefined || event.orgId !== orgId) {
-    return createResultError(op, "Event not found")
+    return createResultError(op, "Veranstaltung nicht gefunden.")
   }
   return createResult(event)
 }

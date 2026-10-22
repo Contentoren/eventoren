@@ -4,5 +4,5 @@ import { inputMaxLength500 } from "#src/utils/valibot/inputMaxLength.ts"
 export const stringSchema0to500 = a.pipe(
   a.string(),
   a.trim(),
-  a.maxLength(inputMaxLength500, "Only a max length of 500 is allowed"),
+  a.maxLength(inputMaxLength500, "Höchstens 500 Zeichen erlaubt."),
 )

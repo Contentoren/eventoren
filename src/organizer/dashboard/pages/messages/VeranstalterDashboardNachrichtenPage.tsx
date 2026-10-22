@@ -25,6 +25,7 @@ export function VeranstalterDashboardNachrichtenPage(p: {
       <section class="flex flex-col gap-4">
         <h1 class="text-2xl font-semibold">Nachrichten</h1>
         <Show when={state.canSend()} fallback={<p role="alert">Keine Berechtigung für diesen Bereich.</p>}>
+          <Show when={state.scopeError()}>{(scopeError) => <p role="alert">{scopeError()}</p>}</Show>
           <Show when={state.message.get()}>
             <p role="status">{state.message.get()}</p>
           </Show>

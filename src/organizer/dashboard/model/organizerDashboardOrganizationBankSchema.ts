@@ -6,9 +6,9 @@ export const organizerDashboardOrganizationBankSchema = v.object({
   iban: v.pipe(
     v.string(),
     v.trim(),
-    v.minLength(15),
-    v.maxLength(34),
-    v.check(organizerDashboardIbanValidate, "Invalid IBAN"),
+    v.minLength(15, "Die IBAN ist zu kurz (mindestens 15 Zeichen)."),
+    v.maxLength(34, "Die IBAN ist zu lang (höchstens 34 Zeichen)."),
+    v.check(organizerDashboardIbanValidate, "Bitte gib eine gültige IBAN ein."),
   ),
   holder: stringSchemaName,
 })

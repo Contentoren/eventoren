@@ -24,7 +24,7 @@ export const organizerDashboardGuestQuotaUpsertMutation = mutation({
       const scope = await organizerDashboardGuestScopeGet(ctx, orgId, eventKey.trim(), quotaId ?? null, op)
       if (!scope.success) return scope
       const parsed = a.safeParse(organizerDashboardGuestQuotaSchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const now = new Date().toISOString()
       if (quotaId !== undefined) {
         if (!scope.data.quota) return createResultError(op, "Kontingent nicht verfügbar")

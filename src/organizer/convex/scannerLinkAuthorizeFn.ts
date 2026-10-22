@@ -8,16 +8,16 @@ export async function scannerLinkAuthorizeFn(
   code: string,
 ): PromiseResult<Doc<"scannerLinks">> {
   const op = "scannerLinkAuthorizeFn"
-  if (!/^[a-f0-9]{64}$/.test(code)) return createResultError(op, "Link unavailable")
+  if (!/^[a-f0-9]{64}$/.test(code)) return createResultError(op, "Link nicht verfügbar.")
   const link = await ctx.db
     .query("scannerLinks")
     .withIndex("code", (q) => q.eq("code", code))
     .unique()
   if (!link || link.revokedAt !== undefined || link.expiresAt <= Date.now()) {
-    return createResultError(op, "Link unavailable")
+    return createResultError(op, "Link nicht verfügbar.")
   }
   if (link.role === "helper") {
-    if (!link.parentId) return createResultError(op, "Link unavailable")
+    if (!link.parentId) return createResultError(op, "Link nicht verfügbar.")
     const parent = await ctx.db.get("scannerLinks", link.parentId)
     if (
       !parent ||
@@ -28,9 +28,9 @@ export async function scannerLinkAuthorizeFn(
       link.expiresAt > parent.expiresAt ||
       link.eventKeys.some((key) => !parent.eventKeys.includes(key))
     )
-      return createResultError(op, "Link unavailable")
+      return createResultError(op, "Link nicht verfügbar.")
   } else if (link.parentId || !link.createdByUserId) {
-    return createResultError(op, "Link unavailable")
+    return createResultError(op, "Link nicht verfügbar.")
   }
   return createResult(link)
 }

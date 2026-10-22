@@ -17,7 +17,7 @@ export const organizerDashboardMessageDeliveryRecordMutation = internalMutation(
   handler: async (ctx, args): PromiseResult<{ recorded: boolean }> => {
     const op = "organizerDashboardMessageDeliveryRecordMutation"
     const message = await ctx.db.get("organizerDashboardMessages", args.messageId)
-    if (!message) return createResultError(op, "Message not found")
+    if (!message) return createResultError(op, "Nachricht nicht gefunden.")
     if (message.deliveryState !== "sending" || message.deliveryAttempts !== args.attempt) {
       return createResult({ recorded: false })
     }

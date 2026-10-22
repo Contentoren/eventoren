@@ -4,10 +4,13 @@ import { catalogEventScheduleSchema } from "#src/catalog/catalogEventScheduleSch
 
 const organizerDashboardEventDateSchema = v.pipe(
   v.string(),
-  v.isoTimestamp("StartsAt must be a valid ISO date and time"),
+  v.isoTimestamp("Bitte gib ein gültiges Datum mit Uhrzeit an (Europe/Berlin)."),
 )
 
-const organizerDashboardEventNonEmptySchema = v.pipe(v.string(), v.minLength(1))
+const organizerDashboardEventNonEmptySchema = v.pipe(
+  v.string(),
+  v.minLength(1, "Bitte ausfüllen, darf nicht leer sein."),
+)
 
 export const organizerDashboardEventCreateSchema = v.object({
   title: organizerDashboardEventNonEmptySchema,
@@ -17,7 +20,9 @@ export const organizerDashboardEventCreateSchema = v.object({
   startsAt: organizerDashboardEventDateSchema,
   endsAt: organizerDashboardEventDateSchema,
   doorsAt: organizerDashboardEventDateSchema,
-  bookingOpensAt: v.optional(v.pipe(v.string(), v.isoTimestamp("BookingOpensAt must be a valid ISO date and time"))),
+  bookingOpensAt: v.optional(
+    v.pipe(v.string(), v.isoTimestamp("Bitte gib ein gültiges Datum mit Uhrzeit an (Europe/Berlin).")),
+  ),
   venue: organizerDashboardEventNonEmptySchema,
   city: organizerDashboardEventNonEmptySchema,
   address: v.string(),

@@ -35,7 +35,7 @@ export const organizerDashboardAdmissionCheckInRevokeMutation = mutation({
         ...input,
         ...(input.ticketId !== undefined ? { ticketId: String(input.ticketId) } : {}),
       })
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const { eventKey, entrance, ticketCode } = parsed.output
       const ticketId = input.ticketId as Id<"ticketIssued"> | undefined
       if ((ticketCode === undefined) === (ticketId === undefined)) {
@@ -102,7 +102,7 @@ export const organizerDashboardAdmissionCheckInRevokeMutation = mutation({
       })
       await log("ok")
       const updatedTicket = await mutationCtx.db.get("ticketIssued", ticket._id)
-      if (!updatedTicket) return createResultError(op, "Ticket disappeared")
+      if (!updatedTicket) return createResultError(op, "Ticket nicht gefunden.")
       return createResult({
         status: "reset" as const,
         historyId,

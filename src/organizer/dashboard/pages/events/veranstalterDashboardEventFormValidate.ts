@@ -92,6 +92,6 @@ export function veranstalterDashboardEventFormValidate(
     imageUrl: form.imageUrl,
     imageAlt: form.imageAlt,
   })
-  if (!parsed.success) return createResultError(op, v.summarize(parsed.issues))
+  if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
   return createResult(parsed.output)
 }

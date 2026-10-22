@@ -38,7 +38,7 @@ export const organizerDashboardSettlementGetQuery = query({
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, "finanzen.sehen")
       if (!auth.success) return auth
       const filters = a.safeParse(organizerDashboardSettlementFilterSchema, { orgId: String(orgId), eventKey })
-      if (!filters.success) return createResultError(op, a.summarize(filters.issues))
+      if (!filters.success) return createResultError(op, filters.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const scope = await organizerDashboardFinanceEventScopeGet(ctx, orgId, filters.output.eventKey, op)
       if (!scope.success) return scope
       const stats = await organizerDashboardFinanceEventStatsRead(ctx, orgId, scope.data.event)

@@ -45,6 +45,10 @@ export function veranstalterDashboardGaestelistePageStateCreate(inputs: {
       busy.set(false)
     }
   }
+  const scopeError = (): string | null => {
+    const failed = [quotas(), guests()].find((result) => result !== undefined && !result.success)
+    return failed !== undefined && !failed.success ? failed.errorMessage : null
+  }
   const quotaCards = createMemo(() => {
     const result = quotas()
     return result && result.success ? result.data.quotas : []
@@ -62,6 +66,7 @@ export function veranstalterDashboardGaestelistePageStateCreate(inputs: {
     guests: guestRows,
     quotasLoading: () => quotas() === undefined,
     guestsLoading: () => guests() === undefined,
+    scopeError,
     message,
     busy,
     run,

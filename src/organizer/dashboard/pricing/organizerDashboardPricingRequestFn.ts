@@ -27,7 +27,7 @@ export async function organizerDashboardPricingRequestFn(
     .query("organizerDashboardOrganizations")
     .withIndex("orgId", (q) => q.eq("orgId", args.orgId))
     .unique()
-  if (!organization) return createResultError(op, "Organization onboarding required")
+  if (!organization) return createResultError(op, "Bitte schließe zuerst das Veranstalter-Onboarding ab.")
   const probe = await ctx.db
     .query("catalogEvents")
     .withIndex("orgId", (q) => q.eq("orgId", args.orgId))

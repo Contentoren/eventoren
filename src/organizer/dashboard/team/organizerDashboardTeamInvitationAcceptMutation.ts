@@ -34,37 +34,38 @@ export const organizerDashboardTeamInvitationAcceptMutation = mutation({
     authMutationTokenToUserId(ctx, args, async (mutationCtx, { userId, invitationId }) => {
       const op = "organizerDashboardTeamInvitationAcceptMutation"
       const user = await mutationCtx.db.get("users", userId)
-      if (!user || user.deletedAt) return createResultError(op, "Account not found")
+      if (!user || user.deletedAt) return createResultError(op, "Konto nicht gefunden.")
       const accountEmail = user.email
-      if (!accountEmail) return createResultError(op, "The account has no e-mail address")
+      if (!accountEmail) return createResultError(op, "Dein Konto hat keine E-Mail-Adresse hinterlegt.")
 
       const invitation = await mutationCtx.db.get("organizerDashboardTeamInvitations", invitationId)
-      if (!invitation) return createResultError(op, "Invitation not found")
+      if (!invitation) return createResultError(op, "Einladung nicht gefunden.")
       const now = new Date()
       const status = organizerDashboardTeamInvitationStatusEffective(invitation, now)
-      if (status === "expired") return createResultError(op, "The invitation has expired")
-      if (invitation.status !== "pending") return createResultError(op, `The invitation is ${invitation.status}`)
+      if (status === "expired") return createResultError(op, "Diese Einladung ist abgelaufen.")
+      if (invitation.status !== "pending") return createResultError(op, "Diese Einladung ist nicht mehr offen.")
       if (
         organizerDashboardTeamEmailNormalize(invitation.invitedEmail) !==
         organizerDashboardTeamEmailNormalize(accountEmail)
       ) {
-        return createResultError(op, "This invitation was sent to a different address")
+        return createResultError(op, "Diese Einladung wurde an eine andere E-Mail-Adresse gesendet.")
       }
 
       const org = await mutationCtx.db.get("orgs", invitation.orgId)
-      if (!org) return createResultError(op, "Organization not found")
+      if (!org) return createResultError(op, "Organisation nicht gefunden.")
       const organization = await mutationCtx.db
         .query("organizerDashboardOrganizations")
         .withIndex("orgId", (q) => q.eq("orgId", invitation.orgId))
         .unique()
-      if (!organization) return createResultError(op, "Organization not found")
-      if (organization.status === "gesperrt") return createResultError(op, "Organization is blocked")
+      if (!organization) return createResultError(op, "Organisation nicht gefunden.")
+      if (organization.status === "gesperrt") return createResultError(op, "Diese Organisation ist gesperrt.")
 
       const memberships = await mutationCtx.db
         .query("orgMembers")
         .withIndex("userIdOrgId", (q) => q.eq("userId", userId).eq("orgId", invitation.orgId))
         .take(2)
-      if (memberships.length > 1) return createResultError(op, "The membership of this account is ambiguous")
+      if (memberships.length > 1)
+        return createResultError(op, "Deine Mitgliedschaft ist nicht eindeutig. Bitte wende dich an den Support.")
       const membership = memberships[0]
       // Invitation authority is a live transaction dependency, not a snapshot
       // from creation. Deleted, removed and ambiguous inviters fail closed.
@@ -79,7 +80,7 @@ export const organizerDashboardTeamInvitationAcceptMutation = mutation({
       if (currentRole !== null && currentRole !== invitation.organizerRole) {
         return createResultError(
           op,
-          "The existing team role conflicts with this invitation; a manager must change it explicitly",
+          "Deine bestehende Teamrolle passt nicht zu dieser Einladung; bitte die Teamverwaltung um eine explizite Änderung.",
         )
       }
       const guard = organizerDashboardTeamRoleGuard({

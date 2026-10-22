@@ -12,7 +12,7 @@ import { stringSchemaName } from "#src/utils/valibot/stringSchemaName.ts"
  */
 export const organizerDashboardOrganizationUpdateSchema = v.pipe(
   v.strictObject({
-    orgId: v.pipe(v.string(), v.trim(), v.nonEmpty("Cannot be empty")),
+    orgId: v.pipe(v.string(), v.trim(), v.nonEmpty("Bitte wähle zuerst eine Organisation.")),
     profile: v.optional(
       v.strictObject({
         name: v.optional(stringSchemaName),
@@ -25,7 +25,7 @@ export const organizerDashboardOrganizationUpdateSchema = v.pipe(
   }),
   v.check(
     (input) => input.profile !== undefined || input.bank !== undefined,
-    "Nothing to update: provide profile or bank",
+    "Keine Änderungen angegeben: bitte passe Profil oder Bank an.",
   ),
 )
 

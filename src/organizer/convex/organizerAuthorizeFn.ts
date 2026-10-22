@@ -16,8 +16,8 @@ export async function organizerAuthorizeFn(
 ): PromiseResult<DocUser> {
   const op = "organizerAuthorizeFn"
   const user = await ctx.db.get("users", userId)
-  if (!user || user.deletedAt) return createResultError(op, "User not found")
-  if (!userRoleCanAccessOrganizer(user.role)) return createResultError(op, "Organizer role required")
+  if (!user || user.deletedAt) return createResultError(op, "Benutzer nicht gefunden.")
+  if (!userRoleCanAccessOrganizer(user.role)) return createResultError(op, "Eine Veranstalterrolle ist erforderlich.")
   if (userRoleIsAdmin(user.role)) return createResult(user)
   if (orgId !== undefined) {
     const membership = await organizerDashboardAuthorize(ctx, userId, orgId, permission)
@@ -25,13 +25,14 @@ export async function organizerAuthorizeFn(
     return createResult(user)
   }
   if (eventStartsAt === undefined) return createResult(user)
-  if (!user.organizerInvitedAt) return createResultError(op, "Organizer invitation time is missing")
+  if (!user.organizerInvitedAt) return createResultError(op, "Die Einladungszeit des Veranstalters fehlt.")
 
   const eventTimestamp = Date.parse(eventStartsAt)
   const invitationTimestamp = Date.parse(user.organizerInvitedAt)
   if (!Number.isFinite(eventTimestamp) || !Number.isFinite(invitationTimestamp)) {
-    return createResultError(op, "Invalid organizer authorization timestamp")
+    return createResultError(op, "Ungültiger Autorisierungszeitpunkt.")
   }
-  if (eventTimestamp < invitationTimestamp) return createResultError(op, "Event starts before organizer invitation")
+  if (eventTimestamp < invitationTimestamp)
+    return createResultError(op, "Die Veranstaltung beginnt vor der Veranstaltereinladung.")
   return createResult(user)
 }

@@ -49,7 +49,7 @@ export const organizerDashboardTeamInvitationInboxQuery = query({
           return createResultError(op, `numItems must be an integer from 1 to ${maxPageSize}`)
         }
         const user = await queryCtx.db.get("users", userId)
-        if (!user) return createResultError(op, "Account not found")
+        if (!user) return createResultError(op, "Konto nicht gefunden.")
         const accountEmail = user.email ?? null
         if (!accountEmail) {
           return createResult({ page: [], isDone: true, continueCursor: "", accountEmail: null })

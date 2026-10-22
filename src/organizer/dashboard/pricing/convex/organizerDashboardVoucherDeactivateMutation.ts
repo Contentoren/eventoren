@@ -16,7 +16,7 @@ export const organizerDashboardVoucherDeactivateMutation = mutation({
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, "gutscheine.bearbeiten")
       if (!auth.success) return auth
       const parsed = a.safeParse(organizerDashboardVoucherDeactivateSchema, { orgId: String(orgId), voucherId })
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       let existing = null
       try {
         existing = await ctx.db.get(

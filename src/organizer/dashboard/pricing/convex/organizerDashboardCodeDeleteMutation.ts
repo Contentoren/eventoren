@@ -18,7 +18,7 @@ export const organizerDashboardCodeDeleteMutation = mutation({
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, "codes.bearbeiten")
       if (!auth.success) return auth
       const parsed = a.safeParse(organizerDashboardCodeArchiveSchema, { orgId: String(orgId), codeId })
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const loaded = await organizerDashboardCodeLoad(ctx, orgId, parsed.output.codeId, op)
       if (!loaded.success) return loaded
       if (loaded.data.usedTickets > 0) {

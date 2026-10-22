@@ -9,9 +9,16 @@ export const organizerDashboardBerlinDaySchema = v.pipe(
 
 export type OrganizerDashboardBerlinDay = v.InferOutput<typeof organizerDashboardBerlinDaySchema>
 
-const id = v.pipe(v.string(), v.trim(), v.nonEmpty("Cannot be empty"))
+const id = v.pipe(v.string(), v.trim(), v.nonEmpty("Bitte wähle zuerst eine Organisation."))
 
-const eventKey = v.optional(v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(200)))
+const eventKey = v.optional(
+  v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Ein Veranstaltungsschlüssel ist erforderlich."),
+    v.maxLength(200, "Veranstaltungsschlüssel zu lang."),
+  ),
+)
 
 const dayRange = {
   fromDay: v.optional(organizerDashboardBerlinDaySchema),
@@ -27,10 +34,18 @@ export const organizerDashboardFinanceOverviewFilterSchema = v.strictObject({
 
 export const organizerDashboardSettlementFilterSchema = v.strictObject({
   orgId: id,
-  eventKey: v.pipe(v.string(), v.trim(), v.minLength(1, "Cannot be empty"), v.maxLength(200)),
+  eventKey: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Ein Veranstaltungsschlüssel ist erforderlich."),
+    v.maxLength(200, "Veranstaltungsschlüssel zu lang."),
+  ),
 })
 
-export const organizerDashboardPayoutStatusSchema = v.picklist(["vorgemerkt", "ausgezahlt"])
+export const organizerDashboardPayoutStatusSchema = v.picklist(
+  ["vorgemerkt", "ausgezahlt"],
+  "Bitte wähle einen Auszahlungsstatus.",
+)
 
 export type OrganizerDashboardPayoutStatus = v.InferOutput<typeof organizerDashboardPayoutStatusSchema>
 
@@ -42,7 +57,16 @@ export const organizerDashboardPayoutListFilterSchema = v.strictObject({
 
 export const organizerDashboardPayoutRecordSchema = v.strictObject({
   orgId: id,
-  eventKey: v.pipe(v.string(), v.trim(), v.minLength(1, "Cannot be empty"), v.maxLength(200)),
-  amountCents: v.pipe(v.number(), v.integer(), v.minValue(1, "Betrag muss positiv sein")),
-  note: v.optional(v.pipe(v.string(), v.trim(), v.maxLength(500))),
+  eventKey: v.pipe(
+    v.string(),
+    v.trim(),
+    v.minLength(1, "Ein Veranstaltungsschlüssel ist erforderlich."),
+    v.maxLength(200, "Veranstaltungsschlüssel zu lang."),
+  ),
+  amountCents: v.pipe(
+    v.number(),
+    v.integer("Der Betrag muss in ganzen Cent angegeben werden."),
+    v.minValue(1, "Betrag muss positiv sein"),
+  ),
+  note: v.optional(v.pipe(v.string(), v.trim(), v.maxLength(500, "Notiz zu lang (höchstens 500 Zeichen)."))),
 })

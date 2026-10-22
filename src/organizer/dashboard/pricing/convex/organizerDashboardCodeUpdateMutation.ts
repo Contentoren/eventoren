@@ -37,7 +37,7 @@ export const organizerDashboardCodeUpdateMutation = mutation({
           ...(validUntil !== undefined ? { validUntil } : {}),
           ...(note !== undefined ? { note } : {}),
         })
-        if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+        if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
         const loaded = await organizerDashboardCodeLoad(ctx, orgId, parsed.output.codeId, op)
         if (!loaded.success) return loaded
         const at = new Date().toISOString()

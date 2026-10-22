@@ -86,7 +86,7 @@ async function organizerDashboardEventCreateAuthorizedFn(
     .query("catalogEvents")
     .withIndex("eventKey", (q) => q.eq("eventKey", eventKey))
     .unique()
-  if (existing) return createResultError(op, "Event key collision; retry event creation")
+  if (existing) return createResultError(op, "Veranstaltung konnte nicht angelegt werden, bitte erneut versuchen.")
 
   const versionResult = await catalogSyncAdvanceFn(ctx, args.userId, now)
   if (!versionResult.success) return versionResult
@@ -118,6 +118,6 @@ async function organizerDashboardEventCreateAuthorizedFn(
     updatedAt: now,
   })
   const event = await ctx.db.get("catalogEvents", eventId)
-  if (!event) return createResultError(op, "Event not found after creation")
+  if (!event) return createResultError(op, "Veranstaltung wurde angelegt, konnte aber nicht erneut geladen werden.")
   return createResult(organizerDashboardEventSummaryCreate(event))
 }

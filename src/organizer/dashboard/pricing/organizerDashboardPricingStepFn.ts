@@ -61,7 +61,7 @@ export async function organizerDashboardPricingStepFn(
     .query("organizerDashboardOrganizations")
     .withIndex("orgId", (q) => q.eq("orgId", args.orgId))
     .unique()
-  if (!organization) return createResultError(op, "Organization onboarding required")
+  if (!organization) return createResultError(op, "Bitte schließe zuerst das Veranstalter-Onboarding ab.")
   if (organizerDashboardPricingRevisionOf(organization) !== args.feeRevision) {
     return createResult({
       status: "superseded",

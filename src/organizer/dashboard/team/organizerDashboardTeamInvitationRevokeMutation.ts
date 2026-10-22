@@ -23,10 +23,11 @@ export const organizerDashboardTeamInvitationRevokeMutation = mutation({
       if (!authorization.success) return authorization
 
       const invitation = await mutationCtx.db.get("organizerDashboardTeamInvitations", invitationId)
-      if (!invitation) return createResultError(op, "Invitation not found")
-      if (invitation.orgId !== orgId) return createResultError(op, "Invitation does not belong to this organization")
+      if (!invitation) return createResultError(op, "Einladung nicht gefunden.")
+      if (invitation.orgId !== orgId)
+        return createResultError(op, "Diese Einladung gehört nicht zu dieser Organisation.")
       if (invitation.status !== "pending") {
-        return createResultError(op, `The invitation is already ${invitation.status}`)
+        return createResultError(op, "Diese Einladung ist nicht mehr offen.")
       }
 
       const nowIso = new Date().toISOString()
@@ -36,7 +37,7 @@ export const organizerDashboardTeamInvitationRevokeMutation = mutation({
         updatedAt: nowIso,
       })
       const updated = await mutationCtx.db.get("organizerDashboardTeamInvitations", invitation._id)
-      if (!updated) return createResultError(op, "Invitation not found after the revocation")
+      if (!updated) return createResultError(op, "Einladung wurde widerrufen, konnte aber nicht erneut geladen werden.")
       const org = await mutationCtx.db.get("orgs", orgId)
       return createResult({
         id: updated._id,

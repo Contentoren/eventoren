@@ -24,7 +24,7 @@ export const organizerDashboardMessageUpdateMutation = mutation({
       if (!message || message.orgId !== orgId) return createResultError(op, "Nachricht nicht verfügbar")
       if (message.status === "gesendet") return createResultError(op, "Gesendete Nachricht ist fixiert")
       const parsed = a.safeParse(organizerDashboardMessageContentSchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const recipientCount = await organizerDashboardMessageRecipientsCount(
         ctx,
         message.eventKey,

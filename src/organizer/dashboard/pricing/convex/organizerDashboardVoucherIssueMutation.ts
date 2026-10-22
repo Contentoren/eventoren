@@ -68,7 +68,7 @@ export const organizerDashboardVoucherIssueMutation = mutation({
           ...(recipientEmail !== undefined ? { recipientEmail } : {}),
           ...(message !== undefined ? { message } : {}),
         })
-        if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+        if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
         const input = parsed.output
         if (input.validity === "datum" && input.customDate === undefined) {
           return createResultError(op, "Eigenes Datum erforderlich")

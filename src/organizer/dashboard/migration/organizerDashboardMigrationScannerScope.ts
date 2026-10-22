@@ -40,7 +40,7 @@ export async function organizerDashboardMigrationScannerSnapshotCreate(
       .query("catalogEvents")
       .withIndex("eventKey", (q) => q.eq("eventKey", eventKey))
       .unique()
-    if (!event) return createResultError(op, "Event not found")
+    if (!event) return createResultError(op, "Veranstaltung nicht gefunden.")
     snapshot[eventKey] = event.orgId ?? null
   }
   return createResult(snapshot)

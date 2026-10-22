@@ -18,7 +18,7 @@ export async function organizerDashboardEventListCursorParse(args: {
   try {
     parsed = JSON.parse(args.cursor)
   } catch {
-    return createResultError(op, "Invalid event page cursor")
+    return createResultError(op, "Ungültiger Seitenzeiger für die Veranstaltungsliste.")
   }
   if (
     typeof parsed !== "object" ||
@@ -42,7 +42,7 @@ export async function organizerDashboardEventListCursorParse(args: {
     !("sourceCursor" in parsed) ||
     typeof parsed.sourceCursor !== "string"
   ) {
-    return createResultError(op, "Event page cursor does not match the current filters")
+    return createResultError(op, "Der Seitenzeiger passt nicht zu den aktuellen Filtern.")
   }
   return createResult(parsed.sourceCursor)
 }

@@ -18,9 +18,9 @@ export const organizerDashboardAdminApproveMutation = mutation({
         .query("organizerDashboardOrganizations")
         .withIndex("orgId", (q) => q.eq("orgId", orgId))
         .unique()
-      if (!organization) return createResultError(op, "Organization onboarding required")
+      if (!organization) return createResultError(op, "Bitte schließe zuerst das Veranstalter-Onboarding ab.")
       if (organization.status !== "pruefung") {
-        return createResultError(op, "Only organizations in review can be approved")
+        return createResultError(op, "Nur Organisationen in Prüfung können freigegeben werden.")
       }
       const readiness = organizerDashboardAdminActivationCheck(organization)
       if (!readiness.success) return readiness

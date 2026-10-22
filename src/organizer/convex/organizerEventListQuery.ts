@@ -72,7 +72,7 @@ function organizerEventListSourceCursorGet(cursor: string | null, userId: string
   try {
     parsed = JSON.parse(cursor)
   } catch {
-    return createResultError(op, "Invalid organizer event page cursor")
+    return createResultError(op, "Ungültiger Seitenzeiger für die Veranstaltungsliste.")
   }
 
   if (
@@ -85,7 +85,7 @@ function organizerEventListSourceCursorGet(cursor: string | null, userId: string
     !("sourceCursor" in parsed) ||
     typeof parsed.sourceCursor !== "string"
   ) {
-    return createResultError(op, "Organizer event page cursor does not match the current organizer")
+    return createResultError(op, "Der Seitenzeiger passt nicht zur aktuellen Organisation.")
   }
 
   return createResult(parsed.sourceCursor)

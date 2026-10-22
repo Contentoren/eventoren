@@ -27,7 +27,7 @@ export const organizerDashboardMessageReminderUpdateMutation = mutation({
         .unique()
       if (!event || event.orgId !== orgId) return createResultError(op, "Veranstaltung nicht verfügbar")
       const parsed = a.safeParse(organizerDashboardMessageReminderSchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const now = new Date().toISOString()
       const existing = await ctx.db
         .query("organizerDashboardMessageReminders")

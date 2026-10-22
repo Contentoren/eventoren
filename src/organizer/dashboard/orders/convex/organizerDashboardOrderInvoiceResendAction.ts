@@ -28,7 +28,7 @@ export const organizerDashboardOrderInvoiceResendAction = action({
       orderId: args.orderId,
       idempotencyKey: args.idempotencyKey,
     })
-    if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+    if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
     const access = await ctx.runQuery(internal.organizerDashboardBilling.organizerDashboardOrderBillingAccessQuery, {
       token: args.token,
       orgId: args.orgId,

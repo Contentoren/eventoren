@@ -61,12 +61,12 @@ export const organizerDashboardOrganizationCreateMutation = mutation({
         .query("orgs")
         .withIndex("orgHandle", (q) => q.eq("orgHandle", parsed.output.slug))
         .unique()
-      if (slugTakenByOrg) return createResultError(op, "Slug is already taken")
+      if (slugTakenByOrg) return createResultError(op, "Diese Kurzadresse ist bereits vergeben.")
       const slugTakenByConfig = await mutationCtx.db
         .query("organizerDashboardOrganizations")
         .withIndex("slug", (q) => q.eq("profile.slug", parsed.output.slug))
         .unique()
-      if (slugTakenByConfig) return createResultError(op, "Slug is already taken")
+      if (slugTakenByConfig) return createResultError(op, "Diese Kurzadresse ist bereits vergeben.")
       const now = new Date().toISOString()
       const orgId = await mutationCtx.db.insert("orgs", {
         orgHandle: parsed.output.slug,

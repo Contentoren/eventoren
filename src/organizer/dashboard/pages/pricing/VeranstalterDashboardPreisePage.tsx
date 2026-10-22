@@ -36,7 +36,7 @@ export function VeranstalterDashboardPreisePage(p: {
               const data = state.phases()
               return data && "success" in data && data.success ? data.data : undefined
             })()}
-            fallback={<p>Preisphasen werden geladen …</p>}
+            fallback={<p role="alert">{state.scopeError() ?? "Preisphasen werden geladen …"}</p>}
           >
             {(tiers) => (
               <section class="flex flex-col gap-2">
@@ -133,7 +133,7 @@ export function VeranstalterDashboardPreisePage(p: {
               const data = state.codes()
               return data && "success" in data && data.success ? data.data : undefined
             })()}
-            fallback={<p>Codes werden geladen …</p>}
+            fallback={<p role="alert">{state.scopeError() ?? "Codes werden geladen …"}</p>}
           >
             {(result) => (
               <section class="flex flex-col gap-2">

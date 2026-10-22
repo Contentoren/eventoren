@@ -43,7 +43,11 @@ export const organizerDashboardTeamInvitationDeliverAction = internalAction({
     const sender = organizerDashboardTeamEmailSenderCreate({
       send: async () => {
         const baseUrl = envBaseUrlAppResult()
-        if (!baseUrl.success) return createResultError(op, "The application base URL is not configured")
+        if (!baseUrl.success)
+          return createResultError(
+            op,
+            "Die Basis-URL der Anwendung ist nicht konfiguriert. Bitte wende dich an den Support.",
+          )
         const url = organizerDashboardTeamInvitationUrlCreate(baseUrl.data, args.invitationId)
         return await ctx.runAction(internal.authEmail.sendAuthEmailInternalAction, {
           kind: "orgInvitation",

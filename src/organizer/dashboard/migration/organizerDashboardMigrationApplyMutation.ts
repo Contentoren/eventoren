@@ -84,7 +84,7 @@ export const organizerDashboardMigrationApplyMutation = mutation({
       const orgById = new Map<string, { orgHandle: string; name?: string }>()
       for (const orgId of orgIds) {
         const org = await mutationCtx.db.get("orgs", orgId as Id<"orgs">)
-        if (!org) return createResultError(op, "Organization not found")
+        if (!org) return createResultError(op, "Organisation nicht gefunden.")
         orgById.set(orgId, { orgHandle: org.orgHandle, ...(org.name ? { name: org.name } : {}) })
       }
 
@@ -99,7 +99,7 @@ export const organizerDashboardMigrationApplyMutation = mutation({
           .query("organizerDashboardOrganizations")
           .withIndex("orgId", (q) => q.eq("orgId", orgId as Id<"orgs">))
           .take(2)
-        if (configs.length > 1) return createResultError(op, "Organization configuration is ambiguous")
+        if (configs.length > 1) return createResultError(op, "Die Organisationskonfiguration ist nicht eindeutig.")
         const config = configs[0]
         if (config) configByOrgId.set(orgId, { id: config._id, kind: config.profile.kind })
       }
@@ -111,7 +111,7 @@ export const organizerDashboardMigrationApplyMutation = mutation({
         const existing = configByOrgId.get(init.orgId)
         if (existing) {
           if (existing.kind !== kindParsed.output) {
-            return createResultError(op, "Organization configuration kind mismatch")
+            return createResultError(op, "Die Organisationskonfiguration passt nicht zum Typ.")
           }
           continue
         }
@@ -121,18 +121,21 @@ export const organizerDashboardMigrationApplyMutation = mutation({
       const eventsToAssign: { id: string; eventKey: string; orgId: Id<"orgs"> }[] = []
       for (const assignment of eventAssignments) {
         if (assignment.eventKey.trim().length === 0) {
-          return createResultError(op, "Event key cannot be empty")
+          return createResultError(op, "Ein Veranstaltungsschlüssel ist erforderlich.")
         }
         const events = await mutationCtx.db
           .query("catalogEvents")
           .withIndex("eventKey", (q) => q.eq("eventKey", assignment.eventKey))
           .take(2)
         const event = events[0]
-        if (!event) return createResultError(op, "Event not found")
-        if (events.length > 1) return createResultError(op, "Event key is ambiguous")
-        if (event.deletedAt) return createResultError(op, "Event is deleted")
+        if (!event) return createResultError(op, "Veranstaltung nicht gefunden.")
+        if (events.length > 1) return createResultError(op, "Der Veranstaltungsschlüssel ist nicht eindeutig.")
+        if (event.deletedAt) return createResultError(op, "Die Veranstaltung ist gelöscht.")
         if (event.orgId !== undefined && event.orgId !== assignment.orgId) {
-          return createResultError(op, "Event already has a different owner")
+          return createResultError(
+            op,
+            "Die Veranstaltung hat bereits eine andere Inhaberin bzw. einen anderen Inhaber.",
+          )
         }
         if (event.orgId === assignment.orgId) continue
         eventsToAssign.push({ id: event._id, eventKey: event.eventKey, orgId: assignment.orgId })
@@ -150,10 +153,10 @@ export const organizerDashboardMigrationApplyMutation = mutation({
           .take(2)
         const membership = memberships[0]
         if (!membership) {
-          return createResultError(op, "Organization membership required")
+          return createResultError(op, "Eine Organisationsmitgliedschaft ist erforderlich.")
         }
         if (memberships.length > 1) {
-          return createResultError(op, "Organization membership is ambiguous")
+          return createResultError(op, "Die Organisationsmitgliedschaft ist nicht eindeutig.")
         }
         if (membership.organizerRole === roleParsed.output) continue
         rolesToPatch.push({
@@ -202,7 +205,7 @@ export const organizerDashboardMigrationApplyMutation = mutation({
           if (!hasConfig && !ownsExistingEvents) continue
           const remaining = await effectiveOwnerUserIds(orgId)
           if (remaining.size === 0) {
-            return createResultError(op, "Organization must keep at least one owner")
+            return createResultError(op, "Die Organisation muss mindestens eine Inhaberin bzw. einen Inhaber behalten.")
           }
         }
       }
@@ -211,11 +214,11 @@ export const organizerDashboardMigrationApplyMutation = mutation({
       for (const orgId of eventTargetOrgIds) {
         const hasConfig = configByOrgId.has(orgId) || orgInitsToCreate.some((init) => init.orgId === orgId)
         if (!hasConfig) {
-          return createResultError(op, "Event target organization is not configured")
+          return createResultError(op, "Die Zielorganisation der Veranstaltung ist nicht konfiguriert.")
         }
         const effective = await effectiveOwnerUserIds(orgId)
         if (effective.size === 0) {
-          return createResultError(op, "Event target organization must have at least one owner")
+          return createResultError(op, "Die Zielorganisation braucht mindestens eine Inhaberin bzw. einen Inhaber.")
         }
       }
 
@@ -228,7 +231,7 @@ export const organizerDashboardMigrationApplyMutation = mutation({
       const approvedPairs = new Set<string>()
       for (const approval of scannerLinkApprovals) {
         if (approval.eventKey.trim().length === 0) {
-          return createResultError(op, "Event key cannot be empty")
+          return createResultError(op, "Ein Veranstaltungsschlüssel ist erforderlich.")
         }
         const pairKey = `${approval.linkId}:${approval.eventKey}`
         const fullKey = `${pairKey}:${approval.orgId}`
@@ -244,12 +247,12 @@ export const organizerDashboardMigrationApplyMutation = mutation({
           .withIndex("eventKey", (q) => q.eq("eventKey", approval.eventKey))
           .take(2)
         const event = events[0]
-        if (!event) return createResultError(op, "Event not found")
-        if (events.length > 1) return createResultError(op, "Event key is ambiguous")
-        if (event.deletedAt) return createResultError(op, "Event is deleted")
+        if (!event) return createResultError(op, "Veranstaltung nicht gefunden.")
+        if (events.length > 1) return createResultError(op, "Der Veranstaltungsschlüssel ist nicht eindeutig.")
+        if (event.deletedAt) return createResultError(op, "Die Veranstaltung ist gelöscht.")
         const postManifestOwner = stagedEventOwnerByKey.get(approval.eventKey) ?? event.orgId
         if (postManifestOwner === undefined) {
-          return createResultError(op, "Event has no owning organization")
+          return createResultError(op, "Die Veranstaltung hat keine eigene Organisation.")
         }
         if (approval.orgId !== postManifestOwner) {
           return createResultError(op, "Scanner link approval targets a different organization")
@@ -280,7 +283,7 @@ export const organizerDashboardMigrationApplyMutation = mutation({
       const now = new Date().toISOString()
       for (const init of orgInitsToCreate) {
         const org = orgById.get(init.orgId)
-        if (!org) return createResultError(op, "Organization not found")
+        if (!org) return createResultError(op, "Organisation nicht gefunden.")
         await mutationCtx.db.insert("organizerDashboardOrganizations", {
           orgId: init.orgId,
           status: "pruefung",

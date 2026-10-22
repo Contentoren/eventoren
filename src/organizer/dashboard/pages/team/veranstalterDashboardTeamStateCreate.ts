@@ -228,13 +228,17 @@ export function organizerDashboardTeamStateCreate(inputs: {
       error.set("Bitte eine E-Mail-Adresse angeben.")
       return
     }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/u.test(email)) {
+      error.set("Bitte gib eine gültige E-Mail-Adresse ein.")
+      return
+    }
     submitting.set(true)
     error.set(null)
     message.set(null)
     try {
       const roleParsed = v.safeParse(organizerDashboardRoleSchema, inviteRole.get())
       if (!roleParsed.success) {
-        error.set(v.summarize(roleParsed.issues))
+        error.set(roleParsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
         return
       }
       const result = await invite({
@@ -272,7 +276,7 @@ export function organizerDashboardTeamStateCreate(inputs: {
       const selection = roleSelection.get()
       const parsed = selection === "" ? null : v.safeParse(organizerDashboardRoleSchema, selection)
       if (parsed && !parsed.success) {
-        error.set(v.summarize(parsed.issues))
+        error.set(parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
         return
       }
       const result = await roleUpdate({

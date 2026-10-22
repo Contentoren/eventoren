@@ -26,7 +26,7 @@ export const organizerContractsAcceptMutation = mutation({
       const authorization = await organizerDashboardAuthorize(mutationCtx, userId, orgId)
       if (!authorization.success) return authorization
       if (authorization.data.role !== "inhaber")
-        return createResultError(op, "Only the organization owner may accept contracts")
+        return createResultError(op, "Nur die Inhaberin bzw. der Inhaber darf Verträge annehmen.")
       const { organization } = authorization.data
       // Idempotent retries must not replace evidence timestamps or the accepting actor.
       if (organizerContractsCurrentCheck(organization.contracts)) return createResult({ orgId })

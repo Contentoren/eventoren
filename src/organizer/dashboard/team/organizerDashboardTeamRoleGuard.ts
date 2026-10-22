@@ -19,7 +19,10 @@ export function organizerDashboardTeamRoleGuard(inputs: {
   const op = "organizerDashboardTeamRoleGuard"
   const touchesOwner = inputs.targetRole === "inhaber" || inputs.nextRole === "inhaber"
   if (touchesOwner && inputs.actorRole !== "inhaber") {
-    return createResultError(op, "Only the current owner can grant, change or remove the owner role")
+    return createResultError(
+      op,
+      "Nur die aktuelle Inhaberin bzw. der aktuelle Inhaber kann die Inhaberrolle vergeben, ändern oder entziehen.",
+    )
   }
   if (inputs.actorMemberId === inputs.targetMemberId && inputs.nextRole !== null) {
     const currentPermissions =
@@ -27,7 +30,7 @@ export function organizerDashboardTeamRoleGuard(inputs: {
     if (
       [...organizerDashboardPermissionsGet(inputs.nextRole)].some((permission) => !currentPermissions.has(permission))
     ) {
-      return createResultError(op, "You cannot escalate your own role")
+      return createResultError(op, "Die eigene Rolle kann nicht erweitert werden.")
     }
   }
   return createResult(null)

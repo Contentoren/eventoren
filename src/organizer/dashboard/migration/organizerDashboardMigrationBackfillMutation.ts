@@ -34,7 +34,7 @@ export const organizerDashboardMigrationBackfillMutation = mutation({
       const { userId, eventKey, cursor } = data
       const authorization = await catalogAdminAuthorizeFn(mutationCtx, userId)
       if (!authorization.success) return authorization
-      if (eventKey.trim().length === 0) return createResultError(op, "Event key cannot be empty")
+      if (eventKey.trim().length === 0) return createResultError(op, "Ein Veranstaltungsschlüssel ist erforderlich.")
       const pageSize = data.pageSize ?? defaultPageSize
       if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > maxPageSize) {
         return createResultError(op, `pageSize must be an integer from 1 to ${maxPageSize}`)
@@ -44,7 +44,7 @@ export const organizerDashboardMigrationBackfillMutation = mutation({
         .withIndex("eventKey", (q) => q.eq("eventKey", eventKey))
         .take(2)
       const event = events[0]
-      if (!event) return createResultError(op, "Event not found")
+      if (!event) return createResultError(op, "Veranstaltung nicht gefunden.")
       if (events.length > 1) return createResultError(op, "Event key is ambiguous")
       if (event.deletedAt) return createResultError(op, "Event is deleted")
       if (event.orgId === undefined) {

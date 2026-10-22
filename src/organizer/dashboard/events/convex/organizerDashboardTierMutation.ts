@@ -47,7 +47,8 @@ async function organizerDashboardTierUpsertAuthorizedFn(
   const eventResult = await organizerDashboardEventLoad(ctx, authorization.data.orgId, args.eventKey)
   if (!eventResult.success) return eventResult
   const event = eventResult.data
-  if (event.status === "archived") return createResultError(op, "Archived events cannot change ticket tiers")
+  if (event.status === "archived")
+    return createResultError(op, "Archivierte Veranstaltungen können keine Ticketarten mehr ändern.")
 
   const parsed = await organizerDashboardTierUpsertParse(args.input)
   if (!parsed.success) return parsed
@@ -57,10 +58,10 @@ async function organizerDashboardTierUpsertAuthorizedFn(
   const endsAt = tierInput.endsAt ?? event.endsAt
   const doorsAt = tierInput.doorsAt ?? event.doorsAt
   if (Date.parse(endsAt) <= Date.parse(startsAt)) {
-    return createResultError(op, "End time must be after start time")
+    return createResultError(op, "Das Ende muss nach dem Beginn liegen.")
   }
   if (doorsAt.trim().length > 0 && Date.parse(doorsAt) > Date.parse(startsAt)) {
-    return createResultError(op, "Admission time must not be after start time")
+    return createResultError(op, "Der Einlass darf nicht nach dem Beginn liegen.")
   }
 
   const requestedTierKey = tierInput.tierKey
@@ -72,12 +73,12 @@ async function organizerDashboardTierUpsertAuthorizedFn(
           .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", requestedTierKey))
           .unique()
   if (tierInput.tierKey !== undefined && existing?.archivedAt !== undefined) {
-    return createResultError(op, "An archived ticket tier key cannot be reused")
+    return createResultError(op, "Ein archivierter Tarifschlüssel kann nicht wiederverwendet werden.")
   }
   const reserved = existing?.reserved ?? 0
   const sold = existing?.sold ?? 0
   if (tierInput.capacity < reserved + sold) {
-    return createResultError(op, "Capacity cannot be below reserved plus sold inventory")
+    return createResultError(op, "Die Kapazität darf nicht unter reservierte plus verkaufte Plätze sinken.")
   }
   const tierKey =
     tierInput.tierKey ??
@@ -89,7 +90,7 @@ async function organizerDashboardTierUpsertAuthorizedFn(
       .query("catalogTicketTiers")
       .withIndex("eventIdAndTierKey", (q) => q.eq("eventId", event._id).eq("tierKey", tierKey))
       .unique()
-    if (collision) return createResultError(op, "Ticket tier key collision; retry tier creation")
+    if (collision) return createResultError(op, "Tarif konnte nicht angelegt werden, bitte erneut versuchen.")
   }
 
   const feeCents = organizerDashboardTierFeeCompute({
@@ -207,13 +208,14 @@ async function organizerDashboardTierArchiveAuthorizedFn(
   args: { userId: IdUser; orgId: Id<"orgs">; eventKey: string; tierKey: string },
 ): PromiseResult<{ tierKey: string; archivedAt: string }> {
   const op = "organizerDashboardTierArchiveMutation"
-  if (args.tierKey.trim().length === 0) return createResultError(op, "Tier key is required")
+  if (args.tierKey.trim().length === 0) return createResultError(op, "Ein Tarifschlüssel ist erforderlich.")
   const authorization = await organizerDashboardEventAuthGet(ctx, args.userId, args.orgId, "tickets.bearbeiten")
   if (!authorization.success) return authorization
   const eventResult = await organizerDashboardEventLoad(ctx, authorization.data.orgId, args.eventKey)
   if (!eventResult.success) return eventResult
   const event = eventResult.data
-  if (event.status === "archived") return createResultError(op, "Archived events cannot change ticket tiers")
+  if (event.status === "archived")
+    return createResultError(op, "Archivierte Veranstaltungen können keine Ticketarten mehr ändern.")
 
   const tier = await ctx.db
     .query("catalogTicketTiers")

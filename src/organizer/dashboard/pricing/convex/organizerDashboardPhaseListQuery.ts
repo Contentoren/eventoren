@@ -53,7 +53,7 @@ export const organizerDashboardPhaseListQuery = query({
         eventKey,
         ...(tierKey !== undefined ? { tierKey } : {}),
       })
-      if (!filters.success) return createResultError(op, a.summarize(filters.issues))
+      if (!filters.success) return createResultError(op, filters.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const scope = await organizerDashboardPricingEventScopeGet(
         ctx,
         orgId,

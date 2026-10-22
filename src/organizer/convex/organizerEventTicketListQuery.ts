@@ -51,7 +51,7 @@ export const organizerEventTicketListQuery = query({
         .query("catalogEvents")
         .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
         .unique()
-      if (!event) return createResultError(op, "The event was not found")
+      if (!event) return createResultError(op, "Die Veranstaltung wurde nicht gefunden.")
 
       const eventAuthorization = await organizerAuthorizeFn(queryCtx, userId, event.startsAt, event.orgId)
       if (!eventAuthorization.success) return eventAuthorization
@@ -109,7 +109,7 @@ function organizerTicketListSourceCursorGet(
   try {
     parsed = JSON.parse(cursor)
   } catch {
-    return createResultError(op, "Invalid organizer ticket page cursor")
+    return createResultError(op, "Ungültiger Seitenzeiger für die Ticketliste.")
   }
 
   if (
@@ -124,7 +124,7 @@ function organizerTicketListSourceCursorGet(
     !("sourceCursor" in parsed) ||
     typeof parsed.sourceCursor !== "string"
   ) {
-    return createResultError(op, "Organizer ticket page cursor does not match the requested event or search")
+    return createResultError(op, "Der Seitenzeiger passt nicht zu Veranstaltung oder Suche.")
   }
 
   return createResult(parsed.sourceCursor)

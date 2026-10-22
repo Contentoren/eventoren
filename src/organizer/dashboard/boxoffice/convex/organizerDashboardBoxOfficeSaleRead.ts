@@ -72,7 +72,7 @@ export const organizerDashboardBoxOfficeSaleCancelMutation = mutation({
       if (scoped.data.status !== "wartet") return createResultError(op, "Nur wartende Vorgänge sind stornierbar")
       await mutationCtx.db.patch("organizerDashboardBoxOfficeSales", saleId, { status: "abgebrochen" })
       const sale = await mutationCtx.db.get("organizerDashboardBoxOfficeSales", saleId)
-      if (!sale) return createResultError(op, "Sale disappeared")
+      if (!sale) return createResultError(op, "Kassenvorgang nicht gefunden.")
       return createResult(organizerDashboardBoxOfficeSaleRowCreate(sale))
     }),
 })

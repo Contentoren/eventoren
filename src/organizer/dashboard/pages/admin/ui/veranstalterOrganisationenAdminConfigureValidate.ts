@@ -47,6 +47,6 @@ export function veranstalterOrganisationenAdminConfigureValidate(
     tax: { status: raw.taxStatus, defaultRateBps: Number(raw.taxRateBps) },
     fee: { percentBps, fixedCents, payer: raw.feePayer },
   })
-  if (!parsed.success) return createResultError(op, v.summarize(parsed.issues))
+  if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
   return createResult(parsed.output)
 }

@@ -1,6 +1,6 @@
 import * as v from "valibot"
 
-const id = v.pipe(v.string(), v.trim(), v.nonEmpty())
+const id = v.pipe(v.string(), v.trim(), v.nonEmpty("Bitte gib eine ID an."))
 
 /**
  * Real completion path: links an already-paid canonical order, then atomically

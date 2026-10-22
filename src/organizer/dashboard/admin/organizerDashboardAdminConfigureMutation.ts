@@ -36,7 +36,7 @@ export const organizerDashboardAdminConfigureMutation = mutation({
         .query("organizerDashboardOrganizations")
         .withIndex("orgId", (q) => q.eq("orgId", orgId))
         .unique()
-      if (!organization) return createResultError(op, "Organization onboarding required")
+      if (!organization) return createResultError(op, "Bitte schließe zuerst das Veranstalter-Onboarding ab.")
       const now = new Date().toISOString()
       const feeChanged =
         organization.fee.percentBps !== parsed.output.fee.percentBps ||

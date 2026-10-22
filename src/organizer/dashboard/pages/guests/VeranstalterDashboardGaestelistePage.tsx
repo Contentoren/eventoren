@@ -22,6 +22,7 @@ export function VeranstalterDashboardGaestelistePage(p: {
       <section class="flex flex-col gap-4">
         <h1 class="text-2xl font-semibold">Gästeliste</h1>
         <Show when={state.canEdit()} fallback={<p role="alert">Keine Berechtigung für diesen Bereich.</p>}>
+          <Show when={state.scopeError()}>{(scopeError) => <p role="alert">{scopeError()}</p>}</Show>
           <form onSubmit={state.filtersSubmit} role="search" class="flex flex-wrap items-center gap-2">
             <Input
               type="search"

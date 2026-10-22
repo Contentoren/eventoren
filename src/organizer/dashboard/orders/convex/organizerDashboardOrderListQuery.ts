@@ -38,7 +38,7 @@ export const organizerDashboardOrderListQuery = query({
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, "bestellungen.sehen")
       if (!auth.success) return auth
       const filters = a.safeParse(organizerDashboardOrderListFilterSchema, input)
-      if (!filters.success) return createResultError(op, a.summarize(filters.issues))
+      if (!filters.success) return createResultError(op, filters.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const { eventKey, status } = filters.output
       const search = (filters.output.search ?? "").toLowerCase()
       if (!Number.isInteger(paginationOpts.numItems) || paginationOpts.numItems < 1 || paginationOpts.numItems > 50)

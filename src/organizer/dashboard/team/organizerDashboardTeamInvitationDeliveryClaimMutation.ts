@@ -18,7 +18,7 @@ export const organizerDashboardTeamInvitationDeliveryClaimMutation = internalMut
   handler: async (ctx, args): PromiseResult<OrganizerDashboardTeamDeliveryClaimResult> => {
     const op = "organizerDashboardTeamInvitationDeliveryClaimMutation"
     const invitation = await ctx.db.get("organizerDashboardTeamInvitations", args.invitationId)
-    if (!invitation) return createResultError(op, "Invitation not found")
+    if (!invitation) return createResultError(op, "Einladung nicht gefunden.")
 
     const now = new Date()
     const nowIso = now.toISOString()

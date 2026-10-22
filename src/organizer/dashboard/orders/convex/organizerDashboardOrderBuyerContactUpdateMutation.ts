@@ -27,7 +27,7 @@ export const organizerDashboardOrderBuyerContactUpdateMutation = mutation({
       const scope = await organizerDashboardOrderScopeGet(ctx, orgId, orderId, op)
       if (!scope.success) return scope
       const parsed = a.safeParse(organizerDashboardOrderBuyerContactSchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       if (!Object.values(parsed.output).some((value) => value !== undefined))
         return createResultError(op, "Keine Kontaktänderung angegeben")
       const previous = scope.data.order.operationalContact

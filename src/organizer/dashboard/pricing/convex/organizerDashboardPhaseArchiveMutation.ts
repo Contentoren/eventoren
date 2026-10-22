@@ -16,7 +16,7 @@ export const organizerDashboardPhaseArchiveMutation = mutation({
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, "tickets.bearbeiten")
       if (!auth.success) return auth
       const parsed = a.safeParse(organizerDashboardPhaseArchiveSchema, { orgId: String(orgId), phaseId })
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       let existing = null
       try {
         existing = await ctx.db.get(

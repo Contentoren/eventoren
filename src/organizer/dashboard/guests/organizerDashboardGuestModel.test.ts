@@ -85,3 +85,35 @@ describe("message ICS generation", () => {
     expect(ics).not.toContain("URL:")
   })
 })
+
+describe("dashboard schemas speak German", () => {
+  const englishPattern = /invalid|must be|expected|received|required|cannot be empty|missing|unknown/i
+  const firstMessage = (issues: readonly { message?: unknown }[]): string =>
+    typeof issues[0]?.message === "string" ? (issues[0].message as string) : ""
+  test("guest failures explain in German", () => {
+    const empty = v.safeParse(organizerDashboardGuestSchema, { name: "  ", plusOnes: 0 })
+    expect(empty.success).toBe(false)
+    if (empty.success) return
+    expect(firstMessage(empty.issues)).toBe("Name fehlt")
+    const badMail = v.safeParse(organizerDashboardGuestSchema, {
+      name: "Gast",
+      plusOnes: 0,
+      email: "keine-mail",
+    })
+    expect(badMail.success).toBe(false)
+    if (badMail.success) return
+    expect(firstMessage(badMail.issues)).toContain("E-Mail")
+    expect(firstMessage(badMail.issues)).not.toMatch(englishPattern)
+  })
+  test("message content failures explain in German", () => {
+    const parsed = v.safeParse(organizerDashboardMessageContentSchema, {
+      kind: "info",
+      audience: { type: "alle", tierKeys: [] },
+      subject: "",
+      body: "Text",
+    })
+    expect(parsed.success).toBe(false)
+    if (parsed.success) return
+    expect(firstMessage(parsed.issues)).toBe("Betreff fehlt")
+  })
+})

@@ -39,6 +39,9 @@ export function veranstalterOnboardingInputValidate(
   const imprint = emptyToUndefined(raw.imprint)
   const iban = emptyToUndefined(raw.iban)?.replace(/[\s-]+/g, "")
   const bankHolder = emptyToUndefined(raw.bankHolder)
+  if ((iban !== undefined) !== (bankHolder !== undefined)) {
+    return createResultError(op, "Bitte IBAN und Kontoinhaber gemeinsam angeben.")
+  }
   const parsed = v.safeParse(
     v.omit(organizerDashboardOrganizationCreateSchema, [
       "termsAccepted",
@@ -69,6 +72,6 @@ export function veranstalterOnboardingInputValidate(
         : {}),
     },
   )
-  if (!parsed.success) return createResultError(op, v.summarize(parsed.issues))
+  if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
   return createResult(parsed.output)
 }

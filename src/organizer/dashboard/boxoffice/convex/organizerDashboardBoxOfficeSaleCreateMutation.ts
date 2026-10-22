@@ -78,7 +78,7 @@ export const organizerDashboardBoxOfficeSaleCreateMutation = mutation({
       const auth = await organizerDashboardAuthorize(mutationCtx, userId, orgId, "abendkasse.preise")
       if (!auth.success) return auth
       const parsed = a.safeParse(organizerDashboardBoxOfficeSaleCreateSchema, input)
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const { eventKey, tierKey, quantity, buyerEmail } = parsed.output
       const scoped = await organizerDashboardBoxOfficeTierGet(mutationCtx, orgId, eventKey, tierKey, op)
       if (!scoped.success) return scoped
@@ -112,7 +112,7 @@ export const organizerDashboardBoxOfficeSaleCreateMutation = mutation({
         createdByUserId: String(userId),
       })
       const sale = await mutationCtx.db.get("organizerDashboardBoxOfficeSales", saleId)
-      if (!sale) return createResultError(op, "Sale disappeared")
+      if (!sale) return createResultError(op, "Kassenvorgang nicht gefunden.")
       return createResult(organizerDashboardBoxOfficeSaleRowCreate(sale))
     }),
 })

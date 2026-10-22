@@ -25,7 +25,7 @@ export const organizerDashboardAdmissionStatsQuery = query({
       const auth = await organizerDashboardAuthorize(queryCtx, userId, orgId)
       if (!auth.success) return auth
       if (!auth.data.permissions.includes("einlass.nutzen") && !auth.data.permissions.includes("bestellungen.sehen")) {
-        return createResultError(op, "Permission denied")
+        return createResultError(op, "Keine Berechtigung für diesen Bereich.")
       }
       const scope = await organizerDashboardAdmissionScopeGet(queryCtx, orgId, eventKey, op)
       if (!scope.success) return scope

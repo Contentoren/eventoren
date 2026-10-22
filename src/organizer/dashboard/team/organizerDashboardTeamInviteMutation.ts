@@ -43,13 +43,16 @@ export const organizerDashboardTeamInviteMutation = mutation({
         emails: rawEmails.map(organizerDashboardTeamEmailNormalize),
         organizerRole,
       })
-      if (!parsed.success) return createResultError(op, v.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const input = parsed.output
       if (input.organizerRole === "inhaber" && authorization.data.role !== "inhaber") {
-        return createResultError(op, "Only the current owner can invite the owner role")
+        return createResultError(
+          op,
+          "Nur die aktuelle Inhaberin bzw. der aktuelle Inhaber kann die Inhaberrolle vergeben.",
+        )
       }
       if (new Set(input.emails).size !== input.emails.length) {
-        return createResultError(op, "The batch contains the same address more than once")
+        return createResultError(op, "Eine Adresse ist mehrfach in der Einladung enthalten.")
       }
       const rawByNormalized = new Map<string, string>()
       for (const raw of rawEmails) rawByNormalized.set(organizerDashboardTeamEmailNormalize(raw), raw)
@@ -70,7 +73,7 @@ export const organizerDashboardTeamInviteMutation = mutation({
       if (roster.length > legacyRosterBudget) {
         return createResultError(
           op,
-          "Legacy email safety check exceeded its 200-membership budget; canonical email migration is required",
+          "Zu viele Mitgliedschaften für die Sicherheitsprüfung; bitte wende dich an den Support.",
         )
       }
       for (const member of roster) {
@@ -78,7 +81,7 @@ export const organizerDashboardTeamInviteMutation = mutation({
         if (account?.email && input.emails.includes(organizerDashboardTeamEmailNormalize(account.email))) {
           return createResultError(
             op,
-            `${organizerDashboardTeamEmailNormalize(account.email)} is already a member of this organization`,
+            `${organizerDashboardTeamEmailNormalize(account.email)} ist bereits Mitglied dieser Organisation.`,
           )
         }
       }
@@ -92,7 +95,7 @@ export const organizerDashboardTeamInviteMutation = mutation({
           )
           .take(2)
         if (existing.length > 0) {
-          return createResultError(op, `${email} already has an open invitation`)
+          return createResultError(op, `${email} hat bereits eine offene Einladung.`)
         }
         const expired = await mutationCtx.db
           .query("organizerDashboardTeamInvitations")
@@ -107,16 +110,24 @@ export const organizerDashboardTeamInviteMutation = mutation({
             .query("users")
             .withIndex("email", (q) => q.eq("email", lookup))
             .take(2)
-          if (users.length > 1) return createResultError(op, `The address ${email} belongs to more than one account`)
+          if (users.length > 1)
+            return createResultError(
+              op,
+              `Die Adresse ${email} gehört zu mehr als einem Konto. Bitte wende dich an den Support.`,
+            )
           const user = users[0]
           if (!user) continue
           const memberships = await mutationCtx.db
             .query("orgMembers")
             .withIndex("userIdOrgId", (q) => q.eq("userId", user._id).eq("orgId", orgId))
             .take(2)
-          if (memberships.length > 1) return createResultError(op, `The membership of ${email} is ambiguous`)
+          if (memberships.length > 1)
+            return createResultError(
+              op,
+              `Die Mitgliedschaft von ${email} ist nicht eindeutig. Bitte wende dich an den Support.`,
+            )
           if (memberships.length === 1) {
-            return createResultError(op, `${email} is already a member of this organization`)
+            return createResultError(op, `${email} ist bereits Mitglied dieser Organisation.`)
           }
         }
       }

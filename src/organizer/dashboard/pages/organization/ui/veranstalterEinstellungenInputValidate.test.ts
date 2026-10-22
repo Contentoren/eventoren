@@ -49,3 +49,38 @@ describe("veranstalterEinstellungenInputValidate validates owner settings update
     expect(result.success).toBe(false)
   })
 })
+
+describe("veranstalterEinstellungenInputValidate speaks German", () => {
+  const englishPattern = /invalid|must be|expected|received|required|cannot|empty|missing|unknown/i
+  test("invalid IBAN explains in German", () => {
+    const result = veranstalterEinstellungenInputValidate({ ...validRaw(), iban: "DE00000000000000000000" })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.errorMessage).toContain("IBAN")
+    expect(result.errorMessage).not.toMatch(englishPattern)
+  })
+
+  test("unknown kind explains in German", () => {
+    const result = veranstalterEinstellungenInputValidate({ ...validRaw(), kind: "gmbh" })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.errorMessage).toContain("Verein")
+    expect(result.errorMessage).not.toMatch(englishPattern)
+  })
+
+  test("partial bank explains in German", () => {
+    const result = veranstalterEinstellungenInputValidate({ ...validRaw(), bankHolder: "" })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.errorMessage).toContain("Kontoinhaber")
+    expect(result.errorMessage).not.toMatch(englishPattern)
+  })
+
+  test("bad contact email explains in German", () => {
+    const result = veranstalterEinstellungenInputValidate({ ...validRaw(), contactEmail: "keine-mail" })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.errorMessage).toContain("E-Mail")
+    expect(result.errorMessage).not.toMatch(englishPattern)
+  })
+})

@@ -34,7 +34,7 @@ export const scannerLinkEventTicketListQuery = query({
       .query("catalogEvents")
       .withIndex("eventKey", (q) => q.eq("eventKey", args.eventKey))
       .unique()
-    if (!event) return createResultError(op, "Event unavailable")
+    if (!event) return createResultError(op, "Veranstaltung nicht verfügbar.")
 
     const sourcePage = await ctx.db
       .query("ticketIssued")
@@ -85,7 +85,7 @@ function scannerLinkTicketCursorRead(
   try {
     parsed = JSON.parse(cursor)
   } catch {
-    return createResultError(op, "Invalid ticket cursor")
+    return createResultError(op, "Ungültiger Ticket-Seitenzeiger.")
   }
   if (
     typeof parsed !== "object" ||
@@ -101,6 +101,6 @@ function scannerLinkTicketCursorRead(
     !("sourceCursor" in parsed) ||
     typeof parsed.sourceCursor !== "string"
   )
-    return createResultError(op, "Ticket cursor does not match link, event or search")
+    return createResultError(op, "Der Ticket-Seitenzeiger passt nicht zu Link, Veranstaltung oder Suche.")
   return createResult(parsed.sourceCursor)
 }

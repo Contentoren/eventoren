@@ -22,7 +22,7 @@ export const organizerDashboardGuestCheckInMutation = mutation({
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, "gaesteliste.bearbeiten")
       if (!auth.success) return auth
       const parsed = a.safeParse(organizerDashboardGuestCheckInSchema, { entrance })
-      if (!parsed.success) return createResultError(op, a.summarize(parsed.issues))
+      if (!parsed.success) return createResultError(op, parsed.issues[0]?.message ?? "Bitte prüfe deine Eingaben.")
       const guest = await ctx.db.get("organizerDashboardGuests", guestId)
       if (!guest || guest.orgId !== orgId) return createResultError(op, "Gast nicht verfügbar")
       const now = new Date().toISOString()

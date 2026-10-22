@@ -29,19 +29,20 @@ export const organizerDashboardTeamInvitationResendMutation = mutation({
       if (!authorization.success) return authorization
 
       const invitation = await mutationCtx.db.get("organizerDashboardTeamInvitations", invitationId)
-      if (!invitation) return createResultError(op, "Invitation not found")
-      if (invitation.orgId !== orgId) return createResultError(op, "Invitation does not belong to this organization")
+      if (!invitation) return createResultError(op, "Einladung nicht gefunden.")
+      if (invitation.orgId !== orgId)
+        return createResultError(op, "Diese Einladung gehört nicht zu dieser Organisation.")
       const status = organizerDashboardTeamInvitationStatusEffective(invitation, new Date())
-      if (status !== "pending") return createResultError(op, `The invitation is ${status}`)
+      if (status !== "pending") return createResultError(op, "Diese Einladung ist nicht mehr offen.")
 
       if (invitation.deliveryState === "sending") {
         return createResultError(
           op,
-          "Delivery is already in progress or its outcome is unknown; reconcile it before resending",
+          "Der Versand läuft bereits oder sein Ergebnis ist unbekannt; bitte wende dich an den Support.",
         )
       }
       if (invitation.deliveryState === "queued") {
-        return createResultError(op, "Delivery is already queued")
+        return createResultError(op, "Der Versand ist bereits angestoßen.")
       }
 
       const nowIso = new Date().toISOString()
@@ -52,7 +53,8 @@ export const organizerDashboardTeamInvitationResendMutation = mutation({
       })
       await mutationCtx.scheduler.runAfter(0, organizerDashboardTeamDeliverActionReference, { invitationId })
       const updated = await mutationCtx.db.get("organizerDashboardTeamInvitations", invitation._id)
-      if (!updated) return createResultError(op, "Invitation not found after the resend")
+      if (!updated)
+        return createResultError(op, "Einladung wurde erneut angestoßen, konnte aber nicht erneut geladen werden.")
       const org = await mutationCtx.db.get("orgs", orgId)
       return createResult({
         id: updated._id,

@@ -19,7 +19,7 @@ export const organizerDashboardTeamInvitationDeliveryRecordMutation = internalMu
   handler: async (ctx, args): PromiseResult<{ readonly recorded: boolean }> => {
     const op = "organizerDashboardTeamInvitationDeliveryRecordMutation"
     const invitation = await ctx.db.get("organizerDashboardTeamInvitations", args.invitationId)
-    if (!invitation) return createResultError(op, "Invitation not found")
+    if (!invitation) return createResultError(op, "Einladung nicht gefunden.")
     if (invitation.deliveryState !== "sending" || invitation.deliveryAttempts !== args.attempt) {
       return createResult({ recorded: false })
     }
