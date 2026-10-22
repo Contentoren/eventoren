@@ -1,19 +1,14 @@
-import * as a from "valibot"
-import { api } from "#convex/_generated/api.js"
 import type { ActionCtx } from "#convex/_generated/server.js"
-import {
-  convexFunctionCallIsPublic,
-  convexFunctionCallResolve,
-  convexFunctionArgsWithToken,
-} from "#src/utils/convex_client/convexFunctionCall.ts"
 import type { McpToolDefinition } from "#src/mcp/mcpToolRegistry.ts"
 import { mcpToolError, mcpToolResult } from "#src/mcp/mcpToolRegistry.ts"
-
-const convexCallMcpInput = a.object({
-  module: a.string(),
-  function: a.string(),
-  args: a.optional(a.record(a.string(), a.unknown()), {}),
-})
+import { type McpConvexCallInput, mcpConvexCallInputSchema } from "#src/utils/convex_client/convexCallSchemas.ts"
+import {
+  convexFunctionArgsWithToken,
+  convexFunctionCallDispatch,
+  convexFunctionCallIsPublic,
+  convexFunctionCallResolve,
+  convexFunctionReferenceLookup,
+} from "#src/utils/convex_client/convexFunctionCall.ts"
 
 /**
  * Generic `convex-call` tool reaching every public Convex function via the
@@ -28,8 +23,8 @@ export function mcpConvexCallToolDefinitions(ctx: ActionCtx, token: string): Mcp
       name: "convex-call",
       description:
         "Call any public Convex function by module and name (see convexFunctionCatalog; e.g. catalog/catalogEventListPublishedPageQuery). Args are passed as-is; the credential is added as 'token' only when the function accepts one.",
-      inputSchema: convexCallMcpInput,
-      run: async (toolArgs: { module: string; function: string; args?: Record<string, unknown> }) => {
+      inputSchema: mcpConvexCallInputSchema,
+      run: async (toolArgs: McpConvexCallInput) => {
         const resolved = convexFunctionCallResolve({ module: toolArgs.module, name: toolArgs.function })
         if (!resolved) {
           return mcpToolError(-32602, `Unknown Convex function "${toolArgs.module}:${toolArgs.function}"`)
@@ -41,17 +36,17 @@ export function mcpConvexCallToolDefinitions(ctx: ActionCtx, token: string): Mcp
           )
         }
         const args = convexFunctionArgsWithToken(resolved, toolArgs.args ?? {}, token)
+        const reference = convexFunctionReferenceLookup(resolved)
+        if (!reference) {
+          return mcpToolError(-32603, `Missing Convex reference for "${toolArgs.module}:${toolArgs.function}"`)
+        }
         try {
-          const reference = (api as unknown as Record<string, Record<string, unknown>>)[resolved.module]?.[
-            resolved.name
-          ] as never
-          const result =
-            resolved.kind === "query"
-              ? await ctx.runQuery(reference as never, args as never)
-              : resolved.kind === "mutation"
-                ? await ctx.runMutation(reference as never, args as never)
-                : await ctx.runAction(reference as never, args as never)
-          return mcpToolResult(result, false)
+          const result = await convexFunctionCallDispatch(resolved, reference, args, {
+            query: (queryReference, queryArgs) => ctx.runQuery(queryReference, queryArgs),
+            mutation: (mutationReference, mutationArgs) => ctx.runMutation(mutationReference, mutationArgs),
+            action: (actionReference, actionArgs) => ctx.runAction(actionReference, actionArgs),
+          })
+          return mcpToolResult(result)
         } catch (error) {
           return mcpToolError(-32603, error instanceof Error ? error.message : String(error))
         }

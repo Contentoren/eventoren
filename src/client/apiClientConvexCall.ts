@@ -1,11 +1,13 @@
-import { api } from "#convex/_generated/api.js"
 import type { ConvexHttpClient } from "convex/browser"
 import {
   convexFunctionCallIsPublic,
   convexFunctionCallResolve,
   convexFunctionArgsWithToken,
+  convexFunctionReferenceLookup,
+  convexFunctionCallDispatch,
   type ConvexFunctionCallTarget,
 } from "#src/utils/convex_client/convexFunctionCall.ts"
+import { convexCallArgsParse } from "#src/utils/convex_client/convexCallSchemas.ts"
 import { apiClientCreate, type ApiClientResult } from "./apiClient.js"
 
 export type ApiClientConvexCallInput = ConvexFunctionCallTarget & {
@@ -43,18 +45,33 @@ export async function apiClientConvexCall(
       },
     }
   }
-  const args = convexFunctionArgsWithToken(resolved, input.args ?? {}, input.token)
+  let args: Record<string, unknown>
   try {
-    const reference = (api as unknown as Record<string, Record<string, unknown>>)[resolved.module]?.[
-      resolved.name
-    ] as never
-    const data =
-      resolved.kind === "query"
-        ? await client.query(reference, args as never)
-        : resolved.kind === "mutation"
-          ? await client.mutation(reference, args as never)
-          : await client.action(reference, args as never)
-    return { success: true, data: data as unknown }
+    args = convexCallArgsParse(input.args ?? {})
+  } catch {
+    return {
+      success: false,
+      error: {
+        status: 400,
+        message: `Invalid args for "${input.module}:${input.name}": expected an object`,
+      },
+    }
+  }
+  const argsWithToken = convexFunctionArgsWithToken(resolved, args, input.token)
+  const reference = convexFunctionReferenceLookup(resolved)
+  if (!reference) {
+    return {
+      success: false,
+      error: { status: 503, message: `Missing Convex reference for "${input.module}:${input.name}"` },
+    }
+  }
+  try {
+    const data = await convexFunctionCallDispatch(resolved, reference, argsWithToken, {
+      query: (queryReference, queryArgs) => client.query(queryReference, queryArgs),
+      mutation: (mutationReference, mutationArgs) => client.mutation(mutationReference, mutationArgs),
+      action: (actionReference, actionArgs) => client.action(actionReference, actionArgs),
+    })
+    return { success: true, data }
   } catch (error) {
     return {
       success: false,
