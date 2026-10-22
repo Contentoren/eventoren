@@ -8,8 +8,8 @@ import { isServer } from "solid-js/web"
 import { cataloguePublicPageFetch } from "../client/cataloguePublicPageFetch.ts"
 import { catalogEventListPublishedPagePublicCachedGet } from "../server/catalogEventListPublishedPagePublicCachedGet.ts"
 
-const siteName = "eventoren"
-const description = "A public Solid website built with Adaptive DS."
+const siteName = "Eventoren | Veranstaltungen, Events & Erlebnisse"
+const description = "Eventoren präsentiert Veranstaltungen, Termine und Erlebnisse an einem Ort."
 const getCatalogEvents = createServerFn({ method: "GET" })
   .validator((filter: EventFilter) => filter)
   .handler(({ data: filter }) =>

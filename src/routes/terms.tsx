@@ -13,9 +13,9 @@ export const Route = createFileRoute("/terms")({
       path: "/terms",
     }),
     links: [
-      { rel: "canonical", href: seo.canonicalLink("/terms").href },
+      { rel: "canonical", href: seo.canonicalLink("/agb").href },
       { rel: "stylesheet", href: markdownCss },
     ],
   }),
-  component: () => <LegalPage html={Route.useLoaderData()} />,
+  component: () => <LegalPage html={Route.useLoaderData()} title="Allgemeine Geschäftsbedingungen" />,
 })

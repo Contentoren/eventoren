@@ -13,7 +13,7 @@ export const Route = createFileRoute("/privacy")({
       path: "/privacy",
     }),
     links: [
-      { rel: "canonical", href: seo.canonicalLink("/privacy").href },
+      { rel: "canonical", href: seo.canonicalLink("/datenschutz").href },
       { rel: "stylesheet", href: markdownCss },
     ],
   }),

@@ -20,7 +20,7 @@ export const Route = createFileRoute("/datenschutz")({
   }),
   component: () => (
     <SiteFrame>
-      <LegalPage html={Route.useLoaderData()} title="Datenschutzerklärung" />
+      <LegalPage html={Route.useLoaderData()} />
     </SiteFrame>
   ),
 })
