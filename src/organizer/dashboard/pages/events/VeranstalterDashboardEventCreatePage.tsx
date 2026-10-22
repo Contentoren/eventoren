@@ -23,7 +23,7 @@ export function VeranstalterDashboardEventCreatePage(p: { readonly state: Verans
 
       <Show when={state.failure()}>
         {(message) => (
-          <p role="alert" class="rounded-md border border-input px-3 py-2 text-sm text-content">
+          <p role="alert" class="rounded-card border border-border-subtle bg-surface px-3 py-2 text-sm text-content">
             {message()}
           </p>
         )}
@@ -32,7 +32,7 @@ export function VeranstalterDashboardEventCreatePage(p: { readonly state: Verans
       <Show
         when={!state.isLocked()}
         fallback={
-          <div class="flex flex-col gap-2 rounded-md border border-input p-3">
+          <div class="flex flex-col gap-2 rounded-card border border-border-subtle bg-surface p-3">
             <p class="text-sm font-medium text-content">Keine Bearbeitungsrechte</p>
             <p class="text-sm text-content-muted">
               Der Assistent ist schreibgeschützt: Ohne das Recht „Veranstaltungen bearbeiten“ lassen sich keine Entwürfe
@@ -47,13 +47,16 @@ export function VeranstalterDashboardEventCreatePage(p: { readonly state: Verans
         }
       >
         <Show when={state.isResuming()}>
-          <p class="rounded-md border border-input px-3 py-2 text-sm text-content-muted" role="status">
+          <p
+            class="rounded-card border border-border-subtle bg-surface px-3 py-2 text-sm text-content-muted"
+            role="status"
+          >
             Entwurf wird geladen …
           </p>
         </Show>
         <Show when={state.resumeError()}>
           {(message) => (
-            <p role="alert" class="rounded-md border border-input px-3 py-2 text-sm text-content">
+            <p role="alert" class="rounded-card border border-border-subtle bg-surface px-3 py-2 text-sm text-content">
               {message()}
             </p>
           )}
@@ -240,7 +243,7 @@ export function VeranstalterDashboardEventCreatePage(p: { readonly state: Verans
                 </div>
               </dl>
               <Show when={!state.orgActive()}>
-                <p class="rounded-md border border-input px-3 py-2 text-sm text-content-muted">
+                <p class="rounded-card border border-border-subtle bg-surface px-3 py-2 text-sm text-content-muted">
                   Die Organisation ist nicht aktiv — die Veröffentlichung bleibt gesperrt, bis sie aktiviert ist.
                 </p>
               </Show>

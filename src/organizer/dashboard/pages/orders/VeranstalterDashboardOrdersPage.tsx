@@ -90,7 +90,7 @@ export function VeranstalterDashboardOrdersPage(p: {
               <ul class="flex flex-col gap-2">
                 <For each={state.orders()} fallback={<li>Keine Bestellungen in diesem Fenster.</li>}>
                   {(order) => (
-                    <li class="rounded-md border border-input p-3">
+                    <li class="rounded-card border border-border-subtle bg-surface p-3">
                       <Button variant="ghost" onClick={() => state.openOrder(order.orderId)}>
                         Bestellung {order.bookingNumber ?? "ohne Nummer"}
                       </Button>
@@ -133,7 +133,7 @@ export function VeranstalterDashboardOrdersPage(p: {
               <ul class="flex flex-col gap-2">
                 <For each={state.participants()} fallback={<li>Keine Teilnehmer in diesem Fenster.</li>}>
                   {(ticket) => (
-                    <li class="rounded-md border border-input p-3">
+                    <li class="rounded-card border border-border-subtle bg-surface p-3">
                       <p class="font-medium">{ticket.participantName || "Ohne Teilnehmername"}</p>
                       <p>
                         {ticket.participantEmail} · {ticket.tierName} · Nr. {ticket.sequence}

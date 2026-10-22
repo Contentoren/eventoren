@@ -49,7 +49,7 @@ export function VeranstalterDashboardEventDetailPage(p: {
       </Show>
       <Show when={state.detailError()}>
         {(message) => (
-          <p role="alert" class="rounded-md border border-input px-3 py-2 text-sm text-content">
+          <p role="alert" class="rounded-card border border-border-subtle bg-surface px-3 py-2 text-sm text-content">
             {message()}
           </p>
         )}
@@ -78,7 +78,7 @@ export function VeranstalterDashboardEventDetailPage(p: {
                 <Link
                   to="/events/$eventId"
                   params={{ eventId: event().eventKey }}
-                  class="rounded-md border border-input px-3 py-1.5 text-sm font-medium text-content"
+                  class="rounded-card border border-border-subtle bg-surface px-3 py-1.5 text-sm font-medium text-content"
                 >
                   Öffentliche Ansicht
                 </Link>
@@ -140,7 +140,10 @@ export function VeranstalterDashboardEventDetailPage(p: {
 
             <Show when={state.failure()}>
               {(message) => (
-                <p role="alert" class="rounded-md border border-input px-3 py-2 text-sm text-content">
+                <p
+                  role="alert"
+                  class="rounded-card border border-border-subtle bg-surface px-3 py-2 text-sm text-content"
+                >
                   {message()}
                 </p>
               )}
@@ -148,7 +151,7 @@ export function VeranstalterDashboardEventDetailPage(p: {
 
             <Show when={state.canEdit() && state.isDraft()}>
               <form
-                class="flex flex-col gap-3 rounded-md border border-input p-3"
+                class="flex flex-col gap-3 rounded-card border border-border-subtle bg-surface p-3"
                 onSubmit={(submit) => {
                   submit.preventDefault()
                   void state.patchSave()
@@ -192,14 +195,14 @@ export function VeranstalterDashboardEventDetailPage(p: {
                     />
                   </label>
                 </div>
-                <fieldset disabled={state.pending()} class="flex flex-col gap-3 border-t border-input pt-3">
+                <fieldset disabled={state.pending()} class="flex flex-col gap-3 border-t border-border-subtle pt-3">
                   <legend class="text-sm font-semibold text-content">FAQ</legend>
                   <p class="text-xs text-content-muted">
                     Bis zu 20 Fragen. Löschen aller Einträge wird beim Speichern übernommen.
                   </p>
                   <Index each={state.faqRows()}>
                     {(row, index) => (
-                      <div class="flex flex-col gap-2 rounded-md border border-input p-3">
+                      <div class="flex flex-col gap-2 rounded-card border border-border-subtle bg-surface p-3">
                         <label class="flex flex-col gap-1 text-sm">
                           Frage {index + 1}
                           <Input
@@ -237,14 +240,14 @@ export function VeranstalterDashboardEventDetailPage(p: {
                     </Button>
                   </div>
                 </fieldset>
-                <fieldset disabled={state.pending()} class="flex flex-col gap-3 border-t border-input pt-3">
+                <fieldset disabled={state.pending()} class="flex flex-col gap-3 border-t border-border-subtle pt-3">
                   <legend class="text-sm font-semibold text-content">Ablauf (Europe/Berlin)</legend>
                   <p class="text-xs text-content-muted">
                     Bis zu 50 Punkte in Listenreihenfolge. Uhrzeiten im Format HH:mm, Ortszeit Europe/Berlin.
                   </p>
                   <Index each={state.scheduleRows()}>
                     {(row, index) => (
-                      <div class="flex flex-col gap-2 rounded-md border border-input p-3">
+                      <div class="flex flex-col gap-2 rounded-card border border-border-subtle bg-surface p-3">
                         <label class="flex flex-col gap-1 text-sm">
                           Uhrzeit {index + 1} (Europe/Berlin, HH:mm)
                           <Input
@@ -308,7 +311,10 @@ export function VeranstalterDashboardEventDetailPage(p: {
             </Show>
 
             <Show when={!state.canEdit() || !state.isDraft()}>
-              <section class="flex flex-col gap-2 rounded-md border border-input p-3" aria-label="FAQ und Ablauf">
+              <section
+                class="flex flex-col gap-2 rounded-card border border-border-subtle bg-surface p-3"
+                aria-label="FAQ und Ablauf"
+              >
                 <h2 class="text-sm font-semibold text-content">FAQ</h2>
                 <For each={event().faqs} fallback={<p class="text-sm text-content-muted">Keine Fragen hinterlegt.</p>}>
                   {(row) => (
@@ -356,7 +362,7 @@ export function VeranstalterDashboardEventDetailPage(p: {
                 <ul class="flex flex-col gap-2">
                   <For each={event().tiers}>
                     {(tier) => (
-                      <li class="flex flex-wrap items-center justify-between gap-2 rounded-md border border-input px-3 py-2 text-sm">
+                      <li class="flex flex-wrap items-center justify-between gap-2 rounded-card border border-border-subtle bg-surface px-3 py-2 text-sm">
                         <div class="flex flex-col">
                           <span class="font-medium text-content">{tier.name}</span>
                           <Show when={tier.archivedAt !== undefined}>
@@ -409,7 +415,7 @@ export function VeranstalterDashboardEventDetailPage(p: {
                   </Button>
                 </Show>
                 <Show when={state.isPublished()}>
-                  <p class="rounded-md border border-input px-3 py-2 text-sm text-content-muted">
+                  <p class="rounded-card border border-border-subtle bg-surface px-3 py-2 text-sm text-content-muted">
                     Veröffentlichte Veranstaltungen können derzeit nicht archiviert werden — die sichere Stornierung
                     laufender Verkäufe wird noch serverseitig abgesichert.
                   </p>
