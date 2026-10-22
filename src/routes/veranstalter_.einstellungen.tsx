@@ -9,8 +9,7 @@ import { VeranstalterEinstellungenPage } from "../organizer/dashboard/pages/orga
 export const Route = createFileRoute("/veranstalter_/einstellungen")({
   validateSearch: (input: unknown) => veranstalterDashboardSearchParse(input),
   head: () => ({
-    ...seoHeadCreate("/veranstalter/einstellungen"),
-    meta: [...seoHeadCreate("/veranstalter/einstellungen").meta, { name: "robots", content: "noindex, nofollow" }],
+    ...seoHeadCreate("/veranstalter/einstellungen", { noindex: true }),
   }),
   component: () => (
     <ClientOnly fallback={<VeranstalterDashboardLoadingState />}>

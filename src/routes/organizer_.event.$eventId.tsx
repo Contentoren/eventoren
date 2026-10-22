@@ -12,8 +12,7 @@ const getOrganizerAccess = createServerFn({ method: "GET" }).handler(eventorenOr
 export const Route = createFileRoute("/organizer_/event/$eventId")({
   validateSearch: organizerEventDetailSearchParse,
   head: () => ({
-    ...seoHeadCreate("/organizer"),
-    meta: [...seoHeadCreate("/organizer").meta, { name: "robots", content: "noindex, nofollow" }],
+    ...seoHeadCreate("/organizer", { noindex: true }),
   }),
   loader: async ({ params }) => {
     const result = await getOrganizerAccess()

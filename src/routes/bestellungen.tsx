@@ -8,8 +8,7 @@ const getCurrentUser = createServerFn({ method: "GET" }).handler(eventorenCurren
 
 export const Route = createFileRoute("/bestellungen")({
   head: () => ({
-    ...seoHeadCreate("/bestellungen"),
-    meta: [...seoHeadCreate("/bestellungen").meta, { name: "robots", content: "noindex, nofollow" }],
+    ...seoHeadCreate("/bestellungen", { noindex: true }),
   }),
   loader: async () => {
     const result = await getCurrentUser()

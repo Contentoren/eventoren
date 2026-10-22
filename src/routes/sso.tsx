@@ -7,8 +7,7 @@ import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 export const Route = createFileRoute("/sso")({
   validateSearch: eventorenSsoSearchParse,
   head: () => ({
-    ...seoHeadCreate("/sso"),
-    meta: [...seoHeadCreate("/sso").meta, { name: "robots", content: "noindex, nofollow" }],
+    ...seoHeadCreate("/sso", { noindex: true }),
   }),
   component: () => (
     <SiteFrame>
