@@ -13,7 +13,7 @@ export function ticketContactEmpty(): TicketContact {
     addressLine2: "",
     postalCode: "",
     city: "",
-    country: "",
+    country: "DE",
     phone: "",
   }
 }

@@ -172,7 +172,10 @@ export function ticketCheckoutFormStateCreate(inputs: {
   onMount(() => {
     const draft = ticketContactDraftLoad()
     if (draft.success) {
-      contact.set(draft.data.contact)
+      // Stored drafts stay verbatim in storage; the visible country input
+      // falls back to DE so legacy drafts without a country still prefill.
+      const stored = draft.data.contact
+      contact.set(!stored.country.trim() ? { ...stored, country: "DE" } : stored)
       participantNames.set(
         inputs.itemsReady?.() === false
           ? draft.data.participantNames

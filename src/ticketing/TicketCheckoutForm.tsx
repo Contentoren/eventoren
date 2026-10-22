@@ -94,6 +94,7 @@ export function TicketCheckoutForm(props: {
                     </label>
                     <Input
                       id="checkout-company"
+                      name="organization"
                       autocomplete="organization"
                       required={!props.relaxedValidation}
                       aria-invalid={state.isFieldInvalid("companyName") ? "true" : undefined}
@@ -156,6 +157,7 @@ export function TicketCheckoutForm(props: {
                   <Input
                     id="checkout-email"
                     type={props.relaxedValidation ? "text" : "email"}
+                    name="email"
                     autocomplete="email"
                     required={!props.relaxedValidation}
                     aria-describedby="checkout-email-hint"
@@ -180,6 +182,7 @@ export function TicketCheckoutForm(props: {
                   <Input
                     id="checkout-phone"
                     type="tel"
+                    name="tel"
                     autocomplete="tel"
                     value={state.contact().phone}
                     onInput={(event) => state.contactFieldChange("phone", event.currentTarget.value)}
@@ -213,6 +216,7 @@ export function TicketCheckoutForm(props: {
                   </label>
                   <Input
                     id="checkout-address-line2"
+                    name="address-line2"
                     autocomplete="address-line2"
                     value={state.contact().addressLine2}
                     onInput={(event) => state.contactFieldChange("addressLine2", event.currentTarget.value)}
@@ -226,6 +230,7 @@ export function TicketCheckoutForm(props: {
                     </label>
                     <Input
                       id="checkout-postal-code"
+                      name="postal-code"
                       autocomplete="postal-code"
                       required={!props.relaxedValidation}
                       aria-invalid={state.isFieldInvalid("postalCode") ? "true" : undefined}
@@ -244,6 +249,7 @@ export function TicketCheckoutForm(props: {
                     </label>
                     <Input
                       id="checkout-city"
+                      name="address-level2"
                       autocomplete="address-level2"
                       required={!props.relaxedValidation}
                       aria-invalid={state.isFieldInvalid("city") ? "true" : undefined}
@@ -263,7 +269,8 @@ export function TicketCheckoutForm(props: {
                   </label>
                   <Input
                     id="checkout-country"
-                    autocomplete="off"
+                    name="country"
+                    autocomplete="country"
                     maxlength={2}
                     pattern="[A-Z]{2}"
                     required={!props.relaxedValidation}
@@ -289,6 +296,7 @@ export function TicketCheckoutForm(props: {
                     </label>
                     <Input
                       id="checkout-company-extra"
+                      name="organization-title"
                       autocomplete="organization-title"
                       value={state.contact().companyExtra}
                       onInput={(event) => state.contactFieldChange("companyExtra", event.currentTarget.value)}
@@ -301,6 +309,7 @@ export function TicketCheckoutForm(props: {
                     </label>
                     <Input
                       id="checkout-tax-id"
+                      name="tax-id"
                       autocomplete="off"
                       value={state.contact().taxId}
                       onInput={(event) => state.contactFieldChange("taxId", event.currentTarget.value.toUpperCase())}
@@ -470,7 +479,6 @@ export function TicketCheckoutForm(props: {
                   <Input
                     id="checkout-terms-acceptance"
                     type="checkbox"
-                    autocomplete="off"
                     required
                     checked={state.termsAccepted()}
                     onChange={(event) => state.termsAcceptanceChange(event.currentTarget.checked)}
@@ -491,7 +499,6 @@ export function TicketCheckoutForm(props: {
                   <Input
                     id="checkout-privacy-acknowledgement"
                     type="checkbox"
-                    autocomplete="off"
                     required
                     checked={state.privacyAcknowledged()}
                     onChange={(event) => state.privacyAcknowledgementChange(event.currentTarget.checked)}

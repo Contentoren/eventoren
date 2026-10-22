@@ -48,6 +48,8 @@ export function ticketContactDraftLoad(): Result<TicketContactDraftStored> {
   if (!validated.success) return createResultError(op, v.summarize(validated.issues), parsed)
 
   const draft = validated.output
+  // Stored drafts are returned verbatim; the DE default for new visitors
+  // lives in ticketContactEmpty so the country input can fall back to it.
   // Old local drafts do not constitute a request to remember details across sessions.
   if (
     (fromLocalStorage && !draft.rememberDraft) ||
