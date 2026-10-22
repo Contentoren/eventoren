@@ -33,7 +33,7 @@ export function VeranstalterDashboardPublicProfilePage(p: {
           <ul class="flex flex-col gap-2">
             <For each={profile().events} fallback={<li class="text-sm text-content-muted">Keine kommenden Events.</li>}>
               {(event) => (
-                <li class="rounded-md border border-input p-3">
+                <li class="rounded-card border border-border-subtle bg-surface p-3">
                   <a href={`/veranstalter-p/${profile().slug}/${event.eventKey}`} class="font-medium underline">
                     {event.title}
                   </a>

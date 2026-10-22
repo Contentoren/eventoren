@@ -55,7 +55,7 @@ export function VeranstalterDashboardTeamPage(props: { readonly state: Veranstal
         </p>
       </Show>
 
-      <CardWrapper>
+      <CardWrapper class="rounded-card border-border-subtle shadow-none">
         <div class="flex flex-col gap-3">
           <h2 class="text-lg font-semibold text-content">Teammitglieder</h2>
           <Show when={state.memberListError() !== null}>
@@ -119,7 +119,7 @@ export function VeranstalterDashboardTeamPage(props: { readonly state: Veranstal
         </div>
       </CardWrapper>
 
-      <CardWrapper>
+      <CardWrapper class="rounded-card border-border-subtle shadow-none">
         <div class="flex flex-col gap-3">
           <h2 class="text-lg font-semibold text-content">Offene Einladungen</h2>
           <Show when={state.invitationListError() !== null}>

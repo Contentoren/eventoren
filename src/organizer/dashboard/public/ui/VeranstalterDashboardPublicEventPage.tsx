@@ -41,7 +41,7 @@ export function VeranstalterDashboardPublicEventPage(p: {
           <ul class="flex flex-col gap-2">
             <For each={event().tiers} fallback={<li class="text-sm text-content-muted">Derzeit keine Tickets.</li>}>
               {(tier) => (
-                <li class="flex items-baseline justify-between gap-2 rounded-md border border-input p-3">
+                <li class="flex items-baseline justify-between gap-2 rounded-card border border-border-subtle bg-surface p-3">
                   <span class="font-medium">{tier.name}</span>
                   <span class="text-sm tabular-nums">
                     {veranstalterDashboardPublicEuroFormat(tier.priceCents)} ·{" "}

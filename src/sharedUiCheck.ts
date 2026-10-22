@@ -6,6 +6,9 @@ const projectRoot = resolve(".")
 const sourceDirectory = join(projectRoot, "src")
 const excludedFiles = new Set(["src/sharedUiCheck.ts", "src/ui/UiButton.tsx"])
 const nativeButtonLiteral = "<" + "button"
+const organizerDashboardPrefix = "src/organizer/dashboard/"
+const harshCardLiteral = "rounded-md border border-input"
+const bareCardLiteral = "<CardWrapper>"
 const failures: string[] = []
 
 const sourceFiles = await sourceFilesRead(sourceDirectory)
@@ -23,13 +26,29 @@ for (const sourceFile of sourceFiles) {
   if (contents.includes(nativeButtonLiteral)) {
     failures.push(relativePath + ": application source contains " + nativeButtonLiteral + "; use a shared UI Button")
   }
+  if (relativePath.startsWith(organizerDashboardPrefix) && contents.includes(harshCardLiteral)) {
+    failures.push(
+      relativePath +
+        ": Veranstalter dashboard uses harsh " +
+        harshCardLiteral +
+        "; use the demo rounded-card border-border-subtle card language",
+    )
+  }
+  if (relativePath.startsWith(organizerDashboardPrefix) && contents.includes(bareCardLiteral)) {
+    failures.push(
+      relativePath +
+        ": Veranstalter dashboard uses bare " +
+        bareCardLiteral +
+        " with harsh default border; pass class rounded-card border-border-subtle shadow-none",
+    )
+  }
 }
 
 if (failures.length > 0) {
   console.error("Shared UI source check failed:\n" + failures.map((failure) => "- " + failure).join("\n"))
   process.exitCode = 1
 } else {
-  console.log("Verified shared UI Button reuse in application source.")
+  console.log("Verified shared UI Button reuse and Veranstalter card language in application source.")
 }
 
 async function sourceFilesRead(directory: string): Promise<string[]> {

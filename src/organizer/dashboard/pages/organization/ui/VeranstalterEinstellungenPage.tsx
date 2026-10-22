@@ -49,12 +49,12 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
         </p>
       </div>
       <Show when={state.profileResult() === undefined}>
-        <CardWrapper>
+        <CardWrapper class="rounded-card border-border-subtle shadow-none">
           <p class="p-4 text-sm text-content-muted">Wird geladen …</p>
         </CardWrapper>
       </Show>
       <Show when={state.profileError() !== null}>
-        <CardWrapper>
+        <CardWrapper class="rounded-card border-border-subtle shadow-none">
           <p role="alert" class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
             {state.profileError() ?? "Keine Organisation ausgewählt."}
           </p>
@@ -63,7 +63,7 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
       <Show when={state.storedProfile()}>
         {(stored) => (
           <>
-            <CardWrapper>
+            <CardWrapper class="rounded-card border-border-subtle shadow-none">
               <form
                 class="flex flex-col gap-4 p-4 sm:p-6"
                 onSubmit={(event) => {
@@ -183,7 +183,7 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
                 </div>
               </form>
             </CardWrapper>
-            <CardWrapper>
+            <CardWrapper class="rounded-card border-border-subtle shadow-none">
               <dl class="flex flex-col gap-3 p-4 sm:p-6">
                 <div class="flex flex-wrap items-center gap-2">
                   <dt class="text-sm text-content-muted">Status</dt>

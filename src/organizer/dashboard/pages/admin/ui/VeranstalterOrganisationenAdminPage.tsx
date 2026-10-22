@@ -55,7 +55,7 @@ export function VeranstalterOrganisationenAdminPage(p: {
           Admin-Detail vollständig sichtbar.
         </p>
       </div>
-      <CardWrapper>
+      <CardWrapper class="rounded-card border-border-subtle shadow-none">
         <div class="flex flex-col gap-1.5 p-4 sm:p-6">
           <Label for="admin-org-status">Statusfilter</Label>
           <SelectSingleNative
@@ -67,19 +67,19 @@ export function VeranstalterOrganisationenAdminPage(p: {
         </div>
       </CardWrapper>
       <Show when={state.list.result() === undefined}>
-        <CardWrapper>
+        <CardWrapper class="rounded-card border-border-subtle shadow-none">
           <p class="p-4 text-sm text-content-muted">Wird geladen …</p>
         </CardWrapper>
       </Show>
       <Show when={state.listError() !== null}>
-        <CardWrapper>
+        <CardWrapper class="rounded-card border-border-subtle shadow-none">
           <p role="alert" class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
             {state.listError()}
           </p>
         </CardWrapper>
       </Show>
       <Show when={state.list.result() !== undefined && state.listError() === null}>
-        <CardWrapper>
+        <CardWrapper class="rounded-card border-border-subtle shadow-none">
           <ul class="flex flex-col divide-y divide-border-subtle">
             <For each={state.listItems()}>
               {(item) => {
@@ -122,7 +122,7 @@ export function VeranstalterOrganisationenAdminPage(p: {
       </Show>
       <Show when={state.detail()}>
         {(detail) => (
-          <CardWrapper>
+          <CardWrapper class="rounded-card border-border-subtle shadow-none">
             <div class="flex flex-col gap-4 p-4 sm:p-6" role="dialog" aria-label={`Details ${detail().profile.name}`}>
               <div class="flex flex-wrap items-start justify-between gap-2">
                 <div>

@@ -30,7 +30,7 @@ export function VeranstalterDashboardNachrichtenPage(p: {
           </Show>
           <Show when={state.reminderData()}>
             {(reminder) => (
-              <div class="rounded-md border border-input p-3">
+              <div class="rounded-card border border-border-subtle bg-surface p-3">
                 <h2 class="font-medium">Automatische Erinnerung</h2>
                 <p class="text-sm text-content-muted">
                   {reminder().enabled ? "Eingeschaltet" : "Ausgeschaltet"} · {reminder().hoursBefore} h vor Beginn ·{" "}
@@ -128,7 +128,7 @@ export function VeranstalterDashboardNachrichtenPage(p: {
           <ul class="flex flex-col gap-2">
             <For each={state.rows()} fallback={<li>Keine Nachrichten.</li>}>
               {(row) => (
-                <li class="rounded-md border border-input p-3">
+                <li class="rounded-card border border-border-subtle bg-surface p-3">
                   <p class="font-medium">{row.subject}</p>
                   <p class="text-sm text-content-muted">
                     {row.kind} · {row.audienceType} · {row.recipientCount} Empfänger · {row.status} ·{" "}

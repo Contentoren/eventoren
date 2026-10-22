@@ -42,7 +42,7 @@ export function VeranstalterDashboardGaestelistePage(p: {
           <ul class="flex flex-wrap gap-2">
             <For each={state.quotas()} fallback={<li>Keine Kontingente.</li>}>
               {(quota) => (
-                <li class="rounded-md border border-input p-3">
+                <li class="rounded-card border border-border-subtle bg-surface p-3">
                   <p class="font-medium">{quota.name}</p>
                   <p class="text-sm text-content-muted">
                     {quota.seats} / {quota.limit} Plätze · {quota.guests} Gäste
@@ -129,7 +129,7 @@ export function VeranstalterDashboardGaestelistePage(p: {
           <ul class="flex flex-col gap-2">
             <For each={state.guests()} fallback={<li>Keine Gäste in diesem Fenster.</li>}>
               {(guest) => (
-                <li class="rounded-md border border-input p-3">
+                <li class="rounded-card border border-border-subtle bg-surface p-3">
                   <p class="font-medium">
                     {guest.name} <span class="text-sm text-content-muted">+{guest.plusOnes}</span>
                   </p>

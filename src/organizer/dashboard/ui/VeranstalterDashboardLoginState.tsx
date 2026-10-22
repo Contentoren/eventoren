@@ -7,7 +7,7 @@ import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
 /** Login view shown when the visitor is signed out. */
 export function VeranstalterDashboardLoginState() {
   return (
-    <CardWrapper>
+    <CardWrapper class="rounded-card border-border-subtle shadow-none">
       <EmptyState
         icon={mdiAlertBoxOutline}
         title="Anmeldung erforderlich"

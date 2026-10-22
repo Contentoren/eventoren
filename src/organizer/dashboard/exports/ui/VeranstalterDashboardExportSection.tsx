@@ -12,7 +12,7 @@ export function VeranstalterDashboardExportSection(p: {
       when={state.canReadKind("teilnehmer") || state.canReadKind("checkins")}
       fallback={<p class="text-sm text-content-muted">Keine Berechtigung für Exporte.</p>}
     >
-      <section aria-label="Exporte" class="flex flex-col gap-2 rounded-md border border-input p-3">
+      <section aria-label="Exporte" class="flex flex-col gap-2 rounded-card border border-border-subtle bg-surface p-3">
         <h2 class="text-sm font-semibold text-content">Exporte</h2>
         <div class="flex flex-wrap gap-2">
           <Show when={state.canReadKind("teilnehmer")}>

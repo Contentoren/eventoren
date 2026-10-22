@@ -104,7 +104,7 @@ export function VeranstalterDashboardOrderDetail(p: { state: VeranstalterDashboa
               {(ticket) => (
                 <form
                   onSubmit={(event) => p.state.holderSubmit(ticket.ticketId, event)}
-                  class="flex flex-col gap-2 rounded-md border border-input p-3"
+                  class="flex flex-col gap-2 rounded-card border border-border-subtle bg-surface p-3"
                 >
                   <p>
                     Nr. {ticket.sequence} · {ticket.tierName} ·{" "}
@@ -153,7 +153,7 @@ export function VeranstalterDashboardOrderDetail(p: { state: VeranstalterDashboa
             <h3 class="font-semibold">Interne Notizen</h3>
             <For each={order().notes} fallback={<p>Keine internen Notizen.</p>}>
               {(note) => (
-                <article class="rounded-md border border-input p-3">
+                <article class="rounded-card border border-border-subtle bg-surface p-3">
                   <p class="whitespace-pre-wrap">{note.text}</p>
                   <p class="text-xs">{veranstalterDashboardOrdersTimeFormat(note.createdAt)}</p>
                   <Show when={p.state.canEdit()}>

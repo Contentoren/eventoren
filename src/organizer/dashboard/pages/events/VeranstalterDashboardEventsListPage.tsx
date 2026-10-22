@@ -44,7 +44,7 @@ export function VeranstalterDashboardEventsListPage(p: {
               to="/veranstalter/events"
               search={{ ...(p.orgParam ? { org: p.orgParam } : {}), filter: tab.value }}
               activeProps={{ "data-active": true }}
-              class="rounded-md border border-input px-3 py-1.5 text-sm font-medium text-content data-[active]:border-content data-[active]:font-semibold"
+              class="rounded-card border border-border-subtle bg-surface px-3 py-1.5 text-sm font-medium text-content data-[active]:border-content data-[active]:font-semibold"
             >
               {tab.label}
             </Link>
@@ -78,7 +78,7 @@ export function VeranstalterDashboardEventsListPage(p: {
       </Show>
       <Show when={p.state.listError()}>
         {(message) => (
-          <p role="alert" class="rounded-md border border-input px-3 py-2 text-sm text-content">
+          <p role="alert" class="rounded-card border border-border-subtle bg-surface px-3 py-2 text-sm text-content">
             {message()}
           </p>
         )}
@@ -100,7 +100,7 @@ export function VeranstalterDashboardEventsListPage(p: {
                   to="/veranstalter/events/$eventKey"
                   params={{ eventKey: event.eventKey }}
                   search={p.orgParam ? { org: p.orgParam } : {}}
-                  class="flex flex-col gap-1 rounded-md border border-input bg-surface p-3"
+                  class="flex flex-col gap-1 rounded-card border border-border-subtle bg-surface p-3"
                 >
                   <span class="text-sm font-semibold text-content">{event.title}</span>
                   <span class="text-xs text-content-muted">
@@ -118,7 +118,7 @@ export function VeranstalterDashboardEventsListPage(p: {
         <div class="hidden overflow-x-auto sm:block">
           <table class="w-full text-left text-sm">
             <thead>
-              <tr class="border-b border-input text-xs text-content-muted">
+              <tr class="border-b border-border-subtle text-xs text-content-muted">
                 <th class="px-2 py-2 font-medium">Titel</th>
                 <th class="px-2 py-2 font-medium">Ort</th>
                 <th class="px-2 py-2 font-medium">Status</th>
@@ -127,7 +127,7 @@ export function VeranstalterDashboardEventsListPage(p: {
             <tbody>
               <For each={p.state.rows() ?? []}>
                 {(event) => (
-                  <tr class="border-b border-input">
+                  <tr class="border-b border-border-subtle">
                     <td class="px-2 py-2">
                       <Link
                         to="/veranstalter/events/$eventKey"
