@@ -216,12 +216,22 @@ export async function e2eSuccessCleanupRun(input: {
     const ticket = checkpoint.ticket
     const orderId = ticket.orderId
     if (!orderId) return createResultError(op, "App order correlation could not be verified; checkpoint retained")
+    let captured: Extract<Awaited<ReturnType<typeof stripeConfig.orderProof>>, { success: true }> | null = null
     try {
       const proof = await stripeConfig.orderProof(orderId, ticket.eventKey, checkpoint.runId, checkpoint.createdAt)
-      if (!proof.success || !proof.data?.paymentReference || !proof.data.orderReference)
-        return createResultError(op, "App order correlation could not be verified; checkpoint retained")
-      const captured = proof
-      ledgerOrderProof = (async () => captured) as typeof stripeConfig.orderProof
+      if (proof.success && proof.data?.paymentReference && proof.data.orderReference) captured = proof
+    } catch {
+      captured = null
+    }
+    // Owned fixtures are already gone when a previous attempt captured proof
+    // and then deleted the graph before a later phase failed. Reuse the
+    // run-bound ledger proof instead of demanding live rows; a live proof
+    // always wins when the rows still exist.
+    if (!captured) captured = e2eCleanupLedgerOrderProof(priorLedger, orderId)
+    if (!captured) return createResultError(op, "App order correlation could not be verified; checkpoint retained")
+    {
+      const reused = captured
+      ledgerOrderProof = (async () => reused) as typeof stripeConfig.orderProof
       const ledgerKept = await e2eCleanupLedgerWrite(ledgerPath, {
         version: 1 as const,
         runId: checkpoint.runId,
@@ -243,8 +253,6 @@ export async function e2eSuccessCleanupRun(input: {
         updatedAt: now,
       })
       if (!ledgerKept.success) return createResultError(op, `Cleanup ledger unavailable: ${ledgerKept.errorMessage}`)
-    } catch {
-      return createResultError(op, "App order proof unavailable; checkpoint retained")
     }
   } else {
     const ledgerKept = await e2eCleanupLedgerWrite(ledgerPath, {
@@ -1152,10 +1160,23 @@ function e2eCleanupLedgerPath(directory: string, runId: string): string {
   return join(directory, `cleanup-ledger-${runId}.json`)
 }
 
+type E2eCleanupLedgerOrderProof = {
+  paymentReference: string
+  orderReference: string
+  status: string
+  paymentStatus: string
+}
+
 async function e2eCleanupLedgerRead(
   path: string,
   runId: string,
-): Promise<{ runId?: string; historical?: unknown; preHistoricalCandidates?: unknown } | null> {
+): Promise<{
+  runId?: string
+  historical?: unknown
+  preHistoricalCandidates?: unknown
+  orderProof?: E2eCleanupLedgerOrderProof
+  ticketEvidence?: { orderId?: string }
+} | null> {
   try {
     const parsed: unknown = JSON.parse(await readFile(path, "utf8"))
     if (typeof parsed !== "object" || parsed === null) return null
@@ -1165,10 +1186,49 @@ async function e2eCleanupLedgerRead(
       runId: typeof record["runId"] === "string" ? record["runId"] : undefined,
       historical: record["historical"],
       preHistoricalCandidates: record["preHistoricalCandidates"],
+      orderProof: e2eCleanupLedgerOrderProofRead(record["orderProof"]),
+      ticketEvidence: e2eCleanupLedgerTicketEvidenceRead(record["ticketEvidence"]),
     }
   } catch {
     return null
   }
+}
+
+function e2eCleanupLedgerOrderProofRead(value: unknown): E2eCleanupLedgerOrderProof | undefined {
+  if (typeof value !== "object" || value === null) return undefined
+  const record = value as Record<string, unknown>
+  const { paymentReference, orderReference, status, paymentStatus } = record
+  if (
+    typeof paymentReference !== "string" ||
+    !paymentReference ||
+    typeof orderReference !== "string" ||
+    !orderReference ||
+    typeof status !== "string" ||
+    !status ||
+    typeof paymentStatus !== "string" ||
+    !paymentStatus
+  )
+    return undefined
+  return { paymentReference, orderReference, status, paymentStatus }
+}
+
+function e2eCleanupLedgerTicketEvidenceRead(value: unknown): { orderId?: string } | undefined {
+  if (typeof value !== "object" || value === null) return undefined
+  const orderId = (value as Record<string, unknown>)["orderId"]
+  return { orderId: typeof orderId === "string" ? orderId : undefined }
+}
+
+/**
+ * Reuse the run-bound ledger proof when the owned rows are already gone. The
+ * ledger binds the proof to this runId and orderId; provider reconciliation
+ * still verifies current Stripe state independently and fails closed.
+ */
+function e2eCleanupLedgerOrderProof(
+  ledger: { orderProof?: E2eCleanupLedgerOrderProof; ticketEvidence?: { orderId?: string } } | null,
+  orderId: string,
+): { success: true; data: E2eCleanupLedgerOrderProof } | null {
+  if (!ledger || ledger.ticketEvidence?.orderId !== orderId || !ledger.orderProof) return null
+  return { success: true as const, data: ledger.orderProof }
 }
 
 async function e2eCleanupLedgerWrite(path: string, ledger: Record<string, unknown>) {

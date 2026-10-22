@@ -194,6 +194,108 @@ test("success cleanup bypasses the 24h gate and inventories current plus histori
   expect(authDiscoveryCalls).toBeGreaterThan(0)
 })
 
+test("cleanup retry reuses the ledger proof after owned rows are already deleted", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
+  directories.push(directory)
+  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const checkpoint = await successCheckpoint(directory, target)
+  const liveProof = {
+    success: true,
+    data: { paymentReference: "pi_1", orderReference: "order-1", status: "paid", paymentStatus: "paid" },
+  }
+  const historicalData = {
+    isDone: true,
+    continueCursor: null,
+    scannedEvents: 1,
+    cleaned: [{ eventKey: `ticket-e2e-${checkpoint.runId}`, runId: checkpoint.runId, kind: "ticket-e2e" }],
+    skipped: [],
+  }
+  const base = {
+    directory,
+    target,
+    convexUrl: "https://example.convex.cloud",
+    adminToken: "admin-token",
+    catalogCleanup: async () => ({ success: true, data: {} }),
+    catalogHistoricalCleanup: async () => ({ success: true, data: historicalData }),
+    ...discoveryVerifyMocks(),
+    stripeKey: "sk_test_mock",
+    stripeAccountId: "acct_mock",
+    stripeOrganizationId: "org_mock",
+    mail: { host: "localhost", port: 993, user: "buyer@example.test", password: "unused" },
+    mailCleanup: async () => createResult({ status: "verified-deleted" as const }),
+  }
+  // First attempt captures proof, deletes owned rows, then fails historically.
+  const failed = await e2eSuccessCleanupRun({
+    ...base,
+    stripeReconcile: async () =>
+      createResult({
+        status: "stripe-reconciled-checkpoint-retained" as const,
+        session: "cs_test_123456789",
+        customer: "retained",
+        subscriptionsCanceled: 0,
+        chargesRetained: 0,
+        invoicesRetained: 0,
+        paymentIntentsRetained: 0,
+      }),
+    stripeOrderProof: async () => liveProof,
+    historicalStripeCleanup: async () => ({ success: false, errorMessage: "historical provider unavailable" }),
+    historicalMailCleanup: async () => ({ success: true, data: { status: "imap-historical-reconciled" as const } }),
+  })
+  expect(failed.success).toBe(false)
+  if (failed.success) throw new Error("expected failure")
+
+  // Retry: live rows are gone, so the live proof fails; the run-bound ledger
+  // proof must carry provider reconciliation instead of retaining forever.
+  let reconciledProof: unknown = null
+  const retried = await e2eSuccessCleanupRun({
+    ...base,
+    stripeReconcile: async (input: { orderProof: () => Promise<unknown> }) => {
+      reconciledProof = await input.orderProof()
+      return createResult({
+        status: "stripe-reconciled-checkpoint-retained" as const,
+        session: "cs_test_123456789",
+        customer: "retained",
+        subscriptionsCanceled: 0,
+        chargesRetained: 0,
+        invoicesRetained: 0,
+        paymentIntentsRetained: 0,
+      })
+    },
+    stripeOrderProof: async () => ({ success: false, errorMessage: "order rows already deleted" }),
+    historicalStripeCleanup: async () => ({ success: true, data: { status: "stripe-historical-reconciled" as const } }),
+    historicalMailCleanup: async () => ({ success: true, data: { status: "imap-historical-reconciled" as const } }),
+  })
+  expect(retried.success).toBe(true)
+  if (!retried.success) throw new Error(`expected success: ${retried.errorMessage}`)
+  expect(reconciledProof).toMatchObject({
+    success: true,
+    data: { paymentReference: "pi_1", orderReference: "order-1" },
+  })
+})
+
+test("cleanup retry still retains without any live or ledger proof", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
+  directories.push(directory)
+  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  await successCheckpoint(directory, target)
+  const result = await e2eSuccessCleanupRun({
+    directory,
+    target,
+    convexUrl: "https://example.convex.cloud",
+    adminToken: "admin-token",
+    catalogCleanup: async () => ({ success: true, data: {} }),
+    ...discoveryVerifyMocks(),
+    stripeKey: "sk_test_mock",
+    stripeAccountId: "acct_mock",
+    stripeOrganizationId: "org_mock",
+    stripeOrderProof: async () => ({ success: false, errorMessage: "order rows already deleted" }),
+    mail: { host: "localhost", port: 993, user: "buyer@example.test", password: "unused" },
+  })
+  expect(result.success).toBe(false)
+  if (result.success) throw new Error("expected failure")
+  expect(result.errorMessage).toMatch(/App order correlation could not be verified/)
+})
+
 test("success cleanup refuses no-op success without complete backend credentials", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
   directories.push(directory)
