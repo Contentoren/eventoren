@@ -17,7 +17,7 @@ import { RootFooter } from "../marketing/RootFooter.js"
 import appCss from "../tailwind.css?url"
 import { speculationRules } from "./speculationRules.ts"
 
-const siteName = "eventoren"
+const siteName = "Eventoren | Veranstaltungen, Events & Erlebnisse"
 
 export const Route = createRootRoute({
   loader: async ({ location }) => {
@@ -33,6 +33,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://assets.eventoren.de" },
       { rel: "icon", type: "image/svg+xml", href: urlDocument("favicon.svg") },
       { rel: "manifest", href: "/site.webmanifest" },
     ],

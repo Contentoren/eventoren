@@ -7,13 +7,16 @@ import { LegalPage } from "../marketing/LegalPage.js"
 export const Route = createFileRoute("/privacy")({
   loader: () => legal.htmlGet("privacy"),
   head: () => ({
-    meta: seo.pageMeta({
-      title: "Datenschutzerklärung | Eventoren",
-      description: "Datenschutzerklärung von Eventoren: Informationen zur Verarbeitung personenbezogener Daten.",
-      path: "/privacy",
-    }),
+    meta: [
+      ...seo.pageMeta({
+        title: "Datenschutzerklärung | Eventoren",
+        description: "Datenschutzerklärung von Eventoren: Informationen zur Verarbeitung personenbezogener Daten.",
+        path: "/privacy",
+      }),
+      { name: "robots", content: "index, follow" },
+    ],
     links: [
-      { rel: "canonical", href: seo.canonicalLink("/privacy").href },
+      { rel: "canonical", href: seo.canonicalLink("/datenschutz").href },
       { rel: "stylesheet", href: markdownCss },
     ],
   }),

@@ -8,11 +8,14 @@ import { LegalPage } from "../marketing/LegalPage.js"
 export const Route = createFileRoute("/datenschutz")({
   loader: () => legal.htmlGet("datenschutz"),
   head: () => ({
-    meta: seo.pageMeta({
-      title: "Datenschutz",
-      description: "Informationen zur Verarbeitung personenbezogener Daten und zu deinen Datenschutzrechten.",
-      path: "/datenschutz",
-    }),
+    meta: [
+      ...seo.pageMeta({
+        title: "Datenschutz",
+        description: "Informationen zur Verarbeitung personenbezogener Daten und zu deinen Datenschutzrechten.",
+        path: "/datenschutz",
+      }),
+      { name: "robots", content: "index, follow" },
+    ],
     links: [
       { rel: "canonical", href: seo.canonicalLink("/datenschutz").href },
       { rel: "stylesheet", href: markdownCss },
@@ -20,7 +23,7 @@ export const Route = createFileRoute("/datenschutz")({
   }),
   component: () => (
     <SiteFrame>
-      <LegalPage html={Route.useLoaderData()} title="Datenschutzerklärung" />
+      <LegalPage html={Route.useLoaderData()} />
     </SiteFrame>
   ),
 })

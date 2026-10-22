@@ -10,11 +10,12 @@ export interface ImgProps extends MayHaveClass {
   onError?: JSX.ImgHTMLAttributes<HTMLImageElement>["onError"]
   zoomIn?: boolean
   invertColorsInDarkMode?: boolean
+  eager?: boolean
   width?: string | number
   height?: string | number
 }
 
-/** Lazy-loaded image with optional zoom and dark-mode invert. */
+/** Lazy-loaded image with optional zoom and dark-mode invert. Pass eager for above-the-fold heroes. */
 export function Img(p: ImgProps) {
   return (
     <img
@@ -22,8 +23,9 @@ export function Img(p: ImgProps) {
       alt={p.alt}
       onError={p.onError}
       class={classArr(p.zoomIn && classesImgZoomInOnHover5, p.invertColorsInDarkMode && classInvertBlack, p.class)}
-      loading="lazy"
+      loading={p.eager ? "eager" : "lazy"}
       decoding="async"
+      fetchpriority={p.eager ? "high" : undefined}
       draggable={false}
       width={p.width}
       height={p.height}

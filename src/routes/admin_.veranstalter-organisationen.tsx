@@ -7,8 +7,7 @@ import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 export const Route = createFileRoute("/admin_/veranstalter-organisationen")({
   validateSearch: (input: unknown) => veranstalterOrganisationenAdminSearchParse(input),
   head: () => ({
-    ...seoHeadCreate("/"),
-    meta: [...seoHeadCreate("/").meta, { name: "robots", content: "noindex, nofollow" }],
+    ...seoHeadCreate("/admin/veranstalter-organisationen", { noindex: true }),
   }),
   component: VeranstalterOrganisationenAdminRoute,
 })

@@ -9,8 +9,7 @@ import { VeranstalterOnboardingPage } from "../organizer/dashboard/pages/organiz
 export const Route = createFileRoute("/veranstalter_/onboarding")({
   validateSearch: (input: unknown) => veranstalterDashboardSearchParse(input),
   head: () => ({
-    ...seoHeadCreate("/veranstalter/onboarding"),
-    meta: [...seoHeadCreate("/veranstalter/onboarding").meta, { name: "robots", content: "noindex, nofollow" }],
+    ...seoHeadCreate("/veranstalter/onboarding", { noindex: true }),
   }),
   component: () => (
     <ClientOnly fallback={<VeranstalterDashboardLoadingState />}>

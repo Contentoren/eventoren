@@ -15,8 +15,7 @@ const getAdminAccess = createServerFn({ method: "GET" }).handler(eventorenAdminA
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
-    ...seoHeadCreate("/"),
-    meta: [...seoHeadCreate("/").meta, { name: "robots", content: "noindex, nofollow" }],
+    ...seoHeadCreate("/admin", { noindex: true }),
   }),
   loader: ({ location }) =>
     adminRouteLoaderResolve({

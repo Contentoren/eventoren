@@ -201,7 +201,8 @@ export function dashSettingsPageStateCreate() {
 
   const scrollToSection = (section: string): void => {
     if (typeof document === "undefined") return
-    document.getElementById(`einstellungen-${section}`)?.scrollIntoView({ behavior: "smooth", block: "start" })
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
+    document.getElementById(`einstellungen-${section}`)?.scrollIntoView({ behavior, block: "start" })
   }
 
   return {

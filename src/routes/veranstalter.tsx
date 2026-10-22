@@ -11,8 +11,7 @@ import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 export const Route = createFileRoute("/veranstalter")({
   validateSearch: (input: unknown) => veranstalterDashboardSearchParse(input),
   head: () => ({
-    ...seoHeadCreate("/veranstalter"),
-    meta: [...seoHeadCreate("/veranstalter").meta, { name: "robots", content: "noindex, nofollow" }],
+    ...seoHeadCreate("/veranstalter", { noindex: true }),
   }),
   component: () => (
     <ClientOnly fallback={<VeranstalterDashboardLoadingState />}>
