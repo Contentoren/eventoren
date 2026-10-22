@@ -24,6 +24,7 @@ export const socialLoginGetUserProfile = {
   dev: oauthDev,
   microsoft: oauthMicrosoft,
   zitadel: oauthZitadel,
+  authworks: oauthAuthworks,
 } satisfies Record<LoginProvider, (cid: string, code: string) => PromiseResult<CommonAuthProvider>>
 
 async function getProfile<T, P>(props: T, fn: (code: T) => PromiseResult<P>): PromiseResult<P> {
@@ -139,6 +140,10 @@ async function oauthMicrosoft(code: string): PromiseResult<CommonAuthProvider> {
 
 async function oauthZitadel(code: string): PromiseResult<CommonAuthProvider> {
   return createResultError("oauthZitadel", `Zitadel callbacks are handled by the Eventoren origin: ${code}`)
+}
+
+async function oauthAuthworks(code: string): PromiseResult<CommonAuthProvider> {
+  return createResultError("oauthAuthworks", `Authworks callbacks are handled by the Eventoren origin: ${code}`)
 }
 
 function convertMicrosoftProfile(p: MicrosoftUserProfile): CommonAuthProvider {

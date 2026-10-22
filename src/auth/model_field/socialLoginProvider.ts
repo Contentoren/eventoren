@@ -7,6 +7,7 @@ export const socialLoginProvider = {
   github: "github",
   microsoft: "microsoft",
   zitadel: "zitadel",
+  authworks: "authworks",
 } as const
 
 export const socialLoginProviderSchema = a.enum(socialLoginProvider)

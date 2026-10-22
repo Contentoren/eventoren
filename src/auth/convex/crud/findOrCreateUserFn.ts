@@ -44,12 +44,17 @@ export async function findOrCreateUserFn(
     )
     .unique()
   if (existingAuthAccount) {
-    const user = await ctx.db.get("users", existingAuthAccount.userId)
+    let user = await ctx.db.get("users", existingAuthAccount.userId)
     if (!user) return createResultError(op, "User not found by userId", existingAuthAccount.userId)
     if (user.deletedAt) return createResultError(op, "User account has been deleted")
-    if (authData.provider === "zitadel") {
+    if (authData.provider === "zitadel" || authData.provider === "authworks") {
       const profileUpdated = await updateUserFromAuthProviderFn(ctx, user._id, authData)
       if (!profileUpdated.success) return createResultError(op, profileUpdated.errorMessage)
+      if (authData.provider === "authworks") {
+        // The Zitadel role sync below re-reads the user; mirror that so the
+        // refreshed Authworks profile lands in this session.
+        user = (await ctx.db.get("users", user._id)) ?? user
+      }
     }
     const synchronized =
       authData.provider === "zitadel"
@@ -79,9 +84,13 @@ export async function findOrCreateUserFn(
     if (existingUser) {
       if (existingUser.deletedAt) return createResultError(op, "User account has been deleted")
       await linkAuthToExistingUserFn(ctx, existingUser._id, authData.provider, authData.providerId)
-      if (authData.provider === "zitadel") {
+      let linkedUser = existingUser
+      if (authData.provider === "zitadel" || authData.provider === "authworks") {
         const profileUpdated = await updateUserFromAuthProviderFn(ctx, existingUser._id, authData)
         if (!profileUpdated.success) return createResultError(op, profileUpdated.errorMessage)
+        if (authData.provider === "authworks") {
+          linkedUser = (await ctx.db.get("users", existingUser._id)) ?? existingUser
+        }
       }
       const synchronized =
         authData.provider === "zitadel"
@@ -93,7 +102,7 @@ export async function findOrCreateUserFn(
               undefined,
               authData.zitadelRoleSyncEnabled === true,
             )
-          : createResult(existingUser)
+          : createResult(linkedUser)
       if (!synchronized.success) return createResultError(op, synchronized.errorMessage)
       const { orgHandle, orgRole } = await orgMemberGetHandleAndRoleFn(ctx, synchronized.data._id)
       const userProfile = docUserToUserProfile(synchronized.data, orgHandle, orgRole)

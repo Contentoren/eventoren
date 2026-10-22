@@ -18,6 +18,7 @@ export function eventorenSsoPageStateCreate(inputs: {
 
   const returnTarget = () => eventorenSsoReturnToResolve(inputs.returnTo())
   const loginDestination = () => `/login/zitadel?returnTo=${encodeURIComponent(returnTarget())}`
+  const authworksLoginDestination = () => `/login/authworks?returnTo=${encodeURIComponent(returnTarget())}`
 
   const isAuthenticated = () => (inputs.isServerAuthorized?.() ?? false) || (auth.ready() && auth.identity() !== null)
 
@@ -99,6 +100,7 @@ export function eventorenSsoPageStateCreate(inputs: {
     autoSignIn: autoSignIn.get,
     autoSignInToggle,
     loginDestination,
+    authworksLoginDestination,
     loginClick: login,
     retrySession,
     returnTarget,

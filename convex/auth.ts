@@ -11,6 +11,7 @@ export { findUserByEmailInternalQuery } from "#src/auth/convex/crud/findUserByEm
 export { authSessionInsertInternalMutation } from "#src/auth/convex/crud/saveTokenIntoSessionReturnExpiresAtMutation.ts"
 export { otpSaveInternalMutation } from "#src/auth/convex/otp/otpSaveMutation.ts"
 export { authSignInUsingZitadelAction } from "#src/auth/convex/sign_in_social/authSignInUsingZitadelAction.ts"
+export { authSignInUsingAuthworksAction } from "#src/auth/convex/sign_in_social/authSignInUsingAuthworksAction.ts"
 export { signInUsingSocialAuth3InternalMutation } from "#src/auth/convex/sign_in_social/signInUsingSocialAuth3Mutation.ts"
 export { notifyTelegramAuthInternalAction } from "#src/auth/convex/telegram/notifyTelegramAuth.ts"
 export { authCurrentUserGetQuery } from "#src/auth/convex/user/authCurrentUserGetQuery.ts"

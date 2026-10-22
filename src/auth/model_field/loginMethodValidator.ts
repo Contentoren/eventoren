@@ -14,6 +14,7 @@ export const loginMethodValidator = v.union(
   v.literal(loginMethod.microsoft),
   v.literal(loginMethod.dev),
   v.literal(loginMethod.zitadel),
+  v.literal(loginMethod.authworks),
 )
 
 function types1(a: typeof loginMethodValidator.type): LoginMethod {
@@ -28,6 +29,7 @@ export const socialLoginProviderValidator = v.union(
   v.literal(socialLoginProvider.github),
   v.literal(socialLoginProvider.microsoft),
   v.literal(socialLoginProvider.zitadel),
+  v.literal(socialLoginProvider.authworks),
 )
 
 export const loginProviderValidator = v.union(
@@ -36,6 +38,7 @@ export const loginProviderValidator = v.union(
   v.literal(loginProvider.microsoft),
   v.literal(loginProvider.dev),
   v.literal(loginProvider.zitadel),
+  v.literal(loginProvider.authworks),
 )
 
 function types2(a: typeof socialLoginProviderValidator.type): SocialLoginProvider {

@@ -22,6 +22,8 @@ function urlOAuthSwitcher(provider: SocialLoginProvider, redirectUrl: string = "
       return urlAuthMicrosoft(redirectUrl)
     case socialLoginProvider.zitadel:
       return `/login/zitadel?returnTo=${encodeURIComponent(redirectUrl || "/")}`
+    case socialLoginProvider.authworks:
+      return `/login/authworks?returnTo=${encodeURIComponent(redirectUrl || "/")}`
   }
 }
 

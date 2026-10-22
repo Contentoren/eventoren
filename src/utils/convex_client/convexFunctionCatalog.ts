@@ -39,6 +39,7 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
     "authSessionE2eMarkMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
     "authSessionInsertInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: true },
     "authSessionRevokeMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
+    "authSignInUsingAuthworksAction": { kind: "action", visibility: "public", acceptsToken: false },
     "authSignInUsingZitadelAction": { kind: "action", visibility: "public", acceptsToken: false },
     "authUserRoleSetInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
     "authUserZitadelRolesSynchronizeInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
@@ -353,12 +354,12 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
 
 export const convexFunctionCatalogTotals = {
   modules: 31,
-  functions: 267,
-  public: 188,
+  functions: 268,
+  public: 189,
   internal: 79,
   query: 84,
   mutation: 91,
-  action: 13,
+  action: 14,
   internalQuery: 16,
   internalMutation: 49,
   internalAction: 14,
