@@ -25,6 +25,10 @@ export const orgSchema = a.object({
   ...fieldsSchemaCreatedAtUpdatedAt,
 })
 
+export type OrgData = a.InferOutput<typeof orgDataSchema>
+
+export type Org = a.InferOutput<typeof orgSchema>
+
 function types1(m: DocOrg): OrgModel {
   return m
 }

@@ -13,3 +13,5 @@ export const eventBookingOpensAtSchema = v.pipe(
     )
   }, "Booking opening must be a valid date and time"),
 )
+
+export type EventBookingOpensAt = v.InferOutput<typeof eventBookingOpensAtSchema>

@@ -19,3 +19,7 @@ export const fileSchema = a.object({
   ...fileSchemaFields,
   ...fieldsSchemaCreatedAtUpdatedAtDeletedAt,
 })
+
+export type FileData = a.InferOutput<typeof fileDataSchema>
+
+export type FileRecord = a.InferOutput<typeof fileSchema>

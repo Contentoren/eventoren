@@ -35,6 +35,10 @@ export const orgInvitationSchema = a.object({
   ...fieldsSchemaCreatedAtUpdatedAt,
 })
 
+export type OrgInvitationData = a.InferOutput<typeof orgInvitationDataSchema>
+
+export type OrgInvitation = a.InferOutput<typeof orgInvitationSchema>
+
 function types1(o: DocOrgInvitation): OrgInvitationModel {
   return o
 }

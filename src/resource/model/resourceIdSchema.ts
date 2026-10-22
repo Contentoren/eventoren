@@ -30,3 +30,5 @@ export const resourceIdSchema = a.pipe(
   a.regex(/[^-_]$/, regexMessage4),
   a.maxLength(inputMaxLength100),
 )
+
+export type ResourceId = a.InferOutput<typeof resourceIdSchema>
