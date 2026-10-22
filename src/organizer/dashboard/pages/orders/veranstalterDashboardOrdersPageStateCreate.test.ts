@@ -11,6 +11,6 @@ if (process.env[flag] === "1") {
     })
     const output = result.stdout.toString() + result.stderr.toString()
     expect(result.exitCode, output).toBe(0)
-    expect(output).toMatch(/\b21 pass\b/)
+    expect(output).toMatch(/\b22 pass\b/)
   })
 }
