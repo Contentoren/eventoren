@@ -71,7 +71,7 @@ export function DashOnboardingStepContracts(p: { state: DashOnboardingPageState 
               <div
                 class={`flex items-start gap-3 rounded-card border p-4 ${card.signal.get() ? "border-success/50 bg-success/5" : "border-border-subtle bg-surface"}`}
               >
-                <span class="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-content">
+                <span class="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-surface-muted text-content-muted">
                   <Icon path={card.icon} class="size-5" />
                 </span>
                 <div class="min-w-0 flex-1">
