@@ -134,6 +134,13 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
     "organizerTicketCheckInMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
     "organizerTicketCheckInResetMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
 },
+  "organizerContractDelivery": {
+    "organizerContractDeliveryClaimInternalMutation": { kind: "query", visibility: "public", acceptsToken: null },
+    "organizerContractDeliveryUpdateInternalMutation": { kind: "query", visibility: "public", acceptsToken: null },
+},
+  "organizerContractEmail": {
+    "organizerContractConfirmationSendInternalAction": { kind: "query", visibility: "public", acceptsToken: null },
+},
   "organizerDashboard": {
     "organizerContractsAcceptMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
     "organizerDashboardContextQuery": { kind: "query", visibility: "public", acceptsToken: true },
@@ -275,6 +282,18 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
     "organizerDashboardTeamMemberRemoveMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
     "organizerDashboardTeamRoleUpdateMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
 },
+  "organizerTermination": {
+    "organizerTerminationReceiptQuery": { kind: "query", visibility: "public", acceptsToken: null },
+    "organizerTerminationRetryMutation": { kind: "mutation", visibility: "public", acceptsToken: null },
+    "organizerTerminationSubmitMutation": { kind: "mutation", visibility: "public", acceptsToken: null },
+},
+  "organizerTerminationDelivery": {
+    "organizerTerminationDeliveryClaimInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
+    "organizerTerminationDeliveryUpdateInternalMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
+},
+  "organizerTerminationEmail": {
+    "organizerTerminationEmailInternalAction": { kind: "internalAction", visibility: "internal", acceptsToken: false },
+},
   "publicProjectInfo": {
     "publicProjectInfo": { kind: "query", visibility: "public", acceptsToken: false },
 },
@@ -353,14 +372,14 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
 }
 
 export const convexFunctionCatalogTotals = {
-  modules: 31,
-  functions: 268,
-  public: 189,
-  internal: 79,
-  query: 84,
-  mutation: 91,
+  modules: 36,
+  functions: 277,
+  public: 195,
+  internal: 82,
+  query: 88,
+  mutation: 93,
   action: 14,
   internalQuery: 16,
-  internalMutation: 49,
-  internalAction: 14,
+  internalMutation: 51,
+  internalAction: 15,
 } as const

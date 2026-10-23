@@ -1,4 +1,5 @@
 import { defineSchema } from "convex/server"
+import { organizerTerminationTables } from "#src/organizer/termination/organizerTerminationTables.ts"
 import { authTables } from "#src/auth/convex/authTables.ts"
 import { catalogTables } from "#src/catalog/convex/catalogTables.ts"
 import { fileTables } from "#src/file/convex/fileTables.ts"
@@ -19,6 +20,7 @@ import { organizerDashboardTeamTables } from "#src/organizer/dashboard/team/orga
 import { ticketTables } from "#src/ticketing/convex/ticketTables.ts"
 
 const schema = defineSchema({
+  ...organizerTerminationTables,
   ...authTables,
   ...orgTables,
   ...orgInvitationTables,
