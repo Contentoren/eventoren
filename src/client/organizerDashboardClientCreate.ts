@@ -3,7 +3,10 @@ import * as v from "valibot"
 import { api } from "#convex/_generated/api.js"
 import type { Id } from "#convex/_generated/dataModel.js"
 import { organizerDashboardAdminConfigureSchema } from "#src/organizer/dashboard/admin/organizerDashboardAdminConfigureSchema.ts"
-import { organizerContractConsentSchema } from "#src/organizer/dashboard/contracts/organizerContractConsentSchema.ts"
+import {
+  type OrganizerContractConsent,
+  organizerContractConsentSchema,
+} from "#src/organizer/dashboard/contracts/organizerContractConsentSchema.ts"
 import { organizerDashboardEventCreateSchema } from "#src/organizer/dashboard/events/model/organizerDashboardEventCreateSchema.ts"
 import { organizerDashboardEventListFilterSchema } from "#src/organizer/dashboard/events/model/organizerDashboardEventListFilterSchema.ts"
 import { organizerDashboardEventPatchSchema } from "#src/organizer/dashboard/events/model/organizerDashboardEventPatchSchema.ts"
@@ -485,7 +488,7 @@ export type OrganizerDashboardClient = {
     readonly orgId: string
   }) => Promise<ApiClientResult<OrganizerDashboardData<OrganizerDashboardOrganizationGetRef>>>
   readonly contractsAccept: (
-    args: { readonly orgId: string } & v.InferOutput<typeof organizerContractConsentSchema>,
+    args: { readonly orgId: string } & OrganizerContractConsent,
   ) => Promise<ApiClientResult<OrganizerDashboardData<OrganizerDashboardContractsAcceptRef>>>
   readonly eventList: (
     args: Omit<OrganizerDashboardEventListArgs, "token" | "orgId" | "paginationOpts"> & {

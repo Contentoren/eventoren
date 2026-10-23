@@ -10,3 +10,5 @@ export const passwordSchema = a.pipe(
   a.minLength(requiredPasswordLength, "Password is to short"),
   a.maxLength(inputMaxLengthUrl),
 )
+
+export type Password = a.InferOutput<typeof passwordSchema>

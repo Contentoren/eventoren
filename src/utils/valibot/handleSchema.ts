@@ -19,6 +19,8 @@ export const handleSchema = a.pipe(
   a.maxLength(inputMaxLengthDefault, "Höchstens 100 Zeichen erlaubt."),
 )
 
+export type Handle = a.InferOutput<typeof handleSchema>
+
 export function handleGenerate(name: string) {
   return name
     .trim()

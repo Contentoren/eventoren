@@ -32,3 +32,5 @@ export const fileIdSchema = a.pipe(
   a.regex(/[^-_]$/, regexMessage4),
   a.maxLength(inputMaxLength100),
 )
+
+export type FileId = a.InferOutput<typeof fileIdSchema>

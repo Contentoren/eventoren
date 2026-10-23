@@ -10,3 +10,5 @@ export const organizerContractConsentSchema = v.strictObject({
   ),
   dpaRevision: v.literal(organizerContractDocuments.dpa.revision, "Die aktuelle AVV-Musterfassung ist erforderlich."),
 })
+
+export type OrganizerContractConsent = v.InferOutput<typeof organizerContractConsentSchema>

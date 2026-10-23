@@ -19,6 +19,8 @@ export const orgHandleSchema = a.pipe(
   a.maxLength(inputMaxLengthDefault, "Höchstens 100 Zeichen erlaubt."),
 )
 
+export type OrgHandle = a.InferOutput<typeof orgHandleSchema>
+
 export function orgHandleGenerate(name: string) {
   return name
     .trim()

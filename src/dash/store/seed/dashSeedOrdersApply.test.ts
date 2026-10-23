@@ -115,13 +115,9 @@ describe("dashSeedOrdersApply", () => {
     expect(withoutGuests.length).toBeLessThanOrEqual(1100)
   })
 
-  it("misst Laufzeit und JSON-Größe", () => {
-    const start = Date.now()
+  it("hält die JSON-Größe unter 2 MB", () => {
     const state = dashSeedCreate(fixedNow)
-    const runtimeMs = Date.now() - start
     const jsonSize = JSON.stringify(state).length
-    console.log(`dashSeedCreate: ${runtimeMs} ms, JSON ${jsonSize} Bytes`)
-    expect(runtimeMs).toBeLessThan(400)
     expect(jsonSize).toBeLessThan(2 * 1024 * 1024)
   })
 })

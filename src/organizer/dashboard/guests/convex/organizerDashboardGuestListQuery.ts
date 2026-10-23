@@ -19,9 +19,11 @@ export type OrganizerDashboardGuestSummary = {
   entrance: string | null
 }
 
+const organizerDashboardGuestListMaxRead = 5000
+
 export const organizerDashboardGuestListQuery = query({
   args: { orgId: v.id("orgs"), token: v.string(), eventKey: v.string(), search: v.optional(v.string()) },
-  handler: (ctx, args): PromiseResult<{ guests: OrganizerDashboardGuestSummary[] }> =>
+  handler: (ctx, args): PromiseResult<{ guests: OrganizerDashboardGuestSummary[]; truncated: boolean }> =>
     authQueryTokenToUserId(ctx, args, async (ctx, { userId, orgId, eventKey, search }) => {
       const op = "organizerDashboardGuestListQuery"
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, "gaesteliste.bearbeiten")
@@ -31,15 +33,18 @@ export const organizerDashboardGuestListQuery = query({
       const quotas = await ctx.db
         .query("organizerDashboardGuestQuotas")
         .withIndex("orgIdAndEventKey", (q) => q.eq("orgId", orgId).eq("eventKey", trimmed))
-        .collect()
+        .take(organizerDashboardGuestListMaxRead)
       const names = new Map(quotas.map((quota) => [String(quota._id), quota.name]))
       const guests = await ctx.db
         .query("organizerDashboardGuests")
         .withIndex("orgIdAndEventKey", (q) => q.eq("orgId", orgId).eq("eventKey", trimmed))
-        .collect()
+        .take(organizerDashboardGuestListMaxRead + 1)
+      const truncated = guests.length > organizerDashboardGuestListMaxRead
       const needle = (search ?? "").trim().toLowerCase()
       return createResult({
+        truncated,
         guests: guests
+          .slice(0, organizerDashboardGuestListMaxRead)
           .filter((guest) =>
             needle.length === 0 ? true : `${guest.name} ${guest.email ?? ""}`.toLowerCase().includes(needle),
           )

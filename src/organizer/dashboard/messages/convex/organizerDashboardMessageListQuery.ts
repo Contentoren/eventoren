@@ -19,9 +19,11 @@ export type OrganizerDashboardMessageSummary = {
   readonly deliveryReason: string | null
 }
 
+const organizerDashboardMessageListMaxRead = 5000
+
 export const organizerDashboardMessageListQuery = query({
   args: { orgId: v.id("orgs"), token: v.string(), eventKey: v.string() },
-  handler: (ctx, args): PromiseResult<{ messages: OrganizerDashboardMessageSummary[] }> =>
+  handler: (ctx, args): PromiseResult<{ messages: OrganizerDashboardMessageSummary[]; truncated: boolean }> =>
     authQueryTokenToUserId(ctx, args, async (ctx, { userId, orgId, eventKey }) => {
       const op = "organizerDashboardMessageListQuery"
       const auth = await organizerDashboardAuthorize(ctx, userId, orgId, "nachrichten.senden")
@@ -31,9 +33,11 @@ export const organizerDashboardMessageListQuery = query({
       const messages = await ctx.db
         .query("organizerDashboardMessages")
         .withIndex("orgIdAndEventKey", (q) => q.eq("orgId", orgId).eq("eventKey", trimmed))
-        .collect()
+        .take(organizerDashboardMessageListMaxRead + 1)
+      const truncated = messages.length > organizerDashboardMessageListMaxRead
       return createResult({
-        messages: messages.map((message) => ({
+        truncated,
+        messages: messages.slice(0, organizerDashboardMessageListMaxRead).map((message) => ({
           messageId: String(message._id),
           kind: message.kind,
           audienceType: message.audienceType,

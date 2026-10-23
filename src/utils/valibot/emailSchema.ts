@@ -9,6 +9,8 @@ export const emailSchema = a.pipe(
   a.email("Bitte gib eine gültige E-Mail-Adresse ein."),
 )
 
+export type Email = a.InferOutput<typeof emailSchema>
+
 export const emailSchemaOptional = a.union([
   a.pipe(a.string(), a.length(0)),
   a.pipe(
