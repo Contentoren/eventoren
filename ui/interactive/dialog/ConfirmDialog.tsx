@@ -1,15 +1,15 @@
-import Dialog from "@corvu/dialog"
 import { mdiClose } from "@adaptive-ds/mdi/mdiClose.js"
+import Dialog from "@corvu/dialog"
+import { cn } from "cn"
 import type { JSX } from "solid-js"
 import { For, Show } from "solid-js"
-import { buttonVariant, buttonCvaIconOnly } from "#ui/interactive/button/buttonCva.js"
-import { Button } from "#ui/interactive/button/Button.jsx"
-import { buttonIconCva } from "#ui/interactive/button/buttonIconCva.js"
-import { confirmDialogStateCreate, type ConfirmConsequence } from "#ui/interactive/dialog/confirmDialogStateCreate.js"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
+import { Button } from "#ui/interactive/button/Button.jsx"
+import { buttonCvaIconOnly, buttonVariant } from "#ui/interactive/button/buttonCva.js"
+import { buttonIconCva } from "#ui/interactive/button/buttonIconCva.js"
+import { type ConfirmConsequence, confirmDialogStateCreate } from "#ui/interactive/dialog/confirmDialogStateCreate.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 export interface ConfirmDialogProps {
   open: boolean
@@ -53,13 +53,13 @@ export function ConfirmDialog(p: ConfirmDialogProps) {
     <Dialog open={p.open} onOpenChange={p.onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay
-          class={classMerge(
+          class={cn(
             "fixed inset-0 transition-opacity duration-200 motion-reduce:transition-none data-closed:opacity-0",
             p.nested ? "z-[60] bg-black/20" : "z-40 bg-black/40",
           )}
         />
         <Dialog.Content
-          class={classMerge(
+          class={cn(
             "fixed left-1/2 top-1/2 w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2",
             "max-h-[92dvh] overflow-y-auto rounded-card border border-border-subtle bg-surface p-5 text-content shadow-xl",
             "max-w-lg transition-transform duration-200 motion-reduce:transition-none",
@@ -75,7 +75,7 @@ export function ConfirmDialog(p: ConfirmDialogProps) {
               </Show>
             </div>
             <Dialog.Close
-              class={classMerge(buttonCvaIconOnly(buttonVariant.outline, false, false), "shrink-0")}
+              class={cn(buttonCvaIconOnly(buttonVariant.outline, false, false), "shrink-0")}
               aria-label="Schließen"
               title="Schließen"
             >
@@ -91,7 +91,7 @@ export function ConfirmDialog(p: ConfirmDialogProps) {
                     <Show when={item.icon}>
                       <Icon
                         path={item.icon ?? ""}
-                        class={classMerge("size-4", consequenceToneIconClass[item.tone ?? "neutral"])}
+                        class={cn("size-4", consequenceToneIconClass[item.tone ?? "neutral"])}
                       />
                     </Show>
                     <span>{item.text}</span>

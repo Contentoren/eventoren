@@ -1,7 +1,7 @@
+import { cn } from "cn"
 import { type JSX, Show } from "solid-js"
 import { Portal } from "solid-js/web"
 import { Button } from "#ui/interactive/button/Button.jsx"
-import { classMerge } from "./classMerge.ts"
 import { uiDrawerStateCreate } from "./uiDrawerStateCreate.ts"
 
 const widthClass = {
@@ -31,7 +31,7 @@ export function UiDrawer(props: {
           <div
             onClick={state.handleBackdropClick}
             aria-hidden="true"
-            class={classMerge(
+            class={cn(
               "fixed inset-0 z-40 bg-black/50 backdrop-blur-xs transition-opacity duration-300 ease-out",
               state.isVisible() ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
             )}
@@ -44,7 +44,7 @@ export function UiDrawer(props: {
             aria-labelledby={state.titleId}
             aria-describedby={props.description ? state.descriptionId : undefined}
             tabIndex={-1}
-            class={classMerge(
+            class={cn(
               "fixed inset-y-0 right-0 z-50 flex h-full flex-col border-l border-border-subtle bg-surface text-content shadow-2xl transition-transform duration-300 ease-out",
               widthClass[props.width ?? "xs"],
               state.isVisible() ? "translate-x-0 pointer-events-auto" : "translate-x-full pointer-events-none",

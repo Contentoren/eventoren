@@ -1,20 +1,20 @@
-import Popover from "@corvu/popover"
 import { mdiChevronDown } from "@adaptive-ds/mdi/mdiChevronDown.js"
+import Popover from "@corvu/popover"
+import { cn } from "cn"
 import { For, Match, Show, Switch } from "solid-js"
 import {
   type ButtonSize,
-  buttonSize,
   type ButtonVariant,
-  buttonVariant,
   buttonCva2,
   buttonCvaIconOnly,
+  buttonSize,
+  buttonVariant,
 } from "#ui/interactive/button/buttonCva.js"
 import { buttonIconCva } from "#ui/interactive/button/buttonIconCva.js"
 import { classesButtonClickAnimation } from "#ui/interactive/button/classesButtonClickAnimation.js"
 import { dropdownMenuStateCreate } from "#ui/interactive/menu/dropdownMenuStateCreate.js"
 import { classesPopoverContentMerge } from "#ui/interactive/popover/classesPopoverContent.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 
 export type DropdownMenuItemEntry = {
@@ -116,7 +116,7 @@ export function DropdownMenu(p: DropdownMenuProps) {
                         role="menuitem"
                         data-dropdown-item-id={item.id}
                         disabled={item.disabled}
-                        class={classMerge(
+                        class={cn(
                           "flex min-h-9 w-full items-center gap-2 rounded-md px-3 text-left text-sm text-content",
                           "focus-visible:outline-2 focus-visible:outline-ring",
                           state.isActive(item.id) && "bg-surface-muted",

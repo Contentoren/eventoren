@@ -1,4 +1,4 @@
-import { classMerge } from "#ui/utils/classMerge.js"
+import { cn } from "cn"
 
 export type ModalDialogSize = "sm" | "md" | "lg"
 
@@ -38,10 +38,10 @@ const modalDialogContentBase = [
  * parent layer with a lighter overlay.
  */
 export function modalDialogStateCreate(p: ModalDialogStateProps) {
-  const overlayClass = () => classMerge(modalDialogOverlayBase, p.nested() ? "z-[60] bg-black/20" : "z-40 bg-black/40")
+  const overlayClass = () => cn(modalDialogOverlayBase, p.nested() ? "z-[60] bg-black/20" : "z-40 bg-black/40")
 
   const contentClass = (extra?: string) =>
-    classMerge(modalDialogContentBase, p.nested() ? "z-[70]" : "z-50", modalDialogSizeClass[p.size()], extra)
+    cn(modalDialogContentBase, p.nested() ? "z-[70]" : "z-50", modalDialogSizeClass[p.size()], extra)
 
   return { overlayClass, contentClass }
 }

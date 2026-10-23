@@ -1,7 +1,7 @@
+import { cn } from "cn"
 import { Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { stickySaveBarStateCreate } from "#ui/interactive/savebar/stickySaveBarStateCreate.js"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 export interface StickySaveBarProps {
   visible: boolean
@@ -28,7 +28,7 @@ export function StickySaveBar(p: StickySaveBarProps) {
   return (
     <div
       aria-live="polite"
-      class={classMerge(
+      class={cn(
         "pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))]",
         "transition-all duration-200 motion-reduce:transition-none",
         p.visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",

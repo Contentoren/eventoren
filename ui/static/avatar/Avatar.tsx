@@ -1,5 +1,5 @@
+import { cn } from "cn"
 import { Show } from "solid-js"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 import { avatarInitialsGet } from "./avatarInitialsGet.js"
 import { avatarPaletteResolve } from "./avatarPaletteResolve.js"
@@ -37,7 +37,7 @@ export function Avatar(p: AvatarProps) {
         <span
           role="img"
           aria-label={p.name}
-          class={classMerge(
+          class={cn(
             "inline-flex shrink-0 items-center justify-center font-semibold select-none",
             state.shapeClass(),
             sizeClasses[state.sizeKey()],
@@ -54,7 +54,7 @@ export function Avatar(p: AvatarProps) {
         alt={p.name}
         loading="lazy"
         onError={() => state.markFailed()}
-        class={classMerge("shrink-0 object-cover", state.shapeClass(), sizeClasses[state.sizeKey()], p.class)}
+        class={cn("shrink-0 object-cover", state.shapeClass(), sizeClasses[state.sizeKey()], p.class)}
       />
     </Show>
   )

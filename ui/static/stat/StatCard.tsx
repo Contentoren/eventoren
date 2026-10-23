@@ -1,10 +1,10 @@
-import type { JSX } from "solid-js"
-import { Show } from "solid-js"
 import { mdiArrowDownRight } from "@adaptive-ds/mdi/mdiArrowDownRight.js"
 import { mdiArrowUpRight } from "@adaptive-ds/mdi/mdiArrowUpRight.js"
-import { Icon } from "#ui/static/icon/Icon.jsx"
+import { cn } from "cn"
+import type { JSX } from "solid-js"
+import { Show } from "solid-js"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 import { statDeltaFormat } from "./statDeltaFormat.js"
 
@@ -29,7 +29,7 @@ export function StatCard(p: StatCardProps) {
   const goodWhenDown = () => p.deltaInverted === true
   const deltaGood = () => (isPositive() && !goodWhenDown()) || (isNegative() && goodWhenDown())
   return (
-    <CardWrapper class={classMerge("flex h-full flex-col gap-1.5 border-border-subtle p-4 sm:p-5", p.class)}>
+    <CardWrapper class={cn("flex h-full flex-col gap-1.5 border-border-subtle p-4 sm:p-5", p.class)}>
       <div class="flex items-center justify-between gap-2">
         <p class="text-xs text-content-muted">{p.label}</p>
         <Show when={p.icon}>{(path) => <Icon path={path()} class="size-4 text-content-muted" />}</Show>
@@ -39,7 +39,7 @@ export function StatCard(p: StatCardProps) {
         {(delta) => (
           <p class="flex flex-wrap items-center gap-1 text-xs">
             <span
-              class={classMerge(
+              class={cn(
                 "inline-flex items-center gap-0.5 font-medium tabular-nums",
                 delta().value === 0
                   ? "text-content-muted"

@@ -1,8 +1,8 @@
+import { cn } from "cn"
 import { For, Show } from "solid-js"
 import { inputDateTimeStateCreate } from "#ui/input/datetime/inputDateTimeStateCreate.js"
 import { classesInput } from "#ui/input/input/classesInput.js"
 import { Input } from "#ui/input/input/Input.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 export interface InputDateTimeProps {
   value?: string
@@ -26,7 +26,7 @@ export function InputDateTime(p: InputDateTimeProps) {
   })
 
   return (
-    <div class={classMerge("flex flex-col gap-2 sm:flex-row sm:gap-3", p.class)}>
+    <div class={cn("flex flex-col gap-2 sm:flex-row sm:gap-3", p.class)}>
       <Input
         type="date"
         id={p.id}
@@ -45,7 +45,7 @@ export function InputDateTime(p: InputDateTimeProps) {
         onChange={(event) => state.timeChange(event.currentTarget.value)}
         required={p.required}
         disabled={p.disabled}
-        class={classMerge(classesInput, "flex-1")}
+        class={cn(classesInput, "flex-1")}
       >
         <option value="">Uhrzeit</option>
         <Show when={state.customTime()}>{(custom) => <option value={custom()}>{custom()}</option>}</Show>

@@ -1,6 +1,6 @@
+import { cn } from "cn"
 import { createEffect, createSignal, on } from "solid-js"
 import { Input } from "#ui/input/input/Input.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import { dashMoneyFormat } from "./dashMoneyFormat.ts"
 import { dashMoneyParse } from "./dashMoneyParse.ts"
 
@@ -59,7 +59,7 @@ export function DashMoneyInput(props: {
   const showInvalid = () => props.invalid === true || state.invalid()
 
   return (
-    <div class={classMerge("flex flex-col gap-1", props.class)}>
+    <div class={cn("flex flex-col gap-1", props.class)}>
       <div class="relative">
         <Input
           type="text"
@@ -73,7 +73,7 @@ export function DashMoneyInput(props: {
           onFocus={state.focusInput}
           onInput={(event) => state.textInput(event.currentTarget.value)}
           onBlur={state.blurFormat}
-          class={classMerge("h-10 pr-8 text-sm tabular-nums rounded-control", showInvalid() && "border-danger")}
+          class={cn("h-10 pr-8 text-sm tabular-nums rounded-control", showInvalid() && "border-danger")}
         />
         <span
           aria-hidden="true"

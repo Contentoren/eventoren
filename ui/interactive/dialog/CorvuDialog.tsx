@@ -1,5 +1,6 @@
 import { mdiClose } from "@adaptive-ds/mdi/mdiClose.js"
 import Dialog from "@corvu/dialog"
+import { cn } from "cn"
 import type { Accessor, ComponentProps, JSX } from "solid-js"
 import { classesDisabledDirectly } from "#ui/classes/classesDisabledDirectly.js"
 import { type ButtonCvaProps, buttonCva2, buttonCvaIconOnly, buttonVariant } from "#ui/interactive/button/buttonCva.js"
@@ -9,7 +10,6 @@ import type { CorcuDialogTexts } from "#ui/interactive/dialog/CorcuDialogTexts.j
 import { corvuDialogTextDefault } from "#ui/interactive/dialog/CorcuDialogTexts.js"
 import { classesDialogContentMerge, classesDialogOverlayMerge } from "#ui/interactive/dialog/classesDialogContent.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveChildren } from "#ui/utils/MayHaveChildren.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 import type { MayHaveInnerClass } from "#ui/utils/MayHaveInnerClass.js"
@@ -69,15 +69,15 @@ export function CorvuDialog(p: CorvuDialogProps) {
         <Dialog.Content class={classesDialogContentMerge(p.innerClass)}>
           <header class="mb-4 flex items-start justify-between gap-2">
             <div class="min-w-0">
-              <Dialog.Label class={classMerge("text-lg font-semibold", p.titleClass)}>{p.title}</Dialog.Label>
+              <Dialog.Label class={cn("text-lg font-semibold", p.titleClass)}>{p.title}</Dialog.Label>
               {p.description && (
-                <Dialog.Description class={classMerge("text-muted-foreground", p.descriptionClass)}>
+                <Dialog.Description class={cn("text-muted-foreground", p.descriptionClass)}>
                   {p.description}
                 </Dialog.Description>
               )}
             </div>
             <Dialog.Close
-              class={classMerge(buttonCvaIconOnly(buttonVariant.outline, false, false), "shrink-0")}
+              class={cn(buttonCvaIconOnly(buttonVariant.outline, false, false), "shrink-0")}
               title={texts.closeDialog}
             >
               <Icon path={mdiClose} class={buttonIconCva(buttonVariant.outline, "")} />

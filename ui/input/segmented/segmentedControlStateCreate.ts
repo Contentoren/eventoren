@@ -1,5 +1,5 @@
+import { cn } from "cn"
 import type { SegmentedControlSize } from "#ui/input/segmented/SegmentedControl.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 const sizeClass: Record<SegmentedControlSize, string> = {
   sm: "px-2.5 py-1.5 text-xs",
@@ -15,14 +15,14 @@ export function segmentedControlStateCreate(input: {
   extraClass?: () => string | undefined
 }) {
   const rootClass = () =>
-    classMerge(
+    cn(
       "inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-control border border-border-subtle bg-surface-muted p-1",
       input.fullWidth() && "flex w-full",
       input.extraClass?.(),
     )
 
   const optionClass = (selected: boolean) =>
-    classMerge(
+    cn(
       "inline-flex min-h-10 flex-none cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[8px] font-medium transition-colors focus-ring",
       sizeClass[input.size()],
       input.fullWidth() && "flex-1",

@@ -22,6 +22,7 @@ import { mdiTicketPercentOutline } from "@adaptive-ds/mdi/mdiTicketPercentOutlin
 import { mdiUnfoldMoreHorizontal } from "@adaptive-ds/mdi/mdiUnfoldMoreHorizontal.js"
 import { mdiViewDashboardOutline } from "@adaptive-ds/mdi/mdiViewDashboardOutline.js"
 import { Link, useLocation } from "@tanstack/solid-router"
+import { cn } from "cn"
 import type { JSX } from "solid-js"
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
@@ -29,7 +30,6 @@ import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
 import { Avatar } from "#ui/static/avatar/Avatar.jsx"
 import { Icon } from "#ui/static/icon/Icon.jsx"
 import { Kbd } from "#ui/static/kbd/Kbd.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import { eventDateFormat } from "../../../events/eventDateFormat.ts"
 import { dashEventById } from "../../store/dashEventById.ts"
 import type { DashNavItem } from "./dashNavItemsCreate.ts"
@@ -136,7 +136,7 @@ function DashNavLink(p: { item: DashNavItem; onNavigate?: () => void }) {
       to={p.item.to}
       onClick={() => p.onNavigate?.()}
       aria-current={active() ? "page" : undefined}
-      class={classMerge(
+      class={cn(
         "flex h-9 items-center gap-2.5 rounded-control px-2.5 text-sm transition-colors",
         "focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         active()

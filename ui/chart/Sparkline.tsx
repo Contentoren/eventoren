@@ -1,5 +1,5 @@
+import { cn } from "cn"
 import { createUniqueId, Show } from "solid-js"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 import { sparklineStateCreate, sparklineToneClass } from "./sparklineStateCreate.js"
 
@@ -29,7 +29,7 @@ export function Sparkline(p: SparklineProps) {
       preserveAspectRatio="none"
       role="img"
       aria-label={label()}
-      class={classMerge("block w-full", p.class)}
+      class={cn("block w-full", p.class)}
       style={{ height: `${p.height ?? 32}px` }}
     >
       <defs>

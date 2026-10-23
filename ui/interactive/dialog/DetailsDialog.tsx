@@ -1,6 +1,7 @@
-import Dialog from "@corvu/dialog"
 import { mdiChevronDown } from "@adaptive-ds/mdi/mdiChevronDown.js"
 import { mdiClose } from "@adaptive-ds/mdi/mdiClose.js"
+import Dialog from "@corvu/dialog"
+import { cn } from "cn"
 import { createSignal, type JSXElement, onMount, Show } from "solid-js"
 import { buttonCvaIconOnly, buttonVariant } from "#ui/interactive/button/buttonCva.js"
 import { buttonIconCva } from "#ui/interactive/button/buttonIconCva.js"
@@ -8,7 +9,6 @@ import type { CorcuDialogTexts } from "#ui/interactive/dialog/CorcuDialogTexts.j
 import { corvuDialogTextDefault } from "#ui/interactive/dialog/CorcuDialogTexts.js"
 import { classesDialogContentMerge, classesDialogOverlayMerge } from "#ui/interactive/dialog/classesDialogContent.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 
 export interface DetailsDialogProps extends MayHaveClass {
@@ -64,13 +64,9 @@ export function DetailsDialog(p: DetailsDialogProps) {
     <Show
       when={enhanced()}
       fallback={
-        <details class={classMerge(detailsClasses, p.class)}>
+        <details class={cn(detailsClasses, p.class)}>
           <summary
-            class={classMerge(
-              summaryClasses,
-              "hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors",
-              p.summaryClass,
-            )}
+            class={cn(summaryClasses, "hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors", p.summaryClass)}
           >
             {face()}
           </summary>
@@ -80,7 +76,7 @@ export function DetailsDialog(p: DetailsDialogProps) {
     >
       <Dialog>
         <Dialog.Trigger
-          class={classMerge(
+          class={cn(
             "group",
             detailsClasses,
             summaryClasses,

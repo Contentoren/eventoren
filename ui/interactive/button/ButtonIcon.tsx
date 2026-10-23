@@ -1,4 +1,5 @@
 import { mdiLoading } from "@adaptive-ds/mdi/mdiLoading.js"
+import { cn } from "cn"
 import { type Component, type ComponentProps, splitProps } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import type { ButtonCvaProps, ButtonVariant } from "#ui/interactive/button/buttonCva.js"
@@ -6,7 +7,6 @@ import { buttonIconCva } from "#ui/interactive/button/buttonIconCva.js"
 import { buttonIconStateCreate } from "#ui/interactive/button/buttonIconStateCreate.js"
 import { classesButtonClickAnimation } from "#ui/interactive/button/classesButtonClickAnimation.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 export interface ButtonIconProps extends ComponentProps<"button">, ButtonCvaProps {
   // icon
@@ -53,11 +53,7 @@ export const ButtonIcon: Component<ButtonIconProps> = (p) => {
   }
   return (
     <Button
-      class={classMerge(
-        classesButtonClickAnimation,
-        (s.isLoading || !!s.validationMessage) && "cursor-not-allowed",
-        s.class,
-      )}
+      class={cn(classesButtonClickAnimation, (s.isLoading || !!s.validationMessage) && "cursor-not-allowed", s.class)}
       variant={s.validationMessage ? s.validationVariant : s.variant}
       size={s.size}
       onClick={onClick2}

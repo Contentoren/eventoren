@@ -1,11 +1,11 @@
+import { mdiChartDonut } from "@adaptive-ds/mdi/mdiChartDonut.js"
+import { cn } from "cn"
 import type { JSX } from "solid-js"
 import { For, Show } from "solid-js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { mdiChartDonut } from "@adaptive-ds/mdi/mdiChartDonut.js"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
-import { donutChartStateCreate } from "./donutChartStateCreate.js"
 import type { DonutSegment } from "./donutChartStateCreate.js"
+import { donutChartStateCreate } from "./donutChartStateCreate.js"
 import { donutToneClass } from "./donutToneClass.js"
 
 export interface DonutChartProps extends MayHaveClass {
@@ -28,7 +28,7 @@ export function DonutChart(p: DonutChartProps) {
   const size = () => p.size ?? 160
   const showLegend = () => p.legend ?? true
   return (
-    <div class={classMerge("flex flex-col items-center gap-4", p.class)}>
+    <div class={cn("flex flex-col items-center gap-4", p.class)}>
       <div class="relative" style={{ width: `${size()}px`, height: `${size()}px` }}>
         <Show
           when={state.total() > 0}
@@ -69,7 +69,7 @@ export function DonutChart(p: DonutChartProps) {
                     onMouseLeave={() => state.activate(null)}
                     onFocus={() => state.activate(arc.index)}
                     onBlur={() => state.activate(null)}
-                    class={classMerge(
+                    class={cn(
                       "cursor-pointer fill-current outline-none transition-opacity duration-150 focus-ring",
                       donutToneClass[segment().tone],
                       dimmed() ? "opacity-40" : "opacity-100",
@@ -100,14 +100,14 @@ export function DonutChart(p: DonutChartProps) {
                     onMouseLeave={() => state.activate(null)}
                     onFocus={() => state.activate(index())}
                     onBlur={() => state.activate(null)}
-                    class={classMerge(
+                    class={cn(
                       "flex w-full items-center gap-2 rounded-control px-2 py-1.5 text-sm transition-opacity duration-150 focus-ring",
                       state.activeIndex() !== null && state.activeIndex() !== index() && "opacity-40",
                     )}
                   >
                     <span
                       aria-hidden="true"
-                      class={classMerge("size-2.5 shrink-0 rounded-full bg-current", donutToneClass[segment.tone])}
+                      class={cn("size-2.5 shrink-0 rounded-full bg-current", donutToneClass[segment.tone])}
                     />
                     <span class="min-w-0 flex-1 truncate text-left">{segment.label}</span>
                     <span class="font-medium tabular-nums">{p.valueFormat(segment.value)}</span>

@@ -1,13 +1,13 @@
-import { For, Show } from "solid-js"
 import { mdiWeb } from "@adaptive-ds/mdi/mdiWeb.js"
-import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
+import { cn } from "cn"
+import { For, Show } from "solid-js"
 import type { DashSocials } from "#src/dash/model/dashSocialsSchema.ts"
+import { Icon } from "#ui/static/icon/Icon.jsx"
+import { DashSocialIcon } from "./DashSocialIcon.tsx"
+import { dashSocialLinksStateCreate } from "./dashSocialLinksStateCreate.ts"
 import type { DashSocialNetwork } from "./dashSocialNetworks.ts"
 import { dashSocialNetworksCreate } from "./dashSocialNetworks.ts"
 import { dashSocialUrl } from "./dashSocialUrl.ts"
-import { DashSocialIcon } from "./DashSocialIcon.tsx"
-import { dashSocialLinksStateCreate } from "./dashSocialLinksStateCreate.ts"
 
 export interface DashSocialLinksProps {
   socials: DashSocials
@@ -23,7 +23,7 @@ export function DashSocialLinks(p: DashSocialLinksProps) {
   const state = dashSocialLinksStateCreate({ socials: () => p.socials, website: () => p.website })
 
   return (
-    <div class={classMerge("flex flex-wrap items-center gap-2", p.class)}>
+    <div class={cn("flex flex-wrap items-center gap-2", p.class)}>
       <For each={state.entries()}>
         {(entry) => (
           <DashSocialEntryLink
@@ -42,7 +42,7 @@ export function DashSocialLinks(p: DashSocialLinksProps) {
             href={href()}
             target="_blank"
             rel="noopener noreferrer"
-            class={classMerge(
+            class={cn(
               "inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-surface text-content-muted transition-colors",
               "hover:border-border-strong/40 hover:text-content",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
@@ -69,7 +69,7 @@ export function DashSocialLinks(p: DashSocialLinksProps) {
   )
 }
 
-export { dashSocialUrl, dashSocialNetworksCreate }
+export { dashSocialNetworksCreate, dashSocialUrl }
 
 function DashSocialEntryLink(p: {
   network: DashSocialNetwork
@@ -91,7 +91,7 @@ function DashSocialEntryLink(p: {
               rel="noopener noreferrer"
               aria-label={`${p.label} von ${p.name ?? "diesem Veranstalter"}`}
               title={`${p.label} von ${p.name ?? "diesem Veranstalter"}`}
-              class={classMerge(
+              class={cn(
                 "inline-flex items-center justify-center rounded-full border border-border-subtle bg-surface text-content-muted transition-colors",
                 "hover:border-border-strong/40 hover:text-content",
                 "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
@@ -108,7 +108,7 @@ function DashSocialEntryLink(p: {
             rel="noopener noreferrer"
             aria-label={`${p.label} von ${p.name ?? "diesem Veranstalter"}`}
             title={`${p.label} von ${p.name ?? "diesem Veranstalter"}`}
-            class={classMerge(
+            class={cn(
               "inline-flex items-center gap-1.5 rounded-full border border-border-subtle bg-surface text-content-muted transition-colors",
               "hover:border-border-strong/40 hover:text-content",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",

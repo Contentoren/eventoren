@@ -1,14 +1,14 @@
-import { classMerge } from "#ui/utils/classMerge.js"
+import { cn } from "cn"
 
 export function tabNavStateCreate(input: { ids: () => string[]; onSelect: (id: string) => void }) {
   const rootClass = (extra?: string) =>
-    classMerge(
+    cn(
       "flex items-center gap-1 overflow-x-auto border-b border-border-subtle [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
       extra,
     )
 
   const tabClass = (selected: boolean) =>
-    classMerge(
+    cn(
       "inline-flex min-h-11 flex-none items-center gap-1.5 whitespace-nowrap border-b-2 px-3 text-sm font-medium transition-colors focus-ring",
       selected
         ? "border-brand text-content"

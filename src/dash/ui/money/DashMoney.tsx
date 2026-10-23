@@ -1,4 +1,4 @@
-import { classMerge } from "#ui/utils/classMerge.js"
+import { cn } from "cn"
 import { dashMoneyStateCreate } from "./dashMoneyStateCreate.ts"
 
 export interface DashMoneyProps {
@@ -12,7 +12,5 @@ export interface DashMoneyProps {
 export function DashMoney(p: DashMoneyProps) {
   const state = dashMoneyStateCreate({ cents: () => p.cents, signed: () => p.signed })
 
-  return (
-    <span class={classMerge("tabular-nums", (p.muted ?? false) && "text-content-muted", p.class)}>{state.text()}</span>
-  )
+  return <span class={cn("tabular-nums", (p.muted ?? false) && "text-content-muted", p.class)}>{state.text()}</span>
 }

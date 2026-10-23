@@ -1,8 +1,8 @@
-import { For, Show } from "solid-js"
-import type { JSX } from "solid-js"
 import { mdiChartLine } from "@adaptive-ds/mdi/mdiChartLine.js"
+import { cn } from "cn"
+import type { JSX } from "solid-js"
+import { For, Show } from "solid-js"
 import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 import { areaChartBaseY, areaChartTooltipTop, areaChartXFor, areaChartYFor } from "./areaChartGeometry.ts"
 import { areaChartStateCreate } from "./areaChartStateCreate.ts"
@@ -89,7 +89,7 @@ export function AreaChart(p: AreaChartProps) {
 
   if (count() === 0) {
     return (
-      <div style={{ height: `${height()}px` }} class={classMerge("w-full", p.class)}>
+      <div style={{ height: `${height()}px` }} class={cn("w-full", p.class)}>
         <EmptyState icon={mdiChartLine} title="Keine Daten" />
       </div>
     )
@@ -136,7 +136,7 @@ export function AreaChart(p: AreaChartProps) {
   }
 
   return (
-    <div class={classMerge("w-full", p.class)}>
+    <div class={cn("w-full", p.class)}>
       <div
         ref={state.registerContainer}
         class="relative w-full focus-ring rounded-control"

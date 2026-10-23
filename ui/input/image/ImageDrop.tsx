@@ -1,8 +1,8 @@
-import { Show, createUniqueId } from "solid-js"
-import { Button } from "#ui/interactive/button/Button.jsx"
+import { cn } from "cn"
+import { createUniqueId, Show } from "solid-js"
 import { imageDropStateCreate } from "#ui/input/image/imageDropStateCreate.js"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 
 export type ImageDropProps = MayHaveClass & {
@@ -37,7 +37,7 @@ export function ImageDrop(p: ImageDropProps) {
   const hintId = `${inputId}-hint`
 
   const frameClass = () =>
-    classMerge(
+    cn(
       shapeClass[p.shape ?? "rounded"],
       aspectClass[p.aspect ?? "free"],
       "focus-visible:outline-2 focus-visible:outline-ring",
@@ -58,7 +58,7 @@ export function ImageDrop(p: ImageDropProps) {
             tabIndex={0}
             aria-label={p.label ?? "Bild hochladen"}
             aria-describedby={p.hint ? hintId : undefined}
-            class={classMerge(
+            class={cn(
               "flex w-full cursor-pointer flex-col items-center justify-center gap-2 border-2 border-dashed px-4 py-8 text-center transition-colors",
               "border-border-subtle bg-surface text-content-muted hover:border-brand hover:text-content",
               state.dragging() && "border-brand bg-brand-soft/40 text-content",
@@ -81,7 +81,7 @@ export function ImageDrop(p: ImageDropProps) {
           </div>
         }
       >
-        <div class={classMerge("relative overflow-hidden border border-border-subtle bg-surface-muted", frameClass())}>
+        <div class={cn("relative overflow-hidden border border-border-subtle bg-surface-muted", frameClass())}>
           <img
             src={p.value ?? ""}
             alt={p.label ? `Vorschau: ${p.label}` : "Hochgeladenes Bild"}

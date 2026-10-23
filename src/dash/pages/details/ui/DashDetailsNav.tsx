@@ -1,5 +1,5 @@
+import { cn } from "cn"
 import { For } from "solid-js"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 import type { DashDetailsPageState } from "../dashDetailsPageStateCreate.ts"
 
@@ -19,7 +19,7 @@ export function DashDetailsNav(p: { state: DashDetailsPageState }) {
               <a
                 href={item.hash}
                 onClick={scrollTo(item.hash)}
-                class={classMerge(
+                class={cn(
                   "block truncate rounded-control px-3 py-2 text-sm text-content-muted transition-colors",
                   "hover:bg-surface-muted hover:text-content",
                 )}

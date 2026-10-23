@@ -1,7 +1,7 @@
-import { For, Show } from "solid-js"
 import { mdiChartBar } from "@adaptive-ds/mdi/mdiChartBar.js"
+import { cn } from "cn"
+import { For, Show } from "solid-js"
 import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 import { barChartStateCreate, barChartVisibleLabels } from "./barChartStateCreate.ts"
 
@@ -38,14 +38,14 @@ export function BarChart(p: BarChartProps) {
 
   if (p.bars.length === 0) {
     return (
-      <div style={{ height: `${height()}px` }} class={classMerge("w-full", p.class)}>
+      <div style={{ height: `${height()}px` }} class={cn("w-full", p.class)}>
         <EmptyState icon={mdiChartBar} title="Keine Daten" />
       </div>
     )
   }
 
   return (
-    <div class={classMerge("w-full", p.class)} role="img" aria-label={p.ariaLabel}>
+    <div class={cn("w-full", p.class)} role="img" aria-label={p.ariaLabel}>
       <div class="flex items-end gap-0.5 sm:gap-1" style={{ height: `${height()}px` }} role="presentation">
         <For each={p.bars}>
           {(bar, index) => (
@@ -59,7 +59,7 @@ export function BarChart(p: BarChartProps) {
               onBlur={state.blur}
             >
               <div
-                class={classMerge(
+                class={cn(
                   "w-full rounded-t-[3px] transition-[height] duration-150 group-hover:opacity-100 group-focus-visible:opacity-100",
                   toneClass(bar.highlight === true),
                   state.activeIndex() !== null && state.activeIndex() !== index() && "opacity-70",

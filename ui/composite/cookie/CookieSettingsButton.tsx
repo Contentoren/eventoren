@@ -1,4 +1,4 @@
-import { classMerge } from "#ui/utils/classMerge.js"
+import { cn } from "cn"
 import { type ConsentConfig, resolveConsentConfig } from "./consent/consentConfig.js"
 import { openCookiePreferences } from "./consent/openCookiePreferences.js"
 import { defaultCookieBannerLabels } from "./cookieBannerLabels.js"
@@ -17,7 +17,7 @@ export function CookieSettingsButton(p: CookieSettingsButtonProps) {
     <button
       type="button"
       onClick={() => openCookiePreferences(resolveConsentConfig(p.consentConfig))}
-      class={classMerge(
+      class={cn(
         "cursor-pointer text-sm text-slate-500 transition-colors hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100",
         p.class,
       )}
