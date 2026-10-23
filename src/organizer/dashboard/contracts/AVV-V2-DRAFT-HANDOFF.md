@@ -56,3 +56,25 @@
 5. Spezifische Risiken (Einlass-/Scanner-Daten, Minderjährige als Teilnehmer,
    Aufbewahrungspflichten vs. Löschung) und Aufsichtsbehörden-Zuständigkeit.
 6. Aktivierungs-Rollout: Zeitplan für Neu-Zustimmungen bestehender Orgs.
+
+## Rollout 2026-10-23 — neue publizierte Revisionen (v1 ohne MUSTER/ENTWURF)
+
+- `organizerContractDocuments.ts` publiziert neu:
+  - AGB: `documentId` `eventoren-veranstalter-agb`, `revision`
+    `eventoren-veranstalter-agb-2026-10-23-v1`, Titel `Veranstalter-AGB`
+    (6 Abschnitte, Substanz der MUSTER-Fassung, Abschnitt 1 neu
+    „1. Geltung und Parteien“).
+  - AVV: `documentId` `eventoren-veranstalter-avv`, `revision`
+    `eventoren-veranstalter-avv-2026-10-23-v1`, Titel
+    `Auftragsverarbeitungsvereinbarung (AVV)` (10 Abschnitte auf Basis des
+    ENTWURF-Inhalts: 7 Abschnitte + Anlagen 1–3 als Abschnitte 8–10,
+    Abschnitt 1 neu „1. Gegenstand und Parteien“).
+- Diese Revisionen supersedieren sowohl die MUSTER-Revisionen
+  `…-2026-10-21-v1` als auch die ENTWURF-Revision
+  `eventoren-veranstalter-avv-entwurf-2026-10-22-v1`; der
+  ENTWURF-Stand in `organizerContractDocuments.v2-draft.ts` bleibt als
+  Entwurfshistorie bestehen und wird nicht live referenziert.
+- Alte Evidenz-Zeilen bleiben append-only gültig; neue Zustimmungen und
+  künftige Aktivierungen/Reaktivierungen erfordern die neuen Revisionen
+  (kein Grandfathering, bereits aktive Orgs bleiben bis zur nächsten
+  Reaktivierung unberührt).

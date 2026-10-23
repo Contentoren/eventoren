@@ -1,10 +1,10 @@
 # Organizer contract templates and legacy policy
 
-These are organizer-specific **MUSTER**, not buyer terms and not legal advice. They are unreviewed example documents. No deployment or production enablement is part of this change. Before productive use, replace them with reviewed documents and complete the parties, pricing, TOM and subprocessor annexes.
+These are organizer-specific **Vertragsdokumente** (Veranstalter-AGB and AVV), not buyer terms and not legal advice. They are unreviewed documents — noch nicht anwaltlich geprüft. No deployment or production enablement is part of this change. Before productive use, replace them with reviewed documents and complete the parties, pricing, TOM and subprocessor annexes.
 
 ## Version identity
 
-`organizerContractDocuments.ts` is the immutable source of the example texts and static IDs. `termsRevision` / `dpaRevision` are globally unique document-version IDs (they include the document identity). The currently published example stand is `2026-10-21-v1` for both documents (`eventoren-veranstalter-agb-muster-2026-10-21-v1`, `eventoren-veranstalter-avv-muster-2026-10-21-v1`); every caller derives its revision from that constant, and the parity suite derives its stale revision from the current one instead of a hardcoded date. Published revisions must never be edited in place. A text change requires new IDs/revisions and retaining prior text for old evidence. The static, unauthenticated SSR route `/veranstalter-vertraege` exposes both full texts; fragment URLs address each document. Both are linked before onboarding checkboxes and from settings. Do not relabel or reuse checkout/buyer terms.
+`organizerContractDocuments.ts` is the immutable source of the example texts and static IDs. `termsRevision` / `dpaRevision` are globally unique document-version IDs (they include the document identity). The currently published stand is `2026-10-23-v1` for both documents (`eventoren-veranstalter-agb-2026-10-23-v1`, `eventoren-veranstalter-avv-2026-10-23-v1`); every caller derives its revision from that constant, and the parity suite derives its stale revision from the current one instead of a hardcoded date. Published revisions must never be edited in place. A text change requires new IDs/revisions and retaining prior text for old evidence. The static, unauthenticated SSR route `/veranstalter-vertraege` exposes both full texts; fragment URLs address each document. Both are linked before onboarding checkboxes and from settings. Do not relabel or reuse checkout/buyer terms.
 
 ## Evidence
 
