@@ -4,6 +4,7 @@ import type { Doc, Id } from "#convex/_generated/dataModel.js"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
+import { dashFeeCompute } from "#src/dash/model/dashFeeCompute.ts"
 import { ticketCheckoutLegalDocumentRevision } from "../ticketCheckoutLegalDocumentRevision.js"
 import { ticketCheckoutLegalDocumentSnapshot } from "../ticketCheckoutLegalDocumentSnapshot.js"
 import { eventTicketTierMaxPerOrderGet } from "#src/events/eventTicketTierMaxPerOrderGet.ts"
@@ -275,6 +276,14 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     // Ownership gate before any new reservation/order/inventory/code writes.
     const salesCheck = await ticketOrganizerSalesCheck(ctx, event.orgId)
     if (!salesCheck.success) return salesCheck
+    const organization =
+      event.orgId === undefined
+        ? null
+        : await ctx.db
+            .query("organizerDashboardOrganizations")
+            .withIndex("orgId", (q) => q.eq("orgId", event.orgId!))
+            .unique()
+    const feePayer = organization?.fee.payer === "veranstalter" ? "organizer" : "buyer"
 
     const requestedSelections = [...args.tickets].sort((left, right) => left.tierKey.localeCompare(right.tierKey))
     const quantitiesByTier = new Map<
@@ -313,6 +322,8 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     }> = []
     let subtotalCents = 0
     let feeCents = 0
+    let platformFeeCents = 0
+    let organizerDeductionCents = 0
     for (const [tierKey, aggregated] of [...quantitiesByTier.entries()].sort(([left], [right]) =>
       left.localeCompare(right),
     )) {
@@ -373,6 +384,22 @@ export const ticketCheckoutPrepareMutation = internalMutation({
           return createResultError(op, "The activation code is no longer available")
         activationCode = code
       }
+      const platformFeePerTicket =
+        tier.priceCents === 0
+          ? 0
+          : organization
+            ? dashFeeCompute({ priceCents: tier.priceCents, fee: organization.fee }).feeCents
+            : tier.feeCents
+      if (feePayer === "organizer" && platformFeePerTicket > tier.priceCents)
+        return createResultError(
+          op,
+          "Die Veranstaltergebühr übersteigt den Ticketpreis. Bitte Ticketpreis oder Gebührenvereinbarung ändern.",
+        )
+      const buyerFeePerTicket = feePayer === "buyer" ? platformFeePerTicket : 0
+      if (tier.feeCents !== buyerFeePerTicket)
+        return createResultError(op, "Ticket prices are being updated; please reload before checkout")
+      platformFeeCents += platformFeePerTicket * aggregated.quantity
+      organizerDeductionCents += feePayer === "organizer" ? platformFeePerTicket * aggregated.quantity : 0
       subtotalCents += tier.priceCents * aggregated.quantity
       feeCents += tier.feeCents * aggregated.quantity
       lineInputs.push({
@@ -442,6 +469,7 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       catalogVersion: args.catalogVersion,
       subtotalCents,
       feeCents,
+      feeSnapshot: { payer: feePayer, platformFeeCents, organizerDeductionCents },
       totalCents: subtotalCents + feeCents,
       checkoutContextJson: acceptedContextJson,
       // Canonical ownership snapshot; never client-supplied.

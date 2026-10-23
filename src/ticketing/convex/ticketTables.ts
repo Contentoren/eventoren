@@ -90,6 +90,14 @@ export const ticketTables = {
     catalogVersion: v.number(),
     subtotalCents: v.number(),
     feeCents: v.number(),
+    // Immutable settlement agreement for new checkouts. Absence is legacy buyer-fee pricing.
+    feeSnapshot: v.optional(
+      v.object({
+        payer: v.union(v.literal("buyer"), v.literal("organizer")),
+        platformFeeCents: v.number(),
+        organizerDeductionCents: v.number(),
+      }),
+    ),
     totalCents: v.number(),
     checkoutContextJson: v.string(),
     // Canonical snapshot of the owning org at reservation time (never

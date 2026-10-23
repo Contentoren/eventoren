@@ -26,10 +26,10 @@ test("Gratis-Tickets kosten keine Gebühr", () => {
   })
 })
 
-test("Organisator-Anteil wird nie negativ", () => {
+test("zu hohe Veranstaltergebühr bleibt sichtbar statt still auf null gekappt zu werden", () => {
   const result = dashFeeCompute({ priceCents: 10, fee: { ...fee, payer: "veranstalter" } })
   expect(result.feeCents).toBe(50)
-  expect(result.organizerGetsCents).toBe(0)
+  expect(result.organizerGetsCents).toBe(-40)
 })
 
 test("rundet prozentuale Gebühr kaufmännisch", () => {

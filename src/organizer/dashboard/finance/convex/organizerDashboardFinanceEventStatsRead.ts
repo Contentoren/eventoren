@@ -38,6 +38,7 @@ export async function organizerDashboardFinanceEventStatsRead(
     paid.map((order) => ({
       subtotalCents: order.subtotalCents,
       feeCents: order.feeCents,
+      feeSnapshot: order.feeSnapshot,
       totalCents: order.totalCents,
       disputed: order.cancellation !== undefined,
     })),

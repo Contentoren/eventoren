@@ -610,6 +610,17 @@ test("client feeCents are rejected, server derives the buyer fee from the org co
   expect(afterPayer.success).toBe(true)
   if (!afterPayer.success) return
   expect(afterPayer.data.tiers.find((tier) => tier.tierKey === "org-zahlt")?.feeCents).toBe(0)
+  const tooSmall = await t.mutation(
+    tierUpsertMutation,
+    tierInput(orgA, managerToken, created.data.eventKey, { tierKey: "too-small", priceCents: 1 }),
+  )
+  expect(tooSmall.success).toBe(false)
+  if (!tooSmall.success) expect(tooSmall.errorMessage).toContain("übersteigt den Ticketpreis")
+  const freeOrganizer = await t.mutation(
+    tierUpsertMutation,
+    tierInput(orgA, managerToken, created.data.eventKey, { tierKey: "free-organizer", priceCents: 0 }),
+  )
+  expect(freeOrganizer.success).toBe(true)
 })
 
 test("tier upserts are idempotent and capacity never drops below sold plus reserved", async () => {

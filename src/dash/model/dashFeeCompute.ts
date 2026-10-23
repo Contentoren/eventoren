@@ -10,5 +10,5 @@ export function dashFeeCompute(args: { priceCents: number; fee: DashFee }): {
   const feeCents = Math.round((priceCents * fee.percentBps) / 10000) + fee.fixedCents
   if (fee.payer === "kaeufer")
     return { feeCents, buyerPaysCents: priceCents + feeCents, organizerGetsCents: priceCents }
-  return { feeCents, buyerPaysCents: priceCents, organizerGetsCents: Math.max(0, priceCents - feeCents) }
+  return { feeCents, buyerPaysCents: priceCents, organizerGetsCents: priceCents - feeCents }
 }

@@ -197,13 +197,13 @@ test("finance overview aggregates integer-cent totals with Berlin day buckets", 
   const data = result.data as OverviewData
   expect(data.paidOrders).toBe(2)
   expect(data.grossCents).toBe(3500)
-  expect(data.feeCents).toBe(350)
-  expect(data.disputeCents).toBe(1650)
-  expect(data.payoutCents).toBe(1500)
+  expect(data.feeCents).toBe(0)
+  expect(data.disputeCents).toBe(1500)
+  expect(data.payoutCents).toBe(2000)
   expect(data.tickets).toBe(2)
   expect(data.checkedIn).toBe(1)
   expect(data.events).toHaveLength(1)
-  expect(data.events[0]).toMatchObject({ eventKey: "event-a", capacity: 100, remainingPayoutCents: 1500 })
+  expect(data.events[0]).toMatchObject({ eventKey: "event-a", capacity: 100, remainingPayoutCents: 2000 })
   const day = data.salesCurve.find((point) => point.day === "2026-10-01")
   expect(day).toMatchObject({ grossCents: 3500, tickets: 2 })
 })
@@ -214,18 +214,37 @@ test("finance overview requires the finance permission", async () => {
   expect(denied.success).toBe(false)
 })
 
+test("settlement uses the immutable organizer deduction snapshot, not buyer fees", async () => {
+  const s = await seed()
+  await s.t.run(async (ctx) => {
+    const order = await ctx.db
+      .query("ticketOrders")
+      .withIndex("checkoutKey", (q) => q.eq("checkoutKey", "finance_checkout_a"))
+      .unique()
+    await ctx.db.patch("ticketOrders", order!._id, {
+      feeCents: 0,
+      totalCents: 2000,
+      feeSnapshot: { payer: "organizer", platformFeeCents: 127, organizerDeductionCents: 127 },
+    })
+  })
+  const result = await s.t.query(settlement, { token: s.tokens.finanzen, orgId: s.orgId, eventKey: "event-a" })
+  expect(result.success).toBe(true)
+  if (!result.success) return
+  expect(result.data).toMatchObject({ grossCents: 3500, feeCents: 127, disputeCents: 1500, payoutCents: 1873 })
+})
+
 test("settlement exposes per-event accounting and payout recording guards the remainder", async () => {
   const s = await seed()
   const base = { token: s.tokens.finanzen, orgId: s.orgId, eventKey: "event-a" }
   const before = await s.t.query(settlement, base)
   expect(before.success).toBe(true)
   if (!before.success) return
-  expect(before.data).toMatchObject({ grossCents: 3500, payoutCents: 1500, remainingPayoutCents: 1500 })
+  expect(before.data).toMatchObject({ grossCents: 3500, payoutCents: 2000, remainingPayoutCents: 2000 })
 
   const recorded = await s.t.mutation(payoutRecord, { ...base, amountCents: 1000, note: "Teil 1" })
   expect(recorded.success).toBe(true)
 
-  const over = await s.t.mutation(payoutRecord, { ...base, amountCents: 600 })
+  const over = await s.t.mutation(payoutRecord, { ...base, amountCents: 1001 })
   expect(over.success).toBe(false)
 
   const bad = await s.t.mutation(payoutRecord, { ...base, amountCents: 0 })
@@ -234,7 +253,7 @@ test("settlement exposes per-event accounting and payout recording guards the re
   const after = await s.t.query(settlement, base)
   expect(after.success).toBe(true)
   if (!after.success) return
-  expect(after.data).toMatchObject({ recordedPayoutsCents: 1000, remainingPayoutCents: 500 })
+  expect(after.data).toMatchObject({ recordedPayoutsCents: 1000, remainingPayoutCents: 1000 })
 
   const listed = await s.t.query(payoutList, {
     token: s.tokens.finanzen,

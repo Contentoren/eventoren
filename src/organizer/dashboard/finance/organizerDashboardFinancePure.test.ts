@@ -23,13 +23,41 @@ describe("organizerDashboardBerlinDay", () => {
 })
 
 describe("organizerDashboardFinanceTotalsCreate", () => {
-  test("sums integer cents and subtracts disputes from the payout", () => {
+  test("legacy buyer fees remain outside organizer deductions and disputes reverse only ticket value", () => {
     expect(
       organizerDashboardFinanceTotalsCreate([
         { subtotalCents: 2000, feeCents: 100, totalCents: 2100, disputed: false },
         { subtotalCents: 1500, feeCents: 75, totalCents: 1575, disputed: true },
       ]),
-    ).toEqual({ paidOrders: 2, grossCents: 3500, feeCents: 175, disputeCents: 1575, payoutCents: 1750 })
+    ).toEqual({ paidOrders: 2, grossCents: 3500, feeCents: 0, disputeCents: 1500, payoutCents: 2000 })
+  })
+
+  test("snapshot deductions include ordinary payment costs and cancellation reverses net entitlement once", () => {
+    const buyer = {
+      subtotalCents: 2000,
+      feeCents: 127,
+      totalCents: 2127,
+      disputed: false,
+      feeSnapshot: { payer: "buyer" as const, platformFeeCents: 127, organizerDeductionCents: 0 },
+    }
+    const organizer = {
+      subtotalCents: 2000,
+      feeCents: 0,
+      totalCents: 2000,
+      disputed: false,
+      feeSnapshot: { payer: "organizer" as const, platformFeeCents: 127, organizerDeductionCents: 127 },
+    }
+    expect(organizerDashboardFinanceTotalsCreate([buyer, organizer])).toMatchObject({
+      grossCents: 4000,
+      feeCents: 127,
+      payoutCents: 3873,
+    })
+    expect(
+      organizerDashboardFinanceTotalsCreate([
+        { ...buyer, disputed: true },
+        { ...organizer, disputed: true },
+      ]),
+    ).toMatchObject({ feeCents: 127, disputeCents: 3873, payoutCents: 0 })
   })
 
   test("empty input yields zeros", () => {

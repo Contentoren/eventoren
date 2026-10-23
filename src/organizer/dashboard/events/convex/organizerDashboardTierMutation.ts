@@ -2,6 +2,7 @@ import { v } from "convex/values"
 import type { Id } from "#convex/_generated/dataModel.js"
 import { type MutationCtx, mutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
+import { dashFeeCompute } from "#src/dash/model/dashFeeCompute.ts"
 import type { IdUser } from "#src/auth/convex/IdUser.ts"
 import { catalogSyncAdvanceFn } from "#src/catalog/convex/catalogSyncAdvanceFn.ts"
 import { organizerDashboardTierArchiveSchema } from "#src/organizer/dashboard/events/model/organizerDashboardTierArchiveSchema.ts"
@@ -53,6 +54,14 @@ async function organizerDashboardTierUpsertAuthorizedFn(
   const parsed = await organizerDashboardTierUpsertParse(args.input)
   if (!parsed.success) return parsed
   const tierInput = parsed.data
+  if (
+    dashFeeCompute({ priceCents: tierInput.priceCents, fee: authorization.data.organization.fee }).organizerGetsCents <
+    0
+  )
+    return createResultError(
+      op,
+      "Die Veranstaltergebühr übersteigt den Ticketpreis. Bitte Ticketpreis oder Gebührenvereinbarung ändern.",
+    )
 
   const startsAt = tierInput.startsAt ?? event.startsAt
   const endsAt = tierInput.endsAt ?? event.endsAt

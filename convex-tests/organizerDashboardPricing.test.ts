@@ -1,4 +1,5 @@
 import { organizerContractDocuments } from "#src/organizer/dashboard/contracts/organizerContractDocuments.ts"
+import { organizerContractPartyConsentFixture } from "../test/organizerContractPartyConsent.fixture.ts"
 /// <reference types="vite/client" />
 
 import { convexTest } from "convex-test"
@@ -15,6 +16,71 @@ const authSecret = "eventoren-auth-convex-test-secret"
 process.env.AUTH_SECRET = authSecret
 const now = "2026-10-20T00:00:00.000Z"
 const validIban = "DE89370400440532013000"
+
+test.each(["kaeufer", "veranstalter"] as const)(
+  "checkout freezes %s fees per ticket, including quantities and free tickets",
+  async (payer) => {
+    const t = convexTest(schema, modules)
+    await pricingAdmin(t)
+    const { orgId } = await pricingOrgInsert(t, `snapshot-${payer}`, {
+      fee: { percentBps: 390, fixedCents: 49, payer },
+    })
+    const { eventId } = await pricingEventInsert(t, orgId, `snapshot-${payer}`)
+    // 1001 * 3.9% rounds to 39 cents, plus 49 cents, per ticket (not per order).
+    await pricingTierInsert(t, eventId, "standard", 1001, payer === "kaeufer" ? 88 : 0)
+    await pricingTierInsert(t, eventId, "free", 0, 0)
+    const args = {
+      ...prepareArgs(`snapshot-${payer}`, 1, `snapshot-order-${payer}`),
+      tickets: [
+        { tierKey: "standard", quantity: 3, participantNames: ["One", "Two", "Three"] },
+        { tierKey: "free", quantity: 1, participantNames: ["Free"] },
+      ],
+    }
+    const result = await t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, args)
+    expect(result.success).toBe(true)
+    if (!result.success) return
+    const before = await t.run((ctx) => ctx.db.get("ticketOrders", result.data.orderId))
+    expect(before).toMatchObject({
+      subtotalCents: 3003,
+      feeCents: payer === "kaeufer" ? 264 : 0,
+      totalCents: payer === "kaeufer" ? 3267 : 3003,
+      feeSnapshot: {
+        payer: payer === "kaeufer" ? "buyer" : "organizer",
+        platformFeeCents: 264,
+        organizerDeductionCents: payer === "kaeufer" ? 0 : 264,
+      },
+    })
+    await t.run(async (ctx) => {
+      const org = await ctx.db
+        .query("organizerDashboardOrganizations")
+        .withIndex("orgId", (q) => q.eq("orgId", orgId))
+        .unique()
+      await ctx.db.patch("organizerDashboardOrganizations", org!._id, {
+        fee: { percentBps: 0, fixedCents: 999, payer: "veranstalter" },
+      })
+    })
+    expect((await t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, args)).success).toBe(true)
+    expect(await t.run((ctx) => ctx.db.get("ticketOrders", result.data.orderId))).toEqual(before)
+  },
+)
+
+test("checkout rejects an existing organizer-paid tier below its platform fee before reserving inventory", async () => {
+  const t = convexTest(schema, modules)
+  await pricingAdmin(t)
+  const { orgId } = await pricingOrgInsert(t, "too-small", {
+    fee: { percentBps: 390, fixedCents: 49, payer: "veranstalter" },
+  })
+  const { eventId } = await pricingEventInsert(t, orgId, "too-small")
+  const { tierId } = await pricingTierInsert(t, eventId, "standard", 1, 0)
+  const result = await t.mutation(
+    internal.ticketing.ticketCheckoutPrepareMutation,
+    prepareArgs("too-small", 1, "too-small"),
+  )
+  expect(result.success).toBe(false)
+  if (result.success) return
+  expect(result.errorMessage).toContain("übersteigt den Ticketpreis")
+  expect(await t.run((ctx) => ctx.db.get("catalogTicketTiers", tierId))).toMatchObject({ reserved: 0 })
+})
 
 type Fee = { percentBps: number; fixedCents: number; payer: "kaeufer" | "veranstalter" }
 
@@ -276,6 +342,7 @@ test("approval stays blocked while repricing and succeeds once the barrier clear
   const t = convexTest(schema, modules)
   const { token } = await pricingAdmin(t)
   const { orgId } = await pricingOrgInsert(t, "approve-gate-org", { status: "pruefung" })
+  await pricingActivationConsentSet(t, orgId)
   const { eventId } = await pricingEventInsert(t, orgId, "approve-gate-event")
   await pricingTierInsert(t, eventId, "standard", 1000, 0)
 
@@ -803,6 +870,7 @@ test("configuring a new organization without events finishes ready immediately",
   const t = convexTest(schema, modules)
   const { token } = await pricingAdmin(t)
   const { orgId } = await pricingOrgInsert(t, "empty-org", { status: "pruefung" })
+  await pricingActivationConsentSet(t, orgId)
 
   const configured = await t.mutation(api.organizerDashboardAdmin.organizerDashboardAdminConfigureMutation, {
     token,
@@ -818,3 +886,22 @@ test("configuring a new organization without events finishes ready immediately",
   })
   expect(approved.success).toBe(true)
 })
+
+async function pricingActivationConsentSet(t: ReturnType<typeof convexTest>, orgId: Id<"orgs">) {
+  await t.run(async (ctx) => {
+    const org = await ctx.db
+      .query("organizerDashboardOrganizations")
+      .withIndex("orgId", (q) => q.eq("orgId", orgId))
+      .unique()
+    if (!org) throw new Error("Missing organization")
+    await ctx.db.patch("organizerDashboardOrganizations", org._id, {
+      contracts: {
+        ...org.contracts,
+        party: organizerContractPartyConsentFixture.contractParty,
+        acceptedFee: { percentBps: 500, fixedCents: 0, payer: "kaeufer" },
+        authorityConfirmed: true,
+        earlyServiceStartRequested: false,
+      },
+    })
+  })
+}

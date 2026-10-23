@@ -1,5 +1,10 @@
 # Veranstalter-Dashboard – interaktive Demo
 
+> Produktionsabrechnung (23.10.2026): Die unten beschriebene Demo-Abrechnungsformel
+> ist kein Gebührenversprechen. Checkout und Finance verwenden unveränderliche
+> Order-Snapshots, keine separate reguläre PSP-Gebühr und keine erneute Absetzung
+> der Käufer-Servicegebühr; siehe [Ticket-Fee-Settlement](20261023_ticket-fee-settlement.md).
+
 Status: fertig und live auf https://eventoren.de/demo/dashboard (Commit `697bc5d`, Pages-Deployment `d4c6e0ba`, 19.10.2026).
 
 ## Ziel
