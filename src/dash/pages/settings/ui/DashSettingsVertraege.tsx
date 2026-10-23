@@ -15,6 +15,17 @@ const agbText =
 const avvText =
   "Demo-Text: Dieser Auftragsverarbeitungsvertrag (AVV) regelt, wie wir Gästedaten für dich verarbeiten. Wir speichern Bestellungen, Tickets und Nachrichten nur zur Vertragsabwicklung und geben sie nicht an Dritte weiter. In der Demo ist das ein gekürzter Platzhalter."
 
+/** Sichere Formatierung eines Annahme-Zeitstempels (Europe/Berlin). */
+function formatAcceptedAt(iso: string): string {
+  try {
+    const date = new Date(iso)
+    if (Number.isNaN(date.getTime())) return "Ungültiger Zeitstempel"
+    return `${dashDateFormat(iso, "kurz")} (Europe/Berlin)`
+  } catch {
+    return "Ungültiger Zeitstempel"
+  }
+}
+
 /** Sektion „Verträge“: AGB und AVV mit Annahmedatum und Lese-Ansicht. */
 export function DashSettingsVertraege(p: { state: DashSettingsPageState }) {
   const org = () => p.state.org()
@@ -31,7 +42,7 @@ export function DashSettingsVertraege(p: { state: DashSettingsPageState }) {
           <div class="min-w-0">
             <p class="font-medium text-content">AGB für Veranstalter</p>
             <Show when={org()?.termsAcceptedAt}>
-              {(at) => <p class="text-xs text-content-muted">Angenommen am {dashDateFormat(at(), "datum")}</p>}
+              {(at) => <p class="text-xs text-content-muted">Angenommen am {formatAcceptedAt(at())}</p>}
             </Show>
           </div>
           <Button
@@ -47,7 +58,7 @@ export function DashSettingsVertraege(p: { state: DashSettingsPageState }) {
           <div class="min-w-0">
             <p class="font-medium text-content">Auftragsverarbeitungsvertrag (AVV)</p>
             <Show when={org()?.dpaAcceptedAt}>
-              {(at) => <p class="text-xs text-content-muted">Angenommen am {dashDateFormat(at(), "datum")}</p>}
+              {(at) => <p class="text-xs text-content-muted">Angenommen am {formatAcceptedAt(at())}</p>}
             </Show>
           </div>
           <Button

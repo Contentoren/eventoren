@@ -41,7 +41,7 @@ export function veranstalterOnboardingPageStateCreate() {
   }
   const blockerMessage = (): string | null => {
     if (!termsAccepted.get() || !dpaAccepted.get()) {
-      return "Bitte beide Vertragsmuster lesen und ausdrücklich zustimmen."
+      return "Bitte beide Veranstalter-Verträge lesen und ausdrücklich zustimmen."
     }
     return null
   }

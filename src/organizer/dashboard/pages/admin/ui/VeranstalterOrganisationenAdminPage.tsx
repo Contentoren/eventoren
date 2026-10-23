@@ -148,15 +148,15 @@ export function VeranstalterOrganisationenAdminPage(p: {
                   <dd class="text-content">
                     <p>
                       {detail().contracts.current
-                        ? "Aktuelle Vertragsmuster bestätigt"
+                        ? "Aktuelle Verträge bestätigt"
                         : "Keine aktuelle revisionierte Zustimmung — Aktivierung gesperrt"}
                     </p>
                     <p>
-                      AGB (MUSTER): {detail().contracts.termsRevision ?? "keine Revision"} ·{" "}
+                      AGB: {detail().contracts.termsRevision ?? "keine Revision"} ·{" "}
                       {veranstalterOrganisationenAdminBerlinTimeFormat(detail().contracts.termsConsentedAt) ?? "offen"}
                     </p>
                     <p>
-                      AVV (MUSTER): {detail().contracts.dpaRevision ?? "keine Revision"} ·{" "}
+                      AVV: {detail().contracts.dpaRevision ?? "keine Revision"} ·{" "}
                       {veranstalterOrganisationenAdminBerlinTimeFormat(detail().contracts.dpaConsentedAt) ?? "offen"}
                     </p>
                     <p>
