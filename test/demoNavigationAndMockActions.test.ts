@@ -1,15 +1,17 @@
 import { describe, expect, test } from "bun:test"
 import { createRoot } from "solid-js"
-import { demoAdminNavStateCreate } from "../src/demo/state/demoAdminNavStateCreate.ts"
-import { demoSiteFrameStateCreate } from "../src/demo/state/demoSiteFrameStateCreate.ts"
+import { language } from "../src/app/i18n/language.ts"
+import { siteHeaderNavLinks } from "../src/components/siteHeaderNavLinks.ts"
 import { demoCatalogEvents } from "../src/demo/fixtures/demoCatalogEvents.ts"
-import { demoAdminCatalogPageStateCreate } from "../src/demo/state/demoAdminCatalogPageStateCreate.ts"
 import { demoOrganizerDataSourceCreate } from "../src/demo/fixtures/demoOrganizerDataSourceCreate.ts"
 import { demoOrganizerScanScenarios } from "../src/demo/fixtures/demoOrganizerScanScenarios.ts"
+import { demoAdminCatalogPageStateCreate } from "../src/demo/state/demoAdminCatalogPageStateCreate.ts"
+import { demoAdminNavStateCreate } from "../src/demo/state/demoAdminNavStateCreate.ts"
 import { demoCartStore } from "../src/demo/state/demoCartStore.ts"
 import { demoCheckoutFormStateCreate } from "../src/demo/state/demoCheckoutFormStateCreate.ts"
-import { demoOrderStatusPageStateCreate } from "../src/demo/state/demoOrderStatusPageStateCreate.ts"
 import { demoOrderHistoryPageStateCreate } from "../src/demo/state/demoOrderHistoryPageStateCreate.ts"
+import { demoOrderStatusPageStateCreate } from "../src/demo/state/demoOrderStatusPageStateCreate.ts"
+import { demoSiteFrameStateCreate } from "../src/demo/state/demoSiteFrameStateCreate.ts"
 
 describe("demo shared admin navigation", () => {
   test("shared admin demo nav exposes all admin destinations", () => {
@@ -71,11 +73,14 @@ describe("demo site frame overrides", () => {
     expect(frame.header.cartHref).toBe("/demo/customer/cart")
     expect(frame.header.checkoutHref).toBe("/demo/customer/checkout")
 
-    expect(frame.header.navLinkHref({ to: "/", label: "Events", exact: true })).toBe("/demo/customer/events")
-    expect(frame.header.navLinkHref({ to: "/organizer", label: "Veranstalter", exact: false })).toBe(
-      "/demo/admin/organizer",
-    )
-    expect(frame.header.navLinkHref({ to: "/admin", label: "Verwaltung", exact: false })).toBe("/demo/admin/events")
+    const headerLinks = siteHeaderNavLinks(language.de, "admin")
+    const eventsHeaderLink = headerLinks.find((link) => link.to === "/")!
+    const organizerHeaderLink = headerLinks.find((link) => link.to === "/organizer")!
+    const adminHeaderLink = headerLinks.find((link) => link.to === "/admin")!
+
+    expect(frame.header.navLinkHref(eventsHeaderLink)).toBe("/demo/customer/events")
+    expect(frame.header.navLinkHref(organizerHeaderLink)).toBe("/demo/admin/organizer")
+    expect(frame.header.navLinkHref(adminHeaderLink)).toBe("/demo/admin/events")
 
     expect(frame.footerLinkHref("/impressum")).toBe("/demo/impressum")
     expect(frame.footerLinkHref("/datenschutz")).toBe("/demo/datenschutz")
@@ -86,48 +91,26 @@ describe("demo site frame overrides", () => {
   test("header nav active state identifies subroutes for admin, events and organizer", () => {
     const frame = demoSiteFrameStateCreate({ sessionRole: "admin" })
     const isActive = frame.header.navLinkIsActive
+    const headerLinks = siteHeaderNavLinks(language.de, "admin")
+    const eventsHeaderLink = headerLinks.find((link) => link.to === "/")!
+    const organizerHeaderLink = headerLinks.find((link) => link.to === "/organizer")!
+    const adminHeaderLink = headerLinks.find((link) => link.to === "/admin")!
 
     // Admin active on subroutes
-    expect(isActive({ to: "/admin", label: "Admin", exact: false }, "/demo/admin/events", "/demo/admin/events")).toBe(
-      true,
-    )
-    expect(isActive({ to: "/admin", label: "Admin", exact: false }, "/demo/admin/events", "/demo/admin/orders")).toBe(
-      true,
-    )
-    expect(isActive({ to: "/admin", label: "Admin", exact: false }, "/demo/admin/events", "/demo/admin/members")).toBe(
-      true,
-    )
-    expect(
-      isActive({ to: "/admin", label: "Admin", exact: false }, "/demo/admin/events", "/demo/admin/organizers"),
-    ).toBe(true)
+    expect(isActive(adminHeaderLink, "/demo/admin/events", "/demo/admin/events")).toBe(true)
+    expect(isActive(adminHeaderLink, "/demo/admin/events", "/demo/admin/orders")).toBe(true)
+    expect(isActive(adminHeaderLink, "/demo/admin/events", "/demo/admin/members")).toBe(true)
+    expect(isActive(adminHeaderLink, "/demo/admin/events", "/demo/admin/organizers")).toBe(true)
 
     // Events active on catalog and event details
-    expect(isActive({ to: "/", label: "Events", exact: true }, "/demo/customer/events", "/demo/customer/events")).toBe(
+    expect(isActive(eventsHeaderLink, "/demo/customer/events", "/demo/customer/events")).toBe(true)
+    expect(isActive(eventsHeaderLink, "/demo/customer/events", "/demo/customer/events/kraftklub-arena-berlin")).toBe(
       true,
     )
-    expect(
-      isActive(
-        { to: "/", label: "Events", exact: true },
-        "/demo/customer/events",
-        "/demo/customer/events/kraftklub-arena-berlin",
-      ),
-    ).toBe(true)
 
     // Organizer active on list and scanner
-    expect(
-      isActive(
-        { to: "/organizer", label: "Veranstalter", exact: false },
-        "/demo/admin/organizer",
-        "/demo/admin/organizer",
-      ),
-    ).toBe(true)
-    expect(
-      isActive(
-        { to: "/organizer", label: "Veranstalter", exact: false },
-        "/demo/admin/organizer",
-        "/demo/admin/organizer/event/xyz",
-      ),
-    ).toBe(true)
+    expect(isActive(organizerHeaderLink, "/demo/admin/organizer", "/demo/admin/organizer")).toBe(true)
+    expect(isActive(organizerHeaderLink, "/demo/admin/organizer", "/demo/admin/organizer/event/xyz")).toBe(true)
   })
 })
 

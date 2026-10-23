@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/solid-router"
 import type { Accessor } from "solid-js"
 import { For, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 import type { Language } from "../app/i18n/language.ts"
 import type { UserRole } from "../auth/model_field/userRole.ts"
 import { UiButton } from "../ui/UiButton.tsx"
@@ -56,8 +57,9 @@ export function SiteHeader(
                           activeOptions={{ exact: link.exact }}
                           activeProps={{ class: "text-brand-accent", "aria-current": "page" }}
                           inactiveProps={{ class: "text-content-muted hover:bg-surface-muted hover:text-content" }}
-                          class="focus-ring rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors"
+                          class="focus-ring inline-flex items-center gap-2 rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors"
                         >
+                          <Icon path={link.icon} class="size-4 shrink-0 opacity-70" />
                           {link.label}
                         </Link>
                       }
@@ -69,12 +71,13 @@ export function SiteHeader(
                           <Link
                             to={href}
                             aria-current={active ? "page" : undefined}
-                            class={`focus-ring rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors ${
+                            class={`focus-ring inline-flex items-center gap-2 rounded-control px-space-3 py-space-2 text-sm font-semibold transition-colors ${
                               active
                                 ? "bg-brand-soft text-brand-accent"
                                 : "text-content-muted hover:bg-surface-muted hover:text-content"
                             }`}
                           >
+                            <Icon path={link.icon} class="size-4 shrink-0 opacity-70" />
                             {link.label}
                           </Link>
                         )

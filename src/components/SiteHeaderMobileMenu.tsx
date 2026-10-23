@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 import { UiDrawer } from "../ui/UiDrawer.tsx"
 import type { SiteHeaderNavLink } from "./SiteHeaderNavLink.ts"
 
@@ -27,8 +28,9 @@ export function SiteHeaderMobileMenu(props: {
                         activeProps={{ class: "bg-brand-soft text-brand-accent", "aria-current": "page" }}
                         inactiveProps={{ class: "text-content hover:bg-surface-muted" }}
                         onClick={() => props.onClose()}
-                        class="focus-ring flex min-h-11 items-center rounded-control px-space-4 text-base font-semibold transition-colors"
+                        class="focus-ring flex min-h-11 items-center gap-3 rounded-control px-space-4 text-base font-semibold transition-colors"
                       >
+                        <Icon path={link.icon} class="size-5 shrink-0 opacity-70" />
                         {link.label}
                       </Link>
                     }
@@ -37,12 +39,13 @@ export function SiteHeaderMobileMenu(props: {
                       <Link
                         to={linkHref()(link)}
                         onClick={() => props.onClose()}
-                        class="focus-ring flex min-h-11 items-center rounded-control px-space-4 text-base font-semibold transition-colors hover:bg-surface-muted"
+                        class="focus-ring flex min-h-11 items-center gap-3 rounded-control px-space-4 text-base font-semibold transition-colors hover:bg-surface-muted"
                         classList={{
                           "bg-brand-soft text-brand-accent": props.isLinkActive?.(link, linkHref()(link)),
                         }}
                         aria-current={props.isLinkActive?.(link, linkHref()(link)) ? "page" : undefined}
                       >
+                        <Icon path={link.icon} class="size-5 shrink-0 opacity-70" />
                         {link.label}
                       </Link>
                     )}
