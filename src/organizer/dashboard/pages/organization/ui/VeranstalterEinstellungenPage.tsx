@@ -55,7 +55,10 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
       </Show>
       <Show when={state.profileError() !== null}>
         <CardWrapper class="rounded-card border-border-subtle shadow-none">
-          <p role="alert" class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+          <p
+            role="alert"
+            class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger dark:bg-red-950/60 dark:text-red-300"
+          >
             {state.profileError() ?? "Keine Organisation ausgewählt."}
           </p>
         </CardWrapper>
@@ -148,31 +151,46 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
                   </Show>
                 </div>
                 <Show when={!state.canEditBank() && state.canViewBank()}>
-                  <p role="note" class="rounded-xl bg-warning-soft px-4 py-3 text-sm text-warning">
+                  <p
+                    role="note"
+                    class="rounded-xl bg-warning-soft px-4 py-3 text-sm text-warning dark:bg-amber-950/60 dark:text-amber-300"
+                  >
                     Die Bankverbindung ist für deine Rolle schreibgeschützt.
                   </p>
                 </Show>
                 <Show when={state.blockerMessage()}>
                   {(message) => (
-                    <p role="status" class="rounded-xl bg-warning-soft px-4 py-3 text-sm text-warning">
+                    <p
+                      role="status"
+                      class="rounded-xl bg-warning-soft px-4 py-3 text-sm text-warning dark:bg-amber-950/60 dark:text-amber-300"
+                    >
                       {message()}
                     </p>
                   )}
                 </Show>
                 <Show when={state.validationError() !== null}>
-                  <p role="alert" class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+                  <p
+                    role="alert"
+                    class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger dark:bg-red-950/60 dark:text-red-300"
+                  >
                     {state.validationError()}
                   </p>
                 </Show>
                 <Show when={state.serverError.get()}>
                   {(message) => (
-                    <p role="alert" class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+                    <p
+                      role="alert"
+                      class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger dark:bg-red-950/60 dark:text-red-300"
+                    >
                       {message()}
                     </p>
                   )}
                 </Show>
                 <Show when={state.saved.get()}>
-                  <p role="status" class="rounded-xl bg-success-soft px-4 py-3 text-sm text-success">
+                  <p
+                    role="status"
+                    class="rounded-xl bg-success-soft px-4 py-3 text-sm text-success dark:bg-emerald-950/60 dark:text-emerald-300"
+                  >
                     Gespeichert.
                   </p>
                 </Show>
@@ -216,8 +234,8 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
                   <dt class="text-sm text-content-muted">Verträge</dt>
                   <dd class="text-sm text-content">
                     {stored().contracts.current
-                      ? "Aktuelle Vertragsmuster bestätigt"
-                      : "Aktuelle Vertragsmuster noch nicht bestätigt (Alt-Zeitstempel sind keine aktuelle Zustimmung)"}
+                      ? "Aktuelle Verträge bestätigt"
+                      : "Aktuelle Verträge noch nicht bestätigt (Alt-Zeitstempel sind keine aktuelle Zustimmung)"}
                     <p>
                       AGB: {stored().contracts.termsRevision ?? "keine Revision"} ·{" "}
                       {state.contractDateLabel(stored().contracts.termsConsentedAt)}
@@ -232,25 +250,31 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
               <div class="flex flex-col gap-3 p-4 sm:p-6">
                 <OrganizerContractLinks />
                 <Show when={!stored().contracts.current}>
-                  <p>
+                  <p class="text-sm text-content">
                     Nur die inhabende Person darf für die Organisation zustimmen. Ohne aktuelle Zustimmung ist keine
                     (erneute) Aktivierung möglich.
                   </p>
-                  <Checkbox
-                    disabled={!stored().canAcceptContracts}
-                    checked={state.termsAccepted.get()}
-                    onChange={state.termsAccepted.set}
-                  >
-                    Ich stimme den verlinkten Muster-Veranstalter-AGB in der angegebenen Revision für meine Organisation
-                    zu.
-                  </Checkbox>
-                  <Checkbox
-                    disabled={!stored().canAcceptContracts}
-                    checked={state.dpaAccepted.get()}
-                    onChange={state.dpaAccepted.set}
-                  >
-                    Ich stimme der verlinkten Muster-AVV in der angegebenen Revision für meine Organisation zu.
-                  </Checkbox>
+                  <fieldset class="flex flex-col gap-2">
+                    <legend class="text-sm font-semibold text-content">
+                      Ausdrückliche Zustimmung zu den Veranstalter-Verträgen
+                    </legend>
+                    <Checkbox
+                      id="settings-terms-accept"
+                      disabled={!stored().canAcceptContracts}
+                      checked={state.termsAccepted.get()}
+                      onChange={state.termsAccepted.set}
+                    >
+                      Ich stimme den verlinkten Veranstalter-AGB in der angegebenen Revision für meine Organisation zu.
+                    </Checkbox>
+                    <Checkbox
+                      id="settings-dpa-accept"
+                      disabled={!stored().canAcceptContracts}
+                      checked={state.dpaAccepted.get()}
+                      onChange={state.dpaAccepted.set}
+                    >
+                      Ich stimme der verlinkten AVV in der angegebenen Revision für meine Organisation zu.
+                    </Checkbox>
+                  </fieldset>
                   <Button
                     type="button"
                     variant="contrast"
@@ -262,7 +286,7 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
                     }
                     onClick={() => void state.submitContracts()}
                   >
-                    {state.contractsSubmitting.get() ? "Wird bestätigt …" : "Vertragsmuster ausdrücklich bestätigen"}
+                    {state.contractsSubmitting.get() ? "Wird bestätigt …" : "Verträge ausdrücklich bestätigen"}
                   </Button>
                 </Show>
               </div>

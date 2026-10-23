@@ -31,8 +31,7 @@ export function VeranstalterOnboardingPage() {
       <div>
         <h1 class="text-xl font-semibold text-content">Organisation gründen</h1>
         <p class="mt-1 text-sm text-content-muted">
-          Neue Veranstalter-Organisation mit ausdrücklicher Zustimmung zu den Vertragsmustern einreichen. MUSTER — keine
-          Rechtsberatung, nicht anwaltlich geprüft.
+          Neue Veranstalter-Organisation mit ausdrücklicher Zustimmung zu den Veranstalter-Verträgen einreichen.
         </p>
       </div>
       <Show when={state.createdSlug.get()}>
@@ -148,23 +147,27 @@ export function VeranstalterOnboardingPage() {
             </div>
           </div>
           <Show when={state.validationError() !== null}>
-            <p role="alert" class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+            <p
+              role="alert"
+              class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger dark:bg-red-950/60 dark:text-red-300"
+            >
               {state.validationError()}
             </p>
           </Show>
           <OrganizerContractLinks />
-          <fieldset class="flex flex-col gap-2 rounded-xl bg-warning-soft px-4 py-3">
-            <legend class="px-1 text-sm font-semibold text-warning">Ausdrückliche Zustimmung zu Vertragsmustern</legend>
+          <fieldset class="flex flex-col gap-2 rounded-xl bg-warning-soft px-4 py-3 dark:bg-amber-950/60">
+            <legend class="px-1 text-sm font-semibold text-warning dark:text-amber-300">
+              Ausdrückliche Zustimmung zu den Veranstalter-Verträgen
+            </legend>
             <Checkbox
               id="onboarding-terms-accept"
               checked={state.termsAccepted.get()}
               onChange={state.termsAccepted.set}
             >
-              Ich stimme den oben verlinkten Muster-Veranstalter-AGB in der angegebenen Revision für meine Organisation
-              zu.
+              Ich stimme den oben verlinkten Veranstalter-AGB in der angegebenen Revision für meine Organisation zu.
             </Checkbox>
             <Checkbox id="onboarding-dpa-accept" checked={state.dpaAccepted.get()} onChange={state.dpaAccepted.set}>
-              Ich stimme der oben verlinkten Muster-AVV in der angegebenen Revision für meine Organisation zu.
+              Ich stimme der oben verlinkten AVV in der angegebenen Revision für meine Organisation zu.
             </Checkbox>
           </fieldset>
           <Show when={state.blockerMessage()}>
@@ -179,7 +182,10 @@ export function VeranstalterOnboardingPage() {
           </Show>
           <Show when={state.serverError.get()}>
             {(message) => (
-              <p role="alert" class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">
+              <p
+                role="alert"
+                class="rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger dark:bg-red-950/60 dark:text-red-300"
+              >
                 {message()}
               </p>
             )}

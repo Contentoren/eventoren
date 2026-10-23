@@ -6,30 +6,37 @@ import { organizerContractDocuments } from "./organizerContractDocuments.ts"
 export function OrganizerContractDocumentsPage() {
   return (
     <main class="mx-auto flex max-w-3xl flex-col gap-6 p-6">
-      <h1 class="text-2xl font-semibold">Veranstalter-Vertragsmuster</h1>
-      <p role="note">
-        MUSTER — keine Rechtsberatung. Nicht anwaltlich geprüft. Vor produktivem Einsatz ersetzen und prüfen lassen.
-        Keine Käuferbedingungen.
+      <h1 class="text-2xl font-semibold">Veranstalter-Verträge</h1>
+      <p
+        role="note"
+        class="rounded-md bg-warning-soft px-4 py-3 text-sm text-warning dark:bg-warning-soft/20 dark:text-amber-200"
+      >
+        Noch nicht anwaltlich geprüft — keine Rechtsberatung. Vor produktivem Einsatz rechtlich prüfen lassen.
       </p>
       <For each={[organizerContractDocuments.terms, organizerContractDocuments.dpa]}>
         {(document) => (
-          <CardWrapper class="rounded-card border-border-subtle shadow-none">
-            <article id={document.documentId} class="flex flex-col gap-4 p-6">
-              <h2 class="text-xl font-semibold">{document.title}</h2>
-              <p>
-                Dokument: {document.documentId}
-                <br />
-                Revision: {document.revision}
-              </p>
+          <CardWrapper id={document.documentId} class="flex scroll-mt-24 flex-col gap-4">
+            <div class="flex flex-col gap-4">
+              <h2 class="text-xl font-semibold text-content">{document.title}</h2>
+              <dl class="flex flex-col gap-1 text-sm">
+                <div class="flex gap-2">
+                  <dt class="text-content-muted">Dokument</dt>
+                  <dd class="text-content">{document.documentId}</dd>
+                </div>
+                <div class="flex gap-2">
+                  <dt class="text-content-muted">Revision</dt>
+                  <dd class="text-content">{document.revision}</dd>
+                </div>
+              </dl>
               <For each={document.sections}>
                 {(section) => (
-                  <section>
-                    <h3 class="font-semibold">{section[0]}</h3>
-                    <p>{section[1]}</p>
+                  <section class="flex flex-col gap-1">
+                    <h3 class="font-semibold text-content">{section[0]}</h3>
+                    <p class="text-content">{section[1]}</p>
                   </section>
                 )}
               </For>
-            </article>
+            </div>
           </CardWrapper>
         )}
       </For>

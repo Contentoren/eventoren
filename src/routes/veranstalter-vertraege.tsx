@@ -3,7 +3,7 @@ import { OrganizerContractDocumentsPage } from "../organizer/dashboard/contracts
 
 export const Route = createFileRoute("/veranstalter-vertraege")({
   head: () => ({
-    meta: [{ title: "Veranstalter-Vertragsmuster | Eventoren" }, { name: "robots", content: "noindex, nofollow" }],
+    meta: [{ title: "Veranstalter-Verträge | Eventoren" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: OrganizerContractDocumentsPage,
 })
