@@ -1,21 +1,21 @@
-import { For, Show } from "solid-js"
 import { mdiCheck } from "@adaptive-ds/mdi/mdiCheck.js"
 import { mdiImagePlusOutline } from "@adaptive-ds/mdi/mdiImagePlusOutline.js"
 import { mdiPencilOutline } from "@adaptive-ds/mdi/mdiPencilOutline.js"
-import { Button } from "#ui/interactive/button/Button.jsx"
-import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
-import { ImageDrop } from "#ui/input/image/ImageDrop.jsx"
-import { Input } from "#ui/input/input/Input.jsx"
-import { Sheet } from "#ui/interactive/sheet/Sheet.jsx"
-import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
+import { cn } from "cn"
+import { For, Show } from "solid-js"
 import { imageList } from "#src/app/assets/imageList.ts"
 import { urlImage } from "#src/app/assets/urlImage.ts"
+import { ImageDrop } from "#ui/input/image/ImageDrop.jsx"
+import { Input } from "#ui/input/input/Input.jsx"
+import { Button } from "#ui/interactive/button/Button.jsx"
+import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
+import { Sheet } from "#ui/interactive/sheet/Sheet.jsx"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 
 import { DashField } from "../../../ui/layout/DashField.tsx"
 import { DashSection } from "../../../ui/layout/DashSection.tsx"
-import { dashDetailsBildStateCreate } from "./dashDetailsBildStateCreate.ts"
 import type { DashDetailsPageState } from "../dashDetailsPageStateCreate.ts"
+import { dashDetailsBildStateCreate } from "./dashDetailsBildStateCreate.ts"
 
 /** Sektion „Bild“: 16:9-Vorschau mit Galerie-Auswahl und Alt-Text-Pflichtfeld. */
 export function DashDetailsBild(p: { state: DashDetailsPageState }) {
@@ -81,7 +81,7 @@ export function DashDetailsBild(p: { state: DashDetailsPageState }) {
               maxLength={150}
               disabled={disabled()}
               aria-invalid={altInvalid() ? "true" : undefined}
-              class={classMerge("h-10 text-sm rounded-control", altInvalid() && "border-danger")}
+              class={cn("h-10 text-sm rounded-control", altInvalid() && "border-danger")}
               onInput={(event) => p.state.setDraft({ imageAlt: event.currentTarget.value })}
             />
             <p

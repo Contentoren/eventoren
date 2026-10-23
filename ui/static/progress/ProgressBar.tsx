@@ -1,6 +1,6 @@
-import { classMerge } from "#ui/utils/classMerge.js"
+import { cn } from "cn"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
-import { progressPercentCreate, type ProgressTone } from "./progressPercentCreate.js"
+import { type ProgressTone, progressPercentCreate } from "./progressPercentCreate.js"
 
 export type ProgressBarSize = "sm" | "md"
 
@@ -30,14 +30,14 @@ export function ProgressBar(p: ProgressBarProps) {
       aria-valuemin={0}
       aria-valuemax={p.max}
       aria-valuenow={Math.min(Math.max(0, p.value), p.max)}
-      class={classMerge(
+      class={cn(
         "w-full overflow-hidden rounded-full bg-surface-muted",
         (p.size ?? "md") === "sm" ? "h-1.5" : "h-2.5",
         p.class,
       )}
     >
       <div
-        class={classMerge("h-full rounded-full transition-[width] duration-200", toneClasses[p.tone ?? "brand"])}
+        class={cn("h-full rounded-full transition-[width] duration-200", toneClasses[p.tone ?? "brand"])}
         style={{ width: `${percent()}%` }}
       />
     </div>

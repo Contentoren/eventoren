@@ -1,11 +1,10 @@
+import { cn } from "cn"
 import { Show } from "solid-js"
-
 import { ImageDrop } from "#ui/input/image/ImageDrop.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
-import type { DashProfilePageState } from "../dashProfilePageStateCreate.ts"
 import { DashField } from "../../../ui/layout/DashField.tsx"
 import { DashSection } from "../../../ui/layout/DashSection.tsx"
+import type { DashProfilePageState } from "../dashProfilePageStateCreate.ts"
 
 /** Profil-Sektion: Logo-Upload, Name und Untertitel mit Zählern. */
 export function DashProfileBasics(p: { state: DashProfilePageState; disabled: boolean }) {
@@ -68,7 +67,7 @@ export function DashProfileBasics(p: { state: DashProfilePageState; disabled: bo
                   onInput={(event) => p.state.setText("subtitle", event.currentTarget.value)}
                 />
                 <p
-                  class={classMerge(
+                  class={cn(
                     "text-right text-xs tabular-nums text-content-muted",
                     (form()?.subtitle.length ?? 0) > 80 && "text-danger",
                   )}

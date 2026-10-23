@@ -1,15 +1,15 @@
-import { mdiCancel } from "@adaptive-ds/mdi/mdiCancel.js"
 import { mdiCalendarRemoveOutline } from "@adaptive-ds/mdi/mdiCalendarRemoveOutline.js"
+import { mdiCancel } from "@adaptive-ds/mdi/mdiCancel.js"
 import { mdiPauseCircleOutline } from "@adaptive-ds/mdi/mdiPauseCircleOutline.js"
 import { mdiPencilOutline } from "@adaptive-ds/mdi/mdiPencilOutline.js"
 import { Outlet } from "@tanstack/solid-router"
+import { cn } from "cn"
 import { Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
-import { Icon } from "#ui/static/icon/Icon.jsx"
-import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
-import { LinkButtonInternal } from "#ui/interactive/link/LinkButton.jsx"
 import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
-import { classMerge } from "#ui/utils/classMerge.js"
+import { LinkButtonInternal } from "#ui/interactive/link/LinkButton.jsx"
+import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 import { dashEventLayoutStateCreate } from "./dashEventLayoutStateCreate.ts"
 import { DashEventDialogsHost } from "./dialogs/DashEventDialogsHost.tsx"
 
@@ -56,7 +56,7 @@ export function DashEventLayout(p: DashEventLayoutProps) {
         {(banner) => (
           <div
             role="status"
-            class={classMerge(
+            class={cn(
               "mb-6 flex items-center gap-2 rounded-control border px-3 py-2 text-sm",
               bannerTones[banner().tone],
             )}

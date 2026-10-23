@@ -1,3 +1,4 @@
+import { cn } from "cn"
 import { createSignal, onCleanup, onMount } from "solid-js"
 import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
 import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
@@ -5,7 +6,6 @@ import type { ThemeButtonText } from "#ui/interactive/theme/ThemeButtonText.js"
 import { themeButtonTextDefault } from "#ui/interactive/theme/ThemeButtonText.js"
 import { themeInit, themeRotate, themeSignal } from "#ui/interactive/theme/themeSignal.js"
 import { themeIcon } from "#ui/interactive/theme/themeVariant.js"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 
 export interface ThemeButtonProps extends MayHaveClass {
@@ -39,7 +39,7 @@ export function ThemeButton(p: ThemeButtonProps) {
       title={texts.currentTheme(texts[themeSignal.get()])}
       icon={themeIcon(themeSignal.get())}
       variant={buttonVariant.ghost}
-      class={classMerge(p.showText && "min-w-24", p.class)}
+      class={cn(p.showText && "min-w-24", p.class)}
       onClick={themeRotate}
     >
       {p.showText && themeReady() && texts[themeSignal.get()]}

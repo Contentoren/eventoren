@@ -1,10 +1,10 @@
-import Dialog from "@corvu/dialog"
 import { mdiMagnify } from "@adaptive-ds/mdi/mdiMagnify.js"
+import Dialog from "@corvu/dialog"
+import { cn } from "cn"
 import { For, Show } from "solid-js"
 import { commandPaletteStateCreate } from "#ui/interactive/command/commandPaletteStateCreate.js"
 import { classesDialogOverlayMerge } from "#ui/interactive/dialog/classesDialogContent.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 
 export type CommandPaletteItem = {
@@ -68,7 +68,7 @@ export function CommandPalette(p: CommandPaletteProps) {
       <Dialog.Portal>
         <Dialog.Overlay class={classesDialogOverlayMerge()} />
         <Dialog.Content
-          class={classMerge(
+          class={cn(
             "fixed left-1/2 top-[12vh] z-50 max-h-[60vh] w-[calc(100vw-2rem)] max-w-xl -translate-x-1/2",
             "flex flex-col overflow-hidden rounded-card border border-border-subtle bg-surface text-content shadow-lg",
             p.class,
@@ -122,7 +122,7 @@ export function CommandPalette(p: CommandPaletteProps) {
                             aria-describedby={`command-group-${group.id}`}
                             data-command-option={ranked.id}
                             tabIndex={-1}
-                            class={classMerge(
+                            class={cn(
                               "flex min-h-9 cursor-pointer items-center gap-2.5 rounded-md px-3 py-1.5 text-sm text-content",
                               selected() && "bg-surface-muted",
                               "focus-visible:outline-2 focus-visible:outline-ring",

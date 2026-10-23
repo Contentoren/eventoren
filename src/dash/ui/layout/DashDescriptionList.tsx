@@ -1,6 +1,6 @@
-import { For } from "solid-js"
+import { cn } from "cn"
 import type { JSX } from "solid-js"
-import { classMerge } from "#ui/utils/classMerge.js"
+import { For } from "solid-js"
 
 export interface DashDescriptionItem {
   label: string
@@ -18,7 +18,7 @@ export interface DashDescriptionListProps {
 export function DashDescriptionList(p: DashDescriptionListProps) {
   return (
     <dl
-      class={classMerge(
+      class={cn(
         "grid gap-x-6 gap-y-3 text-sm",
         (p.columns ?? 1) === 2 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1",
         p.class,
@@ -28,7 +28,7 @@ export function DashDescriptionList(p: DashDescriptionListProps) {
         {(item) => (
           <div class="min-w-0">
             <dt class="text-xs text-content-muted">{item.label}</dt>
-            <dd class={classMerge("mt-0.5 text-content", item.mono && "font-mono tabular-nums")}>{item.value}</dd>
+            <dd class={cn("mt-0.5 text-content", item.mono && "font-mono tabular-nums")}>{item.value}</dd>
           </div>
         )}
       </For>

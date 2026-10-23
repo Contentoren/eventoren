@@ -1,11 +1,11 @@
-import Dialog from "@corvu/dialog"
 import { mdiClose } from "@adaptive-ds/mdi/mdiClose.js"
+import Dialog from "@corvu/dialog"
+import { cn } from "cn"
 import type { JSX } from "solid-js"
 import { Show } from "solid-js"
-import { buttonVariant, buttonCvaIconOnly } from "#ui/interactive/button/buttonCva.js"
+import { buttonCvaIconOnly, buttonVariant } from "#ui/interactive/button/buttonCva.js"
 import { buttonIconCva } from "#ui/interactive/button/buttonIconCva.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 export type SheetSize = "sm" | "md" | "lg" | "xl"
 
@@ -43,7 +43,7 @@ export function Sheet(p: SheetProps) {
       <Dialog.Portal>
         <Dialog.Overlay class="fixed inset-0 z-40 bg-black/40 transition-opacity duration-200 motion-reduce:transition-none data-closed:opacity-0" />
         <Dialog.Content
-          class={classMerge(
+          class={cn(
             "fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col",
             "rounded-t-2xl border-t border-border-subtle bg-surface text-content shadow-xl",
             "sm:inset-y-0 sm:left-auto sm:right-0 sm:h-full sm:max-h-none",
@@ -64,7 +64,7 @@ export function Sheet(p: SheetProps) {
             </div>
             <Show when={p.headerActions}>{p.headerActions}</Show>
             <Dialog.Close
-              class={classMerge(buttonCvaIconOnly(buttonVariant.ghost, false, false), "shrink-0")}
+              class={cn(buttonCvaIconOnly(buttonVariant.ghost, false, false), "shrink-0")}
               aria-label="Schließen"
               title="Schließen"
             >

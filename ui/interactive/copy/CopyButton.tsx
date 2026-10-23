@@ -1,10 +1,10 @@
 import { mdiCheck } from "@adaptive-ds/mdi/mdiCheck.js"
 import { mdiContentCopy } from "@adaptive-ds/mdi/mdiContentCopy.js"
-import { copyButtonStateCreate } from "#ui/interactive/copy/copyButtonStateCreate.js"
+import { cn } from "cn"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { ButtonSize, ButtonVariant } from "#ui/interactive/button/buttonCva.js"
+import { copyButtonStateCreate } from "#ui/interactive/copy/copyButtonStateCreate.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 
 export interface CopyButtonProps extends MayHaveClass {
@@ -45,7 +45,7 @@ export function CopyButton(p: CopyButtonProps) {
           variant={p.variant ?? "ghost"}
           size="none"
           iconClass="size-4"
-          class={classMerge("size-8 rounded-control hover:bg-surface-muted", p.class)}
+          class={cn("size-8 rounded-control hover:bg-surface-muted", p.class)}
           icon={state.copied() ? mdiCheck : mdiContentCopy}
           onClick={() => void state.copy()}
         />

@@ -1,6 +1,6 @@
+import { cn } from "cn"
 import type { ComponentProps } from "solid-js"
 import { splitProps } from "solid-js"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 export interface SkeletonProps extends ComponentProps<"div"> {}
 
@@ -10,7 +10,7 @@ export function Skeleton(p: SkeletonProps) {
   return (
     <div
       aria-hidden={s["aria-hidden"] ?? true}
-      class={classMerge("animate-pulse rounded-control bg-surface-muted motion-reduce:animate-none", s.class)}
+      class={cn("animate-pulse rounded-control bg-surface-muted motion-reduce:animate-none", s.class)}
       {...rest}
     />
   )

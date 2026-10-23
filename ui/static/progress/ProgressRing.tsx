@@ -1,4 +1,4 @@
-import { classMerge } from "#ui/utils/classMerge.js"
+import { cn } from "cn"
 import type { MayHaveChildren } from "#ui/utils/MayHaveChildren.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 import type { ProgressTone } from "./progressPercentCreate.js"
@@ -36,7 +36,7 @@ export function ProgressRing(p: ProgressRingProps) {
       aria-valuemin={0}
       aria-valuemax={p.max}
       aria-valuenow={Math.min(Math.max(0, p.value), p.max)}
-      class={classMerge("relative inline-flex items-center justify-center", p.class)}
+      class={cn("relative inline-flex items-center justify-center", p.class)}
       style={{ width: `${state.normalized().size}px`, height: `${state.normalized().size}px` }}
     >
       <svg
@@ -62,7 +62,7 @@ export function ProgressRing(p: ProgressRingProps) {
           stroke-linecap="round"
           stroke-dasharray={`${state.circumference()}`}
           stroke-dashoffset={`${state.dashOffset()}`}
-          class={classMerge("transition-[stroke-dashoffset] duration-200", toneClasses[p.tone ?? "brand"])}
+          class={cn("transition-[stroke-dashoffset] duration-200", toneClasses[p.tone ?? "brand"])}
         />
       </svg>
       <span class="absolute inset-0 flex items-center justify-center empty:hidden">{p.children}</span>

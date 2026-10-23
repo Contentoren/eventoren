@@ -1,16 +1,16 @@
-import { For, Show } from "solid-js"
 import { mdiChevronDown } from "@adaptive-ds/mdi/mdiChevronDown.js"
 import { mdiChevronUp } from "@adaptive-ds/mdi/mdiChevronUp.js"
 import { mdiDragVertical } from "@adaptive-ds/mdi/mdiDragVertical.js"
 import { mdiPlus } from "@adaptive-ds/mdi/mdiPlus.js"
 import { mdiTrashCanOutline } from "@adaptive-ds/mdi/mdiTrashCanOutline.js"
+import { cn } from "cn"
+import { For, Show } from "solid-js"
+import { Input } from "#ui/input/input/Input.jsx"
+import { Textarea } from "#ui/input/textarea/Textarea.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
 import { FilterChip } from "#ui/interactive/chip/FilterChip.jsx"
-import { Input } from "#ui/input/input/Input.jsx"
-import { Textarea } from "#ui/input/textarea/Textarea.jsx"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 import type { DashFaqItem } from "../../../model/dashFaqItemSchema.ts"
 import { DashFaqEditorStateCreate } from "./DashFaqEditorStateCreate.ts"
@@ -39,10 +39,7 @@ export function DashFaqEditor(p: {
       <For each={p.items}>
         {(item) => (
           <div
-            class={classMerge(
-              "rounded-card border border-border-subtle bg-surface",
-              state.isDragging(item.id) && "opacity-50",
-            )}
+            class={cn("rounded-card border border-border-subtle bg-surface", state.isDragging(item.id) && "opacity-50")}
             onDragOver={state.allowDrop}
             onDrop={(domEvent) => state.dropOn(item.id, domEvent)}
           >

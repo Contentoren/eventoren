@@ -1,6 +1,6 @@
-import { Show } from "solid-js"
+import { cn } from "cn"
 import type { JSX } from "solid-js"
-import { classMerge } from "#ui/utils/classMerge.js"
+import { Show } from "solid-js"
 
 export interface DashSectionProps {
   title?: string
@@ -22,11 +22,7 @@ export function DashSection(p: DashSectionProps) {
   const hasHeadText = () => p.title !== undefined || p.description !== undefined
 
   return (
-    <section
-      id={p.id}
-      aria-label={p.title}
-      class={classMerge("rounded-card border border-border-subtle bg-surface", p.class)}
-    >
+    <section id={p.id} aria-label={p.title} class={cn("rounded-card border border-border-subtle bg-surface", p.class)}>
       <Show
         when={hasHeadText()}
         fallback={
@@ -45,7 +41,7 @@ export function DashSection(p: DashSectionProps) {
           <div class="flex shrink-0 flex-wrap items-center gap-2">{p.actions}</div>
         </div>
       </Show>
-      <div class={classMerge((p.padded ?? true) ? "p-4 sm:p-5" : "p-0")}>{p.children}</div>
+      <div class={cn((p.padded ?? true) ? "p-4 sm:p-5" : "p-0")}>{p.children}</div>
       <div class="border-t border-border-subtle px-4 py-3 text-sm text-content-muted empty:hidden sm:px-5">
         {p.footer}
       </div>

@@ -1,12 +1,12 @@
 import { mdiCheckboxBlankCircleOutline } from "@adaptive-ds/mdi/mdiCheckboxBlankCircleOutline.js"
 import { mdiCheckboxMarkedCircle } from "@adaptive-ds/mdi/mdiCheckboxMarkedCircle.js"
+import { cn } from "cn"
 import { For, Show, splitProps } from "solid-js"
 import { classesTextMuted } from "#ui/classes/classesTextMuted.js"
 import { ButtonIcon } from "#ui/interactive/button/ButtonIcon.jsx"
 import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
 import { classesGridCols3xl } from "#ui/static/grid/classesGridCols.js"
 import { classArr } from "#ui/utils/classArr.js"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { SignalObject } from "#ui/utils/createSignalObject.js"
 import type { MayHaveButtonVariant } from "#ui/utils/MayHaveButtonVariant.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
@@ -39,7 +39,7 @@ export function CheckSingle<T extends string = string>(p: CheckSingleProps<T>) {
   return (
     <div
       id={p.id}
-      class={classMerge(
+      class={cn(
         "group border border-input",
         "px-2 py-2",
         "ring-offset-background",
@@ -133,13 +133,13 @@ function CheckOption<T extends string>(p: CheckOptionProps<T>) {
       // iconRight={isSelected() ? mdiCheckboxMarkedCircle : mdiCheckboxBlankCircleOutline}
       onClick={() => toggleOption(p, p.disallowDeselection)}
       variant={p.variant ?? buttonVariant.filled}
-      class={classMerge("justify-start text-left", p.optionClass)}
+      class={cn("justify-start text-left", p.optionClass)}
       disabled={p.disabled}
     >
       <span class="flex flex-col items-start">
         <span class={p.valueTextClass}>{label()}</span>
         <Show when={subtitle()}>
-          {(subtitle) => <span class={classMerge(classesTextMuted, p.valueTextSubtitleClass)}>{subtitle()}</span>}
+          {(subtitle) => <span class={cn(classesTextMuted, p.valueTextSubtitleClass)}>{subtitle()}</span>}
         </Show>
       </span>
     </ButtonIcon>

@@ -1,9 +1,9 @@
 import { mdiCheckboxBlankOutline } from "@adaptive-ds/mdi/mdiCheckboxBlankOutline.js"
 import { mdiCheckboxMarked } from "@adaptive-ds/mdi/mdiCheckboxMarked.js"
+import { cn } from "cn"
 import { type ComponentProps, splitProps } from "solid-js"
 import { classesDisabledDirectly } from "#ui/classes/classesDisabledDirectly.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveChildren } from "#ui/utils/MayHaveChildren.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 import type { MayHaveDisabled } from "#ui/utils/MayHaveDisabled.js"
@@ -23,7 +23,7 @@ export function Checkbox(p: CheckboxProps) {
   }
 
   return (
-    <div class={classMerge("flex items-start gap-1", s.class)}>
+    <div class={cn("flex items-start gap-1", s.class)}>
       <input
         id={s.id}
         type="checkbox"
@@ -36,7 +36,7 @@ export function Checkbox(p: CheckboxProps) {
       />
       <div
         onClick={handleToggle}
-        class={classMerge(
+        class={cn(
           "size-6", // sizing + interaction
           "cursor-pointer", // cursor
           "flex items-center justify-center", // layout children
@@ -58,7 +58,7 @@ export function Checkbox(p: CheckboxProps) {
       <label
         id={s.id ? `${s.id}-label` : undefined}
         for={s.id}
-        class={classMerge(
+        class={cn(
           "block cursor-pointer", // interaction: full-row target incl. wrapped-line gaps
           s.disabled && classesDisabledDirectly, // disabled state
         )}

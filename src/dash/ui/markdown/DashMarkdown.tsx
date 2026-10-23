@@ -1,5 +1,5 @@
+import { cn } from "cn"
 import { For } from "solid-js"
-import { classMerge } from "#ui/utils/classMerge.js"
 import { dashMarkdownParse } from "#src/dash/model/dashMarkdownParse.ts"
 import type { DashMdInline } from "#src/dash/model/dashMdInline.ts"
 
@@ -46,7 +46,7 @@ export function DashMarkdown(props: { text: string; class?: string; size?: "sm" 
   const blocks = () => dashMarkdownParse(props.text)
 
   return (
-    <div class={classMerge("flex flex-col gap-2", props.size === "sm" ? "text-sm" : "text-sm", props.class)}>
+    <div class={cn("flex flex-col gap-2", props.size === "sm" ? "text-sm" : "text-sm", props.class)}>
       <For each={blocks()}>
         {(block) => {
           if (block.type === "heading") {

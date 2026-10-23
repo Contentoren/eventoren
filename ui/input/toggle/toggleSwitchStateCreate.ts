@@ -1,6 +1,6 @@
+import { cn } from "cn"
 import { createUniqueId } from "solid-js"
 import type { ToggleSwitchSize } from "#ui/input/toggle/ToggleSwitch.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 const trackSizeClass: Record<ToggleSwitchSize, string> = {
   sm: "h-6 w-11",
@@ -28,7 +28,7 @@ export function toggleSwitchStateCreate(input: {
   const controlId = () => input.id() ?? generatedId
 
   const trackClass = () =>
-    classMerge(
+    cn(
       "relative inline-flex shrink-0 cursor-pointer items-center rounded-full border transition-colors focus-ring",
       trackSizeClass[input.size()],
       input.checked() ? "border-brand bg-brand dark:bg-brand" : "border-border-subtle bg-surface-muted",
@@ -36,7 +36,7 @@ export function toggleSwitchStateCreate(input: {
     )
 
   const thumbClass = () =>
-    classMerge(
+    cn(
       "inline-block rounded-full bg-white shadow transition-transform dark:bg-slate-900",
       thumbSizeClass[input.size()],
       input.checked() && thumbOffsetClass[input.size()],

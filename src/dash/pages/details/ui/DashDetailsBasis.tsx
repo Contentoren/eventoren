@@ -1,4 +1,3 @@
-import { For, Show } from "solid-js"
 import { mdiBookOpen } from "@adaptive-ds/mdi/mdiBookOpen.js"
 import { mdiMusic } from "@adaptive-ds/mdi/mdiMusic.js"
 import { mdiPalette } from "@adaptive-ds/mdi/mdiPalette.js"
@@ -7,17 +6,18 @@ import { mdiSchool } from "@adaptive-ds/mdi/mdiSchool.js"
 import { mdiTag } from "@adaptive-ds/mdi/mdiTag.js"
 import { mdiTent } from "@adaptive-ds/mdi/mdiTent.js"
 import { mdiTrophy } from "@adaptive-ds/mdi/mdiTrophy.js"
+import { cn } from "cn"
+import { For, Show } from "solid-js"
+import { Input } from "#ui/input/input/Input.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
 import { FilterChip } from "#ui/interactive/chip/FilterChip.jsx"
-import { Input } from "#ui/input/input/Input.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 import type { DashEventCategory } from "../../../model/dashEventCategorySchema.ts"
-import { dashEventCategoryLabel } from "../../events/model/dashEventListFilter.ts"
+import { DashDateTimeInput } from "../../../ui/form/DashDateTimeInput.tsx"
 import { DashField } from "../../../ui/layout/DashField.tsx"
 import { DashSection } from "../../../ui/layout/DashSection.tsx"
-import { DashDateTimeInput } from "../../../ui/form/DashDateTimeInput.tsx"
+import { dashEventCategoryLabel } from "../../events/model/dashEventListFilter.ts"
 import type { DashDetailsPageState } from "../dashDetailsPageStateCreate.ts"
 
 const categoryIcons: Record<DashEventCategory, string> = {
@@ -65,7 +65,7 @@ export function DashDetailsBasis(p: { state: DashDetailsPageState }) {
             maxLength={120}
             disabled={disabled()}
             aria-invalid={showErrors() && errors()?.title ? "true" : undefined}
-            class={classMerge("h-10 text-sm rounded-control", showErrors() && errors()?.title && "border-danger")}
+            class={cn("h-10 text-sm rounded-control", showErrors() && errors()?.title && "border-danger")}
             onInput={(event) => p.state.setDraft({ title: event.currentTarget.value })}
           />
         </DashField>
@@ -89,7 +89,7 @@ export function DashDetailsBasis(p: { state: DashDetailsPageState }) {
                   fallback={
                     <span
                       aria-current={draft()?.category === category ? "true" : undefined}
-                      class={classMerge(
+                      class={cn(
                         "inline-flex min-h-10 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium",
                         draft()?.category === category
                           ? "border-brand bg-brand-soft text-brand-accent"

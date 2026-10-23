@@ -1,12 +1,12 @@
 import { mdiChevronDown } from "@adaptive-ds/mdi/mdiChevronDown.js"
 import { mdiChevronUp } from "@adaptive-ds/mdi/mdiChevronUp.js"
 import { mdiUnfoldMoreHorizontal } from "@adaptive-ds/mdi/mdiUnfoldMoreHorizontal.js"
-import { For, Show, createMemo } from "solid-js"
+import { cn } from "cn"
 import type { JSX } from "solid-js"
-import { Button } from "#ui/interactive/button/Button.jsx"
+import { createMemo, For, Show } from "solid-js"
 import { Checkbox } from "#ui/input/check/Checkbox.jsx"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { DataTableBreakpoint, DataTableColumn, DataTableHideBelow } from "./DataTableColumn.ts"
 import { type DataTableSortDirection, dataTableSort } from "./dataTableSort.ts"
 import { dataTableStateCreate } from "./dataTableStateCreate.ts"
@@ -110,7 +110,7 @@ export function DataTable<T>(p: DataTableProps<T>) {
   const stopSelection = (event: Event) => event.stopPropagation()
 
   return (
-    <div class={classMerge("overflow-clip rounded-card border border-border-subtle bg-surface", p.class)}>
+    <div class={cn("overflow-clip rounded-card border border-border-subtle bg-surface", p.class)}>
       <Show when={selectable() && selectedCount() > 0}>
         <div
           class="sticky top-0 z-10 flex flex-wrap items-center gap-2 border-b border-border-subtle bg-surface-muted px-4 py-2"
@@ -126,12 +126,12 @@ export function DataTable<T>(p: DataTableProps<T>) {
           </Button>
         </div>
       </Show>
-      <div class={classMerge(desktopBreakpointClass[p.mobileBreakpoint ?? "md"])}>
+      <div class={cn(desktopBreakpointClass[p.mobileBreakpoint ?? "md"])}>
         <div class="overflow-x-auto">
           <table class="w-full text-sm" aria-label={p.ariaLabel}>
             <thead>
               <tr
-                class={classMerge(
+                class={cn(
                   "sticky border-b border-border-subtle bg-surface/95 backdrop-blur",
                   p.stickyHeaderClass ?? "top-0",
                 )}
@@ -152,7 +152,7 @@ export function DataTable<T>(p: DataTableProps<T>) {
                     <th
                       scope="col"
                       aria-sort={column.sortValue ? state.sortAria(column.id) : undefined}
-                      class={classMerge(
+                      class={cn(
                         "px-4 py-2 text-xs font-medium normal-case tracking-normal text-content-muted",
                         alignCellClass[column.align ?? "left"],
                         column.hideBelow ? hideBelowClass[column.hideBelow] : undefined,
@@ -167,7 +167,7 @@ export function DataTable<T>(p: DataTableProps<T>) {
                         <Button
                           variant="ghost"
                           size="sm"
-                          class={classMerge(
+                          class={cn(
                             "-ml-2 inline-flex items-center gap-1 px-2 py-1 text-xs font-medium normal-case tracking-normal text-content-muted",
                             (column.align ?? "left") === "right" && "flex-row-reverse",
                             (column.align ?? "left") === "center" && "mx-auto",
@@ -199,7 +199,7 @@ export function DataTable<T>(p: DataTableProps<T>) {
                 fallback={
                   <For each={Array.from({ length: p.skeletonRows ?? 6 }, (_, index) => index)}>
                     {() => (
-                      <tr class={classMerge("border-b border-border-subtle last:border-b-0", rowHeightClass())}>
+                      <tr class={cn("border-b border-border-subtle last:border-b-0", rowHeightClass())}>
                         <Show when={selectable()}>
                           <td class="px-4 py-2">
                             <div class="size-4 animate-pulse rounded bg-surface-muted" />
@@ -208,10 +208,7 @@ export function DataTable<T>(p: DataTableProps<T>) {
                         <For each={p.columns}>
                           {(column) => (
                             <td
-                              class={classMerge(
-                                "px-4 py-2",
-                                column.hideBelow ? hideBelowClass[column.hideBelow] : undefined,
-                              )}
+                              class={cn("px-4 py-2", column.hideBelow ? hideBelowClass[column.hideBelow] : undefined)}
                             >
                               <div class="h-4 animate-pulse rounded bg-surface-muted" />
                             </td>
@@ -257,7 +254,7 @@ export function DataTable<T>(p: DataTableProps<T>) {
                                 }
                               : undefined
                           }
-                          class={classMerge(
+                          class={cn(
                             "border-b border-border-subtle transition-colors last:border-b-0",
                             rowHeightClass(),
                             p.onRowClick &&
@@ -280,7 +277,7 @@ export function DataTable<T>(p: DataTableProps<T>) {
                           <For each={p.columns}>
                             {(column) => (
                               <td
-                                class={classMerge(
+                                class={cn(
                                   "px-4 py-2 align-middle text-content",
                                   alignCellClass[column.align ?? "left"],
                                   column.hideBelow ? hideBelowClass[column.hideBelow] : undefined,
@@ -302,7 +299,7 @@ export function DataTable<T>(p: DataTableProps<T>) {
           </table>
         </div>
       </div>
-      <div class={classMerge("w-full", mobileBreakpointClass[p.mobileBreakpoint ?? "md"])}>
+      <div class={cn("w-full", mobileBreakpointClass[p.mobileBreakpoint ?? "md"])}>
         <Show
           when={!p.loading}
           fallback={
@@ -325,7 +322,7 @@ export function DataTable<T>(p: DataTableProps<T>) {
               <For each={sortedRows()}>
                 {(row) => (
                   <li
-                    class={classMerge(
+                    class={cn(
                       "rounded-control border border-border-subtle bg-surface p-3",
                       p.onRowClick && "cursor-pointer active:bg-surface-muted",
                       isActive(row) && "border-brand ring-1 ring-brand",
@@ -362,7 +359,7 @@ function DataTableDefaultCard<T>(p: { readonly row: T; readonly columns: readonl
           {(column) => (
             <div class="flex items-baseline justify-between gap-3 text-sm">
               <dt class="shrink-0 text-xs text-content-muted">{column.header}</dt>
-              <dd class={classMerge("min-w-0 text-right text-content", column.cellClass)}>{column.cell(p.row)}</dd>
+              <dd class={cn("min-w-0 text-right text-content", column.cellClass)}>{column.cell(p.row)}</dd>
             </div>
           )}
         </For>

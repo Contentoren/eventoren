@@ -1,10 +1,10 @@
 import { mdiArrowDown } from "@adaptive-ds/mdi/mdiArrowDown.js"
 import { mdiArrowUp } from "@adaptive-ds/mdi/mdiArrowUp.js"
+import { cn } from "cn"
 import { ButtonIcon } from "#ui/interactive/button/ButtonIcon.jsx"
 import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
 import type { TableColumnDef } from "#ui/table/shared/TableColumnDef.js"
 import { type SortDir, sortDir } from "#ui/table/table2/sortDir.js"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 export interface Table2DSortButtonProps<T> {
   sortHeader: TableColumnDef<T>
@@ -17,7 +17,7 @@ export function Table2DSortButton<T>(p: Table2DSortButtonProps<T>) {
     <ButtonIcon
       variant={buttonVariant.ghost}
       onClick={() => p.onClick(p.sortHeader)}
-      class={classMerge("w-full justify-start py-2 pl-1 pr-3 rounded-sm", p.sortHeader.headerClass)}
+      class={cn("w-full justify-start py-2 pl-1 pr-3 rounded-sm", p.sortHeader.headerClass)}
       iconClass={"size-5"}
       // iconRight={sortIcon(h, prevHeader, sortDir)}
       title={p.sortHeader.title}

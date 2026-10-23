@@ -3,22 +3,21 @@ import { mdiCheckCircleOutline } from "@adaptive-ds/mdi/mdiCheckCircleOutline.js
 import { mdiCloseCircleOutline } from "@adaptive-ds/mdi/mdiCloseCircleOutline.js"
 import { mdiMinusCircleOutline } from "@adaptive-ds/mdi/mdiMinusCircleOutline.js"
 import Dialog from "@corvu/dialog"
+import { cn } from "cn"
 import { For, Show } from "solid-js"
+import { dashEventPublicPath } from "#src/dash/model/dashEventPublicPath.ts"
+import { dashEventPublicUrl } from "#src/dash/model/dashEventPublicUrl.ts"
+import { type DashEventPublishCheckItem, dashEventPublishCheck } from "#src/dash/model/dashEventPublishCheck.ts"
+import { dashEventPublish } from "#src/dash/store/actions/event/dashEventPublish.ts"
+import { dashEventByIdIn } from "#src/dash/store/dashEventByIdIn.ts"
+import { dashStateGet } from "#src/dash/store/dashStateGet.ts"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
 import { classesDialogContentMerge, classesDialogOverlayMerge } from "#ui/interactive/dialog/classesDialogContent.js"
 import { toastAdd } from "#ui/interactive/toast/toastAdd.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
-import { dashStateGet } from "#src/dash/store/dashStateGet.ts"
-import { dashEventByIdIn } from "#src/dash/store/dashEventByIdIn.ts"
-import { dashEventPublishCheck, type DashEventPublishCheckItem } from "#src/dash/model/dashEventPublishCheck.ts"
-import { dashEventPublicPath } from "#src/dash/model/dashEventPublicPath.ts"
-import { dashEventPublicUrl } from "#src/dash/model/dashEventPublicUrl.ts"
-import { dashEventPublish } from "#src/dash/store/actions/event/dashEventPublish.ts"
-
-import { dashEventPublishDialogStateCreate } from "./dashEventPublishDialogStateCreate.ts"
 import { DashEventPublishSuccess } from "./DashEventPublishSuccess.tsx"
+import { dashEventPublishDialogStateCreate } from "./dashEventPublishDialogStateCreate.ts"
 
 export interface DashEventPublishDialogProps {
   open: boolean
@@ -114,12 +113,12 @@ export function DashEventPublishDialog(p: DashEventPublishDialogProps) {
                       const icon = dashPublishItemIcon(item)
                       return (
                         <li
-                          class={classMerge(
+                          class={cn(
                             "flex items-center gap-2 rounded-control px-3 py-2 text-sm",
                             item.done || !item.required ? "bg-surface-muted" : "bg-danger-soft dark:bg-red-950/60",
                           )}
                         >
-                          <Icon path={icon.path} class={classMerge("size-4 shrink-0", icon.class)} />
+                          <Icon path={icon.path} class={cn("size-4 shrink-0", icon.class)} />
                           <span class="flex-1">{item.label}</span>
                           <Show when={!item.required && !item.done}>
                             <span class="text-xs text-content-muted">optional</span>

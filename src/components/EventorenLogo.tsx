@@ -1,12 +1,12 @@
+import { cn } from "cn"
 import { Show } from "solid-js"
 import { urlDocument } from "../app/assets/urlDocument.ts"
-import { classMerge } from "../ui/classMerge.ts"
 
 export function EventorenLogo(
   props: { readonly class?: string; readonly iconClass?: string; readonly iconOnly?: boolean } = {},
 ) {
   return (
-    <span class={classMerge("flex items-center gap-2", props.class)}>
+    <span class={cn("flex items-center gap-2", props.class)}>
       <img
         src={urlDocument("logo.svg")}
         alt=""

@@ -1,6 +1,6 @@
+import { cn } from "cn"
 import { Show } from "solid-js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { MayHaveChildren } from "#ui/utils/MayHaveChildren.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 
@@ -38,7 +38,7 @@ export function DotPill(p: DotPillProps) {
   const showDot = () => (p.dot ?? true) && !p.icon
   return (
     <span
-      class={classMerge(
+      class={cn(
         "inline-flex items-center gap-1.5 rounded-full font-medium whitespace-nowrap",
         (p.size ?? "md") === "sm" ? "px-2 py-0.5 text-xs" : "px-2.5 py-1 text-xs",
         toneClasses[p.tone],
@@ -50,13 +50,10 @@ export function DotPill(p: DotPillProps) {
         <span class="relative flex size-1.5">
           <Show when={p.pulse}>
             <span
-              class={classMerge(
-                "absolute inline-flex size-full animate-ping rounded-full opacity-60",
-                dotClasses[p.tone],
-              )}
+              class={cn("absolute inline-flex size-full animate-ping rounded-full opacity-60", dotClasses[p.tone])}
             />
           </Show>
-          <span class={classMerge("relative inline-flex size-1.5 rounded-full", dotClasses[p.tone])} />
+          <span class={cn("relative inline-flex size-1.5 rounded-full", dotClasses[p.tone])} />
         </span>
       </Show>
       {p.children}

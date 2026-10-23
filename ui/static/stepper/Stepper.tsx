@@ -1,8 +1,8 @@
 import { mdiCheck } from "@adaptive-ds/mdi/mdiCheck.js"
+import { cn } from "cn"
 import { For, Show } from "solid-js"
-import { stepperStateCreate } from "#ui/static/stepper/stepperStateCreate.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
+import { stepperStateCreate } from "#ui/static/stepper/stepperStateCreate.js"
 import type { MayHaveClass } from "#ui/utils/MayHaveClass.js"
 
 export type StepperOrientation = "horizontal" | "vertical"
@@ -46,7 +46,7 @@ export function Stepper(p: StepperProps) {
         </div>
       </Show>
       <ol
-        class={classMerge(
+        class={cn(
           orientation() === "horizontal" ? "hidden gap-1 sm:flex" : "flex flex-col gap-1",
           orientation() === "horizontal" && "items-start",
         )}
@@ -54,13 +54,13 @@ export function Stepper(p: StepperProps) {
         <For each={p.steps}>
           {(step, index) => (
             <li
-              class={classMerge(
+              class={cn(
                 "flex min-h-10",
                 orientation() === "horizontal" ? "flex-1 items-start gap-2" : "items-stretch gap-3",
               )}
             >
               <div
-                class={classMerge(
+                class={cn(
                   "flex",
                   orientation() === "horizontal" ? "flex-col items-center gap-1" : "flex-col items-center",
                 )}
@@ -70,7 +70,7 @@ export function Stepper(p: StepperProps) {
                     type="button"
                     onClick={() => p.onStepClick?.(index())}
                     aria-label={`${step.label} öffnen`}
-                    class={classMerge(state.dotClass(index()), "cursor-pointer")}
+                    class={cn(state.dotClass(index()), "cursor-pointer")}
                   >
                     <Show when={state.statusOf(index()) === "done"} fallback={<span>{index() + 1}</span>}>
                       <Icon path={mdiCheck} class="size-4" />
@@ -84,9 +84,7 @@ export function Stepper(p: StepperProps) {
                   </span>
                 )}
               </div>
-              <div
-                class={classMerge("min-w-0", orientation() === "horizontal" ? "pt-1 text-center sm:text-left" : "pb-4")}
-              >
+              <div class={cn("min-w-0", orientation() === "horizontal" ? "pt-1 text-center sm:text-left" : "pb-4")}>
                 <p class={state.labelClass(index())}>
                   <span class="sr-only">
                     {state.statusOf(index()) === "done"
@@ -102,7 +100,7 @@ export function Stepper(p: StepperProps) {
                 </Show>
               </div>
               <Show when={orientation() === "horizontal" && index() < state.total() - 1}>
-                <div aria-hidden="true" class={classMerge(state.connectorClass(index()), "mx-1 mt-4 min-w-4")} />
+                <div aria-hidden="true" class={cn(state.connectorClass(index()), "mx-1 mt-4 min-w-4")} />
               </Show>
             </li>
           )}

@@ -1,10 +1,10 @@
-import { For, Show } from "solid-js"
 import { mdiCheck } from "@adaptive-ds/mdi/mdiCheck.js"
+import { cn } from "cn"
+import { For, Show } from "solid-js"
+import { Textarea } from "#ui/input/textarea/Textarea.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { Sheet } from "#ui/interactive/sheet/Sheet.jsx"
-import { Textarea } from "#ui/input/textarea/Textarea.jsx"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 import { dashRoleLabel } from "../../../model/dashRoleLabel.ts"
 import type { DashRole } from "../../../model/dashRoleSchema.ts"
@@ -75,7 +75,7 @@ export function DashTeamInviteSheet(p: { open: boolean; onClose: () => void; sta
                     variant="outline"
                     aria-pressed={selected()}
                     onClick={() => p.state.role.set(role)}
-                    class={classMerge(
+                    class={cn(
                       "h-auto items-start justify-start p-3 text-left",
                       selected() && "border-ring ring-2 ring-brand/30",
                     )}

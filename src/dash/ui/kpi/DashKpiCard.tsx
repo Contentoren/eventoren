@@ -1,11 +1,11 @@
-import { Show } from "solid-js"
-import type { JSX } from "solid-js"
 import { mdiArrowTopRight } from "@adaptive-ds/mdi/mdiArrowTopRight.js"
 import { Link } from "@tanstack/solid-router"
+import { cn } from "cn"
+import type { JSX } from "solid-js"
+import { Show } from "solid-js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
 import { Skeleton } from "#ui/static/skeleton/Skeleton.jsx"
 import { StatCard } from "#ui/static/stat/StatCard.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import { dashKpiCardStateCreate } from "./dashKpiCardStateCreate.ts"
 
 export interface DashKpiCardProps {
@@ -37,7 +37,7 @@ export function DashKpiCard(p: DashKpiCardProps) {
       when={p.loading !== true}
       fallback={
         <div
-          class={classMerge(
+          class={cn(
             "flex h-full flex-col gap-1.5 rounded-card border border-border-subtle bg-surface p-4 sm:p-5",
             p.class,
           )}
@@ -72,7 +72,7 @@ export function DashKpiCard(p: DashKpiCardProps) {
             to={link().to}
             search={link().search}
             aria-label={`${p.label}: ${p.value}`}
-            class={classMerge(
+            class={cn(
               "group relative block h-full rounded-card outline-none transition-colors",
               "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
               p.class,

@@ -1,24 +1,24 @@
-import { Show, createSignal } from "solid-js"
 import { mdiFormatBold } from "@adaptive-ds/mdi/mdiFormatBold.js"
 import { mdiFormatHeader2 } from "@adaptive-ds/mdi/mdiFormatHeader2.js"
 import { mdiFormatItalic } from "@adaptive-ds/mdi/mdiFormatItalic.js"
 import { mdiFormatListBulleted } from "@adaptive-ds/mdi/mdiFormatListBulleted.js"
 import { mdiLinkVariant } from "@adaptive-ds/mdi/mdiLinkVariant.js"
-import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
-import { SegmentedControl } from "#ui/input/segmented/SegmentedControl.jsx"
-import { Textarea } from "#ui/input/textarea/Textarea.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
-import { createSignalObject } from "#ui/utils/createSignalObject.js"
+import { cn } from "cn"
+import { createSignal, Show } from "solid-js"
 import { DashMarkdown } from "#src/dash/ui/markdown/DashMarkdown.tsx"
 import {
+  type DashMarkdownEditResult,
+  type DashMarkdownEditSelection,
   dashMarkdownEditToggleHeading,
   dashMarkdownEditToggleList,
   dashMarkdownEditWrapBold,
   dashMarkdownEditWrapItalic,
   dashMarkdownEditWrapLink,
-  type DashMarkdownEditResult,
-  type DashMarkdownEditSelection,
 } from "#src/dash/ui/markdown/dashMarkdownEditApply.ts"
+import { SegmentedControl } from "#ui/input/segmented/SegmentedControl.jsx"
+import { Textarea } from "#ui/input/textarea/Textarea.jsx"
+import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
+import { createSignalObject } from "#ui/utils/createSignalObject.js"
 
 export function dashMarkdownEditorStateCreate(inputs: {
   value: () => string
@@ -157,7 +157,7 @@ export function DashMarkdownEditor(props: {
             rows={props.rows ?? 8}
             aria-invalid={props.invalid === true ? "true" : undefined}
             onInput={(event) => props.onChange(event.currentTarget.value)}
-            class={classMerge("h-10 text-sm rounded-control", props.invalid === true && "border-danger")}
+            class={cn("h-10 text-sm rounded-control", props.invalid === true && "border-danger")}
           />
         }
       >

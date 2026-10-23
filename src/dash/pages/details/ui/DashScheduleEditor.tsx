@@ -1,14 +1,14 @@
-import { For, Show } from "solid-js"
 import { mdiCalendarClockOutline } from "@adaptive-ds/mdi/mdiCalendarClockOutline.js"
 import { mdiDragVertical } from "@adaptive-ds/mdi/mdiDragVertical.js"
 import { mdiPlus } from "@adaptive-ds/mdi/mdiPlus.js"
 import { mdiTrashCanOutline } from "@adaptive-ds/mdi/mdiTrashCanOutline.js"
+import { cn } from "cn"
+import { For, Show } from "solid-js"
+import { Input } from "#ui/input/input/Input.jsx"
 import { Button } from "#ui/interactive/button/Button.jsx"
 import { ButtonIconOnly } from "#ui/interactive/button/ButtonIconOnly.jsx"
-import { Input } from "#ui/input/input/Input.jsx"
 import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 import type { DashScheduleItem } from "../../../model/dashScheduleItemSchema.ts"
 import { DashScheduleEditorStateCreate } from "./DashScheduleEditorStateCreate.ts"
@@ -61,7 +61,7 @@ export function DashScheduleEditor(p: {
       <For each={p.items}>
         {(item) => (
           <div
-            class={classMerge(
+            class={cn(
               "flex flex-wrap items-center gap-2 rounded-card border border-border-subtle bg-surface p-2",
               state.isDragging(item.id) && "opacity-50",
             )}

@@ -1,18 +1,18 @@
-import { For, Show } from "solid-js"
 import { mdiDragVertical } from "@adaptive-ds/mdi/mdiDragVertical.js"
 import { mdiEyeOffOutline } from "@adaptive-ds/mdi/mdiEyeOffOutline.js"
+import { cn } from "cn"
+import { For, Show } from "solid-js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
 import { ProgressBar } from "#ui/static/progress/ProgressBar.jsx"
-import { DashMoney } from "../../../ui/money/DashMoney.tsx"
 import { dashCentsFormat } from "../../../model/dashCentsFormat.ts"
 import { dashDateFormat } from "../../../model/dashDateFormat.ts"
-import { dashRelativeTimeFormat } from "../../../model/dashRelativeTimeFormat.ts"
+import type { DashOrder } from "../../../model/dashOrderSchema.ts"
 import { dashPhaseResolve } from "../../../model/dashPhaseResolve.ts"
+import { dashRelativeTimeFormat } from "../../../model/dashRelativeTimeFormat.ts"
+import type { DashTicket } from "../../../model/dashTicketSchema.ts"
 import { dashTicketTypeSales } from "../../../model/dashTicketTypeSales.ts"
 import type { DashTicketType } from "../../../model/dashTicketTypeSchema.ts"
-import type { DashOrder } from "../../../model/dashOrderSchema.ts"
-import type { DashTicket } from "../../../model/dashTicketSchema.ts"
-import { classMerge } from "#ui/utils/classMerge.js"
+import { DashMoney } from "../../../ui/money/DashMoney.tsx"
 
 function endsHintText(args: {
   endsReason: "datum" | "kontingent" | null
@@ -75,7 +75,7 @@ export function DashTicketCard(p: {
 
   return (
     <article
-      class={classMerge(
+      class={cn(
         "cursor-pointer rounded-card border border-border-subtle bg-surface p-4 transition-shadow hover:shadow-sm sm:p-5",
         p.isDragging && "opacity-50",
       )}
@@ -145,7 +145,7 @@ export function DashTicketCard(p: {
               <For each={p.ticketType.phases}>
                 {(phase, index) => (
                   <div
-                    class={classMerge(
+                    class={cn(
                       "min-w-0 flex-1 rounded-control px-2 py-1.5 text-center",
                       phaseState(phase.id, index()) === "aktiv" && "bg-brand-soft text-brand ring-1 ring-brand/30",
                       phaseState(phase.id, index()) === "beendet" && "bg-surface-muted text-content-muted line-through",

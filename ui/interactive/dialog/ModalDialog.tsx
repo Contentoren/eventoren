@@ -1,12 +1,12 @@
-import Dialog from "@corvu/dialog"
 import { mdiClose } from "@adaptive-ds/mdi/mdiClose.js"
+import Dialog from "@corvu/dialog"
+import { cn } from "cn"
 import type { JSX } from "solid-js"
 import { Show } from "solid-js"
-import { buttonVariant, buttonCvaIconOnly } from "#ui/interactive/button/buttonCva.js"
+import { buttonCvaIconOnly, buttonVariant } from "#ui/interactive/button/buttonCva.js"
 import { buttonIconCva } from "#ui/interactive/button/buttonIconCva.js"
-import { modalDialogStateCreate, type ModalDialogSize } from "#ui/interactive/dialog/modalDialogStateCreate.js"
+import { type ModalDialogSize, modalDialogStateCreate } from "#ui/interactive/dialog/modalDialogStateCreate.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 export interface ModalDialogProps {
   open: boolean
@@ -48,7 +48,7 @@ export function ModalDialog(p: ModalDialogProps) {
               </Show>
             </div>
             <Dialog.Close
-              class={classMerge(buttonCvaIconOnly(buttonVariant.ghost, false, false), "shrink-0")}
+              class={cn(buttonCvaIconOnly(buttonVariant.ghost, false, false), "shrink-0")}
               aria-label="Schließen"
               title="Schließen"
             >

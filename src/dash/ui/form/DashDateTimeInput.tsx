@@ -1,5 +1,5 @@
+import { cn } from "cn"
 import { createUniqueId, Show } from "solid-js"
-import { classMerge } from "#ui/utils/classMerge.js"
 import { adminEventReleaseDateTimeFromIso } from "#src/admin/adminEventReleaseDateTimeFromIso.ts"
 import { adminEventReleaseDateTimeToIso } from "#src/admin/adminEventReleaseDateTimeToIso.ts"
 import { dashDateTimeInputStateCreate } from "./dashDateTimeInputStateCreate.ts"
@@ -38,7 +38,7 @@ export function dashDateTimeInputStateCreateFromIso(inputs: {
 export type DashDateTimeInputState = ReturnType<typeof dashDateTimeInputStateCreateFromIso>
 
 const fieldClass = (invalid: boolean) =>
-  classMerge(
+  cn(
     "h-10 rounded-control border border-input bg-surface-muted px-3 text-sm text-content",
     "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
     invalid && "border-danger focus-visible:ring-danger",
@@ -83,7 +83,7 @@ export function DashDateTimeInput(props: {
           disabled={props.disabled}
           aria-invalid={invalid() ? "true" : undefined}
           onInput={(event) => fields.dateInput(event.currentTarget.value)}
-          class={classMerge(fieldClass(invalid()), "min-w-[9.5rem] flex-1")}
+          class={cn(fieldClass(invalid()), "min-w-[9.5rem] flex-1")}
         />
         <input
           type="time"
@@ -95,7 +95,7 @@ export function DashDateTimeInput(props: {
           disabled={props.disabled || !fields.dateValue()}
           aria-invalid={invalid() ? "true" : undefined}
           onInput={(event) => fields.timeInput(event.currentTarget.value)}
-          class={classMerge(fieldClass(invalid()), "w-[7rem]")}
+          class={cn(fieldClass(invalid()), "w-[7rem]")}
         />
       </div>
       <Show when={invalid()}>

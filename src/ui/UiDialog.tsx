@@ -1,6 +1,6 @@
+import { cn } from "cn"
 import { type JSX, Show } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
-import { classMerge } from "./classMerge.ts"
 import { uiDialogStateCreate } from "./uiDialogStateCreate.ts"
 
 const widthClass = {
@@ -30,7 +30,7 @@ export function UiDialog(props: {
         state.requestClose()
       }}
       onPointerDown={(event) => state.dismissOnBackdrop(event)}
-      class={classMerge(
+      class={cn(
         "m-auto w-[calc(100vw-2rem)] rounded-card border border-border-strong bg-surface p-0 text-content shadow-2xl shadow-black/60 backdrop:bg-black/70 backdrop:backdrop-blur-sm",
         widthClass[props.width ?? "md"],
       )}

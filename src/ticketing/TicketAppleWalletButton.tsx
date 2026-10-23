@@ -1,6 +1,6 @@
+import { cn } from "cn"
 import type { JSX } from "solid-js"
 import { UiButton } from "../ui/UiButton.tsx"
-import { classMerge } from "../ui/classMerge.ts"
 
 type TicketAppleWalletButtonProps = {
   onClick?: (event: MouseEvent) => void
@@ -22,7 +22,7 @@ export function TicketAppleWalletButton(props: TicketAppleWalletButtonProps) {
       title={props.title}
       id={props.id}
       aria-label={props["aria-label"] ?? "Zu Apple Wallet hinzufügen"}
-      class={classMerge(
+      class={cn(
         "bg-black text-white hover:bg-neutral-800 active:bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-2.5 text-sm font-medium tracking-tight shadow-sm transition-colors focus-ring disabled:cursor-not-allowed disabled:opacity-50",
         props.class,
       )}

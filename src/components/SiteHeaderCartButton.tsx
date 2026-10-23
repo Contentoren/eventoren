@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/solid-router"
+import { cn } from "cn"
 import { Show } from "solid-js"
-import { classMerge } from "../ui/classMerge.ts"
 
 export function SiteHeaderCartButton(props: {
   quantity: number
@@ -33,7 +33,7 @@ export function SiteHeaderCartButton(props: {
       </Show>
     </>
   )
-  const className = classMerge(
+  const className = cn(
     "focus-ring relative inline-flex h-10 items-center gap-2 rounded-control px-space-3 text-sm font-semibold text-content transition-colors hover:bg-surface-muted max-md:px-space-2",
     props.active && "bg-surface-muted",
     props.class,

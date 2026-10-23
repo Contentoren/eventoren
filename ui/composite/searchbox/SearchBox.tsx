@@ -1,11 +1,11 @@
 import { mdiCheck } from "@adaptive-ds/mdi/mdiCheck.js"
 import { mdiMagnify } from "@adaptive-ds/mdi/mdiMagnify.js"
 import { mdiUndo } from "@adaptive-ds/mdi/mdiUndo.js"
+import { cn } from "cn"
 import { createSignal, For, onCleanup, Show } from "solid-js"
 import { ButtonIcon } from "#ui/interactive/button/ButtonIcon.jsx"
 import { buttonVariant } from "#ui/interactive/button/buttonCva.js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 import type { SignalObject } from "#ui/utils/createSignalObject.js"
 
 export interface SearchFilterEntry {
@@ -183,7 +183,7 @@ function FilterDropdown(p: { filter: SearchFilterEntry; isActive: boolean; onSel
               role="option"
               aria-selected={isSelected(option)}
               onClick={() => p.onSelect(option)}
-              class={classMerge(
+              class={cn(
                 "flex w-full items-center justify-between border-t border-slate-100 dark:border-slate-800 px-4 py-2.5 text-left text-sm transition-colors",
                 isSelected(option)
                   ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100"

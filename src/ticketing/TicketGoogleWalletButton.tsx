@@ -1,6 +1,6 @@
+import { cn } from "cn"
 import type { JSX } from "solid-js"
 import { UiButton } from "../ui/UiButton.tsx"
-import { classMerge } from "../ui/classMerge.ts"
 
 type TicketGoogleWalletButtonProps = {
   onClick?: (event: MouseEvent) => void
@@ -22,7 +22,7 @@ export function TicketGoogleWalletButton(props: TicketGoogleWalletButtonProps) {
       title={props.title}
       id={props.id}
       aria-label={props["aria-label"] ?? "Zu Google Wallet hinzufügen"}
-      class={classMerge(
+      class={cn(
         "bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-950 border border-neutral-700 rounded-xl px-4 py-2.5 text-sm font-medium tracking-tight shadow-sm transition-colors focus-ring disabled:cursor-not-allowed disabled:opacity-50",
         props.class,
       )}

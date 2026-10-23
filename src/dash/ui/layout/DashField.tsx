@@ -1,10 +1,9 @@
-import { Show } from "solid-js"
-import type { JSX } from "solid-js"
-import { createUniqueId } from "solid-js"
 import { mdiAlertCircleOutline } from "@adaptive-ds/mdi/mdiAlertCircleOutline.js"
-import { Icon } from "#ui/static/icon/Icon.jsx"
+import { cn } from "cn"
+import type { JSX } from "solid-js"
+import { createUniqueId, Show } from "solid-js"
 import { InfoPopover } from "#ui/interactive/popover/InfoPopover.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 
 export interface DashFieldProps {
   label: string
@@ -24,7 +23,7 @@ export function DashField(p: DashFieldProps) {
   const describedBy = () => [p.hint ? hintId : null, p.error ? errorId : null].filter(Boolean).join(" ") || undefined
 
   return (
-    <div class={classMerge("flex flex-col gap-1.5", p.class)}>
+    <div class={cn("flex flex-col gap-1.5", p.class)}>
       <span class="flex items-center text-sm font-medium text-content">
         <label for={p.for}>
           {p.label}

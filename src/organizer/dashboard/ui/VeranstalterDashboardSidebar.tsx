@@ -3,12 +3,12 @@ import { mdiCogOutline } from "@adaptive-ds/mdi/mdiCogOutline.js"
 import { mdiDomainPlus } from "@adaptive-ds/mdi/mdiDomainPlus.js"
 import { mdiViewDashboardOutline } from "@adaptive-ds/mdi/mdiViewDashboardOutline.js"
 import { Link } from "@tanstack/solid-router"
+import { cn } from "cn"
 import { Show } from "solid-js"
 import { Icon } from "#ui/static/icon/Icon.jsx"
-import { classMerge } from "#ui/utils/classMerge.js"
 
 const itemClass = (active: boolean) =>
-  classMerge(
+  cn(
     "flex h-9 items-center gap-2.5 rounded-control px-2.5 text-sm transition-colors",
     active
       ? "bg-surface-muted font-medium text-content"
