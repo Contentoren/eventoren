@@ -1,8 +1,7 @@
 import { createFileRoute } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
-import { onMount, Show } from "solid-js"
+import { Show } from "solid-js"
 import { createResult } from "#result"
-import { posthogInit } from "#src/app/analytics/posthogInit.ts"
 import { envBaseUrlAppResult } from "#src/app/env/public/envBaseUrlAppResult.ts"
 import { envCheckoutBillingBypassEnabled } from "#src/app/env/public/envCheckoutBillingBypassEnabled.ts"
 import { envCheckoutFormBypassEnabled } from "#src/app/env/public/envCheckoutFormBypassEnabled.ts"
@@ -52,9 +51,6 @@ export const Route = createFileRoute("/checkout")({
 })
 
 function CheckoutPage() {
-  onMount(() => {
-    void posthogInit()
-  })
   const emailAccessState = ticketOrderEmailAccessPageStateCreate()
   const search = Route.useSearch()
   const loaderData = Route.useLoaderData()

@@ -33,7 +33,6 @@ import { ticketContactEmpty } from "./ticketContactEmpty.ts"
 import { ticketContactValidate } from "./ticketContactValidate.ts"
 import { ticketGuestAccessTokenCreate } from "./ticketGuestAccessTokenCreate.ts"
 import { ticketingServerRead } from "./ticketingServerRead.ts"
-import { posthogCapture } from "#src/app/analytics/posthogCapture.ts"
 import { ticketOrderAccessStorageUpsert } from "./ticketOrderAccessStorageUpsert.ts"
 import { ticketParticipantFieldKeyCreate } from "./ticketParticipantFieldKeyCreate.ts"
 import { ticketParticipantNamesAlign } from "./ticketParticipantNamesAlign.ts"
@@ -395,7 +394,6 @@ export function ticketCheckoutFormStateCreate(inputs: {
       await router.invalidate()
     } catch {
       errorMessage.set(text.catalogUnavailable)
-      void posthogCapture("checkout_failed", { stage: "catalog-refresh" })
       isSubmitting.set(false)
       return
     }
@@ -497,7 +495,6 @@ export function ticketCheckoutFormStateCreate(inputs: {
           } else {
             errorMessage.set(created.errorMessage)
           }
-          void posthogCapture("checkout_failed", { stage: "checkout-create", event: item.event.id })
           isSubmitting.set(false)
           return
         }
@@ -518,7 +515,6 @@ export function ticketCheckoutFormStateCreate(inputs: {
       }
     } catch (error) {
       errorMessage.set(error instanceof Error ? error.message : text.checkoutFailed)
-      void posthogCapture("checkout_failed", { stage: "checkout-unexpected" })
       isSubmitting.set(false)
       return
     }
