@@ -11,7 +11,7 @@ export function OrganizerContractLinks() {
         variant={buttonVariant.link}
         size="sm"
       >
-        Veranstalter-AGB lesen · {organizerContractDocuments.terms.revision}
+        Veranstaltervertrag, Preisblatt und Widerrufsbelehrung lesen
       </LinkButtonExternal>
       <LinkButtonExternal
         href={`/veranstalter-vertraege#${organizerContractDocuments.dpa.documentId}`}
@@ -19,8 +19,13 @@ export function OrganizerContractLinks() {
         variant={buttonVariant.link}
         size="sm"
       >
-        AVV lesen · {organizerContractDocuments.dpa.revision}
+        Auftragsverarbeitungsvertrag (AVV) einschließlich Anlagen lesen
       </LinkButtonExternal>
+      <p class="text-xs text-content-muted break-words">
+        Vertragsstand: {organizerContractDocuments.terms.revision}
+        <br />
+        AVV-Stand: {organizerContractDocuments.dpa.revision}. Beide Links öffnen einen neuen Tab.
+      </p>
     </div>
   )
 }

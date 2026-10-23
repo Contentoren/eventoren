@@ -2,6 +2,7 @@ import { organizerContractDocuments } from "#src/organizer/dashboard/contracts/o
 /// <reference types="vite/client" />
 
 import { convexTest } from "convex-test"
+import { organizerContractPartyConsentFixture } from "../test/organizerContractPartyConsent.fixture.ts"
 import { expect, test } from "vitest"
 import * as v from "valibot"
 import { api } from "../convex/_generated/api.js"
@@ -203,6 +204,7 @@ test("creates an organization with linked core org, config, and inhaber membersh
     termsRevision: organizerContractDocuments.terms.revision,
     dpaRevision: organizerContractDocuments.dpa.revision,
     termsAccepted: true,
+    ...organizerContractPartyConsentFixture,
     dpaAccepted: true,
   })
   expect(created.success).toBe(true)
@@ -227,7 +229,7 @@ test("creates an organization with linked core org, config, and inhaber membersh
     profile: { name: "Neue Org", slug: "neue-org", kind: "verein" },
     bank: { iban: validIban, holder: "Neue Org e.V." },
     tax: { status: "regel", defaultRateBps: 1900 },
-    fee: { percentBps: 0, fixedCents: 0, payer: "kaeufer" },
+    fee: { percentBps: 390, fixedCents: 49, payer: "kaeufer" },
     configurationConfirmed: false,
   })
   expect(typeof linked.config?.contracts.termsAcceptedAt).toBe("string")
@@ -250,6 +252,7 @@ test("rejects creation without terms, with duplicate slug, or with invalid IBAN 
     termsRevision: organizerContractDocuments.terms.revision,
     dpaRevision: organizerContractDocuments.dpa.revision,
     termsAccepted: true,
+    ...organizerContractPartyConsentFixture,
     dpaAccepted: true,
   } as const
   const noTerms = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationCreateMutation, {

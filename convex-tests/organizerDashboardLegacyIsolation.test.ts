@@ -2,6 +2,7 @@ import { organizerContractDocuments } from "#src/organizer/dashboard/contracts/o
 /// <reference types="vite/client" />
 
 import { convexTest } from "convex-test"
+import { organizerContractPartyConsentFixture } from "../test/organizerContractPartyConsent.fixture.ts"
 import { expect, test } from "vitest"
 import { api } from "../convex/_generated/api.js"
 import type { Doc, Id } from "../convex/_generated/dataModel.js"
@@ -155,6 +156,7 @@ async function orgCreate(
     termsRevision: organizerContractDocuments.terms.revision,
     dpaRevision: organizerContractDocuments.dpa.revision,
     termsAccepted: true,
+    ...organizerContractPartyConsentFixture,
     dpaAccepted: true,
   })
   if (!created.success) throw new Error(created.errorMessage)

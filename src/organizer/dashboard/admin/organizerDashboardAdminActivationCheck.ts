@@ -1,4 +1,5 @@
 import { organizerContractsCurrentCheck } from "../contracts/organizerContractsCurrentCheck.ts"
+import { organizerConsumerActivationAvailableAt } from "../contracts/organizerConsumerActivationAvailableAt.ts"
 import { createResult, createResultError, type Result } from "#result"
 import type { Doc } from "#convex/_generated/dataModel.js"
 import { organizerDashboardIbanValidate } from "#src/organizer/dashboard/model/organizerDashboardIbanValidate.ts"
@@ -26,6 +27,23 @@ export function organizerDashboardAdminActivationCheck(organization: DashboardOr
   if (!organization.configurationConfirmed) {
     return createResultError(op, "Activation requires admin-confirmed tax and fee configuration")
   }
+  const { party, acceptedFee, authorityConfirmed, earlyServiceStartRequested, termsConsentedAt, dpaConsentedAt } =
+    organization.contracts
+  if (!party || !acceptedFee || authorityConfirmed !== true || earlyServiceStartRequested === undefined)
+    return createResultError(op, "Activation requires current party and pricing acceptance evidence")
+  if (
+    acceptedFee.percentBps !== organization.fee.percentBps ||
+    acceptedFee.fixedCents !== organization.fee.fixedCents ||
+    acceptedFee.payer !== organization.fee.payer
+  )
+    return createResultError(op, "Activation requires fees matching the accepted contract")
+  if (
+    party.customerType === "consumer" &&
+    !earlyServiceStartRequested &&
+    Date.now() <
+      organizerConsumerActivationAvailableAt(termsConsentedAt! > dpaConsentedAt! ? termsConsentedAt! : dpaConsentedAt!)
+  )
+    return createResultError(op, "Die Freischaltung ist erst nach Ablauf der 14-tägigen Widerrufsfrist möglich.")
   if (!organizerDashboardPricingIsReady(organization)) {
     return createResultError(op, "Activation is blocked while ticket prices are being updated")
   }

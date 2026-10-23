@@ -130,6 +130,10 @@ export type OrganizerDashboardHttpBackend = {
     readonly dpaRevision: string
     readonly termsAccepted: boolean
     readonly dpaAccepted: boolean
+    readonly contractParty: import("../contracts/organizerContractPartySchema.ts").OrganizerContractParty
+    readonly authorityConfirmed: boolean
+    readonly earlyServiceStartRequested: boolean
+    readonly feePayer: "kaeufer" | "veranstalter"
   }) => Promise<Result<unknown>>
   readonly organizationUpdate: (args: {
     readonly token: string
@@ -148,6 +152,10 @@ export type OrganizerDashboardHttpBackend = {
     readonly orgId: string
     readonly termsAccepted: true
     readonly dpaAccepted: true
+    readonly contractParty: import("../contracts/organizerContractPartySchema.ts").OrganizerContractParty
+    readonly authorityConfirmed: true
+    readonly earlyServiceStartRequested: boolean
+    readonly feePayer: "kaeufer" | "veranstalter"
     readonly termsRevision: string
     readonly dpaRevision: string
   }) => Promise<Result<unknown>>
@@ -859,6 +867,10 @@ export function organizerDashboardConvexBackendCreate(client: ConvexHttpClient):
         dpaRevision: args.dpaRevision,
         termsAccepted: args.termsAccepted,
         dpaAccepted: args.dpaAccepted,
+        contractParty: args.contractParty,
+        authorityConfirmed: args.authorityConfirmed,
+        earlyServiceStartRequested: args.earlyServiceStartRequested,
+        feePayer: args.feePayer,
       }),
     organizationUpdate: (args) =>
       client.mutation(api.organizerDashboard.organizerDashboardOrganizationUpdateMutation, {
@@ -879,6 +891,10 @@ export function organizerDashboardConvexBackendCreate(client: ConvexHttpClient):
       }),
     contractsAccept: (args) =>
       client.mutation(api.organizerDashboard.organizerContractsAcceptMutation, {
+        contractParty: args.contractParty,
+        authorityConfirmed: args.authorityConfirmed,
+        earlyServiceStartRequested: args.earlyServiceStartRequested,
+        feePayer: args.feePayer,
         token: args.token,
         orgId: args.orgId as Id<"orgs">,
         termsAccepted: args.termsAccepted,

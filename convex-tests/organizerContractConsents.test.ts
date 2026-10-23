@@ -1,16 +1,23 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
+import { organizerContractPartyConsentFixture } from "../test/organizerContractPartyConsent.fixture.ts"
 import { expect, test } from "vitest"
-import { api } from "../convex/_generated/api.js"
+import { api, internal } from "../convex/_generated/api.js"
 import schema from "../convex/schema.js"
 import { organizerContractDocuments } from "../src/organizer/dashboard/contracts/organizerContractDocuments.ts"
 import { organizerContractsCurrentCheck } from "../src/organizer/dashboard/contracts/organizerContractsCurrentCheck.ts"
 import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
+import type { ConvexHttpClient } from "convex/browser"
+import { organizerDashboardConvexBackendCreate } from "../src/organizer/dashboard/api/organizerDashboardConvexBackendCreate.ts"
+import { organizerDashboardHonoCreate } from "../src/organizer/dashboard/api/organizerDashboardHonoCreate.ts"
+import { organizerDashboardCliRun } from "../src/cli/organizerDashboardCliRun.ts"
+import { organizerDashboardClientCreate } from "../src/client/organizerDashboardClientCreate.ts"
 
 const modules = import.meta.glob("../convex/**/*.ts")
 const secret = "organizer-consent-evidence-test-secret"
 const old = "2020-01-01T00:00:00.000Z"
 const consent = {
+  ...organizerContractPartyConsentFixture,
   termsAccepted: true,
   dpaAccepted: true,
   termsRevision: organizerContractDocuments.terms.revision,
@@ -82,7 +89,7 @@ async function setup(legacy = false) {
         .unique(),
     )
   const accept = () => t.mutation(api.organizerDashboard.organizerContractsAcceptMutation, { token, orgId, ...consent })
-  return { t, userId, orgId, evidenceRead, organizationRead, accept }
+  return { t, token, userId, orgId, evidenceRead, organizationRead, accept }
 }
 
 test("organization creation freezes both documents in exactly one attributed UTC evidence row", async () => {
@@ -97,6 +104,10 @@ test("organization creation freezes both documents in exactly one attributed UTC
     termsRevision: consent.termsRevision,
     dpaRevision: consent.dpaRevision,
     acceptedByUserId: userId,
+    party: consent.contractParty,
+    acceptedFee: { percentBps: 390, fixedCents: 49, payer: consent.feePayer },
+    authorityConfirmed: true,
+    earlyServiceStartRequested: false,
   })
   expect(row.acceptedAt).toBe(new Date(row.acceptedAt).toISOString())
   for (const key of ["terms", "dpa"] as const) {
@@ -147,9 +158,11 @@ test("idempotent current acceptance preserves row count, accepting actor, time a
         .collect(),
     )
   const auditBefore = await audits()
+  const deliveriesBefore = await t.run((ctx) => ctx.db.query("organizerDashboardContractDeliveries").collect())
   expect((await accept()).success).toBe(true)
   expect(await evidenceRead()).toEqual(before)
   expect(await audits()).toEqual(auditBefore)
+  expect(await t.run((ctx) => ctx.db.query("organizerDashboardContractDeliveries").collect())).toEqual(deliveriesBefore)
 })
 
 test("new acceptance retains old snapshots and digests unchanged while advancing the current pointer", async () => {
@@ -223,4 +236,167 @@ test("creation and explicit acceptance audit only revision IDs, never document t
       for (const [, body] of document.sections) expect(rows[0]?.note).not.toContain(body)
     }
   }
+})
+
+test("party identity, representative and email cannot be swapped even after the accepted revision becomes stale", async () => {
+  const { t, token, orgId, organizationRead, evidenceRead } = await setup()
+  const org = (await organizationRead())!
+  await t.run((ctx) =>
+    ctx.db.patch("organizerDashboardOrganizations", org._id, {
+      contracts: { ...org.contracts, termsRevision: "stale" },
+    }),
+  )
+  const before = await organizationRead()
+  const evidence = await evidenceRead()
+  for (const change of [
+    { legalName: "Another Party" },
+    { representativeName: "Other Representative" },
+    { email: "other@example.org" },
+  ]) {
+    const result = await t.mutation(api.organizerDashboard.organizerContractsAcceptMutation, {
+      token,
+      orgId,
+      ...consent,
+      contractParty: { ...consent.contractParty, ...change },
+    })
+    expect(result.success).toBe(false)
+    expect(await organizationRead()).toEqual(before)
+    expect(await evidenceRead()).toEqual(evidence)
+  }
+})
+
+test("fee payer reacceptance appends evidence without changing prior party or fee snapshots", async () => {
+  const { t, token, orgId, organizationRead, evidenceRead } = await setup()
+  const before = (await evidenceRead())[0]!
+  const result = await t.mutation(api.organizerDashboard.organizerContractsAcceptMutation, {
+    token,
+    orgId,
+    ...consent,
+    feePayer: "veranstalter",
+  })
+  expect(result.success).toBe(true)
+  const rows = await evidenceRead()
+  expect(rows).toHaveLength(2)
+  expect(rows.find((row) => row._id === before._id)).toEqual(before)
+  expect((await organizationRead())?.contracts.acceptedFee).toEqual({
+    percentBps: 390,
+    fixedCents: 49,
+    payer: "veranstalter",
+  })
+})
+
+test("admin cannot change any accepted fee field and failed attempts have no writes or pricing jobs", async () => {
+  const { t, orgId, organizationRead, evidenceRead } = await setup()
+  const adminId = await t.run((ctx) =>
+    ctx.db.insert("users", { name: "Contract Admin", role: "admin", createdAt: old, updatedAt: old }),
+  )
+  const token = await testAuthSessionTokenCreate(t, adminId, secret)
+  const transport = { mutation: t.mutation, query: t.query } as unknown as ConvexHttpClient
+  const backend = organizerDashboardConvexBackendCreate(transport)
+  const app = organizerDashboardHonoCreate(backend)
+  const client = organizerDashboardClientCreate({ client: transport, token })
+  const before = await organizationRead()
+  const evidence = await evidenceRead()
+  for (const fee of [
+    { percentBps: 391, fixedCents: 49, payer: "kaeufer" },
+    { percentBps: 390, fixedCents: 50, payer: "kaeufer" },
+    { percentBps: 390, fixedCents: 49, payer: "veranstalter" },
+  ]) {
+    const result = await t.mutation(api.organizerDashboardAdmin.organizerDashboardAdminConfigureMutation, {
+      token,
+      orgId,
+      tax: { status: "regel", defaultRateBps: 1900 },
+      fee,
+    })
+    expect(result.success).toBe(false)
+    const input = { orgId, tax: { status: "regel", defaultRateBps: 1900 }, fee }
+    const http = await app.request("/api/veranstalter", {
+      method: "POST",
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+      body: JSON.stringify({ operation: "admin-configure", ...input }),
+    })
+    expect(http.ok).toBe(false)
+    expect(await http.text()).toContain("Gebühren")
+    const lines: string[] = []
+    expect(
+      await organizerDashboardCliRun({
+        argv: ["admin-configure", "--url", "https://convex.example.org", "--token-env", "ADMIN_TOKEN"],
+        env: { ADMIN_TOKEN: token },
+        stdinText: JSON.stringify(input),
+        stdout: (text) => lines.push(text),
+        backendFromUrl: () => backend,
+      }),
+    ).not.toBe(0)
+    expect(lines.join("")).toContain("Gebühren")
+    const sdk = await client.adminConfigure(input as Parameters<typeof client.adminConfigure>[0])
+    expect(sdk.success).toBe(false)
+    if (!sdk.success) expect(sdk.error.message).toContain("Gebühren")
+    expect(await organizationRead()).toEqual(before)
+    expect(await evidenceRead()).toEqual(evidence)
+  }
+  expect(await t.run((ctx) => ctx.db.query("organizerDashboardPricingJobs").take(1))).toEqual([])
+  expect(
+    (
+      await t.mutation(api.organizerDashboardAdmin.organizerDashboardAdminConfigureMutation, {
+        token,
+        orgId,
+        tax: { status: "regel", defaultRateBps: 1900 },
+        fee: before!.fee,
+      })
+    ).success,
+  ).toBe(true)
+})
+
+test("mail failure remains private and persisted, leases recover crashes and retries stop at five attempts", async () => {
+  const { t, evidenceRead } = await setup()
+  const evidence = await evidenceRead()
+  const delivery = await t.run((ctx) => ctx.db.query("organizerDashboardContractDeliveries").unique())
+  expect(delivery).toMatchObject({ evidenceId: evidence[0]!._id, status: "pending", attempts: 0 })
+  const deliveryId = delivery!._id
+  const claim = () =>
+    t.mutation(internal.organizerContractDelivery.organizerContractDeliveryClaimInternalMutation, { deliveryId })
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    await t.run((ctx) => ctx.db.patch("organizerDashboardContractDeliveries", deliveryId, { nextAttemptAt: 0 }))
+    const claimed = await claim()
+    expect(claimed?.attempts).toBe(attempt)
+    expect(claimed?.evidence).toEqual(evidence[0])
+    expect(await claim()).toBe(null) // competing worker cannot use the lease
+    if (attempt === 1) continue // action crash: next lease recovers without a result callback
+    await t.mutation(internal.organizerContractDelivery.organizerContractDeliveryUpdateInternalMutation, {
+      deliveryId,
+      attempts: attempt,
+      sent: false,
+    })
+  }
+  expect(await claim()).toBe(null)
+  expect(await t.run((ctx) => ctx.db.get("organizerDashboardContractDeliveries", deliveryId))).toMatchObject({
+    status: "failed",
+    attempts: 5,
+    lastError: "SMTP delivery failed",
+  })
+  expect(await evidenceRead()).toEqual(evidence)
+})
+
+test("successful mail receipt is terminal and old callbacks cannot change delivery status", async () => {
+  const { t } = await setup()
+  const delivery = await t.run((ctx) => ctx.db.query("organizerDashboardContractDeliveries").unique())
+  const deliveryId = delivery!._id
+  await t.mutation(internal.organizerContractDelivery.organizerContractDeliveryClaimInternalMutation, { deliveryId })
+  await t.mutation(internal.organizerContractDelivery.organizerContractDeliveryUpdateInternalMutation, {
+    deliveryId,
+    attempts: 1,
+    sent: true,
+  })
+  await t.mutation(internal.organizerContractDelivery.organizerContractDeliveryUpdateInternalMutation, {
+    deliveryId,
+    attempts: 1,
+    sent: false,
+  })
+  expect(
+    await t.mutation(internal.organizerContractDelivery.organizerContractDeliveryClaimInternalMutation, { deliveryId }),
+  ).toBe(null)
+  expect(await t.run((ctx) => ctx.db.get("organizerDashboardContractDeliveries", deliveryId))).toMatchObject({
+    status: "sent",
+    attempts: 1,
+  })
 })

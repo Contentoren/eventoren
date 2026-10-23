@@ -1,4 +1,5 @@
 import { organizerContractsCurrentCheck } from "../../../contracts/organizerContractsCurrentCheck.ts"
+import type { OrganizerContractParty } from "../../../contracts/organizerContractPartySchema.ts"
 import { v as convexV } from "convex/values"
 import { query } from "#convex/_generated/server.js"
 import { createResult, type PromiseResult } from "#result"
@@ -33,6 +34,10 @@ export const organizerDashboardOrganizationGetQuery = query({
     fee: { percentBps: number; fixedCents: number; payer: string } | null
     tax: { status: string; defaultRateBps: number } | null
     contracts: {
+      party?: OrganizerContractParty
+      acceptedFee?: { percentBps: number; fixedCents: number; payer: "kaeufer" | "veranstalter" }
+      authorityConfirmed?: boolean
+      earlyServiceStartRequested?: boolean
       termsAccepted: boolean
       dpaAccepted: boolean
       current: boolean
@@ -58,7 +63,14 @@ export const organizerDashboardOrganizationGetQuery = query({
         fee: moneyVisible ? { ...organization.fee } : null,
         tax: moneyVisible ? { ...organization.tax } : null,
         contracts: {
-          current: organizerContractsCurrentCheck(organization.contracts),
+          party: organization.contracts.party,
+          acceptedFee: organization.contracts.acceptedFee,
+          authorityConfirmed: organization.contracts.authorityConfirmed,
+          earlyServiceStartRequested: organization.contracts.earlyServiceStartRequested,
+          current:
+            organizerContractsCurrentCheck(organization.contracts) &&
+            !!organization.contracts.party &&
+            !!organization.contracts.acceptedFee,
           termsRevision: organization.contracts.termsRevision,
           dpaRevision: organization.contracts.dpaRevision,
           termsConsentedAt: organization.contracts.termsConsentedAt,

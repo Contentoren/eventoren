@@ -2,6 +2,7 @@ import { organizerContractDocuments } from "#src/organizer/dashboard/contracts/o
 /// <reference types="vite/client" />
 
 import { convexTest } from "convex-test"
+import { organizerContractPartyConsentFixture } from "../test/organizerContractPartyConsent.fixture.ts"
 import { expect, test } from "vitest"
 import * as v from "valibot"
 import { api } from "../convex/_generated/api.js"
@@ -309,6 +310,7 @@ test("approves only with bank, contracts, and confirmed config, then context sho
     termsRevision: organizerContractDocuments.terms.revision,
     dpaRevision: organizerContractDocuments.dpa.revision,
     termsAccepted: true,
+    ...organizerContractPartyConsentFixture,
     dpaAccepted: true,
   })
   expect(created.success).toBe(true)
@@ -325,7 +327,7 @@ test("approves only with bank, contracts, and confirmed config, then context sho
     token: adminToken,
     orgId,
     tax: { status: "klein", defaultRateBps: 700 },
-    fee: { percentBps: 250, fixedCents: 99, payer: "veranstalter" },
+    fee: { percentBps: 390, fixedCents: 49, payer: "kaeufer" },
   })
   expect(configured.success).toBe(true)
 
@@ -359,7 +361,7 @@ test("approves only with bank, contracts, and confirmed config, then context sho
   expect(stored?.configurationConfirmed).toBe(true)
   expect(typeof stored?.configuredAt).toBe("string")
   expect(stored?.tax).toMatchObject({ status: "klein", defaultRateBps: 700 })
-  expect(stored?.fee).toMatchObject({ percentBps: 250, fixedCents: 99, payer: "veranstalter" })
+  expect(stored?.fee).toMatchObject({ percentBps: 390, fixedCents: 49, payer: "kaeufer" })
 
   const context = await t.query(api.organizerDashboard.organizerDashboardContextQuery, {
     token: ownerToken,

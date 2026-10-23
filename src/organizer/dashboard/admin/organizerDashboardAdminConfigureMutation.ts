@@ -37,19 +37,23 @@ export const organizerDashboardAdminConfigureMutation = mutation({
         .withIndex("orgId", (q) => q.eq("orgId", orgId))
         .unique()
       if (!organization) return createResultError(op, "Bitte schließe zuerst das Veranstalter-Onboarding ab.")
+      const acceptedFee = organization.contracts.acceptedFee
+      if (
+        acceptedFee &&
+        (acceptedFee.percentBps !== parsed.output.fee.percentBps ||
+          acceptedFee.fixedCents !== parsed.output.fee.fixedCents ||
+          acceptedFee.payer !== parsed.output.fee.payer)
+      )
+        return createResultError(
+          op,
+          "Die Gebühren müssen dem angenommenen Veranstaltervertrag einschließlich Preisblatt entsprechen.",
+        )
       const now = new Date().toISOString()
       const feeChanged =
         organization.fee.percentBps !== parsed.output.fee.percentBps ||
         organization.fee.fixedCents !== parsed.output.fee.fixedCents ||
         organization.fee.payer !== parsed.output.fee.payer
       const wasConfirmed = organization.configurationConfirmed
-      await mutationCtx.db.patch("organizerDashboardOrganizations", organization._id, {
-        tax: { ...parsed.output.tax },
-        fee: { ...parsed.output.fee },
-        configurationConfirmed: true,
-        configuredAt: now,
-        updatedAt: now,
-      })
       if (feeChanged || !wasConfirmed) {
         const requested = await organizerDashboardPricingRequestFn(mutationCtx, {
           orgId,
@@ -58,6 +62,13 @@ export const organizerDashboardAdminConfigureMutation = mutation({
         })
         if (!requested.success) return requested
       }
+      await mutationCtx.db.patch("organizerDashboardOrganizations", organization._id, {
+        tax: { ...parsed.output.tax },
+        fee: { ...parsed.output.fee },
+        configurationConfirmed: true,
+        configuredAt: now,
+        updatedAt: now,
+      })
       await organizerDashboardAuditWrite(mutationCtx, {
         orgId,
         actorUserId: userId,

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test"
+import { organizerContractPartyConsentFixture } from "../../../../test/organizerContractPartyConsent.fixture.ts"
 import type { ConvexHttpClient } from "convex/browser"
 import { createResult, createResultError, type Result } from "#result"
 import { organizerDashboardCliRun } from "#src/cli/organizerDashboardCliRun.ts"
@@ -15,10 +16,22 @@ const validAcceptBody = {
   operation: "contracts-accept",
   orgId: "org_test",
   termsAccepted: true,
+  ...organizerContractPartyConsentFixture,
   dpaAccepted: true,
   termsRevision: organizerContractDocuments.terms.revision,
   dpaRevision: organizerContractDocuments.dpa.revision,
 }
+
+const invalidConsents = [
+  ...["contractParty", "authorityConfirmed", "earlyServiceStartRequested", "feePayer"].map((key) =>
+    Object.fromEntries(Object.entries(validAcceptBody).filter(([field]) => field !== key)),
+  ),
+  { ...validAcceptBody, authorityConfirmed: false },
+  { ...validAcceptBody, contractParty: { ...validAcceptBody.contractParty, legalName: " " } },
+  { ...validAcceptBody, contractParty: { ...validAcceptBody.contractParty, representativeName: " " } },
+  { ...validAcceptBody, termsRevision: "eventoren-veranstaltervertrag-2099-v99" },
+  { ...validAcceptBody, dpaRevision: "unknown-dpa-v99" },
+]
 
 async function postAccept(
   app: ReturnType<typeof organizerDashboardHonoCreate>,
@@ -39,6 +52,12 @@ function errorOf(json: Record<string, unknown>): Record<string, unknown> {
 }
 
 describe("contracts-accept HTTP parity", () => {
+  test("party, authority, explicit choices and known revisions are mandatory before HTTP dispatch", async () => {
+    const { backend, calls } = organizerDashboardMockBackendCreate()
+    const app = organizerDashboardHonoCreate(backend)
+    for (const body of invalidConsents) expect((await postAccept(app, body)).status).toBe(400)
+    expect(calls).toEqual([])
+  })
   test("accepted request forwards token, orgId, exact revisions and true flags", async () => {
     const { backend, calls } = organizerDashboardMockBackendCreate()
     const { status, json, text } = await postAccept(organizerDashboardHonoCreate(backend), validAcceptBody)
@@ -52,6 +71,7 @@ describe("contracts-accept HTTP parity", () => {
           token: credential,
           orgId: "org_test",
           termsAccepted: true,
+          ...organizerContractPartyConsentFixture,
           dpaAccepted: true,
           termsRevision: organizerContractDocuments.terms.revision,
           dpaRevision: organizerContractDocuments.dpa.revision,
@@ -66,6 +86,7 @@ describe("contracts-accept HTTP parity", () => {
       operation: "contracts-accept",
       orgId: "org_test",
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
       dpaRevision: organizerContractDocuments.dpa.revision,
     })
@@ -176,6 +197,7 @@ describe("contracts-accept HTTP parity", () => {
       slug: "kulturhaus-lindenhof",
       kind: "verein",
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
     })
     expect(status).toBe(400)
@@ -185,6 +207,22 @@ describe("contracts-accept HTTP parity", () => {
 })
 
 describe("contracts-accept CLI parity", () => {
+  test("party, authority, explicit choices and known revisions are mandatory before CLI dispatch", async () => {
+    const { backend, calls } = organizerDashboardMockBackendCreate()
+    for (const body of invalidConsents) {
+      const { operation: _, ...input } = body
+      expect(
+        await organizerDashboardCliRun({
+          argv: ["contracts-accept", "--url", "https://convex.example.org", "--token-env", "DASH_CRED"],
+          env: { DASH_CRED: credential },
+          stdinText: JSON.stringify(input),
+          stdout: () => {},
+          backendFromUrl: () => backend,
+        }),
+      ).toBe(2)
+    }
+    expect(calls).toEqual([])
+  })
   test("CLI forwards the same args as the HTTP surface", async () => {
     const httpMocks = organizerDashboardMockBackendCreate()
     await postAccept(organizerDashboardHonoCreate(httpMocks.backend), validAcceptBody)
@@ -197,6 +235,7 @@ describe("contracts-accept CLI parity", () => {
       stdinText: JSON.stringify({
         orgId: "org_test",
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: true,
         termsRevision: organizerContractDocuments.terms.revision,
         dpaRevision: organizerContractDocuments.dpa.revision,
@@ -218,6 +257,7 @@ describe("contracts-accept CLI parity", () => {
       stdinText: JSON.stringify({
         orgId: "org_test",
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: true,
         termsRevision: staleRevision,
         dpaRevision: organizerContractDocuments.dpa.revision,
@@ -239,6 +279,7 @@ describe("contracts-accept CLI parity", () => {
       stdinText: JSON.stringify({
         orgId: "org_test",
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: false,
         termsRevision: organizerContractDocuments.terms.revision,
         dpaRevision: organizerContractDocuments.dpa.revision,
@@ -258,6 +299,7 @@ describe("contracts-accept CLI parity", () => {
       stdinText: JSON.stringify({
         orgId: "org_test",
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: true,
         termsRevision: organizerContractDocuments.terms.revision,
         dpaRevision: organizerContractDocuments.dpa.revision,
@@ -273,6 +315,23 @@ describe("contracts-accept CLI parity", () => {
 })
 
 describe("contracts-accept TS client", () => {
+  test("party, authority, explicit choices and known revisions are mandatory before client transport", async () => {
+    const seen: unknown[] = []
+    const fakeClient = {
+      mutation: async (...args: unknown[]) => {
+        seen.push(args)
+        return createResult({})
+      },
+    } as unknown as ConvexHttpClient
+    const client = organizerDashboardClientCreate({ client: fakeClient, token: credential })
+    for (const body of invalidConsents) {
+      const { operation: _, ...input } = body
+      const result = await client.contractsAccept(input as never)
+      expect(result.success).toBe(false)
+      if (!result.success) expect(result.error.status).toBe(400)
+    }
+    expect(seen).toEqual([])
+  })
   test("contractsAccept forwards the token plus the validated consent fields", async () => {
     const seen: unknown[] = []
     const fakeClient = {
@@ -286,6 +345,7 @@ describe("contracts-accept TS client", () => {
     const result = await client.contractsAccept({
       orgId: "org_test",
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
       termsRevision: organizerContractDocuments.terms.revision,
       dpaRevision: organizerContractDocuments.dpa.revision,
@@ -297,6 +357,7 @@ describe("contracts-accept TS client", () => {
         token: credential,
         orgId: "org_test",
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: true,
         termsRevision: organizerContractDocuments.terms.revision,
         dpaRevision: organizerContractDocuments.dpa.revision,
@@ -320,6 +381,7 @@ describe("contracts-accept TS client", () => {
     const result = await client.contractsAccept({
       orgId: "org_test",
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
       termsRevision: staleRevision,
       dpaRevision: organizerContractDocuments.dpa.revision,
@@ -370,6 +432,7 @@ describe("contracts-accept TS client", () => {
     const result = await client.contractsAccept({
       orgId: "org_test",
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
       termsRevision: organizerContractDocuments.terms.revision,
       dpaRevision: organizerContractDocuments.dpa.revision,
@@ -389,6 +452,7 @@ describe("contracts-accept TS client", () => {
     const result = await client.contractsAccept({
       orgId: "org_test",
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
       termsRevision: organizerContractDocuments.terms.revision,
       dpaRevision: organizerContractDocuments.dpa.revision,
@@ -413,6 +477,7 @@ describe("contracts-accept TS client", () => {
       termsRevision: organizerContractDocuments.terms.revision,
       dpaRevision: organizerContractDocuments.dpa.revision,
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
     })
     expect(result.success).toBe(true)
@@ -424,6 +489,7 @@ describe("contracts-accept TS client", () => {
         termsRevision: organizerContractDocuments.terms.revision,
         dpaRevision: organizerContractDocuments.dpa.revision,
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: true,
         token: credential,
       },

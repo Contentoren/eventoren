@@ -12,13 +12,13 @@ export function ContactFaqList(props: {
       id: "faq-1",
       question: "Wie schnell kann ich mein Event auf Eventoren veröffentlichen?",
       answer:
-        "Nach deiner Kontaktaufnahme erstellen wir deinen Veranstalter-Account in der Regel innerhalb von 24 Stunden. Du kannst sofort Ticketkategorien anlegen, Kontingente steuern und den Vorverkauf starten.",
+        "Registriere dich im Veranstalter-Onboarding. Vor dem Verkaufsstart prüfen wir Vertragspartner, Bank- und Steuerangaben sowie die Zahlungsanbindung. Bei privaten Veranstaltern berücksichtigen wir zusätzlich das Widerrufsrecht. Der Verkauf startet erst nach Freischaltung.",
     },
     {
       id: "faq-2",
       question: "Welche Gebühren fallen für Veranstalter an?",
       answer:
-        "Das Erstellen und Verwalten von Events ist komplett kostenfrei (0 € Grundgebühr). Es fällt lediglich eine geringe transaktionsbasierte Servicegebühr pro verkauftem Ticket an, die transparent im Vorfeld vereinbart wird.",
+        "Der Standardtarif beträgt 3,9 % des Brutto-Ticketpreises plus 0,49 € je verkauftem kostenpflichtigem Ticket, inklusive Umsatzsteuer und regulärer Zahlungsabwicklung. Keine Grundgebühr, kein Mindestumsatz; kostenlose Tickets sind gebührenfrei. Du entscheidest beim Vertragsabschluss, ob Käufer die Gebühr im Gesamtpreis tragen oder sie von deinem Umsatz abgezogen wird.",
     },
     {
       id: "faq-3",
@@ -35,7 +35,7 @@ export function ContactFaqList(props: {
       id: "faq-5",
       question: "Gibt es eine Mindestvertragslaufzeit oder Mindestmengen?",
       answer:
-        "Nein. Du kannst Eventoren für ein einzelnes Club-Event, eine Tournee oder wiederkehrende Festivals nutzen. Es gibt keine Vertragsbindung oder Mindestmengen.",
+        "Es gibt keine Mindestlaufzeit und keine Mindestmengen. Den Veranstalter-Rahmenvertrag kannst du jederzeit für künftige Verkäufe kündigen; bestehende Ticketverträge, Erstattungen und Abrechnungen werden geordnet abgewickelt.",
     },
   ]
 

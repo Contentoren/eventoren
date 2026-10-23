@@ -246,6 +246,10 @@ export function organizerDashboardBackendDispatchRequest(
         dpaRevision: args.dpaRevision,
         termsAccepted: args.termsAccepted,
         dpaAccepted: args.dpaAccepted,
+        contractParty: args.contractParty,
+        authorityConfirmed: args.authorityConfirmed,
+        earlyServiceStartRequested: args.earlyServiceStartRequested,
+        feePayer: args.feePayer,
       })
     }
     case "update": {
@@ -272,6 +276,10 @@ export function organizerDashboardBackendDispatchRequest(
         dpaAccepted: request.args.dpaAccepted,
         termsRevision: request.args.termsRevision,
         dpaRevision: request.args.dpaRevision,
+        contractParty: request.args.contractParty,
+        authorityConfirmed: request.args.authorityConfirmed,
+        earlyServiceStartRequested: request.args.earlyServiceStartRequested,
+        feePayer: request.args.feePayer,
       })
     case "event-list": {
       const args = request.args

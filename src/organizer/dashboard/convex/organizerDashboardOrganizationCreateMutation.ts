@@ -7,9 +7,12 @@ import { organizerDashboardOrganizationCreateSchema } from "#src/organizer/dashb
 import { authMutationTokenToUserId } from "#src/utils/convex_backend/authMutationTokenToUserId.ts"
 import { organizerDashboardAuditWrite } from "../admin/organizerDashboardAuditWrite.ts"
 import { organizerContractConsentEvidenceCreate } from "../contracts/organizerContractConsentEvidenceCreate.ts"
+import { organizerContractConsentTransportFields } from "../contracts/organizerContractConsentTransportFields.ts"
+import { organizerStandardPricing } from "../contracts/organizerStandardPricing.ts"
 
 export const organizerDashboardOrganizationCreateMutation = mutation({
   args: {
+    ...organizerContractConsentTransportFields,
     token: convexV.string(),
     name: convexV.string(),
     slug: convexV.string(),
@@ -53,6 +56,10 @@ export const organizerDashboardOrganizationCreateMutation = mutation({
         dpaRevision: fields.dpaRevision,
         termsAccepted: fields.termsAccepted,
         dpaAccepted: fields.dpaAccepted,
+        contractParty: fields.contractParty,
+        authorityConfirmed: fields.authorityConfirmed,
+        earlyServiceStartRequested: fields.earlyServiceStartRequested,
+        feePayer: fields.feePayer,
       })
       if (!parsed.success) return createResultError(op, v.summarize(parsed.issues))
       const user = await mutationCtx.db.get("users", userId)
@@ -68,6 +75,12 @@ export const organizerDashboardOrganizationCreateMutation = mutation({
         .unique()
       if (slugTakenByConfig) return createResultError(op, "Diese Kurzadresse ist bereits vergeben.")
       const now = new Date().toISOString()
+      const snapshot = {
+        party: parsed.output.contractParty,
+        acceptedFee: { ...organizerStandardPricing, payer: parsed.output.feePayer },
+        authorityConfirmed: parsed.output.authorityConfirmed,
+        earlyServiceStartRequested: parsed.output.earlyServiceStartRequested,
+      }
       const orgId = await mutationCtx.db.insert("orgs", {
         orgHandle: parsed.output.slug,
         name: parsed.output.name,
@@ -91,13 +104,17 @@ export const organizerDashboardOrganizationCreateMutation = mutation({
           name: parsed.output.name,
           slug: parsed.output.slug,
           kind: parsed.output.kind,
-          ...(parsed.output.contact !== undefined ? { contact: { ...parsed.output.contact } } : {}),
+          contact: {
+            ...parsed.output.contact,
+            email: parsed.output.contact?.email ?? parsed.output.contractParty.email,
+          },
           ...(parsed.output.imprint !== undefined ? { imprint: parsed.output.imprint } : {}),
         },
         ...(parsed.output.bank !== undefined ? { bank: { ...parsed.output.bank } } : {}),
         tax: { status: "regel", defaultRateBps: 1900 },
-        fee: { percentBps: 0, fixedCents: 0, payer: "kaeufer" },
+        fee: snapshot.acceptedFee,
         contracts: {
+          ...snapshot,
           termsAcceptedAt: now,
           dpaAcceptedAt: now,
           termsRevision: parsed.output.termsRevision,
@@ -110,7 +127,12 @@ export const organizerDashboardOrganizationCreateMutation = mutation({
         createdAt: now,
         updatedAt: now,
       })
-      await organizerContractConsentEvidenceCreate(mutationCtx, { orgId, acceptedAt: now, acceptedByUserId: userId })
+      await organizerContractConsentEvidenceCreate(mutationCtx, {
+        orgId,
+        acceptedAt: now,
+        acceptedByUserId: userId,
+        ...snapshot,
+      })
       await organizerDashboardAuditWrite(mutationCtx, {
         orgId,
         actorUserId: userId,

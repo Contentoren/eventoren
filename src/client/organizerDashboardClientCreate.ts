@@ -2319,6 +2319,10 @@ export function organizerDashboardClientCreate(inputs: {
           dpaAccepted: validated.output.dpaAccepted,
           termsRevision: validated.output.termsRevision,
           dpaRevision: validated.output.dpaRevision,
+          contractParty: validated.output.contractParty,
+          authorityConfirmed: validated.output.authorityConfirmed,
+          earlyServiceStartRequested: validated.output.earlyServiceStartRequested,
+          feePayer: validated.output.feePayer,
         })
         if (response.success) return { success: true, data: response.data }
         return { success: false, error: backendFailure(response) }
@@ -2786,6 +2790,7 @@ export function organizerDashboardClientCreate(inputs: {
 }
 
 const organizerDashboardClientOrganizationCreateSchema = v.strictObject({
+  ...organizerContractConsentSchema.entries,
   name: organizerDashboardOrganizationCreateSchema.entries.name,
   slug: organizerDashboardOrganizationCreateSchema.entries.slug,
   kind: organizerDashboardOrganizationKindSchema,

@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 import { convexTest } from "convex-test"
-import { expect, test } from "vitest"
+import { organizerContractPartyConsentFixture } from "../test/organizerContractPartyConsent.fixture.ts"
+import { expect, test, vi } from "vitest"
 import { api } from "../convex/_generated/api.js"
 import schema from "../convex/schema.js"
 import { testAuthSessionTokenCreate } from "./testAuthSessionTokenCreate.ts"
@@ -10,6 +11,7 @@ import { organizerDashboardAdminActivationCheck } from "../src/organizer/dashboa
 const modules = import.meta.glob("../convex/**/*.ts")
 const secret = "organizer-contract-test-secret"
 const consent = {
+  ...organizerContractPartyConsentFixture,
   termsAccepted: true,
   dpaAccepted: true,
   termsRevision: organizerContractDocuments.terms.revision,
@@ -34,6 +36,9 @@ test("onboarding rejects false, stale, missing and buyer revisions before creati
     { dpaAccepted: false },
     { termsRevision: "buyer-agb" },
     { dpaRevision: "old-avv" },
+    { authorityConfirmed: false },
+    { contractParty: { ...consent.contractParty, legalName: "  " } },
+    { contractParty: { ...consent.contractParty, representativeName: "" } },
   ]) {
     const result = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationCreateMutation, {
       ...base,
@@ -45,7 +50,70 @@ test("onboarding rejects false, stale, missing and buyer revisions before creati
   await expect(
     t.mutation(api.organizerDashboard.organizerDashboardOrganizationCreateMutation, missing as typeof base),
   ).rejects.toThrow()
+  for (const key of ["contractParty", "authorityConfirmed", "earlyServiceStartRequested", "feePayer"] as const) {
+    const { [key]: _value, ...incomplete } = base
+    await expect(
+      t.mutation(api.organizerDashboard.organizerDashboardOrganizationCreateMutation, incomplete as typeof base),
+    ).rejects.toThrow()
+  }
   expect(await t.run((ctx) => ctx.db.query("orgs").take(1))).toEqual([])
+})
+
+test("consumer activation checks both current documents, mandatory snapshots, accepted pricing and the Berlin end-of-period boundary", async () => {
+  const { t, token } = await setup()
+  const created = await t.mutation(api.organizerDashboard.organizerDashboardOrganizationCreateMutation, {
+    token,
+    name: "Consumer",
+    slug: "consumer",
+    kind: "privat",
+    ...consent,
+  })
+  expect(created.success).toBe(true)
+  if (!created.success) return
+  const row = await t.run((ctx) =>
+    ctx.db
+      .query("organizerDashboardOrganizations")
+      .withIndex("orgId", (q) => q.eq("orgId", created.data.orgId))
+      .unique(),
+  )
+  const org = {
+    ...row!,
+    bank: { iban: "DE89370400440532013000", holder: "Consumer" },
+    configurationConfirmed: true,
+    contracts: {
+      ...row!.contracts,
+      party: { ...consent.contractParty, customerType: "consumer" as const },
+      termsConsentedAt: "2026-10-10T10:00:00.000Z",
+      dpaConsentedAt: "2026-10-11T10:00:00.000Z",
+    },
+  }
+  const clock = vi.spyOn(Date, "now")
+  try {
+    clock.mockReturnValue(Date.parse("2026-10-26T22:59:59.999Z"))
+    expect(organizerDashboardAdminActivationCheck(org).success).toBe(false)
+    expect(
+      organizerDashboardAdminActivationCheck({
+        ...org,
+        contracts: { ...org.contracts, earlyServiceStartRequested: true },
+      }).success,
+    ).toBe(true)
+    clock.mockReturnValue(Date.parse("2026-10-26T23:00:00.000Z"))
+    expect(organizerDashboardAdminActivationCheck(org).success).toBe(true)
+    for (const missing of ["party", "acceptedFee", "authorityConfirmed", "earlyServiceStartRequested"] as const) {
+      expect(
+        organizerDashboardAdminActivationCheck({ ...org, contracts: { ...org.contracts, [missing]: undefined } })
+          .success,
+      ).toBe(false)
+    }
+    expect(organizerDashboardAdminActivationCheck({ ...org, fee: { ...org.fee, fixedCents: 50 } }).success).toBe(false)
+    for (const revision of ["termsRevision", "dpaRevision"] as const)
+      expect(
+        organizerDashboardAdminActivationCheck({ ...org, contracts: { ...org.contracts, [revision]: "unknown-v99" } })
+          .success,
+      ).toBe(false)
+  } finally {
+    clock.mockRestore()
+  }
 })
 
 test("creation records exact revisions, server UTC times and accepting actor", async () => {
@@ -136,7 +204,9 @@ test("legacy timestamps do not authorize activation; explicit owner acceptance p
   expect(accepted?.contracts.termsAcceptedAt).toBe(old)
   expect(accepted?.contracts.dpaAcceptedAt).toBe(old)
   expect(accepted?.contracts.termsConsentedAt).not.toBe(old)
-  expect(accepted && organizerDashboardAdminActivationCheck(accepted).success).toBe(true)
+  expect(accepted?.configurationConfirmed).toBe(false)
+  expect(accepted?.fee).toEqual({ percentBps: 390, fixedCents: 49, payer: "kaeufer" })
+  expect(accepted && organizerDashboardAdminActivationCheck(accepted).success).toBe(false)
   expect(
     (await t.mutation(api.organizerDashboard.organizerContractsAcceptMutation, { token, orgId, ...consent })).success,
   ).toBe(true)

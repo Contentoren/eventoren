@@ -78,6 +78,7 @@ const organizerDashboardContextRequestSchema = v.strictObject({
 })
 
 const organizerDashboardCreateRequestSchema = v.strictObject({
+  ...organizerContractConsentSchema.entries,
   operation: v.literal("create"),
   name: organizerDashboardOrganizationCreateSchema.entries.name,
   slug: organizerDashboardOrganizationCreateSchema.entries.slug,
@@ -118,6 +119,7 @@ const organizerDashboardOrganizationGetRequestSchema = v.strictObject({
  * stale revision is a 400 and never reaches the backend.
  */
 const organizerDashboardContractsAcceptRequestSchema = v.strictObject({
+  ...organizerContractConsentSchema.entries,
   operation: v.literal("contracts-accept"),
   orgId: organizerDashboardRequestOrgIdSchema,
   termsAccepted: organizerContractConsentSchema.entries.termsAccepted,
@@ -1531,6 +1533,10 @@ function organizerDashboardOrganizationNestedCreate(output: {
   readonly dpaRevision: string
   readonly termsAccepted: true
   readonly dpaAccepted: true
+  readonly contractParty: v.InferOutput<typeof organizerContractConsentSchema>["contractParty"]
+  readonly authorityConfirmed: true
+  readonly earlyServiceStartRequested: boolean
+  readonly feePayer: "kaeufer" | "veranstalter"
 }): unknown {
   return {
     name: output.name,
@@ -1557,6 +1563,10 @@ function organizerDashboardOrganizationNestedCreate(output: {
     dpaRevision: output.dpaRevision,
     termsAccepted: output.termsAccepted,
     dpaAccepted: output.dpaAccepted,
+    contractParty: output.contractParty,
+    authorityConfirmed: output.authorityConfirmed,
+    earlyServiceStartRequested: output.earlyServiceStartRequested,
+    feePayer: output.feePayer,
   }
 }
 

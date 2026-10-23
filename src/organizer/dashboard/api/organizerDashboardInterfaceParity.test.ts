@@ -1,5 +1,6 @@
 import { organizerContractDocuments } from "#src/organizer/dashboard/contracts/organizerContractDocuments.ts"
 import { describe, expect, test } from "bun:test"
+import { organizerContractPartyConsentFixture } from "../../../../test/organizerContractPartyConsent.fixture.ts"
 import type { ConvexHttpClient } from "convex/browser"
 import { createResult, createResultError, createResultErrorCode, type Result } from "#result"
 import { organizerDashboardCliRun } from "#src/cli/organizerDashboardCliRun.ts"
@@ -21,6 +22,7 @@ const validCreateBody = {
   termsRevision: organizerContractDocuments.terms.revision,
   dpaRevision: organizerContractDocuments.dpa.revision,
   termsAccepted: true,
+  ...organizerContractPartyConsentFixture,
   dpaAccepted: true,
 }
 
@@ -77,6 +79,7 @@ describe("organizer dashboard HTTP operations", () => {
           termsRevision: organizerContractDocuments.terms.revision,
           dpaRevision: organizerContractDocuments.dpa.revision,
           termsAccepted: true,
+          ...organizerContractPartyConsentFixture,
           dpaAccepted: true,
         },
       },
@@ -257,6 +260,7 @@ describe("organizer dashboard CLI and HTTP schema parity", () => {
         termsRevision: organizerContractDocuments.terms.revision,
         dpaRevision: organizerContractDocuments.dpa.revision,
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: true,
       }),
       stdout: (text) => lines.push(text),
@@ -386,6 +390,7 @@ describe("organizer dashboard TS client", () => {
       termsRevision: organizerContractDocuments.terms.revision,
       dpaRevision: organizerContractDocuments.dpa.revision,
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
     })
     expect(result.success).toBe(true)
@@ -398,6 +403,7 @@ describe("organizer dashboard TS client", () => {
         termsRevision: organizerContractDocuments.terms.revision,
         dpaRevision: organizerContractDocuments.dpa.revision,
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: true,
         token: credential,
       },
@@ -481,6 +487,7 @@ describe("organizer dashboard TS client", () => {
       termsRevision: organizerContractDocuments.terms.revision,
       dpaRevision: organizerContractDocuments.dpa.revision,
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
     } as never)
     expect(result.success).toBe(false)
@@ -679,6 +686,7 @@ describe("organizer dashboard CLI hardening", () => {
         termsRevision: organizerContractDocuments.terms.revision,
         dpaRevision: organizerContractDocuments.dpa.revision,
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: true,
       }),
       stdout: (text) => lines.push(text),
@@ -833,6 +841,7 @@ describe("organizer dashboard extended operation parity", () => {
       operation: "contracts-accept",
       orgId: "org_test",
       termsAccepted: true,
+      ...organizerContractPartyConsentFixture,
       dpaAccepted: true,
       termsRevision: organizerContractDocuments.terms.revision,
       dpaRevision: organizerContractDocuments.dpa.revision,
@@ -950,6 +959,7 @@ describe("organizer dashboard extended operation parity", () => {
         token: credential,
         orgId: "org_test",
         termsAccepted: true,
+        ...organizerContractPartyConsentFixture,
         dpaAccepted: true,
         termsRevision: organizerContractDocuments.terms.revision,
         dpaRevision: organizerContractDocuments.dpa.revision,

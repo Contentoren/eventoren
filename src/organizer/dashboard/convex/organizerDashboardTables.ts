@@ -1,4 +1,5 @@
 import { defineTable } from "convex/server"
+import { organizerContractSnapshotFields } from "../contracts/organizerContractSnapshotFields.ts"
 import { v } from "convex/values"
 import { vIdOrg } from "#src/org/org_convex/vIdOrg.ts"
 import { valibotFieldToConvexValidator, valibotToConvex } from "#src/utils/convex/valibotToConvex.ts"
@@ -35,6 +36,7 @@ export const organizerDashboardTables = {
     tax: valibotFieldToConvexValidator(organizerDashboardOrganizationTaxSchema),
     fee: valibotFieldToConvexValidator(organizerDashboardOrganizationFeeSchema),
     contracts: v.object({
+      ...organizerContractSnapshotFields,
       termsRevision: v.optional(v.string()),
       dpaRevision: v.optional(v.string()),
       termsConsentedAt: v.optional(v.string()),
