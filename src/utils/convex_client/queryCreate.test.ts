@@ -74,17 +74,19 @@ describe("queryCreate", () => {
     firstCallback(firstResult)
     expect(result?.()).toBe(firstResult)
 
+    // A token refetch with identical args (session refresh on tab focus)
+    // resubscribes without dropping the last visible value.
     setToken("validated-2")
     await Promise.resolve()
     expect(client.calls).toHaveLength(2)
-    expect(result?.()).toBeUndefined()
+    expect(result?.()).toBe(firstResult)
     expect(client.calls[1]?.args).toEqual({ filter: "first", token: "validated-2" })
     expect(client.calls[0]?.unsubscribed).toBe(true)
     firstCallback(createResult("stale"))
-    expect(result?.()).toBeUndefined()
+    expect(result?.()).toBe(firstResult)
     dispose()
     expect(client.calls[1]?.unsubscribed).toBe(true)
-    expect(result?.()).toBeUndefined()
+    expect(result?.()).toBe(firstResult)
   })
 
   test("clears on logout, skips undefined args, and resubscribes after re-authentication", () => {

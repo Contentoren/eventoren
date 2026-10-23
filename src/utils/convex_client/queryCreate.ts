@@ -23,22 +23,13 @@ export function queryCreate<Query extends FunctionReference<"query">>(
   let subscriptionId = 0
   const getArgs: Accessor<TokenQueryArgs<Query> | undefined> =
     typeof args === "function" ? (args as Accessor<TokenQueryArgs<Query> | undefined>) : () => args
+  let lastArgsKey: string | undefined
+  let lastToken: string | null | undefined
 
-  createRenderEffect(() => {
-    const token = auth.token()
-    const isReady = auth.ready()
-    const queryArgs = getArgs()
-    const currentSubscriptionId = ++subscriptionId
-    setResult(undefined)
-    if (!isReady || !token || queryArgs === undefined) return
-    if (!client) {
-      setResult(createResultError(op, "No Convex client"))
-      return
-    }
-
+  const subscribe = (currentSubscriptionId: number, queryArgs: TokenQueryArgs<Query>, token: string): void => {
     let unsubscribe: () => void = () => undefined
     try {
-      unsubscribe = client.onUpdate(
+      unsubscribe = client!.onUpdate(
         query,
         { ...queryArgs, token } as FunctionArgs<Query>,
         (nextResult) => {
@@ -58,6 +49,35 @@ export function queryCreate<Query extends FunctionReference<"query">>(
       if (currentSubscriptionId === subscriptionId) subscriptionId += 1
       unsubscribe()
     })
+  }
+
+  createRenderEffect(() => {
+    const token = auth.token()
+    const isReady = auth.ready()
+    const queryArgs = getArgs()
+    const argsKey = queryArgs === undefined ? undefined : JSON.stringify(queryArgs)
+    const sameArgs = lastArgsKey !== undefined && argsKey !== undefined && lastArgsKey === argsKey
+    // A session refetch (e.g. on tab focus) yields a new token string while
+    // the underlying session is unchanged. Resubscribing with that token
+    // keeps the visible data; clearing it would flicker every subscriber
+    // (and unmount stateful pages) on each focus event.
+    const refetchOnly =
+      sameArgs && lastToken !== undefined && token !== lastToken && token !== null && isReady && client !== undefined
+    lastArgsKey = argsKey
+    lastToken = token
+    if (refetchOnly && queryArgs !== undefined) {
+      subscribe(++subscriptionId, queryArgs, token!)
+      return
+    }
+    const currentSubscriptionId = ++subscriptionId
+    setResult(undefined)
+    if (!isReady || !token || queryArgs === undefined) return
+    if (!client) {
+      setResult(createResultError(op, "No Convex client"))
+      return
+    }
+
+    subscribe(currentSubscriptionId, queryArgs, token)
   })
 
   return result
