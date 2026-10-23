@@ -4,7 +4,21 @@ import { e2eStripeTestClientCreate } from "./e2eStripeTestClientCreate.ts"
 
 type Proof = { paymentReference: string; orderReference: string; status: string; paymentStatus: string }
 
-/** Reconcile only the saved order/session; never search by email or delete payment history. */
+/**
+ * Reconcile only the saved order/session; never search by email or delete payment history.
+ *
+ * Billing reuses one Stripe customer per email, so a reused customer's creation
+ * metadata keeps the FIRST run's event/payment/order refs. The linked customer
+ * therefore requires only the stable triple (source/organization/test-mode)
+ * plus the exact linked ID and TEST live-mode linkage. The saved session keeps
+ * full six-field ownership and every other session must be provably historical.
+ * Subscriptions/intents/invoices must be current-owned or provably historical
+ * (stable triple plus nonempty event/payment/order refs with BOTH refs different
+ * from current; no timestamp comparison because concurrent/later runs are valid).
+ * Unknown/missing metadata or a partial ref collision fails before mutation.
+ * Historical subscriptions are left untouched; charges map to validated intents
+ * with the same customer and are never deleted.
+ */
 export async function e2eStripeTicketReconcile(input: {
   checkpoint: E2eCheckpoint
   organizationId: string
@@ -48,6 +62,8 @@ export async function e2eStripeTicketReconcile(input: {
   }
   if (!proof.success || !proof.data?.paymentReference || !proof.data.orderReference)
     return createResultError(op, "App order correlation could not be verified; checkpoint retained")
+  const paymentReference = proof.data.paymentReference
+  const orderReference = proof.data.orderReference
   const stripe = input.stripe ?? e2eStripeTestClientCreate(input.key)
   const account = await stripe.account()
   if (!account.success || account.data !== input.accountId)
@@ -58,8 +74,22 @@ export async function e2eStripeTicketReconcile(input: {
     metadata.event_key === ticket.eventKey &&
     metadata.organization_id === organizationId &&
     metadata.stripe_mode === "test" &&
-    metadata.payment_reference === proof.data!.paymentReference &&
-    metadata.order_reference === proof.data!.orderReference
+    metadata.payment_reference === paymentReference &&
+    metadata.order_reference === orderReference
+  const stable = (metadata: Record<string, string>) =>
+    metadata.source === "eventoren_ticket" &&
+    metadata.organization_id === organizationId &&
+    metadata.stripe_mode === "test"
+  const historical = (metadata: Record<string, string>) =>
+    stable(metadata) &&
+    typeof metadata.event_key === "string" &&
+    metadata.event_key.length > 0 &&
+    typeof metadata.payment_reference === "string" &&
+    metadata.payment_reference.length > 0 &&
+    typeof metadata.order_reference === "string" &&
+    metadata.order_reference.length > 0 &&
+    metadata.payment_reference !== paymentReference &&
+    metadata.order_reference !== orderReference
   const sessionId = ticket.stripeSession
   const session = await stripe.get("session", `checkout/sessions/${encodeURIComponent(sessionId)}`)
   if (!session.success || session.data.id !== sessionId || !owned(session.data.metadata) || !session.data.customer)
@@ -71,14 +101,21 @@ export async function e2eStripeTicketReconcile(input: {
     return createResultError(op, "Unexpected checkout mode or status")
   const customerId = session.data.customer
   const customer = await stripe.get("customer", `customers/${encodeURIComponent(customerId)}`)
-  if (!customer.success || customer.data.id !== customerId || customer.data.deleted || !owned(customer.data.metadata))
+  if (!customer.success || customer.data.id !== customerId || customer.data.deleted || !stable(customer.data.metadata))
     return createResultError(op, "Customer ownership cannot be proven")
   const sessions = await stripe.list("session", `checkout/sessions?customer=${encodeURIComponent(customerId)}`)
+  if (!sessions.success)
+    return createResultError(op, "Customer is shared or checkout discovery is incomplete; no mutation")
+  const savedSessions = sessions.data.filter(
+    (entry) => entry.id === sessionId && entry.customer === customerId && owned(entry.metadata),
+  )
+  if (savedSessions.length !== 1)
+    return createResultError(op, "Customer is shared or checkout discovery is incomplete; no mutation")
   if (
-    !sessions.success ||
-    sessions.data.length !== 1 ||
-    sessions.data[0]?.id !== sessionId ||
-    !owned(sessions.data[0].metadata)
+    sessions.data.some((entry) => {
+      if (entry.id === sessionId) return entry.customer !== customerId || !owned(entry.metadata)
+      return entry.customer !== customerId || !historical(entry.metadata)
+    })
   )
     return createResultError(op, "Customer is shared or checkout discovery is incomplete; no mutation")
   const subscriptions = await stripe.list(
@@ -88,21 +125,36 @@ export async function e2eStripeTicketReconcile(input: {
   const intents = await stripe.list("paymentIntent", `payment_intents?customer=${encodeURIComponent(customerId)}`)
   const invoices = await stripe.list("invoice", `invoices?customer=${encodeURIComponent(customerId)}`)
   const charges = await stripe.list("charge", `charges?customer=${encodeURIComponent(customerId)}`)
+  if (!subscriptions.success || !intents.success || !invoices.success || !charges.success)
+    return createResultError(op, "Provider history is not exclusively attributable to this checkout")
   if (
-    !subscriptions.success ||
-    !intents.success ||
-    !invoices.success ||
-    !charges.success ||
-    subscriptions.data.some((entry) => entry.customer !== customerId || !owned(entry.metadata)) ||
-    intents.data.some((entry) => entry.customer !== customerId || !owned(entry.metadata)) ||
-    invoices.data.some((entry) => entry.customer !== customerId || !owned(entry.metadata)) ||
-    charges.data.some(
-      (entry) => entry.customer !== customerId || !intents.data.some((intent) => intent.id === entry.payment_intent),
+    subscriptions.data.some(
+      (entry) => entry.customer !== customerId || (!owned(entry.metadata) && !historical(entry.metadata)),
     ) ||
-    (session.data.subscription && !subscriptions.data.some((entry) => entry.id === session.data.subscription)) ||
-    (!session.data.subscription && subscriptions.data.length > 0)
+    intents.data.some(
+      (entry) => entry.customer !== customerId || (!owned(entry.metadata) && !historical(entry.metadata)),
+    ) ||
+    invoices.data.some(
+      (entry) => entry.customer !== customerId || (!owned(entry.metadata) && !historical(entry.metadata)),
+    )
   )
     return createResultError(op, "Provider history is not exclusively attributable to this checkout")
+  const currentSubscriptions = subscriptions.data.filter((entry) => owned(entry.metadata))
+  const currentIntents = intents.data.filter((entry) => owned(entry.metadata))
+  const validatedIntentIds = new Set(intents.data.map((entry) => entry.id))
+  if (
+    charges.data.some(
+      (entry) =>
+        entry.customer !== customerId || !entry.payment_intent || !validatedIntentIds.has(entry.payment_intent),
+    )
+  )
+    return createResultError(op, "Provider history is not exclusively attributable to this checkout")
+  if (session.data.subscription) {
+    if (currentSubscriptions.length !== 1 || currentSubscriptions[0]?.id !== session.data.subscription)
+      return createResultError(op, "Provider history is not exclusively attributable to this checkout")
+  } else if (currentSubscriptions.length > 0) {
+    return createResultError(op, "Provider history is not exclusively attributable to this checkout")
+  }
   if (session.data.status === "open" && session.data.payment_status !== "unpaid")
     return createResultError(op, "Open checkout has ambiguous payment state")
   if (
@@ -112,10 +164,11 @@ export async function e2eStripeTicketReconcile(input: {
     return createResultError(op, "Paid checkout and app payment state disagree")
   if (session.data.status === "expired" && session.data.payment_status === "paid")
     return createResultError(op, "Expired checkout reports a paid payment")
-  if (intents.data.length > 1) return createResultError(op, "Multiple payment intents require manual reconciliation")
+  if (currentIntents.length > 1) return createResultError(op, "Multiple payment intents require manual reconciliation")
 
-  // Preflight all provider objects before any mutation. A failed verification keeps the checkpoint.
-  for (const entry of subscriptions.data) {
+  // Preflight current-owned provider objects before any mutation. Historical
+  // entries are never touched. A failed verification keeps the checkpoint.
+  for (const entry of currentSubscriptions) {
     const current = await stripe.get("subscription", `subscriptions/${encodeURIComponent(entry.id)}`)
     if (
       !current.success ||
@@ -167,10 +220,15 @@ export async function e2eStripeTicketReconcile(input: {
   )
     return createResultError(op, "Checkout expiration could not be verified")
 
-  // Provider invoices/charges remain immutable. Keep their customer attached; only an
-  // invoice/charge-free exclusive test customer may be deleted only after Billing mapping proof.
+  // Provider invoices/charges remain immutable. A shared historical customer is
+  // never deleted: deletion additionally requires full current customer metadata,
+  // exactly one saved session, zero subscriptions/intents/invoices/charges of any
+  // kind, and independent Billing exclusivity proof. The exclusivity callback is
+  // only invoked when all of those hold.
   let customerDisposition = "retained"
   if (
+    owned(customer.data.metadata) &&
+    sessions.data.length === 1 &&
     invoices.data.length === 0 &&
     charges.data.length === 0 &&
     intents.data.length === 0 &&
@@ -195,7 +253,7 @@ export async function e2eStripeTicketReconcile(input: {
     status: "stripe-reconciled-checkpoint-retained" as const,
     session: sessionId,
     customer: customerDisposition,
-    subscriptionsCanceled: subscriptions.data.length,
+    subscriptionsCanceled: currentSubscriptions.length,
     chargesRetained: charges.data.length,
     invoicesRetained: invoices.data.length,
     paymentIntentsRetained: intents.data.length,
