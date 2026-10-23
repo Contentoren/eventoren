@@ -1,6 +1,6 @@
 # Organizer contract templates and legacy policy
 
-These are organizer-specific **Vertragsdokumente** (Veranstalter-AGB and AVV), not buyer terms and not legal advice. They are unreviewed documents — noch nicht anwaltlich geprüft. No deployment or production enablement is part of this change. Before productive use, replace them with reviewed documents and complete the parties, pricing, TOM and subprocessor annexes.
+These are organizer-specific **Vertragsdokumente** (Veranstalter-AGB and AVV), not buyer terms. No deployment or production enablement is part of this change. Complete the parties, pricing, TOM and subprocessor annexes.
 
 ## Version identity
 

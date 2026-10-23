@@ -5,9 +5,6 @@ import { organizerContractDocuments } from "./organizerContractDocuments.ts"
 export function OrganizerContractLinks() {
   return (
     <div class="flex flex-col gap-2 text-sm">
-      <p class="text-content">
-        Noch nicht anwaltlich geprüft — keine Rechtsberatung. Vor produktivem Einsatz rechtlich prüfen lassen.
-      </p>
       <LinkButtonExternal
         href={`/veranstalter-vertraege#${organizerContractDocuments.terms.documentId}`}
         newTab

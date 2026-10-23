@@ -55,6 +55,8 @@ test("contract pages carry no MUSTER labels and expose the current revisions", (
   expect(page).not.toContain("Muster")
   expect(page).not.toContain("ENTWURF")
   expect(page).not.toContain("Vertragsmuster")
+  expect(page).not.toContain("anwaltlich")
+  expect(page).not.toContain("Rechtsberatung")
   expect(page).toContain("eventoren-veranstalter-agb-2026-10-23-v1")
   expect(page).toContain("eventoren-veranstalter-avv-2026-10-23-v1")
   expect(page).toContain('id="eventoren-veranstalter-agb"')
