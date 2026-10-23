@@ -14,6 +14,7 @@ const siteFrameRouteIds = new Set([
   "/warenkorb",
   "/events/$eventId",
   "/impressum",
+  "/veranstalter-vertraege",
   "/admin",
   "/sign-in",
   "/organizer",

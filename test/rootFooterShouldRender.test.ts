@@ -10,6 +10,7 @@ const siteFrameRouteIds = [
   "/warenkorb",
   "/events/$eventId",
   "/impressum",
+  "/veranstalter-vertraege",
   "/admin",
   "/sign-in",
   "/support",
