@@ -251,13 +251,13 @@ function fillOrgForm(
   )
   agentBrowser(
     session,
-    ["find", "text", "Ich stimme den oben verlinkten Muster-Veranstalter-AGB", "click"],
+    ["find", "text", "Ich stimme den oben verlinkten Veranstalter-AGB", "click"],
     handle,
     `${tag}-consent-first`,
   )
   agentBrowser(
     session,
-    ["find", "text", "Ich stimme der oben verlinkten Muster-AVV", "click"],
+    ["find", "text", "Ich stimme der oben verlinkten AVV", "click"],
     handle,
     `${tag}-consent-second`,
   )

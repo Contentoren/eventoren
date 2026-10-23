@@ -337,13 +337,13 @@ export async function veranstalterOnboardingLocalE2eRun(): Promise<Result<Verans
     )
     agentBrowser(
       ownerSession,
-      ["find", "text", "Ich stimme den oben verlinkten Muster-Veranstalter-AGB", "click"],
+      ["find", "text", "Ich stimme den oben verlinkten Veranstalter-AGB", "click"],
       handle,
       "owner-consent-first",
     )
     agentBrowser(
       ownerSession,
-      ["find", "text", "Ich stimme der oben verlinkten Muster-AVV", "click"],
+      ["find", "text", "Ich stimme der oben verlinkten AVV", "click"],
       handle,
       "owner-consent-second",
     )
