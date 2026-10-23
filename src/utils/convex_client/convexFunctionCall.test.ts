@@ -97,14 +97,25 @@ test("convexFunctionCallDispatch routes by kind through the passed runner", asyn
 
 test("callConvexFunction resolves, gates and dispatches a public function", async () => {
   const calls: string[] = []
+  const response = { success: true as const, data: { page: [], isDone: true, continueCursor: "" } }
+  const runner: ConvexFunctionRunner = {
+    ...dispatchRunner(calls),
+    query: async () => {
+      calls.push("query")
+      return response
+    },
+  }
   const result = await callConvexFunction(
     "catalog",
     "catalogEventListPublishedPageQuery",
-    { filter: "x" },
-    dispatchRunner(calls),
+    {
+      filter: { query: "x", location: "", category: "", timeWindow: "alle" },
+      paginationOpts: { numItems: 10, cursor: null },
+    },
+    runner,
   )
   expect(calls).toEqual(["query"])
-  expect(result).toEqual({ kind: "query" })
+  expect(result).toEqual(response)
 })
 
 test("callConvexFunction throws for unknown and internal functions", async () => {
