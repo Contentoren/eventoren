@@ -1,4 +1,7 @@
 import { createRenderEffect } from "solid-js"
+import * as v from "valibot"
+import { organizerContractConsentSchema } from "../../../contracts/organizerContractConsentSchema.ts"
+import type { OrganizerContractParty } from "../../../contracts/organizerContractPartySchema.ts"
 import { api } from "#convex/_generated/api.js"
 import type { Id } from "#convex/_generated/dataModel.js"
 import { mutationCreate } from "#src/utils/convex_client/mutationCreate.ts"
@@ -24,6 +27,32 @@ export function veranstalterEinstellungenPageStateCreate(inputs: {
   const acceptContracts = mutationCreate(api.organizerDashboard.organizerContractsAcceptMutation)
   const termsAccepted = createSignalObject(false)
   const dpaAccepted = createSignalObject(false)
+  const emptyParty = (): OrganizerContractParty => ({
+    legalName: "",
+    representativeName: "",
+    streetAddress: "",
+    postalCode: "",
+    city: "",
+    countryCode: "DE",
+    email: "",
+    customerType: "business",
+  })
+  const contractParty = createSignalObject(emptyParty())
+  const customerType = createSignalObject("business")
+  const authorityConfirmed = createSignalObject(false)
+  const earlyServiceStartRequested = createSignalObject(false)
+  const feePayer = createSignalObject("kaeufer")
+  const partyFields = [
+    { key: "legalName", label: "Vollständiger Name / Firma" },
+    { key: "representativeName", label: "Vertretende Person" },
+    { key: "streetAddress", label: "Straße und Hausnummer" },
+    { key: "postalCode", label: "Postleitzahl" },
+    { key: "city", label: "Ort" },
+    { key: "countryCode", label: "Land (ISO-Code, z. B. DE)" },
+    { key: "email", label: "Vertrags-E-Mail" },
+  ] as const
+  const partyFieldChange = (key: keyof OrganizerContractParty, value: string) =>
+    contractParty.set({ ...contractParty.get(), [key]: value })
   const contractsSubmitting = createSignalObject(false)
   const name = createSignalObject("")
   const kind = createSignalObject("verein")
@@ -84,6 +113,11 @@ export function veranstalterEinstellungenPageStateCreate(inputs: {
       serverError.set(null)
       termsAccepted.set(false)
       dpaAccepted.set(false)
+      contractParty.set(emptyParty())
+      customerType.set("business")
+      authorityConfirmed.set(false)
+      earlyServiceStartRequested.set(false)
+      feePayer.set("kaeufer")
     }
     // Authoritative redaction (or lost visibility permission) overrides dirty
     // preservation. Never keep sensitive drafts visible after a role change.
@@ -105,6 +139,19 @@ export function veranstalterEinstellungenPageStateCreate(inputs: {
     contactEmail.set(data.profile.contact?.email ?? "")
     contactPhone.set(data.profile.contact?.phone ?? "")
     imprint.set(data.profile.imprint ?? "")
+    contractParty.set(data.contracts.party ?? emptyParty())
+    customerType.set(data.contracts.party?.customerType ?? "business")
+    feePayer.set(data.contracts.acceptedFee?.payer ?? "kaeufer")
+  })
+
+  createRenderEffect(() => {
+    contractParty.get()
+    customerType.get()
+    feePayer.get()
+    termsAccepted.set(false)
+    dpaAccepted.set(false)
+    authorityConfirmed.set(false)
+    earlyServiceStartRequested.set(false)
   })
 
   const validation = () =>
@@ -200,10 +247,25 @@ export function veranstalterEinstellungenPageStateCreate(inputs: {
       return
     }
     if (!data.canAcceptContracts || !termsAccepted.get() || !dpaAccepted.get() || contractsSubmitting.get()) return
+    const consent = v.safeParse(organizerContractConsentSchema, {
+      termsAccepted: termsAccepted.get(),
+      dpaAccepted: dpaAccepted.get(),
+      termsRevision: organizerContractDocuments.terms.revision,
+      dpaRevision: organizerContractDocuments.dpa.revision,
+      contractParty: { ...contractParty.get(), customerType: customerType.get() },
+      authorityConfirmed: authorityConfirmed.get(),
+      earlyServiceStartRequested: customerType.get() === "consumer" && earlyServiceStartRequested.get(),
+      feePayer: feePayer.get(),
+    })
+    if (!consent.success) {
+      serverError.set(v.summarize(consent.issues))
+      return
+    }
     contractsSubmitting.set(true)
     serverError.set(null)
     try {
       const result = await acceptContracts({
+        ...consent.output,
         orgId: targetOrgId as Id<"orgs">,
         termsAccepted: termsAccepted.get(),
         dpaAccepted: dpaAccepted.get(),
@@ -223,6 +285,13 @@ export function veranstalterEinstellungenPageStateCreate(inputs: {
   }
 
   return {
+    contractParty,
+    customerType,
+    authorityConfirmed,
+    earlyServiceStartRequested,
+    feePayer,
+    partyFields,
+    partyFieldChange,
     termsAccepted,
     dpaAccepted,
     contractsSubmitting,

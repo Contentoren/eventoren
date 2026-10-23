@@ -5,7 +5,7 @@ import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { EmptyState } from "#ui/static/empty/EmptyState.jsx"
 
 /** Login view shown when the visitor is signed out. */
-export function VeranstalterDashboardLoginState() {
+export function VeranstalterDashboardLoginState(p: { readonly returnTo?: string }) {
   return (
     <CardWrapper class="rounded-card border-border-subtle shadow-none">
       <EmptyState
@@ -13,7 +13,11 @@ export function VeranstalterDashboardLoginState() {
         title="Anmeldung erforderlich"
         description="Melde dich an, um dein Veranstalter-Dashboard zu sehen."
         actions={
-          <LinkButtonInternal to="/sign-in" search={{ returnTo: "/veranstalter" }} variant={buttonVariant.contrast}>
+          <LinkButtonInternal
+            to="/sign-in"
+            search={{ returnTo: p.returnTo ?? "/veranstalter" }}
+            variant={buttonVariant.contrast}
+          >
             Zur Anmeldung
           </LinkButtonInternal>
         }

@@ -1,4 +1,4 @@
-import { Show } from "solid-js"
+import { For, Show } from "solid-js"
 import { Checkbox } from "#ui/input/check/Checkbox.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { Label } from "#ui/input/label/Label.jsx"
@@ -8,6 +8,8 @@ import { Button } from "#ui/interactive/button/Button.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { OrganizerContractLinks } from "../../../contracts/OrganizerContractLinks.tsx"
+import { OrganizerPricingSummary } from "../../../contracts/OrganizerPricingSummary.tsx"
+import { LinkButtonExternal } from "#ui/interactive/link/LinkButton.jsx"
 import type { VeranstalterDashboardShellState } from "../../../ui/veranstalterDashboardShellStateCreate.ts"
 import { veranstalterEinstellungenPageStateCreate } from "./veranstalterEinstellungenPageStateCreate.ts"
 
@@ -44,8 +46,8 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
       <div>
         <h1 class="text-xl font-semibold text-content">Einstellungen</h1>
         <p class="mt-1 text-sm text-content-muted">
-          Profil und Bankverbindung der aktiven Organisation. Gebühren und Steuern legt die Administration fest und sind
-          hier nur einsehbar.
+          Profil und Bankverbindung der aktiven Organisation. Die Administration bestätigt die Steuerangaben und die
+          ausdrücklich vereinbarten Konditionen; Gebühren sind hier nur einsehbar.
         </p>
       </div>
       <Show when={state.profileResult() === undefined}>
@@ -237,9 +239,41 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
                       ? "Aktuelle Verträge bestätigt"
                       : "Aktuelle Verträge noch nicht bestätigt (Alt-Zeitstempel sind keine aktuelle Zustimmung)"}
                     <p>
-                      AGB: {stored().contracts.termsRevision ?? "keine Revision"} ·{" "}
+                      Veranstaltervertrag einschließlich Preisblatt:{" "}
+                      {stored().contracts.termsRevision ?? "keine Revision"} ·{" "}
                       {state.contractDateLabel(stored().contracts.termsConsentedAt)}
                     </p>
+                    <Show when={stored().contracts.party}>
+                      {(party) => (
+                        <div>
+                          <p>
+                            {party().legalName} · vertreten durch {party().representativeName}
+                          </p>
+                          <p>
+                            {party().streetAddress}, {party().postalCode} {party().city}, {party().countryCode}
+                          </p>
+                          <p>
+                            {party().email} · {party().customerType === "consumer" ? "Verbraucher" : "Unternehmer"}
+                          </p>
+                          <p>
+                            Vertretungsberechtigung bestätigt: {stored().contracts.authorityConfirmed ? "Ja" : "Nein"}
+                          </p>
+                          <p>
+                            Vorzeitiger Leistungsbeginn verlangt:{" "}
+                            {stored().contracts.earlyServiceStartRequested ? "Ja" : "Nein"}. Ein Widerrufsrecht erlischt
+                            dadurch nicht automatisch.
+                          </p>
+                        </div>
+                      )}
+                    </Show>
+                    <Show when={stored().contracts.acceptedFee}>
+                      {(fee) => (
+                        <p>
+                          Vereinbart: {feeLabel(fee())} brutto je bezahltem Ticket; kostenlose Tickets frei,
+                          Zahlungsabwicklung inklusive, kein Grundpreis.
+                        </p>
+                      )}
+                    </Show>
                     <p>
                       AVV: {stored().contracts.dpaRevision ?? "keine Revision"} ·{" "}
                       {state.contractDateLabel(stored().contracts.dpaConsentedAt)}
@@ -258,13 +292,71 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
                     <legend class="text-sm font-semibold text-content">
                       Ausdrückliche Zustimmung zu den Veranstalter-Verträgen
                     </legend>
+                    <For each={state.partyFields}>
+                      {(field) => (
+                        <div class="flex flex-col gap-1.5">
+                          <Label for={`contract-${field.key}`}>{field.label}</Label>
+                          <Input
+                            id={`contract-${field.key}`}
+                            value={state.contractParty.get()[field.key]}
+                            disabled={!stored().canAcceptContracts}
+                            onInput={(event) => state.partyFieldChange(field.key, event.currentTarget.value)}
+                          />
+                        </div>
+                      )}
+                    </For>
+                    <Label for="contract-customer-type">Vertragsschluss als</Label>
+                    <SelectSingleNative
+                      id="contract-customer-type"
+                      valueSignal={state.customerType}
+                      getOptions={() => ["business", "consumer"]}
+                      valueText={(value) => (value === "consumer" ? "Verbraucher" : "Unternehmer")}
+                      disabled={!stored().canAcceptContracts}
+                    />
+                    <Label for="contract-fee-payer">Gebühren trägt</Label>
+                    <SelectSingleNative
+                      id="contract-fee-payer"
+                      valueSignal={state.feePayer}
+                      getOptions={() => ["kaeufer", "veranstalter"]}
+                      valueText={(value) => (value === "kaeufer" ? "Käufer" : "Veranstalter")}
+                      disabled={!stored().canAcceptContracts}
+                    />
+                    <OrganizerPricingSummary
+                      payer={state.feePayer.get() === "veranstalter" ? "veranstalter" : "kaeufer"}
+                    />
+                    <Checkbox
+                      id="contract-authority"
+                      checked={state.authorityConfirmed.get()}
+                      onChange={state.authorityConfirmed.set}
+                      disabled={!stored().canAcceptContracts}
+                    >
+                      Ich bin volljährig und zum Abschluss für den angegebenen Vertragspartner berechtigt.
+                    </Checkbox>
+                    <Show when={state.customerType.get() === "consumer"}>
+                      <p class="text-sm">
+                        Die Widerrufsbelehrung und das Musterformular findest du im verlinkten Veranstaltervertrag. Ohne
+                        den folgenden freiwilligen Wunsch beginnt die Leistung erst nach Ablauf der 14-tägigen Frist und
+                        nach Freischaltung.
+                      </p>
+                      <Checkbox
+                        id="contract-early"
+                        checked={state.earlyServiceStartRequested.get()}
+                        onChange={state.earlyServiceStartRequested.set}
+                        disabled={!stored().canAcceptContracts}
+                      >
+                        Ich verlange ausdrücklich den Leistungsbeginn vor Ablauf der 14-tägigen Widerrufsfrist. Bei
+                        Widerruf kann unter den gesetzlichen Voraussetzungen Wertersatz für bereits erbrachte Leistungen
+                        anfallen. Mein Widerrufsrecht erlischt dadurch nicht automatisch.
+                      </Checkbox>
+                    </Show>
                     <Checkbox
                       id="settings-terms-accept"
                       disabled={!stored().canAcceptContracts}
                       checked={state.termsAccepted.get()}
                       onChange={state.termsAccepted.set}
                     >
-                      Ich stimme den verlinkten Veranstalter-AGB in der angegebenen Revision für meine Organisation zu.
+                      Ich stimme dem verlinkten Veranstaltervertrag einschließlich Preisblatt in der angegebenen
+                      Revision zu.
                     </Checkbox>
                     <Checkbox
                       id="settings-dpa-accept"
@@ -282,13 +374,17 @@ export function VeranstalterEinstellungenPage(p: { readonly shell: VeranstalterD
                       !stored().canAcceptContracts ||
                       !state.termsAccepted.get() ||
                       !state.dpaAccepted.get() ||
+                      !state.authorityConfirmed.get() ||
                       state.contractsSubmitting.get()
                     }
                     onClick={() => void state.submitContracts()}
                   >
-                    {state.contractsSubmitting.get() ? "Wird bestätigt …" : "Verträge ausdrücklich bestätigen"}
+                    {state.contractsSubmitting.get() ? "Wird bestätigt …" : "Zahlungspflichtigen Vertrag abschließen"}
                   </Button>
                 </Show>
+                <LinkButtonExternal href="/veranstalter-vertrag-beenden" variant="outline">
+                  Vertrag widerrufen oder kündigen
+                </LinkButtonExternal>
               </div>
             </CardWrapper>
           </>

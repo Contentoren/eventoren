@@ -1,25 +1,22 @@
 import * as v from "valibot"
 import { createResult, createResultError, type Result } from "#result"
 import { organizerDashboardOrganizationCreateSchema } from "#src/organizer/dashboard/model/organizerDashboardOrganizationCreateSchema.ts"
+import type { VeranstalterOnboardingDraft } from "./veranstalterOnboardingDraftSchema.ts"
 
 type CreateOutput = v.InferOutput<typeof organizerDashboardOrganizationCreateSchema>
 
 /** Validated technical onboarding fields; consent booleans are never part of this data. */
 export type VeranstalterOnboardingTechnicalData = Omit<
   CreateOutput,
-  "termsAccepted" | "dpaAccepted" | "termsRevision" | "dpaRevision"
+  | "termsAccepted"
+  | "dpaAccepted"
+  | "termsRevision"
+  | "dpaRevision"
+  | "authorityConfirmed"
+  | "earlyServiceStartRequested"
 >
 
-export type VeranstalterOnboardingRawInput = {
-  readonly name: string
-  readonly slug: string
-  readonly kind: string
-  readonly contactEmail: string
-  readonly contactPhone: string
-  readonly imprint: string
-  readonly iban: string
-  readonly bankHolder: string
-}
+export type VeranstalterOnboardingRawInput = Omit<VeranstalterOnboardingDraft, "kind"> & { readonly kind: string }
 
 function emptyToUndefined(value: string): string | undefined {
   const trimmed = value.trim()
@@ -48,11 +45,15 @@ export function veranstalterOnboardingInputValidate(
       "dpaAccepted",
       "termsRevision",
       "dpaRevision",
+      "authorityConfirmed",
+      "earlyServiceStartRequested",
     ]),
     {
       name: raw.name.trim(),
       slug: raw.slug.trim(),
       kind: raw.kind.trim(),
+      contractParty: { ...raw.contractParty, countryCode: raw.contractParty.countryCode.trim().toUpperCase() },
+      feePayer: raw.feePayer,
       ...(contactEmail !== undefined || contactPhone !== undefined
         ? {
             contact: {

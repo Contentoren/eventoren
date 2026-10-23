@@ -7,6 +7,9 @@ import { VeranstalterDashboardLoadingState } from "../organizer/dashboard/ui/Ver
 import { VeranstalterDashboardLoginState } from "../organizer/dashboard/ui/VeranstalterDashboardLoginState.tsx"
 import { seoHeadCreate } from "../seo/seoHeadCreate.ts"
 import { VeranstalterOnboardingPage } from "../organizer/dashboard/pages/organization/ui/VeranstalterOnboardingPage.tsx"
+import { OrganizerContractLinks } from "../organizer/dashboard/contracts/OrganizerContractLinks.tsx"
+import { OrganizerPricingSummary } from "../organizer/dashboard/contracts/OrganizerPricingSummary.tsx"
+import { LinkButtonInternal } from "#ui/interactive/link/LinkButton.jsx"
 
 export const Route = createFileRoute("/veranstalter_/onboarding")({
   validateSearch: (input: unknown) => veranstalterDashboardSearchParse(input),
@@ -42,9 +45,13 @@ function VeranstalterOnboardingRoute() {
   return (
     <div class="min-h-dvh bg-surface-base text-content">
       <div class="mx-auto flex min-h-dvh w-full max-w-[1120px] flex-col px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
-        <p class="text-lg font-bold tracking-tight text-content" aria-label="eventoren">
+        <LinkButtonInternal
+          to="/"
+          class="self-start text-lg font-bold tracking-tight"
+          aria-label="Eventoren Startseite"
+        >
           eventoren
-        </p>
+        </LinkButtonInternal>
         <p class="mt-1 text-xs text-content-muted">Dein Weg zum ersten Event.</p>
         <main class="mx-auto flex w-full max-w-[720px] flex-1 flex-col py-6">
           <Switch>
@@ -52,7 +59,21 @@ function VeranstalterOnboardingRoute() {
               <VeranstalterDashboardLoadingState />
             </Match>
             <Match when={view() === "login"}>
-              <VeranstalterDashboardLoginState />
+              <div class="flex flex-col gap-5">
+                <h1 class="text-xl font-semibold">Als Veranstalter starten</h1>
+                <p class="text-sm text-content-muted">
+                  Für Unternehmen, Vereine, Schulen und private Veranstalter. Mit der Registrierung legst du ein
+                  Veranstalterkonto an – keine neue Firma oder keinen neuen Verein.
+                </p>
+                <ol class="list-decimal space-y-2 pl-5 text-sm">
+                  <li>Anmelden und vollständige Vertragspartner- und Kontaktdaten angeben.</li>
+                  <li>Kostenaufteilung wählen und Veranstaltervertrag sowie AVV bestätigen.</li>
+                  <li>Bank- und Steuerangaben prüfen lassen; erst nach Freischaltung Tickets verkaufen.</li>
+                </ol>
+                <OrganizerPricingSummary />
+                <OrganizerContractLinks />
+                <VeranstalterDashboardLoginState returnTo="/veranstalter/onboarding" />
+              </div>
             </Match>
             <Match when={view() === "error"}>
               <VeranstalterDashboardErrorState state={page.shell} />

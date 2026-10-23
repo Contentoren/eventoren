@@ -11,14 +11,14 @@ export function VeranstalterDashboardEmptyState() {
       <EmptyState
         icon={mdiDomain}
         title="Noch keine Organisation"
-        description="Sobald du einer Veranstalter-Organisation angehörst, erscheint sie hier. Oder gründe eine neue Organisation."
+        description="Sobald du einer Veranstalter-Organisation angehörst, erscheint sie hier. Oder registriere dich als Veranstalter."
         actions={
           <>
             <LinkButtonInternal to="/veranstalter-einladungen" variant={buttonVariant.contrast}>
               Meine Einladungen
             </LinkButtonInternal>
             <LinkButtonInternal to="/veranstalter/onboarding" variant={buttonVariant.outline}>
-              Organisation erstellen
+              Veranstalter registrieren
             </LinkButtonInternal>
           </>
         }

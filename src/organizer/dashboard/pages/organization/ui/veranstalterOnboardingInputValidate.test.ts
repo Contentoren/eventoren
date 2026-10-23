@@ -13,6 +13,17 @@ function validRaw() {
     imprint: "Kulturhaus Lindenhof e. V., Beispielstraße 1, 10115 Berlin",
     iban: validIban,
     bankHolder: "Kulturhaus Lindenhof e. V.",
+    contractParty: {
+      legalName: "Kulturhaus Lindenhof e. V.",
+      representativeName: "Max Mustermann",
+      streetAddress: "Beispielstraße 1",
+      postalCode: "10115",
+      city: "Berlin",
+      countryCode: "DE",
+      email: "hallo@example.org",
+      customerType: "business" as const,
+    },
+    feePayer: "kaeufer" as const,
   }
 }
 

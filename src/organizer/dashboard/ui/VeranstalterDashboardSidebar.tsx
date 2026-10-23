@@ -1,6 +1,9 @@
+import { mdiAccountGroupOutline } from "@adaptive-ds/mdi/mdiAccountGroupOutline.js"
+import { mdiAccountPlusOutline } from "@adaptive-ds/mdi/mdiAccountPlusOutline.js"
 import { mdiCalendarOutline } from "@adaptive-ds/mdi/mdiCalendarOutline.js"
 import { mdiCogOutline } from "@adaptive-ds/mdi/mdiCogOutline.js"
 import { mdiDomainPlus } from "@adaptive-ds/mdi/mdiDomainPlus.js"
+import { mdiReceiptTextOutline } from "@adaptive-ds/mdi/mdiReceiptTextOutline.js"
 import { mdiViewDashboardOutline } from "@adaptive-ds/mdi/mdiViewDashboardOutline.js"
 import { Link } from "@tanstack/solid-router"
 import { Show } from "solid-js"
@@ -61,6 +64,7 @@ export function VeranstalterDashboardSidebar(p: {
                 aria-current={path() === "/veranstalter/bestellungen" ? "page" : undefined}
                 class={itemClass(path() === "/veranstalter/bestellungen")}
               >
+                <Icon path={mdiReceiptTextOutline} class="size-4 shrink-0" />
                 Bestellungen
               </Link>
             </li>
@@ -73,6 +77,7 @@ export function VeranstalterDashboardSidebar(p: {
                 aria-current={path() === "/veranstalter/team" ? "page" : undefined}
                 class={itemClass(path() === "/veranstalter/team")}
               >
+                <Icon path={mdiAccountGroupOutline} class="size-4 shrink-0" />
                 Team
               </Link>
             </li>
@@ -97,6 +102,7 @@ export function VeranstalterDashboardSidebar(p: {
               aria-current={path() === "/veranstalter-einladungen" ? "page" : undefined}
               class={itemClass(path() === "/veranstalter-einladungen")}
             >
+              <Icon path={mdiAccountPlusOutline} class="size-4 shrink-0" />
               Meine Einladungen
             </Link>
           </li>
@@ -107,7 +113,7 @@ export function VeranstalterDashboardSidebar(p: {
               class={itemClass(path() === "/veranstalter/onboarding")}
             >
               <Icon path={mdiDomainPlus} class="size-4 shrink-0" />
-              Organisation erstellen
+              Veranstalter registrieren
             </Link>
           </li>
         </ul>
