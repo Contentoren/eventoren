@@ -417,17 +417,13 @@ export function convexFunctionCatalogCollect(repoRoot: string): CatalogEntry[] {
     const module = file.replace(/\.ts$/, "")
     if (module === "schema" || module === "http" || module === "crons") continue
     const source = readFileSync(join(convexDir, file), "utf8")
-    const reexportTargets = new Map<string, string>()
+    const reexportTargets = new Map<string, { target: string; local: string }>()
     for (const match of source.matchAll(/export\s*\{([^}]*)\}\s*from\s*["']([^"']+)["']/g)) {
       const target = resolveTarget(match[2] ?? "")
       if (!target) continue
       for (const raw of (match[1] ?? "").split(",")) {
-        const name = raw
-          .trim()
-          .split(/\s+as\s+/)
-          .pop()
-          ?.trim()
-        if (name) reexportTargets.set(name, target)
+        const pair = exportPair(raw)
+        if (pair) reexportTargets.set(pair.exported, { target, local: pair.local })
       }
     }
     const directDefinitions = new Map<string, ConvexFunctionKindValue>()
@@ -460,7 +456,12 @@ export function convexFunctionCatalogCollect(repoRoot: string): CatalogEntry[] {
         if (name && !bareExports.has(name)) bareExports.set(name, importTargets.get(name) ?? "")
       }
     }
-    const push = (name: string, fileRelative: string | null, kind: ConvexFunctionKindValue | null): void => {
+    const push = (
+      name: string,
+      fileRelative: string | null,
+      kind: ConvexFunctionKindValue | null,
+      lookup = name,
+    ): void => {
       if (!kind || !fileRelative) {
         entries.push({
           module,
@@ -480,12 +481,14 @@ export function convexFunctionCatalogCollect(repoRoot: string): CatalogEntry[] {
         file: withTs(fileRelative),
         kind,
         visibility: kind.startsWith("internal") ? "internal" : "public",
-        acceptsToken: fileSource ? acceptsTokenDetect(fileSource, withTs(fileRelative), name, loadImportedFile) : null,
+        acceptsToken: fileSource
+          ? acceptsTokenDetect(fileSource, withTs(fileRelative), lookup, loadImportedFile)
+          : null,
       })
     }
-    for (const [name, target] of reexportTargets) {
-      const fileSource = readFileOrNull(repoRoot, target)
-      push(name, target, fileSource ? definitionKind(fileSource, name) : null)
+    for (const [name, reexport] of reexportTargets) {
+      const fileSource = readFileOrNull(repoRoot, reexport.target)
+      push(name, reexport.target, fileSource ? definitionKind(fileSource, reexport.local) : null, reexport.local)
     }
     for (const [name, target] of bareExports) {
       if (reexportTargets.has(name) || directDefinitions.has(name)) continue

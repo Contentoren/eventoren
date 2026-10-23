@@ -91,3 +91,11 @@ test("collect keeps the public token validators true", () => {
   expect(byKey.get("auth:userEmailChange2ConfirmMutation")?.acceptsToken).toBe(true)
   expect(byKey.get("auth:userProfileUpdateMutation")?.acceptsToken).toBe(true)
 })
+
+test("collect follows aliased re-exports to the local definition", () => {
+  const entries = convexFunctionCatalogCollect(process.cwd())
+  const byKey = new Map(entries.map((entry) => [`${entry.module}:${entry.name}`, entry]))
+  const entry = byKey.get("publicProjectInfo:publicProjectInfo")
+  expect(entry?.kind).toBe("query")
+  expect(entry?.acceptsToken).toBe(false)
+})
