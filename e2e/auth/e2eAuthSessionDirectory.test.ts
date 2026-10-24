@@ -19,7 +19,7 @@ for (const target of ["production", "development"] as const) {
     const token = "offline-private-session-token"
     try {
       process.env.E2E_TARGET = target
-      process.env.E2E_BASE_URL = target === "production" ? "https://eventoren.de" : "https://eventoren.leonardomora.de"
+      process.env.E2E_BASE_URL = target === "production" ? "https://eventoren.de" : "https://eventoren.wonder1.de"
       process.env.E2E_CHECKPOINT_DIRECTORY = directory
       const result = await e2eAuthSessionMark({
         convexUrl: "https://offline.convex.cloud",

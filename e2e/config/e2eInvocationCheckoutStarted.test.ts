@@ -14,7 +14,7 @@ function devTicketCheckpoint(ticket: Record<string, unknown>) {
   return {
     version: 1 as const,
     target: "development" as const,
-    baseUrl: "https://eventoren.leonardomora.de" as const,
+    baseUrl: "https://eventoren.wonder1.de" as const,
     runId,
     createdAt: 1_000_000,
     phase: "ticket-unreconciled" as const,

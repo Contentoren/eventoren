@@ -13,11 +13,7 @@ describe("ticket checkout E2E route", () => {
   })
 
   test("a run-marked development event requires test mode", () => {
-    expect(ticketCheckoutE2eRouteCheck("ticket-e2e-abc", "https://eventoren.leonardomora.de", "live").success).toBe(
-      false,
-    )
-    expect(ticketCheckoutE2eRouteCheck("ticket-e2e-abc", "https://eventoren.leonardomora.de", "test").success).toBe(
-      true,
-    )
+    expect(ticketCheckoutE2eRouteCheck("ticket-e2e-abc", "https://eventoren.wonder1.de", "live").success).toBe(false)
+    expect(ticketCheckoutE2eRouteCheck("ticket-e2e-abc", "https://eventoren.wonder1.de", "test").success).toBe(true)
   })
 })

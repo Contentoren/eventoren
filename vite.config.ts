@@ -31,6 +31,6 @@ export default defineConfig({
     noExternal: [/^@corvu\//],
   },
   server: {
-    allowedHosts: ["eventoren.leonardomora.de"],
+    allowedHosts: ["eventoren.wonder1.de"],
   },
 })

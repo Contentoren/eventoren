@@ -2,7 +2,7 @@ import { createResult, createResultError } from "#result"
 
 const targetOrigins = {
   production: "https://eventoren.de",
-  development: "https://eventoren.leonardomora.de",
+  development: "https://eventoren.wonder1.de",
 } as const
 
 export const e2eEnvironmentRead = (environment: Record<string, string | undefined>) => {

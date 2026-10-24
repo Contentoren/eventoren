@@ -47,7 +47,7 @@ async function ticketProgressToDone(directory: string, target: Pick<E2eCheckpoin
 }
 
 async function checkpointNativeWorkflowsComplete(directory: string) {
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   for (const workflow of ["SSO", "native auth HTTP", "native auth lifecycle"] as const) {
     const loaded = await e2eCheckpointLoad(directory, target)
     if (!loaded.success || !loaded.data) throw new Error("Cannot load fixture checkpoint")
@@ -258,7 +258,7 @@ describe("Eventoren E2E runner", () => {
           checkpointDirectory: directory,
           historicalStripeConfigResolve: ticketResolver,
           commandRun: async (workflow, environment) => {
-            expect(environment.E2E_BASE_URL).toBe("https://eventoren.leonardomora.de")
+            expect(environment.E2E_BASE_URL).toBe("https://eventoren.wonder1.de")
             expect(environment.E2E_RUN_ID).toMatch(/^[0-9a-z]+-[0-9a-f-]{36}$/u)
             started.push(workflow.name)
             return 0
@@ -409,7 +409,7 @@ describe("Eventoren E2E runner", () => {
             if (workflow.name === "ticket purchase") {
               await ticketProgressToDone(directory, {
                 target: "development",
-                baseUrl: "https://eventoren.leonardomora.de",
+                baseUrl: "https://eventoren.wonder1.de",
               })
             }
             return 0
@@ -438,7 +438,7 @@ describe("Eventoren E2E runner", () => {
 
   it("retries persisted cleanup without rerunning verified workflows after a cleanup failure", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-cleanup-retry-"))
-    const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+    const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
     try {
       let historicalAttempts = 0
       const runWorkflows = async (workflow: { name: string }, environment: Record<string, string>) => {
@@ -585,7 +585,7 @@ describe("Eventoren E2E runner", () => {
 
   it("completes a successful development run and verifies absence before removing the checkpoint", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-dev-success-"))
-    const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+    const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
     try {
       const started: string[] = []
       let catalogCalls = 0
@@ -651,7 +651,7 @@ describe("Eventoren E2E runner", () => {
 
   it("refuses success cleanup without complete backend credentials instead of claiming no-op success", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-no-backend-"))
-    const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+    const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
     try {
       expect(
         await e2eInvocationRun({
@@ -794,7 +794,7 @@ describe("Eventoren E2E runner", () => {
           await e2eCheckpointSave(directory, {
             version: 1,
             target: "development",
-            baseUrl: "https://eventoren.leonardomora.de",
+            baseUrl: "https://eventoren.wonder1.de",
             runId,
             createdAt: 1_000_000,
             phase: "ticket-unreconciled",
@@ -853,7 +853,7 @@ describe("Eventoren E2E runner", () => {
           await e2eCheckpointSave(directory, {
             version: 1,
             target: "development",
-            baseUrl: "https://eventoren.leonardomora.de",
+            baseUrl: "https://eventoren.wonder1.de",
             runId,
             createdAt,
             phase: "ticket-unreconciled",
@@ -909,7 +909,7 @@ describe("Eventoren E2E runner", () => {
           await e2eCheckpointSave(directory, {
             version: 1,
             target: "development",
-            baseUrl: "https://eventoren.leonardomora.de",
+            baseUrl: "https://eventoren.wonder1.de",
             runId,
             createdAt,
             phase: "ticket-unreconciled",
@@ -969,7 +969,7 @@ describe("Eventoren E2E runner", () => {
   it("does not silently redirect a production run with a preview env file", async () => {
     expect(
       await e2eInvocationRun({
-        environment: { E2E_BASE_URL: "https://eventoren.leonardomora.de" },
+        environment: { E2E_BASE_URL: "https://eventoren.wonder1.de" },
         commandRun: async () => 0,
       }),
     ).toBe(1)
@@ -985,7 +985,7 @@ describe("Eventoren E2E runner", () => {
           await e2eCheckpointSave(directory, {
             version: 1,
             target: "development",
-            baseUrl: "https://eventoren.leonardomora.de",
+            baseUrl: "https://eventoren.wonder1.de",
             runId,
             createdAt,
             phase: "ticket-unreconciled",
@@ -1037,7 +1037,7 @@ describe("Eventoren E2E runner", () => {
 
   it("forwards snapshot typed seams and cleans snapshot-only residue without live fetching", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-snapshot-forward-"))
-    const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+    const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
     try {
       const snapshotCandidate = { version: 7, kind: "ticket-e2e", eventKey: "ticket-e2e-old", chunkCount: 2 }
       let discoveryCalls = 0
@@ -1132,7 +1132,7 @@ describe("Eventoren E2E runner", () => {
 
   it("retains redacted cleanup session failure and retries cleanup-only without rerunning workflows", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-auto-session-"))
-    const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+    const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
     const freshToken = "fresh-auto-cleanup-token-abc"
     const password = "e2e-password"
     try {
@@ -1217,7 +1217,7 @@ describe("Eventoren E2E runner", () => {
       // Resolve failure retains business fixtures with a redacted error: no token/secret in the checkpoint.
       expect(JSON.stringify(retained)).not.toContain(freshToken)
       expect(JSON.stringify(retained)).not.toContain(password)
-      expect(sessionInputs[0]!.targetBaseUrl).toBe("https://eventoren.leonardomora.de")
+      expect(sessionInputs[0]!.targetBaseUrl).toBe("https://eventoren.wonder1.de")
       expect(sessionInputs[0]!.convexUrl).toBe("https://example.convex.cloud")
       expect(sessionInputs[0]!.runId).toMatch(/^[0-9a-z]+-[0-9a-f-]{36}$/u)
       expect(sessionInputs[0]!.runId).toBe(retained.runId)
@@ -1253,7 +1253,7 @@ describe("Eventoren E2E runner", () => {
       expect(reruns).toBe(0)
       expect(sessionCalls).toBe(2)
       expect(forwardedAdminTokens).toEqual([freshToken])
-      expect(sessionInputs[1]!.targetBaseUrl).toBe("https://eventoren.leonardomora.de")
+      expect(sessionInputs[1]!.targetBaseUrl).toBe("https://eventoren.wonder1.de")
       expect(sessionInputs[1]!.runId).toBe(retained.runId)
       await expect(readFile(join(directory, "checkpoint.json"), "utf8")).rejects.toMatchObject({ code: "ENOENT" })
     } finally {
@@ -1308,7 +1308,7 @@ describe("Eventoren E2E runner", () => {
       const base = {
         version: 1 as const,
         target: "development" as const,
-        baseUrl: "https://eventoren.leonardomora.de" as const,
+        baseUrl: "https://eventoren.wonder1.de" as const,
         runId,
         createdAt,
         phase: "sso" as const,
@@ -1324,7 +1324,7 @@ describe("Eventoren E2E runner", () => {
       const { e2eCheckpointSsoClear } = await import("../checkpoint/e2eCheckpointSsoClear.ts")
       const loaded = await e2eCheckpointLoad(directory, {
         target: "development",
-        baseUrl: "https://eventoren.leonardomora.de",
+        baseUrl: "https://eventoren.wonder1.de",
       })
       if (!loaded.success || !loaded.data) throw new Error("Cannot load expired progress checkpoint")
       expect((await e2eCheckpointSsoClear(directory, loaded.data)).success).toBe(false)
@@ -1368,7 +1368,7 @@ describe("Eventoren E2E runner", () => {
       const base = {
         version: 1 as const,
         target: "development" as const,
-        baseUrl: "https://eventoren.leonardomora.de" as const,
+        baseUrl: "https://eventoren.wonder1.de" as const,
         runId,
         createdAt,
         phase: "sso" as const,

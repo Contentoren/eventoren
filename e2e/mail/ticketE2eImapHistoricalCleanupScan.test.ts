@@ -3,11 +3,11 @@ import { ticketE2eImapHistoricalCleanupScan } from "./ticketE2eImapHistoricalCle
 import { ticketE2eImapHistoricalDiscover } from "./ticketE2eImapHistoricalDiscovery.ts"
 import type { ticketE2eImapConfirmationDelete } from "./ticketE2eImapConfirmationDelete.ts"
 
-const baseUrl = "https://eventoren.leonardomora.de"
+const baseUrl = "https://eventoren.wonder1.de"
 const mail = { host: "localhost", port: 993, user: "buyer@example.test", password: "unused" }
 const runId = "mold-12345678-1234-1234-1234-123456789abc"
 const eventTitle = `Ticket E2E ${runId}`
-const capability = `https://eventoren.leonardomora.de/checkout#ticketAccess=${"b".repeat(48)}`
+const capability = `https://eventoren.wonder1.de/checkout#ticketAccess=${"b".repeat(48)}`
 const pdfBytes = Buffer.from("%PDF-1.7\nfixture-ticket-bytes\n", "utf8")
 
 function deleteMock(

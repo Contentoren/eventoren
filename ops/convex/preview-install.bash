@@ -28,9 +28,9 @@ if [[ ! -f "$ENV_FILE" ]]; then
   umask 077
   instance_secret="$(od -An -N32 -tx1 /dev/urandom | tr -d ' \n')"
   cat >"$ENV_FILE" <<EOF
-CONVEX_CLOUD_ORIGIN=https://eventoren-convex.leonardomora.de
-CONVEX_SITE_ORIGIN=https://eventoren-api.leonardomora.de
-NEXT_PUBLIC_DEPLOYMENT_URL=https://eventoren-convex.leonardomora.de
+CONVEX_CLOUD_ORIGIN=https://eventoren-convex.wonder1.de
+CONVEX_SITE_ORIGIN=https://eventoren-api.wonder1.de
+NEXT_PUBLIC_DEPLOYMENT_URL=https://eventoren-convex.wonder1.de
 INSTANCE_NAME=development
 INSTANCE_SECRET=$instance_secret
 DISABLE_BEACON=true

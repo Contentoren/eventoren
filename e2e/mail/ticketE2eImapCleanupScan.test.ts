@@ -13,7 +13,7 @@ test("only a completed or stale exact-owned run can request IMAP deletion, with 
     const checkpoint: E2eCheckpoint = {
       version: 1,
       target: "development",
-      baseUrl: "https://eventoren.leonardomora.de",
+      baseUrl: "https://eventoren.wonder1.de",
       runId,
       createdAt: Date.now() - 1000,
       phase: "ticket-unreconciled",
@@ -73,7 +73,7 @@ test("cleans successful current-run mail but refuses a checkpoint with a foreign
     const checkpoint: E2eCheckpoint = {
       version: 1,
       target: "development",
-      baseUrl: "https://eventoren.leonardomora.de",
+      baseUrl: "https://eventoren.wonder1.de",
       runId,
       createdAt: Date.now() - 1000,
       phase: "ticket-unreconciled",
@@ -113,7 +113,7 @@ test("cleans successful current-run mail but refuses a checkpoint with a foreign
     const checkpoint: E2eCheckpoint = {
       version: 1,
       target: "development",
-      baseUrl: "https://eventoren.leonardomora.de",
+      baseUrl: "https://eventoren.wonder1.de",
       runId,
       createdAt: Date.now() - 1000,
       phase: "ticket-unreconciled",

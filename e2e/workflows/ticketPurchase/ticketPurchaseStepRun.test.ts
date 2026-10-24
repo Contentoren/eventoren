@@ -19,7 +19,7 @@ describe("ticket purchase stage persistence", () => {
         checkpoint: {
           version: 1,
           target: "development",
-          baseUrl: "https://eventoren.leonardomora.de",
+          baseUrl: "https://eventoren.wonder1.de",
           runId,
           createdAt: 1_000_000,
           phase: "ticket-unreconciled",
@@ -71,7 +71,7 @@ describe("ticket purchase stage persistence", () => {
         checkpoint: {
           version: 1 as const,
           target: "development" as const,
-          baseUrl: "https://eventoren.leonardomora.de" as const,
+          baseUrl: "https://eventoren.wonder1.de" as const,
           runId: "abc-12345678-1234-1234-1234-123456789abc",
           createdAt: 1_000_000,
           phase: "ticket-unreconciled" as const,
@@ -131,7 +131,7 @@ describe("ticket purchase stage persistence", () => {
         checkpoint: {
           version: 1 as const,
           target: "development" as const,
-          baseUrl: "https://eventoren.leonardomora.de" as const,
+          baseUrl: "https://eventoren.wonder1.de" as const,
           runId: "abc-12345678-1234-1234-1234-123456789abc",
           createdAt: 1_000_000,
           phase: "ticket-unreconciled" as const,
@@ -174,7 +174,7 @@ describe("ticket purchase stage persistence", () => {
         checkpoint: {
           version: 1 as const,
           target: "development" as const,
-          baseUrl: "https://eventoren.leonardomora.de" as const,
+          baseUrl: "https://eventoren.wonder1.de" as const,
           runId: "abc-12345678-1234-1234-1234-123456789abc",
           createdAt: 1_000_000,
           phase: "ticket-unreconciled" as const,
@@ -216,7 +216,7 @@ describe("ticket purchase stage persistence", () => {
         checkpoint: {
           version: 1 as const,
           target: "development" as const,
-          baseUrl: "https://eventoren.leonardomora.de" as const,
+          baseUrl: "https://eventoren.wonder1.de" as const,
           runId: "abc-12345678-1234-1234-1234-123456789abc",
           createdAt: 1_000_000,
           phase: "ticket-unreconciled" as const,

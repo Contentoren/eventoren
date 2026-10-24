@@ -50,8 +50,8 @@ const pageMock = {
     waitedUrls.push("waitForURL")
     // The flow navigates event -> /warenkorb -> /checkout. Prove each leg
     // targets its expected path instead of accepting any navigation.
-    const matchesWarenkorb = predicate(new URL("https://eventoren.leonardomora.de/warenkorb"))
-    const matchesCheckout = predicate(new URL("https://eventoren.leonardomora.de/checkout"))
+    const matchesWarenkorb = predicate(new URL("https://eventoren.wonder1.de/warenkorb"))
+    const matchesCheckout = predicate(new URL("https://eventoren.wonder1.de/checkout"))
     if (!matchesWarenkorb && !matchesCheckout)
       throw new Error("Checkout navigation does not target /warenkorb or /checkout")
   },
@@ -67,7 +67,7 @@ const guestContextMock = {
   storageState: async () => ({
     origins: [
       {
-        origin: "https://eventoren.leonardomora.de",
+        origin: "https://eventoren.wonder1.de",
         localStorage: scenario.orderId
           ? [{ name: "eventoren.ticketOrderAccess.v1", value: JSON.stringify([{ orderId: scenario.orderId }]) }]
           : [],
@@ -97,14 +97,14 @@ const { e2eCheckpointSave } = await import("../../checkpoint/e2eCheckpointSave.t
 const { e2eCheckpointLoad } = await import("../../checkpoint/e2eCheckpointLoad.ts")
 
 const runId = "abc-12345678-1234-1234-1234-123456789abc"
-const baseUrl = "https://eventoren.leonardomora.de"
-const target = { target: "development" as const, baseUrl: baseUrl as "https://eventoren.leonardomora.de" }
+const baseUrl = "https://eventoren.wonder1.de"
+const target = { target: "development" as const, baseUrl: baseUrl as "https://eventoren.wonder1.de" }
 
 function freshCheckpoint() {
   return {
     version: 1 as const,
     target: "development" as const,
-    baseUrl: baseUrl as "https://eventoren.leonardomora.de",
+    baseUrl: baseUrl as "https://eventoren.wonder1.de",
     runId,
     createdAt: 1_000_000,
     phase: "ticket-unreconciled" as const,
@@ -303,8 +303,8 @@ describe("ticket checkout browser contracts match the current frontend", () => {
         ticketPurchaseCheckoutStep(context, {
           environment: {
             E2E_TARGET: "development",
-            E2E_BASE_URL: "https://eventoren.leonardomora.de",
-            E2E_CLEANUP_CONVEX_URL: "https://eventoren-convex.leonardomora.de",
+            E2E_BASE_URL: "https://eventoren.wonder1.de",
+            E2E_CLEANUP_CONVEX_URL: "https://eventoren-convex.wonder1.de",
           },
           stripeKey: "sk_test_123456",
           stripeAccountId: "acct_test",
