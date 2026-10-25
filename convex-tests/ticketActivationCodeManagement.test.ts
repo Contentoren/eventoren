@@ -287,6 +287,33 @@ test("public validation accepts only available codes of the same product", async
   }
 })
 
+test("public validation stays read-only and creates no browser hold", async () => {
+  const t = convexTest(schema, modules)
+  const token = await userTokenCreate(t, "admin")
+  await setupPublished(t, token)
+  const generated = await t.mutation(api.ticketing.ticketActivationCodeGenerateMutation, {
+    eventKey: "code-event",
+    tierKey: "standard",
+    count: 1,
+    token,
+  })
+  expect(generated.success).toBe(true)
+  if (!generated.success) return
+  const code = generated.data.generated[0]?.code
+  if (!code) throw new Error("code missing")
+
+  const checked = await t.query(api.ticketing.ticketActivationCodeValidateQuery, {
+    eventKey: "code-event",
+    tierKey: "standard",
+    code,
+  })
+  expect(checked).toMatchObject({ success: true, data: { valid: true } })
+  const stored = await t.run(async (ctx) => await ctx.db.query("ticketActivationCodes").first())
+  expect(stored?.status).toBe("available")
+  expect(stored?.browserHoldDigest).toBeUndefined()
+  expect(stored?.browserHoldExpiresAt).toBeUndefined()
+})
+
 test("public validation stays invalid for unpublished events", async () => {
   const t = convexTest(schema, modules)
   const token = await userTokenCreate(t, "admin")

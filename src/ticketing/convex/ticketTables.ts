@@ -301,6 +301,10 @@ export const ticketTables = {
     number: v.number(),
     status: ticketActivationCodeStatusValidator,
     orderId: v.optional(v.id("ticketOrders")),
+    // Browser-scoped hold before a checkout exists: only the credential digest
+    // is stored, never the credential itself. Absent on order-owned codes.
+    browserHoldDigest: v.optional(v.string()),
+    browserHoldExpiresAt: v.optional(v.number()),
     createdAt: v.string(),
     updatedAt: v.string(),
     reservedAt: v.optional(v.string()),

@@ -1,6 +1,8 @@
 export { ticketActivationCodeGenerateMutation } from "#src/ticketing/convex/ticketActivationCodeGenerateMutation.ts"
 export { ticketActivationCodeExportAdminQuery } from "#src/ticketing/convex/ticketActivationCodeExportAdminQuery.ts"
+export { ticketActivationCodeHoldExpireMutation } from "#src/ticketing/convex/ticketActivationCodeHoldExpireMutation.ts"
 export { ticketActivationCodeListAdminQuery } from "#src/ticketing/convex/ticketActivationCodeListAdminQuery.ts"
+export { ticketActivationCodeReserveMutation } from "#src/ticketing/convex/ticketActivationCodeReserveMutation.ts"
 export { ticketActivationCodeValidateQuery } from "#src/ticketing/convex/ticketActivationCodeValidateQuery.ts"
 export { ticketCheckoutClaimBillingMutation } from "#src/ticketing/convex/ticketCheckoutClaimBillingMutation.ts"
 export { ticketCheckoutCreateAction } from "#src/ticketing/convex/ticketCheckoutCreateAction.ts"

@@ -330,7 +330,9 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
   "ticketing": {
     "ticketActivationCodeExportAdminQuery": { kind: "query", visibility: "public", acceptsToken: true },
     "ticketActivationCodeGenerateMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
+    "ticketActivationCodeHoldExpireMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
     "ticketActivationCodeListAdminQuery": { kind: "query", visibility: "public", acceptsToken: true },
+    "ticketActivationCodeReserveMutation": { kind: "mutation", visibility: "public", acceptsToken: false },
     "ticketActivationCodeValidateQuery": { kind: "query", visibility: "public", acceptsToken: false },
     "ticketCheckoutClaimBillingMutation": { kind: "internalMutation", visibility: "internal", acceptsToken: false },
     "ticketCheckoutCreateAction": { kind: "action", visibility: "public", acceptsToken: true },
@@ -373,13 +375,13 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
 
 export const convexFunctionCatalogTotals = {
   modules: 36,
-  functions: 277,
-  public: 192,
-  internal: 85,
+  functions: 279,
+  public: 193,
+  internal: 86,
   query: 85,
-  mutation: 93,
+  mutation: 94,
   action: 14,
   internalQuery: 16,
-  internalMutation: 53,
+  internalMutation: 54,
   internalAction: 16,
 } as const
