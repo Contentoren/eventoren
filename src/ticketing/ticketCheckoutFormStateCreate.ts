@@ -11,22 +11,29 @@ import type { TicketCheckoutStep } from "./TicketCheckoutStep.ts"
 import type { TicketContact } from "./TicketContact.ts"
 import type { TicketParticipantNames } from "./TicketParticipantNames.ts"
 import type { TicketRequiredFieldKey } from "./TicketRequiredFieldKey.ts"
+import { ticketActivationCodeMissing } from "./ticketActivationCodeMissing.ts"
 import { ticketCartDraftAddOrUpdate } from "./ticketCartDraftAddOrUpdate.ts"
 import { ticketCartDraftLoad } from "./ticketCartDraftLoad.ts"
 import { ticketCartDraftSave } from "./ticketCartDraftSave.ts"
-import { ticketActivationCodeMissing } from "./ticketActivationCodeMissing.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
 import { ticketCheckoutCancelUrlCreate } from "./ticketCheckoutCancelUrlCreate.ts"
 import { ticketCheckoutCreate } from "./ticketCheckoutCreate.ts"
 import { ticketCheckoutKeyCreate } from "./ticketCheckoutKeyCreate.ts"
 import { ticketCheckoutLegalDocumentRevision } from "./ticketCheckoutLegalDocumentRevision.ts"
 import { ticketCheckoutLegalDocumentSnapshot } from "./ticketCheckoutLegalDocumentSnapshot.ts"
-import { ticketCheckoutTicketsCreate } from "./ticketCheckoutTicketsCreate.ts"
+import { ticketCheckoutRetryProbeUrlsRead } from "./ticketCheckoutRetryProbeUrlsRead.ts"
+import {
+  ticketCheckoutRetryHasCode,
+  ticketCheckoutRetryLoad,
+  ticketCheckoutRetryStore,
+} from "./ticketCheckoutRetryStore.ts"
+import { ticketCheckoutRetryTerminalSubmit } from "./ticketCheckoutRetryTerminalSubmit.ts"
 import { ticketCheckoutReturnUrlCreate } from "./ticketCheckoutReturnUrlCreate.ts"
 import { ticketCheckoutSearchOrderIds } from "./ticketCheckoutSearchOrderIds.ts"
 import { ticketCheckoutStepLabels } from "./ticketCheckoutStepLabels.ts"
 import { ticketCheckoutStepOrder } from "./ticketCheckoutStepOrder.ts"
 import { ticketCheckoutText } from "./ticketCheckoutText.ts"
+import { ticketCheckoutTicketsCreate } from "./ticketCheckoutTicketsCreate.ts"
 import { ticketContactDraftLoad } from "./ticketContactDraftLoad.ts"
 import { ticketContactDraftSave } from "./ticketContactDraftSave.ts"
 import { ticketContactEmpty } from "./ticketContactEmpty.ts"
@@ -413,10 +420,32 @@ export function ticketCheckoutFormStateCreate(inputs: {
     }
 
     const authenticated = Boolean(auth.identity())
-    const guestAccessToken = authenticated ? undefined : ticketGuestAccessTokenCreate()
     const createdOrderIds: string[] = []
     let redirectUrl: string | undefined
     errorMessage.set("")
+
+    // Every checkout attempt goes through one submit path, so a fresh attempt
+    // after a terminal retry failure uses the same transport as the first one.
+    const submitCheckout = async (
+      input: Omit<TicketCheckoutCreateInput, "token" | "guestAccessToken">,
+      guestAccessToken: string | undefined,
+    ) =>
+      authenticated
+        ? await (await ticketingServerRead()).checkoutCreate({ data: input })
+        : await ticketCheckoutCreate({ ...input, guestAccessToken })
+
+    const checkoutFailureHandle = async (failure: { readonly errorMessage: string }) => {
+      if (
+        failure.errorMessage === "The event revision is stale" ||
+        failure.errorMessage === "The event revision is required"
+      ) {
+        await router.invalidate()
+        errorMessage.set(ticketCheckoutText().catalogChanged)
+      } else {
+        errorMessage.set(failure.errorMessage)
+      }
+      isSubmitting.set(false)
+    }
 
     try {
       for (const item of inputs.items()) {
@@ -424,79 +453,142 @@ export function ticketCheckoutFormStateCreate(inputs: {
         const updatedDraft = ticketCartDraftAddOrUpdate(currentDraft, item.cart)
         ticketCartDraftSave(updatedDraft)
 
-        const checkoutKey = ticketCheckoutKeyCreate()
-        const returnUrl = ticketCheckoutReturnUrlCreate(appOrigin.data, checkoutKey)
-        if (!returnUrl.success) {
-          errorMessage.set(returnUrl.errorMessage)
-          isSubmitting.set(false)
-          return
+        const tickets = ticketCheckoutTicketsCreate(item.cart, validatedParticipantNames.data)
+        const billingDetails = {
+          givenName: validated.data.firstName,
+          familyName: validated.data.lastName,
+          ...(validated.data.billingKind === "company"
+            ? {
+                company: validated.data.companyName,
+                ...(validated.data.companyExtra ? { companyExtra: validated.data.companyExtra } : {}),
+              }
+            : {}),
+          address: {
+            line1: validated.data.address,
+            ...(validated.data.addressLine2 ? { line2: validated.data.addressLine2 } : {}),
+            postalCode: validated.data.postalCode,
+            city: validated.data.city,
+            country: validated.data.country,
+          },
+          ...(validated.data.billingKind === "company" && validated.data.taxId
+            ? { taxId: { type: "eu_vat" as const, value: validated.data.taxId } }
+            : {}),
         }
-        const cancelUrl = ticketCheckoutCancelUrlCreate(appOrigin.data, item.event.id)
-        if (!cancelUrl.success) {
-          errorMessage.set(cancelUrl.errorMessage)
-          isSubmitting.set(false)
-          return
+        const customer = {
+          email: validated.data.email,
+          givenName: validated.data.firstName,
+          familyName: validated.data.lastName,
+          address: validated.data.address,
+          phone: validated.data.phone,
+          billingDetails,
+        }
+        const legalContext = {
+          cta: text.legalCta,
+          termsAccepted: true as const,
+          privacyAcknowledged: true as const,
+          documentSetRevision: ticketCheckoutLegalDocumentRevision,
+          termsMarkdown: ticketCheckoutLegalDocumentSnapshot.termsMarkdown,
+          privacyMarkdown: ticketCheckoutLegalDocumentSnapshot.privacyMarkdown,
+        }
+        const probeUrls = ticketCheckoutRetryProbeUrlsRead(appOrigin.data, item.event.id)
+        const materialProbe: Omit<
+          TicketCheckoutCreateInput,
+          "token" | "guestAccessToken" | "checkoutKey" | "successUrl" | "cancelUrl"
+        > = {
+          eventKey: item.event.id,
+          catalogVersion: item.event.catalogVersion,
+          eventRevision: item.event.eventRevision ?? 1,
+          tickets,
+          locale: "de",
+          customer,
+          legalContext,
+        }
+        // Same-browser back/cancel retry: an unchanged code order reuses its
+        // stored checkout key and guest credential. The lookup runs before a
+        // checkout key exists, so the URL context of the current attempt comes
+        // from the pre-key URL helpers and only the generated checkout key
+        // query value stays out of the comparison; a changed booking never
+        // replays old evidence. Code-free orders keep the fresh-key path.
+        const retry = ticketCheckoutRetryHasCode({ tickets })
+          ? ticketCheckoutRetryLoad(materialProbe, probeUrls)
+          : undefined
+        let checkoutKey = retry?.checkoutKey ?? ticketCheckoutKeyCreate()
+        let guestAccessToken = authenticated ? undefined : (retry?.guestAccessToken ?? ticketGuestAccessTokenCreate())
+        // A replayed checkout sends the unchanged first-submit URLs together
+        // with the reused key: the server compares the canonical booking
+        // context, which includes both URLs.
+        const storedSuccessUrl = retry?.checkoutInput.successUrl
+        const storedCancelUrl = retry?.checkoutInput.cancelUrl
+        let successUrl: string
+        let cancelUrl: string
+        if (
+          typeof storedSuccessUrl === "string" &&
+          storedSuccessUrl.length > 0 &&
+          typeof storedCancelUrl === "string" &&
+          storedCancelUrl.length > 0
+        ) {
+          successUrl = storedSuccessUrl
+          cancelUrl = storedCancelUrl
+        } else {
+          const returnUrl = ticketCheckoutReturnUrlCreate(appOrigin.data, checkoutKey)
+          if (!returnUrl.success) {
+            errorMessage.set(returnUrl.errorMessage)
+            isSubmitting.set(false)
+            return
+          }
+          const cancel = ticketCheckoutCancelUrlCreate(appOrigin.data, item.event.id)
+          if (!cancel.success) {
+            errorMessage.set(cancel.errorMessage)
+            isSubmitting.set(false)
+            return
+          }
+          successUrl = returnUrl.data
+          cancelUrl = cancel.data
         }
         const checkoutInput: Omit<TicketCheckoutCreateInput, "token" | "guestAccessToken"> = {
           checkoutKey,
           eventKey: item.event.id,
           catalogVersion: item.event.catalogVersion,
           eventRevision: item.event.eventRevision ?? 1,
-          tickets: ticketCheckoutTicketsCreate(item.cart, validatedParticipantNames.data),
-          successUrl: returnUrl.data,
-          cancelUrl: cancelUrl.data,
+          tickets,
+          successUrl,
+          cancelUrl,
           locale: "de",
-          customer: {
-            email: validated.data.email,
-            givenName: validated.data.firstName,
-            familyName: validated.data.lastName,
-            address: validated.data.address,
-            phone: validated.data.phone,
-            billingDetails: {
-              givenName: validated.data.firstName,
-              familyName: validated.data.lastName,
-              ...(validated.data.billingKind === "company"
-                ? {
-                    company: validated.data.companyName,
-                    ...(validated.data.companyExtra ? { companyExtra: validated.data.companyExtra } : {}),
-                  }
-                : {}),
-              address: {
-                line1: validated.data.address,
-                ...(validated.data.addressLine2 ? { line2: validated.data.addressLine2 } : {}),
-                postalCode: validated.data.postalCode,
-                city: validated.data.city,
-                country: validated.data.country,
-              },
-              ...(validated.data.billingKind === "company" && validated.data.taxId
-                ? { taxId: { type: "eu_vat" as const, value: validated.data.taxId } }
-                : {}),
-            },
-          },
-          legalContext: {
-            cta: text.legalCta,
-            termsAccepted: true,
-            privacyAcknowledged: true,
-            documentSetRevision: ticketCheckoutLegalDocumentRevision,
-            termsMarkdown: ticketCheckoutLegalDocumentSnapshot.termsMarkdown,
-            privacyMarkdown: ticketCheckoutLegalDocumentSnapshot.privacyMarkdown,
-          },
+          customer,
+          legalContext,
         }
-        const created = authenticated
-          ? await (await ticketingServerRead()).checkoutCreate({ data: checkoutInput })
-          : await ticketCheckoutCreate({ ...checkoutInput, guestAccessToken })
+        // Persist the exact first-submit payload before the network call so a
+        // back/cancel retry replays the unchanged evidence instead of minting
+        // a second Stripe session. Code-free orders are never stored.
+        ticketCheckoutRetryStore({ checkoutInput, checkoutKey, guestAccessToken })
+        let created = await submitCheckout(checkoutInput, guestAccessToken)
         if (!created.success) {
-          if (
-            created.errorMessage === "The event revision is stale" ||
-            created.errorMessage === "The event revision is required"
-          ) {
-            await router.invalidate()
-            errorMessage.set(ticketCheckoutText().catalogChanged)
-          } else {
-            errorMessage.set(created.errorMessage)
+          // A stored checkout key that the backend reports as terminal (failed,
+          // expired, released or a paid inventory conflict) can never be
+          // replayed again. Its record is removed and one fresh checkout
+          // starts with a new key, a new guest credential, the current hold
+          // credential and the current URLs. Every other failure keeps the
+          // record and stays a plain error.
+          const outcome = await ticketCheckoutRetryTerminalSubmit({
+            failed: created,
+            retry,
+            failedCheckoutKey: checkoutKey,
+            appOrigin: appOrigin.data,
+            material: materialProbe,
+            authenticated,
+            submit: submitCheckout,
+          })
+          if (outcome.kind === "not_applicable") {
+            await checkoutFailureHandle(created)
+            return
           }
-          isSubmitting.set(false)
-          return
+          checkoutKey = outcome.checkoutKey
+          guestAccessToken = outcome.guestAccessToken
+          created = outcome.result
+          if (!created.success) {
+            await checkoutFailureHandle(created)
+            return
+          }
         }
 
         const stored = ticketOrderAccessStorageUpsert({
