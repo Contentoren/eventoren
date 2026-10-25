@@ -1,4 +1,7 @@
 import { expect, test } from "bun:test"
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
 import {
   convexCatalogImportLoader,
   convexCatalogTokenDetect,
@@ -50,6 +53,18 @@ test("convexCatalogTokenDetect classifies loader-independent shapes", () => {
     ["v.object({ name: v.string() })", false],
     ["a.object({ token: a.string() })", true],
     ["v.object(groupLookupConvexFields)", null],
+    ["valibotToConvex({ token: v.string() })", true],
+    ["valibotToConvex({ receiptToken: v.string() })", false],
+    ["valibotToConvex(v.pipe(v.strictObject({ token: v.string() }), v.check(() => true)).pipe[0].entries)", true],
+    ["v.pipe(v.strictObject({ receiptToken: v.string() }), v.check(() => ({ token: true })))", false],
+    ['valibotToConvex(v.pick(schema, ["requestKey", "receiptToken"]).entries)', false],
+    ["a.pick(schema, ['token', 'receiptToken']).entries", true],
+    ['v.pick(schema, ["token",]).entries', true],
+    ["v.pick(schema, []).entries", false],
+    ["v.pick(schema, keys).entries", null],
+    ['v.pick(schema, ["requestKey", dynamicKey]).entries', null],
+    ['v.pick(schema, ["tok\\\\u0065n"]).entries', null],
+    ["valibotToConvex(unknownSchema.entries)", null],
     ["unknownValidator", null],
   ] as const) {
     expect(convexCatalogTokenDetect(expression), expression).toBe(expected)
@@ -92,10 +107,70 @@ test("collect keeps the public token validators true", () => {
   expect(byKey.get("auth:userProfileUpdateMutation")?.acceptsToken).toBe(true)
 })
 
+test("collect follows imported Valibot entry schemas without mistaking receiptToken for an auth token", () => {
+  const entries = convexFunctionCatalogCollect(process.cwd())
+  for (const name of [
+    "organizerTerminationSubmitMutation",
+    "organizerTerminationReceiptQuery",
+    "organizerTerminationRetryMutation",
+  ]) {
+    expect(entries.find((entry) => entry.module === "organizerTermination" && entry.name === name)?.acceptsToken).toBe(
+      false,
+    )
+  }
+})
+
 test("collect follows aliased re-exports to the local definition", () => {
   const entries = convexFunctionCatalogCollect(process.cwd())
   const byKey = new Map(entries.map((entry) => [`${entry.module}:${entry.name}`, entry]))
   const entry = byKey.get("publicProjectInfo:publicProjectInfo")
   expect(entry?.kind).toBe("query")
   expect(entry?.acceptsToken).toBe(false)
+})
+
+test("collect resolves parent-relative convex re-exports inside the repo", () => {
+  const repoRoot = mkdtempSync(join(tmpdir(), "convex-catalog-parent-"))
+  try {
+    mkdirSync(join(repoRoot, "convex"), { recursive: true })
+    mkdirSync(join(repoRoot, "src", "organizer", "dashboard", "contracts"), { recursive: true })
+    writeFileSync(
+      join(repoRoot, "convex", "organizerContractDelivery.ts"),
+      'export { organizerContractDeliveryClaimInternalMutation } from "../src/organizer/dashboard/contracts/organizerContractDeliveryClaimInternalMutation.ts"\n' +
+        'export { organizerContractDeliveryListQuery } from "../src/organizer/dashboard/contracts/organizerContractDeliveryListQuery.ts"\n',
+    )
+    writeFileSync(
+      join(repoRoot, "src", "organizer", "dashboard", "contracts", "organizerContractDeliveryClaimInternalMutation.ts"),
+      "export const organizerContractDeliveryClaimInternalMutation = internalMutation({\n" +
+        '  args: { deliveryId: v.id("organizerDashboardContractDeliveries") },\n' +
+        "  handler: async () => null,\n" +
+        "})\n",
+    )
+    writeFileSync(
+      join(repoRoot, "src", "organizer", "dashboard", "contracts", "organizerContractDeliveryListQuery.ts"),
+      "export const organizerContractDeliveryListQuery = query({\n" +
+        "  args: { token: v.string() },\n" +
+        "  handler: async () => null,\n" +
+        "})\n",
+    )
+    const entries = convexFunctionCatalogCollect(repoRoot)
+    const byKey = new Map(entries.map((entry) => [`${entry.module}:${entry.name}`, entry]))
+    expect(byKey.get("organizerContractDelivery:organizerContractDeliveryClaimInternalMutation")).toEqual({
+      module: "organizerContractDelivery",
+      name: "organizerContractDeliveryClaimInternalMutation",
+      file: "src/organizer/dashboard/contracts/organizerContractDeliveryClaimInternalMutation.ts",
+      kind: "internalMutation",
+      visibility: "internal",
+      acceptsToken: false,
+    })
+    expect(byKey.get("organizerContractDelivery:organizerContractDeliveryListQuery")).toEqual({
+      module: "organizerContractDelivery",
+      name: "organizerContractDeliveryListQuery",
+      file: "src/organizer/dashboard/contracts/organizerContractDeliveryListQuery.ts",
+      kind: "query",
+      visibility: "public",
+      acceptsToken: true,
+    })
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true })
+  }
 })

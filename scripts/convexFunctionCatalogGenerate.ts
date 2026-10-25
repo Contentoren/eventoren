@@ -26,7 +26,7 @@ const kindPattern = "internalQuery|internalMutation|internalAction|query|mutatio
 function resolveTarget(target: string): string | null {
   if (target.startsWith("#src/")) return `src/${target.slice("#src/".length)}`
   if (target.startsWith("./")) return `convex/${target.slice(2)}`
-  if (target.startsWith("../")) return target
+  if (target.startsWith("../")) return join("convex", target)
   return null
 }
 
@@ -327,6 +327,59 @@ function acceptsTokenDetect(
   return argsExprAcceptsToken(afterArgs, definitionFileSource, definitionFile, loadImportedFile, 6)
 }
 
+/** A parsed call expression: callee and its top-level arguments. */
+type ParsedCall = {
+  readonly callee: string
+  readonly args: readonly string[]
+}
+
+/**
+ * Parses a leading `name(...)` call into callee and top-level arguments.
+ * Text after the closing parenthesis is ignored.
+ */
+function parseCallExpression(expression: string): ParsedCall | null {
+  const match = /^([A-Za-z_$][\w$.]*)\s*\(/.exec(expression)
+  if (!match) return null
+  const openIndex = expression.indexOf("(", match[0].length - 1)
+  const call = balancedSlice(expression, openIndex)
+  if (!call) return null
+  const inner = call.slice(1, -1)
+  const masked = maskStringsAndComments(inner)
+  const args: string[] = []
+  let depth = 0
+  let start = 0
+  for (let index = 0; index < inner.length; index += 1) {
+    const char = masked[index]
+    if (char === "(" || char === "[" || char === "{") depth += 1
+    else if (char === ")" || char === "]" || char === "}") depth -= 1
+    else if (char === "," && depth === 0) {
+      args.push(inner.slice(start, index).trim())
+      start = index + 1
+    }
+  }
+  args.push(inner.slice(start).trim())
+  return { callee: match[1] ?? "", args: args.filter((arg) => arg.length > 0) }
+}
+
+/**
+ * Reads a fully literal key list (`["a", "b"]`). A dynamic or unknown key
+ * expression yields null so the caller keeps the unknown shape.
+ */
+function parseStaticKeyList(expression: string | undefined): string[] | null {
+  if (expression === undefined) return null
+  const match = /^\[([\s\S]*)\](\s*as const)?$/.exec(expression.trim())
+  if (!match) return null
+  const items = (match[1] ?? "").split(",")
+  if (items.at(-1)?.trim() === "") items.pop()
+  const keys: string[] = []
+  for (const item of items) {
+    const literal = /^\s*(?:"([^"\\]*)"|'([^'\\]*)')\s*$/.exec(item)
+    if (!literal) return null
+    keys.push(literal[1] ?? literal[2] ?? "")
+  }
+  return keys
+}
+
 /**
  * Best-effort token detection. Returns true when the args block declares a
  * `token` field (directly or via createTokenValidator), false when args are
@@ -337,6 +390,11 @@ function acceptsTokenDetect(
  * Validator identifiers are followed through `const` alias chains (local
  * first, then imports) with a fuel limit so `args: groupCreateValidator`
  * resolves through `groupCreateConvexValidator = v.object(fields)`.
+ *
+ * Valibot shapes are inspected statically, never executed: `valibotToConvex`
+ * is unwrapped to its argument, `v.pipe`/`a.pipe` contribute only their
+ * first schema (later checks add no fields) and `v.pick`/`a.pick` contribute
+ * their literal key list.
  */
 function argsExprAcceptsToken(
   expression: string,
@@ -358,16 +416,36 @@ function argsExprAcceptsToken(
     if (!block) return null
     return convexCatalogTokenScan(block)
   }
-  // Object-validator calls (`v.object(`, `a.object(`, ...): inspect the
-  // inner fields expression with the same rules.
+  if (fuel <= 0) return null
+  const call = /^(?:valibotToConvex|[va]\.(?:pipe|pick))\s*\(/.test(trimmed) ? parseCallExpression(trimmed) : null
+  if (call) {
+    // valibotToConvex(fields) only wraps the fields expression.
+    if (call.callee === "valibotToConvex") {
+      const wrapped = call.args[0]
+      if (!wrapped) return null
+      return argsExprAcceptsToken(wrapped, currentSource, currentFile, loadImportedFile, fuel - 1)
+    }
+    // v.pipe(schema, ...checks): only the first schema defines the fields.
+    if (call.callee === "v.pipe" || call.callee === "a.pipe") {
+      const first = call.args[0]
+      if (!first) return null
+      return argsExprAcceptsToken(first, currentSource, currentFile, loadImportedFile, fuel - 1)
+    }
+    // v.pick(schema, keys): the picked keys are the only fields.
+    if (call.callee === "v.pick" || call.callee === "a.pick") {
+      const keys = parseStaticKeyList(call.args[1])
+      return keys ? keys.includes("token") : null
+    }
+  }
+  // Object-validator calls (`v.object(`, `a.strictObject(`, ...): inspect
+  // the inner fields expression with the same rules.
   if (/^[\w$.]*[Oo]bject\s*\(/.test(trimmed)) {
     const inner = balancedSlice(trimmed, trimmed.indexOf("("))
     if (!inner) return null
-    if (fuel <= 0) return null
     return argsExprAcceptsToken(inner.slice(1, -1), currentSource, currentFile, loadImportedFile, fuel - 1)
   }
   const identifier = /^[A-Za-z_$][\w$]*/.exec(trimmed)?.[0]
-  if (!identifier || fuel <= 0) return null
+  if (!identifier) return null
   const rhs = constRhs(currentSource, identifier)
   if (rhs) return argsExprAcceptsToken(rhs, currentSource, currentFile, loadImportedFile, fuel - 1)
   const imported = importLocalSource(currentSource, currentFile, identifier, loadImportedFile)
