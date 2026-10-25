@@ -35,6 +35,24 @@ function profileCreate(orgId: string, canAcceptContracts = true) {
   })
 }
 
+function contractConsentFill(state: ReturnType<typeof veranstalterEinstellungenPageStateCreate>) {
+  state.contractParty.set({
+    legalName: "Testorganisation GmbH",
+    representativeName: "Ada Beispiel",
+    streetAddress: "Teststraße 1",
+    postalCode: "10115",
+    city: "Berlin",
+    countryCode: "DE",
+    email: "contracts@example.org",
+    customerType: "business",
+  })
+  state.customerType.set("business")
+  // Party changes invalidate consent, so fill the acknowledgements last.
+  state.termsAccepted.set(true)
+  state.dpaAccepted.set(true)
+  state.authorityConfirmed.set(true)
+}
+
 type MutationCall = { reference: unknown; args: Record<string, unknown> }
 type Subscription = { args: Record<string, unknown>; push: (value: unknown) => void; active: boolean }
 
@@ -108,8 +126,7 @@ test("switching A to B immediately clears all organization fields, flags and con
     expect(h.state.bankHolder.get()).toBe("Bank A")
     h.state.saved.set(true)
     h.state.serverError.set("old error")
-    h.state.termsAccepted.set(true)
-    h.state.dpaAccepted.set(true)
+    contractConsentFill(h.state)
     h.orgId.set("B")
     expect(h.state.name.get()).toBe("")
     for (const field of [h.state.contactEmail, h.state.contactPhone, h.state.imprint, h.state.iban, h.state.bankHolder])
@@ -119,6 +136,8 @@ test("switching A to B immediately clears all organization fields, flags and con
     expect(h.state.serverError.get()).toBeNull()
     expect(h.state.termsAccepted.get()).toBe(false)
     expect(h.state.dpaAccepted.get()).toBe(false)
+    expect(h.state.authorityConfirmed.get()).toBe(false)
+    expect(h.state.contractParty.get().legalName).toBe("")
     expect(h.state.canSubmit()).toBe(false)
     expect(h.state.storedProfile()).toBeNull()
     h.push("B")
@@ -184,12 +203,12 @@ test("contract acceptance requires a matching loaded organization and that organ
     h.push("A")
     h.orgId.set("B")
     h.push("B", profileCreate("A"))
-    h.state.termsAccepted.set(true)
-    h.state.dpaAccepted.set(true)
+    contractConsentFill(h.state)
     await h.state.submitContracts()
     expect(h.calls).toHaveLength(0)
     expect(h.state.serverError.get()).toMatch(/Organisation.*geladen/)
     h.push("B", profileCreate("B", false))
+    contractConsentFill(h.state)
     await h.state.submitContracts()
     expect(h.calls).toHaveLength(0)
     h.push("B")
@@ -199,6 +218,8 @@ test("contract acceptance requires a matching loaded organization and that organ
       getFunctionName(api.organizerDashboard.organizerContractsAcceptMutation),
     )
     expect(h.calls[0]?.args.orgId).toBe("B")
+    expect(h.calls[0]?.args.contractParty).toEqual(h.state.contractParty.get())
+    expect(h.calls[0]?.args.authorityConfirmed).toBe(true)
   } finally {
     h.dispose()
   }
@@ -268,8 +289,7 @@ test("an in-flight consent mutation never clears the new organization's consents
     for (const response of [createResult({ orgId: "A" }), createResultError("test", "old failure")]) {
       h.orgId.set("A")
       h.push("A")
-      h.state.termsAccepted.set(true)
-      h.state.dpaAccepted.set(true)
+      contractConsentFill(h.state)
       let finish: ((value: unknown) => void) | undefined
       h.deferMutation(
         () =>
@@ -281,8 +301,7 @@ test("an in-flight consent mutation never clears the new organization's consents
       expect(h.calls.at(-1)?.args.orgId).toBe("A")
       h.orgId.set("B")
       h.push("B")
-      h.state.termsAccepted.set(true)
-      h.state.dpaAccepted.set(true)
+      contractConsentFill(h.state)
       if (!finish) throw new Error("Consent mutation did not start")
       finish(response)
       await pending
@@ -301,8 +320,7 @@ for (const request of ["profile", "consent"] as const) {
       const h = harnessCreate()
       try {
         h.push("A")
-        h.state.termsAccepted.set(true)
-        h.state.dpaAccepted.set(true)
+        contractConsentFill(h.state)
         let finish!: (value: unknown) => void
         h.deferMutation(
           () =>
@@ -315,8 +333,7 @@ for (const request of ["profile", "consent"] as const) {
         h.orgId.set("A")
         h.push("A")
         h.state.name.set("New unsaved A")
-        h.state.termsAccepted.set(true)
-        h.state.dpaAccepted.set(true)
+        contractConsentFill(h.state)
         finish(outcome === "success" ? createResult({ orgId: "A" }) : createResultError("test", "old A failure"))
         await oldRequest
         expect(h.state.saved.get()).toBe(false)
@@ -332,8 +349,7 @@ for (const request of ["profile", "consent"] as const) {
       const h = harnessCreate()
       try {
         h.push("A")
-        h.state.termsAccepted.set(true)
-        h.state.dpaAccepted.set(true)
+        contractConsentFill(h.state)
         const completions: ((value: unknown) => void)[] = []
         h.deferMutation(() => new Promise((resolve) => completions.push(resolve)))
         const submit = request === "profile" ? h.state.submit : h.state.submitContracts
@@ -346,8 +362,7 @@ for (const request of ["profile", "consent"] as const) {
         h.orgId.set("A")
         h.push("A")
         h.state.name.set("New A unsaved name")
-        h.state.termsAccepted.set(true)
-        h.state.dpaAccepted.set(true)
+        contractConsentFill(h.state)
         const newRequest = submit()
         expect(completions).toHaveLength(2)
         completions[0]!(

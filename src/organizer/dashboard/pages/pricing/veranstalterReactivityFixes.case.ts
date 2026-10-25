@@ -125,6 +125,7 @@ const profileOk = (orgId: string, bank: { iban: string; holder: string } | null)
     imprint: "Impressum",
   },
   bank,
+  contracts: { termsAccepted: false, dpaAccepted: false, current: false },
   canAcceptContracts: false,
 })
 
