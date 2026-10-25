@@ -1,7 +1,7 @@
-import { internalQuery } from "#convex/_generated/server.js"
 import { v } from "convex/values"
-import { vIdUser } from "#src/auth/convex/vIdUser.ts"
+import { internalQuery } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
+import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 
 export const ticketOrderPaymentContextQuery = internalQuery({
   args: {

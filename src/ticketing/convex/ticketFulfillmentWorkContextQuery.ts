@@ -2,8 +2,8 @@ import { v } from "convex/values"
 import type { Id } from "#convex/_generated/dataModel.js"
 import { internalQuery } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
-import type { TicketFulfillmentWorkSnapshot } from "./ticketFulfillmentWorkSnapshotCreate.js"
 import { ticketFulfillmentWorkEligible } from "./ticketFulfillmentWorkEligible.js"
+import type { TicketFulfillmentWorkSnapshot } from "./ticketFulfillmentWorkSnapshotCreate.js"
 
 export const ticketFulfillmentWorkContextQuery = internalQuery({
   args: { workId: v.id("ticketFulfillmentWork") },

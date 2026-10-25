@@ -4,11 +4,11 @@ import { eventPriceFrom } from "../events/eventPriceFrom.ts"
 import type { Result } from "../ui/Result.ts"
 import type { TicketCart } from "./TicketCart.ts"
 import { ticketCartTotalCalculate } from "./ticketCartTotalCalculate.ts"
-import { ticketTierSelectorStateCreate } from "./ticketTierSelectorStateCreate.ts"
-import { ticketPriceFormat } from "./ticketPriceFormat.ts"
 import { ticketCheckoutText } from "./ticketCheckoutText.ts"
 import { ticketPaymentHintsGet } from "./ticketPaymentHintsGet.ts"
 import { ticketPaymentMethodsGet } from "./ticketPaymentMethodsGet.ts"
+import { ticketPriceFormat } from "./ticketPriceFormat.ts"
+import { ticketTierSelectorStateCreate } from "./ticketTierSelectorStateCreate.ts"
 
 export function ticketCartSummaryStateCreate(inputs: {
   event: () => EventItem

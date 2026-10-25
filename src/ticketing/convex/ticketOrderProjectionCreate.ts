@@ -1,5 +1,5 @@
-import type { QueryCtx } from "#convex/_generated/server.js"
 import type { Id } from "#convex/_generated/dataModel.js"
+import type { QueryCtx } from "#convex/_generated/server.js"
 import { createResult } from "#result"
 import { ticketOrderSalesCheck } from "./ticketOrderSalesCheck.js"
 

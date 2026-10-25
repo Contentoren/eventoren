@@ -1,9 +1,9 @@
 import { v } from "convex/values"
-import { query } from "#convex/_generated/server.js"
 import type { Doc } from "#convex/_generated/dataModel.js"
+import { query } from "#convex/_generated/server.js"
 import { createResult, createResultError } from "#result"
-import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryTokenToUserId.ts"
 import { catalogAdminAuthorizeFn } from "#src/catalog/convex/catalogAdminAuthorizeFn.js"
+import { authQueryTokenToUserId } from "#src/utils/convex_backend/authQueryTokenToUserId.ts"
 
 /** Read-only, admin-authorized correlation: never return customer data or checkout capability URLs. */
 export const ticketE2eOrderProofQuery = query({

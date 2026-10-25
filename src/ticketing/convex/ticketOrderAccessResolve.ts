@@ -1,5 +1,5 @@
-import type { IdUser } from "#src/auth/convex/IdUser.ts"
 import { createResult, createResultError, type PromiseResult } from "#result"
+import type { IdUser } from "#src/auth/convex/IdUser.ts"
 import { verifyTokenGetUserId } from "#src/auth/server/jwt_token/verifyTokenGetUserId.ts"
 import { ticketAccessDigestCreate } from "./ticketAccessDigestCreate.js"
 

@@ -1,4 +1,4 @@
-import { v, type Infer } from "convex/values"
+import { type Infer, v } from "convex/values"
 
 export const ticketPaymentReconcileScanValidator = v.object({
   stripeMode: v.union(v.literal("live"), v.literal("test")),
