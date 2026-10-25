@@ -5,21 +5,28 @@ import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { vIdUser } from "#src/auth/convex/vIdUser.ts"
 import { dashFeeCompute } from "#src/dash/model/dashFeeCompute.ts"
+import { eventBookingIsOpen } from "#src/events/eventBookingIsOpen.ts"
+import { eventTicketTierMaxPerOrderGet } from "#src/events/eventTicketTierMaxPerOrderGet.ts"
 import { ticketCheckoutLegalDocumentRevision } from "../ticketCheckoutLegalDocumentRevision.js"
 import { ticketCheckoutLegalDocumentSnapshot } from "../ticketCheckoutLegalDocumentSnapshot.js"
-import { eventTicketTierMaxPerOrderGet } from "#src/events/eventTicketTierMaxPerOrderGet.ts"
-import { eventBookingIsOpen } from "#src/events/eventBookingIsOpen.ts"
-import { ticketCheckoutContextCanonicalize } from "./ticketCheckoutContextCanonicalize.js"
-import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.js"
+import { ticketActivationCodeHoldAdoptionResolve } from "./ticketActivationCodeHoldAdoptionResolve.js"
 import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
-import { ticketOrganizerSalesCheck } from "./ticketOrganizerSalesCheck.js"
+import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.js"
+import { ticketCheckoutContextCanonicalize } from "./ticketCheckoutContextCanonicalize.js"
 import { ticketOrderSalesCheck } from "./ticketOrderSalesCheck.js"
+import { ticketOrganizerSalesCheck } from "./ticketOrganizerSalesCheck.js"
+
+/** Server-owned reservation window of a checkout without an adopted hold. */
+const reservationDurationMs = 15 * 60 * 1000
 
 const ticketSelectionValidator = v.object({
   tierKey: v.string(),
   quantity: v.number(),
   participantNames: v.optional(v.array(v.string())),
   activationCode: v.optional(v.string()),
+  // Browser-bound hold credential: proof of ownership of a browser hold, never
+  // part of the canonical checkout evidence.
+  activationCodeHoldToken: v.optional(v.string()),
 })
 
 export const ticketCheckoutPrepareMutation = internalMutation({
@@ -286,9 +293,10 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     const feePayer = organization?.fee.payer === "veranstalter" ? "organizer" : "buyer"
 
     const requestedSelections = [...args.tickets].sort((left, right) => left.tierKey.localeCompare(right.tierKey))
+    const nowMs = Date.now()
     const quantitiesByTier = new Map<
       string,
-      { quantity: number; participantNames: string[]; activationCode?: string }
+      { quantity: number; participantNames: string[]; activationCode?: string; activationCodeHoldToken?: string }
     >()
     for (const selection of requestedSelections) {
       if (!Number.isSafeInteger(selection.quantity) || selection.quantity < 1)
@@ -302,7 +310,14 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       const previous = quantitiesByTier.get(selection.tierKey)
       if (previous && previous.activationCode !== activationCode)
         return createResultError(op, "Each ticket product must use the same activation code")
-      const aggregated = previous ?? { quantity: 0, participantNames: [], activationCode }
+      if (previous && previous.activationCodeHoldToken !== selection.activationCodeHoldToken)
+        return createResultError(op, "Each ticket product must use the same activation code hold")
+      const aggregated = previous ?? {
+        quantity: 0,
+        participantNames: [],
+        activationCode,
+        activationCodeHoldToken: selection.activationCodeHoldToken,
+      }
       aggregated.quantity += selection.quantity
       if (!Number.isSafeInteger(aggregated.quantity)) return createResultError(op, "Ticket quantity is invalid")
       aggregated.participantNames.push(...selection.participantNames)
@@ -320,6 +335,8 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       priceCents: number
       feeCents: number
     }> = []
+    // Server-owned deadlines of the browser holds this checkout adopts.
+    const adoptedHoldExpiries: number[] = []
     let subtotalCents = 0
     let feeCents = 0
     let platformFeeCents = 0
@@ -374,14 +391,13 @@ export const ticketCheckoutPrepareMutation = internalMutation({
           .query("ticketActivationCodeReservations")
           .withIndex("codeIdAndStatusAndCreatedAt", (q) => q.eq("codeId", code._id).eq("status", "reserved"))
           .first()
-        if (
-          code.status !== "available" ||
-          code.orderId !== undefined ||
-          code.consumedAt !== undefined ||
-          charged ||
-          active
-        )
-          return createResultError(op, "The activation code is no longer available")
+        if (charged || active) return createResultError(op, "The activation code is no longer available")
+        // A free code is taken directly, a browser hold only by its own
+        // credential and only while it is alive. The deadline of an adopted
+        // hold is the server-owned hold expiry.
+        const adoption = await ticketActivationCodeHoldAdoptionResolve(code, aggregated.activationCodeHoldToken, nowMs)
+        if (!adoption.success) return createResultError(op, adoption.errorMessage)
+        if (adoption.data.kind === "adopt") adoptedHoldExpiries.push(adoption.data.holdExpiresAt)
         activationCode = code
       }
       const platformFeePerTicket =
@@ -417,8 +433,13 @@ export const ticketCheckoutPrepareMutation = internalMutation({
     }
     if (lineInputs.length === 0) return createResultError(op, "At least one ticket is required")
     if (subtotalCents + feeCents < 1) return createResultError(op, "The selected tickets are not payable")
-    const now = new Date().toISOString()
-    const expiresAt = Date.now() + 15 * 60 * 1000
+    const now = new Date(nowMs).toISOString()
+    // A code-bound checkout inherits the earliest server hold deadline of the
+    // holds it adopts; a checkout without an adopted hold keeps the plain
+    // reservation window. The deadline is always server-owned.
+    const defaultExpiresAt = nowMs + reservationDurationMs
+    const expiresAt =
+      adoptedHoldExpiries.length > 0 ? Math.min(defaultExpiresAt, ...adoptedHoldExpiries) : defaultExpiresAt
     // TODO(voucher-write): no voucher/discount redemption flow exists anywhere in real
     // checkout (prepare-mutation args, create-action args, TicketCheckoutCreateInput, the
     // billing eventorenTicketCheckoutCreateRequestSchema contract, and
@@ -547,7 +568,11 @@ export const ticketCheckoutPrepareMutation = internalMutation({
       createdAt: now,
       updatedAt: now,
     })
-    await ctx.scheduler.runAfter(15 * 60 * 1000, internal.ticketing.ticketReservationExpireAction, { orderId })
+    // The expiry runs when the order deadline is reached: an adopted hold
+    // inherits its own remaining window instead of a fresh 15 minutes.
+    await ctx.scheduler.runAfter(Math.max(0, expiresAt - nowMs), internal.ticketing.ticketReservationExpireAction, {
+      orderId,
+    })
     return createResult({
       orderId,
       paymentReference: args.paymentReference,

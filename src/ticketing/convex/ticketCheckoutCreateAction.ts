@@ -3,9 +3,9 @@ import { internal } from "#convex/_generated/api.js"
 import { action } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult, type Result } from "#result"
 import { billingEventorenClient } from "./billingEventorenClient.js"
+import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.js"
 import { ticketCheckoutE2eRouteCheck } from "./ticketCheckoutE2eRouteCheck.js"
 import { ticketOrderAccessResolve } from "./ticketOrderAccessResolve.js"
-import { ticketActivationCodeNormalize } from "./ticketActivationCodeNormalize.js"
 
 const checkoutKeyValidator = v.string()
 const ticketSelectionValidator = v.object({
@@ -13,6 +13,9 @@ const ticketSelectionValidator = v.object({
   quantity: v.number(),
   participantNames: v.optional(v.array(v.string())),
   activationCode: v.optional(v.string()),
+  // Browser-bound hold credential of an activation code. It proves ownership
+  // of the browser hold and never enters the canonical checkout evidence.
+  activationCodeHoldToken: v.optional(v.string()),
 })
 const billingDetailsValidator = v.object({
   givenName: v.string(),
@@ -149,6 +152,9 @@ export const ticketCheckoutCreateAction = action({
       quantity: ticket.quantity,
       ...(ticket.activationCode !== undefined
         ? { activationCode: ticketActivationCodeNormalize(ticket.activationCode) }
+        : {}),
+      ...(ticket.activationCodeHoldToken !== undefined
+        ? { activationCodeHoldToken: ticket.activationCodeHoldToken }
         : {}),
       ...(ticket.participantNames !== undefined
         ? { participantNames: ticket.participantNames.map((name) => name.trim()) }

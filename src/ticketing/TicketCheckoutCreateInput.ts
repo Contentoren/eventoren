@@ -9,6 +9,7 @@ export type TicketCheckoutCreateInput = {
     readonly tierKey: string
     readonly quantity: number
     readonly activationCode?: string
+    readonly activationCodeHoldToken?: string
     readonly participantNames: string[]
   }[]
   readonly successUrl: string
