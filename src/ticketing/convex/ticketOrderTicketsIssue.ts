@@ -2,17 +2,17 @@ import type { Doc, Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { ticketAccessDigestCreate } from "./ticketAccessDigestCreate.js"
-import { ticketActivationCodeLifecycleApply } from "./ticketActivationCodeLifecycleApply.js"
-import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
 
 /** Shared paid/processing-SEPA allocation. All Result preflights precede writes.
  * A conflict is read-only: the caller applies the existing paid conflict policy.
+ * Ticket allocation never charges or frees an activation code: the payment
+ * lifecycle owns that transition.
  */
 export async function ticketOrderTicketsIssue(
   ctx: MutationCtx,
   order: Doc<"ticketOrders">,
   ticketCount: number,
-  activationCodes: Extract<Awaited<ReturnType<typeof ticketActivationCodeLifecyclePlan>>, { success: true }>["data"],
+  activationCodes: { readonly hasOwnershipConflict: boolean },
   now: string,
 ): PromiseResult<{ ticketCount: number; inventoryConflict: boolean }> {
   const op = "ticketOrderTicketsIssue"
@@ -91,7 +91,6 @@ export async function ticketOrderTicketsIssue(
     codes.add(code.data)
   }
 
-  await ticketActivationCodeLifecycleApply(ctx, activationCodes, now)
   for (const reservation of reservations) {
     const tier = tiers.get(reservation.tierId)!
     await ctx.db.patch("catalogTicketTiers", tier._id, {

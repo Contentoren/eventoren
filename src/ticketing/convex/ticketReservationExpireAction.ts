@@ -63,6 +63,10 @@ async function ticketReservationExpireActionHandler(
       paymentReference: status.paymentReference,
       billingOrderReference: status.orderReference,
       stripeMode: status.stripeMode,
+      // Only a provider-confirmed expiry of the correlated payment frees an
+      // early-issued order. A timer, a checkout creation, a redirect or an
+      // unknown payment status never claims this evidence.
+      paymentConfirmedExpired: ticketPaymentCorrelationMatches(context.data, status),
       reason: "Billing confirmed that the checkout session expired",
     })
   // Apply the provider response before any local retry/expiry decision. A
@@ -87,4 +91,16 @@ async function ticketReservationExpireActionHandler(
     return { success: true as const, data: { action: "deferred" as const } }
   }
   return applied
+}
+
+/** The provider response must belong to the very payment of this order. */
+function ticketPaymentCorrelationMatches(
+  context: { paymentReference: string; billingOrderReference?: string; stripeMode: "live" | "test" },
+  status: { paymentReference: string; orderReference: string; stripeMode: "live" | "test" },
+): boolean {
+  if (context.paymentReference !== status.paymentReference) return false
+  if (context.stripeMode !== status.stripeMode) return false
+  if (context.billingOrderReference !== undefined && context.billingOrderReference !== status.orderReference)
+    return false
+  return true
 }

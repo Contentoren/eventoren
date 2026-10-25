@@ -42,6 +42,10 @@ export const ticketPaymentReconcileAction = action({
         paymentReference: payment.paymentReference,
         billingOrderReference: payment.orderReference,
         stripeMode: payment.stripeMode,
+        // The trusted evidence is only claimed when the provider confirmed THIS
+        // payment as expired. A pending or unknown status, a provider error or a
+        // foreign payment response never frees an early issuance.
+        paymentConfirmedExpired: ticketPaymentCorrelationMatches(paymentContext.data, payment),
         reason: "Billing confirmed that the checkout session expired",
       })
     // Explicit reconciliation also fetches paid orders: a lost SEPA cancellation
@@ -54,3 +58,18 @@ export const ticketPaymentReconcileAction = action({
     return createResult(applied.data)
   },
 })
+
+/**
+ * The provider response must belong to the very payment of this order. Only a
+ * matching response proves that THIS payment is expired.
+ */
+function ticketPaymentCorrelationMatches(
+  context: { paymentReference: string; billingOrderReference?: string; stripeMode: "live" | "test" },
+  status: { paymentReference: string; orderReference: string; stripeMode: "live" | "test" },
+): boolean {
+  if (context.paymentReference !== status.paymentReference) return false
+  if (context.stripeMode !== status.stripeMode) return false
+  if (context.billingOrderReference !== undefined && context.billingOrderReference !== status.orderReference)
+    return false
+  return true
+}

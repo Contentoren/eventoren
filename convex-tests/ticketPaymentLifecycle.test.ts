@@ -405,7 +405,7 @@ test("settlement before SEPA completion uses paid issuance once and does not reg
   expect(completed.work).toEqual(paid.work)
 })
 
-test("processing SEPA consumes its activation code once before settlement", async () => {
+test("processing SEPA keeps its activation code reserved until the final payment consumes it", async () => {
   vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "true")
   const h = await checkoutCreate([1])
   const codeId = await h.t.run(async (ctx) => {
@@ -459,21 +459,26 @@ test("processing SEPA consumes its activation code once before settlement", asyn
         .withIndex("orderId", (q) => q.eq("orderId", h.correlation.orderId))
         .unique(),
     }))
-  const consumed = await codeRead()
-  expect(consumed.code).toMatchObject({ status: "consumed", orderId: h.correlation.orderId })
-  expect(consumed.code?.consumedAt).toBeDefined()
-  expect(consumed.claim?.status).toBe("consumed")
+  const reserved = await codeRead()
+  // The early issuance proves the code ownership but never charges it.
+  expect(reserved.code).toMatchObject({ status: "reserved", orderId: h.correlation.orderId })
+  expect(reserved.code?.consumedAt).toBeUndefined()
+  expect(reserved.claim?.status).toBe("reserved")
   expect(await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)).toMatchObject({
     success: true,
     data: { ticketCount: 1 },
   })
+  expect(await codeRead()).toEqual(reserved)
   expect(
     await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
       ...h.correlation,
       payment: "paid",
     }),
   ).toMatchObject({ success: true, data: { paymentStatus: "paid", ticketCount: 1 } })
-  expect(await codeRead()).toEqual(consumed)
+  const consumed = await codeRead()
+  expect(consumed.code).toMatchObject({ status: "consumed", orderId: h.correlation.orderId })
+  expect(consumed.code?.consumedAt).toBeDefined()
+  expect(consumed.claim?.status).toBe("consumed")
 })
 
 test.each(["capacity", "corruption", "wrong correlation"] as const)(

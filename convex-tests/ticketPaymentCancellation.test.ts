@@ -525,7 +525,7 @@ test("dispute redelivery refuses conflicting charge/dispute evidence even with a
   expect(await h.read()).toEqual(before)
 })
 
-test("cancelled processing order preserves consumed activation-code scars and their ownership validation", async () => {
+test("cancelled processing order releases its own activation code and keeps the ownership history valid", async () => {
   const h = await fixtureCreate()
   const codeId = await h.t.run(async (ctx) => {
     const tier = await ctx.db.get("catalogTicketTiers", h.tierId)
@@ -561,10 +561,16 @@ test("cancelled processing order preserves consumed activation-code scars and th
     return codeId
   })
   expect(await h.processing()).toMatchObject({ success: true })
-  const consumed = await h.t.run((ctx) => ctx.db.get("ticketActivationCodes", codeId))
-  expect(consumed?.status).toBe("consumed")
+  // The early issuance never charges the code.
+  const reserved = await h.t.run((ctx) => ctx.db.get("ticketActivationCodes", codeId))
+  expect(reserved?.status).toBe("reserved")
+  expect(reserved?.consumedAt).toBeUndefined()
   expect(await h.cancel()).toMatchObject({ success: true })
-  expect(await h.t.run((ctx) => ctx.db.get("ticketActivationCodes", codeId))).toEqual(consumed)
+  // A definitively unpaid failure frees the order's own code.
+  const released = await h.t.run((ctx) => ctx.db.get("ticketActivationCodes", codeId))
+  expect(released?.status).toBe("available")
+  expect(released?.orderId).toBeUndefined()
+  expect(released?.consumedAt).toBeUndefined()
   expect(
     await h.t.run(async (ctx) =>
       ticketActivationCodeLifecyclePlan(ctx, (await ctx.db.get("ticketOrders", h.orderId))!, "release"),

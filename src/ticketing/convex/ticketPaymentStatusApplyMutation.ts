@@ -4,15 +4,16 @@ import type { Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { internalMutation } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
+import { ticketActivationCodeLifecycleApply } from "./ticketActivationCodeLifecycleApply.js"
+import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
 import { ticketFulfillmentWorkEnsure } from "./ticketFulfillmentWorkEnsure.js"
 import { ticketIssuedCountRead } from "./ticketIssuedCountRead.js"
 import { ticketOrderAccessCapabilityEnsure } from "./ticketOrderAccessCapabilityEnsure.js"
-import { ticketReservationsRelease } from "./ticketReservationsRelease.js"
-import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
-import { ticketActivationCodeLifecycleApply } from "./ticketActivationCodeLifecycleApply.js"
+import { ticketOrderTicketsCancel } from "./ticketOrderTicketsCancel.js"
 import { ticketOrderTicketsIssue } from "./ticketOrderTicketsIssue.js"
-import { ticketPaymentCancellationValidator } from "./ticketPaymentCancellationValidator.js"
 import { ticketPaymentCancellationApply } from "./ticketPaymentCancellationApply.js"
+import { ticketPaymentCancellationValidator } from "./ticketPaymentCancellationValidator.js"
+import { ticketReservationsRelease } from "./ticketReservationsRelease.js"
 
 const paymentStatusValidator = v.union(v.literal("pending"), v.literal("paid"), v.literal("failed"))
 export const ticketPaymentStatusApplyMutation = internalMutation({
@@ -144,7 +145,9 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         })
       let issuedCount = ticketCount.data
       if (earlyIssuanceEligible) {
-        const activationCodes = await ticketActivationCodeLifecyclePlan(ctx, order, "consume")
+        // Early issuance proves the code ownership but never charges it: only
+        // the final paid status may consume an activation code.
+        const activationCodes = await ticketActivationCodeLifecyclePlan(ctx, order, "hold")
         if (!activationCodes.success) return activationCodes
         const issuance = await ticketOrderTicketsIssue(ctx, order, issuedCount, activationCodes.data, now)
         if (!issuance.success) return issuance
@@ -208,9 +211,15 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
           ticketCount: ticketCount.data,
         })
       }
-      if (ticketCount.data !== 0) return createResultError(op, "An unpaid order already has issued tickets")
+      // A definitively failed payment frees the order's own code. Tickets that
+      // were issued early keep the established cancellation semantics: no valid
+      // admission survives a confirmed failure. Tickets without an issuance
+      // timestamp are corrupt and never silently cancelled.
+      if (ticketCount.data !== 0 && order.ticketsIssuedAt === undefined)
+        return createResultError(op, "An unpaid order already has issued tickets")
       const release = await ticketReservationsRelease(ctx, order._id, now)
       if (!release.success) return release
+      if (ticketCount.data !== 0) await ticketOrderTicketsCancel(ctx, order._id, now)
       await ctx.db.patch("ticketOrders", order._id, {
         status: "failed",
         paymentStatus: "failed",
@@ -226,7 +235,12 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         lastCheckedAt: now,
         updatedAt: now,
       })
-      return createResult({ orderId: order._id, status: "failed", paymentStatus: "failed", ticketCount: 0 })
+      return createResult({
+        orderId: order._id,
+        status: "failed",
+        paymentStatus: "failed",
+        ticketCount: ticketCount.data,
+      })
     }
 
     const activationCodes = await ticketActivationCodeLifecyclePlan(ctx, order, "consume")
@@ -236,6 +250,9 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
         return createResultError(op, "A fulfilled order no longer owns its activation code")
       const capability = await ticketOrderAccessCapabilityEnsure(ctx, order._id)
       if (!capability.success) return capability
+      // The settled payment charges the code even when the tickets were issued
+      // earlier: the early issuance never consumed it.
+      await ticketActivationCodeLifecycleApply(ctx, activationCodes.data, now)
       await ctx.db.patch("ticketOrders", order._id, lifecycle)
       await ticketOrderBookingDetailsBackfill(ctx, order._id, order, { bookingNumber, bookingReference }, now)
       await ticketFulfillmentWorkScheduleIfEligible(
@@ -313,6 +330,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       })
     }
 
+    // The final payment charges the code even when the tickets were issued earlier.
+    await ticketActivationCodeLifecycleApply(ctx, activationCodes.data, now)
     await ctx.db.patch("ticketOrders", order._id, {
       ...lifecycle,
       status: "paid",

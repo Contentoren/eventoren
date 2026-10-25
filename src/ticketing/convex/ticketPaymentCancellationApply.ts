@@ -1,8 +1,9 @@
-import * as a from "valibot"
 import { eventorenTicketCheckoutCancellationSchema } from "billing/contracts/eventorenTicketCheckoutCancellationSchema"
+import * as a from "valibot"
 import type { Doc } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { createResult, createResultError } from "#result"
+import { ticketOrderTicketsCancel } from "./ticketOrderTicketsCancel.js"
 import { ticketReservationsRelease } from "./ticketReservationsRelease.js"
 
 /** One transaction for callback and status recovery. All Result preflights precede writes. */
@@ -88,40 +89,24 @@ export async function ticketPaymentCancellationApply(
     return createResult({ orderId: order._id, replayed: true })
   }
   // Complete per-order sets, bounded by checkout transaction size; never truncate tickets.
-  const tickets = await ctx.db
-    .query("ticketIssued")
-    .withIndex("orderIdAndSequence", (q) => q.eq("orderId", order._id))
-    .collect()
-  const works = await ctx.db
-    .query("ticketFulfillmentWork")
-    .withIndex("orderId", (q) => q.eq("orderId", order._id))
-    .collect()
   const now = new Date().toISOString()
-  const released = await ticketReservationsRelease(ctx, order._id, now)
+  // Only a definitively unpaid failure frees an activation code. A paid, refunded
+  // or disputed payment keeps its code blocked for the buyer.
+  const unpaidFailure = cancellation.reason === "payment_failed" && order.paymentStatus !== "paid"
+  const released = await ticketReservationsRelease(ctx, order._id, now, unpaidFailure ? "release" : "hold")
   if (!released.success) return released
-  for (const ticket of tickets) await ctx.db.patch("ticketIssued", ticket._id, { cancelled: true })
-  for (const work of works)
-    await ctx.db.patch("ticketFulfillmentWork", work._id, {
-      cancelledAt: now,
-      leaseUntil: undefined,
-      nextAttemptAt: Number.MAX_SAFE_INTEGER,
-      status: work.status === "preparing" ? "pending" : work.status,
-      updatedAt: now,
-    })
+  await ticketOrderTicketsCancel(ctx, order._id, now)
   await ctx.db.patch("ticketOrders", order._id, {
     cancellation,
     stripeSessionId: sessionId,
     stripePaymentIntentId: cancellation.stripePaymentIntentId,
     paymentMethodType: "sepa_debit",
     // A SEPA dispute is not a refund or a reversal of the original paid truth.
-    ...(cancellation.reason === "payment_failed" && order.paymentStatus !== "paid"
-      ? { status: "failed" as const, paymentStatus: "failed" as const }
-      : {}),
+    ...(unpaidFailure ? { status: "failed" as const, paymentStatus: "failed" as const } : {}),
     checkoutAttemptLeaseUntil: undefined,
     updatedAt: now,
   })
-  if (cancellation.reason === "payment_failed" && order.paymentStatus !== "paid")
-    await ctx.db.patch("ticketPaymentAttempts", attempt._id, { status: "failed", updatedAt: now })
+  if (unpaidFailure) await ctx.db.patch("ticketPaymentAttempts", attempt._id, { status: "failed", updatedAt: now })
   console.info("Ticket payment cancellation applied", { orderId: order._id, stripeEventId: cancellation.stripeEventId })
   return createResult({ orderId: order._id, replayed: false })
 }

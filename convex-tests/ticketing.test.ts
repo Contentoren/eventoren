@@ -382,6 +382,40 @@ test("reserves atomically and replays the same checkout without a second Billing
   expect(billing.fetchMock).toHaveBeenCalled()
 })
 
+test("the same checkout key replays the reservation without a second order or a refreshed deadline", async () => {
+  environmentSet()
+  const billing = billingMock()
+  const t = convexTest(schema, modules)
+  const adminId = await createUser(t, "admin")
+  const userId = await createUser(t)
+  const catalogVersion = await seedCatalog(t, await tokenFor(t, adminId))
+  const args = checkoutArgs(await tokenFor(t, userId), catalogVersion, "checkoutkey423456789012345678901234")
+
+  const first = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(first.success).toBe(true)
+  if (!first.success) return
+  const before = await t.run(async (ctx) => ({
+    orders: await ctx.db.query("ticketOrders").collect(),
+    reservations: await ctx.db.query("ticketReservations").collect(),
+  }))
+  expect(before.orders).toHaveLength(1)
+  // A checkout without an activation code keeps the plain reservation window.
+  expect(before.orders[0]?.reservationExpiresAt).toBe(before.reservations[0]?.expiresAt)
+  expect(before.orders[0]!.reservationExpiresAt - Date.now()).toBeLessThanOrEqual(15 * 60 * 1000)
+
+  const replay = await t.action(api.ticketing.ticketCheckoutCreateAction, args)
+  expect(replay).toMatchObject({ success: true, data: { replayed: true, orderId: first.data.orderId } })
+  const after = await t.run(async (ctx) => ({
+    orders: await ctx.db.query("ticketOrders").collect(),
+    reservations: await ctx.db.query("ticketReservations").collect(),
+  }))
+  // The replay never creates a second order and never refreshes the deadline.
+  expect(after.orders).toHaveLength(1)
+  expect(after.orders[0]?.reservationExpiresAt).toBe(before.orders[0]?.reservationExpiresAt)
+  expect(after.reservations[0]?.expiresAt).toBe(before.reservations[0]?.expiresAt)
+  expect(billing.checkoutCallsGet()).toBe(1)
+})
+
 test("persists structured invoice billing details and forwards them to Billing without replacing the contact name with the company", async () => {
   environmentSet()
   const billing = billingMock()

@@ -3,11 +3,11 @@ import { internal } from "#convex/_generated/api.js"
 import { internalAction } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
 import { billingEventorenClient } from "./billingEventorenClient.js"
-import { ticketPaymentStatusApplyArgsCreate } from "./ticketPaymentStatusApplyArgsCreate.js"
 import {
-  ticketPaymentReconcileScanValidator,
   type TicketPaymentReconcileScan,
+  ticketPaymentReconcileScanValidator,
 } from "./ticketPaymentReconcileScanValidator.js"
+import { ticketPaymentStatusApplyArgsCreate } from "./ticketPaymentStatusApplyArgsCreate.js"
 
 export const ticketPaymentReconcileScheduledAction = internalAction({
   args: { scan: v.optional(ticketPaymentReconcileScanValidator) },
@@ -92,6 +92,10 @@ export const ticketPaymentReconcileScheduledAction = internalAction({
           paymentReference: payment.paymentReference,
           billingOrderReference: payment.orderReference,
           stripeMode: payment.stripeMode,
+          // The trusted evidence is only claimed when the provider confirmed THIS
+          // payment as expired. A pending or unknown status, a provider error or a
+          // foreign payment response never frees an early issuance.
+          paymentConfirmedExpired: ticketPaymentCorrelationMatches(context, payment),
           reason: "Billing confirmed that the checkout session expired",
         })
         if (!expired.success) {
@@ -126,3 +130,18 @@ export const ticketPaymentReconcileScheduledAction = internalAction({
     return createResult({ checked, fulfilled: 0 })
   },
 })
+
+/**
+ * The provider response must belong to the very payment of this order. Only a
+ * matching response proves that THIS payment is expired.
+ */
+function ticketPaymentCorrelationMatches(
+  context: { paymentReference: string; billingOrderReference?: string; stripeMode: "live" | "test" },
+  status: { paymentReference: string; orderReference: string; stripeMode: "live" | "test" },
+): boolean {
+  if (context.paymentReference !== status.paymentReference) return false
+  if (context.stripeMode !== status.stripeMode) return false
+  if (context.billingOrderReference !== undefined && context.billingOrderReference !== status.orderReference)
+    return false
+  return true
+}

@@ -152,13 +152,14 @@ async function orderPrepare(h: Harness, key = "a") {
 test.each(["guest", "owner"])(
   "scheduled booking rejects %s checkout before opening without reservations or code consumption",
   async (identity) => {
+    vi.setSystemTime(Date.parse("2026-10-12T00:00:00.000Z"))
     const h = await harnessCreate()
-    const opensAt = Date.parse("2026-10-13T18:00:00.000Z")
-    vi.setSystemTime(opensAt - 1)
+    const opensAt = Date.now() + 3_600_000
     const ownerUserId = await h.t.run(async (ctx) => {
       await ctx.db.patch("catalogEvents", h.eventId, { bookingOpensAt: new Date(opensAt).toISOString() })
       return ctx.db.insert("users", { name: "Existing contact", role: "user", createdAt: now, updatedAt: now })
     })
+    vi.setSystemTime(opensAt - 1)
     const rejected = await h.t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, {
       ...h.args,
       ...(identity === "owner" ? { ownerUserId } : {}),
@@ -349,13 +350,14 @@ test("normalized idempotent replay keeps the exact reservation; altered code con
 test.each(["guest", "contact"])(
   "public %s checkout enforces scheduled opening before Billing and opens exactly at the boundary",
   async (identity) => {
+    vi.setSystemTime(Date.parse("2026-10-12T00:00:00.000Z"))
     const h = await harnessCreate()
-    const opensAt = Date.parse("2026-10-13T18:00:00.000Z")
-    vi.setSystemTime(opensAt - 1)
+    const opensAt = Date.now() + 3_600_000
     const userId = await h.t.run(async (ctx) => {
       await ctx.db.patch("catalogEvents", h.eventId, { bookingOpensAt: new Date(opensAt).toISOString() })
       return ctx.db.insert("users", { name: "Existing contact", role: "user", createdAt: now, updatedAt: now })
     })
+    vi.setSystemTime(opensAt - 1)
     const authSecret = "booking-opening-contact-test-secret"
     vi.stubEnv("AUTH_SECRET", authSecret)
     const token = await testAuthSessionTokenCreate(h.t, userId, authSecret)
@@ -790,4 +792,179 @@ test("digest and issued-code failures occur before activation-code consumption",
   ).toMatchObject({ success: false })
   expect(await stateRead(h)).toEqual(before)
   uuid.mockRestore()
+})
+
+test("early issuance reserves the activation code and only the final payment consumes it", async () => {
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "true")
+  const h = await harnessCreate()
+  const correlation = await orderPrepare(h)
+  // The browser hold of the reserving browser is bound to the adopted order.
+  await h.t.run((ctx) =>
+    ctx.db.patch("ticketActivationCodes", h.codeIds[0]!, {
+      browserHoldDigest: "hold-digest",
+      browserHoldExpiresAt: Date.now() + 600000,
+    }),
+  )
+  const processing = {
+    ...correlation,
+    payment: "pending" as const,
+    checkoutCompletedAt: now,
+    paymentMethodType: "sepa_debit",
+    stripePaymentIntentStatus: "processing" as const,
+  }
+  expect(await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)).toMatchObject({
+    success: true,
+    data: { paymentStatus: "pending", ticketCount: 1 },
+  })
+  const issued = await stateRead(h)
+  expect(issued.orders[0]?.ticketsIssuedAt).toBeDefined()
+  expect(issued.tickets).toHaveLength(1)
+  // The reserved code is proven, never charged.
+  expect(issued.codes[0]).toMatchObject({ status: "reserved", orderId: correlation.orderId })
+  expect(issued.codes[0]?.consumedAt).toBeUndefined()
+  expect(issued.histories[0]?.status).toBe("reserved")
+  expect(await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, processing)).toMatchObject({
+    success: true,
+    data: { ticketCount: 1 },
+  })
+  const repeated = await stateRead(h)
+  expect(repeated.codes).toEqual(issued.codes)
+  expect(repeated.histories).toEqual(issued.histories)
+  expect(repeated.tickets).toEqual(issued.tickets)
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, { ...correlation, payment: "paid" }),
+  ).toMatchObject({ success: true, data: { status: "paid", paymentStatus: "paid", ticketCount: 1 } })
+  const paid = await stateRead(h)
+  // The settled payment charges the code although the tickets were issued earlier.
+  expect(paid.codes[0]).toMatchObject({
+    status: "consumed",
+    orderId: correlation.orderId,
+    consumedAt: expect.any(String),
+  })
+  expect(paid.codes[0]?.browserHoldDigest).toBeUndefined()
+  expect(paid.codes[0]?.browserHoldExpiresAt).toBeUndefined()
+  expect(paid.histories[0]?.status).toBe("consumed")
+  expect(paid.tickets).toEqual(issued.tickets)
+})
+
+test("a definitively failed early issuance frees the code and cancels the issued tickets", async () => {
+  vi.stubEnv("EVENTOREN_SEPA_EARLY_TICKET_ISSUANCE_ENABLED", "true")
+  const h = await harnessCreate()
+  const correlation = await orderPrepare(h)
+  await h.t.run((ctx) =>
+    ctx.db.patch("ticketActivationCodes", h.codeIds[0]!, {
+      browserHoldDigest: "hold-digest",
+      browserHoldExpiresAt: Date.now() + 600000,
+    }),
+  )
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, {
+      ...correlation,
+      payment: "pending",
+      checkoutCompletedAt: now,
+      paymentMethodType: "sepa_debit",
+      stripePaymentIntentStatus: "processing",
+    }),
+  ).toMatchObject({ success: true, data: { ticketCount: 1 } })
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, { ...correlation, payment: "failed" }),
+  ).toMatchObject({ success: true, data: { status: "failed", paymentStatus: "failed" } })
+  const failed = await stateRead(h)
+  expect(failed.orders[0]).toMatchObject({ status: "failed", paymentStatus: "failed" })
+  expect(failed.codes[0]?.status).toBe("available")
+  expect(failed.codes[0]?.orderId).toBeUndefined()
+  expect(failed.codes[0]?.consumedAt).toBeUndefined()
+  expect(failed.codes[0]?.browserHoldDigest).toBeUndefined()
+  expect(failed.codes[0]?.browserHoldExpiresAt).toBeUndefined()
+  expect(failed.histories[0]?.status).toBe("released")
+  // No valid admission survives a confirmed failure.
+  expect(failed.tickets).toHaveLength(1)
+  expect(failed.tickets[0]?.cancelled).toBe(true)
+  // The freed code is reservable again by a new checkout.
+  expect(
+    await h.t.mutation(internal.ticketing.ticketCheckoutPrepareMutation, {
+      ...h.args,
+      checkoutKey: "checkout-b",
+      paymentReference: "payment-b",
+      guestAccessDigest: "guest-b",
+    }),
+  ).toMatchObject({ success: true, data: { replayed: false, status: "reserved" } })
+  const reservedAgain = await stateRead(h)
+  expect(reservedAgain.codes[0]).toMatchObject({ status: "reserved" })
+  expect(reservedAgain.codes[0]?.orderId).not.toBe(correlation.orderId)
+})
+
+/** Historical state of an early issuance that charged the code before the payment settled. */
+async function historicalEarlyIssuanceSeed(h: Harness, orderId: Id<"ticketOrders">) {
+  await h.t.run(async (ctx) => {
+    const order = await ctx.db.get("ticketOrders", orderId)
+    if (!order) throw new Error("The order was not found")
+    await ctx.db.patch("ticketOrders", orderId, { ticketsIssuedAt: now })
+    await ctx.db.patch("ticketActivationCodes", h.codeIds[0]!, { status: "consumed", consumedAt: now })
+    const history = await ctx.db
+      .query("ticketActivationCodeReservations")
+      .withIndex("orderId", (q) => q.eq("orderId", orderId))
+      .unique()
+    await ctx.db.patch("ticketActivationCodeReservations", history!._id, { status: "consumed" })
+    const reservation = await ctx.db
+      .query("ticketReservations")
+      .withIndex("orderId", (q) => q.eq("orderId", orderId))
+      .unique()
+    await ctx.db.patch("ticketReservations", reservation!._id, { status: "consumed" })
+    const tier = await ctx.db.get("catalogTicketTiers", reservation!.tierId)
+    await ctx.db.patch("catalogTicketTiers", reservation!.tierId, {
+      reserved: tier!.reserved - reservation!.quantity,
+      sold: tier!.sold + reservation!.quantity,
+    })
+    await ctx.db.insert("ticketIssued", {
+      orderId,
+      sequence: 1,
+      code: "TKT-HISTORIC01",
+      eventKey: order.eventKey,
+      eventTitle: order.eventTitle,
+      eventStartsAt: order.eventStartsAt,
+      eventDoorsAt: order.eventDoorsAt,
+      venue: order.venue,
+      city: order.city,
+      address: order.address,
+      tierKey: "a",
+      tierName: "a",
+      priceCents: 100,
+      feeCents: 10,
+      issuedAt: now,
+    })
+  })
+}
+
+test("a historical early-issued consumption is freed only by its own still-unpaid order", async () => {
+  const h = await harnessCreate()
+  const correlation = await orderPrepare(h)
+  await historicalEarlyIssuanceSeed(h, correlation.orderId)
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, { ...correlation, payment: "failed" }),
+  ).toMatchObject({ success: true, data: { status: "failed", paymentStatus: "failed" } })
+  const released = await stateRead(h)
+  expect(released.codes[0]?.status).toBe("available")
+  expect(released.codes[0]?.orderId).toBeUndefined()
+  expect(released.codes[0]?.consumedAt).toBeUndefined()
+  expect(released.histories[0]?.status).toBe("released")
+  // The cancelled early ticket never survives the confirmed failure.
+  expect(released.tickets[0]?.cancelled).toBe(true)
+})
+
+test("a paid order keeps its consumed code even when a later failure arrives", async () => {
+  const h = await harnessCreate()
+  const correlation = await orderPrepare(h)
+  await historicalEarlyIssuanceSeed(h, correlation.orderId)
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, { ...correlation, payment: "paid" }),
+  ).toMatchObject({ success: true })
+  const paid = await stateRead(h)
+  expect(paid.codes[0]).toMatchObject({ status: "consumed", orderId: correlation.orderId })
+  expect(
+    await h.t.mutation(internal.ticketing.ticketPaymentStatusApplyMutation, { ...correlation, payment: "failed" }),
+  ).toMatchObject({ success: true, data: { status: "paid", paymentStatus: "paid" } })
+  const after = await stateRead(h)
+  expect(after.codes).toEqual(paid.codes)
+  expect(after.histories).toEqual(paid.histories)
 })

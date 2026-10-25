@@ -1,14 +1,17 @@
 import type { Doc, Id } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { createResult, createResultError, type PromiseResult } from "#result"
-import { ticketActivationCodeLifecyclePlan } from "./ticketActivationCodeLifecyclePlan.js"
 import { ticketActivationCodeLifecycleApply } from "./ticketActivationCodeLifecycleApply.js"
+import {
+  type TicketActivationCodeLifecycleDisposition,
+  ticketActivationCodeLifecyclePlan,
+} from "./ticketActivationCodeLifecyclePlan.js"
 
 export async function ticketReservationsRelease(
   ctx: MutationCtx,
   orderId: Id<"ticketOrders">,
   now: string,
-  activationCodeDisposition: "release" | "consume" = "release",
+  activationCodeDisposition: TicketActivationCodeLifecycleDisposition = "release",
 ): PromiseResult<void> {
   const op = "ticketReservationsRelease"
   const order = await ctx.db.get("ticketOrders", orderId)

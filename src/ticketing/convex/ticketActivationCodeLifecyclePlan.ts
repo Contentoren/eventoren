@@ -2,11 +2,19 @@ import type { Doc } from "#convex/_generated/dataModel.js"
 import type { MutationCtx } from "#convex/_generated/server.js"
 import { createResult, createResultError } from "#result"
 
+/**
+ * Lifecycle disposition of an order-bound activation code:
+ * - "hold": prove ownership only, never change a code (early issuance, replay).
+ * - "consume": charge the code because the order is definitively paid.
+ * - "release": free the code this order still holds after a definitive unpaid end state.
+ */
+export type TicketActivationCodeLifecycleDisposition = "hold" | "consume" | "release"
+
 /** Read-only preflight. Result errors commit writes, so callers apply this only after ALL other preflights. */
 export async function ticketActivationCodeLifecyclePlan(
   ctx: MutationCtx,
   order: Doc<"ticketOrders">,
-  disposition: "release" | "consume",
+  disposition: TicketActivationCodeLifecycleDisposition,
 ) {
   const op = "ticketActivationCodeLifecyclePlan"
   // These are complete, order-scoped sets (one line/claim per selected product),
@@ -30,7 +38,7 @@ export async function ticketActivationCodeLifecyclePlan(
   const changes: Array<{
     code: Doc<"ticketActivationCodes">
     history: Doc<"ticketActivationCodeReservations">
-    codeDisposition?: "release" | "consume" | "charge_foreign_reservation"
+    codeDisposition?: "consume" | "release" | "release_charged" | "charge_foreign_reservation"
     chargedOwnerId?: Doc<"ticketOrders">["_id"]
     historyStatus: "released" | "consumed"
   }> = []
@@ -60,7 +68,14 @@ export async function ticketActivationCodeLifecyclePlan(
       .query("ticketActivationCodeReservations")
       .withIndex("codeIdAndStatusAndCreatedAt", (q) => q.eq("codeId", code._id).eq("status", "reserved"))
       .take(2)
-    if (code.status === "reserved" ? active.length !== 1 || active[0]!.orderId !== code.orderId : active.length !== 0)
+    // A browser hold reserves a code before a checkout exists: it has no owner
+    // and no order history, only the credential digest and its deadline. Every
+    // other reserved code needs exactly one active history that names its owner.
+    const browserHold = ticketActivationCodeBrowserHold(code, active.length)
+    if (
+      !browserHold &&
+      (code.status === "reserved" ? active.length !== 1 || active[0]!.orderId !== code.orderId : active.length !== 0)
+    )
       return createResultError(op, "The activation code active ownership history is corrupt")
 
     // A durable consumedAt scar is necessary while a newer owner still holds the code.
@@ -105,7 +120,10 @@ export async function ticketActivationCodeLifecyclePlan(
     if (code.status === "available") {
       if (code.orderId !== undefined || code.consumedAt !== undefined || history.status !== "released")
         return createResultError(op, "The activation code available ownership is corrupt")
-    } else {
+    } else if (!browserHold) {
+      // A browser hold owns the code until it expires or a checkout adopts it.
+      // No order owns it, so there is no owner history to prove: the charge
+      // state was already cross-checked against the charged history above.
       if (code.orderId === undefined || (code.status === "consumed" && !charged))
         return createResultError(op, "The activation code owner is missing")
       const owner = code.orderId === order._id ? order : await ctx.db.get("ticketOrders", code.orderId)
@@ -150,15 +168,35 @@ export async function ticketActivationCodeLifecyclePlan(
       return createResultError(op, "The activation code active reservation is corrupt")
     if (history.status === "consumed" && order.paymentStatus !== "paid" && order.ticketsIssuedAt === undefined)
       return createResultError(op, "The activation code paid reservation is corrupt")
+
+    // An order may only prove a historical early-issued consumption as its own
+    // while it is still unpaid: a settled order keeps its charged code forever.
+    const ownEarlyIssuanceScar =
+      owned && history.status === "consumed" && charged?.orderId === order._id && order.paymentStatus !== "paid"
+
+    // Early issuance and replay only prove ownership; a code is never charged
+    // or freed by a ticket allocation.
+    if (disposition === "hold") {
+      const foreignOwnership = !owned && code.status !== "available"
+      hasOwnershipConflict ||= foreignOwnership
+      continue
+    }
+
     if (disposition === "release") {
-      if (history.status !== "reserved") continue
-      changes.push({
-        code,
-        history,
-        codeDisposition: "release",
-        chargedOwnerId: charged?.orderId,
-        historyStatus: "released",
-      })
+      if (history.status === "reserved" && owned) {
+        changes.push({
+          code,
+          history,
+          // A charged code stays blocked for the order that paid for it.
+          codeDisposition: code.consumedAt === undefined ? "release" : "release_charged",
+          chargedOwnerId: charged?.orderId,
+          historyStatus: "released",
+        })
+        continue
+      }
+      if (ownEarlyIssuanceScar) {
+        changes.push({ code, history, codeDisposition: "release", historyStatus: "released" })
+      }
       continue
     }
 
@@ -167,6 +205,9 @@ export async function ticketActivationCodeLifecyclePlan(
     changes.push({
       code,
       history,
+      // A foreign holder keeps its hold: only the charge scar is recorded. A
+      // browser hold is such a holder: it stays untouched until its own
+      // expiry finalizes the charged code for the order that paid.
       codeDisposition: foreignOwnership
         ? code.status === "reserved" && code.consumedAt === undefined
           ? "charge_foreign_reservation"
@@ -178,4 +219,24 @@ export async function ticketActivationCodeLifecyclePlan(
     })
   }
   return createResult({ changes, hasOwnershipConflict })
+}
+
+/**
+ * A browser hold reserves an activation code before a checkout exists.
+ *
+ * Such a code has no owner and no order history: only the credential digest
+ * and the server-owned deadline of the hold. Any other reserved code belongs
+ * to an order and proves it with exactly one active reservation history.
+ */
+function ticketActivationCodeBrowserHold(code: Doc<"ticketActivationCodes">, activeHistoryCount: number): boolean {
+  return (
+    code.status === "reserved" &&
+    code.orderId === undefined &&
+    code.browserHoldDigest !== undefined &&
+    code.browserHoldDigest.length > 0 &&
+    code.browserHoldExpiresAt !== undefined &&
+    Number.isFinite(code.browserHoldExpiresAt) &&
+    code.browserHoldExpiresAt > 0 &&
+    activeHistoryCount === 0
+  )
 }
