@@ -139,7 +139,7 @@ const mailEnvironment = {
 describe("Eventoren E2E historical Stripe TEST default", () => {
   it("resolves config behind the success barrier and forwards it to provider cleanup", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-stripe-config-"))
-    const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
+    const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
     const calls: string[] = []
     const captured: { key?: string; accountId?: string; organizationId?: string } = {}
     const seenTargets: unknown[] = []
@@ -197,7 +197,7 @@ describe("Eventoren E2E historical Stripe TEST default", () => {
 
   it("fails the DEV ticket with the checkpoint retained when default config resolution fails before providers", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-stripe-config-fail-"))
-    const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
+    const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
     const calls: string[] = []
     let resolveCalls = 0
     try {
@@ -330,7 +330,7 @@ describe("Eventoren E2E historical Stripe TEST default", () => {
 
   it("attaches validated TEST config only to the DEV ticket child and reuses it for historical cleanup", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-stripe-ticket-env-"))
-    const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
+    const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
     const calls: string[] = []
     const captured: { key?: string; accountId?: string; organizationId?: string } = {}
     const childEnvs: Record<string, Record<string, string>> = {}

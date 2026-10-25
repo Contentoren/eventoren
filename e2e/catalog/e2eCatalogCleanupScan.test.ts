@@ -18,7 +18,7 @@ test("preserves a failed current run and never scans an unrelated target", async
   const checkpoint: E2eCheckpoint = {
     version: 1,
     target: "development",
-    baseUrl: "https://eventoren.wonder1.de",
+    baseUrl: "https://eventoren.leonardomora.de",
     runId,
     createdAt: Date.now() - 1000,
     phase: "ticket-unreconciled",
@@ -63,7 +63,7 @@ test("scans a successful owned current run but retains its checkpoint for provid
   const checkpoint: E2eCheckpoint = {
     version: 1,
     target: "development",
-    baseUrl: "https://eventoren.wonder1.de",
+    baseUrl: "https://eventoren.leonardomora.de",
     runId,
     createdAt: Date.now() - 1000,
     phase: "ticket-unreconciled",
@@ -109,7 +109,7 @@ test("refuses a stale marker with a foreign participant before invoking cleanup"
   const checkpoint: E2eCheckpoint = {
     version: 1,
     target: "development",
-    baseUrl: "https://eventoren.wonder1.de",
+    baseUrl: "https://eventoren.leonardomora.de",
     runId,
     createdAt: Date.now() - 25 * 60 * 60_000,
     phase: "ticket-unreconciled",

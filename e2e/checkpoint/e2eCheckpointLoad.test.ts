@@ -10,7 +10,7 @@ import type { E2eCheckpoint } from "./e2eCheckpointSchema.ts"
 const checkpoint: E2eCheckpoint = {
   version: 1,
   target: "development",
-  baseUrl: "https://eventoren.wonder1.de",
+  baseUrl: "https://eventoren.leonardomora.de",
   runId: "abc-12345678-1234-1234-1234-123456789abc",
   createdAt: 1_000_000,
   phase: "sso",

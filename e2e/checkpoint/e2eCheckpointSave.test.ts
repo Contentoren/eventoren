@@ -13,7 +13,7 @@ afterEach(async () => {
 const base: E2eCheckpoint = {
   version: 1,
   target: "development",
-  baseUrl: "https://eventoren.wonder1.de",
+  baseUrl: "https://eventoren.leonardomora.de",
   runId: "mtest-12345678-1234-1234-1234-123456789abc",
   createdAt: Date.now() - 1000,
   phase: "sso",

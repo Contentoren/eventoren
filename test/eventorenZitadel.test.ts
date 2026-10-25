@@ -151,7 +151,7 @@ test("does not derive the Zitadel origin from the incoming request", async () =>
 test("accepts Zitadel login start behind reverse proxy forwarding headers", async () => {
   await withEnvironment(async () => {
     const response = await eventorenZitadel.loginStart(
-      new Request("http://eventoren.wonder1.de/login/zitadel?returnTo=%2Fadmin", {
+      new Request("http://eventoren.leonardomora.de/login/zitadel?returnTo=%2Fadmin", {
         headers: {
           host: "eventoren.example.test",
           "x-forwarded-host": "eventoren.example.test",

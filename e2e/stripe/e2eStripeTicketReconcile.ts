@@ -39,7 +39,7 @@ export async function e2eStripeTicketReconcile(input: {
   const ticket = checkpoint.ticket
   if (
     checkpoint.target !== "development" ||
-    checkpoint.baseUrl !== "https://eventoren.wonder1.de" ||
+    checkpoint.baseUrl !== "https://eventoren.leonardomora.de" ||
     !/^(sk|rk)_test_[A-Za-z0-9]+$/u.test(input.key) ||
     !/^acct_[A-Za-z0-9]+$/u.test(input.accountId) ||
     !organizationId ||

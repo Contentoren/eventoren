@@ -14,7 +14,7 @@ import { nativeAuthLifecycleStepRun, type NativeAuthLifecycleStepContext } from 
 import * as stepRunModule from "./nativeAuthLifecycleStepRun.ts"
 
 const runId = "mtest-12345678-1234-1234-1234-123456789abc"
-const target = { target: "development", baseUrl: "https://eventoren.wonder1.de" } as const
+const target = { target: "development", baseUrl: "https://eventoren.leonardomora.de" } as const
 
 function checkpointCreate(overrides: Partial<NativeAuthLifecycleCheckpoint> = {}): NativeAuthLifecycleCheckpoint {
   const identity = nativeAuthLifecycleIdentityCreate(runId)

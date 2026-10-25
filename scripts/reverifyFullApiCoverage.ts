@@ -373,7 +373,7 @@ function overrideFor(name: string, state: FixtureState, surface: SurfaceName): {
   if (name === "country") return v("DE")
   if (name === "phone") return v("+4930000000")
   if (name === "successurl" || name === "cancelurl" || name === "imageurl")
-    return v(`https://eventoren.wonder1.de/${DEV}`)
+    return v(`https://eventoren.leonardomora.de/${DEV}`)
   if (name === "imagealt") return v(DEV)
   if (name === "l" || name === "locale") return v("de")
   if (name === "quantity" || name === "count" || name === "limit" || name === "numitems") return v(1)
@@ -775,7 +775,7 @@ async function phaseSetup(spec: Map<string, SpecFn>): Promise<FixtureState> {
         startsAt: "2026-12-01T19:00:00.000Z",
         endsAt: "2026-12-01T22:00:00.000Z",
         doorsAt: "2026-12-01T18:30:00.000Z",
-        imageUrl: `https://eventoren.wonder1.de/${DEV}`,
+        imageUrl: `https://eventoren.leonardomora.de/${DEV}`,
         imageAlt: DEV,
       },
       config.apiKey,
@@ -1239,7 +1239,7 @@ async function ensureEvent(state: FixtureState): Promise<void> {
       startsAt: "2026-12-01T19:00:00.000Z",
       endsAt: "2026-12-01T22:00:00.000Z",
       doorsAt: "2026-12-01T18:30:00.000Z",
-      imageUrl: `https://eventoren.wonder1.de/${DEV}`,
+      imageUrl: `https://eventoren.leonardomora.de/${DEV}`,
       imageAlt: DEV,
     },
     config.apiKey,
@@ -1500,7 +1500,7 @@ async function planCall(state: FixtureState, module: string, name: string, surfa
           startsAt: "2026-12-01T19:00:00.000Z",
           endsAt: "2026-12-01T22:00:00.000Z",
           doorsAt: "2026-12-01T18:30:00.000Z",
-          imageUrl: `https://eventoren.wonder1.de/${DEV}`,
+          imageUrl: `https://eventoren.leonardomora.de/${DEV}`,
           imageAlt: DEV,
         },
         config.apiKey,
@@ -1530,7 +1530,7 @@ async function planCall(state: FixtureState, module: string, name: string, surfa
           startsAt: "2025-01-01T19:00:00.000Z",
           endsAt: "2025-01-01T22:00:00.000Z",
           doorsAt: "2025-01-01T18:30:00.000Z",
-          imageUrl: `https://eventoren.wonder1.de/${DEV}`,
+          imageUrl: `https://eventoren.leonardomora.de/${DEV}`,
           imageAlt: DEV,
         },
         config.apiKey,

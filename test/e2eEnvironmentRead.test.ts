@@ -27,7 +27,7 @@ describe("E2E environment configuration", () => {
   test("selects the development origin only with an explicit target and forwards auth values", () => {
     const result = e2eEnvironmentRead({
       E2E_TARGET: "development",
-      E2E_BASE_URL: "https://eventoren.wonder1.de/",
+      E2E_BASE_URL: "https://eventoren.leonardomora.de/",
       E2E_AUTH_USERNAME: " admin ",
       E2E_AUTH_PASSWORD: "password",
     })
@@ -36,7 +36,7 @@ describe("E2E environment configuration", () => {
       success: true,
       data: {
         target: "development",
-        baseUrl: "https://eventoren.wonder1.de",
+        baseUrl: "https://eventoren.leonardomora.de",
         authUsername: "admin",
         authPassword: "password",
         mailcow: {},
@@ -48,7 +48,7 @@ describe("E2E environment configuration", () => {
     expect(e2eEnvironmentRead({ E2E_BASE_URL: "not a URL" }).success).toBe(false)
     expect(e2eEnvironmentRead({ E2E_BASE_URL: "file:///tmp/page" }).success).toBe(false)
     expect(e2eEnvironmentRead({ E2E_BASE_URL: "http://localhost:4173/" }).success).toBe(false)
-    expect(e2eEnvironmentRead({ E2E_BASE_URL: "https://eventoren.wonder1.de" }).success).toBe(false)
+    expect(e2eEnvironmentRead({ E2E_BASE_URL: "https://eventoren.leonardomora.de" }).success).toBe(false)
     expect(e2eEnvironmentRead({ E2E_TARGET: "development", E2E_BASE_URL: "https://eventoren.de" }).success).toBe(false)
     expect(e2eEnvironmentRead({ E2E_TARGET: "preview" }).success).toBe(false)
     expect(e2eEnvironmentRead({ E2E_TARGET: "development", E2E_BASE_URL: "http://localhost:4173/" }).success).toBe(

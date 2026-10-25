@@ -61,6 +61,6 @@ registry_project_edit() {
   done
 }
 
-registry_project_edit preview-convex "$CONVEX_PORT" "eventoren-convex.wonder1.de"
-registry_project_edit preview-api "$API_PORT" "eventoren-api.wonder1.de"
+registry_project_edit preview-convex "$CONVEX_PORT" "eventoren-convex.leonardomora.de"
+registry_project_edit preview-api "$API_PORT" "eventoren-api.leonardomora.de"
 echo "Project Registry grouped preview Convex services under $REGISTRY_OWNER/$REGISTRY_PROJECT_NAME"

@@ -10,7 +10,7 @@ import { e2eCheckpointLoad } from "./e2eCheckpointLoad.ts"
 type Target = "production" | "development"
 const bindings = [
   { target: "production", baseUrl: "https://eventoren.de" },
-  { target: "development", baseUrl: "https://eventoren.wonder1.de" },
+  { target: "development", baseUrl: "https://eventoren.leonardomora.de" },
 ] as const
 
 /** Retain target-owned legacy state in place; all new runs use private target-scoped roots. */

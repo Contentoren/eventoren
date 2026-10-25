@@ -5,7 +5,7 @@ import { api } from "../../convex/_generated/api.js"
 import { e2eAuthSessionMark } from "./e2eAuthSessionMark.ts"
 import { e2eAuthCredentialsGet } from "../config/e2eAuthCredentialsGet.ts"
 
-const targetOrigins = ["https://eventoren.de", "https://eventoren.wonder1.de"] as const
+const targetOrigins = ["https://eventoren.de", "https://eventoren.leonardomora.de"] as const
 
 type CleanupSessionBrowserHandle = {
   token: string

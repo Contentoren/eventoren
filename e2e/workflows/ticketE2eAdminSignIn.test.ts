@@ -10,7 +10,7 @@ interface TicketAdminScenario {
 
 function ticketAdminScenarioCreate(overrides: Partial<TicketAdminScenario> = {}): TicketAdminScenario {
   return {
-    url: "https://eventoren.wonder1.de/admin/events",
+    url: "https://eventoren.leonardomora.de/admin/events",
     navVisible: true,
     headingText: "Events",
     contentHeadingVisible: true,
@@ -45,7 +45,7 @@ const ticketAdminPageMock = {
         getByRole: (innerRole: string, innerOptions?: { name?: string | RegExp }) => ({
           __key: `navigation:${name} ${innerRole}:${String(innerOptions?.name)}`,
           click: async () => {
-            scenario.url = "https://eventoren.wonder1.de/admin/events"
+            scenario.url = "https://eventoren.leonardomora.de/admin/events"
           },
         }),
       }
@@ -94,9 +94,9 @@ describe("ticket admin sign-in stays green with a closed account menu", () => {
     recorded.length = 0
     signInCalls.length = 0
 
-    await ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.wonder1.de")
+    await ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.leonardomora.de")
 
-    expect(signInCalls).toEqual([{ baseUrl: "https://eventoren.wonder1.de", path: "/admin/events" }])
+    expect(signInCalls).toEqual([{ baseUrl: "https://eventoren.leonardomora.de", path: "/admin/events" }])
     expect(
       recorded.some(
         ({ key, matcher }) => key === "navigation:Admin-Navigation link:Events" && matcher === "toBeVisible",
@@ -110,22 +110,22 @@ describe("ticket admin sign-in stays green with a closed account menu", () => {
 
   it("does not accept anonymous visitors stuck on the sign-in page", async () => {
     scenario = ticketAdminScenarioCreate({
-      url: "https://eventoren.wonder1.de/sign-in?returnTo=%2Fadmin%2Fevents",
+      url: "https://eventoren.leonardomora.de/sign-in?returnTo=%2Fadmin%2Fevents",
       navVisible: false,
     })
     recorded.length = 0
 
-    await expect(ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.wonder1.de")).rejects.toThrow(
-      "waitForURL timeout",
-    )
+    await expect(
+      ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.leonardomora.de"),
+    ).rejects.toThrow("waitForURL timeout")
   })
 
   it("does not accept the access-denied error page without admin navigation", async () => {
     scenario = ticketAdminScenarioCreate({ navVisible: false, headingText: "Zugriff verweigert" })
     recorded.length = 0
 
-    await expect(ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.wonder1.de")).rejects.toThrow(
-      "to be visible",
-    )
+    await expect(
+      ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.leonardomora.de"),
+    ).rejects.toThrow("to be visible")
   })
 })

@@ -22,7 +22,7 @@ function checkpointBase(step: string, status: string, extra: Record<string, unkn
   return {
     version: 1 as const,
     target: "development" as const,
-    baseUrl: "https://eventoren.wonder1.de" as const,
+    baseUrl: "https://eventoren.leonardomora.de" as const,
     runId,
     createdAt: 1_000_000,
     phase: "ticket-unreconciled" as const,
@@ -59,7 +59,7 @@ function stripePaymentFixture(session: Record<string, unknown>, customer: Record
 const paymentProofInput = (stripe: ReturnType<typeof e2eStripeTestClientCreate>) => ({
   environment: {
     E2E_TARGET: "development",
-    E2E_CLEANUP_CONVEX_URL: "https://eventoren-convex.wonder1.de",
+    E2E_CLEANUP_CONVEX_URL: "https://eventoren-convex.leonardomora.de",
   },
   stripeKey: "sk_test_dummy",
   stripeAccountId: "acct_test",
@@ -552,7 +552,7 @@ describe("ticket purchase card method selection proves card fields on the actual
         ticketPurchasePaymentStep(context, {
           environment: {
             E2E_TARGET: "development",
-            E2E_CLEANUP_CONVEX_URL: "https://eventoren-convex.wonder1.de",
+            E2E_CLEANUP_CONVEX_URL: "https://eventoren-convex.leonardomora.de",
           },
           stripeKey: "sk_test_dummy",
           stripeAccountId: "acct_test",

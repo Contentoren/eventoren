@@ -21,7 +21,7 @@ function startedCheckpoint(ticket: Record<string, unknown>): E2eCheckpoint {
   return {
     version: 1,
     target: "development",
-    baseUrl: "https://eventoren.wonder1.de",
+    baseUrl: "https://eventoren.leonardomora.de",
     runId,
     createdAt: 1_000_000,
     phase: "ticket-unreconciled",

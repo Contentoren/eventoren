@@ -12,7 +12,7 @@ Status: fertig und live auf https://eventoren.de/demo/dashboard (Commit `697bc5d
 - Eine klickbare, interaktive Demo unter `/demo/...` für das neue Veranstalter-Dashboard und die angrenzenden Seiten. Sie dient zum Ansehen, Testen und Weiterentwickeln.
 - Die Demo ändert nur Oberfläche und Interaktion. Die Daten liegen lokal im Browser (Demodaten in localStorage). Convex und das Backend werden nicht angefasst, die Anbindung kommt später.
 - Wichtigstes Kriterium ist UI/UX auf dem Niveau moderner SaaS-Dashboards (Stripe, Linear, Luma, pretix): intuitiv, wenig Text, Icons, und alle Teile greifen ineinander.
-- Vorschau-URL ist der laufende Dev-Server mit HMR: https://eventoren.wonder1.de/demo/dashboard (lokal: http://127.0.0.1:3057).
+- Vorschau-URL ist der laufende Dev-Server mit HMR: https://eventoren.leonardomora.de/demo/dashboard (lokal: http://127.0.0.1:3057).
 
 ## Umfang
 
@@ -236,7 +236,7 @@ Alles Neue liegt im neuen Bounded Context `src/dash/`.
 
 ### Prüfen (für alle Aufgaben)
 
-- Der Dev-Server läuft schon: systemd `eventoren.service`, http://127.0.0.1:3057, mit HMR. Er ist öffentlich erreichbar unter https://eventoren.wonder1.de. Keinen zweiten Server starten. Den Dienst nicht selbst neu starten, weil andere Subagenten parallel prüfen; nur wenn er länger als 2 Minuten nicht `active` ist, einmal `systemctl --user restart eventoren.service`.
+- Der Dev-Server läuft schon: systemd `eventoren.service`, http://127.0.0.1:3057, mit HMR. Er ist öffentlich erreichbar unter https://eventoren.leonardomora.de. Keinen zweiten Server starten. Den Dienst nicht selbst neu starten, weil andere Subagenten parallel prüfen; nur wenn er länger als 2 Minuten nicht `active` ist, einmal `systemctl --user restart eventoren.service`.
 - Typen:
   - Da parallel gearbeitet wird, zählen nur Fehler in den eigenen Dateien: `bunx tsc --noEmit -p . 2>&1 | grep 'error TS' | grep -E '<Regex der eigenen Pfade>'` muss leer sein.
   - Die 52 bekannten Fehler in `src/auth/(convex/apiKey|model/apiKey)` werden ignoriert.

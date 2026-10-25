@@ -15,7 +15,7 @@ describe("localRehearsalLoopbackValidate", () => {
   test("refuses external targets, missing ports, and embedded credentials", () => {
     for (const external of [
       "https://convex.eventoren.de",
-      "https://eventoren-convex.wonder1.de",
+      "https://eventoren-convex.leonardomora.de",
       "http://169.254.1.2:3146",
       "http://localhost",
       "http://user:pass@127.0.0.1:13470",

@@ -11,14 +11,14 @@ describe("E2E target protection", () => {
 
   it("selects preview only with an explicit development target", () => {
     const result = e2eEnvironmentRead({ E2E_TARGET: "development" })
-    expect(result.success && result.data.baseUrl).toBe("https://eventoren.wonder1.de")
+    expect(result.success && result.data.baseUrl).toBe("https://eventoren.leonardomora.de")
   })
 
   it("rejects cross-target, credential-bearing and noncanonical URLs", () => {
     for (const environment of [
-      { E2E_BASE_URL: "https://eventoren.wonder1.de" },
+      { E2E_BASE_URL: "https://eventoren.leonardomora.de" },
       { E2E_TARGET: "development", E2E_BASE_URL: "https://eventoren.de" },
-      { E2E_TARGET: "development", E2E_BASE_URL: "http://eventoren.wonder1.de" },
+      { E2E_TARGET: "development", E2E_BASE_URL: "http://eventoren.leonardomora.de" },
       { E2E_BASE_URL: "https://user:secret@eventoren.de" },
       { E2E_BASE_URL: "https://eventoren.de/admin" },
       { E2E_TARGET: "preview" },

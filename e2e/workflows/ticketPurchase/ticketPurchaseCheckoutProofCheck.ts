@@ -65,7 +65,7 @@ export async function ticketPurchaseCheckoutProofCheck(input: {
   const ticket = checkpoint.ticket
   if (
     checkpoint.target !== "development" ||
-    checkpoint.baseUrl !== "https://eventoren.wonder1.de" ||
+    checkpoint.baseUrl !== "https://eventoren.leonardomora.de" ||
     checkpoint.phase !== "ticket-unreconciled" ||
     !/^(sk|rk)_test_[A-Za-z0-9]+$/u.test(key) ||
     !/^acct_[A-Za-z0-9]+$/u.test(accountId) ||

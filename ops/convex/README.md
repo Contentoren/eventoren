@@ -64,8 +64,8 @@ systemctl --user is-active billing-preview.service
 systemctl --user is-active eventoren-convex-preview.service
 podman exec eventoren-convex-preview \
   curl -fsS -o /dev/null -w '%{http_code}\n' http://169.254.1.2:3146/login
-curl -fsS https://eventoren-convex.wonder1.de/version
-curl -fsS -i https://eventoren-api.wonder1.de/
+curl -fsS https://eventoren-convex.leonardomora.de/version
+curl -fsS -i https://eventoren-api.leonardomora.de/
 ```
 
 The container request should return Billing's normal HTTP status (currently
