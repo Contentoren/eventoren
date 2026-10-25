@@ -15,7 +15,7 @@ import * as v from "valibot"
 const schema = v.strictObject({
   version: v.literal(1),
   target: v.picklist(["production", "development"]),
-  baseUrl: v.picklist(["https://eventoren.de", "https://eventoren.leonardomora.de"]),
+  baseUrl: v.picklist(["https://eventoren.de", "https://eventoren.wonder1.de"]),
   runId: v.pipe(v.string(), v.regex(/^[0-9a-z]+-[0-9a-f-]{36}$/u)),
   createdAt: v.pipe(v.number(), v.integer(), v.minValue(1)),
   workflow: v.literal("native auth HTTP"),

@@ -34,11 +34,11 @@ const timeSelections: Array<{ selector: string; value: string }> = []
 let catalogCalls = 0
 const capturedClients: unknown[] = []
 
-const developmentConvexUrl = "https://eventoren-convex.leonardomora.de"
+const developmentConvexUrl = "https://eventoren-convex.wonder1.de"
 const productionConvexUrl = "https://eventoren-convex.contentoren.de"
 const developmentEnvironment: Record<string, string | undefined> = {
   E2E_TARGET: "development",
-  E2E_BASE_URL: "https://eventoren.leonardomora.de",
+  E2E_BASE_URL: "https://eventoren.wonder1.de",
   E2E_CLEANUP_CONVEX_URL: developmentConvexUrl,
 }
 
@@ -154,14 +154,14 @@ const { e2eCheckpointSave } = await import("../../checkpoint/e2eCheckpointSave.t
 const { e2eCheckpointLoad } = await import("../../checkpoint/e2eCheckpointLoad.ts")
 
 const runId = "abc-12345678-1234-1234-1234-123456789abc"
-const baseUrl = "https://eventoren.leonardomora.de"
-const target = { target: "development" as const, baseUrl: baseUrl as "https://eventoren.leonardomora.de" }
+const baseUrl = "https://eventoren.wonder1.de"
+const target = { target: "development" as const, baseUrl: baseUrl as "https://eventoren.wonder1.de" }
 
 function startedCheckpoint(ticketOverrides: Record<string, unknown> = {}) {
   return {
     version: 1 as const,
     target: "development" as const,
-    baseUrl: baseUrl as "https://eventoren.leonardomora.de",
+    baseUrl: baseUrl as "https://eventoren.wonder1.de",
     runId,
     createdAt: 1_000_000,
     phase: "ticket-unreconciled" as const,
@@ -524,14 +524,14 @@ describe("ticket event canonical backend binding", () => {
         name: "missing-key",
         environment: {
           E2E_TARGET: "development",
-          E2E_BASE_URL: "https://eventoren.leonardomora.de",
+          E2E_BASE_URL: "https://eventoren.wonder1.de",
         },
       },
       {
         name: "foreign-prod-url",
         environment: {
           E2E_TARGET: "development",
-          E2E_BASE_URL: "https://eventoren.leonardomora.de",
+          E2E_BASE_URL: "https://eventoren.wonder1.de",
           E2E_CLEANUP_CONVEX_URL: productionConvexUrl,
         },
       },
@@ -539,7 +539,7 @@ describe("ticket event canonical backend binding", () => {
         name: "foreign-example-url",
         environment: {
           E2E_TARGET: "development",
-          E2E_BASE_URL: "https://eventoren.leonardomora.de",
+          E2E_BASE_URL: "https://eventoren.wonder1.de",
           E2E_CLEANUP_CONVEX_URL: "https://example.convex.cloud",
         },
       },

@@ -93,7 +93,7 @@ preview_web_register() {
 
   local registry_owner='leo'
   local registry_project_name='eventoren'
-  local preview_host='preview.eventoren.leonardomora.de'
+  local preview_host='eventoren.wonder1.de'
   local registry_socket="${PROJECT_REGISTRY_SOCKET:-/run/project-registry/$registry_owner.sock}"
   local project_json allocated_values preview_web_port default_web_port default_has_preview
 

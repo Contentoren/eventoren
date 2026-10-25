@@ -141,7 +141,7 @@ function discoveryVerifyMocks() {
 test("success cleanup bypasses the 24h gate and inventories current plus historical evidence", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   await successCheckpoint(directory, target)
   let catalogCalls = 0
   let historicalCalls = 0
@@ -197,7 +197,7 @@ test("success cleanup bypasses the 24h gate and inventories current plus histori
 test("cleanup retry reuses the ledger proof after owned rows are already deleted", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   const checkpoint = await successCheckpoint(directory, target)
   const liveProof = {
     success: true,
@@ -276,7 +276,7 @@ test("cleanup retry reuses the ledger proof after owned rows are already deleted
 test("cleanup retry still retains without any live or ledger proof", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   await successCheckpoint(directory, target)
   const result = await e2eSuccessCleanupRun({
     directory,
@@ -299,7 +299,7 @@ test("cleanup retry still retains without any live or ledger proof", async () =>
 test("success cleanup refuses no-op success without complete backend credentials", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   await successCheckpoint(directory, target)
   const missing = await e2eSuccessCleanupRun({ directory, target })
   expect(missing.success).toBe(false)
@@ -309,7 +309,7 @@ test("success cleanup refuses no-op success without complete backend credentials
 test("success cleanup fails on truncated historical pages and retains the phase", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   await successCheckpoint(directory, target)
   const truncated = await e2eSuccessCleanupRun({
     directory,
@@ -401,7 +401,7 @@ test("production success cleans historical catalog without a ticket purchase or 
 test("drains multiple event and orphan-order pages with staleAfterMs 0 across current and legacy fixtures", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   const checkpoint = await successCheckpoint(directory, target)
   const currentEventKey = `ticket-e2e-${checkpoint.runId}`
   const legacyRunId = "mold-12345678-1234-1234-1234-123456789abc"
@@ -514,7 +514,7 @@ test("drains multiple event and orphan-order pages with staleAfterMs 0 across cu
 test("fails on skipped identifiable candidates instead of silently leaving proven fixtures", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   await successCheckpoint(directory, target)
   const skippedKey = "ticket-e2e-mold-12345678-1234-1234-1234-123456789abc"
   const result = await e2eSuccessCleanupRun({
@@ -562,7 +562,7 @@ test("fails on skipped identifiable candidates instead of silently leaving prove
 test("retains ledger evidence when historical providers fail and resumes providers on retry", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-cleanup-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   const checkpoint = await successCheckpoint(directory, target)
   const historicalData = {
     isDone: true,
@@ -630,7 +630,7 @@ test("retains ledger evidence when historical providers fail and resumes provide
 test("preserves pre-deletion inventory across a lost deletion receipt and resumes providers on retry", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-crash-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   const checkpoint = await successCheckpoint(directory, target)
   const crashedKey = `ticket-e2e-${checkpoint.runId}`
   const preCandidates = [{ eventKey: crashedKey, runId: checkpoint.runId, kind: "ticket-e2e" }]
@@ -713,7 +713,7 @@ test("preserves pre-deletion inventory across a lost deletion receipt and resume
 test("refuses to clear state while final absence verification retains disposable resources", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-verify-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   const checkpoint = await successCheckpoint(directory, target)
   const historicalData = {
     isDone: true,
@@ -814,7 +814,7 @@ test("refuses to clear state while final absence verification retains disposable
 test("cleans snapshot-only historical residue with no event candidate and persists versions before deletion", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-snapshot-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   const checkpoint = await successCheckpoint(directory, target)
   const snapshotCandidate = { version: 7, kind: "ticket-e2e", eventKey: "ticket-e2e-old", chunkCount: 2 }
   let discoveryCalls = 0
@@ -917,7 +917,7 @@ test("cleans snapshot-only historical residue with no event candidate and persis
 test("retains the checkpoint and version ledger when snapshot deletion fails", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-snapshot-fail-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   const checkpoint = await successCheckpoint(directory, target)
   const snapshotCandidate = { version: 7, kind: "ticket-e2e", eventKey: "ticket-e2e-old", chunkCount: 2 }
   const result = await e2eSuccessCleanupRun({
@@ -981,7 +981,7 @@ test("retains the checkpoint and version ledger when snapshot deletion fails", a
 test("fails final verification while retaining the checkpoint when snapshot residue remains", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-snapshot-final-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   await successCheckpoint(directory, target)
   const snapshotCandidate = { version: 7, kind: "ticket-e2e", eventKey: "ticket-e2e-old", chunkCount: 2 }
   let discoveryCalls = 0
@@ -1391,7 +1391,7 @@ test("empty DB/ledger still runs provider scans+verifiers incl prod; orphan TEST
 test("empty DB/ledger provider verify failure retains phase", async () => {
   const directory = await mkdtemp(join(tmpdir(), "eventoren-success-empty-verify-fail-"))
   directories.push(directory)
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   await successCheckpoint(directory, target)
   let stripeVerifyCalls = 0
   let mailVerifyCalls = 0
@@ -1623,7 +1623,7 @@ test("foreign HTTP checkpoint refuses retirement before any caller deletion", as
       await nativeAuthHttpCheckpoint.save(directory, {
         version: 1,
         target: "development",
-        baseUrl: "https://eventoren.leonardomora.de",
+        baseUrl: "https://eventoren.wonder1.de",
         runId: checkpoint.runId,
         createdAt,
         workflow: "native auth HTTP",

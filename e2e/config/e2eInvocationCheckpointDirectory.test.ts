@@ -39,7 +39,7 @@ for (const target of ["production", "development"] as const) {
     expect(children).toHaveLength(1)
     expect(children[0]).toMatchObject({
       E2E_TARGET: target,
-      E2E_BASE_URL: target === "production" ? "https://eventoren.de" : "https://eventoren.leonardomora.de",
+      E2E_BASE_URL: target === "production" ? "https://eventoren.de" : "https://eventoren.wonder1.de",
       E2E_CHECKPOINT_DIRECTORY: directory,
     })
     const stored = JSON.parse(await readFile(join(directory, "checkpoint.json"), "utf8"))
@@ -108,7 +108,7 @@ test("development cleanup forwards the resolved explicit root into same-process 
     JSON.stringify({
       version: 1,
       target: "development",
-      baseUrl: "https://eventoren.leonardomora.de",
+      baseUrl: "https://eventoren.wonder1.de",
       runId,
       createdAt: 111,
       phase: "ticket-unreconciled",

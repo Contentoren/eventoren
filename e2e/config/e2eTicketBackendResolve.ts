@@ -5,7 +5,7 @@ import { e2eTicketTargetCheck } from "./e2eTicketTargetCheck.ts"
 /** Canonical Convex backend per exact E2E target. Ambient VITE/localhost URLs are never consulted. */
 const ticketBackendConvexUrls = {
   production: "https://eventoren-convex.contentoren.de",
-  development: "https://eventoren-convex.leonardomora.de",
+  development: "https://eventoren-convex.wonder1.de",
 } as const
 
 /**

@@ -3,7 +3,7 @@ import { createResult, createResultError } from "#result"
 // Dev canonical origin must match provisioned DNS/proxy and registered OIDC callbacks before being changed.
 const targetOrigins = {
   production: "https://eventoren.de",
-  development: "https://eventoren.leonardomora.de",
+  development: "https://eventoren.wonder1.de",
 } as const
 
 export const e2eEnvironmentRead = (environment: Record<string, string | undefined>) => {

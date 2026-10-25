@@ -6,7 +6,7 @@ import { nativeAuthHttpCheckpoint, type NativeAuthHttpCheckpoint } from "./nativ
 
 const runId = "mhttp-12345678-1234-1234-1234-123456789abc"
 const foreignRunId = "mother-12345678-1234-1234-1234-123456789abc"
-const binding = { target: "development", baseUrl: "https://eventoren.leonardomora.de" } as const
+const binding = { target: "development", baseUrl: "https://eventoren.wonder1.de" } as const
 
 function checkpointCreate(overrides: Partial<NativeAuthHttpCheckpoint> = {}): NativeAuthHttpCheckpoint {
   return {

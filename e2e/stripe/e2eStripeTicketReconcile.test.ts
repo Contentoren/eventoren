@@ -22,7 +22,7 @@ const metadata = {
 const checkpoint: E2eCheckpoint = {
   version: 1,
   target: "development",
-  baseUrl: "https://eventoren.leonardomora.de",
+  baseUrl: "https://eventoren.wonder1.de",
   runId,
   createdAt: Date.now() - 25 * 60 * 60_000,
   phase: "ticket-unreconciled",

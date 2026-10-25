@@ -21,7 +21,7 @@ function checkpointCreate(target: "production" | "development" = "development"):
   return {
     version: 1,
     target,
-    baseUrl: target === "production" ? "https://eventoren.de" : "https://eventoren.leonardomora.de",
+    baseUrl: target === "production" ? "https://eventoren.de" : "https://eventoren.wonder1.de",
     runId,
     createdAt: 111,
     phase: "ticket-unreconciled",
@@ -139,7 +139,7 @@ for (const workflow of ["HTTP", "lifecycle"] as const) {
     const identity = {
       version: 1,
       target: "development",
-      baseUrl: "https://eventoren.leonardomora.de",
+      baseUrl: "https://eventoren.wonder1.de",
       runId,
       createdAt: 111,
       status: "started",

@@ -30,7 +30,7 @@ const fixtureEvent = {
 }
 
 async function successCheckpoint(directory: string) {
-  const target = { target: "development" as const, baseUrl: "https://eventoren.leonardomora.de" as const }
+  const target = { target: "development" as const, baseUrl: "https://eventoren.wonder1.de" as const }
   const selected = [
     "SSO",
     "native auth HTTP",
