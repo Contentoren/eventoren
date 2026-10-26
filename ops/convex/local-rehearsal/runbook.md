@@ -139,6 +139,7 @@ bash ops/convex/local-rehearsal/bootstrap.bash down
 ```
 
 ## Local frontend env (recommendations for browser tests; write to a private
+
 `.env.local` outside git, never into the repo)
 
 ```bash
