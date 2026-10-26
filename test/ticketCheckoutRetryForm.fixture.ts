@@ -231,7 +231,7 @@ test("the real form replays the same checkout key and guest on an unchanged code
       if (!stored.success) return
       expect(stored.data).toHaveLength(1)
       expect(stored.data[0]?.checkoutKey).toBe(firstInput.checkoutKey)
-      expect(stored.data[0]?.guestAccessToken).toBe(first.guestAccessToken)
+      expect(stored.data[0]?.guestAccessToken).toBe(first.guestAccessToken as string | undefined)
       expect(firstInput.tickets[0]?.activationCodeHoldToken).toBe("hold-token-0123456789abcdef")
 
       transport.impl = async () => successResponse("order-replay-2", "https://pay.test/replay-1")
@@ -312,7 +312,7 @@ test("the real form mints one fresh key after the exact terminal answer and bind
       if (!stored.success) return
       expect(stored.data).toHaveLength(1)
       expect(stored.data[0]?.checkoutKey).toBe(freshKey)
-      expect(stored.data[0]?.guestAccessToken).toBe(fresh.guestAccessToken)
+      expect(stored.data[0]?.guestAccessToken).toBe(fresh.guestAccessToken as string | undefined)
       const access = ticketOrderAccessStorageLoad()
       expect(access.success).toBe(true)
       if (!access.success) return
