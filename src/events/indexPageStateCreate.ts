@@ -74,6 +74,32 @@ export function indexPageStateCreate(inputs: {
     isLoading.set(false)
   }
 
+  const initialPageApply = (initialPage: {
+    filter: EventFilter
+    result: ApiClientResult<CatalogEventListPublishedPage>
+  }) => {
+    reset()
+    if (!initialPage.result.success) {
+      error.set(initialPage.result.error.message)
+      return
+    }
+    pageApply(initialPage.result.data)
+    // fillSparsePage parity: the original effect only ever ran on the client, so never
+    // fire this async top-up from the synchronous SSR seed path.
+    if (typeof window !== "undefined" && initialPage.result.data.page.length === 0 && !initialPage.result.data.isDone) {
+      void pageLoad(initialPage.result.data.continueCursor, revision, initialPage.filter)
+    }
+  }
+
+  // Seed from the loader synchronously: effects never run during SSR, so without this the
+  // server render always emits the loading placeholder with zero event links.
+  const seedPage = inputs.initialPage()
+  appliedInitialPage = seedPage
+  activeFilterFingerprint = eventFilterFingerprintGet(filter())
+  if (eventFilterFingerprintGet(seedPage.filter) === activeFilterFingerprint) {
+    initialPageApply(seedPage)
+  }
+
   createEffect(() => {
     const currentFingerprint = eventFilterFingerprintGet(filter())
     if (activeFilterFingerprint !== currentFingerprint) {
@@ -86,15 +112,7 @@ export function indexPageStateCreate(inputs: {
     if (eventFilterFingerprintGet(initialPage.filter) !== currentFingerprint) return
     appliedInitialPage = initialPage
 
-    reset()
-    if (!initialPage.result.success) {
-      error.set(initialPage.result.error.message)
-      return
-    }
-    pageApply(initialPage.result.data)
-    if (initialPage.result.data.page.length === 0 && !initialPage.result.data.isDone) {
-      void pageLoad(initialPage.result.data.continueCursor, revision, initialPage.filter)
-    }
+    initialPageApply(initialPage)
   })
 
   const applyFilter = (next: EventFilter) => {
