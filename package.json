@@ -13,9 +13,6 @@
     "upload": "bunx wrangler pages deploy dist/client --project-name eventoren --branch main --commit-dirty=true",
     "typecheck": "bun --check",
     "format": "biome format --write .",
-    "assets:optimize": "bun run ./src/app/assets/assetsOptimize.ts",
-    "assets:process": "bun run ./src/app/assets/assetsProcess.ts",
-    "assets:process:init": "bun run ./src/app/assets/assetsProcess.ts -- --resync",
     "preview": "vite preview",
     "test": "bun test --isolate --path-ignore-patterns='**/{convex-tests,e2e}/**' --max-concurrency=1 --pass-with-no-tests",
     "test:e2e": "bun e2e/config/e2eInvocationMain.ts production",
@@ -120,7 +117,6 @@
     "valibot": "^1.5.0"
   },
   "devDependencies": {
-    "@adaptive-ds/assets-optimizer": "^0.20.0",
     "@biomejs/biome": "^2.6.3",
     "@edge-runtime/vm": "^5.0.0",
     "@rstest/core": "^0.12.4",
