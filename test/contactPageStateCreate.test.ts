@@ -22,6 +22,27 @@ test("contact form state exposes signal objects and reset restores its fields", 
   })
 })
 
+test("submitting the form never claims a received message", async () => {
+  await createRoot(async (dispose) => {
+    const state = contactPageStateCreate()
+    let prevented = false
+
+    state.submitForm({ preventDefault: () => (prevented = true) } as unknown as SubmitEvent)
+
+    // The submit only stops the browser navigation, there is no delivery to report.
+    expect(prevented).toBe(true)
+    expect(state.isSubmitting.get()).toBe(false)
+    expect(state.isSubmitted.get()).toBe(false)
+
+    // The former delayed success (600ms) must not come back.
+    await new Promise((resolve) => setTimeout(resolve, 700))
+    expect(state.isSubmitted.get()).toBe(false)
+    expect(state.isSubmitting.get()).toBe(false)
+
+    dispose()
+  })
+})
+
 test("contact FAQ toggle opens and closes the selected question", () => {
   createRoot((dispose) => {
     const state = contactPageStateCreate()

@@ -10,19 +10,18 @@ export function contactPageStateCreate(inputs: { readonly initialSubmitted?: boo
   const eventType = createSignalObject("Konzert / Festival")
   const expectedTickets = createSignalObject("100 - 500")
   const message = createSignalObject("")
+  // Online submission is unavailable: no backend or email delivery exists, so
+  // submitForm must never claim receipt. isSubmitting/isSubmitted/resetForm and
+  // the inputs param stay for call-site compatibility until the demo submitted
+  // variant is retired (follow-up for review, together with real delivery).
   const isSubmitting = createSignalObject(false)
   const isSubmitted = createSignalObject(inputs.initialSubmitted ?? false)
   const expandedFaqId = createSignalObject<string | null>("faq-1")
 
   const submitForm = (e: SubmitEvent) => {
+    // No delivery exists: only stop navigation (e.g. Enter in a field).
+    // Contact happens via the already-published mailto addresses.
     e.preventDefault()
-    isSubmitting.set(true)
-
-    // Simulate sending inquiry
-    setTimeout(() => {
-      isSubmitting.set(false)
-      isSubmitted.set(true)
-    }, 600)
   }
 
   const resetForm = () => {
