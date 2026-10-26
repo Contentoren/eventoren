@@ -115,17 +115,17 @@ describe("ticket admin sign-in stays green with a closed account menu", () => {
     })
     recorded.length = 0
 
-    await expect(
-      ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.wonder1.de"),
-    ).rejects.toThrow("waitForURL timeout")
+    await expect(ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.wonder1.de")).rejects.toThrow(
+      "waitForURL timeout",
+    )
   })
 
   it("does not accept the access-denied error page without admin navigation", async () => {
     scenario = ticketAdminScenarioCreate({ navVisible: false, headingText: "Zugriff verweigert" })
     recorded.length = 0
 
-    await expect(
-      ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.wonder1.de"),
-    ).rejects.toThrow("to be visible")
+    await expect(ticketE2eAdminSignIn(ticketAdminPageMock as never, "https://eventoren.wonder1.de")).rejects.toThrow(
+      "to be visible",
+    )
   })
 })
