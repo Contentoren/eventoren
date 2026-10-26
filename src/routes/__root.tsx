@@ -90,9 +90,9 @@ function RootDocument(props: { children: JSX.Element }) {
       <head>
         <HydrationScript />
         <script type="speculationrules" innerHTML={speculationRules} />
-        <HeadContent />
       </head>
       <body class="min-h-dvh">
+        <HeadContent />
         <div>
           <Suspense>{props.children}</Suspense>
         </div>
