@@ -6,7 +6,8 @@ type Meta = JSX.MetaHTMLAttributes<HTMLMetaElement>
 
 const siteUrl = "https://eventoren.de"
 const siteName = "Eventoren"
-const siteDescription = "Eventoren präsentiert Veranstaltungen, Termine und Erlebnisse an einem Ort."
+const siteDescription =
+  "Entdecke veröffentlichte Veranstaltungen, prüfe Termine, Orte und Ticketpreise und kaufe deine Tickets direkt bei Eventoren."
 const ogImage = "https://assets.eventoren.de/production/public/images/1200x630_webp/eventoren-og_default_v1.avif"
 
 function pageMeta(input: { readonly title: string; readonly description?: string; readonly path?: string }): Meta[] {

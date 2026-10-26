@@ -11,8 +11,9 @@ type SeoPage = {
 export const seoPages = [
   {
     path: "/",
-    title: "Eventoren | Veranstaltungen, Events & Erlebnisse",
-    description: "Eventoren präsentiert Veranstaltungen, Termine und Erlebnisse an einem Ort.",
+    title: "Veranstaltungen entdecken & Tickets kaufen | Eventoren",
+    description:
+      "Entdecke veröffentlichte Veranstaltungen, prüfe Termine, Orte und Ticketpreise und kaufe deine Tickets direkt bei Eventoren.",
     changefreq: "weekly",
     priority: 1,
     jsonLdType: "WebPage",

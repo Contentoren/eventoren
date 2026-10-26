@@ -8,8 +8,9 @@ import { isServer } from "solid-js/web"
 import { cataloguePublicPageFetch } from "../client/cataloguePublicPageFetch.ts"
 import { catalogEventListPublishedPagePublicCachedGet } from "../server/catalogEventListPublishedPagePublicCachedGet.ts"
 
-const siteName = "Eventoren | Veranstaltungen, Events & Erlebnisse"
-const description = "Eventoren präsentiert Veranstaltungen, Termine und Erlebnisse an einem Ort."
+const siteName = "Veranstaltungen entdecken & Tickets kaufen | Eventoren"
+const description =
+  "Entdecke veröffentlichte Veranstaltungen, prüfe Termine, Orte und Ticketpreise und kaufe deine Tickets direkt bei Eventoren."
 const getCatalogEvents = createServerFn({ method: "GET" })
   .validator((filter: EventFilter) => filter)
   .handler(({ data: filter }) =>
