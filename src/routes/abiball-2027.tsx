@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/solid-router"
+import { abiballShopHtmlResponseCreate } from "../abiball/abiballShopHtmlResponseCreate.ts"
 
 export const Route = createFileRoute("/abiball-2027")({
   server: {
     handlers: {
-      GET: ({ request }) => Response.redirect(new URL("/abiball-2027.html", request.url), 308),
+      GET: async () => {
+        const { default: shopHtml } = await import("../../public/abiball-2027.html?raw")
+        return abiballShopHtmlResponseCreate(shopHtml)
+      },
     },
   },
   component: () => null,
