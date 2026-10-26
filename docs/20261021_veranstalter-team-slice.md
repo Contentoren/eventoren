@@ -50,20 +50,20 @@ Dünner Wrapper: `convex/organizerDashboardTeam.ts`. Alle Funktionen sind
 token-geschützt (Session-Token wie im übrigen Dashboard) und liefern ein
 `Result` (`{success:true,data}` / `{success:false,op,errorMessage}`).
 
-| Operation | Art | Args (ohne `token`) | Ergebnis |
-| --- | --- | --- | --- |
-| `organizerDashboardTeamMemberListQuery` | query | `orgId`, `paginationOpts` | `{page: Member[], isDone, continueCursor}` |
-| `organizerDashboardTeamInvitationListQuery` | query | `orgId`, `paginationOpts` | `{page: Invitation[], isDone, continueCursor}` |
-| `organizerDashboardTeamInviteMutation` | mutation | `orgId`, `emails: string[]` (max. 5), `organizerRole` | `{invitations: Invitation[]}` |
-| `organizerDashboardTeamRoleUpdateMutation` | mutation | `orgId`, `memberId`, `organizerRole: Role \| null` | `Member` |
-| `organizerDashboardTeamMemberRemoveMutation` | mutation | `orgId`, `memberId` | `Member` |
-| `organizerDashboardTeamInvitationRevokeMutation` | mutation | `orgId`, `invitationId` | `Invitation` |
-| `organizerDashboardTeamInvitationResendMutation` | mutation | `orgId`, `invitationId` | `Invitation` |
-| `organizerDashboardTeamInvitationInboxQuery` | query | `paginationOpts` | `{page: Invitation[], isDone, continueCursor, accountEmail}` |
-| `organizerDashboardTeamInvitationAcceptMutation` | mutation | `invitationId` | `{memberId, orgId, organizerRole}` |
-| `organizerDashboardTeamInvitationDeliveryClaimMutation` | internalMutation | `invitationId` | Claim-Ergebnis |
-| `organizerDashboardTeamInvitationDeliveryRecordMutation` | internalMutation | `invitationId`, `attempt`, `state`, `reason?` | `{recorded}` |
-| `organizerDashboardTeamInvitationDeliverAction` | internalAction | `invitationId` | `null` |
+| Operation                                                | Art              | Args (ohne `token`)                                   | Ergebnis                                                     |
+| -------------------------------------------------------- | ---------------- | ----------------------------------------------------- | ------------------------------------------------------------ |
+| `organizerDashboardTeamMemberListQuery`                  | query            | `orgId`, `paginationOpts`                             | `{page: Member[], isDone, continueCursor}`                   |
+| `organizerDashboardTeamInvitationListQuery`              | query            | `orgId`, `paginationOpts`                             | `{page: Invitation[], isDone, continueCursor}`               |
+| `organizerDashboardTeamInviteMutation`                   | mutation         | `orgId`, `emails: string[]` (max. 5), `organizerRole` | `{invitations: Invitation[]}`                                |
+| `organizerDashboardTeamRoleUpdateMutation`               | mutation         | `orgId`, `memberId`, `organizerRole: Role \| null`    | `Member`                                                     |
+| `organizerDashboardTeamMemberRemoveMutation`             | mutation         | `orgId`, `memberId`                                   | `Member`                                                     |
+| `organizerDashboardTeamInvitationRevokeMutation`         | mutation         | `orgId`, `invitationId`                               | `Invitation`                                                 |
+| `organizerDashboardTeamInvitationResendMutation`         | mutation         | `orgId`, `invitationId`                               | `Invitation`                                                 |
+| `organizerDashboardTeamInvitationInboxQuery`             | query            | `paginationOpts`                                      | `{page: Invitation[], isDone, continueCursor, accountEmail}` |
+| `organizerDashboardTeamInvitationAcceptMutation`         | mutation         | `invitationId`                                        | `{memberId, orgId, organizerRole}`                           |
+| `organizerDashboardTeamInvitationDeliveryClaimMutation`  | internalMutation | `invitationId`                                        | Claim-Ergebnis                                               |
+| `organizerDashboardTeamInvitationDeliveryRecordMutation` | internalMutation | `invitationId`, `attempt`, `state`, `reason?`         | `{recorded}`                                                 |
+| `organizerDashboardTeamInvitationDeliverAction`          | internalAction   | `invitationId`                                        | `null`                                                       |
 
 `Member` = `{id, userId, name, email|null, role:"member"|"guest",
 organizerRole: Role|null, invitedBy, createdAt}`.
@@ -111,7 +111,7 @@ wiederverwendbar): `organizerDashboardTeamMemberSchema`,
 
 ## 5. Zustellung (ehrlicher Zustand)
 
-Der Versand läuft über eine interne Action, die die Einladung zuerst *claimt*
+Der Versand läuft über eine interne Action, die die Einladung zuerst _claimt_
 (`sending`, `deliveryAttempts + 1`). Dadurch wird dieselbe Mail nie doppelt
 versendet; ein späteres Ergebnis einer älteren Versuchsnummer wird verworfen.
 

@@ -10,10 +10,10 @@ ohne die von anderen Agenten verantworteten Bereiche (events, orders, team, Bill
 - **D1** Contract-Revisionen bekommen einen neuen, datierten Stand: `2026-10-21-v1`.
   `organizerContractDocuments` bleibt die einzige Quelle; alle Aufrufer leiten sich daraus ab.
 - **D2** "Aktuelle Zustimmung" (`organizerContractsCurrentCheck`) verlangt künftig
-  * beide exakten aktuellen Revisionen,
-  * einen akzeptierenden Akteur (`consentedByUserId`),
-  * syntaktisch gültige UTC-ISO-Zeitstempel für `termsConsentedAt`/`dpaConsentedAt`.
-  Zeitstempel-only-Legacy-Datensätze qualifizieren sich weiterhin **nicht**.
+  - beide exakten aktuellen Revisionen,
+  - einen akzeptierenden Akteur (`consentedByUserId`),
+  - syntaktisch gültige UTC-ISO-Zeitstempel für `termsConsentedAt`/`dpaConsentedAt`.
+    Zeitstempel-only-Legacy-Datensätze qualifizieren sich weiterhin **nicht**.
 - **D3** Zustimmung wird append-only in einer eigenen Tabelle
   `organizerDashboardContractConsents` belegt (Organisation, beide Dokument-IDs + Revisionen,
   SHA-256-Digest **und** eingefrorener Text-Snapshot, `acceptedAt` UTC, `acceptedByUserId`).
@@ -56,7 +56,7 @@ Verhalten:
 - `storedProfile()` liefert nur ein Profil, dessen `data.orgId` dem aktuellen `inputs.orgId()` entspricht.
 - Org-Wechsel (inkl. `undefined`) leert sofort Felder, `saved`, `serverError` und beide
   Zustimmungs-Checkboxen.
-- Prefill nur für die *neu geladene, passende* Organisation; ein Live-Update derselben Org
+- Prefill nur für die _neu geladene, passende_ Organisation; ein Live-Update derselben Org
   überschreibt keine ungespeicherten Änderungen.
 - `canSubmit` und derdirekte `submit()`-Guard verlangen die aktuell passende, geladene Organisation.
 - `submit()` / `submitContracts()` frieren die Ziel-`orgId` beim Aufruf ein und zeigen kein

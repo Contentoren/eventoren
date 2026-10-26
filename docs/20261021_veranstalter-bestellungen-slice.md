@@ -87,15 +87,15 @@ Keine Änderung von Statusmodellen, Indizes oder historischen Feldern durch dies
 
 Dünner Wrapper `convex/organizerDashboardOrders.ts` exportiert genau:
 
-| vorgeschlagene Surface-Operation | Funktion | Art |
-| --- | --- | --- |
-| `order-list` | `organizerDashboardOrderListQuery` | query |
-| `order-get` | `organizerDashboardOrderGetQuery` | query |
-| `order-note-create` | `organizerDashboardOrderNoteCreateMutation` | mutation |
-| `order-note-delete` | `organizerDashboardOrderNoteDeleteMutation` | mutation |
-| `order-buyer-contact-update` | `organizerDashboardOrderBuyerContactUpdateMutation` | mutation |
-| `order-participant-update` | `organizerDashboardOrderParticipantUpdateMutation` | mutation |
-| `order-participant-list` | `organizerDashboardOrderParticipantListQuery` | query |
+| vorgeschlagene Surface-Operation | Funktion                                            | Art      |
+| -------------------------------- | --------------------------------------------------- | -------- |
+| `order-list`                     | `organizerDashboardOrderListQuery`                  | query    |
+| `order-get`                      | `organizerDashboardOrderGetQuery`                   | query    |
+| `order-note-create`              | `organizerDashboardOrderNoteCreateMutation`         | mutation |
+| `order-note-delete`              | `organizerDashboardOrderNoteDeleteMutation`         | mutation |
+| `order-buyer-contact-update`     | `organizerDashboardOrderBuyerContactUpdateMutation` | mutation |
+| `order-participant-update`       | `organizerDashboardOrderParticipantUpdateMutation`  | mutation |
+| `order-participant-list`         | `organizerDashboardOrderParticipantListQuery`       | query    |
 
 Alle Argumente: `orgId`, `token`. Liste zusätzlich optionale `eventKey`, `status`, `search` und
 `paginationOpts`; Detail `orderId`; Note-create `orderId,text`; Note-delete `orderId,noteId`;
