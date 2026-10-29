@@ -61,8 +61,8 @@ export function queryPaginatedCreate<Query extends PageQuery>(
       if (value === undefined) return undefined
       try {
         return createResult({ key: JSON.stringify(convexToJson(value as Value)), value })
-      } catch (error) {
-        return createResultError(op, error instanceof Error ? error.message : String(error))
+      } catch {
+        return createResultError(op, "Die Daten konnten nicht geladen werden. Bitte Seite neu laden.")
       }
     },
     undefined,

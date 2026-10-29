@@ -36,14 +36,17 @@ export function queryCreate<Query extends FunctionReference<"query">>(
           if (currentSubscriptionId !== subscriptionId) return
           setResult(nextResult)
         },
-        (error) => {
+        () => {
           if (currentSubscriptionId !== subscriptionId) return
-          console.error(op, error)
-          setResult(createResultError(op, error.message))
+          // Convex validation failures echo call args: never log or display
+          // the raw message because it discloses the signed session token.
+          console.error(op, "Live-Abfrage fehlgeschlagen.")
+          setResult(createResultError(op, "Die Daten konnten nicht geladen werden. Bitte Seite neu laden."))
         },
       )
-    } catch (error) {
-      setResult(createResultError(op, error instanceof Error ? error.message : String(error)))
+    } catch {
+      console.error(op, "Live-Abfrage fehlgeschlagen.")
+      setResult(createResultError(op, "Die Daten konnten nicht geladen werden. Bitte Seite neu laden."))
     }
     onCleanup(() => {
       if (currentSubscriptionId === subscriptionId) subscriptionId += 1

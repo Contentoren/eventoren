@@ -1,7 +1,7 @@
-import { describe, expect, test } from "bun:test"
+import { describe, expect, mock, test } from "bun:test"
 import type { FunctionReference } from "convex/server"
-import { mock } from "bun:test"
 import { createResult, createResultError } from "#result"
+
 const solidJsClientPath = "solid-js/dist/solid.js"
 type SolidJsModule = typeof import("solid-js")
 const solidJsClient = (await import(solidJsClientPath)) as unknown as SolidJsModule
@@ -154,8 +154,55 @@ describe("queryCreate", () => {
     })
 
     client.calls[0]?.onError?.(new Error("offline"))
-    expect(result?.()).toEqual(createResultError("queryCreate", "offline"))
+    expect(result?.()).toEqual(
+      createResultError("queryCreate", "Die Daten konnten nicht geladen werden. Bitte Seite neu laden."),
+    )
     dispose()
+  })
+
+  test("never displays or logs caught subscription errors, including encoded token fragments", () => {
+    const marker = "FAKE_TOKEN_MARKER"
+    const messages: unknown[][] = []
+    const original = console.error
+    console.error = (...args) => messages.push(args)
+    try {
+      const client = new FakeConvexClient()
+      let result: (() => unknown) | undefined
+      const dispose = createRoot((disposeRoot) => {
+        getOwner()!.context = {
+          [convexClientContext.id]: client,
+          [eventorenAuthContext.id]: { token: () => marker, ready: () => true },
+        }
+        result = queryCreate(query, {})
+        return disposeRoot
+      })
+      client.calls[0]!.onError!(new Error(`ArgumentValidationError: ${marker.slice(0, 10)}`))
+      expect(result?.()).toEqual(
+        createResultError("queryCreate", "Die Daten konnten nicht geladen werden. Bitte Seite neu laden."),
+      )
+      expect(JSON.stringify([result?.(), messages])).not.toContain(marker.slice(0, 10))
+      dispose()
+      const throwClient = {
+        onUpdate: () => {
+          throw new Error(`ArgumentValidationError: ${marker}`)
+        },
+      }
+      const disposeThrow = createRoot((disposeRoot) => {
+        getOwner()!.context = {
+          [convexClientContext.id]: throwClient,
+          [eventorenAuthContext.id]: { token: () => marker, ready: () => true },
+        }
+        result = queryCreate(query, {})
+        return disposeRoot
+      })
+      expect(result?.()).toEqual(
+        createResultError("queryCreate", "Die Daten konnten nicht geladen werden. Bitte Seite neu laden."),
+      )
+      expect(JSON.stringify([result?.(), messages])).not.toContain(marker)
+      disposeThrow()
+    } finally {
+      console.error = original
+    }
   })
 
   test("returns a local failure if the shared client is unavailable", () => {

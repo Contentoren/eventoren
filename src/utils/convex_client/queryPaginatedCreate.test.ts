@@ -229,10 +229,33 @@ describe("queryPaginatedCreate", () => {
     client.calls[0]!.update(page([item("recovered")], "new-c1"))
     expect(state.result()).toBeUndefined()
     client.calls[2]!.error(new Error("offline"))
-    expect(state.result()).toEqual(createResultError("queryCreate", "offline"))
+    expect(state.result()).toEqual(
+      createResultError("queryCreate", "Die Daten konnten nicht geladen werden. Bitte Seite neu laden."),
+    )
     client.calls[2]!.update(page([item("online")], "end", true))
     expect(state.result()).toEqual(createResult([item("recovered"), item("online")]))
     dispose()
+  })
+
+  test("transport errors never display or log token fragments", () => {
+    const marker = "FAKE_TOKEN_MARKER_PAGINATED"
+    const messages: unknown[][] = []
+    const original = console.error
+    console.error = (...args: unknown[]) => messages.push(args)
+    try {
+      const { client, state, setToken, dispose } = setup({ allPages: true })
+      setToken(marker)
+      const active = client.active()
+      expect(active.length).toBeGreaterThan(0)
+      active[0]!.error(new Error(`ArgumentValidationError: ${marker.slice(0, 10)}`))
+      expect(state.result()).toEqual(
+        createResultError("queryCreate", "Die Daten konnten nicht geladen werden. Bitte Seite neu laden."),
+      )
+      expect(JSON.stringify([state.result(), messages])).not.toContain(marker.slice(0, 10))
+      dispose()
+    } finally {
+      console.error = original
+    }
   })
 
   test("repeated cursors fail explicitly instead of creating an infinite all-pages chain", () => {
