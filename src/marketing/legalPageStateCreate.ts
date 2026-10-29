@@ -2,7 +2,8 @@ import { createMemo } from "solid-js"
 
 export function legalPageStateCreate(props: { readonly html: () => string }) {
   const document = createMemo(() => {
-    const source = props.html()
+    // The page renders its own h1 from props.title, so drop a leading content h1 to keep exactly one h1.
+    const source = props.html().replace(/<h1\b[^>]*>[\s\S]*?<\/h1>/i, "")
     const headings: { id: string; html: string }[] = []
     const hasNumberedSections = /<h2>\d+\.\s/u.test(source)
     const html = source.replace(/<h2>([\s\S]*?)<\/h2>/gu, (heading, content: string, offset: number) => {

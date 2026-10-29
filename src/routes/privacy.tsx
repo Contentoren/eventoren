@@ -20,5 +20,5 @@ export const Route = createFileRoute("/privacy")({
       { rel: "stylesheet", href: markdownCss },
     ],
   }),
-  component: () => <LegalPage html={Route.useLoaderData()} />,
+  component: () => <LegalPage html={Route.useLoaderData()} title="Datenschutzerklärung" />,
 })

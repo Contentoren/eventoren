@@ -23,7 +23,7 @@ export const Route = createFileRoute("/datenschutz")({
   }),
   component: () => (
     <SiteFrame>
-      <LegalPage html={Route.useLoaderData()} />
+      <LegalPage html={Route.useLoaderData()} title="Datenschutz" />
     </SiteFrame>
   ),
 })

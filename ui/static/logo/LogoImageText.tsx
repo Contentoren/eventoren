@@ -13,13 +13,22 @@ export interface LogoImageTextProps extends MayHaveClass {
   logoText: string
   logoTextClass?: string
   variant?: ButtonVariant
+  width?: number
+  height?: number
 }
 
 /** Clickable logo image link with accompanying text. */
 export function LogoImageText(p: LogoImageTextProps) {
   return (
     <LinkButtonInternal to={p.to ?? "/"} variant={p.variant ?? buttonVariant.ghost} class={cn("flex gap-1.5", p.class)}>
-      <Img src={p.logoUrl ?? "/logo.svg"} alt={"Logo"} zoomIn={false} class={cn("size-7 mr-1", p.imageClass)} />
+      <Img
+        src={p.logoUrl ?? "/logo.svg"}
+        alt={"Logo"}
+        width={p.width ?? 170}
+        height={p.height ?? 32}
+        zoomIn={false}
+        class={cn("size-7 mr-1", p.imageClass)}
+      />
       <span class={cn("text-2xl font-bold", p.logoTextClass)}>{p.logoText}</span>
     </LinkButtonInternal>
   )
