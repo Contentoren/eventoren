@@ -14,7 +14,8 @@
       "!src/app/assets/service/documentList.ts",
       "!src/app/assets/service/fontList.ts",
       "!src/app/assets/service/imageList.ts",
-      "!src/app/assets/service/videoList.ts"
+      "!src/app/assets/service/videoList.ts",
+      "!src/legal/**"
     ]
   },
   "assist": {
