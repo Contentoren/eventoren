@@ -6,8 +6,8 @@ import { adminEventsRouteStateCreate } from "./adminEventsRouteStateCreate.ts"
 const route = getRouteApi("/admin/events_/$eventKey")
 
 export function adminEventDetailRouteStateCreate() {
-  const catalog = adminEventsRouteStateCreate()
   const params = route.useParams()
+  const catalog = adminEventsRouteStateCreate(() => ({ eventKey: params().eventKey }))
   const search = route.useSearch()
   const event = () => catalog.events().find((candidate) => candidate.id === params().eventKey)
   createEffect(() => {

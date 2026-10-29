@@ -1,14 +1,17 @@
+import { mdiArchiveOutline } from "@adaptive-ds/mdi/mdiArchiveOutline.js"
+import { mdiArrowLeft } from "@adaptive-ds/mdi/mdiArrowLeft.js"
 import { Link } from "@tanstack/solid-router"
 import { For, Show } from "solid-js"
-import { Checkbox } from "#ui/input/check/Checkbox.jsx"
 import { Input } from "#ui/input/input/Input.jsx"
 import { SelectSingle } from "#ui/input/select/SelectSingle.jsx"
 import { SelectSingleNative } from "#ui/input/select/SelectSingleNative.jsx"
+import { Button } from "#ui/interactive/button/Button.jsx"
 import { Badge } from "#ui/static/badge/Badge.jsx"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
+import { Icon } from "#ui/static/icon/Icon.jsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
-import { adminListViewPreferenceContextUse } from "../viewPreference/adminListViewPreferenceContextUse.ts"
 import { AdminEventFeedback } from "./AdminEventFeedback.tsx"
+import { AdminEventOverviewPanel } from "./AdminEventOverviewPanel.tsx"
 import { adminEventStatusLabel } from "./adminEventStatusLabel.ts"
 import type { adminEventsListRouteStateCreate } from "./adminEventsListRouteStateCreate.ts"
 
@@ -20,8 +23,6 @@ const statusLabels: Record<string, string> = {
 }
 
 export function AdminEventsListPage(props: { state: ReturnType<typeof adminEventsListRouteStateCreate> }) {
-  const viewPreference = adminListViewPreferenceContextUse()
-
   const eventDetails = (event: ReturnType<typeof props.state.filteredEvents>[number], tile: boolean) => (
     <>
       <div class="min-w-0">
@@ -78,15 +79,43 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
       <UiContainer width="wide" class="flex flex-col gap-6 py-6 sm:py-8">
         <header class="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 class="text-3xl font-semibold tracking-tight text-content">Events</h1>
-            <p class="mt-1 text-sm text-content-muted">{props.state.catalog.events().length} Events im Katalog</p>
+            <h1 class="text-3xl font-semibold tracking-tight text-content">
+              {props.state.archiveMode() ? "Event-Archiv" : "Events"}
+            </h1>
+            <Show
+              when={!props.state.catalog.errorMessage() && !(props.state.catalog.eventsError?.() ?? "")}
+              fallback={
+                <p class="mt-1 text-sm text-content-muted">Admin-Veranstaltungen konnten nicht geladen werden.</p>
+              }
+            >
+              <Show
+                when={!props.state.catalog.isLoading?.()}
+                fallback={<p class="mt-1 text-sm text-content-muted">Events werden geladen …</p>}
+              >
+                <p class="mt-1 text-sm text-content-muted">{props.state.catalog.events().length} Events im Katalog</p>
+              </Show>
+            </Show>
           </div>
-          <Link
-            to="/admin/events/new"
-            class="inline-flex rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-content hover:bg-brand-strong"
-          >
-            Neues Event
-          </Link>
+          <div class="ml-auto flex max-w-full shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              class="size-11 shrink-0 p-2"
+              title={props.state.archiveLabel()}
+              aria-label={props.state.archiveLabel()}
+              aria-pressed={props.state.archiveMode()}
+              onClick={props.state.archiveToggle}
+            >
+              <Icon path={props.state.archiveMode() ? mdiArrowLeft : mdiArchiveOutline} class="size-5" />
+            </Button>
+            <Link
+              to="/admin/events/new"
+              class="inline-flex min-h-11 items-center whitespace-nowrap rounded-md bg-brand px-4 py-2 text-sm font-semibold text-brand-content hover:bg-brand-strong"
+            >
+              Neues Event
+            </Link>
+          </div>
         </header>
         <AdminEventFeedback state={props.state.catalog} />
         <div class="min-w-0 overflow-hidden rounded-xl bg-surface shadow-lg shadow-slate-900/10 dark:shadow-black/30">
@@ -118,14 +147,6 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                 innerClass="flex flex-col"
                 listOptionClass="w-full"
               />
-              <Checkbox
-                id="admin-events-show-archived"
-                class="items-center whitespace-nowrap text-sm text-content"
-                checked={props.state.showArchived()}
-                onChange={props.state.showArchivedChange}
-              >
-                Archiviert
-              </Checkbox>
             </div>
             <div class="relative">
               <SelectSingleNative
@@ -149,9 +170,27 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
           </div>
           <Show
             when={props.state.filteredEvents().length > 0}
-            fallback={<p class="p-8 text-center text-sm text-content-muted">Keine passenden Events gefunden.</p>}
+            fallback={
+              <Show
+                when={props.state.catalog.eventsError?.()}
+                fallback={
+                  <Show
+                    when={props.state.catalog.isLoading?.()}
+                    fallback={
+                      <p class="p-8 text-center text-sm text-content-muted">Keine passenden Events gefunden.</p>
+                    }
+                  >
+                    <p class="p-8 text-center text-sm text-content-muted">Events werden geladen …</p>
+                  </Show>
+                }
+              >
+                <p class="p-8 text-center text-sm text-content-muted">
+                  Admin-Veranstaltungen konnten nicht geladen werden.
+                </p>
+              </Show>
+            }
           >
-            <Show when={viewPreference?.view() !== "tiles"}>
+            <Show when={!props.state.tiles()}>
               <div class="hidden items-center bg-surface-muted/40 text-xs font-semibold text-content-muted dark:bg-slate-800/40 xl:flex">
                 <div class="grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,8rem)_minmax(0,11rem)_minmax(0,10rem)_7rem] gap-2 px-4 py-3">
                   <span>Event</span>
@@ -163,41 +202,50 @@ export function AdminEventsListPage(props: { state: ReturnType<typeof adminEvent
                 </div>
               </div>
             </Show>
-            <ul class={viewPreference?.view() === "tiles" ? "grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3" : ""}>
+            <ul class={props.state.tiles() ? "grid items-start gap-4 p-4 sm:grid-cols-2 xl:grid-cols-3" : ""}>
               <For each={props.state.filteredEvents()}>
                 {(event) => (
                   <li
                     class={
-                      viewPreference?.view() === "tiles"
-                        ? "min-w-0"
-                        : "min-w-0 even:bg-surface-muted/35 dark:even:bg-slate-800/30"
+                      props.state.tiles() ? "min-w-0" : "min-w-0 even:bg-surface-muted/35 dark:even:bg-slate-800/30"
                     }
                   >
                     <Show
-                      when={viewPreference?.view() === "tiles"}
+                      when={props.state.tiles()}
                       fallback={
                         <div class="flex items-center hover:bg-surface-muted/60">
-                          <Link
-                            to="/admin/events/$eventKey"
-                            params={{ eventKey: event.id }}
-                            search={{}}
-                            class="grid min-w-0 flex-1 gap-2 p-4 transition-colors xl:grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,8rem)_minmax(0,11rem)_minmax(0,10rem)_7rem] xl:items-center"
+                          <Button
+                            type="button"
+                            variant="none"
+                            size="none"
+                            aria-expanded={props.state.overviewExpanded(event.id)}
+                            aria-controls={props.state.overview.panelId(event.id)}
+                            aria-label={`Übersicht für ${event.title}`}
+                            onClick={() => props.state.overviewToggle(event.id)}
+                            class="grid min-w-0 flex-1 cursor-pointer items-start justify-stretch gap-2 rounded-none p-4 text-left font-normal transition-colors active:scale-100 focus-visible:outline-2 focus-visible:outline-ring xl:grid-cols-[minmax(0,1fr)_minmax(0,9rem)_minmax(0,8rem)_minmax(0,11rem)_minmax(0,10rem)_7rem] xl:items-center"
                           >
                             {eventDetails(event, false)}
-                          </Link>
+                          </Button>
                         </div>
                       }
                     >
-                      <CardWrapper class="relative h-full overflow-hidden rounded-xl border-0 p-0 shadow-md shadow-slate-900/10 dark:shadow-black/25 lg:p-0">
-                        <Link
-                          to="/admin/events/$eventKey"
-                          params={{ eventKey: event.id }}
-                          search={{}}
-                          class="grid h-full gap-3 p-4 transition-colors hover:bg-surface-muted/60"
+                      <CardWrapper class="relative overflow-hidden rounded-xl border-0 p-0 shadow-md shadow-slate-900/10 dark:shadow-black/25 lg:p-0">
+                        <Button
+                          type="button"
+                          variant="none"
+                          size="none"
+                          aria-expanded={props.state.overviewExpanded(event.id)}
+                          aria-controls={props.state.overview.panelId(event.id)}
+                          aria-label={`Übersicht für ${event.title}`}
+                          onClick={() => props.state.overviewToggle(event.id)}
+                          class="grid w-full cursor-pointer items-start justify-stretch gap-3 rounded-none p-4 text-left font-normal transition-colors hover:bg-surface-muted/60 active:scale-100 focus-visible:outline-2 focus-visible:outline-ring"
                         >
                           {eventDetails(event, true)}
-                        </Link>
+                        </Button>
                       </CardWrapper>
+                    </Show>
+                    <Show when={props.state.overviewExpanded(event.id)}>
+                      <AdminEventOverviewPanel {...props.state.overview.panelProps()} />
                     </Show>
                   </li>
                 )}

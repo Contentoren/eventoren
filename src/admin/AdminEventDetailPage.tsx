@@ -3,6 +3,7 @@ import { Match, Show, Switch } from "solid-js"
 import { CardWrapper } from "#ui/static/card/CardWrapper.jsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { AdminActivationCodesPanel } from "./AdminActivationCodesPanel.tsx"
+import { AdminArchivedEventDetails } from "./AdminArchivedEventDetails.tsx"
 import { AdminEventDetailHeader } from "./AdminEventDetailHeader.tsx"
 import { AdminEventDetailsForm } from "./AdminEventDetailsForm.tsx"
 import { AdminEventFeedback } from "./AdminEventFeedback.tsx"
@@ -68,26 +69,35 @@ export function AdminEventDetailPage(props: { state: ReturnType<typeof adminEven
           {(event) => (
             <>
               <AdminEventDetailHeader event={event()} />
-              <AdminEventTabs
-                eventKey={props.state.eventKey()}
-                tab={props.state.tab()}
-                tierCount={event().tiers.length}
-              />
-              <Switch>
-                <Match when={props.state.tab() === "products"}>
-                  <AdminEventFeedback state={props.state.catalog} />
-                  <AdminTicketProductsForm state={props.state.catalog} />
-                </Match>
-                <Match when={props.state.tab() === "codes"}>
-                  <AdminActivationCodesPanel eventKey={props.state.eventKey} tiers={() => event().tiers} />
-                </Match>
-                <Match when={props.state.tab() === "release"}>
-                  <AdminEventReleaseForm state={props.state.catalog} />
-                </Match>
-                <Match when={true}>
-                  <AdminEventDetailsForm state={props.state.catalog} />
-                </Match>
-              </Switch>
+              <Show
+                when={event().status === "archived"}
+                fallback={
+                  <>
+                    <AdminEventTabs
+                      eventKey={props.state.eventKey()}
+                      tab={props.state.tab()}
+                      tierCount={event().tiers.length}
+                    />
+                    <Switch>
+                      <Match when={props.state.tab() === "products"}>
+                        <AdminEventFeedback state={props.state.catalog} />
+                        <AdminTicketProductsForm state={props.state.catalog} />
+                      </Match>
+                      <Match when={props.state.tab() === "codes"}>
+                        <AdminActivationCodesPanel eventKey={props.state.eventKey} tiers={() => event().tiers} />
+                      </Match>
+                      <Match when={props.state.tab() === "release"}>
+                        <AdminEventReleaseForm state={props.state.catalog} />
+                      </Match>
+                      <Match when={true}>
+                        <AdminEventDetailsForm state={props.state.catalog} />
+                      </Match>
+                    </Switch>
+                  </>
+                }
+              >
+                <AdminArchivedEventDetails event={event()} />
+              </Show>
             </>
           )}
         </Show>

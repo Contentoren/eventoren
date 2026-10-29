@@ -1,12 +1,12 @@
 import { getRouteApi } from "@tanstack/solid-router"
 import { createServerFn } from "@tanstack/solid-start"
-import { eventorenAuthContextUse } from "#src/auth/ui/eventorenAuthContextUse.ts"
 import { api } from "#convex/_generated/api.js"
-import { queryPaginatedCreate } from "#src/utils/convex_client/queryPaginatedCreate.ts"
-import { queryCreate } from "#src/utils/convex_client/queryCreate.ts"
-import { mutationCreate } from "#src/utils/convex_client/mutationCreate.ts"
 import { createResultError } from "#result"
+import { eventorenAuthContextUse } from "#src/auth/ui/eventorenAuthContextUse.ts"
 import { adminImageUploadFromSession } from "#src/server/adminImageUploadFromSession.ts"
+import { mutationCreate } from "#src/utils/convex_client/mutationCreate.ts"
+import { queryCreate } from "#src/utils/convex_client/queryCreate.ts"
+import { queryPaginatedCreate } from "#src/utils/convex_client/queryPaginatedCreate.ts"
 import { adminCatalogPageStateCreate } from "./adminCatalogPageStateCreate.ts"
 
 const adminRoute = getRouteApi("/admin")
@@ -14,12 +14,17 @@ const uploadAdminImage = createServerFn({ method: "POST" })
   .validator((data: FormData) => data)
   .handler(({ data }) => adminImageUploadFromSession(data))
 
-export function adminEventsRouteStateCreate() {
+export function adminEventsRouteStateCreate(
+  listOptions?: () => {
+    readonly archiveOnly?: boolean
+    readonly eventKey?: string
+  },
+) {
   const data = adminRoute.useLoaderData()
   const auth = eventorenAuthContextUse()
   const liveEvents = queryPaginatedCreate(
     api.catalog.catalogEventListAdminPageQuery,
-    () => (data().authorized ? {} : undefined),
+    () => (data().authorized ? (listOptions?.() ?? {}) : undefined),
     { pageSize: 50, allPages: true },
   )
   const liveEventsResult = liveEvents.result
@@ -38,6 +43,7 @@ export function adminEventsRouteStateCreate() {
     const live = liveEventsResult()
     if (live) return live
     const routeData = data()
+    if (listOptions) return undefined
     return isServerAuthorized() ? (routeData.authorized ? routeData.eventsResult : undefined) : undefined
   }
   const isServerAuthorized = () => data().authorized && (!auth.ready() || !!auth.token())
@@ -45,23 +51,23 @@ export function adminEventsRouteStateCreate() {
   const hiddenCategoryListResultGet = () => hiddenCategoriesResult()
 
   return adminCatalogPageStateCreate({
-    isLoading: liveEvents.isLoading,
+    isLoading: () => liveEventsResult() === undefined || liveEvents.isLoading(),
     isDone: liveEvents.isDone,
     eventsError: () => {
       const result = liveEventsResult()
-      return result && !result.success ? result.errorMessage : ""
+      return result && !result.success ? "Admin-Veranstaltungen konnten nicht geladen werden." : ""
     },
     events: () => {
       const result = eventsResultGet()
-      return result?.success ? result.data : []
+      return result?.success && "data" in result ? result.data : []
     },
     eventsLive: () => {
       const result = liveEventsResult()
-      return result?.success ? result.data : undefined
+      return result?.success ? result.data : listOptions ? [] : undefined
     },
     eventsLoadError: () => {
       const result = eventsResultGet()
-      return result && !result.success ? result.errorMessage : ""
+      return result && !result.success ? "Admin-Veranstaltungen konnten nicht geladen werden." : ""
     },
     isServerAuthorized,
     categoryLive: categoryListResultGet,

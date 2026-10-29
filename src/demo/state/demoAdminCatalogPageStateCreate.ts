@@ -2,14 +2,15 @@ import { createMemo } from "solid-js"
 import { createSignalObject } from "#ui/utils/createSignalObject.js"
 import type { AdminCatalogPageState } from "../../admin/AdminCatalogPageState.ts"
 import type { AdminEventDraft } from "../../admin/AdminEventDraft.ts"
+import type { AdminEventItem } from "../../admin/AdminEventItem.ts"
 import type { AdminTierDraft } from "../../admin/AdminTierDraft.ts"
 import type { EventItem } from "../../events/EventItem.ts"
 import type { EventTicketTier } from "../../events/EventTicketTier.ts"
-import { eventTicketTierMaxPerOrderGet } from "../../events/eventTicketTierMaxPerOrderGet.ts"
-import { eventTicketTierActivationCodeRequiredGet } from "../../events/eventTicketTierActivationCodeRequiredGet.ts"
+import { eventExclusionsGet } from "../../events/eventExclusionsGet.ts"
 import { eventHighlightsGet } from "../../events/eventHighlightsGet.ts"
 import { eventInclusionsGet } from "../../events/eventInclusionsGet.ts"
-import { eventExclusionsGet } from "../../events/eventExclusionsGet.ts"
+import { eventTicketTierActivationCodeRequiredGet } from "../../events/eventTicketTierActivationCodeRequiredGet.ts"
+import { eventTicketTierMaxPerOrderGet } from "../../events/eventTicketTierMaxPerOrderGet.ts"
 
 import type { DemoFlowContextValue } from "./demoFlowContext.ts"
 import { demoFlowContextUse } from "./demoFlowContextUse.ts"
@@ -53,13 +54,14 @@ const emptyTierDraft = (): AdminTierDraft => ({
 })
 
 export function demoAdminCatalogPageStateCreate(inputs: {
-  events: readonly EventItem[]
+  events: readonly (EventItem | AdminEventItem)[]
   authorized?: boolean
   flow?: DemoFlowContextValue
 }): AdminCatalogPageState {
   const flow = inputs.flow ?? demoFlowContextUse()
-  const firstEvent = inputs.events[0]
-  const baseEvents = createSignalObject<readonly EventItem[]>(inputs.events)
+  const adminEvents = inputs.events.map((event) => demoEventToAdminItem(event))
+  const firstEvent = adminEvents[0]
+  const baseEvents = createSignalObject<readonly AdminEventItem[]>(adminEvents)
   const selectedEventKey = createSignalObject(firstEvent?.id ?? "")
   const eventDraft = createSignalObject<AdminEventDraft>(firstEvent ? eventToDraft(firstEvent) : emptyEventDraft())
   const eventDraftRevision = createSignalObject(0)
@@ -90,7 +92,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
   const selectEvent = (event: EventItem) => {
     selectedEventKey.set(event.id)
     eventDraftRevision.set(eventDraftRevision.get() + 1)
-    eventDraft.set(eventToDraft(event))
+    eventDraft.set(eventToDraft(demoEventToAdminItem(event)))
     tierDraft.set(emptyTierDraft())
     baseErrorMessage.set("")
     successMessage.set("")
@@ -147,7 +149,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
     }
     isSaving.set(true)
     const previous = baseEvents.get().find((event) => event.id === draft.eventKey)
-    const updated: EventItem = {
+    const updated: AdminEventItem = {
       ...(previous ?? emptyEventAsItem(draft)),
       ...draft,
       id: draft.eventKey.trim(),
@@ -287,7 +289,7 @@ export function demoAdminCatalogPageStateCreate(inputs: {
     const event = baseEvents.get().find((candidate) => candidate.id === eventKey)
     if (event)
       baseEvents.set([
-        { ...event, catalogVersion: event.catalogVersion + 1 },
+        { ...event, status: "published", catalogVersion: event.catalogVersion + 1 },
         ...baseEvents.get().filter((candidate) => candidate.id !== eventKey),
       ])
     successMessage.set("Event veröffentlicht. Diese Änderung bleibt lokal in der Demo.")
@@ -337,7 +339,13 @@ export function demoAdminCatalogPageStateCreate(inputs: {
   }
 }
 
-function eventToDraft(event: EventItem): AdminEventDraft {
+function demoEventToAdminItem(event: EventItem | AdminEventItem): AdminEventItem {
+  if ("status" in event && (event.status === "draft" || event.status === "published" || event.status === "archived"))
+    return event
+  return { ...event, status: "published" }
+}
+
+function eventToDraft(event: AdminEventItem): AdminEventDraft {
   return {
     eventKey: event.id,
     title: event.title,
@@ -357,11 +365,11 @@ function eventToDraft(event: EventItem): AdminEventDraft {
     highlights: [...eventHighlightsGet(event)],
     inclusions: [...eventInclusionsGet(event)],
     exclusions: [...eventExclusionsGet(event)],
-    status: "published",
+    status: event.status,
   }
 }
 
-function emptyEventAsItem(draft: AdminEventDraft): EventItem {
+function emptyEventAsItem(draft: AdminEventDraft): AdminEventItem {
   return {
     ...draft,
     id: draft.eventKey,

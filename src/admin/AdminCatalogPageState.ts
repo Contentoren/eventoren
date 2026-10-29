@@ -1,13 +1,14 @@
 import type { Accessor } from "solid-js"
+import type { EventImageVariants } from "../events/EventImageVariants.ts"
 import type { EventItem } from "../events/EventItem.ts"
 import type { EventTicketTier } from "../events/EventTicketTier.ts"
-import type { EventImageVariants } from "../events/EventImageVariants.ts"
 import type { Result } from "../ui/Result.ts"
 import type { AdminEventDraft } from "./AdminEventDraft.ts"
+import type { AdminEventItem } from "./AdminEventItem.ts"
 import type { AdminTierDraft } from "./AdminTierDraft.ts"
 
 export type AdminCatalogPageState = {
-  events: Accessor<readonly EventItem[]>
+  events: Accessor<readonly AdminEventItem[]>
   hiddenCategories: Accessor<readonly string[]>
   categories: Accessor<readonly string[]>
   selectedEvent: Accessor<EventItem | undefined>
