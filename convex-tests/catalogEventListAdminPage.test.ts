@@ -61,7 +61,7 @@ async function userTokenCreate(t: ReturnType<typeof convexTest>, role: "user" | 
   return token
 }
 
-test("authorized admin event loading includes every status and ticket data needed by the editor", async () => {
+test("authorized admin event loading separates archives and includes ticket data needed by the editor", async () => {
   const t = convexTest(schema, modules)
   const token = await userTokenCreate(t, "admin")
   await t.run(async (ctx) => {
@@ -96,7 +96,6 @@ test("authorized admin event loading includes every status and ticket data neede
   expect(result.data.page.map((event) => [event.id, event.status])).toEqual([
     ["event-draft", "draft"],
     ["event-published", "published"],
-    ["event-archived", "archived"],
   ])
   expect(result.data.page[0]?.tiers).toEqual([
     {
@@ -117,6 +116,15 @@ test("authorized admin event loading includes every status and ticket data neede
       sortOrder: 0,
     },
   ])
+
+  const archived = await t.query(api.catalog.catalogEventListAdminPageQuery, {
+    token,
+    archiveOnly: true,
+    paginationOpts: { numItems: 50, cursor: null },
+  })
+  expect(archived.success).toBe(true)
+  if (!archived.success) return
+  expect(archived.data.page.map((event) => [event.id, event.status])).toEqual([["event-archived", "archived"]])
 })
 
 test("admin ticket sales count updates when sold inventory changes", async () => {

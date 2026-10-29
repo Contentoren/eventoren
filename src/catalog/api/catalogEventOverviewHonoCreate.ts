@@ -1,0 +1,55 @@
+import type { ConvexHttpClient } from "convex/browser"
+import { Hono } from "hono"
+import * as v from "valibot"
+import { catalogEventOverviewPageInputSchema } from "#src/catalog/catalogEventOverviewPageInputSchema.ts"
+import { catalogEventOverviewPage } from "#src/catalog/client/catalogEventOverviewPage.ts"
+import { organizerDashboardBearerTokenRead } from "#src/organizer/dashboard/api/organizerDashboardBearerTokenRead.ts"
+
+export function catalogEventOverviewHonoCreate(client: ConvexHttpClient) {
+  const app = new Hono()
+  app.post("/api/admin-event-overview", async (c) => {
+    c.header("Cache-Control", "no-store")
+    const requestId = crypto.randomUUID()
+    const fail = (code: string, message: string, status: 400 | 401 | 500 | 503) =>
+      c.json(
+        { error: { code, message, op: "catalogEventOverviewHttp", status, requestId, retryable: status === 503 } },
+        status,
+      )
+    const token = organizerDashboardBearerTokenRead(c.req.header("authorization"))
+    if (!token) return fail("catalog.unauthenticated", "Authorization Bearer is required", 401)
+    const reader = c.req.raw.body?.getReader()
+    if (!reader) return fail("catalog.invalid-input", "JSON body required", 400)
+    const chunks: Uint8Array[] = []
+    let size = 0
+    while (true) {
+      const part = await reader.read()
+      if (part.done) break
+      size += part.value.length
+      if (size > 16384) {
+        await reader.cancel()
+        return fail("catalog.invalid-input", "Request too large", 400)
+      }
+      chunks.push(part.value)
+    }
+    const bytes = new Uint8Array(size)
+    let offset = 0
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset)
+      offset += chunk.length
+    }
+    let body: unknown
+    try {
+      body = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes))
+    } catch {
+      return fail("catalog.invalid-input", "Invalid JSON", 400)
+    }
+    const schema = v.omit(catalogEventOverviewPageInputSchema, ["token"])
+    const parsed = v.safeParse(schema, body)
+    if (!parsed.success) return fail("catalog.invalid-input", v.summarize(parsed.issues), 400)
+    console.info("catalogEventOverviewHttp", { requestId })
+    const result = await catalogEventOverviewPage({ ...parsed.output, token }, client)
+    if (!result.success) return fail("platform.internal", "Overview query failed", 500)
+    return c.json(result)
+  })
+  return app
+}

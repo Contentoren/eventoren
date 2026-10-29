@@ -109,6 +109,9 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
     "catalogSyncStateGetQuery": { kind: "query", visibility: "public", acceptsToken: true },
     "catalogTicketTierDeleteMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
     "catalogTicketTierUpsertMutation": { kind: "mutation", visibility: "public", acceptsToken: true },
+    "eventArchive": { kind: "mutation", visibility: "public", acceptsToken: true },
+    "eventDuplicate": { kind: "mutation", visibility: "public", acceptsToken: true },
+    "eventOverviewPage": { kind: "query", visibility: "public", acceptsToken: true },
 },
   "catalogImage": {
     "catalogImageUploadAction": { kind: "internalAction", visibility: "internal", acceptsToken: true },
@@ -375,11 +378,11 @@ export const convexFunctionCatalog: Record<string, Record<string, ConvexFunction
 
 export const convexFunctionCatalogTotals = {
   modules: 36,
-  functions: 279,
-  public: 193,
+  functions: 282,
+  public: 196,
   internal: 86,
-  query: 85,
-  mutation: 94,
+  query: 86,
+  mutation: 96,
   action: 14,
   internalQuery: 16,
   internalMutation: 54,

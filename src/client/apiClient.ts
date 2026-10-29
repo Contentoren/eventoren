@@ -113,10 +113,16 @@ export async function apiClientCatalogEventGetPublished(
 
 export const apiClient = apiClientCreate
 
-export { organizerDashboardClientCreate } from "./organizerDashboardClientCreate.js"
-export type { OrganizerDashboardClient } from "./organizerDashboardClientCreate.js"
-export { apiClientConvexCall } from "./apiClientConvexCall.js"
+export type { CatalogEventArchiveInput } from "#src/catalog/catalogEventArchiveInputSchema.ts"
+export type { CatalogEventDuplicateInput } from "#src/catalog/catalogEventDuplicateInputSchema.ts"
+export type { CatalogEventOverviewPageInput } from "#src/catalog/catalogEventOverviewPageInputSchema.ts"
+export { catalogEventArchive } from "#src/catalog/client/catalogEventArchive.ts"
+export { catalogEventDuplicate } from "#src/catalog/client/catalogEventDuplicate.ts"
+export { catalogEventOverviewPage } from "#src/catalog/client/catalogEventOverviewPage.ts"
 export type { ApiClientConvexCallInput } from "./apiClientConvexCall.js"
+export { apiClientConvexCall } from "./apiClientConvexCall.js"
+export type { OrganizerDashboardClient } from "./organizerDashboardClientCreate.js"
+export { organizerDashboardClientCreate } from "./organizerDashboardClientCreate.js"
 export async function apiClientApiKeyList(
   token: string,
   client: ConvexHttpClient = apiClientCreate(),
