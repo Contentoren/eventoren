@@ -1,4 +1,5 @@
 import { For } from "solid-js"
+import { Img } from "#ui/static/img/Img.jsx"
 import { classArr } from "../ui/classArr.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { imageList } from "../app/assets/imageList.js"
@@ -30,10 +31,12 @@ export function EventHeroMagnific(props: { eventCount?: number }) {
           aria-hidden="true"
           class="pointer-events-none absolute bottom-0 left-1/2 h-[350px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,#38bdf8_0%,transparent_75%)] opacity-15 blur-3xl"
         />
-        <img
+        <Img
           src={urlImage(imageList.i1920x1080_webp_festival_lights)}
           alt=""
-          aria-hidden="true"
+          ariaHidden
+          width={imageList.i1920x1080_webp_festival_lights.metadata.width}
+          height={imageList.i1920x1080_webp_festival_lights.metadata.height}
           class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-10 mix-blend-screen"
         />
 

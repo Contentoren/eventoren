@@ -1,4 +1,5 @@
 import { For, Show } from "solid-js"
+import { Img } from "#ui/static/img/Img.jsx"
 import type { EventItem } from "./EventItem.ts"
 import { eventBookingCountdownPageStateCreate } from "./eventBookingCountdownPageStateCreate.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
@@ -15,12 +16,12 @@ export function EventBookingCountdownPage(props: { event: EventItem; now?: () =>
           <Show when={state.image()} keyed>
             {(image) => (
               <Show when={!image.failed()}>
-                <img
+                <Img
                   src={image.src}
                   alt={state.event().imageAlt}
                   onError={image.onError}
                   class="absolute inset-0 -z-20 h-full w-full object-cover"
-                  fetchpriority="high"
+                  eager
                 />
               </Show>
             )}

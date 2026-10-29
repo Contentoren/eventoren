@@ -1,4 +1,5 @@
 import { For } from "solid-js"
+import { Img } from "#ui/static/img/Img.jsx"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import { eventCatalogHeroStateCreate } from "./eventCatalogHeroStateCreate.ts"
 
@@ -9,7 +10,7 @@ export function EventCatalogHero() {
     <section class="relative isolate overflow-hidden border-b border-border-subtle bg-slate-100 text-content">
       {/* Warm up background images in browser cache */}
       <div class="hidden">
-        <For each={state.images}>{(image) => <img src={image.src} alt="" aria-hidden="true" decoding="async" />}</For>
+        <For each={state.images}>{(image) => <Img src={image.src} alt="" ariaHidden class="hidden" />}</For>
       </div>
 
       {/* Atmospheric ambient glows */}

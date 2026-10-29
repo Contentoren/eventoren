@@ -1,5 +1,6 @@
 import { For } from "solid-js"
 import { Button } from "#ui/interactive/button/Button.jsx"
+import { Img } from "#ui/static/img/Img.jsx"
 import { classArr } from "../ui/classArr.ts"
 import { UiContainer } from "../ui/UiContainer.tsx"
 import type { EventFilter } from "./EventFilter.ts"
@@ -26,7 +27,7 @@ export function EventHeroKnockout(props: {
     >
       {/* Warm up the loop images before the first cross-fade. */}
       <div class="hidden">
-        <For each={state.preloadUrls()}>{(url) => <img src={url} alt="" aria-hidden="true" decoding="async" />}</For>
+        <For each={state.preloadUrls()}>{(url) => <Img src={url} alt="" ariaHidden class="hidden" />}</For>
       </div>
 
       {/* Bright ambient backdrop: soft colorful brand glows + light grid. */}

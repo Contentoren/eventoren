@@ -1,5 +1,6 @@
 import { cn } from "cn"
 import { Show } from "solid-js"
+import { Img } from "#ui/static/img/Img.jsx"
 import { urlDocument } from "../app/assets/urlDocument.ts"
 
 export function EventorenLogo(
@@ -7,13 +8,7 @@ export function EventorenLogo(
 ) {
   return (
     <span class={cn("flex items-center gap-2", props.class)}>
-      <img
-        src={urlDocument("logo.svg")}
-        alt=""
-        aria-hidden="true"
-        decoding="async"
-        class={props.iconClass ?? "h-8 w-auto shrink-0"}
-      />
+      <Img src={urlDocument("logo.svg")} alt="" ariaHidden class={props.iconClass ?? "h-8 w-auto shrink-0"} />
       <Show when={!props.iconOnly}>
         <span class="flex min-w-0 flex-col leading-none">
           <span class="truncate text-lg font-extrabold tracking-tight text-content">eventoren</span>
