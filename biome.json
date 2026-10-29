@@ -14,8 +14,7 @@
       "!src/app/assets/service/documentList.ts",
       "!src/app/assets/service/fontList.ts",
       "!src/app/assets/service/imageList.ts",
-      "!src/app/assets/service/videoList.ts",
-      "!src/legal/**"
+      "!src/app/assets/service/videoList.ts"
     ]
   },
   "assist": {
@@ -29,6 +28,11 @@
     "enabled": true,
     "indentStyle": "space",
     "lineWidth": 120
+  },
+  "markdown": {
+    "parser": {
+      "frontmatter": true
+    }
   },
   "javascript": {
     "formatter": {
