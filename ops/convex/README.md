@@ -3,7 +3,7 @@
 The development Billing preview is the existing user service
 `billing-preview.service` from the Billing project. It listens on
 `127.0.0.1:3146`; Project Registry exposes the same service publicly as
-`https://preview.billing.contentoren.de`.
+`https://billing.wonder1.de`.
 
 Do not use that public hostname from development Convex actions. The rootless
 Podman network uses pasta, and the public hostname hairpins through the host's
@@ -80,7 +80,7 @@ Production Convex uses the private values
 `EVENTOREN_BILLING_BASE_URL=https://billing.contentoren.de` and
 `EVENTOREN_BILLING_STRIPE_MODE=live`. Preview's
 `http://169.254.1.2:3146` is the container-local route to the existing Billing
-preview service; `https://preview.billing.contentoren.de` is its public
+preview service; `https://billing.wonder1.de` is its public
 equivalent, not a replacement for the internal route. No routing change is
 needed.
 

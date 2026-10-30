@@ -33,7 +33,7 @@ let signInCalls = 0
 const capturedClients: unknown[] = []
 
 const developmentConvexUrl = "https://eventoren-convex.wonder1.de"
-const productionConvexUrl = "https://eventoren-convex.contentoren.de"
+const productionConvexUrl = "https://convex.eventoren.de"
 const developmentEnvironment: Record<string, string | undefined> = {
   E2E_TARGET: "development",
   E2E_BASE_URL: "https://eventoren.wonder1.de",
