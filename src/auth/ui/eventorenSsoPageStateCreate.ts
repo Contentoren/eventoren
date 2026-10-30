@@ -1,6 +1,7 @@
-import { createEffect } from "solid-js"
+import { createEffect, onMount } from "solid-js"
 import { eventorenSsoAttemptRecord } from "#src/auth/model/eventorenSsoAttemptRecord.ts"
 import { eventorenSsoAttemptsReset } from "#src/auth/model/eventorenSsoAttemptsReset.ts"
+import { eventorenSsoErrorMessage } from "#src/auth/model/eventorenSsoErrorMessage.ts"
 import { eventorenSsoPreferenceRead } from "#src/auth/model/eventorenSsoPreferenceRead.ts"
 import { eventorenSsoPreferenceWrite } from "#src/auth/model/eventorenSsoPreferenceWrite.ts"
 import { eventorenSsoReturnToResolve } from "#src/auth/model/eventorenSsoReturnToResolve.ts"
@@ -38,6 +39,27 @@ export function eventorenSsoPageStateCreate(inputs: {
     })
   }
 
+  // A failed callback redirects here with ?ssoError=<code>. Show what happened,
+  // drop the flag from the URL, and skip the automatic sign-in so the page
+  // does not fire straight into another attempt. Read synchronously so the
+  // auto sign-in effect below cannot run first on the client.
+  const initialSsoError =
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("ssoError")
+  let ssoErrorBlocksAutoSignIn = initialSsoError !== null
+
+  onMount(() => {
+    if (!initialSsoError) return
+    errorMessage.set(eventorenSsoErrorMessage(initialSsoError))
+    const searchParams = new URLSearchParams(window.location.search)
+    searchParams.delete("ssoError")
+    const query = searchParams.toString()
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`,
+    )
+  })
+
   let hasNavigatedAuthenticated = false
   createEffect(() => {
     if (hasNavigatedAuthenticated) return
@@ -53,6 +75,7 @@ export function eventorenSsoPageStateCreate(inputs: {
   let autoSignInInitiated = false
   createEffect(() => {
     if (autoSignInInitiated) return
+    if (ssoErrorBlocksAutoSignIn) return
     if (isAuthenticated()) return
     if (!autoSignIn.get()) return
 

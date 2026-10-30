@@ -34,8 +34,11 @@ test("exchanges the Authworks callback code with the configured client authentic
           ),
         )
 
-        expect(callbackResponse.status).toBe(502)
-        expect(await callbackResponse.text()).toBe("Die Eventoren-Benutzerinformationen konnten nicht geladen werden.")
+        expect(callbackResponse.status).toBe(302)
+        expect(callbackResponse.headers.get("location")).toBe("/sso?ssoError=exchange")
+        const cleared = callbackResponse.headers.get("set-cookie") ?? ""
+        expect(cleared).toContain("eventoren-zitadel-login=")
+        expect(cleared).toContain("Max-Age=0")
         expect(tokenRequest?.method).toBe("POST")
         expect(tokenRequest?.headers.get("authorization")).toBe("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=")
         const body = new URLSearchParams(await tokenRequest?.text())
@@ -118,7 +121,9 @@ test("rejects an Authworks callback received on a non-canonical origin", async (
           ),
         )
 
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(302)
+        expect(response.headers.get("location")).toBe("/sso?ssoError=state")
+        expect(response.headers.get("set-cookie")).toContain("eventoren-zitadel-login=")
         expect(fetchCalled).toBe(false)
       },
     )
@@ -204,7 +209,9 @@ test("denies Authworks login when the organization membership claim does not mat
             { headers: { cookie: start.headers.get("set-cookie")?.split(";", 1)[0] ?? "" } },
           ),
         )
-        expect(callback.status).toBe(401)
+        expect(callback.status).toBe(302)
+        expect(callback.headers.get("location")).toBe("/sso?ssoError=exchange")
+        expect(callback.headers.get("set-cookie")).toContain("eventoren-zitadel-login=")
       },
     )
   })
@@ -238,7 +245,8 @@ test("submits the verified Authworks profile without roles to the signed Convex 
             { headers: { cookie: start.headers.get("set-cookie")?.split(";", 1)[0] ?? "" } },
           ),
         )
-        expect(callback.status).toBe(403)
+        expect(callback.status).toBe(302)
+        expect(callback.headers.get("location")).toBe("/sso?ssoError=exchange")
         const args = (submitted?.args as Array<Record<string, unknown>> | undefined)?.[0]
         expect(args).toMatchObject({ provider: "authworks", providerId: "subject-1" })
         expect(args).not.toHaveProperty("zitadelRoles")

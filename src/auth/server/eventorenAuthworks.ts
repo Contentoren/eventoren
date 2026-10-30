@@ -6,6 +6,8 @@ import type { UserSession } from "#src/auth/model/UserSession.ts"
 import { convexUrlGet } from "#src/server/convexUrlGet.ts"
 import { authworksLoginProofCreate } from "./authworksLoginProofCreate.ts"
 import { eventorenAuthworksProviderCreate } from "./eventorenAuthworksProviderCreate.ts"
+import { eventorenSsoCallbackErrorRedirect } from "./eventorenSsoCallback.ts"
+import type { EventorenSsoCallbackError } from "../model/eventorenSsoErrorMessage.ts"
 import type { CommonAuthProvider } from "./social_identity_providers/CommonAuthProvider.ts"
 import { eventorenSessionCookie } from "./eventorenSessionCookie.ts"
 
@@ -56,35 +58,28 @@ export const eventorenAuthworks = {
 
   async loginComplete(request: Request): Promise<Response> {
     const config = configuration()
-    if (!config) return new Response("Eventoren-Authworks ist nicht konfiguriert.", { status: 503 })
+    if (!config) return eventorenSsoCallbackErrorRedirect(request, "exchange")
 
     const url = new URL(request.url)
     const login = await eventorenSessionCookie.loginRead(request.headers.get("cookie") ?? undefined)
     const state = url.searchParams.get("state") ?? ""
     const code = url.searchParams.get("code") ?? ""
-    if (
-      requestOriginRead(request) !== config.appOrigin ||
-      url.searchParams.get("error") ||
-      !login ||
-      !code ||
-      login.state !== state
-    ) {
-      return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 400)
+    if (url.searchParams.get("error")) return loginErrorResponse(request, "cancelled")
+    if (requestOriginRead(request) !== config.appOrigin || !login || !code || login.state !== state) {
+      return loginErrorResponse(request, "state")
     }
 
     const tokenResponse = await tokenExchange(config, code, login.verifier)
-    if (!tokenResponse)
-      return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht abgeschlossen werden.", 502)
+    if (!tokenResponse) return loginErrorResponse(request, "exchange")
 
     const userInfo = await userInfoRead(config.issuer, tokenResponse.access_token as string)
-    if (!userInfo)
-      return loginErrorResponse(request, "Die Eventoren-Benutzerinformationen konnten nicht geladen werden.", 502)
+    if (!userInfo) return loginErrorResponse(request, "exchange")
     if (config.organizationId && userInfo[resourceOwnerIdClaim] !== config.organizationId)
-      return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 401)
+      return loginErrorResponse(request, "exchange")
 
     let provider: CommonAuthProvider = eventorenAuthworksProviderCreate(userInfo)
     const proof = await authworksLoginProofCreate(provider, config.organizationId)
-    if (!proof) return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht abgeschlossen werden.", 503)
+    if (!proof) return loginErrorResponse(request, "exchange")
     provider = { ...provider, zitadelRoleSyncProof: proof }
     const convexUrl = convexUrlGet()
     const client = new ConvexHttpClient(convexUrl)
@@ -97,10 +92,9 @@ export const eventorenAuthworks = {
         errorName: error instanceof Error ? error.name : "unknown",
         errorCode: error instanceof Error ? error.message.match(/\berror code: (\d{3,4})\b/u)?.[1] : undefined,
       })
-      return loginErrorResponse(request, "Die Eventoren-Sitzung konnte nicht erstellt werden.", 502)
+      return loginErrorResponse(request, "exchange")
     }
-    if (!sessionResult.success)
-      return loginErrorResponse(request, "Die Eventoren-Sitzung konnte nicht erstellt werden.", 403)
+    if (!sessionResult.success) return loginErrorResponse(request, "exchange")
 
     const redirectUrl = new URL("/sign-in", config.appOrigin)
     redirectUrl.searchParams.set("returnTo", login.returnTo)
@@ -114,11 +108,8 @@ export const eventorenAuthworks = {
   },
 } as const
 
-function loginErrorResponse(request: Request, message: string, status: number): Response {
-  return new Response(message, {
-    status,
-    headers: { "set-cookie": eventorenSessionCookie.loginClear(requestIsSecure(request)) },
-  })
+function loginErrorResponse(request: Request, error: EventorenSsoCallbackError): Response {
+  return eventorenSsoCallbackErrorRedirect(request, error)
 }
 
 function configuration(): AuthworksConfiguration | undefined {

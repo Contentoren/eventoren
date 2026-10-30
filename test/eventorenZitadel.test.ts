@@ -27,8 +27,11 @@ test("exchanges the Zitadel callback code with the configured client authenticat
           ),
         )
 
-        expect(callbackResponse.status).toBe(502)
-        expect(await callbackResponse.text()).toBe("Die Eventoren-Benutzerinformationen konnten nicht geladen werden.")
+        expect(callbackResponse.status).toBe(302)
+        expect(callbackResponse.headers.get("location")).toBe("/sso?ssoError=exchange")
+        const cleared = callbackResponse.headers.get("set-cookie") ?? ""
+        expect(cleared).toContain("eventoren-zitadel-login=")
+        expect(cleared).toContain("Max-Age=0")
         expect(tokenRequest?.method).toBe("POST")
         expect(tokenRequest?.headers.get("authorization")).toBe("Basic Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ=")
         const body = new URLSearchParams(await tokenRequest?.text())
@@ -121,7 +124,9 @@ test("rejects a Zitadel callback received on a non-canonical origin", async () =
           ),
         )
 
-        expect(response.status).toBe(400)
+        expect(response.status).toBe(302)
+        expect(response.headers.get("location")).toBe("/sso?ssoError=state")
+        expect(response.headers.get("set-cookie")).toContain("eventoren-zitadel-login=")
         expect(fetchCalled).toBe(false)
       },
     )
@@ -235,7 +240,8 @@ test("configured callback passes only verified project and organization admin ro
             { headers: { cookie: start.headers.get("set-cookie")?.split(";", 1)[0] ?? "" } },
           ),
         )
-        expect(callback.status).toBe(403)
+        expect(callback.status).toBe(302)
+        expect(callback.headers.get("location")).toBe("/sso?ssoError=exchange")
         const args = (submitted?.args as Array<Record<string, unknown>> | undefined)?.[0]
         expect(args).toMatchObject({
           providerId: "subject-1",
