@@ -31,6 +31,8 @@ HealthInterval=5s
 HealthStartPeriod=10s
 
 [Service]
+MemoryHigh=6G
+MemoryMax=8G
 Restart=always
 RestartSec=2
 TimeoutStartSec=300
