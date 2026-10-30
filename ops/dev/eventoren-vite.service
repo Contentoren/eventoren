@@ -4,6 +4,8 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
+MemoryHigh=3G
+MemoryMax=4G
 Type=simple
 WorkingDirectory=%h/eventoren
 Environment=PATH=%h/.local/bin:%h/.bun/bin:/usr/local/bin:/usr/bin:/bin
