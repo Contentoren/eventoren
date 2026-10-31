@@ -14,7 +14,7 @@ import type { NativeAuthLifecycleCheckpoint } from "./nativeAuthLifecycleCheckpo
 import { nativeAuthLifecycleEventFind } from "./nativeAuthLifecycleEventFind.ts"
 import { nativeAuthLifecycleIdentityCreate } from "./nativeAuthLifecycleIdentityCreate.ts"
 import { nativeAuthLifecycleOwnershipProve } from "./nativeAuthLifecycleOwnershipProve.ts"
-import { nativeAuthLifecycleStepRun, type NativeAuthLifecycleStepContext } from "./nativeAuthLifecycleStepRun.ts"
+import { type NativeAuthLifecycleStepContext, nativeAuthLifecycleStepRun } from "./nativeAuthLifecycleStepRun.ts"
 
 const environmentResult = e2eEnvironmentRead(process.env)
 if (!environmentResult.success) throw new Error(environmentResult.errorMessage)
@@ -225,7 +225,8 @@ test("native auth keeps live catalog lifecycle scoped to active sessions", async
       step("observer receives created draft without reload")
       const owned = await adminEventFind(client, creatorToken as string, eventKey)
       if (!owned) throw new Error("Lifecycle draft is missing after create; reconcile it manually")
-      const observerEvent = observerPage.locator(`a[href="/admin/events/${eventKey}"]`)
+      // List rows open an overview panel; they are buttons, not detail-route links.
+      const observerEvent = observerPage.getByRole("button", { name: `Übersicht für ${owned.title}`, exact: true })
       await expect(observerEvent.getByText(owned.title, { exact: true })).toBeVisible({ timeout: 15_000 })
     })
 
@@ -240,7 +241,7 @@ test("native auth keeps live catalog lifecycle scoped to active sessions", async
       if (!proved.data.adopted) {
         throw new Error("Verified lifecycle draft is missing before edit; reconcile it manually instead of recreating")
       }
-      const observerEvent = observerPage.locator(`a[href="/admin/events/${eventKey}"]`)
+      const observerEvent = observerPage.getByRole("button", { name: `Übersicht für ${editedTitle}`, exact: true })
       const observerUrlBeforeEdit = observerPage.url()
       if (owned?.title !== editedTitle) {
         step("edit title, save, and verify observer live update")
@@ -257,7 +258,9 @@ test("native auth keeps live catalog lifecycle scoped to active sessions", async
       }
       await expect(observerEvent.getByText(editedTitle, { exact: true })).toBeVisible({ timeout: 15_000 })
       expect(observerPage.url()).toBe(observerUrlBeforeEdit)
-      await expect(observerEvent.getByText(initialTitle, { exact: true })).toHaveCount(0)
+      await expect(
+        observerPage.getByRole("button", { name: `Übersicht für ${initialTitle}`, exact: true }),
+      ).toHaveCount(0)
     })
 
     // The creator logout is a required destructive session assertion kept as
