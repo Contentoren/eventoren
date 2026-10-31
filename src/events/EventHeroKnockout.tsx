@@ -27,7 +27,9 @@ export function EventHeroKnockout(props: {
     >
       {/* Warm up the loop images before the first cross-fade. */}
       <div class="hidden">
-        <For each={state.preloadUrls()}>{(url) => <Img src={url} alt="" ariaHidden class="hidden" />}</For>
+        <For each={state.preloadUrls()}>
+          {(url) => <Img src={url} alt="" ariaHidden width={1920} height={1080} class="hidden" />}
+        </For>
       </div>
 
       {/* Bright ambient backdrop: soft colorful brand glows + light grid. */}
