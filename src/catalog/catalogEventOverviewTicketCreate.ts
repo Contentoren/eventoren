@@ -4,9 +4,11 @@ import type { Doc } from "#convex/_generated/dataModel.js"
 export function catalogEventOverviewTicketCreate(ticket: Doc<"ticketIssued">, order: Doc<"ticketOrders">) {
   const ticketId = String(ticket._id)
   if (ticket.cancelled || order.cancellation || order.paymentStatus !== "paid") {
-    return { ticketId, soldTicketCount: 0 as const, buyerKey: null }
+    const pendingPaymentTicketCount =
+      !ticket.cancelled && !order.cancellation && order.paymentStatus === "pending" ? (1 as const) : (0 as const)
+    return { ticketId, soldTicketCount: 0 as const, pendingPaymentTicketCount, buyerKey: null }
   }
   const email = order.customerEmail.trim().toLowerCase()
   const buyerKey = email ? `email:${email}` : order.ownerUserId ? `user:${order.ownerUserId}` : `order:${order._id}`
-  return { ticketId, soldTicketCount: 1 as const, buyerKey }
+  return { ticketId, soldTicketCount: 1 as const, pendingPaymentTicketCount: 0 as const, buyerKey }
 }

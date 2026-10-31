@@ -227,16 +227,20 @@ test("expanded live ranges split before joining orders and leaves cover each tic
   expect(new Set(ids).size).toBe(10)
 })
 
-test("a page of only unpaid tickets has zero qualifying contributions", async () => {
+test("a page of only unpaid tickets has zero sales and counts pending payments", async () => {
   const s = await setup()
   await seed(s, { paymentStatus: "pending" })
   const result = await s.t.query(api.catalog.eventOverviewPage, input(s.token, 50))
   expect(result.success).toBe(true)
   if (!result.success) return
   expect(result.data.isDone).toBe(true)
-  expect(result.data.page.map(({ soldTicketCount, buyerKey }) => ({ soldTicketCount, buyerKey }))).toEqual([
-    { soldTicketCount: 0, buyerKey: null },
-  ])
+  expect(
+    result.data.page.map(({ soldTicketCount, pendingPaymentTicketCount, buyerKey }) => ({
+      soldTicketCount,
+      pendingPaymentTicketCount,
+      buyerKey,
+    })),
+  ).toEqual([{ soldTicketCount: 0, pendingPaymentTicketCount: 1, buyerKey: null }])
 })
 
 test("query rejects out-of-range and fractional page sizes", async () => {

@@ -10,19 +10,33 @@ describe("event overview ticket contributions", () => {
     expect(catalogEventOverviewTicketCreate(ticket, order)).toEqual({
       ticketId: "ticket-1",
       soldTicketCount: 1,
+      pendingPaymentTicketCount: 0,
       buyerKey: "email:buyer@example.com",
     })
   })
-  test("pending, failed, cancelled tickets and cancelled orders have no buyer or sale", () => {
+  test("valid tickets of pending orders count as pending payment", () => {
+    expect(catalogEventOverviewTicketCreate(ticket, { ...order, paymentStatus: "pending" })).toEqual({
+      ticketId: "ticket-1",
+      soldTicketCount: 0,
+      pendingPaymentTicketCount: 1,
+      buyerKey: null,
+    })
+  })
+  test("failed, cancelled tickets and cancelled orders have no buyer, sale or pending payment", () => {
     for (const [row, purchase] of [
-      [ticket, { ...order, paymentStatus: "pending" }],
       [ticket, { ...order, paymentStatus: "failed" }],
+      [
+        { ...ticket, cancelled: true },
+        { ...order, paymentStatus: "pending" },
+      ],
+      [ticket, { ...order, paymentStatus: "pending", cancellation: {} }],
       [{ ...ticket, cancelled: true }, order],
       [ticket, { ...order, cancellation: {} }],
     ] as [Doc<"ticketIssued">, Doc<"ticketOrders">][]) {
       expect(catalogEventOverviewTicketCreate(row, purchase)).toEqual({
         ticketId: "ticket-1",
         soldTicketCount: 0,
+        pendingPaymentTicketCount: 0,
         buyerKey: null,
       })
     }
