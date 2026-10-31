@@ -47,12 +47,19 @@ export function AdminEventOverviewPanel(props: AdminEventOverviewPanelProps) {
                     </dd>
                   </div>
                   <div>
+                    <dt class="text-xs text-content-muted">Zahlung ausstehend</dt>
+                    <dd class="mt-1 text-lg font-semibold tabular-nums text-content">
+                      {summary().pendingPaymentTicketCount}
+                    </dd>
+                  </div>
+                  <div>
                     <dt class="text-xs text-content-muted">Käufer:innen</dt>
                     <dd class="mt-1 text-lg font-semibold tabular-nums text-content">{summary().distinctBuyerCount}</dd>
                   </div>
                 </dl>
                 <p class="mt-1 text-xs text-content-muted">
-                  Nur bezahlte, weiterhin gültige Tickets; eindeutige Käufer:innen.
+                  Verkauft: nur bezahlte, weiterhin gültige Tickets; ausstehend: gültige Tickets mit offener Zahlung;
+                  eindeutige Käufer:innen.
                 </p>
               </>
             )}

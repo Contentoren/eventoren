@@ -1,12 +1,18 @@
 import type { AdminEventOverviewPanelProps } from "./AdminEventOverviewPanelProps.ts"
 
 export function adminEventOverviewSummaryCreate(
-  tickets: readonly { readonly soldTicketCount: 0 | 1; readonly buyerKey: string | null }[],
+  tickets: readonly {
+    readonly soldTicketCount: 0 | 1
+    readonly pendingPaymentTicketCount: 0 | 1
+    readonly buyerKey: string | null
+  }[],
   tiers: readonly { readonly capacity: number }[],
 ): NonNullable<AdminEventOverviewPanelProps["summary"]> {
   const buyers = new Set<string>()
   let paidValidTicketCount = 0
+  let pendingPaymentTicketCount = 0
   for (const ticket of tickets) {
+    pendingPaymentTicketCount += ticket.pendingPaymentTicketCount
     if (ticket.soldTicketCount !== 1) continue
     paidValidTicketCount += 1
     if (ticket.buyerKey !== null) buyers.add(ticket.buyerKey)
@@ -20,6 +26,7 @@ export function adminEventOverviewSummaryCreate(
       : undefined
   return {
     paidValidTicketCount,
+    pendingPaymentTicketCount,
     distinctBuyerCount: buyers.size,
     capacity: capacity !== undefined && Number.isSafeInteger(capacity) ? capacity : undefined,
   }

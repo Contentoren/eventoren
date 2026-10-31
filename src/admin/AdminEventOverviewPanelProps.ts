@@ -6,6 +6,7 @@ export interface AdminEventOverviewPanelProps {
   readonly summary:
     | {
         readonly paidValidTicketCount: number
+        readonly pendingPaymentTicketCount: number
         readonly distinctBuyerCount: number
         readonly capacity?: number | null
       }
