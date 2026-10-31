@@ -141,6 +141,41 @@ function invocationDiscoveryMocks() {
 }
 
 describe("Eventoren E2E runner", () => {
+  it("isolates the private development webhook secret to the development ticket child", async () => {
+    for (const target of ["development", "production"] as const) {
+      const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-webhook-secret-"))
+      const seen: string[] = []
+      try {
+        expect(
+          await e2eInvocationRun({
+            target,
+            environment: { E2E_DEV_STRIPE_WEBHOOK_SECRET: "whsec_private" },
+            checkpointDirectory: directory,
+            historicalStripeConfigResolve: async () =>
+              createResult({
+                key: "sk_test_mock",
+                accountId: "acct_mock",
+                organizationId: "org_mock",
+              }),
+            commandRun: async (workflow, environment) => {
+              seen.push(workflow.name)
+              expect(environment.E2E_ENV_FILE).toBe("")
+              expect(environment.E2E_DEV_STRIPE_WEBHOOK_SECRET).toBe(
+                target === "development" && workflow.name === "ticket purchase" ? "whsec_private" : undefined,
+              )
+              return target === "production" || workflow.name === "ticket purchase" ? 1 : 0
+            },
+          }),
+        ).toBe(1)
+        expect(seen).toEqual(
+          target === "production" ? ["SSO"] : ["SSO", "native auth HTTP", "native auth lifecycle", "ticket purchase"],
+        )
+      } finally {
+        await rm(directory, { recursive: true, force: true })
+      }
+    }
+  })
+
   it("runs production SSO and native auth with historical cleanup and no ticket purchase", async () => {
     const directory = await mkdtemp(join(tmpdir(), "eventoren-e2e-test-"))
     const started: { name: string; config: string }[] = []

@@ -7,6 +7,7 @@ import { e2eCheckpointLoad } from "../../checkpoint/e2eCheckpointLoad.ts"
 import { e2eCheckpointSave } from "../../checkpoint/e2eCheckpointSave.ts"
 import type { E2eCheckpoint } from "../../checkpoint/e2eCheckpointSchema.ts"
 import { e2eTicketBackendResolve } from "../../config/e2eTicketBackendResolve.ts"
+import { e2eStripeDevelopmentWebhookForward } from "../../stripe/e2eStripeDevelopmentWebhookForward.ts"
 import { e2eStripeTestClientCreate } from "../../stripe/e2eStripeTestClientCreate.ts"
 import { ticketE2eAdminSignIn } from "../ticketE2eAdminSignIn.ts"
 import type { TicketPurchaseContext } from "./TicketPurchaseContext.ts"
@@ -25,6 +26,7 @@ type PaymentProofInput = {
   stripeOrganizationId?: string
   proofTimeoutMs?: number
   proofPollIntervalMs?: number
+  developmentWebhookForward?: typeof e2eStripeDevelopmentWebhookForward
 }
 
 export async function ticketPurchasePaymentStep(
@@ -121,9 +123,50 @@ async function ticketPurchasePaymentStartedReconcile(
     orderProof,
     stripe,
   }
-  // Pre-submit refusal retains immediately with no browser effect.
+  const paidPollInput = {
+    organizationId: stripeOrganizationId,
+    accountId: stripeAccountId,
+    key: stripeKey,
+    orderProof,
+    stripe,
+    timeoutMs: input.proofTimeoutMs ?? 180_000,
+    intervalMs: input.proofPollIntervalMs ?? 2_000,
+  }
+  const developmentWebhookSecret = environment["E2E_DEV_STRIPE_WEBHOOK_SECRET"]?.trim()
+  const forwardDevelopmentWebhook = async () => {
+    if (!developmentWebhookSecret) return
+    await ticketPurchasePaymentAssertPersisted(context)
+    const forwarded = await (input.developmentWebhookForward ?? e2eStripeDevelopmentWebhookForward)({
+      checkpoint: context.checkpoint,
+      organizationId: stripeOrganizationId,
+      accountId: stripeAccountId,
+      key: stripeKey,
+      secret: developmentWebhookSecret,
+      orderProof,
+    })
+    if (!forwarded.success) throw new Error(forwarded.errorMessage)
+  }
+  // Pre-submit refusal retains immediately with no browser effect. A private
+  // development origin cannot receive Stripe's public webhook: only an
+  // explicitly enabled, independently verified original TEST event may repair
+  // that transport. Canonical paid app proof is still required afterwards.
   const proof = await ticketPurchasePaymentProofCheck(proofBase)
-  if (!proof.success) throw new Error(proof.errorMessage)
+  if (!proof.success) {
+    if (
+      !developmentWebhookSecret ||
+      proof.errorMessage !== "Paid checkout and app payment state disagree; checkpoint retained"
+    )
+      throw new Error(proof.errorMessage)
+    await forwardDevelopmentWebhook()
+    // A resumed guest has no checkout return page to request reconciliation.
+    // Allow the existing five-minute scheduled reconciler to apply Billing's
+    // verified settlement; forwarding alone is never canonical app proof.
+    await ticketPurchasePaymentPollPaid(context, {
+      ...paidPollInput,
+      timeoutMs: input.proofTimeoutMs ?? 360_000,
+    })
+    return
+  }
   if (proof.data.orderId !== ticket.orderId || proof.data.stripeSession !== ticket.stripeSession)
     throw new Error("Adopted payment evidence changed; reconcile before continuing")
   // Exact paid proof adopts with no browser. No record/close here.
@@ -133,18 +176,11 @@ async function ticketPurchasePaymentStartedReconcile(
   const createdNewContext = context.guestContext !== undefined && context.guestContext !== guestBefore
   try {
     await ticketPurchasePaymentBrowserSubmit(context)
+    await forwardDevelopmentWebhook()
     // Single submit only. Poll read-only until fulfilled paid; transient
     // post-submit proof failures are re-read until the deadline, never a
     // second submit and never accepted as authorization.
-    await ticketPurchasePaymentPollPaid(context, {
-      organizationId: stripeOrganizationId,
-      accountId: stripeAccountId,
-      key: stripeKey,
-      orderProof,
-      stripe,
-      timeoutMs: input.proofTimeoutMs ?? 180_000,
-      intervalMs: input.proofPollIntervalMs ?? 2_000,
-    })
+    await ticketPurchasePaymentPollPaid(context, paidPollInput)
   } catch (error) {
     if (createdNewContext) {
       const leaked = context.guestContext

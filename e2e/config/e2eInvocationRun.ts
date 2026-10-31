@@ -3,16 +3,16 @@ import { lstat, unlink } from "node:fs/promises"
 import { join } from "node:path"
 import { ConvexHttpClient } from "convex/browser"
 import { api } from "../../convex/_generated/api.js"
-import { e2eCatalogCleanupScan } from "../catalog/e2eCatalogCleanupScan.ts"
+import { e2eInvocationCleanupSessionCreate } from "../auth/e2eInvocationCleanupSessionCreate.ts"
+import type { e2eCatalogCleanupScan } from "../catalog/e2eCatalogCleanupScan.ts"
 import { e2eCheckpointLoad } from "../checkpoint/e2eCheckpointLoad.ts"
 import { e2eCheckpointRootResolve } from "../checkpoint/e2eCheckpointRootResolve.ts"
 import { e2eCheckpointSave } from "../checkpoint/e2eCheckpointSave.ts"
 import type { E2eCheckpoint } from "../checkpoint/e2eCheckpointSchema.ts"
-import { e2eInvocationCleanupSessionCreate } from "../auth/e2eInvocationCleanupSessionCreate.ts"
 import type { ticketE2eImapCleanupScan } from "../mail/ticketE2eImapCleanupScan.ts"
 import type { e2eStripeCleanupScan } from "../stripe/e2eStripeCleanupScan.ts"
 import { e2eStripeHistoricalConfigResolve } from "../stripe/e2eStripeHistoricalConfigResolve.ts"
-import { e2eStripeTicketReconcile } from "../stripe/e2eStripeTicketReconcile.ts"
+import type { e2eStripeTicketReconcile } from "../stripe/e2eStripeTicketReconcile.ts"
 import { e2eCleanupConvexUrlResolve } from "./e2eCleanupConvexUrlResolve.ts"
 import { e2eEnvironmentLoad } from "./e2eEnvironmentLoad.ts"
 import { e2eEnvironmentRead } from "./e2eEnvironmentRead.ts"
@@ -193,6 +193,7 @@ export async function e2eInvocationRun(
       E2E_STRIPE_TEST_SECRET_KEY: _strippedTestKey,
       E2E_STRIPE_TEST_ACCOUNT_ID: _strippedTestAccount,
       E2E_BILLING_ORGANIZATION_ID: _strippedTestOrg,
+      E2E_DEV_STRIPE_WEBHOOK_SECRET: developmentWebhookSecret,
       ...nonSecretEnvironment
     } = environment
     void _strippedTestKey
@@ -200,6 +201,9 @@ export async function e2eInvocationRun(
     void _strippedTestOrg
     const childEnvironment = {
       ...nonSecretEnvironment,
+      // The parent already loaded private runner settings. Do not let child
+      // config modules reload the file and reintroduce stripped credentials.
+      E2E_ENV_FILE: "",
       E2E_BASE_URL: target.data.baseUrl,
       E2E_RUN_ID: checkpoint.runId,
       E2E_CHECKPOINT_DIRECTORY: root.data.directory,
@@ -292,6 +296,7 @@ export async function e2eInvocationRun(
               E2E_STRIPE_TEST_SECRET_KEY: cachedTicketStripeConfig.key,
               E2E_STRIPE_TEST_ACCOUNT_ID: cachedTicketStripeConfig.accountId,
               E2E_BILLING_ORGANIZATION_ID: cachedTicketStripeConfig.organizationId,
+              ...(developmentWebhookSecret ? { E2E_DEV_STRIPE_WEBHOOK_SECRET: developmentWebhookSecret } : {}),
             }
           }
         }

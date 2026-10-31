@@ -2,6 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { describe, expect, it, rs } from "@rstest/core"
+import { createResult, createResultError } from "#result"
 import { e2eCheckpointSave } from "../../checkpoint/e2eCheckpointSave.ts"
 import { e2eStripeTestClientCreate } from "../../stripe/e2eStripeTestClientCreate.ts"
 import type { TicketPurchaseContext } from "./TicketPurchaseContext.ts"
@@ -894,6 +895,128 @@ describe("ticket purchase card method selection proves card fields on the actual
         orderId: "order-1",
         stripeSession: "cs_test_123456789",
       })
+    } finally {
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  for (const outcome of ["settled", "pending", "refused", "disabled"] as const) {
+    it(`resumed paid Stripe checkout uses optional development transport without resubmitting: ${outcome}`, async () => {
+      const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-webhook-resume-"))
+      try {
+        let forwards = 0
+        let pollsAfterForward = 0
+        const context = {
+          directory,
+          checkpoint: checkpointBase("payment", "started"),
+          browser: {
+            newContext: async () => {
+              throw new Error("A paid session must never reopen checkout")
+            },
+          },
+        } as unknown as TicketPurchaseContext
+        expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+        const { stripe } = stripePaymentFixture(
+          { ...openUnpaidSession(), status: "complete", payment_status: "paid" },
+          stableTestCustomer(),
+        )
+        const baseInput = paymentProofInput(stripe)
+        const run = ticketPurchasePaymentStep(context, {
+          ...baseInput,
+          environment: {
+            ...baseInput.environment,
+            ...(outcome === "disabled" ? {} : { E2E_DEV_STRIPE_WEBHOOK_SECRET: "whsec_dummy" }),
+          },
+          orderProof: async () => {
+            if (forwards > 0) pollsAfterForward += 1
+            return outcome === "settled" && pollsAfterForward >= 2 ? paidOrderProof() : pendingOrderProof()
+          },
+          developmentWebhookForward: async (input) => {
+            expect(input.checkpoint.ticket?.orderId).toBe("order-1")
+            expect(input.checkpoint.ticket?.stripeSession).toBe("cs_test_123456789")
+            forwards += 1
+            return outcome === "refused" ? createResultError("forward", "Transport refused") : createResult(true)
+          },
+          proofTimeoutMs: outcome === "settled" ? 1_000 : 0,
+          proofPollIntervalMs: 0,
+        })
+        if (outcome === "settled") {
+          await run
+          expect(pollsAfterForward).toBeGreaterThanOrEqual(2)
+          expect(context.checkpoint.ticket.status).toBe("completed")
+        } else {
+          await expect(run).rejects.toThrow(
+            outcome === "refused"
+              ? "Transport refused"
+              : outcome === "disabled"
+                ? "Paid checkout and app payment state disagree"
+                : "Canonical saved order/Stripe paid proof missing",
+          )
+          expect(context.checkpoint.ticket.status).toBe("started")
+        }
+        expect(forwards).toBe(outcome === "disabled" ? 0 : 1)
+      } finally {
+        await rm(directory, { recursive: true, force: true })
+      }
+    })
+  }
+
+  it("fresh checkout forwards its original TEST event only after the single payment submit", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "eventoren-ticket-webhook-fresh-"))
+    try {
+      let submits = 0
+      let forwards = 0
+      const field = {
+        ...locatorFake({ count: 1 }),
+        isVisible: async () => true,
+        fill: async () => {},
+        click: async () => {},
+      }
+      const context = {
+        directory,
+        checkpoint: checkpointBase("checkout", "completed"),
+        checkoutPage: {
+          url: () => openUnpaidSession().url,
+          getByRole: () => field,
+          getByLabel: () => field,
+          getByText: () => field,
+          locator: () => field,
+          getByTestId: () => ({
+            click: async () => {
+              submits += 1
+            },
+          }),
+        },
+      } as unknown as TicketPurchaseContext
+      expect((await e2eCheckpointSave(directory, context.checkpoint)).success).toBe(true)
+      const stripe = e2eStripeTestClientCreate("sk_test_dummy", (async (url: string | URL | Request) => {
+        const path = new URL(String(url)).pathname
+        if (path.endsWith("/account")) return Response.json({ id: "acct_test" })
+        if (path.includes("/checkout/sessions/"))
+          return Response.json(
+            submits === 0
+              ? openUnpaidSession()
+              : { ...openUnpaidSession(), status: "complete", payment_status: "paid" },
+          )
+        if (path.includes("/customers/")) return Response.json(stableTestCustomer())
+        return Response.json({ data: [], has_more: false })
+      }) as typeof fetch)
+      const baseInput = paymentProofInput(stripe)
+      await ticketPurchasePaymentStep(context, {
+        ...baseInput,
+        environment: { ...baseInput.environment, E2E_DEV_STRIPE_WEBHOOK_SECRET: "whsec_dummy" },
+        orderProof: () => (forwards > 0 ? paidOrderProof() : pendingOrderProof()),
+        developmentWebhookForward: async () => {
+          expect(submits).toBe(1)
+          forwards += 1
+          return createResult(true)
+        },
+        proofTimeoutMs: 1_000,
+        proofPollIntervalMs: 0,
+      })
+      expect(submits).toBe(1)
+      expect(forwards).toBe(1)
+      expect(context.checkpoint.ticket.status).toBe("completed")
     } finally {
       await rm(directory, { recursive: true, force: true })
     }
