@@ -34,7 +34,7 @@ export const eventorenZitadel = {
     const config = configuration()
     if (!config) return new Response("Eventoren-Zitadel ist nicht konfiguriert.", { status: 503 })
     if (requestOriginRead(request) !== config.appOrigin)
-      return loginErrorResponse(request, "Die Eventoren-Anmeldung konnte nicht verifiziert werden.", 400)
+      return loginErrorResponse(request, "state")
 
     const state = randomValue()
     const verifier = randomValue()
