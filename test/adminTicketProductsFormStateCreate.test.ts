@@ -41,7 +41,7 @@ describe("admin ticket products form state", () => {
         expect(form.showNewTier()).toBe(true)
 
         expect(catalog.tierDraft()).toMatchObject({
-          tierKey: "ticket-1",
+          tierKey: expect.stringMatching(/^ticket-/),
           startsAt: event.startsAt,
           doorsAt: event.doorsAt,
           endsAt: event.endsAt,
@@ -60,6 +60,75 @@ describe("admin ticket products form state", () => {
         })
         expect(form.showNewTier()).toBe(false)
         expect(catalog.tierDraft().tierKey).toBe("saved-ticket")
+      } finally {
+        dispose()
+      }
+    })
+  })
+
+  test("new drafts avoid sequential archived keys, submit their key, and reset to a fresh key", async () => {
+    await createRoot(async (dispose) => {
+      try {
+        const tiers = [1, 2, 3].map((number) => ({
+          id: `ticket-${number}`,
+          name: `Ticket ${number}`,
+          description: "",
+          priceCents: 500,
+          feeCents: 0,
+          capacity: 50,
+          available: 50,
+        }))
+        const event: AdminEventItem = {
+          id: "concert",
+          status: "draft",
+          catalogVersion: 1,
+          title: "Concert",
+          subtitle: "",
+          description: "",
+          category: "konzerte",
+          startsAt: "2026-10-01T18:00:00.000Z",
+          doorsAt: "2026-10-01T17:00:00.000Z",
+          endsAt: "2026-10-01T22:00:00.000Z",
+          venue: "Hall",
+          city: "Berlin",
+          address: "",
+          organizer: "Eventoren",
+          imageUrl: "",
+          imageAlt: "",
+          tags: [],
+          soldOut: false,
+          tiers,
+        }
+        const savedKeys: string[] = []
+        const catalog = adminCatalogPageStateCreate({
+          events: () => [event],
+          isServerAuthorized: () => true,
+          reloadEvents: async () => ({ success: true, data: [event] }),
+          ticketTierUpsert: async (input) => {
+            savedKeys.push(input.tierKey)
+            return { success: true, data: { tierKey: input.tierKey, catalogVersion: 1 } }
+          },
+        })
+        catalog.selectEvent(event)
+        const form = adminTicketProductsFormStateCreate(catalog)
+        form.startNewTier()
+        const firstKey = catalog.tierDraft().tierKey
+        // An archived ticket-4 is not included in the visible active tiers.
+        expect(firstKey).toMatch(/^ticket-[0-9a-f-]{36}$/)
+        expect(firstKey).not.toBe("ticket-4")
+        form.startNewTier()
+        const submittedKey = catalog.tierDraft().tierKey
+        expect(submittedKey).not.toBe(firstKey)
+        catalog.tierFieldChange("name", "New ticket")
+        catalog.tierFieldChange("capacity", "50")
+        form.priceEuro.set("5")
+        form.feeEuro.set("0")
+        await form.submit({ preventDefault() {} } as SubmitEvent)
+        expect(savedKeys).toEqual([submittedKey])
+        expect(catalog.tierDraft().tierKey).not.toBe(submittedKey)
+        form.selectTier(tiers[0]!)
+        expect(catalog.tierDraft()).toMatchObject({ tierKey: "ticket-1", name: "Ticket 1", capacity: "50" })
+        expect(form.priceEuro.get()).toBe("5,00")
       } finally {
         dispose()
       }

@@ -121,11 +121,7 @@ export function adminTicketProductsFormStateCreate(catalog: AdminCatalogPageStat
   }
 
   const newTier = () => {
-    const existingTierKeys = new Set(catalog.selectedEvent()?.tiers.map((tier) => tier.id) ?? [])
-    let tierNumber = existingTierKeys.size + 1
-    while (existingTierKeys.has(`ticket-${tierNumber}`)) tierNumber += 1
-
-    catalog.tierFieldChange("tierKey", `ticket-${tierNumber}`)
+    catalog.tierFieldChange("tierKey", `ticket-${crypto.randomUUID()}`)
     catalog.tierFieldChange("name", "")
     catalog.tierFieldChange("description", "")
     const event = catalog.selectedEvent()
