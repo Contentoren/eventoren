@@ -164,8 +164,7 @@ test("derives the billing directory from registry metadata with service-file cro
     target: "production",
     environment: {},
     eventorenDirectory: "/eventoren-fixture",
-    billingProjectResolve: async () =>
-      createResult({ directory: billingDirectory, units: ["billing-preview.service"] }),
+    billingProjectResolve: async () => createResult({ directory: billingDirectory, units: ["billing.service"] }),
     serviceEnvironmentFiles: async (units) => {
       seenUnits = units
       return createResult([`${billingDirectory}/.env`])
@@ -181,7 +180,7 @@ test("derives the billing directory from registry metadata with service-file cro
     success: true,
     data: { key: "sk_test_registry789", accountId: "acct_registry789", organizationId: "org_registryprod" },
   })
-  expect(seenUnits).toEqual(["billing-preview.service"])
+  expect(seenUnits).toEqual(["billing.service"])
 })
 
 test("forwards minimal USER plus explicit registry socket env without leaking the TEST key", async () => {
@@ -205,7 +204,7 @@ test("forwards minimal USER plus explicit registry socket env without leaking th
           {
             path: "/billing-registry-fixture",
             labels: { sourcePath: "/billing-registry-fixture" },
-            units: ["billing-preview.service"],
+            units: ["billing.service"],
           },
         ],
       })

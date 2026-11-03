@@ -1,7 +1,7 @@
 # Development Convex/Billing network path
 
 The development Billing preview is the existing user service
-`billing-preview.service` from the Billing project. It listens on
+`billing.service` on leo-server from the Billing project (preview only). It listens on
 `127.0.0.1:3146`; Project Registry exposes the same service publicly as
 `https://billing.wonder1.de`.
 
@@ -60,7 +60,7 @@ the existing Project Registry routes. Verify the network path without sending
 credentials in shell arguments:
 
 ```bash
-systemctl --user is-active billing-preview.service
+systemctl --user is-active billing.service
 systemctl --user is-active eventoren-convex-preview.service
 podman exec eventoren-convex-preview \
   curl -fsS -o /dev/null -w '%{http_code}\n' http://169.254.1.2:3146/login
