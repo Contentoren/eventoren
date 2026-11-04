@@ -120,6 +120,26 @@ test("scheduled reconciliation applies completion evidence even without booking 
   expect(runAfter.mock.calls[0]![2]).toMatchObject({ scan: { status: "released", activeOrderIds: [orderId] } })
 })
 
+test("an active Billing lease is a normal deferral, not a provider error", async () => {
+  const { ctx, runQuery, runMutation } = contextCreate()
+  runQuery.mockResolvedValue(
+    createResult({
+      paymentReference: payment.paymentReference,
+      stripeMode: "test",
+      status: "checkout_created",
+      checkoutAttemptLeaseUntil: Date.now() + 60_000,
+    }),
+  )
+  const expire = vi.spyOn(billingEventorenClient, "ticketCheckoutExpire")
+  expect(await ticketReservationExpireAction._handler(ctx, { orderId })).toMatchObject({
+    success: true,
+    data: { action: "deferred" },
+  })
+  expect(expire).not.toHaveBeenCalled()
+  expect(runMutation).toHaveBeenCalledOnce()
+  expect(runMutation.mock.calls[0]![1]).toMatchObject({ orderId, isError: false })
+})
+
 test("local expiry applies a provider-completed but locally-unissued processing debit before scheduling its retry", async () => {
   const { ctx, runMutation } = contextCreate()
   vi.spyOn(billingEventorenClient, "ticketCheckoutExpire").mockResolvedValue(
@@ -134,6 +154,7 @@ test("local expiry applies a provider-completed but locally-unissued processing 
     "ticketing:ticketReservationDeferMutation",
   ])
   expect(runMutation.mock.calls[0]![1]).toMatchObject({ orderId, ...evidence, payment: "pending" })
+  expect(runMutation.mock.calls[1]![1]).toMatchObject({ isError: false })
 })
 
 test("scheduled reconciliation forwards cancellation without combining evidence from the selected local context", async () => {
@@ -212,4 +233,5 @@ test("provider failure during local expiry only defers; it never releases or app
   expect(runMutation.mock.calls.map(([reference]) => getFunctionName(reference))).toEqual([
     "ticketing:ticketReservationDeferMutation",
   ])
+  expect(runMutation.mock.calls[0]![1]).toMatchObject({ isError: true })
 })

@@ -144,6 +144,8 @@ export const ticketTables = {
     checkoutAttemptLeaseUntil: v.optional(v.number()),
     lastPaymentCheckAt: v.optional(v.string()),
     lastPaymentError: v.optional(v.string()),
+    expireErrorDeferralCount: v.optional(v.number()),
+    expireAttentionSince: v.optional(v.string()),
   })
     .index("checkoutKey", ["checkoutKey"])
     .index("paymentReference", ["paymentReference"])
