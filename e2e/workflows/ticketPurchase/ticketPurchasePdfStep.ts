@@ -2,6 +2,7 @@ import { createHash } from "node:crypto"
 import { expect } from "@rstest/playwright"
 import { ticketE2eImapMessageWait } from "../../mail/ticketE2eImapMessageWait.ts"
 import { ticketE2ePdfInspect } from "../../pdf/ticketE2ePdfInspect.ts"
+import { ticketE2ePdfParticipantNameFormat } from "../../pdf/ticketE2ePdfParticipantNameFormat.ts"
 import { ticketE2ePdfTextNormalize } from "../../pdf/ticketE2ePdfTextNormalize.ts"
 import type { TicketPurchaseContext } from "./TicketPurchaseContext.ts"
 import { ticketPurchaseStepRun } from "./ticketPurchaseStepRun.ts"
@@ -36,7 +37,7 @@ export async function ticketPurchasePdfStep(context: TicketPurchaseContext): Pro
     const pdf = await ticketE2ePdfInspect(attachment.content)
     const text = ticketE2ePdfTextNormalize(pdf.text)
     expect(text).toContain(context.checkpoint.ticket.eventTitle)
-    expect(text).toContain(context.checkpoint.ticket.participantName)
+    expect(text).toContain(ticketE2ePdfParticipantNameFormat(context.checkpoint.ticket.participantName))
     expect(pdf.decodedQrPayloads).toHaveLength(1)
     code = pdf.decodedQrPayloads[0] ?? ""
     if (!/^TKT-[0-9A-F]{20}$/u.test(code)) throw new Error("Rendered ticket PDF has no valid issued-ticket QR")
