@@ -28,7 +28,7 @@ Abweichende, entgegenstehende oder ergänzende Geschäftsbedingungen des Kunden 
 **2.1 Bestellung mit oder ohne Nutzerkonto**  
 Der Ticketerwerb auf der Plattform ist grundsätzlich als Gastbestellung ohne dauerhafte Registrierung möglich. Sofern Sie ein persönliches Nutzerkonto anlegen, erfolgt die Registrierung kostenlos.
 
-**2.2 Sorgfaltspflichten und Zugangsdaten**
+**2.2 Sorgfaltspflichten und Zugangsdaten**  
 - Sie verpflichten sich, im Bestellprozess bzw. bei der Registrierung vollständige und wahrheitsgemäße Angaben zu machen.
 - Ihre persönlichen Zugangsdaten sind vertraulich zu behandeln und vor dem unbefugten Zugriff Dritter zu schützen.
 - Erhalten Sie Kenntnis von einem Missbrauch Ihres Kontos, haben Sie Eventoren unverzüglich in Textform zu informieren.
@@ -56,7 +56,7 @@ Die Gültigkeit des Tickets und die daraus resultierende Zutrittsberechtigung zu
 **4.1 Elektronische Übermittlung**  
 Eintrittskarten werden ausschließlich in digitaler Form (als Online-Ticket, PDF-Download, Mobile-Ticket oder QR-Code) an die von Ihnen angegebene E-Mail-Adresse übermittelt bzw. im Kundenbereich bereitgestellt. Ein postalischer Versand von Papiertickets findet nicht statt.
 
-**4.2 Einmalige Zutrittsberechtigung und Prioritätsprinzip**
+**4.2 Einmalige Zutrittsberechtigung und Prioritätsprinzip**  
 - Jedes digitale Ticket verfügt über einen eindeutigen Barcode bzw. QR-Code, der am Einlass der Veranstaltung elektronisch gescannt und entwertet wird.
 - Ein Ticket berechtigt grundsätzlich nur eine Person zum einmaligen Zutritt.
 - Es gilt das **Prioritätsprinzip**: Bei Vorlage mehrerer Ausdrucke oder Kopien desselben Tickets erhält nur derjenige Inhaber Einlass, dessen Ticket als Erstes am Einlass-Scanner vorgelegt und entwertet wurde. Nachfolgende Inhaber desselben Barcodes werden entschädigungslos abgewiesen.
@@ -74,11 +74,11 @@ Alle auf der Plattform ausgewiesenen Preise sind Endpreise in Euro (EUR) und bei
 **5.2 Zahlungsverfahren**  
 Die Zahlung erfolgt über die im Bestellprozess zur Verfügung gestellten Zahlungsmethoden (z. B. Kreditkarte, Apple Pay, Google Pay, PayPal, Klarna, Sofortüberweisung oder SEPA-Lastschrift). Die technische Abwicklung kann über externe, zertifizierte Zahlungsdienstleister erfolgen.
 
-**5.3 Zahlungsverzug, Rücklastschriften und Ticketsperre**
+**5.3 Zahlungsverzug, Rücklastschriften und Ticketsperre**  
 - Scheitert der Zahlungseinzug (insbesondere bei SEPA-Lastschrift) aus Gründen, die der Kunde zu vertreten hat (z. B. unzureichende Kontodeckung, unberechtigter Widerspruch, Rückbuchung oder fehlerhafte Kontoangaben), ist der Kunde verpflichtet, Eventoren bzw. dem Veranstalter die dadurch entstandenen Bank- und Rücklastschriftgebühren in Form einer Pauschale von 4,00 € zu erstatten. Dem Kunden bleibt der Nachweis gestattet, dass kein oder ein wesentlich geringerer Schaden entstanden ist. Weitergehende gesetzliche Schadensersatzansprüche bleiben unberührt.
 - Eventoren ist in diesem Fall berechtigt, das Ticket unverzüglich mit sofortiger Wirkung digital zu sperren, die Einlassberechtigung zu entziehen und die Bestellung kostenpflichtig zu stornieren.
 
-**5.4 Gesetzlicher Ausschluss des Widerrufsrechts**
+**5.4 Gesetzlicher Ausschluss des Widerrufsrechts**  
 > **Wichtiger gesetzlicher Hinweis zum Ausschluss des Widerrufsrechts (§ 312g Abs. 2 Nr. 9 BGB):**  
 > Bei Verträgen über die Erbringung von Dienstleistungen im Zusammenhang mit Freizeitbetätigungen, für die ein spezifischer Termin oder Zeitraum vertraglich vorgesehen ist (insbesondere Eintrittskarten für Konzerte, Partys, Festivals oder sonstige Events), besteht **kein gesetzliches Widerrufs- oder Rückgaberecht**.  
 > **Jede verbindliche Bestellung von Veranstaltungstickets ist damit unmittelbar verbindlich und verpflichtet zur Abnahme und Bezahlung.**
@@ -90,7 +90,7 @@ Die Zahlung erfolgt über die im Bestellprozess zur Verfügung gestellten Zahlun
 **6.1 Hausrecht des Veranstalters**  
 Die Durchführung der Veranstaltung, die Organisation des Einlasses sowie die Ausübung des Hausrechts obliegen allein dem jeweiligen Veranstalter und dessen autorisiertem Ordnungspersonal.
 
-**6.2 Sicherheitskontrollen vor Ort**
+**6.2 Sicherheitskontrollen vor Ort**  
 - Der Ordnungsdienst des Veranstalters ist berechtigt, am Einlass und während der Veranstaltung angemessene Sicherheitskontrollen (inklusive Taschen- und Körperkontrollen) durchzuführen.
 - Das Mitführen von gefährlichen Gegenständen, Waffen, Pyrotechnik, Glasbehältern, Drogen oder sonstigen unzulässigen Substanzen ist verboten.
 
@@ -124,7 +124,7 @@ Zur Gewährleistung einer fairen Preisgestaltung und zur Verhinderung von gewerb
 **8.1 Verantwortung des Veranstalters bei Ausfall oder Verlegung**  
 Eventoren ist Vermittlerin und übernimmt keine Gewähr oder Verantwortung für die tatsächliche Durchführung, den Ablauf, die Sicherheit oder die Qualität der Veranstaltung. Ansprüche wegen Ausfall, Verlegung, inhaltlicher Programmänderungen oder Abbruch einer Veranstaltung richten sich ausschließlich gegen den jeweiligen Veranstalter.
 
-**8.2 Rückabwicklung und Gebühren**
+**8.2 Rückabwicklung und Gebühren**  
 - Wird eine Veranstaltung abgesagt oder verlegt, richtet sich die Rückerstattung des Ticketpreises nach den Bedingungen des jeweiligen Veranstalters und den gesetzlichen Vorschriften. Eventoren wickelt etwaige Erstattungen im Auftrag und nach Freigabe der Geldmittel durch den Veranstalter ab.
 - Soweit Eventoren bei der Buchung gesonderte Service- oder Vermittlungsgebühren erhoben hat, stellen diese das Entgelt für die bereits vollständig erbrachte Vermittlungsdienstleistung dar und verbleiben bei Eventoren.
 
@@ -160,7 +160,7 @@ Die Erhebung und Verarbeitung personenbezogener Daten im Rahmen der Plattformnut
 **11.1 Anwendbares Recht**  
 Für diese AGB und alle Rechtsbeziehungen zwischen Eventoren und dem Kunden gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts (CISG). Bei Verbrauchern mit gewöhnlichem Aufenthalt in der Europäischen Union bleiben die zwingenden Verbraucherschutzbestimmungen des Staates, in dem der Verbraucher seinen gewöhnlichen Aufenthalt hat, unberührt.
 
-**11.2 Gerichtsstand**
+**11.2 Gerichtsstand**  
 - Ist der Kunde Kaufmann im Sinne des Handelsgesetzbuchs, eine juristische Person des öffentlichen Rechts oder ein öffentlich-rechtliches Sondervermögen, ist ausschließlicher Gerichtsstand für alle Streitigkeiten aus diesem Vertrag der Geschäftssitz von Eventoren in **Köln**.
 - Gegenüber Verbrauchern gelten die gesetzlichen Gerichtsstände.
 
@@ -175,9 +175,9 @@ Sollten einzelne Bestimmungen dieser AGB ganz oder teilweise unwirksam oder undu
 **Semesterkur UG (haftungsbeschränkt)**  
 Ernst-Weyden-Straße 15  
 51105 Köln  
-Deutschland
+Deutschland  
 
 E-Mail: kontakt@semesterkur.de  
-Website: [https://eventoren.de](https://eventoren.de)
+Website: [https://eventoren.de](https://eventoren.de)  
 
-_Stand: Oktober 2026_
+*Stand: Oktober 2026*
