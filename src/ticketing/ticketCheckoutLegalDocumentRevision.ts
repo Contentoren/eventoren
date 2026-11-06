@@ -1,4 +1,4 @@
 // Generated from the checkout legal Markdown sources; update with
 // `bun run legal:checkout-revision` whenever agb.md or datenschutz.md changes.
 export const ticketCheckoutLegalDocumentRevision =
-  "sha256:678451c440a695f1c4f74104f92560a14252c5c44ad73a683f886cf647ffe7d0"
+  "sha256:74cef242c1382371e669f9967cebcf2976aedceacdf11be89208baff0e71b462"
