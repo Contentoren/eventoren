@@ -2,6 +2,7 @@ import { afterEach, beforeEach, expect, test } from "bun:test"
 import type { TicketCheckoutCreateInput } from "../src/ticketing/TicketCheckoutCreateInput.ts"
 import type { TicketCheckoutCreateResponse } from "../src/ticketing/TicketCheckoutCreateResponse.ts"
 import { ticketCheckoutCancelUrlCreate } from "../src/ticketing/ticketCheckoutCancelUrlCreate.ts"
+import { ticketCheckoutRetryMemoryStore } from "../src/ticketing/ticketCheckoutRetryMemoryStore.ts"
 import { ticketCheckoutRetryProbeUrlsRead } from "../src/ticketing/ticketCheckoutRetryProbeUrlsRead.ts"
 import { ticketCheckoutRetryStorageLoad } from "../src/ticketing/ticketCheckoutRetryStorageLoad.ts"
 import { ticketCheckoutRetryLoad, ticketCheckoutRetryStore } from "../src/ticketing/ticketCheckoutRetryStore.ts"
@@ -41,11 +42,13 @@ const previousLocalStorage = Object.getOwnPropertyDescriptor(globalThis, "localS
 let storage: MemoryStorage
 
 beforeEach(() => {
+  ticketCheckoutRetryMemoryStore.clear()
   storage = new MemoryStorage()
   Object.defineProperty(globalThis, "localStorage", { configurable: true, value: storage })
 })
 
 afterEach(() => {
+  ticketCheckoutRetryMemoryStore.clear()
   if (previousLocalStorage) Object.defineProperty(globalThis, "localStorage", previousLocalStorage)
   else Reflect.deleteProperty(globalThis, "localStorage")
 })
