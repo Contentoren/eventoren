@@ -1,5 +1,5 @@
 import type { ContentEntry } from "@adaptive-ds/website-content-pipeline"
-import type { ContentHtml } from "../../app/content/contentHtml.ts"
+import type { ContentArticleHtml } from "../../app/content/ContentArticleHtml.ts"
 
 const contentEntries = [
   {
@@ -32,7 +32,7 @@ const contentEntries = [
   },
 ] satisfies readonly ContentEntry[]
 
-const contentHtml: Readonly<Record<string, ContentHtml>> = {
+const contentHtml: Readonly<Record<string, ContentArticleHtml>> = {
   "./public/ratgeber/2026-09-03-events-sicher-planen.md": {
     html: '<h2 id="vorbereitung">Mit der Vorbereitung beginnen</h2><p>Ein klarer Ablauf, belastbare Informationen und erreichbare Ansprechpersonen schaffen die Grundlage für einen entspannten Veranstaltungstag.</p><h2 id="einlass">Den Einlass mitdenken</h2><p>Plane Ticketprüfung, Beschilderung und mögliche Rückfragen so, dass dein Team auch bei großem Andrang handlungsfähig bleibt.</p>',
     headings: [
