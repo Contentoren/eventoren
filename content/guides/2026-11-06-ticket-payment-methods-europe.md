@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticket-payment-methods-europe"
 author: "Eventoren Editorial Team"
 image: "ratgeber-zahlungsarten-ticketshop"
-imageAlt: "Cheering crowd with raised arms at a sold-out arena concert in golden light"
+imageAlt: "Macro detail: hand holding a card over a payment terminal beside a wristband in neutral indoor light"
 category: "selling-tickets"
 keywords:
   [

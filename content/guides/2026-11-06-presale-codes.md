@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "presale-codes"
 author: "Eventoren Editorial Team"
 image: "ratgeber-freischaltcodes-presale"
-imageAlt: "Excited fans stream through a glowing tunnel into the club at doors, the DJ already playing as laser lights dance over the crowd"
+imageAlt: "Hands-only detail: smartphone with blurred screen held up at the gate, fabric wristband on the wrist"
 category: "selling-tickets"
 keywords:
   [

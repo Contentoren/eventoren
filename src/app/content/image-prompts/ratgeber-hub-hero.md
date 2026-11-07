@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-hub-hero"
 articles: ["/ratgeber", "/en/guides"]
-alt: "Jubelnde Festivalmenge bei Sonnenuntergang aus erhöhter Perspektive, türkisfarbenes Bühnenlicht und warme Lichterketten über tanzenden Gästen"
+alt: "Drohnenblick am hellen Mittag auf grünes Festivalgelände mit Bühne, Zelten und Riesenrad"
 ---
 
-Seen from slightly above, a joyful festival crowd dances across a wide field in golden-hour light. The stage glows teal on one side while warm amber string lights crisscross above the cheering guests. Friends laugh with raised hands as confetti drifts through the glowing air.
+High oblique drone photograph on a bright crystal-clear midday: a green festival site from above and to the side — main stage, winding visitor paths, colourful tent rows and a distant Ferris wheel, visitors as tiny anonymous dots on the grass, sharp blue sky above. Fresh daylight greens and blues, no golden glow.

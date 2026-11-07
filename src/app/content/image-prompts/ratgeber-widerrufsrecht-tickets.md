@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-widerrufsrecht-tickets"
 articles: ["/ratgeber/widerrufsrecht-tickets"]
-alt: "Freunde sitzen lachend auf der Wiese beim Open-Air-Konzert in der Abenddämmerung, Laternen und warmes Bühnenlicht um sie herum"
+alt: "Freunde sitzen an einem bedeckten Tag entspannt auf Picknickdecken vor kleiner Bühne auf grüner Wiese"
 ---
 
-Friends sit laughing on the grass at an open-air concert at dusk, lanterns and warm stage light glowing around them. They lean against each other, singing along softly as the band plays a quiet song. The relaxed evening hums with contentment.
+Wide shot on a 35mm lens in soft overcast daylight: friends sit on picnic blankets on a green meadow before a small covered stage, relaxed and chatting, a few children running with paper windmills. No stage lights on, muted cloudy-day greens, calm unhurried mood.

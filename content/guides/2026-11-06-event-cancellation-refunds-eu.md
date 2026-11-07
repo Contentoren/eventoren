@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "event-cancellation-refunds-eu"
 author: "Eventoren Editorial Team"
 image: "ratgeber-veranstaltung-absagen"
-imageAlt: "Cheering crowd at an open-air concert in the evening sun: guests with raised hands in front of the stage, confetti in the air"
+imageAlt: "Empty open-air stage on a grey overcast morning with vacant benches and a lone technician"
 category: "law-tax"
 keywords:
   [

@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-gema-veranstaltung"
 articles: ["/ratgeber/gema-veranstaltung"]
-alt: "Blaskapelle auf einer Dorfbühne im Abendlicht, Publikum als Silhouetten im Vordergrund"
+alt: "Blaskapelle spielt am Vormittag auf dem Dorfplatz, Familien tanzen davor unter blauem Himmel"
 ---
 
-A brass band plays on a small village stage in warm evening light, trumpets and tubas lined up before a wooden backdrop. The audience in the foreground appears only as soft dark silhouettes, heads and raised hands against the light. Bunting stretches above the stage.
+Wide shot on a 24mm lens in bright late-morning sun: a brass band in traditional jackets plays on a flower-decked wooden stage on the village square, families dancing in the foreground with their backs to the camera, blue sky with small white clouds above. Festive, sharp daylight colours.

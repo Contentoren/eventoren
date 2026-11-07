@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "widerrufsrecht-tickets"
 author: "Eventoren Redaktion"
 image: "ratgeber-widerrufsrecht-tickets"
-imageAlt: "Freunde sitzen lachend auf der Wiese beim Open-Air-Konzert in der Abenddämmerung, Laternen und warmes Bühnenlicht um sie herum"
+imageAlt: "Freunde sitzen an einem bedeckten Tag entspannt auf Picknickdecken vor kleiner Bühne auf grüner Wiese"
 category: "recht-steuern"
 keywords:
   [

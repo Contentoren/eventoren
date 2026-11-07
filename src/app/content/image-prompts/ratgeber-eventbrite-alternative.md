@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-eventbrite-alternative"
 articles: ["/ratgeber/eventbrite-alternative", "/en/guides/eventbrite-alternatives-europe"]
-alt: "Ausverkaufte Clubshow mit jubelnden Gästen und Konfetti im bunten Bühnenlicht"
+alt: "Veranstalterin vergleicht in einem hellen Büro zwei Laptops mit verschwommenen Bildschirmen"
 ---
 
-A sold-out club show at its peak: hundreds of guests cheer with raised hands as colourful spotlights sweep the room and confetti rains down, the singer leaning into the crowd from a low stage. Sweat, smiles and bass in the air, nobody thinking about ticketing platforms.
+Medium shot on a 50mm lens in a bright modern office in neutral daylight: a young organiser sits sideways at a desk comparing two laptops with blurred abstract screens, notebook and coffee beside her, a pinboard with blank cards behind. One person, sharp and thoughtful, clean white-grey palette.

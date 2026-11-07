@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-tickets-online-verkaufen"
 articles: ["/ratgeber/tickets-online-verkaufen", "/en/guides/sell-tickets-online"]
-alt: "Konzertmenge von hinten mit erhobenen Händen und Handylichtern vor einer leuchtenden Bühne"
+alt: "Blick über die Schulter: Frau kauft am hellen Heimbüroplatz Tickets am Laptop mit verschwommenem Bildschirm"
 ---
 
-Wide shot from behind a packed concert crowd: hundreds of raised hands and glowing phone lights reach toward a brightly lit stage in the distance. No faces are visible, only backs of heads and arms against the stage glow. The hall is full to the last row.
+Over-the-shoulder documentary shot on a 35mm lens in bright daylight: a woman at a home-office desk clicks a laptop with a blurred abstract shop screen, a handwritten to-do list with blank lines and a coffee mug beside her, green plants at the window. One person, relaxed focus.

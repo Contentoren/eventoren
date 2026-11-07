@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketarten"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketarten"
-imageAlt: "Gästemenge strömt bei goldenem Abendlicht durch die geschmückten Eingangstore eines Sommerfestivals"
+imageAlt: "Aufsicht auf Ticketheft, drei Stoffbändchen und Lanyard in einer Reihe auf dunklem Schiefer"
 category: "tickets-verkaufen"
 keywords:
   [

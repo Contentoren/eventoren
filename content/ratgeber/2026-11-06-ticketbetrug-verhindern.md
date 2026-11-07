@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketbetrug-verhindern"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketbetrug-verhindern"
-imageAlt: "Lächelnde Gäste passieren zügig den Einlass mit Scannern vor einer Konzerthalle am Abend"
+imageAlt: "Ordner scannt am hellen Nachmittag am Einlass ein Handyticket, dahinter wartet die Schlange geordnet"
 category: "einlass-event-tag"
 keywords:
   [

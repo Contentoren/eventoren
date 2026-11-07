@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-sicherheitskonzept-veranstaltung"
 articles: ["/ratgeber/sicherheitskonzept-veranstaltung"]
-alt: "Entspannte Gästemenge beim Open-Air-Konzert in der Abendsonne, Ordner mit Lanyards lächeln mitten unter den Gästen"
+alt: "Drohnenaufnahme des Festivalgeländes am hellen Nachmittag mit Bühne, Rettungswegen und Sanitätszelt"
 ---
 
-Safety done right, celebration in full swing: a relaxed open-air crowd dances in the evening sun while friendly stewards with lanyards stand smiling among the guests. Clear walkways, a visible first-aid point at the edge, families and friends enjoying the concert without a worry.
+Aerial drone photograph pointing straight down on a bright summer afternoon: the full festival site as a readable map — main stage, food rows, wide empty rescue lanes marked in white, a red-cross tent at the edge, visitors as tiny anonymous dots. Saturated daylight colours, plan-like clarity.

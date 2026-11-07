@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "vorverkauf-steigern"
 author: "Eventoren Redaktion"
 image: "ratgeber-vorverkauf-steigern"
-imageAlt: "Künstler-Silhouette am Bühnenrand mit Konfettikanonen über einem Meer erhobener Hände"
+imageAlt: "Fröhliche Warteschlange an einer Holzkasse auf dem Dorfplatz am sonnigen Samstagmorgen"
 category: "tickets-verkaufen"
 keywords:
   [

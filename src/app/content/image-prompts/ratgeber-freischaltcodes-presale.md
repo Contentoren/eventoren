@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-freischaltcodes-presale"
 articles: ["/ratgeber/freischaltcodes-presale", "/en/guides/presale-codes"]
-alt: "Begeisterte Fans strömen beim Einlass durch einen leuchtenden Tunnel in den Club, der DJ spielt bereits, Laserlichter tanzen über der Menge"
+alt: "Detailaufnahme: Hände halten ein Smartphone mit verschwommenem Bildschirm, Festivalbändchen am Handgelenk"
 ---
 
-Excited fans stream through a glowing entrance tunnel into the club on opening night. The DJ already plays from the booth as beams of laser light dance over the arriving crowd. Friends hurry in arm in arm, grinning at the night ahead.
+Tight hands-only detail shot with an 85mm macro lens in bright daylight: two hands hold a smartphone with a softly blurred glowing screen while the other wrist wears a colourful fabric wristband, festival gates out of focus behind. Shallow depth of field, fresh morning colours.

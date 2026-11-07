@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-eventim-light-pretix-ticket-io-alternativen"
 articles: ["/ratgeber/eventim-light-pretix-ticket-io-alternativen"]
-alt: "Ausverkaufte Clubshow: Sänger auf der Bühne vor jubelndem Publikum mit erhobenen Händen"
+alt: "Weite Tagesansicht des Eingangsportals einer Stadthalle mit kleiner Warteschlange unter blassblauem Himmel"
 ---
 
-A sold-out club show on a Friday night: the singer leans into the crowd from a low stage while the packed audience sings along with hands in the air. Warm spotlights and teal washes sweep over the room, a sold-out energy hangs in the air, and friends cheer shoulder to shoulder all the way to the back wall. An intimate venue completely full, exactly what every organiser hopes for.
+Extreme-wide daytime exterior on a 16mm ultra-wide lens under a pale blue midday sky: the historic facade and entrance portal of a city concert hall, a small queue of visitors at the glass doors, wide stone steps leading up. Architecture dominates, people small, neutral daylight stone tones.

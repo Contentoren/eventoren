@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-kleinunternehmerregelung-veranstalter"
 articles: ["/ratgeber/kleinunternehmerregelung-veranstalter"]
-alt: "Junges DJ-Kollektiv feiert hinter dem DJ-Pult seiner eigenen Partyreihe, davor tanzende Menge im türkisen und warmen Licht"
+alt: "Leerer kleiner Veranstaltungssaal im klaren Morgenlicht mit gestapelten Stühlen und kleiner Bühne"
 ---
 
-The young promoter's dream realised: a DJ collective celebrates behind the decks of their own party night, one fist in the air, while the crowd dances in front of them in teal and warm light. A small club packed to the walls, hands up, the night they built themselves.
+Extreme-wide empty venue interior shot on a 16mm ultra-wide lens in clear morning daylight streaming through tall windows: rows of stacked chairs, a bare small stage and a lone microphone stand at the far end, dust motes in the light beams. No people, pale wood and white walls, quiet before the night.

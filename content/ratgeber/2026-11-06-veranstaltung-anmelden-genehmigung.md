@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "veranstaltung-anmelden-genehmigung"
 author: "Eventoren Redaktion"
 image: "ratgeber-veranstaltung-anmelden-genehmigung"
-imageAlt: "Belebtes Straßenfest mit Ständen, Musik und flanierenden Familien am Sommerabend"
+imageAlt: "Morgendlicher Aufbau auf dem Marktplatz vor dem Rathaus, zwei Organisatoren spannen Absperrband"
 category: "recht-steuern"
 keywords:
   [

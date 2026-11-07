@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "abendkasse-organisieren"
 author: "Eventoren Redaktion"
 image: "ratgeber-abendkasse-organisieren"
-imageAlt: "Fröhliche Gäste strömen am Abend in den warm beleuchteten Eingang eines kleinen Clubs, halten ihre Smartphones mit den Tickets bereit und lachen, während drinnen die Bühne leuchtet"
+imageAlt: "Nahaufnahme: Gast zahlt am hellen Nachmittag kontaktlos an einer Holzkasse per Smartphone"
 category: "einlass-event-tag"
 keywords:
   [

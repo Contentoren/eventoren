@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "personalisierte-tickets"
 author: "Eventoren Redaktion"
 image: "ratgeber-personalisierte-tickets"
-imageAlt: "Jubelnde Fans mit erhobenen Armen und bunten Festivalbändchen vor der Bühne einer ausverkauften Show im bunten Bühnenlicht"
+imageAlt: "Makroaufnahme eines Stoffbändchens am Handgelenk im weichen Tageslicht, Garten unscharf dahinter"
 category: "einlass-event-tag"
 keywords:
   [

@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-e-rechnung-veranstalter"
 articles: ["/ratgeber/e-rechnung-veranstalter", "/en/guides/e-invoicing-event-organisers"]
-alt: "Veranstalter blickt bei Sonnenuntergang über die jubelnde Menge seines Festivals"
+alt: "Aufsicht auf Schreibtisch mit Taschenrechner, Rechnungsvordrucken und Laptop im hellen Tageslicht"
 ---
 
-Golden hour at a festival main stage: the organiser stands at the side of the stage with arms open, looking out over thousands of cheering visitors with raised hands, while the crew beside him celebrates and confetti drifts through the warm evening light. The calm confidence of an event whose paperwork is done and whose crowd is happy.
+Top-down flat-lay with a 35mm lens in bright midday daylight: a calculator, blank invoice sheets and a laptop with a blurred abstract screen arranged on a white desk next to a small potted plant. No people, crisp shadows, clean black-white-green palette, everything accounted for.

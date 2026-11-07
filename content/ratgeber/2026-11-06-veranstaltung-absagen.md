@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "veranstaltung-absagen"
 author: "Eventoren Redaktion"
 image: "ratgeber-veranstaltung-absagen"
-imageAlt: "Jubelnde Menge beim Open-Air-Konzert in der Abendsonne: Gäste mit erhobenen Händen vor der Bühne, Konfetti in der Luft"
+imageAlt: "Leere Open-Air-Bühne an einem grauen Morgen mit verwaisten Bänken und einem Techniker am Rand"
 category: "recht-steuern"
 keywords:
   [

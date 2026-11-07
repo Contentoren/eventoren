@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "tickets-online-verkaufen"
 author: "Eventoren Redaktion"
 image: "ratgeber-tickets-online-verkaufen"
-imageAlt: "Konzertmenge von hinten mit erhobenen Händen und Handylichtern vor einer leuchtenden Bühne"
+imageAlt: "Blick über die Schulter: Frau kauft am hellen Heimbüroplatz Tickets am Laptop mit verschwommenem Bildschirm"
 category: "tickets-verkaufen"
 keywords:
   [

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketing-platforms-fees-compared"
 author: "Eventoren Editorial Team"
 image: "ratgeber-ticketing-anbieter-vergleich"
-imageAlt: "Thousands celebrating at night in front of a festival main stage in colourful light"
+imageAlt: "Two laptops with blurred screens and a blank comparison sheet on an office table in neutral light"
 category: "selling-tickets"
 keywords:
   [

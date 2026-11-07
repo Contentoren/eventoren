@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "eintrittskarten-erstellen"
 author: "Eventoren Redaktion"
 image: "ratgeber-eintrittskarten-erstellen"
-imageAlt: "Begeistertes Publikum mit erhobenen Händen und Konfetti vor der Bühne eines ausverkauften Clubkonzerts im bunten Licht"
+imageAlt: "Makroaufnahme blanker Eintrittskarten und Stoffbändchen auf hellem Leinen im weichen Tageslicht"
 category: "tickets-verkaufen"
 keywords:
   [

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "event-marketing"
 author: "Eventoren Redaktion"
 image: "ratgeber-event-marketing"
-imageAlt: "Riesige jubelnde Festivalmenge vor der Hauptbühne in der Abenddämmerung, Konfetti in der Luft"
+imageAlt: "Drohnenbild am klaren Morgen: Festivalgelände im Aufbau mit Bühne, Zelten und Fahnen ohne Publikum"
 category: "planung-marketing"
 keywords:
   [

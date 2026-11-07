@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "eventbrite-alternative"
 author: "Eventoren Redaktion"
 image: "ratgeber-eventbrite-alternative"
-imageAlt: "Ausverkaufte Clubshow mit jubelnden Gästen und Konfetti im bunten Bühnenlicht"
+imageAlt: "Veranstalterin vergleicht in einem hellen Büro zwei Laptops mit verschwommenen Bildschirmen"
 category: "tickets-verkaufen"
 keywords:
   [

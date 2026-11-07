@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-eintrittskarten-erstellen"
 articles: ["/ratgeber/eintrittskarten-erstellen"]
-alt: "Begeistertes Publikum mit erhobenen Händen und Konfetti vor der Bühne eines ausverkauften Clubkonzerts im bunten Licht"
+alt: "Makroaufnahme blanker Eintrittskarten und Stoffbändchen auf hellem Leinen im weichen Tageslicht"
 ---
 
-Sold-out club concert at its peak: an enthusiastic crowd with raised hands and confetti fills the room in front of a glowing stage, the band silhouetted in teal and amber light. Faces turned up to the music, singing along, the whole venue one celebration.
+Macro photograph shot with a 100mm macro lens in soft window daylight: a fan of blank perforated ticket cards and two fabric wristbands lying on pale linen, shallow depth of field turning the edges to blur, fingers just entering the frame at one corner. Muted paper tones, craft and care.

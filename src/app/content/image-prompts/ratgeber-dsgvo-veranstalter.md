@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-dsgvo-veranstalter"
 articles: ["/ratgeber/dsgvo-veranstalter", "/en/guides/gdpr-for-event-organisers"]
-alt: "Blick über die Schulter eines Fotografen auf eine tanzende Festivalmenge in der Abenddämmerung"
+alt: "Nahaufnahme am Schreibtisch: Laptop mit verschwommenem Bildschirm, Klemmbrett und Festivalbändchen"
 ---
 
-Seen over the shoulder of a photographer at a festival at dusk: his hands hold a camera in the foreground as he photographs a dancing crowd with raised arms before a lit stage. The crowd moves under the darkening evening sky. His shoulder and camera frame the view.
+Close desk detail shot with an 85mm lens and shallow depth of field under neutral indoor office light: a laptop with a softly blurred abstract screen beside a clipboard with blank checklists and a fabric wristband, a hand resting a pen on the paper. Tight crop, cool grey-blue tones, no faces, quiet concentrated work mood.

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "konzert-veranstalten"
 author: "Eventoren Redaktion"
 image: "ratgeber-konzert-veranstalten"
-imageAlt: "Rockband auf der Bühne vor tobender Menge mit erhobenen Händen im Scheinwerferlicht"
+imageAlt: "Leere Konzertbühne beim Soundcheck am Nachmittag im harten Arbeitslicht, keine Zuschauer"
 category: "eventformate"
 keywords:
   [

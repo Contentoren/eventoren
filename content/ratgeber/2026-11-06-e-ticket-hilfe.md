@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "e-ticket-hilfe"
 author: "Eventoren Redaktion"
 image: "ratgeber-e-ticket-hilfe"
-imageAlt: "Gut gelaunte Festivalgäste zeigen am Einlass bei Sonnenuntergang ihre Handytickets, Helfer scannen sie lächelnd"
+imageAlt: "Detail am hellen Mittag: Ordnerhand scannt das leuchtende Handyticket eines Gastes am Einlass"
 category: "ticketkaeufer"
 keywords:
   [

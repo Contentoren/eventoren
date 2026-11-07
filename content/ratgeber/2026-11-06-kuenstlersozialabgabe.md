@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "kuenstlersozialabgabe"
 author: "Eventoren Redaktion"
 image: "ratgeber-kuenstlersozialabgabe"
-imageAlt: "Band spielt auf kleiner Bühne vor tanzendem Publikum bei einem Sommerfest"
+imageAlt: "Folkduo spielt mittags auf dem Dorfplatz vor applaudierenden Zuhörern in hellem Sonnenlicht"
 category: "recht-steuern"
 keywords:
   [

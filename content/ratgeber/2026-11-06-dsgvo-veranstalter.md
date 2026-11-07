@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "dsgvo-veranstalter"
 author: "Eventoren Redaktion"
 image: "ratgeber-dsgvo-veranstalter"
-imageAlt: "Blick über die Schulter eines Fotografen auf eine tanzende Festivalmenge in der Abenddämmerung"
+imageAlt: "Nahaufnahme am Schreibtisch: Laptop mit verschwommenem Bildschirm, Klemmbrett und Festivalbändchen"
 category: "recht-steuern"
 keywords:
   [

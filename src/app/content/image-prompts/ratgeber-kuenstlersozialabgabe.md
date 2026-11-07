@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-kuenstlersozialabgabe"
 articles: ["/ratgeber/kuenstlersozialabgabe"]
-alt: "Band spielt auf kleiner Bühne vor tanzendem Publikum bei einem Sommerfest"
+alt: "Folkduo spielt mittags auf dem Dorfplatz vor applaudierenden Zuhörern in hellem Sonnenlicht"
 ---
 
-A summer fete at dusk: a four-piece live band plays on a small open-air stage while couples and friends dance on the grass in front, children sitting on shoulders, string lights glowing above. The artists play with visible joy, the crowd answers with applause.
+Wide documentary shot on a 35mm lens at noon in harsh bright sunshine: a folk duo with guitar and violin plays on the steps of an old village fountain while a small circle of listeners applauds, ice cream in hand. Hard midday shadows, vivid summer greens and blues, small-town charm.

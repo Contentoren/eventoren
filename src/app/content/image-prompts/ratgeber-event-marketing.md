@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-event-marketing"
 articles: ["/ratgeber/event-marketing"]
-alt: "Riesige jubelnde Festivalmenge vor der Hauptbühne in der Abenddämmerung, Konfetti in der Luft"
+alt: "Drohnenbild am klaren Morgen: Festivalgelände im Aufbau mit Bühne, Zelten und Fahnen ohne Publikum"
 ---
 
-A huge festival crowd at dusk in front of the glowing main stage: thousands of cheering people with raised hands stretch across a wide green field while confetti fills the amber evening sky. The headliner performs under bright stage beams, friends sit on each other's shoulders, and the whole field moves as one. The unforgettable highlight moment every guest will talk about and share.
+High oblique drone photograph on a clear fresh morning: the festival site from the side and above — main stage skeleton, rows of white tents, colourful flags being hoisted by tiny crew figures, long morning shadows across dewy grass. Cool fresh greens, build-up energy, no crowd yet.

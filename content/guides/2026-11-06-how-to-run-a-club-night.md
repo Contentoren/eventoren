@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "how-to-run-a-club-night"
 author: "Eventoren Editorial Team"
 image: "ratgeber-clubnacht-veranstalten"
-imageAlt: "Packed dance floor on a club night: dancing guests with hands in the air in front of the DJ booth in teal and amber light"
+imageAlt: "Club night from ground level in cool blue light: DJ booth towering over the dancing crowd"
 category: "event-types"
 keywords:
   [

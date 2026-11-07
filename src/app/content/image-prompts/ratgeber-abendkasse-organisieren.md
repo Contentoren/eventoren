@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-abendkasse-organisieren"
 articles: ["/ratgeber/abendkasse-organisieren", "/en/guides/box-office-door-sales"]
-alt: "Fröhliche Gäste strömen am Abend in den warm beleuchteten Eingang eines kleinen Clubs, halten ihre Smartphones mit den Tickets bereit und lachen, während drinnen die Bühne leuchtet"
+alt: "Nahaufnahme: Gast zahlt am hellen Nachmittag kontaktlos an einer Holzkasse per Smartphone"
 ---
 
-Guests arrive at a small club on a mild evening, queuing happily beneath the glowing entrance canopy. Friends hold up their smartphones with tickets ready, laughing as a welcoming host waves them through the door. Beyond the entryway the stage already glows, and the first chords drift out to meet the newcomers.
+Close-up on an 85mm lens with shallow depth of field in bright late-afternoon sun: a visitor taps a phone on a contactless terminal held by a cashier's hand at a wooden hut counter, blank price board behind, wristbands stacked beside. Hands only, crisp daylight, quick modern ritual.

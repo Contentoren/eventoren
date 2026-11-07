@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketing-anbieter-vergleich"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketing-anbieter-vergleich"
-imageAlt: "Tausende feiern nachts vor der Hauptbühne eines Festivals im bunten Licht"
+imageAlt: "Zwei Laptops mit verschwommenen Bildschirmen und Vergleichstabelle auf einem Bürotisch im neutralen Licht"
 category: "tickets-verkaufen"
 keywords:
   [

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "clubnacht-veranstalten"
 author: "Eventoren Redaktion"
 image: "ratgeber-clubnacht-veranstalten"
-imageAlt: "Volle Tanzfläche einer Clubnacht: tanzende Gäste mit erhobenen Händen vor dem DJ-Pult in türkisfarbenem und bernsteinfarbenem Licht"
+imageAlt: "Clubnacht aus Bodennähe im kühlen blauen Licht: DJ-Pult über tanzender Menge in blauen Strahlen"
 category: "eventformate"
 keywords:
   [

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "how-to-price-event-tickets"
 author: "Eventoren Editorial Team"
 image: "ratgeber-ticketpreis-kalkulieren"
-imageAlt: "An ecstatic crowd with raised arms in a sold-out concert hall, the band on stage in warm spotlight"
+imageAlt: "Hand writing figures into a blank notebook beside a calculator and coffee in morning window light"
 category: "selling-tickets"
 keywords:
   [

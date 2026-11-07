@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "guest-list-management"
 author: "Eventoren Editorial Team"
 image: "ratgeber-gaesteliste-vorlage"
-imageAlt: "Door host greeting smiling guests at a club entrance with warm light spilling from the open door"
+imageAlt: "View through the open venue doorway: host checking a guest list on a clipboard in soft morning light"
 category: "on-the-day"
 keywords:
   [

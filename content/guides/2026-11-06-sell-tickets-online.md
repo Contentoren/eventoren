@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "sell-tickets-online"
 author: "Eventoren Editorial Team"
 image: "ratgeber-tickets-online-verkaufen"
-imageAlt: "Concert crowd seen from behind with raised hands and phone lights facing a glowing stage"
+imageAlt: "Over-the-shoulder view: woman buying tickets on a laptop with blurred screen at a bright home desk"
 category: "selling-tickets"
 keywords:
   [

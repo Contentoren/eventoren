@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "zahlungsarten-ticketshop"
 author: "Eventoren Redaktion"
 image: "ratgeber-zahlungsarten-ticketshop"
-imageAlt: "Jubelnde Menge mit erhobenen Armen bei einem ausverkauften Arenakonzert im goldenen Licht"
+imageAlt: "Makroaufnahme: Hand hält Karte über ein Kartenterminal, daneben ein Festivalbändchen im neutralen Licht"
 category: "tickets-verkaufen"
 keywords:
   [

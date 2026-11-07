@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-dynamic-pricing-tickets"
 articles: ["/ratgeber/dynamic-pricing-tickets", "/en/guides/dynamic-pricing-tickets-eu"]
-alt: "Euphorische Konzertmenge mit erhobenen Händen bei einer Nachtshow in der Arena, bunte Lichtstrahlen fächern über die jubelnden Fans"
+alt: "Teleaufnahme der fernen Festivalbühne in kühlem Blau nach Sonnenuntergang, Menge als dunkle Textur"
 ---
 
-An ecstatic crowd fills a darkened arena, thousands of raised hands swaying beneath sweeping beams of coloured light. The headliner commands the vast stage as waves of cheering roll through the audience. A sea of glowing wristbands pulses with the beat.
+Telephoto shot on a 200mm lens at cool blue hour after sunset: the distant festival main stage glows icy blue-white while the vast crowd in front dissolves into a compressed dark texture of tiny headlit silhouettes, a single amber work light at the far edge. Distant, analytical, almost monochrome blue.

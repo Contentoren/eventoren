@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-gaesteliste-vorlage"
 articles: ["/ratgeber/gaesteliste-vorlage", "/en/guides/guest-list-management"]
-alt: "Türsteherin begrüßt lächelnde Gäste am Club-Eingang, aus der offenen Tür strömt warmes Licht"
+alt: "Blick durch die offene Tür: Gastgeberin prüft Gästeliste auf Klemmbrett, Gäste warten auf sonnigen Stufen"
 ---
 
-A club entrance on a buzzing night: a smiling door host greets arriving guests by name in front of a velvet rope, warm golden light and muffled bass spilling from the open door behind her. Well-dressed visitors laugh, the night feels exclusive yet welcoming.
+Framed view through the open doorway of a venue on a 35mm lens in soft morning light: a host checks names on a clipboard with blank lists while the first two guests wait smiling on the sunlit steps outside, the dark hall behind her. Doorway as a natural frame, calm daylight contrast.

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "gdpr-for-event-organisers"
 author: "Eventoren Editorial Team"
 image: "ratgeber-dsgvo-veranstalter"
-imageAlt: "View over a photographer's shoulder of a dancing festival crowd at dusk"
+imageAlt: "Close desk detail: laptop with blurred screen, clipboard and fabric wristband in neutral office light"
 category: "law-tax"
 keywords:
   [

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "freischaltcodes-presale"
 author: "Eventoren Redaktion"
 image: "ratgeber-freischaltcodes-presale"
-imageAlt: "Begeisterte Fans strömen beim Einlass durch einen leuchtenden Tunnel in den Club, der DJ spielt bereits, Laserlichter tanzen über der Menge"
+imageAlt: "Detailaufnahme: Hände halten ein Smartphone mit verschwommenem Bildschirm, Festivalbändchen am Handgelenk"
 category: "tickets-verkaufen"
 keywords:
   [

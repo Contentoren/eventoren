@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "e-invoicing-event-organisers"
 author: "Eventoren Editorial Team"
 image: "ratgeber-e-rechnung-veranstalter"
-imageAlt: "Event organiser looking over the cheering crowd of his festival at sunset"
+imageAlt: "Top-down desk flat-lay with calculator, blank invoice sheets and laptop in bright daylight"
 category: "law-tax"
 keywords:
   [

@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-personalisierte-tickets"
 articles: ["/ratgeber/personalisierte-tickets"]
-alt: "Jubelnde Fans mit erhobenen Armen und bunten Festivalbändchen vor der Bühne einer ausverkauften Show im bunten Bühnenlicht"
+alt: "Makroaufnahme eines Stoffbändchens am Handgelenk im weichen Tageslicht, Garten unscharf dahinter"
 ---
 
-Cheering fans raise their arms before the stage of a sold-out show, colourful fabric wristbands circling their wrists in the vibrant stage light. The crowd jumps in unison as the chorus hits, confetti swirling overhead. Smiling faces glow in the beams of light.
+Macro detail on a 100mm macro lens in soft daylight: a fabric wristband fastened around a wrist, fingertips adjusting the woven fabric, the printed area turned away and blank, garden green bokeh behind. Intimate and tactile, no faces.

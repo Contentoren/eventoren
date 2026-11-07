@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-ticketing-anbieter-vergleich"
 articles: ["/ratgeber/ticketing-anbieter-vergleich", "/en/guides/ticketing-platforms-fees-compared"]
-alt: "Tausende feiern nachts vor der Hauptbühne eines Festivals im bunten Licht"
+alt: "Zwei Laptops mit verschwommenen Bildschirmen und Vergleichstabelle auf einem Bürotisch im neutralen Licht"
 ---
 
-Night at a festival main stage: thousands of visitors celebrate under sweeping beams of teal, magenta and amber light, hands in the air, the headliner backlit in a haze of confetti. The scale of a sold-out night that any ticketing decision should serve.
+Eye-level desk portrait on a 50mm lens in neutral office light: two laptops with blurred abstract screens side by side on a long table, a blank comparison chart on paper between them, two hands pointing with pens from opposite sides. No faces, focused working mood in cool greys.

@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-konzert-veranstalten"
 articles: ["/ratgeber/konzert-veranstalten"]
-alt: "Rockband auf der Bühne vor tobender Menge mit erhobenen Händen im Scheinwerferlicht"
+alt: "Leere Konzertbühne beim Soundcheck am Nachmittag im harten Arbeitslicht, keine Zuschauer"
 ---
 
-A rock band giving everything on a club stage late at night: the guitarist mid-chord at the edge of the stage, the drummer blurred in motion behind the kit, warm and teal spotlights cutting through a light haze. In front of the stage a roaring crowd surges with raised hands and open-mouthed singing, confetti swirling above them. Raw live energy, loud and unforgettable.
+Extreme-wide empty-stage shot on a 16mm ultra-wide lens in the harsh white work light of an afternoon soundcheck: bare stage with microphone stands and coiled cables, empty rows of seats in front, a lone technician at the mixing desk. No audience, brutally honest daylight-equivalent white.

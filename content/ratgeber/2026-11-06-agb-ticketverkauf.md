@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "agb-ticketverkauf"
 author: "Eventoren Redaktion"
 image: "ratgeber-agb-ticketverkauf"
-imageAlt: "Ausverkauftes Konzert: begeistertes Publikum mit erhobenen Händen vor farbig beleuchteter Bühne"
+imageAlt: "Aufsicht auf einen aufgeräumten Schreibtisch mit Vertrag, Tickets und Lanyard im neutralen Tageslicht"
 category: "recht-steuern"
 keywords:
   [

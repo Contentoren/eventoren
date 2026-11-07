@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "dynamic-pricing-tickets-eu"
 author: "Eventoren Editorial Team"
 image: "ratgeber-dynamic-pricing-tickets"
-imageAlt: "An ecstatic concert crowd with raised hands at a night-time arena show, colourful light beams sweeping over the cheering fans"
+imageAlt: "Telephoto shot of the distant main stage in cool blue hour light, crowd dissolving into dark texture"
 category: "selling-tickets"
 keywords:
   [

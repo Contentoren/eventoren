@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-e-ticket-hilfe"
 articles: ["/ratgeber/e-ticket-hilfe"]
-alt: "Gut gelaunte Festivalgäste zeigen am Einlass bei Sonnenuntergang ihre Handytickets, Helfer scannen sie lächelnd"
+alt: "Detail am hellen Mittag: Ordnerhand scannt das leuchtende Handyticket eines Gastes am Einlass"
 ---
 
-Golden-hour arrival at an open-air festival: cheerful guests hold up their phones with tickets at the entrance lanes while smiling staff scan them through. String lights already glow above the gates, stage sound drifts over the field, friends reunite just inside with hugs.
+Tight over-the-shoulder detail on a 50mm lens in bright midday sun: a steward's hand holds a scanner to a visitor's glowing phone ticket, both hands sharp against the blurred bright entrance gates behind. Quick helpful gesture, vivid daylight.

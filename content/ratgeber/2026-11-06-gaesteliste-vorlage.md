@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "gaesteliste-vorlage"
 author: "Eventoren Redaktion"
 image: "ratgeber-gaesteliste-vorlage"
-imageAlt: "Türsteherin begrüßt lächelnde Gäste am Club-Eingang, aus der offenen Tür strömt warmes Licht"
+imageAlt: "Blick durch die offene Tür: Gastgeberin prüft Gästeliste auf Klemmbrett, Gäste warten auf sonnigen Stufen"
 category: "einlass-event-tag"
 keywords:
   [

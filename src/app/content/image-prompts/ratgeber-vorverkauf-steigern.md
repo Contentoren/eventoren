@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-vorverkauf-steigern"
 articles: ["/ratgeber/vorverkauf-steigern"]
-alt: "Künstler-Silhouette am Bühnenrand mit Konfettikanonen über einem Meer erhobener Hände"
+alt: "Fröhliche Warteschlange an einer Holzkasse auf dem Dorfplatz am sonnigen Samstagmorgen"
 ---
 
-Seen from the side of the stage: a performer stands as a dark silhouette at the edge of the boards while confetti cannons fire over a sea of raised hands stretching into the dark hall. Light beams cross through the falling confetti. The crowd fills the entire floor.
+Wide shot on a 24mm lens on a sunny Saturday morning: a cheerful queue of visitors stretches from a wooden box-office hut across a village square, poster boards blank, children with balloons at the back. Bright primary colours, anticipation in daylight.

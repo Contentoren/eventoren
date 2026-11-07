@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "e-rechnung-veranstalter"
 author: "Eventoren Redaktion"
 image: "ratgeber-e-rechnung-veranstalter"
-imageAlt: "Veranstalter blickt bei Sonnenuntergang über die jubelnde Menge seines Festivals"
+imageAlt: "Aufsicht auf Schreibtisch mit Taschenrechner, Rechnungsvordrucken und Laptop im hellen Tageslicht"
 category: "recht-steuern"
 keywords:
   [

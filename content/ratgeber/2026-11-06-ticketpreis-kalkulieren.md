@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketpreis-kalkulieren"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketpreis-kalkulieren"
-imageAlt: "Ekstatische Menge mit erhobenen Armen in einer ausverkauften Konzerthalle, Band auf der Bühne im warmen Scheinwerferlicht"
+imageAlt: "Hand schreibt Zahlen in ein Notizbuch neben Taschenrechner und Kaffee im morgendlichen Fensterlicht"
 category: "tickets-verkaufen"
 keywords:
   [

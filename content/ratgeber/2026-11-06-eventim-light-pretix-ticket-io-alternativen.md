@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "eventim-light-pretix-ticket-io-alternativen"
 author: "Eventoren Redaktion"
 image: "ratgeber-eventim-light-pretix-ticket-io-alternativen"
-imageAlt: "Ausverkaufte Clubshow: Sänger auf der Bühne vor jubelndem Publikum mit erhobenen Händen"
+imageAlt: "Weite Tagesansicht des Eingangsportals einer Stadthalle mit kleiner Warteschlange unter blassblauem Himmel"
 category: "tickets-verkaufen"
 keywords:
   [

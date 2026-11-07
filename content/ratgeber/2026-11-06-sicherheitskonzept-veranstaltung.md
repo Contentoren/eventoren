@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "sicherheitskonzept-veranstaltung"
 author: "Eventoren Redaktion"
 image: "ratgeber-sicherheitskonzept-veranstaltung"
-imageAlt: "Entspannte Gästemenge beim Open-Air-Konzert in der Abendsonne, Ordner mit Lanyards lächeln mitten unter den Gästen"
+imageAlt: "Drohnenaufnahme des Festivalgeländes am hellen Nachmittag mit Bühne, Rettungswegen und Sanitätszelt"
 category: "einlass-event-tag"
 keywords:
   [

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "dynamic-pricing-tickets"
 author: "Eventoren Redaktion"
 image: "ratgeber-dynamic-pricing-tickets"
-imageAlt: "Euphorische Konzertmenge mit erhobenen Händen bei einer Nachtshow in der Arena, bunte Lichtstrahlen fächern über die jubelnden Fans"
+imageAlt: "Teleaufnahme der fernen Festivalbühne in kühlem Blau nach Sonnenuntergang, Menge als dunkle Textur"
 category: "tickets-verkaufen"
 keywords:
   [

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketshop-erstellen"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketshop-erstellen"
-imageAlt: "Jubelnde Open-Air-Menge mit erhobenen Händen im goldenen Abendlicht vor der Bühne"
+imageAlt: "Schreibtisch von oben im hellen Mittagslicht: Laptop mit verschwommenem Bildschirm, Hände tippen am Rand"
 category: "tickets-verkaufen"
 keywords:
   [

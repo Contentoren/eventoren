@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-ticketbetrug-verhindern"
 articles: ["/ratgeber/ticketbetrug-verhindern"]
-alt: "Lächelnde Gäste passieren zügig den Einlass mit Scannern vor einer Konzerthalle am Abend"
+alt: "Ordner scannt am hellen Nachmittag am Einlass ein Handyticket, dahinter wartet die Schlange geordnet"
 ---
 
-A smooth, friendly entry at a concert hall in the evening: smiling guests flow through open gates where the entry team scans tickets quickly, the queue moving fast under warm entrance lights. Inside, the first arrivals already dance near the stage, and relaxed anticipation shows on every face. Fast, fair and secure admission that gets everyone inside with a smile.
+Documentary medium shot on a 35mm lens in bright afternoon sun: a steward in a yellow vest scans a visitor's phone ticket at a barrier, the queue calm and orderly behind, the venue facade sharp in the background. Honest daylight, alert but friendly routine.

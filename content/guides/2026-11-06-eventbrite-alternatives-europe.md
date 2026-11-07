@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "eventbrite-alternatives-europe"
 author: "Eventoren Editorial Team"
 image: "ratgeber-eventbrite-alternative"
-imageAlt: "Sold-out club show with cheering guests and confetti in colourful stage light"
+imageAlt: "Young organiser comparing two laptops with blurred screens in a bright modern office"
 category: "selling-tickets"
 keywords:
   [

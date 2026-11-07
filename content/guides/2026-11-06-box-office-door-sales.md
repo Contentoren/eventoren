@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "box-office-door-sales"
 author: "Eventoren Editorial Team"
 image: "ratgeber-abendkasse-organisieren"
-imageAlt: "Cheerful guests stream into the warmly lit entrance of a small club in the evening, smartphones with tickets ready, laughing as the stage glows inside"
+imageAlt: "Close-up: guest paying contactless by phone at a wooden box-office counter in bright afternoon sun"
 category: "on-the-day"
 keywords:
   [

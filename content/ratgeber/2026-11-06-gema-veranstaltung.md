@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "gema-veranstaltung"
 author: "Eventoren Redaktion"
 image: "ratgeber-gema-veranstaltung"
-imageAlt: "Blaskapelle auf einer Dorfbühne im Abendlicht, Publikum als Silhouetten im Vordergrund"
+imageAlt: "Blaskapelle spielt am Vormittag auf dem Dorfplatz, Familien tanzen davor unter blauem Himmel"
 category: "recht-steuern"
 keywords:
   [
