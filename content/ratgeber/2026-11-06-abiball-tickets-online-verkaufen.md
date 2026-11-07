@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "abiball-tickets-online-verkaufen"
 author: "Eventoren Redaktion"
 image: "ratgeber-abiball-tickets-online-verkaufen"
-imageAlt: "Festlich gekleidete Abiturientinnen und Eltern kommen am Abend am Eingang des Ballsaals an, eine Helferin scannt ein Ticket mit dem Smartphone"
+imageAlt: "Abiturienten in Abendgarderobe begrüßen sich lachend am Eingang des festlich erleuchteten Ballsaals"
 category: "abiball"
 keywords:
   [
@@ -48,6 +48,8 @@ Der klassische Weg sieht so aus: gedruckte Karten, Verkauf in der großen Pause 
 Ein weiterer Punkt: Bei Überweisungen auf ein Privatkonto prüfen Banken seit Oktober 2025 bei jeder SEPA-Überweisung, ob Name und IBAN zusammenpassen. Lautet das Konto auf eine Privatperson, die Eltern überweisen aber an „Abikomitee“, sehen sie eine Warnung. Das verunsichert, gerade bei Beträgen von mehreren Hundert Euro pro Familie.
 
 Online heißt nicht, dass der Abiball öffentlich beworben wird. Ihr teilt den Link zum Ticketshop nur in der Stufe, und die Gästetickets sind ohne Code ohnehin nicht kaufbar.
+
+![Freundesgruppe in festlicher Kleidung kommt abends lachend gemeinsam am Eingang des Abiballs an](ratgeber-abiball-tickets-online-verkaufen-szene-1)
 
 ## Welche Ticketarten braucht ein Abiball?
 
@@ -112,6 +114,8 @@ Jeder Gast hat sein Ticket als PDF mit QR-Code per E-Mail bekommen, auf dem Smar
 5. Im Dashboard seht ihr live, wie viele Gäste pro Eingang und pro Ticketstufe schon da sind.
 
 **Wichtig:** Das Scannen braucht eine Internetverbindung. Prüft bei der Besichtigung der Location, ob im Eingangsbereich Mobilfunk oder WLAN funktioniert. Fragt nach dem Gäste-WLAN.
+
+![Helfer begrüßt Gäste am Einlass des Abiballs, im Hintergrund strahlt der festliche Saal](ratgeber-abiball-tickets-online-verkaufen-szene-2)
 
 ### Wie viele Helfer braucht der Einlass?
 

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "helfer-minijob-ehrenamt"
 author: "Eventoren Redaktion"
 image: "ratgeber-helfer-minijob-ehrenamt"
-imageAlt: "Eine Helferkoordinatorin teilt am frühen Morgen vor einem Festzelt Schichten ein, Helfer in Westen hören zu"
+imageAlt: "Jubelndes Helferteam stemmt auf einem Vereinsfest gemeinsam die Arme in die Höhe"
 category: "recht-steuern"
 keywords:
   [
@@ -47,6 +47,8 @@ Bevor du über Geld sprichst, ordne jeden Helfer einer Gruppe zu. Davon hängen 
 | Dienstleister mit eigener Firma         | Security-Firma, Catering, Veranstaltungstechnik                | nicht dein Thema               | Rechnung, ggf. Künstlersozialabgabe bei Künstlern | über den Dienstleister                                 |
 
 Wichtig: Jugendliche unter 18 ohne abgeschlossene Berufsausbildung gelten nicht als Arbeitnehmer im Sinne des Mindestlohngesetzes ([§ 22 Abs. 2 MiLoG](https://www.gesetze-im-internet.de/milog/__22.html)). Für sie gilt aber das Jugendarbeitsschutzgesetz: Beschäftigung grundsätzlich nur von 6 bis 20 Uhr, über 16-Jährige im Gaststätten- und Schaustellergewerbe bis 22 Uhr ([§ 14 JArbSchG](https://www.gesetze-im-internet.de/jarbschg/__14.html)). Für die Spätschicht an der Bar sind Minderjährige also keine Option.
+
+![Helfer schenken am Getränkestand eines Vereinsfests lachenden Gästen Getränke aus](ratgeber-helfer-minijob-ehrenamt-szene-1)
 
 ## Wie hoch ist der Mindestlohn 2026 und 2027?
 
@@ -188,6 +190,8 @@ So liest du die Tabelle:
 - Die Pauschalen zählen pro Person und Jahr. Wenn die Ordner schon beim Weihnachtsmarkt 900 € Ehrenamtspauschale bekommen haben, sind nur noch 60 € frei.
 
 Bei 1.200 verkauften Tickets à 5 € (6.000 € Einnahmen) machen die Helferkosten rund 18,6 % aus. Wie du solche Kosten im Eintrittspreis berücksichtigst, zeigt der Ratgeber [Ticketpreis kalkulieren](/ratgeber/ticketpreis-kalkulieren).
+
+![Gut besuchtes Vereinsfest mit Familien, Spielständen und Bühne am Sommernachmittag](ratgeber-helfer-minijob-ehrenamt-szene-2)
 
 ### Checkliste vor dem Fest
 

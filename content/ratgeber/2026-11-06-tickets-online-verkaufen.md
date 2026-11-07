@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "tickets-online-verkaufen"
 author: "Eventoren Redaktion"
 image: "ratgeber-tickets-online-verkaufen"
-imageAlt: "Veranstalterin bereitet am Abend im Foyer eines kleinen Konzertsaals mit Laptop und Smartphone den Ticketverkauf vor, im Hintergrund bauen Helfer auf"
+imageAlt: "Konzertmenge von hinten mit erhobenen Händen und Handylichtern vor einer leuchtenden Bühne"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -43,6 +43,8 @@ Für dich als Veranstalter hat das drei handfeste Vorteile gegenüber dem reinen
 - **Weniger Bargeld:** Kein Wechselgeld, keine Kassenzählung um zwei Uhr nachts, kein Risiko, dass die Kasse verschwindet.
 
 Ein **Ticketshop** ist dabei die Verkaufsseite für dein Event. Ein **Ticketing-System** umfasst zusätzlich Zahlungsabwicklung, Ticketversand, Gästeverwaltung, Einlasskontrolle und Abrechnung.
+
+![Freundesgruppe betritt lachend das Festivalgelände am frühen Abend](ratgeber-tickets-online-verkaufen-szene-1)
 
 ## Welche Optionen gibt es? Eigener Shop, Plattform, Marktplatz oder nur Abendkasse
 
@@ -142,6 +144,8 @@ Lege fest, wer scannt, wie viele Eingänge es gibt und was bei Problemen passier
 ### 9. Abrechnen und Auszahlung prüfen
 
 Nach dem Event exportierst du die Verkaufsdaten für Buchhaltung und Steuer und gleichst die Auszahlung mit den Verkäufen ab. Buchungsbelege musst du acht Jahre aufbewahren (§ 147 Abs. 3 AO, seit 01.01.2025).
+
+![Ausverkaufte Partynacht mit erhobenen Händen und Konfetti in der Menge](ratgeber-tickets-online-verkaufen-szene-2)
 
 ## Welche Regeln gelten 2026 beim Online-Ticketverkauf?
 

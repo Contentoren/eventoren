@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "umsatzsteuer-eintrittskarten"
 author: "Eventoren Redaktion"
 image: "ratgeber-umsatzsteuer-eintrittskarten"
-imageAlt: "Eine Veranstalterin rechnet am Küchentisch mit Taschenrechner, Belegen und Laptop die Ticketeinnahmen ihres Konzerts nach"
+imageAlt: "Historischer Theatersaal von der Galerie: goldene Logen, Kronleuchter und applaudierendes Publikum"
 category: "recht-steuern"
 keywords:
   [
@@ -56,6 +56,8 @@ Die Entscheidungstabelle (Stand: November 2026):
 | Kleinunternehmer (alle Veranstaltungsarten)                                                                           | **keine USt**                                                          | § 19 UStG                                                                |
 
 Für Zuschauer-Eintritt gilt die Befreiung nach § 4 Nr. 22b UStG übrigens nicht. Sie erfasst nur Teilnehmergebühren, etwa das Startgeld beim Volkslauf eines gemeinnützigen Vereins.
+
+![Orchester spielt im festlich beleuchteten Konzertsaal vor aufmerksamem Publikum in roten Samtsesseln](ratgeber-umsatzsteuer-eintrittskarten-szene-1)
 
 ## Warum kostet eine DJ-Party 19 %, ein Konzert aber 7 %?
 
@@ -150,6 +152,8 @@ Bei Tourneen und Kooperationen gilt: Nur wer die Eintrittsberechtigung verschaff
 | Unterschied             |            | **706,82 € weniger** |
 
 Wer eine Party fälschlich mit 7 % kalkuliert, verliert bei einer Prüfung also mehrere hundert Euro, nachträglich und ohne die Möglichkeit, die Gäste nachzubelasten. Kalkuliere deshalb vom Bruttopreis rückwärts.
+
+![Begeisterte Menge bejubelt die Zugabe eines Popkonzerts, goldenes Konfetti über den erhobenen Händen](ratgeber-umsatzsteuer-eintrittskarten-szene-2)
 
 ## Checkliste: Steuersatz für dein Event bestimmen
 

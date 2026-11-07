@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "qr-code-ticket-check-in"
 author: "Eventoren Editorial Team"
 image: "ratgeber-einlasskontrolle-qr-code"
-imageAlt: "A young volunteer with a teal lanyard scans a guest's smartphone ticket at the door of a small clubhouse at dusk"
+imageAlt: "Festival entry lanes from above at blue hour: glowing wristbands and barriers before lit gates"
 category: "on-the-day"
 keywords:
   [
@@ -42,6 +42,8 @@ Compared with paper tickets, stamps or tear-off stubs, a scanned QR ticket gives
 - **Fewer arguments.** The system decides, not a helper's gut feeling.
 
 QR check-in is one part of a bigger door plan. Lanes, arrival peaks and staffing are covered in our guide to [event entry queue management](/en/guides/event-entry-queue-management).
+
+![Smiling helpers scan arriving guests' smartphone tickets at the door of a club in warm light](ratgeber-einlasskontrolle-qr-code-szene-1)
 
 ## How does a QR ticket get validated?
 
@@ -132,6 +134,8 @@ Write the sequence on a card for each lane. Nobody improvises well under pressur
 - **Club lighting:** light the entrance brightly; no strobes or coloured light at the scan line.
 - **Display problems:** cracked screens call for manual entry. If the code is small, ask the guest to zoom the PDF; 15 to 25 cm usually works better than very close.
 - **Paper tickets:** no folds through the code and no lamination, because reflections block the camera.
+
+![A sunny open-air entrance in the afternoon, guests in sunglasses hold up their phones for scanning as helpers greet them kindly under a canopy](ratgeber-einlasskontrolle-qr-code-szene-2)
 
 ## How many people do you need at the door?
 

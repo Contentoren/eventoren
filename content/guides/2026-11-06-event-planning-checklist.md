@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "event-planning-checklist"
 author: "Eventoren Editorial Team"
 image: "ratgeber-veranstaltung-planen-checkliste"
-imageAlt: "Three members of an organising team plan an event around a kitchen table with sticky notes, a wall calendar and a laptop"
+imageAlt: "A dancing crowd before the stage of an evening lantern festival, a live band and warm lights in the historic old town"
 category: "planning-marketing"
 keywords:
   [
@@ -46,6 +46,8 @@ To plan an event, work backwards from the event day through ten phases: concept,
 | Festival                               | 12–18 months      | Site, permits, line-up |
 
 These are rules of thumb, not legal requirements. Peak dates such as New Year's Eve, December weekends or the Eurovision final on 15 May 2027 are booked out earlier.
+
+![Families stroll laughing across a sunny street festival in the old town with colourful stalls and street music](ratgeber-veranstaltung-planen-checkliste-szene-1)
 
 ## Event planning timeline: what happens when?
 
@@ -217,6 +219,8 @@ Our EN guides on cancellation refunds, GDPR and the European Accessibility Act g
 | Early June 2027     | T+4        | Set lists, accounts, receipts                                                                                                                      |
 
 221 of 250 seats to break even shows how tight small concerts are, and cheaper early bird tickets push it higher. Options: a smaller room, a door deal with the band, or a sponsor.
+
+![250 guests celebrate a concert in the warm light of a full hall, the band playing before an enthusiastic audience](ratgeber-veranstaltung-planen-checkliste-szene-2)
 
 ## How to do this with Eventoren
 

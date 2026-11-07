@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "agb-ticketverkauf"
 author: "Eventoren Redaktion"
 image: "ratgeber-agb-ticketverkauf"
-imageAlt: "Zwei Organisatorinnen eines Kulturvereins gehen an einem Küchentisch ausgedruckte Ticketbedingungen mit Textmarker und Laptop durch"
+imageAlt: "Ausverkauftes Konzert: begeistertes Publikum mit erhobenen Händen vor farbig beleuchteter Bühne"
 category: "recht-steuern"
 keywords:
   [
@@ -66,6 +66,8 @@ Diese Übersicht ist die Gliederung für deine AGB. Die folgenden Abschnitte erk
 | 9   | Foto und Video                         | Transparenz für Gäste                 | Art. 6, 13 DSGVO                      |
 | 10  | Datenschutz                            | Verweis auf Datenschutzhinweise       | Art. 13 DSGVO                         |
 | 11  | Schlussbestimmungen                    | Verbraucherschlichtung, Recht         | § 36 VSBG, § 306 BGB                  |
+
+![Gut gelaunte Gäste strömen durch den Einlass eines ausverkauften Konzerts in den Saal](ratgeber-agb-ticketverkauf-szene-1)
 
 ## Vertragspartner und Widerrufsrecht: Wer verkauft hier?
 
@@ -138,6 +140,8 @@ Bei öffentlichen Tanzveranstaltungen dürfen Kinder und Jugendliche unter 16 oh
 > **Muster (unverbindlich):** Es gelten die Vorschriften des Jugendschutzgesetzes. Einlass ab [Alter]. Personen unter 18 Jahren müssen um 24 Uhr die Veranstaltung verlassen, sofern sie nicht von einer personensorgeberechtigten oder einer volljährigen erziehungsbeauftragten Person begleitet werden. Am Einlass ist ein amtlicher Lichtbildausweis vorzuzeigen. Der Veranstalter darf eine Erziehungsbeauftragung ablehnen, wenn Zweifel an ihrer Echtheit bestehen.
 
 Mehr zu Altersbändchen und „Muttizettel“ im Ratgeber [Jugendschutz auf Partys](/ratgeber/jugendschutz-party).
+
+![Freundlicher Ordner begrüßt Gäste am Einlass, dahinter tanzt das Publikum im bunten Licht](ratgeber-agb-ticketverkauf-szene-2)
 
 ## Haftung, Foto und Datenschutz: Wie formulierst du richtig?
 

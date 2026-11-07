@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "event-cancellation-refunds-eu"
 author: "Eventoren Editorial Team"
 image: "ratgeber-veranstaltung-absagen"
-imageAlt: "Two organisers in rain jackets stand under the roof of a ticket hut at an empty festival ground in a storm, one on the phone discussing the cancellation"
+imageAlt: "Cheering crowd at an open-air concert in the evening sun: guests with raised hands in front of the stage, confetti in the air"
 category: "law-tax"
 keywords:
   [
@@ -48,6 +48,8 @@ This guide is not legal or tax advice.
 | Minor change      | doors 30 minutes later, support act swapped                         | usually no claim                                                          |
 
 Irish and English consumer guidance treats a significant change of date or venue like a cancellation.
+
+![Full concert hall applauding on the replacement date: audience rising in cheers, stage in warm light](ratgeber-veranstaltung-absagen-szene-1)
 
 ## Is there an EU law on refunds for cancelled events?
 
@@ -114,6 +116,8 @@ Your contract for the event is with the **organiser**. The official ticket selle
 If you bought on a secondary site or from a private seller, the refund goes to the original buyer's payment method. Our guide to [ticket resale rules in Europe](/en/guides/ticket-resale-rules-europe) covers this risk.
 
 **Example (organiser view):** a club sells 600 tickets at €25 for an open-air show, €15,000 in total. Three days before, the authorities ban it because of a storm warning. All €15,000 goes back to buyers. Costs already incurred, such as €2,000 for staging (50 % cancellation term), €1,500 artist fee without a cancellation clause, €800 for advertising and €400 security cancellation fee, total €4,700 that the organiser carries unless insured. Example figures only.
+
+![Enthusiastic festival crowd in confetti at sunset: dancing guests with raised arms in front of the main stage](ratgeber-veranstaltung-absagen-szene-2)
 
 ## What if the organiser doesn't refund?
 

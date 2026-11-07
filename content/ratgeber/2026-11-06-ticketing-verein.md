@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketing-verein"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketing-verein"
-imageAlt: "Drei Vorstandsmitglieder eines Vereins planen am Abend im Vereinsheim an einem Holztisch den Vorverkauf, eine Frau zeigt auf einen Ausdruck"
+imageAlt: "Blaskapelle auf der Bühne eines Dorffests, Familien tanzen davor auf dem Platz"
 category: "vereine-schulen"
 keywords:
   [
@@ -46,6 +46,8 @@ Es lohnt sich vor allem, wenn mindestens einer dieser Punkte zutrifft:
 - Der Kassenwart möchte weniger Bargeld zählen, transportieren und einzahlen.
 
 Für ein offenes Dorffest ohne Eintritt brauchst du dagegen kein Ticketing. Ob Eintritt oder freier Zugang besser passt, klärt der Ratgeber [Vereinsfest organisieren](/ratgeber/vereinsfest-organisieren).
+
+![Familien mit Kindern betreten lachend das geschmückte Festgelände eines Vereinsfests](ratgeber-ticketing-verein-szene-1)
 
 ## Welches Ticketing passt zu welcher Vereinsveranstaltung?
 
@@ -177,6 +179,8 @@ Ohne Helfer läuft kein Vereinsfest. Mit Online-Ticketing verschiebt sich die Ar
 - **Bezahlte Aushilfen:** Mindestlohn **13,90 €** (2026) bzw. **14,60 €** (2027), oft als kurzfristige Beschäftigung (höchstens 3 Monate oder 70 Arbeitstage im Jahr).
 
 Ob für Thekenhelfer im wirtschaftlichen Geschäftsbetrieb eine Pauschale gezahlt werden darf, ist eine Detailfrage. Den kompletten Überblick mit Beispielrechnung findest du unter [Helfer bezahlen 2026/2027](/ratgeber/helfer-minijob-ehrenamt).
+
+![Fröhliche Besucher strömen durch den blumengeschmückten Eingang des Vereinsfests auf den Platz](ratgeber-ticketing-verein-szene-2)
 
 ### Einlass-Briefing für Helfer (10 Minuten vor Öffnung)
 

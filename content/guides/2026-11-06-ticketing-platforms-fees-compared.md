@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketing-platforms-fees-compared"
 author: "Eventoren Editorial Team"
 image: "ratgeber-ticketing-anbieter-vergleich"
-imageAlt: "Two organisers compare printed fee overviews at a kitchen table in the evening, with a calculator and a laptop beside them"
+imageAlt: "Thousands celebrating at night in front of a festival main stage in colourful light"
 category: "selling-tickets"
 keywords:
   [
@@ -44,6 +44,8 @@ A fair **ticketing fee comparison** needs one scenario for everyone:
 - Rounded to the cent, from public pricing pages.
 
 Volume deals aren't included; check before you sign. New to ticketing? Start with [how to sell tickets online in Europe](/en/guides/sell-tickets-online). German version: [Ticketing-Anbieter im Vergleich](/ratgeber/ticketing-anbieter-vergleich) (in German).
+
+![Mixed crowd enjoying an open-air concert on a summer day](ratgeber-ticketing-anbieter-vergleich-szene-1)
 
 ## What does each ticketing platform charge in 2026?
 
@@ -171,6 +173,8 @@ Payout after the event protects buyers but means you pre-finance venue and artis
 | Festival with poor mobile signal                 | offline scanning, cash till                         | Eventfrog, ticket i/O, pretix                                                      |
 
 Switching from the largest marketplace? Read [Eventbrite alternatives in Europe](/en/guides/eventbrite-alternatives-europe).
+
+![Elegantly dressed audience applauding in a historic concert hall](ratgeber-ticketing-anbieter-vergleich-szene-2)
 
 ## How do you choose? A 10-point checklist
 

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "party-veranstalten"
 author: "Eventoren Redaktion"
 image: "ratgeber-party-veranstalten"
-imageAlt: "Zwei junge Veranstalter bauen am Nachmittag in einem leeren Partyraum eine Bar aus Getränkekisten auf und hängen warme Lichterketten auf"
+imageAlt: "Volle Tanzfläche mit tanzenden Gästen und Konfetti vor dem DJ-Pult in einem Club"
 category: "eventformate"
 keywords:
   [
@@ -47,6 +47,8 @@ Dieser Artikel ersetzt keine Rechts- oder Steuerberatung.
 | Steuern         | keine                                   | bei Gewinnabsicht und Wiederholung: Gewerbe, ESt, ggf. USt      |
 
 Die Grauzone sind Vereins-, Firmen- und Uni-Partys. Vereinsfeiern sind laut GEMA in der Regel öffentlich, Firmenfeiern gelten ausdrücklich als öffentlich. Der Satz „Wir lassen nur Freunde von Freunden rein“ macht eine Party mit Ticketverkauf nicht privat. Wer GEMA-Kosten sparen will, sollte das nicht über eine angebliche Privatparty versuchen, sondern über die richtige Raumgröße und einen realistischen Höchstpreis. Alle Tarife und Nachlässe erklärt der Ratgeber [GEMA für Veranstaltungen](/ratgeber/gema-veranstaltung).
+
+![Tanzende Freunde mit erhobenen Armen auf einer vollen öffentlichen Party](ratgeber-party-veranstalten-szene-1)
 
 ## Welche rechtlichen Folgen hat eine öffentliche Party?
 
@@ -190,6 +192,8 @@ Abipartys finanzieren oft Abiball oder Abikasse. Drei Besonderheiten:
 ### Semesterparty
 
 Semesterpartys organisieren meist Fachschaften oder studentische Vereine. Kläre zuerst, wer rechtlich Veranstalter ist und unterschreibt: Fachschaft, AStA, Verein oder Privatpersonen. Finden sie in Hochschulräumen statt, gelten die Nutzungsregeln der Hochschule, etwa zu Endzeit, Ausschank und Reinigung. Studentische Preise funktionieren gut mit einer eigenen Ticketstufe „Studierende“ und Kontrolle des Studierendenausweises am Einlass.
+
+![Abiturienten feiern tanzend mit Konfetti auf ihrer Abiparty in der Stadthalle](ratgeber-party-veranstalten-szene-2)
 
 ## Checkliste: Party veranstalten in 15 Schritten
 

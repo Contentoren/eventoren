@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "abiball-planen-checkliste"
 author: "Eventoren Redaktion"
 image: "ratgeber-abiball-planen-checkliste"
-imageAlt: "Abikomitee sitzt nach Schulschluss an zusammengeschobenen Tischen im Klassenzimmer und plant mit Laptop, Kalender und Haftnotizen den Abiball"
+imageAlt: "Abiturienten in festlicher Abendgarderobe tanzen lachend unter Kronleuchtern im festlich geschmückten Ballsaal, Konfetti rieselt von der Decke"
 category: "abiball"
 keywords:
   [
@@ -45,6 +45,8 @@ Der Termin hängt am Abitur und an den Sommerferien eures Bundeslandes. Abibäll
 Stand: November 2026. Die Ferientermine stammen aus dem KMK-Ferienkalender, die NRW-Abiturtermine vom Schulministerium. Die Termine für Baden-Württemberg kommen aus einer Sekundärquelle, prüft sie bei eurer Schule nach.
 
 Ein Beispiel für NRW: Die letzten Zeugnisse gibt es bis zum 03.07.2027, die Ferien beginnen am 19.07.2027. Samstag, der 10.07.2027, wäre damit ein naheliegender Balltermin. Stimmt den Termin früh mit der Schulleitung ab, damit Zeugnisausgabe, Gottesdienst oder Entlassfeier nicht kollidieren.
+
+![Glückliche Abiturienten in Abendkleidung umarmen sich bei Sonnenuntergang auf den Stufen ihrer Schule, eine Kappe fliegt jubelnd durch die Luft](ratgeber-abiball-planen-checkliste-szene-1)
 
 ## Wer macht was im Abikomitee?
 
@@ -117,6 +119,8 @@ Buffet oder Menü, mit oder ohne Getränkepauschale? Die Wahl hängt an Budget u
 ### DJ oder Band
 
 Ein DJ ist meist günstiger und flexibler. Eine Band bringt Show, braucht aber mehr Platz und Technik. In beiden Fällen gilt: Die Musik muss vorher bei der GEMA angemeldet werden. Für Abschlussfeiern gibt es Pakete, kleinere Feiern starten laut GEMA ab ca. 100 €.
+
+![Liveband auf der Bühne des Abiballs, davor tanzen begeisterte Abiturienten im Scheinwerferlicht mit erhobenen Armen](ratgeber-abiball-planen-checkliste-szene-2)
 
 ### Programm
 

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "vat-on-event-tickets-europe"
 author: "Eventoren Editorial Team"
 image: "ratgeber-umsatzsteuer-eintrittskarten"
-imageAlt: "An organiser in a teal cardigan sits at her kitchen table in the evening, working through her concert's ticket income with a calculator, receipts and a laptop"
+imageAlt: "Historic theatre auditorium from the gallery: golden boxes, chandelier and applauding audience"
 category: "law-tax"
 keywords:
   [
@@ -48,6 +48,8 @@ This guide is not legal or tax advice.
 **Admission** covers entry to cultural, artistic, sporting, scientific, educational, entertainment or similar events, from concerts and matches to conferences and fairs, plus ancillary services such as cloakrooms.
 
 So a Dutch promoter selling tickets for a show in Antwerp charges Belgian VAT, while a German club streaming to fans in France and Spain charges each buyer's local rate.
+
+![An orchestra plays in a festively lit concert hall before an attentive audience in red velvet seats](ratgeber-umsatzsteuer-eintrittskarten-szene-1)
 
 ## What VAT rates apply to event tickets in each country?
 
@@ -135,6 +137,8 @@ A VAT-registered German promoter sells 300 tickets at €30 for a concert in Vie
 ### Livestream sold to several countries
 
 A Belgian theatre company sells a €10 livestream ticket to consumers. Since 2025, each sale is taxed in the buyer's country, and whether a reduced rate covers streams varies (Ireland, for example, taxes streamed events at the standard rate). At 21 %, VAT is €1.74 per ticket; at 20 %, €1.67. The company can declare all foreign B2C sales through the OSS in Belgium.
+
+![An enthusiastic crowd cheers the encore of a pop concert, golden confetti over raised hands](ratgeber-umsatzsteuer-eintrittskarten-szene-2)
 
 ## Checklist: VAT before you go on sale abroad
 

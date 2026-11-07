@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "early-bird-tickets"
 author: "Eventoren Editorial Team"
 image: "ratgeber-early-bird-tickets"
-imageAlt: "Just after sunrise, an organiser pastes a blank poster onto a round advertising column in a cobbled old-town lane"
+imageAlt: "Excited young festival fans waiting in front of the open gates in the early morning sun"
 category: "selling-tickets"
 keywords:
   [
@@ -48,6 +48,8 @@ Unlike a VIP or concession ticket, it gives exactly the same entry as a standard
 - **Momentum.** Every early buyer tells friends. Visible early sales signal that the event is really happening.
 - **Less last-minute risk.** The more you sell in advance, the less your evening depends on weather or a rival event.
 - **Cash flow, with a caveat.** Many platforms, Eventoren included, pay out only after the event. Do not plan venue deposits around ticket money.
+
+![Young friends cheering arm in arm at a sold-out concert](ratgeber-early-bird-tickets-szene-1)
 
 ## Which early bird tier structures can you use?
 
@@ -110,6 +112,8 @@ Launch it when attention peaks: the moment you announce the event. A typical seq
 5. **Second push (optional):** new information such as a support act gives standard sales a fresh reason to buy.
 
 How long total sales should run depends on the format. Club nights often sell over two to four weeks, concerts and balls over several months, and festivals over half a year or more.
+
+![Cheering crowd streaming through the open doors of a concert hall at sunset](ratgeber-early-bird-tickets-szene-2)
 
 ### What to say: weak vs strong wording
 

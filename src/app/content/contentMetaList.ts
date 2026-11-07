@@ -23,7 +23,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "box-office",
       seoTitle: "Abendkasse 2026: Bargeldlos, TSE, Meldepflicht",
       readingMinutes: 12,
-      wordCount: 2273,
+      wordCount: 2314,
     },
     "2026-11-06-abiball-finanzieren-sponsoren": {
       collection: "ratgeber",
@@ -42,7 +42,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Abiball finanzieren: Sponsoren & Abikasse",
       readingMinutes: 14,
-      wordCount: 2684,
+      wordCount: 2705,
     },
     "2026-11-06-abiball-kosten": {
       collection: "ratgeber",
@@ -61,7 +61,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Abiball-Kosten 2027: Kalkulation pro Person",
       readingMinutes: 11,
-      wordCount: 2170,
+      wordCount: 2199,
     },
     "2026-11-06-abiball-location-catering": {
       collection: "ratgeber",
@@ -80,7 +80,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Abiball-Location & Catering: Preise, Verträge",
       readingMinutes: 14,
-      wordCount: 2705,
+      wordCount: 2734,
     },
     "2026-11-06-abiball-planen-checkliste": {
       collection: "ratgeber",
@@ -98,7 +98,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Abiball planen 2027: Checkliste & Zeitplan",
       readingMinutes: 12,
-      wordCount: 2285,
+      wordCount: 2320,
     },
     "2026-11-06-abiball-tickets-online-verkaufen": {
       collection: "ratgeber",
@@ -117,7 +117,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Abiball-Tickets online verkaufen: So geht's",
       readingMinutes: 11,
-      wordCount: 2089,
+      wordCount: 2115,
     },
     "2026-11-06-abiball-veranstalter-haftung": {
       collection: "ratgeber",
@@ -135,8 +135,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: null,
       seoTitle: "Abiball-Veranstalter: Haftung, Verträge, GEMA",
-      readingMinutes: 15,
-      wordCount: 2999,
+      readingMinutes: 16,
+      wordCount: 3029,
     },
     "2026-11-06-agb-ticketverkauf": {
       collection: "ratgeber",
@@ -154,8 +154,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: null,
       seoTitle: "AGB für Veranstalter: Klauseln für den Ticketverkauf",
-      readingMinutes: 15,
-      wordCount: 2983,
+      readingMinutes: 16,
+      wordCount: 3009,
     },
     "2026-11-06-barrierefreiheit-bfsg": {
       collection: "ratgeber",
@@ -174,7 +174,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "accessibility-act",
       seoTitle: "BFSG Ticketshop: Barrierefreiheit für Veranstalter",
       readingMinutes: 12,
-      wordCount: 2349,
+      wordCount: 2374,
     },
     "2026-11-06-benefizveranstaltung": {
       collection: "ratgeber",
@@ -193,7 +193,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "charity-events",
       seoTitle: "Benefizveranstaltung organisieren: Tickets & Spenden",
       readingMinutes: 15,
-      wordCount: 2827,
+      wordCount: 2847,
     },
     "2026-11-06-clubnacht-veranstalten": {
       collection: "ratgeber",
@@ -212,7 +212,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "club-night",
       seoTitle: "Clubnacht veranstalten: Deal, Vorverkauf, Gästeliste",
       readingMinutes: 11,
-      wordCount: 2136,
+      wordCount: 2168,
     },
     "2026-11-06-dsgvo-veranstalter": {
       collection: "ratgeber",
@@ -230,8 +230,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: "gdpr",
       seoTitle: "DSGVO für Veranstalter: Daten, Fotos, Newsletter",
-      readingMinutes: 15,
-      wordCount: 2995,
+      readingMinutes: 16,
+      wordCount: 3018,
     },
     "2026-11-06-dynamic-pricing-tickets": {
       collection: "ratgeber",
@@ -250,7 +250,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "dynamic-pricing",
       seoTitle: "Dynamic Pricing Tickets: Rechtslage EU 2026/27",
       readingMinutes: 12,
-      wordCount: 2250,
+      wordCount: 2279,
     },
     "2026-11-06-e-rechnung-veranstalter": {
       collection: "ratgeber",
@@ -269,7 +269,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "e-invoicing",
       seoTitle: "E-Rechnung 2027 für Veranstalter und Vereine",
       readingMinutes: 13,
-      wordCount: 2478,
+      wordCount: 2495,
     },
     "2026-11-06-e-ticket-hilfe": {
       collection: "ratgeber",
@@ -288,7 +288,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "E-Ticket nicht angekommen oder verloren? Hilfe",
       readingMinutes: 11,
-      wordCount: 2081,
+      wordCount: 2108,
     },
     "2026-11-06-early-bird-tickets": {
       collection: "ratgeber",
@@ -307,7 +307,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "early-bird-tickets",
       seoTitle: "Early-Bird-Tickets: Bedeutung, Preis, Kontingent",
       readingMinutes: 10,
-      wordCount: 1896,
+      wordCount: 1921,
     },
     "2026-11-06-einlasskontrolle-qr-code": {
       collection: "ratgeber",
@@ -324,8 +324,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: "qr-check-in",
       seoTitle: "Einlasskontrolle mit QR-Code: Ablauf & Technik",
-      readingMinutes: 12,
-      wordCount: 2372,
+      readingMinutes: 13,
+      wordCount: 2405,
     },
     "2026-11-06-einlassmanagement-warteschlangen": {
       collection: "ratgeber",
@@ -343,7 +343,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "entry-queues",
       seoTitle: "Einlassmanagement: Warteschlangen berechnen",
       readingMinutes: 11,
-      wordCount: 2129,
+      wordCount: 2152,
     },
     "2026-11-06-eintrittskarten-erstellen": {
       collection: "ratgeber",
@@ -361,7 +361,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Eintrittskarten erstellen: QR-Code statt Word",
       readingMinutes: 10,
-      wordCount: 1919,
+      wordCount: 1951,
     },
     "2026-11-06-event-marketing": {
       collection: "ratgeber",
@@ -380,7 +380,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Event-Marketing 2026: Kanäle, Plan, Checkliste",
       readingMinutes: 14,
-      wordCount: 2672,
+      wordCount: 2694,
     },
     "2026-11-06-event-sichtbar-google-ki": {
       collection: "ratgeber",
@@ -399,7 +399,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "event-seo-ai",
       seoTitle: "Event bei Google & KI sichtbar machen",
       readingMinutes: 13,
-      wordCount: 2446,
+      wordCount: 2476,
     },
     "2026-11-06-eventbrite-alternative": {
       collection: "ratgeber",
@@ -417,7 +417,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "eventbrite-alternatives",
       seoTitle: "Eventbrite-Alternativen 2026: Gebühren im Vergleich",
       readingMinutes: 10,
-      wordCount: 1972,
+      wordCount: 1989,
     },
     "2026-11-06-eventbudget-planen": {
       collection: "ratgeber",
@@ -436,7 +436,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "event-budget",
       seoTitle: "Eventbudget planen: Vorlage, Puffer, Beispiel",
       readingMinutes: 13,
-      wordCount: 2554,
+      wordCount: 2582,
     },
     "2026-11-06-eventim-light-pretix-ticket-io-alternativen": {
       collection: "ratgeber",
@@ -455,7 +455,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "EVENTIM.Light, pretix, ticket i/O: Kosten 2026",
       readingMinutes: 11,
-      wordCount: 2025,
+      wordCount: 2043,
     },
     "2026-11-06-eventlocation-finden": {
       collection: "ratgeber",
@@ -474,7 +474,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Eventlocation finden & mieten: Checkliste 2026",
       readingMinutes: 14,
-      wordCount: 2653,
+      wordCount: 2682,
     },
     "2026-11-06-fake-tickets-erkennen": {
       collection: "ratgeber",
@@ -492,8 +492,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: "fake-tickets",
       seoTitle: "Fake-Tickets erkennen: So kaufst du sicher",
-      readingMinutes: 11,
-      wordCount: 2196,
+      readingMinutes: 12,
+      wordCount: 2217,
     },
     "2026-11-06-festival-organisieren": {
       collection: "ratgeber",
@@ -511,8 +511,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: "organise-festival",
       seoTitle: "Festival organisieren 2027: Zeitplan & Kosten",
-      readingMinutes: 12,
-      wordCount: 2392,
+      readingMinutes: 13,
+      wordCount: 2421,
     },
     "2026-11-06-firmenevent-konferenz-tickets": {
       collection: "ratgeber",
@@ -531,7 +531,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Konferenz-Tickets & Firmenevents: Rechnung, USt",
       readingMinutes: 11,
-      wordCount: 2160,
+      wordCount: 2178,
     },
     "2026-11-06-freischaltcodes-presale": {
       collection: "ratgeber",
@@ -550,7 +550,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "presale-codes",
       seoTitle: "Presale-Code & Freischaltcode: Exklusiver Vorverkauf",
       readingMinutes: 12,
-      wordCount: 2302,
+      wordCount: 2332,
     },
     "2026-11-06-gaesteliste-vorlage": {
       collection: "ratgeber",
@@ -568,7 +568,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "guest-list",
       seoTitle: "Gästeliste Vorlage: Begleitpersonen & Einlass",
       readingMinutes: 11,
-      wordCount: 2035,
+      wordCount: 2053,
     },
     "2026-11-06-gema-veranstaltung": {
       collection: "ratgeber",
@@ -587,7 +587,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "GEMA Veranstaltung 2026: Anmeldung & Kosten",
       readingMinutes: 13,
-      wordCount: 2492,
+      wordCount: 2522,
     },
     "2026-11-06-helfer-minijob-ehrenamt": {
       collection: "ratgeber",
@@ -606,7 +606,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Helfer bezahlen 2026/27: Mindestlohn & Pauschalen",
       readingMinutes: 15,
-      wordCount: 2842,
+      wordCount: 2862,
     },
     "2026-11-06-jugendschutz-party": {
       collection: "ratgeber",
@@ -625,7 +625,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Jugendschutz auf Partys: Muttizettel & Altersgrenzen",
       readingMinutes: 12,
-      wordCount: 2299,
+      wordCount: 2330,
     },
     "2026-11-06-karneval-2027": {
       collection: "ratgeber",
@@ -644,7 +644,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Karneval 2027: Termine, Sitzungen, Tickets",
       readingMinutes: 11,
-      wordCount: 2050,
+      wordCount: 2071,
     },
     "2026-11-06-kleinunternehmerregelung-veranstalter": {
       collection: "ratgeber",
@@ -662,7 +662,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Kleinunternehmerregelung für Veranstalter 2026/27",
       readingMinutes: 11,
-      wordCount: 2080,
+      wordCount: 2106,
     },
     "2026-11-06-konzert-veranstalten": {
       collection: "ratgeber",
@@ -681,7 +681,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Konzert veranstalten: Kosten, Booking, GEMA 2026",
       readingMinutes: 11,
-      wordCount: 2072,
+      wordCount: 2095,
     },
     "2026-11-06-kostenlose-events-anmeldung": {
       collection: "ratgeber",
@@ -700,7 +700,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Kostenlose Events: Gratis-Tickets & No-Shows senken",
       readingMinutes: 13,
-      wordCount: 2416,
+      wordCount: 2445,
     },
     "2026-11-06-kuenstlersozialabgabe": {
       collection: "ratgeber",
@@ -717,8 +717,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: null,
       seoTitle: "Künstlersozialabgabe 2026/2027 für Veranstalter",
-      readingMinutes: 11,
-      wordCount: 2182,
+      readingMinutes: 12,
+      wordCount: 2202,
     },
     "2026-11-06-lesung-comedy-kleinkunst": {
       collection: "ratgeber",
@@ -737,7 +737,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Lesung & Comedy veranstalten: Kosten, KSA, Tickets",
       readingMinutes: 11,
-      wordCount: 2146,
+      wordCount: 2172,
     },
     "2026-11-06-party-veranstalten": {
       collection: "ratgeber",
@@ -755,8 +755,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: null,
       seoTitle: "Party veranstalten 2026: Was du beachten musst",
-      readingMinutes: 12,
-      wordCount: 2397,
+      readingMinutes: 13,
+      wordCount: 2418,
     },
     "2026-11-06-personalisierte-tickets": {
       collection: "ratgeber",
@@ -775,7 +775,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Personalisierte Tickets: Wann sinnvoll, was gilt",
       readingMinutes: 11,
-      wordCount: 2045,
+      wordCount: 2071,
     },
     "2026-11-06-schulveranstaltung-tickets": {
       collection: "ratgeber",
@@ -794,7 +794,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Schulveranstaltung Tickets: Theater, Konzert, Fest",
       readingMinutes: 14,
-      wordCount: 2628,
+      wordCount: 2647,
     },
     "2026-11-06-sicherheitskonzept-veranstaltung": {
       collection: "ratgeber",
@@ -813,7 +813,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Sicherheitskonzept Veranstaltung: Pflicht & Inhalte",
       readingMinutes: 12,
-      wordCount: 2330,
+      wordCount: 2360,
     },
     "2026-11-06-silvesterparty-2026": {
       collection: "ratgeber",
@@ -832,7 +832,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Silvesterparty 2026 veranstalten: Last-Minute-Plan",
       readingMinutes: 13,
-      wordCount: 2539,
+      wordCount: 2557,
     },
     "2026-11-06-sponsoren-finden": {
       collection: "ratgeber",
@@ -851,7 +851,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Sponsoren finden: Pakete, Mappe, Vorlagen",
       readingMinutes: 15,
-      wordCount: 2927,
+      wordCount: 2957,
     },
     "2026-11-06-sportveranstaltung-turnier": {
       collection: "ratgeber",
@@ -870,7 +870,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Sportturnier organisieren: Startgeld & Tickets",
       readingMinutes: 12,
-      wordCount: 2378,
+      wordCount: 2395,
     },
     "2026-11-06-ticketarten": {
       collection: "ratgeber",
@@ -889,7 +889,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Ticketarten erklärt: VIP, ermäßigt, Gruppe & Co.",
       readingMinutes: 10,
-      wordCount: 1917,
+      wordCount: 1946,
     },
     "2026-11-06-ticketbetrug-verhindern": {
       collection: "ratgeber",
@@ -908,7 +908,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Ticketbetrug verhindern: Fake-Tickets stoppen",
       readingMinutes: 12,
-      wordCount: 2266,
+      wordCount: 2286,
     },
     "2026-11-06-ticketgebuehren": {
       collection: "ratgeber",
@@ -927,7 +927,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Ticketgebühren 2026: Kosten, Endpreis, wer zahlt",
       readingMinutes: 11,
-      wordCount: 2072,
+      wordCount: 2101,
     },
     "2026-11-06-ticketing-anbieter-vergleich": {
       collection: "ratgeber",
@@ -946,7 +946,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "ticketing-fees-compared",
       seoTitle: "Ticketing-Anbieter Vergleich 2026/27: Gebühren",
       readingMinutes: 12,
-      wordCount: 2216,
+      wordCount: 2232,
     },
     "2026-11-06-ticketing-glossar": {
       collection: "ratgeber",
@@ -965,7 +965,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Ticketing-Glossar: 70 Begriffe einfach erklärt",
       readingMinutes: 15,
-      wordCount: 2840,
+      wordCount: 2866,
     },
     "2026-11-06-ticketing-verein": {
       collection: "ratgeber",
@@ -983,8 +983,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: null,
       seoTitle: "Ticketing für Vereine: Preise, Steuern, Helfer",
-      readingMinutes: 13,
-      wordCount: 2599,
+      readingMinutes: 14,
+      wordCount: 2621,
     },
     "2026-11-06-ticketpreis-kalkulieren": {
       collection: "ratgeber",
@@ -1003,7 +1003,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "price-event-tickets",
       seoTitle: "Ticketpreis kalkulieren: Break-even mit Beispiel",
       readingMinutes: 12,
-      wordCount: 2239,
+      wordCount: 2268,
     },
     "2026-11-06-tickets-online-verkaufen": {
       collection: "ratgeber",
@@ -1021,7 +1021,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "sell-tickets-online",
       seoTitle: "Tickets online verkaufen 2026: Leitfaden",
       readingMinutes: 12,
-      wordCount: 2282,
+      wordCount: 2300,
     },
     "2026-11-06-tickets-weiterverkaufen": {
       collection: "ratgeber",
@@ -1040,7 +1040,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "ticket-resale",
       seoTitle: "Tickets weiterverkaufen 2026: Was ist erlaubt?",
       readingMinutes: 12,
-      wordCount: 2365,
+      wordCount: 2397,
     },
     "2026-11-06-ticketshop-erstellen": {
       collection: "ratgeber",
@@ -1057,7 +1057,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Ticketshop erstellen: 10 Schritte zum Vorverkauf",
       readingMinutes: 10,
-      wordCount: 1963,
+      wordCount: 1984,
     },
     "2026-11-06-umsatzsteuer-eintrittskarten": {
       collection: "ratgeber",
@@ -1075,7 +1075,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "vat-event-tickets",
       seoTitle: "Umsatzsteuer Eintrittskarten 2026: 7 % oder 19 %?",
       readingMinutes: 12,
-      wordCount: 2226,
+      wordCount: 2251,
     },
     "2026-11-06-veranstalterhaftpflicht": {
       collection: "ratgeber",
@@ -1093,7 +1093,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Veranstalterhaftpflicht 2026: Kosten und Deckung",
       readingMinutes: 14,
-      wordCount: 2736,
+      wordCount: 2757,
     },
     "2026-11-06-veranstaltung-absagen": {
       collection: "ratgeber",
@@ -1111,8 +1111,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: "cancellation-refunds",
       seoTitle: "Veranstaltung absagen: Erstattung & Vorlage",
-      readingMinutes: 12,
-      wordCount: 2382,
+      readingMinutes: 13,
+      wordCount: 2409,
     },
     "2026-11-06-veranstaltung-anmelden-genehmigung": {
       collection: "ratgeber",
@@ -1131,7 +1131,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Veranstaltung anmelden 2026: Ordnungsamt & Co.",
       readingMinutes: 14,
-      wordCount: 2640,
+      wordCount: 2665,
     },
     "2026-11-06-veranstaltung-planen-checkliste": {
       collection: "ratgeber",
@@ -1150,7 +1150,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "event-planning-checklist",
       seoTitle: "Veranstaltung planen: Checkliste 2026 mit Zeitplan",
       readingMinutes: 10,
-      wordCount: 1879,
+      wordCount: 1911,
     },
     "2026-11-06-vereinsfest-organisieren": {
       collection: "ratgeber",
@@ -1169,7 +1169,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Vereinsfest organisieren: Checkliste 2027",
       readingMinutes: 13,
-      wordCount: 2513,
+      wordCount: 2532,
     },
     "2026-11-06-vorverkauf-steigern": {
       collection: "ratgeber",
@@ -1188,7 +1188,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Vorverkauf steigern: 25 Hebel für mehr Tickets",
       readingMinutes: 11,
-      wordCount: 2084,
+      wordCount: 2118,
     },
     "2026-11-06-weihnachtsfeier-adventsveranstaltung": {
       collection: "ratgeber",
@@ -1207,7 +1207,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Weihnachtsfeier & Adventskonzert 2026 planen",
       readingMinutes: 11,
-      wordCount: 2155,
+      wordCount: 2174,
     },
     "2026-11-06-widerrufsrecht-tickets": {
       collection: "ratgeber",
@@ -1225,7 +1225,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: null,
       seoTitle: "Widerrufsrecht bei Tickets 2026: Rückgabe & AGB",
       readingMinutes: 11,
-      wordCount: 2131,
+      wordCount: 2153,
     },
     "2026-11-06-zahlungsarten-ticketshop": {
       collection: "ratgeber",
@@ -1244,7 +1244,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "payment-methods-europe",
       seoTitle: "Zahlungsarten im Ticketshop 2026: Karte, Klarna, Wero",
       readingMinutes: 12,
-      wordCount: 2276,
+      wordCount: 2292,
     },
   },
   guides: {
@@ -1263,8 +1263,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: "box-office",
       seoTitle: "Box Office and Door Sales: Cashless Setup (2026)",
-      readingMinutes: 12,
-      wordCount: 2380,
+      readingMinutes: 13,
+      wordCount: 2421,
     },
     "2026-11-06-charity-event-tickets": {
       collection: "guides",
@@ -1283,7 +1283,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "charity-events",
       seoTitle: "Charity Event Tickets: Fundraising Events Guide",
       readingMinutes: 12,
-      wordCount: 2302,
+      wordCount: 2327,
     },
     "2026-11-06-dynamic-pricing-tickets-eu": {
       collection: "guides",
@@ -1302,7 +1302,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "dynamic-pricing",
       seoTitle: "Dynamic Ticket Pricing in the EU and UK (2026/27)",
       readingMinutes: 13,
-      wordCount: 2498,
+      wordCount: 2535,
     },
     "2026-11-06-e-invoicing-event-organisers": {
       collection: "guides",
@@ -1320,8 +1320,8 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       ],
       translationKey: "e-invoicing",
       seoTitle: "E-invoicing in Europe 2026–2030 for Organisers",
-      readingMinutes: 11,
-      wordCount: 2193,
+      readingMinutes: 12,
+      wordCount: 2213,
     },
     "2026-11-06-early-bird-tickets": {
       collection: "guides",
@@ -1340,7 +1340,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "early-bird-tickets",
       seoTitle: "Early Bird Tickets: Meaning, Pricing and Tiers",
       readingMinutes: 11,
-      wordCount: 2112,
+      wordCount: 2135,
     },
     "2026-11-06-european-accessibility-act-ticketing": {
       collection: "guides",
@@ -1359,7 +1359,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "accessibility-act",
       seoTitle: "European Accessibility Act for Ticket Shops",
       readingMinutes: 13,
-      wordCount: 2499,
+      wordCount: 2536,
     },
     "2026-11-06-event-budget-template": {
       collection: "guides",
@@ -1378,7 +1378,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "event-budget",
       seoTitle: "Event Budget Template: Cost Lines and Buffers",
       readingMinutes: 13,
-      wordCount: 2450,
+      wordCount: 2483,
     },
     "2026-11-06-event-cancellation-refunds-eu": {
       collection: "guides",
@@ -1397,7 +1397,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "cancellation-refunds",
       seoTitle: "Event Cancelled? Ticket Refund Rights in the EU",
       readingMinutes: 13,
-      wordCount: 2483,
+      wordCount: 2517,
     },
     "2026-11-06-event-entry-queue-management": {
       collection: "guides",
@@ -1415,7 +1415,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "entry-queues",
       seoTitle: "Event Entry Management: Calculate Queues",
       readingMinutes: 13,
-      wordCount: 2449,
+      wordCount: 2478,
     },
     "2026-11-06-event-planning-checklist": {
       collection: "guides",
@@ -1433,7 +1433,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "event-planning-checklist",
       seoTitle: "Event Planning Checklist 2026/27 with Timeline",
       readingMinutes: 12,
-      wordCount: 2217,
+      wordCount: 2255,
     },
     "2026-11-06-event-seo-google-ai": {
       collection: "guides",
@@ -1452,7 +1452,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "event-seo-ai",
       seoTitle: "Event SEO: Google Events and AI Assistants (2026)",
       readingMinutes: 13,
-      wordCount: 2497,
+      wordCount: 2535,
     },
     "2026-11-06-eventbrite-alternatives-europe": {
       collection: "guides",
@@ -1471,7 +1471,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "eventbrite-alternatives",
       seoTitle: "Eventbrite Alternatives in Europe 2026",
       readingMinutes: 10,
-      wordCount: 1850,
+      wordCount: 1872,
     },
     "2026-11-06-fake-tickets": {
       collection: "guides",
@@ -1490,7 +1490,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "fake-tickets",
       seoTitle: "Fake Tickets: How to Spot Them and Buy Safely",
       readingMinutes: 12,
-      wordCount: 2328,
+      wordCount: 2351,
     },
     "2026-11-06-gdpr-for-event-organisers": {
       collection: "guides",
@@ -1509,7 +1509,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "gdpr",
       seoTitle: "GDPR for Event Organisers: Data, Photos, Email",
       readingMinutes: 13,
-      wordCount: 2498,
+      wordCount: 2524,
     },
     "2026-11-06-guest-list-management": {
       collection: "guides",
@@ -1527,7 +1527,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "guest-list",
       seoTitle: "Guest List Template and Management Guide",
       readingMinutes: 11,
-      wordCount: 2086,
+      wordCount: 2108,
     },
     "2026-11-06-how-to-organise-a-festival": {
       collection: "guides",
@@ -1546,7 +1546,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "organise-festival",
       seoTitle: "How to Organise a Festival in 2027",
       readingMinutes: 13,
-      wordCount: 2499,
+      wordCount: 2535,
     },
     "2026-11-06-how-to-price-event-tickets": {
       collection: "guides",
@@ -1565,7 +1565,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "price-event-tickets",
       seoTitle: "How to Price Event Tickets: Break-even and Tiers",
       readingMinutes: 12,
-      wordCount: 2279,
+      wordCount: 2316,
     },
     "2026-11-06-how-to-run-a-club-night": {
       collection: "guides",
@@ -1584,7 +1584,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "club-night",
       seoTitle: "How to Run a Club Night: Promoter's Guide",
       readingMinutes: 13,
-      wordCount: 2492,
+      wordCount: 2528,
     },
     "2026-11-06-presale-codes": {
       collection: "guides",
@@ -1603,7 +1603,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "presale-codes",
       seoTitle: "Presale Codes: Run an Exclusive Ticket Presale",
       readingMinutes: 12,
-      wordCount: 2327,
+      wordCount: 2360,
     },
     "2026-11-06-qr-code-ticket-check-in": {
       collection: "guides",
@@ -1621,7 +1621,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "qr-check-in",
       seoTitle: "QR Code Ticket Check-in Without an App (2026)",
       readingMinutes: 13,
-      wordCount: 2497,
+      wordCount: 2537,
     },
     "2026-11-06-sell-tickets-online": {
       collection: "guides",
@@ -1640,7 +1640,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "sell-tickets-online",
       seoTitle: "How to Sell Tickets Online in Europe (2026)",
       readingMinutes: 12,
-      wordCount: 2208,
+      wordCount: 2231,
     },
     "2026-11-06-ticket-payment-methods-europe": {
       collection: "guides",
@@ -1660,7 +1660,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "payment-methods-europe",
       seoTitle: "Ticket Payment Methods in Europe 2026/27",
       readingMinutes: 12,
-      wordCount: 2359,
+      wordCount: 2381,
     },
     "2026-11-06-ticket-resale-rules-europe": {
       collection: "guides",
@@ -1679,7 +1679,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "ticket-resale",
       seoTitle: "Ticket Resale Rules in Europe 2026",
       readingMinutes: 13,
-      wordCount: 2496,
+      wordCount: 2530,
     },
     "2026-11-06-ticketing-platforms-fees-compared": {
       collection: "guides",
@@ -1698,7 +1698,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "ticketing-fees-compared",
       seoTitle: "Ticketing Platforms in Europe Compared: Fees 2026/27",
       readingMinutes: 10,
-      wordCount: 1882,
+      wordCount: 1901,
     },
     "2026-11-06-vat-on-event-tickets-europe": {
       collection: "guides",
@@ -1717,7 +1717,7 @@ export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record
       translationKey: "vat-event-tickets",
       seoTitle: "VAT on Event Tickets in Europe: Rates 2026",
       readingMinutes: 11,
-      wordCount: 2075,
+      wordCount: 2107,
     },
   },
 }

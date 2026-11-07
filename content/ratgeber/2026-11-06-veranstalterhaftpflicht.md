@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "veranstalterhaftpflicht"
 author: "Eventoren Redaktion"
 image: "ratgeber-veranstalterhaftpflicht"
-imageAlt: "Eine Organisatorin prüft am Morgen nach einem Fest mit dem Hausmeister den Parkettboden einer gemieteten Gemeindehalle"
+imageAlt: "Paare tanzen unbeschwert auf dem Dorfplatz beim Sommerfest zur Livemusik einer Blaskapelle"
 category: "recht-steuern"
 keywords:
   [
@@ -39,6 +39,8 @@ Dieser Artikel ersetzt keine Rechts- oder Steuerberatung. Versicherungsbedingung
 Wer eine Veranstaltung organisiert, übernimmt Verkehrssicherungspflichten: Fluchtwege freihalten, Kabel sichern, Treppen beleuchten, Glasbruch beseitigen, Bühnen und Zelte standsicher aufbauen. Verletzt du diese Pflichten schuldhaft und kommt jemand zu Schaden, haftest du nach [§ 823 BGB](https://www.gesetze-im-internet.de/bgb/__823.html). Eine Obergrenze gibt es nicht. Bei Personenschäden kommen Behandlungskosten, Verdienstausfall, Schmerzensgeld und Regressforderungen von Krankenkassen zusammen. Ein einziger schwerer Unfall kann so ein Vereinsvermögen oder ein Privatvermögen übersteigen.
 
 Wichtig ist der Unterschied zwischen **Haftung** und **Pech**: Die Versicherung zahlt nur, wenn du tatsächlich haftest. Stolpert ein Gast ohne dein Zutun über die eigenen Füße, wehrt der Versicherer seine Forderung ab. Auch das ist ein Wert, denn Anwalts- und Gerichtskosten trägt dann die Versicherung.
+
+![Kinder toben auf der Hüpfburg beim Stadtfest, Eltern schauen entspannt zu](ratgeber-veranstalterhaftpflicht-szene-1)
 
 ## Was deckt die Veranstalterhaftpflicht ab und was nicht?
 
@@ -107,6 +109,8 @@ Nicht verwechseln: Eine Vereinshaftpflicht schützt auch die Organmitglieder. Se
 ### Abiball und Schulveranstaltungen
 
 Beim Abiball ist die Schule in der Regel nicht Veranstalterin. Das Abikomitee ist meist eine GbR, deren Mitglieder persönlich als Gesamtschuldner haften. Deshalb schließt das Komitee oder der Förderverein eine Einzelpolice ab. Achte darauf, dass der Tarif Abibälle ausdrücklich zulässt: Ein von uns geprüfter Online-Tarif schließt „ABI-Feiern“ aus, Abibälle sind aber versicherbar. Was beim Abiball sonst rechtlich gilt, steht im Ratgeber [Jugendschutz auf Partys](/ratgeber/jugendschutz-party).
+
+![Eltern und Abiturienten tanzen gemeinsam zu einer Liveband beim Abiball](ratgeber-veranstalterhaftpflicht-szene-2)
 
 ## Was kostet eine Veranstalterhaftpflicht 2026?
 

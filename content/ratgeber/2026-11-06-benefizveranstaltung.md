@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "benefizveranstaltung"
 author: "Eventoren Redaktion"
 image: "ratgeber-benefizveranstaltung"
-imageAlt: "Ehrenamtliche zählen nach einem Benefizkonzert in einem Gemeindesaal an einem langen Tisch die Einnahmen, im Hintergrund wird die Bühne abgebaut"
+imageAlt: "Begeistertes Publikum applaudiert in einem Konzertsaal einer Benefizband auf der Bühne"
 category: "vereine-schulen"
 keywords:
   [
@@ -48,6 +48,8 @@ Dieser Artikel ersetzt keine Rechts- oder Steuerberatung.
 | Lesung, Vortrag, Kleinkunst       | Tickets, Spenden                                | gering bis mittel                  | kleiner Saal, hohe Spendenbereitschaft                                                  |
 
 Welches Format passt, hängt vor allem von deinem Netzwerk ab: Wer Musiker kennt, macht ein Konzert. Wer Unternehmen im Rücken hat, plant eine Gala. Für Schulen und Sportvereine ist der Sponsorenlauf der Klassiker, weil er fast keine Fixkosten hat.
+
+![Familien und Freunde genießen abends ein Benefizkonzert unter freiem Himmel](ratgeber-benefizveranstaltung-szene-1)
 
 ## Wer veranstaltet: Verein, Kooperation oder Privatperson?
 
@@ -140,6 +142,8 @@ Die Steuersätze im Detail und Beispielrechnungen für Vereine stehen im Ratgebe
 - [ ] Die Veranstaltung war vorher als Benefizveranstaltung angemeldet, und die Nachweise kommen fristgerecht (U-V: innerhalb von 6 Wochen; U-K: innerhalb der Meldefrist von 21 Arbeitstagen).
 
 Zwei Konsequenzen: Ein Benefizkonzert für die neue Schulbühne oder den Vereinsbus erfüllt den Begriff „Hilfe für in Not geratene Menschen“ nicht. Und schon eine kleine Gage für die Band kostet den Nachlass. Im Tarif U-V zählt bei Benefizveranstaltungen als Eintrittsgeld nur der Nettobetrag, der nicht als Spende weitergegeben wird. Sondernachlässe werden nicht kumuliert: Den Benefiznachlass gibt es nicht zusätzlich zum Sondernachlass von 15 % für soziale oder kulturelle Zwecke. Den Gesamtvertragsnachlass von 20 % für Mitglieder bestimmter Verbände regeln die Gesamtverträge gesondert. Tarife, Anmeldung und Fristen findest du im Ratgeber [GEMA für Veranstaltungen](/ratgeber/gema-veranstaltung).
+
+![Chor und Band erhalten tosenden Applaus beim Finale eines Benefizkonzerts](ratgeber-benefizveranstaltung-szene-2)
 
 ## Wie viel kommt beim guten Zweck an? Beispielrechnung mit Ticketgebühren
 

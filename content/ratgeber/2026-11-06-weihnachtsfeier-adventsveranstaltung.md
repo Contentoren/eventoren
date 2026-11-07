@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "weihnachtsfeier-adventsveranstaltung"
 author: "Eventoren Redaktion"
 image: "ratgeber-weihnachtsfeier-adventsveranstaltung"
-imageAlt: "Chormitglieder in dunklen Mänteln stellen vor einem Adventskonzert in einer kerzenbeleuchteten Kirche Notenständer auf, während eine Helferin Programmblätter auf die Bänke legt"
+imageAlt: "Adventskonzert in einer Kirche: Chor singt vor Kerzenlicht, Publikum applaudiert"
 category: "eventformate"
 keywords:
   [
@@ -48,6 +48,8 @@ Für Weihnachtsveranstaltungen im Dezember 2026 gibt es zwei ganz unterschiedlic
 Die Regeln für stille Tage stehen im Feiertagsgesetz deines Landes. In Sachsen sind zum Beispiel öffentliche Tanzveranstaltungen am Totensonntag von 3 bis 24 Uhr verboten. Frag beim Ordnungsamt nach, wenn du rund um den 22.11. planst.
 
 Die Freitage im Dezember sind bei Locations und Caterern oft schon Monate vorher vergeben. Planst du jetzt im November, sind Montag bis Donnerstag, Sonntagnachmittage oder der Januar („Neujahrsempfang“ statt Weihnachtsfeier) die realistischen Ausweichtermine.
+
+![Festlich gekleidete Gäste stoßen auf einer Weihnachtsfeier mit Gläsern an](ratgeber-weihnachtsfeier-adventsveranstaltung-szene-1)
 
 ## Wie planst du ein Adventskonzert mit Tickets?
 
@@ -112,6 +114,8 @@ Ein Vereins- oder Dorfweihnachtsmarkt ist fast immer ein Mix aus Ständen, Bühn
 - **Tickets:** Die meisten Märkte sind frei. Tickets lohnen sich für Sonderformate: Krippenspiel, Kinderprogramm mit Nikolaus, Konzert im Zelt oder Märkte in Burgen und Höfen mit Eintritt.
 
 Wie Genehmigungen und Helferplanung beim Vereinsfest laufen, steht ausführlich im Ratgeber [Vereinsfest organisieren](/ratgeber/vereinsfest-organisieren). Die Behördenseite erklärt [Veranstaltung anmelden](/ratgeber/veranstaltung-anmelden-genehmigung).
+
+![Weihnachtsmarkt am Abend: Besucher mit Glühwein zwischen beleuchteten Buden](ratgeber-weihnachtsfeier-adventsveranstaltung-szene-2)
 
 ## Was gilt bei der Firmen-Weihnachtsfeier?
 

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "eventbudget-planen"
 author: "Eventoren Redaktion"
 image: "ratgeber-eventbudget-planen"
-imageAlt: "Kassenwartin eines Vereins rechnet abends am Küchentisch mit Belegen, Taschenrechner und Laptop das Budget für ein Fest durch"
+imageAlt: "Helfer schmücken eine leere Veranstaltungshalle mit Lichterketten und Stühlen im Morgenlicht"
 category: "planung-marketing"
 keywords:
   [
@@ -42,6 +42,8 @@ Zwei Begriffe musst du sauber trennen:
 - **Variable Kosten** steigen mit jedem verkauften Ticket oder Gast: Ticketgebühr, Wareneinsatz an der Bar, Bändchen, inkludierte Getränke, bei Konzerten die GEMA nach Tarif U-K (Prozent vom Netto-Kartenumsatz).
 
 Wie du daraus den Ticketpreis ableitest, erklärt der Ratgeber [Ticketpreis kalkulieren](/ratgeber/ticketpreis-kalkulieren) mit Break-even-Formel und Preisstufen. Dieser Artikel geht einen Schritt weiter: vom Ticketpreis zum vollständigen Budget mit Einnahmen aus mehreren Quellen, Puffer, Zahlungsterminen und Nachkalkulation.
+
+![Volle Tanzfläche einer Vereinsparty am Höhepunkt: tanzende Gäste im bunten Licht, Konfetti in der Luft](ratgeber-eventbudget-planen-szene-1)
 
 ## Budgetvorlage: Welche Kostenpositionen brauchst du?
 
@@ -172,6 +174,8 @@ Ein Budget kann im Plus enden und trotzdem unterwegs ins Minus rutschen. Der Gru
 | 4–8 Wochen danach | GEMA-Rechnung                                                    | −1.663,69 €               | **+3.089,91 €**        |
 
 Der Verein muss also bis zu **3.580 €** aus eigenen Mitteln vorstrecken, und das schon am Eventtag, nicht erst im schlimmsten Szenario. Kommen weniger Gäste, steigt der Tiefpunkt nach dem Event, weil die Rechnungen gleich bleiben. So entschärfst du den Cashflow:
+
+![Volle Bar in der Eventnacht: Barkeeper servieren lachenden Gästen Getränke im warmen Licht](ratgeber-eventbudget-planen-szene-2)
 
 - **Zahlungsziele verhandeln:** Restzahlungen für Halle, Technik und Security 14 Tage nach dem Event statt am Abend.
 - **Sponsoren früh kassieren:** Zahlung bei Vertragsschluss oder spätestens vier Wochen vorher vereinbaren.

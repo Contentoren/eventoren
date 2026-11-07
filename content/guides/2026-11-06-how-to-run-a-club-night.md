@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "how-to-run-a-club-night"
 author: "Eventoren Editorial Team"
 image: "ratgeber-clubnacht-veranstalten"
-imageAlt: "A promoter and a club owner go through a running order at the bar of an empty club in the early evening while a DJ sets up in the booth behind them"
+imageAlt: "Packed dance floor on a club night: dancing guests with hands in the air in front of the DJ booth in teal and amber light"
 category: "event-types"
 keywords:
   [
@@ -55,6 +55,8 @@ Agree in writing who covers what:
 ### Music licensing
 
 Public club nights need a music licence from the national collecting society. Examples: GEMA (Germany), AKM (Austria), SACEM (France), Buma/Stemra and Sena (Netherlands), Unisono (Belgium), IMRO (Ireland), PPL PRS (UK), SIAE (Italy) and SGAE (Spain). Many clubs hold a licence that also covers external promoters; others expect you to register the night yourself before it happens. Ask, and get the answer in writing. In Germany, a DJ night with an entry fee usually falls under tariff M-V, calculated from room size and the highest entry price.
+
+![Sold-out club night seen from the DJ booth: cheering crowd with raised arms in colourful spotlight beams](ratgeber-clubnacht-veranstalten-szene-1)
 
 ## Which deals do clubs offer promoters?
 
@@ -162,6 +164,8 @@ Club crowds decide late, but steering the presale still pays off:
 | **Total**   | **350**    |       | never above capacity        |
 
 Aim for presale plus bar to cover your costs; treat the door as upside. How a cashless door works is covered in [box office and door sales](/en/guides/box-office-door-sales), and tier design in [early bird tickets](/en/guides/early-bird-tickets).
+
+![Fast entry on a club night: guests showing phone tickets for scanning before streaming into the brightly lit club](ratgeber-clubnacht-veranstalten-szene-2)
 
 ## How do you keep the guest list under control?
 

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "jugendschutz-party"
 author: "Eventoren Redaktion"
 image: "ratgeber-jugendschutz-party"
-imageAlt: "Ein Einlasshelfer legt einer Jugendlichen am Eingang einer Schulparty ein farbiges Stoffbändchen um das Handgelenk, daneben liegen Bändchen in weiteren Farben bereit"
+imageAlt: "Lachende Jugendliche tanzen auf einer Sommerparty im Freien unter Lichterketten, bunte Scheinwerfer tauchen den Garten in Farbe"
 category: "recht-steuern"
 keywords:
   [
@@ -51,6 +51,8 @@ Für Partys sind vor allem drei Paragrafen wichtig: § 5 (Tanzveranstaltungen), 
 ### Ist meine Party eine „öffentliche Tanzveranstaltung“?
 
 Das Gesetz definiert den Begriff nicht. In der Praxis gilt eine Party als öffentlich, wenn grundsätzlich jeder Zutritt bekommen kann, etwa durch freien Ticketverkauf oder Abendkasse. Eine rein private Feier mit persönlich eingeladenen Gästen fällt nicht darunter. Sobald du Tickets an die Öffentlichkeit verkaufst und Musik zum Tanzen läuft, solltest du von einer öffentlichen Tanzveranstaltung ausgehen.
+
+![Jugendliche tanzen begeistert auf einer Schulparty in der bunt beleuchteten Turnhalle, der DJ legt auf der Bühne auf](ratgeber-jugendschutz-party-szene-1)
 
 ## Welche Altersgrenzen gelten auf Partys?
 
@@ -127,6 +129,8 @@ Farbige Einlassbändchen sind keine gesetzliche Pflicht, aber in der Praxis der 
 | Grün                     | ab 18                     | Keine Einschränkungen                                                |
 
 Hänge die Farbbedeutung hinter der Bar aus, damit auch Aushilfen sie kennen.
+
+![Tanzende Menge mit erhobenen Armen, an den Handgelenken leuchten bunte Einlassbändchen im Konfettiregen](ratgeber-jugendschutz-party-szene-2)
 
 ### Ablauf am Einlass in fünf Schritten
 

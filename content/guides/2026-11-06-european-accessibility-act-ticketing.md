@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "european-accessibility-act-ticketing"
 author: "Eventoren Editorial Team"
 image: "ratgeber-barrierefreiheit-bfsg"
-imageAlt: "A volunteer holds open the glass door of a step-free side entrance at a brick concert hall as a woman in a wheelchair rolls in with a friend"
+imageAlt: "A wheelchair user dances amid a cheerful daytime festival crowd, surrounded by laughing, clapping concertgoers"
 category: "law-tax"
 keywords:
   [
@@ -50,6 +50,8 @@ The EAA covers products such as computers, smartphones and ticketing machines, a
 | Exemption        | Microenterprises providing services (Art. 4(5))                                                   |
 | Standard         | Harmonised standards give a presumption of conformity (Art. 15); in practice EN 301 549           |
 | Transition       | Service contracts agreed before 28 June 2025 may run until they expire, max. five years (Art. 32) |
+
+![A mixed concert audience with and without disabilities enjoys an indoor concert together in warm stage light](ratgeber-barrierefreiheit-bfsg-szene-1)
 
 ## Does the EAA apply to your ticket shop?
 
@@ -170,6 +172,8 @@ Write into every event description:
 - a named contact for access questions, with email
 
 For door planning, see [event entry and queue management](/en/guides/event-entry-queue-management) and the [event planning checklist](/en/guides/event-planning-checklist).
+
+![A sign language interpreter at the side of a concert stage, in front of an enthusiastic audience with raised hands](ratgeber-barrierefreiheit-bfsg-szene-2)
 
 ## Checklist: accessible ticket shop and event
 

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "presale-codes"
 author: "Eventoren Editorial Team"
 image: "ratgeber-freischaltcodes-presale"
-imageAlt: "Two club members sit at a table in their clubhouse in the evening, addressing envelopes for the members' presale"
+imageAlt: "Excited fans stream through a glowing tunnel into the club at doors, the DJ already playing as laser lights dance over the crowd"
 category: "selling-tickets"
 keywords:
   [
@@ -52,6 +52,8 @@ Platforms name it differently, but the pattern is always the same:
 
 An unlock code can still lead to a lower price: "Members – €12" next to "Standard – €15" is its own ticket type, not a discount on the standard one.
 
+![Loyal fans dance arm in arm in the front rows before the stage, golden confetti falling onto the cheering crowd](ratgeber-freischaltcodes-presale-szene-1)
+
 ## Which presale formats work for which group?
 
 | Group                          | Goal                                              | Code form                             | Timing                                        | Tip                                                          |
@@ -66,6 +68,8 @@ An unlock code can still lead to a lower price: "Members – €12" next to "Sta
 | Previous attendees             | keep your regular crowd                           | one code per buyer                    | 3–5 days before                               | check you have a lawful basis to email them (GDPR, ePrivacy) |
 
 A presale is worth it when capacity is tight and one group matters most. For an event that never sells out, a presale can feel staged. Combining a presale with an early bird price is covered in [early bird tickets](/en/guides/early-bird-tickets).
+
+![A group of friends dances exuberantly at a summer festival in bright sunshine](ratgeber-freischaltcodes-presale-szene-2)
 
 ## One shared code or one code per person?
 

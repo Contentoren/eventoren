@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "veranstaltung-anmelden-genehmigung"
 author: "Eventoren Redaktion"
 image: "ratgeber-veranstaltung-anmelden-genehmigung"
-imageAlt: "Zwei Vereinsmitglieder besprechen an einem Behördenschalter einen ausgedruckten Lageplan für ihr Dorffest"
+imageAlt: "Belebtes Straßenfest mit Ständen, Musik und flanierenden Familien am Sommerabend"
 category: "recht-steuern"
 keywords:
   [
@@ -45,6 +45,8 @@ Wie die allgemeine Anmeldung heißt und wann sie Pflicht ist, regelt jedes Land 
 - **Andere Länder** kennen keine so klare allgemeine Anzeigepflicht. Dort ergibt sich die Pflicht zur Anmeldung aus den einzelnen Bausteinen: Ausschank, Sondernutzung, Sperrzeit, Lärm, Bauordnung. In der Praxis wollen fast alle Städte eine öffentliche Veranstaltung trotzdem vorab sehen, oft über ein Formular „Veranstaltungsanzeige“.
 
 Auch ohne Anmeldepflicht kann die Behörde Auflagen machen. Lärm-, Jugend- und Brandschutz gelten immer.
+
+![Tanzende Menge vor der Bühne auf einem gut besuchten Stadtfest am Rathausplatz](ratgeber-veranstaltung-anmelden-genehmigung-szene-1)
 
 ## Welche Genehmigung brauche ich wofür?
 
@@ -150,6 +152,8 @@ Der Sportverein feiert sein Sommerfest auf dem Dorfplatz: Bierzelt mit 10 × 15 
 ### Party in einer gemieteten Halle
 
 Ein Abikomitee feiert eine Party in der Stadthalle: 400 Gäste, DJ, Bar, Tickets zu 12 €, Ende um 3 Uhr.
+
+![Volle Stadthalle mit tanzenden Gästen und DJ auf der Bühne bei einer Partynacht](ratgeber-veranstaltung-anmelden-genehmigung-szene-2)
 
 - [ ] Mietvertrag prüfen: Hat die Halle eine Genehmigung als Versammlungsstätte? Ist ein GEMA-Vertrag der Halle für Dritte gültig?
 - [ ] Ausschank: Hat der Hallenbetreiber eine Konzession, die eure Bar abdeckt, oder braucht ihr eine eigene Gestattung bzw. Anzeige?

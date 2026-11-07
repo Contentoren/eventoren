@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "charity-event-tickets"
 author: "Eventoren Editorial Team"
 image: "ratgeber-benefizveranstaltung"
-imageAlt: "After a charity concert in a parish hall, two volunteers count the takings at a long table while helpers dismantle the stage behind them"
+imageAlt: "Enthusiastic audience applauding a band on stage at a charity concert in a warmly lit hall"
 category: "event-types"
 keywords:
   [
@@ -48,6 +48,8 @@ This guide is not legal or tax advice.
 | Bake sale, fair, school fête | Sales, pitch fees, donation box                      | Low                              | Often no ticket needed                                                    |
 
 Pick the format your network supports: musicians suggest a concert, business contacts suggest a gala, schools and sports clubs lean towards a sponsored run because it has almost no fixed costs.
+
+![Families and friends enjoying an open-air charity concert on a summer evening](ratgeber-benefizveranstaltung-szene-1)
 
 ## Is a charity ticket a donation?
 
@@ -170,6 +172,8 @@ Some societies offer discounts for charitable events, usually with strict condit
 - [ ] The event was registered as a benefit event beforehand, and proof is sent on time (six weeks for the U-V tariff).
 
 A concert for a new school stage doesn't count as helping people in need, and even a small fee for the band loses the discount. Plan the licence as a cost line from day one.
+
+![Choir and band receiving loud applause at the finale of a charity concert](ratgeber-benefizveranstaltung-szene-2)
 
 ## Checklist: organise a charity event
 

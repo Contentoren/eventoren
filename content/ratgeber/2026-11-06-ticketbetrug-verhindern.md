@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketbetrug-verhindern"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketbetrug-verhindern"
-imageAlt: "Eine Einlasshelferin hält am Eingang eines Clubs ihr Smartphone zum Scannen bereit, während ein Gast sein Handy-Ticket zeigt und weitere Gäste in der Schlange warten"
+imageAlt: "Lächelnde Gäste passieren zügig den Einlass mit Scannern vor einer Konzerthalle am Abend"
 category: "einlass-event-tag"
 keywords:
   [
@@ -41,6 +41,8 @@ Für dich als Veranstalter ist wichtig, zwei Seiten zu unterscheiden:
 - **Betrug im Verkauf:** Jemand verkauft Tickets, die er nicht hat (Fake-Shop, Kleinanzeige), oder holt sich nach dem Kauf das Geld zurück (Rückbuchung).
 
 Strafrechtlich ist beides in der Regel Betrug nach [§ 263 StGB](https://www.gesetze-im-internet.de/stgb/__263.html), der Versuch ist bereits strafbar. Wer ein Ticket fälscht, kann zusätzlich eine Urkundenfälschung begehen ([§ 267 StGB](https://www.gesetze-im-internet.de/stgb/__267.html)). Für deinen Abend nützt das wenig: Entscheidend ist, dass Fälschungen gar nicht erst durchkommen.
+
+![Sorglose Gäste tanzen auf einem ausverkauften Konzert in buntem Bühnenlicht](ratgeber-ticketbetrug-verhindern-szene-1)
 
 ## Welche Betrugsmaschen gibt es und wie stoppst du sie?
 
@@ -142,6 +144,8 @@ Ein Scanner, der nur „ungültig“ anzeigt, führt zu Diskussionen. Besser ist
 ### 3. Ein Klärungsplatz neben dem Einlass
 
 Diskussionen gehören nicht in die Scanlinie. Richte einen Platz ein, an dem eine erfahrene Person mit Zugriff auf die Bestellungen strittige Fälle klärt. Typische Fragen: Wo wurde das Ticket gekauft? Gibt es eine Bestellbestätigung mit E-Mail-Adresse? Hat der Käufer es von Privat übernommen? Wer über eine Kleinanzeige betrogen wurde, bekommt den Hinweis, Anzeige bei der Polizei zu erstatten. Wenn noch Plätze frei sind, kannst du ihm ein Ticket an der Abendkasse anbieten.
+
+![Freundliches Einlassteam scannt zügig die Tickets ankommender Gäste am Veranstaltungseingang](ratgeber-ticketbetrug-verhindern-szene-2)
 
 ## Beispielrechnung: Was kostet ein Abend mit Screenshot-Betrug?
 

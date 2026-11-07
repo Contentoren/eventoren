@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketgebuehren"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketgebuehren"
-imageAlt: "Ein Veranstalter rechnet am Abend in einem kleinen Club an der Bar mit Notizblock und Taschenrechner, neben ihm ein Stapel unbedruckter Eintrittskarten"
+imageAlt: "Hände reichen an einer Abendkasse eine Blanko-Ticketkarte über den Tresen, daneben ein Kartenlesegerät, Lichterketten im Hintergrund"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -42,6 +42,8 @@ Jede Ticketgebühr lässt sich in drei Bausteine zerlegen. Wer sie kennt, kann A
 | Umsatzsteuer auf die Gebühr                           | 19 % auf die Dienstleistung des Anbieters              | im Preis enthalten oder „zzgl. MwSt.“              | Eventoren, EVENTIM.Light, Weezevent: enthalten. Eventfrog, TicketPAY, Billetto, pretix: zzgl. USt |
 
 Dazu kommen bei manchen Anbietern Extras: Gebühren für Erstattungen (Eventfrog: 0,99 € + 3,9 % pro storniertem Ticket, zzgl. USt), für Saalpläne (TicketPAY: 0,12 € pro genutztem Platz, zzgl. USt), für Reichweite (EVENTIM.Light: + 10 % auf den Basispreis beim Verkauf über das EVENTIM-Netzwerk) oder für Gratistickets über einem Freikontingent (pretix: 0,50 € ab dem 501. Gratisticket im Jahr).
+
+![Verschwitzte tanzende Menge vor dem DJ-Pult in einem Club bei Nacht, bunte Lichteffekte über den feiernden Gästen](ratgeber-ticketgebuehren-szene-1)
 
 ### Welche Anbieter rechnen alles in einem Satz ab?
 
@@ -128,6 +130,8 @@ Eine Vereinbarung, nach der Käufer für SEPA-Lastschrift, SEPA-Überweisung ode
 ### Rabatte und Early Bird
 
 Wer eine Preisermäßigung bewirbt („Early Bird 20 % günstiger“), muss nach der Preisangaben-Richtlinie (Art. 6a, eingefügt durch die Omnibus-Richtlinie) den niedrigsten Preis der letzten 30 Tage als Bezugspunkt nennen. Mehr dazu im Ratgeber zu [Early-Bird-Tickets](/ratgeber/early-bird-tickets).
+
+![Fröhliche Gruppe tanzt bei einem Open-Air-Konzert im goldenen Abendlicht vor der Bühne](ratgeber-ticketgebuehren-szene-2)
 
 ## Welche Umsatzsteuer gilt auf Ticketgebühren?
 

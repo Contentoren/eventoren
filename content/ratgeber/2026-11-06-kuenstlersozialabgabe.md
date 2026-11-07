@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "kuenstlersozialabgabe"
 author: "Eventoren Redaktion"
 image: "ratgeber-kuenstlersozialabgabe"
-imageAlt: "Eine Vereinskassiererin sortiert nach einem Konzert im Vereinsheim Honorarbelege, im Hintergrund packt eine Band ihre Instrumente ein"
+imageAlt: "Band spielt auf kleiner Bühne vor tanzendem Publikum bei einem Sommerfest"
 category: "recht-steuern"
 keywords:
   [
@@ -43,6 +43,8 @@ Drei Punkte sorgen regelmäßig für Überraschungen:
 3. **Die Abgabe kommt zusätzlich zur Gage.** Wer die Abgabe gegenüber der KSK schuldet, ergibt sich laut KSK allein aus dem Gesetz und lässt sich nicht per Vertrag auf den Künstler abwälzen.
 
 Die KSA ist nicht dasselbe wie die GEMA. Die GEMA vergütet Urheber für die Musik, die gespielt wird; die KSA hängt am Honorar für die künstlerische Leistung. Viele Veranstaltungen zahlen beides. Zahlungen an die GEMA zählen ausdrücklich nicht zur KSA-Bemessungsgrundlage. Mehr zur GEMA steht im Ratgeber [GEMA für Veranstaltungen](/ratgeber/gema-veranstaltung).
+
+![Folkduo spielt auf einem Dorfplatz vor applaudierenden Zuhörern im Abendlicht](ratgeber-kuenstlersozialabgabe-szene-1)
 
 ## Wie hoch ist die Künstlersozialabgabe 2025, 2026 und 2027?
 
@@ -126,6 +128,8 @@ Eine GmbH lädt Kunden und Geschäftspartner zum Sommerfest ein. Sie zahlt einer
 - KSA 2026: 2.400 € × 4,9 % = **117,60 €**, gemeldet bis 31.03.2027.
 
 Wäre die Band als GmbH aufgetreten, blieben nur 600 € übrig. Das liegt unter der Grenze, und es fiele keine KSA an. Ob eine reine interne Weihnachtsfeier ohne Außenwirkung überhaupt unter § 24 KSVG fällt, ist nicht eindeutig. Kläre das mit deiner Steuerberatung.
+
+![Kollegen tanzen beim Firmen-Sommerfest zu einer Coverband auf der Terrasse](ratgeber-kuenstlersozialabgabe-szene-2)
 
 ## Wie meldest du die Künstlersozialabgabe? Fristen und Ablauf
 

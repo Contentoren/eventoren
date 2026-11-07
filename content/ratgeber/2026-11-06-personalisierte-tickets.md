@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "personalisierte-tickets"
 author: "Eventoren Redaktion"
 image: "ratgeber-personalisierte-tickets"
-imageAlt: "Zwei Mitglieder eines Abikomitees gleichen an einem Tisch in der Schulaula eine ausgedruckte Gästeliste mit einem Laptop ab"
+imageAlt: "Jubelnde Fans mit erhobenen Armen und bunten Festivalbändchen vor der Bühne einer ausverkauften Show im bunten Bühnenlicht"
 category: "einlass-event-tag"
 keywords:
   [
@@ -43,6 +43,8 @@ Ohne Personalisierung ist ein Ticket rechtlich in der Regel ein sogenanntes klei
 - **Teilnehmername:** Wer das Event besucht. Bei einer Bestellung über vier Tickets gibt es einen Käufer, aber vier Teilnehmer.
 
 Ein Ticket ist erst dann wirklich personalisiert, wenn jedes einzelne Ticket einen eigenen Teilnehmernamen trägt.
+
+![Fröhliche Freundesgruppen strömen tagsüber durch das Eingangstor eines Festivals mit bunten Wimpelketten](ratgeber-personalisierte-tickets-szene-1)
 
 ## Wann lohnen sich personalisierte Tickets?
 
@@ -120,6 +122,8 @@ Lege vorher fest, was passiert, und schule deine Helfer:
 2. Bestellung prüfen: Ist der Gast vielleicht der Käufer, aber ein anderer Name wurde eingetragen?
 3. Wenn deine Regeln es erlauben: Namen vor Ort ändern und einlassen.
 4. Wenn nicht: Einlass verweigern und auf die AGB verweisen. Dokumentiere den Fall kurz.
+
+![Freundlicher Ordner begrüßt lächelnd ankommende Gäste in der Einlassspur auf dem Festivalgelände bei Tageslicht](ratgeber-personalisierte-tickets-szene-2)
 
 ## Wie organisierst du das Umpersonalisieren?
 

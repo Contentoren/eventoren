@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "e-ticket-hilfe"
 author: "Eventoren Redaktion"
 image: "ratgeber-e-ticket-hilfe"
-imageAlt: "Ein junger Mann sitzt abends auf dem Sofa und durchsucht mit dem Laptop auf den Knien sein E-Mail-Postfach, neben ihm liegt ein Smartphone"
+imageAlt: "Gut gelaunte Festivalgäste zeigen am Einlass bei Sonnenuntergang ihre Handytickets, Helfer scannen sie lächelnd"
 category: "ticketkaeufer"
 keywords:
   [
@@ -61,6 +61,8 @@ Hast du beim Kauf ein Kundenkonto genutzt oder angelegt, findest du dort bei vie
 ### 5. Erst dann den Support kontaktieren
 
 Wenn nach diesen Schritten immer noch nichts da ist, schreibe dem Support des Ticketanbieters. Was du dafür bereithalten solltest, steht weiter unten.
+
+![Erleichterte Konzertbesucherin zeigt am Einlass ihr wiedergefundenes Handyticket und wird lächelnd hereingewunken](ratgeber-e-ticket-hilfe-szene-1)
 
 ## Welche Probleme gibt es mit E-Tickets, und wie löst du sie?
 
@@ -136,6 +138,8 @@ Ein E-Ticket ist nicht an dein Handy gebunden. Das PDF kannst du auf jedem Gerä
 ### Ausdrucken: altmodisch, aber sicher
 
 Ein ausgedrucktes PDF-Ticket funktioniert genauso wie das Ticket auf dem Display. Achte darauf, dass der QR-Code scharf, vollständig und nicht zu klein gedruckt ist. Schwarzweiß reicht. Knicke das Papier nicht mitten durch den Code. Bei Konzerten im Freien ist eine Klarsichthülle bei Regen hilfreich.
+
+![Konzertgast zeigt am Einlass sein ausgedrucktes Papierticket vor, dahinter strömen Gäste in den abendlichen Konzertsaal](ratgeber-e-ticket-hilfe-szene-2)
 
 ### Und die Wallet?
 

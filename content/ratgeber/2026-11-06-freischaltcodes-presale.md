@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "freischaltcodes-presale"
 author: "Eventoren Redaktion"
 image: "ratgeber-freischaltcodes-presale"
-imageAlt: "Zwei Vereinsmitglieder sitzen abends im Vereinsheim an einem Tisch und schreiben Briefumschläge für den Mitglieder-Vorverkauf"
+imageAlt: "Begeisterte Fans strömen beim Einlass durch einen leuchtenden Tunnel in den Club, der DJ spielt bereits, Laserlichter tanzen über der Menge"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -53,6 +53,8 @@ Anbieter nennen das Prinzip unterschiedlich (Stand: November 2026): Zugangsschl�
 
 Ein Freischaltcode kann trotzdem zu einem günstigeren Preis führen, nämlich dann, wenn die freigeschaltete Ticketart günstiger ist. „Mitglieder – 12 €“ statt „Regulär – 15 €“ ist eine eigene Ticketart, kein Rabatt auf die reguläre.
 
+![Treue Fans tanzen Arm in Arm in den ersten Reihen vor der Bühne, goldenes Konfetti fällt auf die jubelnde Menge](ratgeber-freischaltcodes-presale-szene-1)
+
 ## Für welche Gruppen lohnt sich ein Presale?
 
 | Gruppe                | Ziel                                                      | Codeform                               | Zeitpunkt                              | Tipp                                                                       |
@@ -67,6 +69,8 @@ Ein Freischaltcode kann trotzdem zu einem günstigeren Preis führen, nämlich d
 | Vorjahreskäufer       | Stammpublikum binden                                      | ein Code pro Käufer                    | 3–5 Tage vorher                        | nur mit zulässiger Werbe-Einwilligung oder Bestandskundenregel anschreiben |
 
 Ein Presale lohnt sich vor allem, wenn deine Kapazität knapp ist und eine Gruppe besonders wichtig ist. Bei einem Event, das ohnehin nie ausverkauft ist, wirkt ein Presale schnell aufgesetzt.
+
+![Freundesgruppe feiert ausgelassen tanzend auf einem Sommerfestival bei strahlendem Sonnenschein](ratgeber-freischaltcodes-presale-szene-2)
 
 ## Ein Code für alle oder ein Code pro Person?
 

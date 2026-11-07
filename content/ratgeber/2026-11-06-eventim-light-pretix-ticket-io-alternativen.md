@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "eventim-light-pretix-ticket-io-alternativen"
 author: "Eventoren Redaktion"
 image: "ratgeber-eventim-light-pretix-ticket-io-alternativen"
-imageAlt: "Ein Theaterleiter und eine Kassiererin besprechen im Foyer einer kleinen Bühne einen Stapel Unterlagen, im Hintergrund leere Sitzreihen"
+imageAlt: "Ausverkaufte Clubshow: Sänger auf der Bühne vor jubelndem Publikum mit erhobenen Händen"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -44,6 +44,8 @@ Damit die Zahlen vergleichbar sind, rechnen wir jedes Beispiel gleich:
 - Bei pretix rechnen wir Stripe mit 1,5 % + 0,25 € als Zahlungsanbieter und 7 % Umsatzsteuer im Ticketpreis.
 
 Alle Werte sind Stand November 2026 und stammen von den Preisseiten, die unter Quellen verlinkt sind.
+
+![Gut gelaunte Gäste betreten am Abend einen hell erleuchteten Konzertsaal](ratgeber-eventim-light-pretix-ticket-io-alternativen-szene-1)
 
 ## Was kostet EVENTIM.Light?
 
@@ -146,6 +148,8 @@ Eventoren berechnet 3,9 % des Bruttoticketpreises plus 0,49 € pro bezahltem Ti
 | Freischaltcodes für Vorverkauf und Mitglieder                                 | Keine Rabattcodes, keine automatischen Preisphasen            |
 | Bargeldlose Abendkasse per QR-Plakat mit eigenen Preisen                      | Keine Barkasse, kein Kartenterminal                           |
 | Auszahlung spätestens am 7. Bankarbeitstag nach Eventende                     | Nur Euro, nur deutsche Oberfläche                             |
+
+![Tanzende Menge vor einer kleinen Festivalbühne im Scheinwerferlicht](ratgeber-eventim-light-pretix-ticket-io-alternativen-szene-2)
 
 ## Welcher Anbieter ist bei 10, 20 und 50 € am günstigsten?
 

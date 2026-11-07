@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "dynamic-pricing-tickets"
 author: "Eventoren Redaktion"
 image: "ratgeber-dynamic-pricing-tickets"
-imageAlt: "Eine junge Frau sitzt abends auf dem Sofa und schaut nachdenklich auf ihr Smartphone, während sie auf den Start eines Ticketverkaufs wartet"
+imageAlt: "Euphorische Konzertmenge mit erhobenen Händen bei einer Nachtshow in der Arena, bunte Lichtstrahlen fächern über die jubelnden Fans"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -49,6 +49,8 @@ Wichtig ist die Abgrenzung zu verwandten Modellen, die oft in einen Topf geworfe
 | Personalisierte Preise       | Preis hängt von Daten über den einzelnen Käufer ab     | je Käufer verschieden                       | anderer Preis je nach Gerät oder Kaufhistorie |
 
 Rechtlich und für das Vertrauen deiner Gäste ist dieser Unterschied zentral. Preisstufen und Preisphasen sind seit Jahrzehnten üblich und unproblematisch, solange sie offen kommuniziert werden. Echte Nachfragepreise und vor allem personalisierte Preise stehen unter besonderer Beobachtung.
+
+![Riesige Festivalmenge vor der Hauptbühne im goldenen Abendlicht, goldenes Konfetti regnet auf die jubelnden Besucher](ratgeber-dynamic-pricing-tickets-szene-1)
 
 ## Was beim Oasis-Vorverkauf 2024 passiert ist
 
@@ -144,6 +146,8 @@ Statt nach Kontingent wechselst du zu festen, angekündigten Terminen: „Bis 31
 - [ ] Nach einer Stufe nicht wieder auf einen niedrigeren Preis zurückfallen, ohne das vorher anzukündigen
 
 Mehr zur Gestaltung von Preisstufen findest du im Ratgeber [Early-Bird-Tickets](/ratgeber/early-bird-tickets), die Kalkulation dahinter im Ratgeber [Ticketpreis kalkulieren](/ratgeber/ticketpreis-kalkulieren).
+
+![Frühentschlossene Fans feiern in den ersten Reihen vor der Bühne eines Sommerfestivals bei Tageslicht](ratgeber-dynamic-pricing-tickets-szene-2)
 
 ## Was empfehlen wir kleinen Veranstaltern?
 

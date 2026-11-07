@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "kostenlose-events-anmeldung"
 author: "Eventoren Redaktion"
 image: "ratgeber-kostenlose-events-anmeldung"
-imageAlt: "Eine Helferin hakt am Eingang eines Vereinsheims an einem Klapptisch Gäste ab, die abends zu einem kostenlosen Vortrag ankommen"
+imageAlt: "Großes Publikum auf Picknickdecken vor der Bühne eines kostenlosen Sommerkonzerts auf dem Dorfplatz bei Sonnenuntergang"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -57,6 +57,8 @@ Dazu kommt ein psychologischer Effekt: Wer einen Platz „gebucht“ hat, fühlt
 | Gratis-Konzert, Party          | Sicherheit und Kapazität            | Überbuchung nur mit strikter Einlassgrenze           |
 
 Bei einem offenen Straßenfest ohne Zugangskontrolle brauchst du dagegen keine Tickets. Dort hilft eine Anmeldung nicht, weil ohnehin jeder kommen kann.
+
+![Voll besetzter Gemeindesaal, das Publikum applaudiert einem Vortrag auf der Bühne im warmen Saallicht](ratgeber-kostenlose-events-anmeldung-szene-1)
 
 ## Wie hoch ist die No-Show-Quote bei kostenlosen Events?
 
@@ -142,6 +144,8 @@ Die Bitte um Absage ist der entscheidende Satz. Viele Menschen bleiben nicht aus
 - **Namen auf dem Ticket:** Ein persönliches Ticket wirkt verbindlicher als ein anonymes.
 - **Begrenzte Tickets pro Bestellung:** Wer 10 Gratis-Tickets „für Freunde“ reserviert, bringt selten alle mit. Ein Limit von 2 oder 4 pro Bestellung verhindert Sammelreservierungen.
 - **Wert sichtbar machen:** Programm, Referent, Verpflegung, Teilnahmebescheinigung. Was etwas wert ist, lässt man ungern verfallen.
+
+![Gut gelaunte Gäste finden lächelnd ihre Plätze im vollen Veranstaltungssaal kurz vor Beginn des Programms](ratgeber-kostenlose-events-anmeldung-szene-2)
 
 ## Symbolischer Preis oder kostenlos: Was ist besser?
 

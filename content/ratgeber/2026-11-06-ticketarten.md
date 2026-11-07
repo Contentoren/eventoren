@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketarten"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketarten"
-imageAlt: "Familie mit zwei Kindern und eine Gruppe Jugendlicher stehen am späten Nachmittag in getrennten Reihen vor dem Eingang eines Open-Air-Festivals"
+imageAlt: "Gästemenge strömt bei goldenem Abendlicht durch die geschmückten Eingangstore eines Sommerfestivals"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -43,6 +43,8 @@ Mit nur einer Kategorie „Eintritt 15 €“ verschenkst du drei Hebel:
 - **Mehrwert:** Gäste, die mehr wollen (bessere Plätze, Getränk inklusive, früher Einlass), zahlen dafür auch mehr.
 
 Die Kehrseite: Jede zusätzliche Ticketart ist eine Entscheidung mehr für den Käufer und eine Regel mehr am Einlass. Deshalb gilt: so viele wie nötig, so wenige wie möglich.
+
+![Familien und Freundesgruppen mit Kindern zeigen am Einlass eines Sommerfests ihre Tickets und werden jubelnd hereingewunken](ratgeber-ticketarten-szene-1)
 
 ## Alle gängigen Ticketarten im Überblick
 
@@ -109,6 +111,8 @@ Typische VIP-Leistungen bei kleineren Events:
 - Meet and Greet, wenn die Künstler mitmachen
 
 **Preisregel:** Regulärer Preis plus Kosten der Zusatzleistungen plus ein Aufschlag für Exklusivität. Begrenze VIP knapp, oft reichen 5 bis 10 % der Kapazität. Kläre steuerlich, ob ein enthaltenes Getränk oder Essen anders besteuert wird: Speisen in der Gastronomie unterliegen seit 01.01.2026 7 %, Getränke 19 %. Details im Ratgeber [Umsatzsteuer auf Eintrittskarten](/ratgeber/umsatzsteuer-eintrittskarten).
+
+![VIP-Gäste mit Begrüßungsgetränken auf einer Terrasse mit Blick über die Festivalbühne bei Sonnenuntergang](ratgeber-ticketarten-szene-2)
 
 ## Gruppen- und Familientickets
 

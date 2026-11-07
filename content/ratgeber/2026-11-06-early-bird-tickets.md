@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "early-bird-tickets"
 author: "Eventoren Redaktion"
 image: "ratgeber-early-bird-tickets"
-imageAlt: "Ein Veranstalter klebt am frühen Morgen in einer Altstadtgasse ein unbedrucktes Plakat an eine Litfaßsäule, im Hintergrund geht die Sonne auf"
+imageAlt: "Aufgeregte junge Festivalfans warten am frühen Morgen vor den geöffneten Toren in der Morgensonne"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -44,6 +44,8 @@ Das Early-Bird-Ticket berechtigt zum selben Eintritt wie das reguläre Ticket. E
 - **Liquidität:** Frühe Einnahmen helfen beim Gefühl für die Kalkulation. Die Auszahlung kommt bei vielen Plattformen, auch bei Eventoren, aber erst nach dem Event, plane Anzahlungen daher nicht aus Ticketgeld.
 - **Sichtbarkeit:** Frühkäufer erzählen anderen von ihrem Ticket. Jeder Kauf ist ein kleines Signal, dass das Event stattfindet.
 - **Weniger Last-Minute-Stress:** Je mehr Tickets vorab verkauft sind, desto weniger hängt vom Wetter oder Konkurrenzevents am Abend ab.
+
+![Junge Freunde jubeln Arm in Arm auf einem ausverkauften Konzert in der ersten Reihe](ratgeber-early-bird-tickets-szene-1)
 
 ## Welche Preisstufen-Modelle gibt es?
 
@@ -107,6 +109,8 @@ Der beste Zeitpunkt ist der Moment, in dem die Aufmerksamkeit am höchsten ist: 
 5. **Zweite Welle (optional):** Neue Infos (Support-Act, Specials) geben dem regulären Verkauf einen neuen Anlass.
 
 Wie lange der gesamte Vorverkauf laufen sollte, hängt vom Format ab: Clubnächte oft 2 bis 4 Wochen, Konzerte und Bälle mehrere Monate, Festivals ein halbes Jahr oder mehr. Mehr Hebel für die Wochen danach findest du im Ratgeber [Vorverkauf ankurbeln](/ratgeber/vorverkauf-steigern).
+
+![Menschenmenge strömt bei Sonnenuntergang jubelnd durch die geöffneten Türen eines Konzertsaals](ratgeber-early-bird-tickets-szene-2)
 
 ## Wie kommunizierst du Early-Bird-Tickets richtig?
 

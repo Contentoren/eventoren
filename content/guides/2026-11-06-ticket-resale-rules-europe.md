@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticket-resale-rules-europe"
 author: "Eventoren Editorial Team"
 image: "ratgeber-tickets-weiterverkaufen"
-imageAlt: "Two young women sit at a café table by the window, one passing her smartphone with a ticket across to the other, with two coffee cups between them"
+imageAlt: "A group of friends celebrates together at a stadium concert: laughing young people with raised arms in the spotlights"
 category: "for-ticket-buyers"
 keywords:
   [
@@ -47,6 +47,8 @@ Three layers decide whether a resale is allowed:
 1. **National law** in the country where the event takes place.
 2. **The organiser's terms and conditions**, which you accepted when you bought the ticket. They can ban resale, cap the price or allow resale only through an official exchange.
 3. **The rules of the platform** you use to sell, which may ban tickets that are personalised or not transferable.
+
+![Two friends hugging and laughing in the crowd in front of the concert stage, cheering concertgoers in colourful light behind](ratgeber-tickets-weiterverkaufen-szene-1)
 
 ## Is it legal to resell tickets in Europe? The country table
 
@@ -129,6 +131,8 @@ The safest route is the one the organiser offers. The table ranks the common opt
 - [ ] Used a payment method with buyer protection and kept the chat and receipt
 
 Buyers face the mirror image of these risks. Our guide on [fake tickets](/en/guides/fake-tickets) covers how to check a seller and what to do if you've been scammed.
+
+![Three friends meeting and laughing at the lit venue entrance, one holding the tickets](ratgeber-tickets-weiterverkaufen-szene-2)
 
 ## What can organisers do about resale?
 

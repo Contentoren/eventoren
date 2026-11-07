@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "veranstaltung-planen-checkliste"
 author: "Eventoren Redaktion"
 image: "ratgeber-veranstaltung-planen-checkliste"
-imageAlt: "Drei Mitglieder eines Organisationsteams planen an einem Küchentisch eine Veranstaltung mit Klebezetteln, Wandkalender und Laptop"
+imageAlt: "Tanzende Menge vor der Bühne eines Laternenfests am Abend, Liveband und warme Lichter in der historischen Altstadt"
 category: "planung-marketing"
 keywords:
   [
@@ -47,6 +47,8 @@ Eine Veranstaltung planst du in zehn Phasen: Konzept, Budget, Location, Genehmig
 | Festival                                        | 9–12 Monate       | Fläche, Genehmigungen, Line-up |
 
 Die Werte sind Erfahrungswerte, keine Vorgaben. Saisontermine wie Silvester oder die Adventswochenenden sind früher ausgebucht. Kurzfristige Pläne für diese Termine findest du in den Ratgebern „Silvesterparty 2026“ und „Weihnachtsfeier und Adventsevent“.
+
+![Familien schlendern lachend über ein sonniges Straßenfest in der Altstadt mit bunten Ständen und Straßenmusik](ratgeber-veranstaltung-planen-checkliste-szene-1)
 
 ## Zeitplan: Was passiert wann?
 
@@ -217,6 +219,8 @@ Eine Kulturinitiative plant ein Konzert für Samstag, 8. Mai 2027. **Beispielrec
 | bis Anfang Juni 2027 | T+4         | Setlist, Abrechnung, Belege                                                                                   |
 
 Der Break-even von 222 Tickets bei 250 Plätzen zeigt, wie knapp kleine Konzerte sind. Mit 60 günstigeren Early-Bird-Tickets steigt er weiter. Wie du gegensteuerst, etwa mit einer kleineren Location oder einem Versus-Deal mit der Band, zeigt der Ratgeber Konzert veranstalten.
+
+![250 Gäste feiern ein Konzert im warmen Licht eines vollen Saals, die Band spielt vor begeistertem Publikum](ratgeber-veranstaltung-planen-checkliste-szene-2)
 
 ## So setzt du das mit Eventoren um
 

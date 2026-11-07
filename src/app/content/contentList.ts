@@ -21,7 +21,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Gast hält am Eingang einer kleinen Konzertbühne sein Smartphone vor ein Plakat an der Wand, während eine Helferin daneben die Schlange im warmen Abendlicht betreut",
+      "Fröhliche Gäste strömen am Abend in den warm beleuchteten Eingang eines kleinen Clubs, halten ihre Smartphones mit den Tickets bereit und lachen, während drinnen die Bühne leuchtet",
   },
   "abiball-finanzieren-sponsoren": {
     id: "2026-11-06-abiball-finanzieren-sponsoren",
@@ -37,7 +37,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Zwei Abiturienten stellen einem Bäckermeister im Verkaufsraum seiner Bäckerei eine Mappe mit Sponsoring-Paketen für ihren Abiball vor",
+      "Abiballpaar tanzt unter goldenem Konfettiregen im festlich beleuchteten Ballsaal, umgeben von feiernden Gästen an gedeckten Tischen",
   },
   "abiball-kosten": {
     id: "2026-11-06-abiball-kosten",
@@ -52,8 +52,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Zwei Schülerinnen und ein Vater des Abikomitees schmücken einen festlichen Saal mit runden Tischen, weißen Tischdecken und warmen Lichterketten",
+    imageAlt: "Blick vom Balkon auf tanzende Abiball-Paare in Abendgarderobe mit Konfetti in der Luft",
   },
   "abiball-location-catering": {
     id: "2026-11-06-abiball-location-catering",
@@ -69,7 +68,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Zwei Abiturientinnen und ein Vater probieren beim Probeessen in einem hellen Nebenraum kleine Teller, während der Koch des Caterers die Gerichte erklärt",
+      "Abiball in einem festlich geschmückten Saal: Abiturienten in Abendgarderobe tanzen lachend unter Kronleuchtern, Konfetti fällt auf die Tanzfläche",
   },
   "abiball-planen-checkliste": {
     id: "2026-11-06-abiball-planen-checkliste",
@@ -85,7 +84,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Abikomitee sitzt nach Schulschluss an zusammengeschobenen Tischen im Klassenzimmer und plant mit Laptop, Kalender und Haftnotizen den Abiball",
+      "Abiturienten in festlicher Abendgarderobe tanzen lachend unter Kronleuchtern im festlich geschmückten Ballsaal, Konfetti rieselt von der Decke",
   },
   "abiball-tickets-online-verkaufen": {
     id: "2026-11-06-abiball-tickets-online-verkaufen",
@@ -100,8 +99,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Festlich gekleidete Abiturientinnen und Eltern kommen am Abend am Eingang des Ballsaals an, eine Helferin scannt ein Ticket mit dem Smartphone",
+    imageAlt: "Abiturienten in Abendgarderobe begrüßen sich lachend am Eingang des festlich erleuchteten Ballsaals",
   },
   "abiball-veranstalter-haftung": {
     id: "2026-11-06-abiball-veranstalter-haftung",
@@ -117,7 +115,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Eine Mutter und zwei volljährige Abiturienten sitzen abends am Küchentisch und gehen gemeinsam einen ausgedruckten Mietvertrag für den Abiball durch",
+      "Junge Abiturienten des Abikomitees feiern lachend auf der vollen Tanzfläche ihres Abiballs unter warmem Licht und Lichterketten",
   },
   "agb-ticketverkauf": {
     id: "2026-11-06-agb-ticketverkauf",
@@ -132,8 +130,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Zwei Organisatorinnen eines Kulturvereins gehen an einem Küchentisch ausgedruckte Ticketbedingungen mit Textmarker und Laptop durch",
+    imageAlt: "Ausverkauftes Konzert: begeistertes Publikum mit erhobenen Händen vor farbig beleuchteter Bühne",
   },
   "barrierefreiheit-bfsg": {
     id: "2026-11-06-barrierefreiheit-bfsg",
@@ -149,7 +146,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Ein Helfer am Einlass eines Konzertsaals hält einer Besucherin im Rollstuhl die Tür zu einem stufenlosen Seiteneingang auf",
+      "Rollstuhlfahrerin tanzt mitten in einer fröhlichen Festivalmenge bei Tageslicht, um sie herum lachende und klatschende Konzertbesucher",
   },
   benefizveranstaltung: {
     id: "2026-11-06-benefizveranstaltung",
@@ -164,8 +161,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Ehrenamtliche zählen nach einem Benefizkonzert in einem Gemeindesaal an einem langen Tisch die Einnahmen, im Hintergrund wird die Bühne abgebaut",
+    imageAlt: "Begeistertes Publikum applaudiert in einem Konzertsaal einer Benefizband auf der Bühne",
   },
   "clubnacht-veranstalten": {
     id: "2026-11-06-clubnacht-veranstalten",
@@ -181,7 +177,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Eine Promoterin und ein Clubbetreiber gehen am frühen Abend im noch leeren Club an der Bar einen Ablaufplan durch, im Hintergrund baut ein DJ sein Equipment auf",
+      "Volle Tanzfläche einer Clubnacht: tanzende Gäste mit erhobenen Händen vor dem DJ-Pult in türkisfarbenem und bernsteinfarbenem Licht",
   },
   "dsgvo-veranstalter": {
     id: "2026-11-06-dsgvo-veranstalter",
@@ -196,8 +192,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine Helferin befestigt am Eingang eines Vereinsheims ein Hinweisblatt an einer Staffelei, während ein Fotograf mit Kamera im Hintergrund den Saal betritt",
+    imageAlt: "Blick über die Schulter eines Fotografen auf eine tanzende Festivalmenge in der Abenddämmerung",
   },
   "dynamic-pricing-tickets": {
     id: "2026-11-06-dynamic-pricing-tickets",
@@ -213,7 +208,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Eine junge Frau sitzt abends auf dem Sofa und schaut nachdenklich auf ihr Smartphone, während sie auf den Start eines Ticketverkaufs wartet",
+      "Euphorische Konzertmenge mit erhobenen Händen bei einer Nachtshow in der Arena, bunte Lichtstrahlen fächern über die jubelnden Fans",
   },
   "e-rechnung-veranstalter": {
     id: "2026-11-06-e-rechnung-veranstalter",
@@ -228,8 +223,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Ein Veranstalter vergleicht im Produktionsbüro eines Festivalgeländes eine Papierrechnung mit den Daten auf seinem Laptop",
+    imageAlt: "Veranstalter blickt bei Sonnenuntergang über die jubelnde Menge seines Festivals",
   },
   "e-ticket-hilfe": {
     id: "2026-11-06-e-ticket-hilfe",
@@ -245,7 +239,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Ein junger Mann sitzt abends auf dem Sofa und durchsucht mit dem Laptop auf den Knien sein E-Mail-Postfach, neben ihm liegt ein Smartphone",
+      "Gut gelaunte Festivalgäste zeigen am Einlass bei Sonnenuntergang ihre Handytickets, Helfer scannen sie lächelnd",
   },
   "early-bird-tickets": {
     id: "2026-11-06-early-bird-tickets",
@@ -260,8 +254,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Ein Veranstalter klebt am frühen Morgen in einer Altstadtgasse ein unbedrucktes Plakat an eine Litfaßsäule, im Hintergrund geht die Sonne auf",
+    imageAlt: "Aufgeregte junge Festivalfans warten am frühen Morgen vor den geöffneten Toren in der Morgensonne",
   },
   "einlasskontrolle-qr-code": {
     id: "2026-11-06-einlasskontrolle-qr-code",
@@ -277,7 +270,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Junge Helferin mit petrolfarbenem Schlüsselband scannt am Eingang eines Vereinsheims in der Abenddämmerung das Smartphone-Ticket eines Gastes",
+      "Festival-Einlassspuren von oben in der blauen Stunde: leuchtende Armbänder und Absperrungen vor erleuchteten Toren",
   },
   "einlassmanagement-warteschlangen": {
     id: "2026-11-06-einlassmanagement-warteschlangen",
@@ -292,8 +285,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Blick von oben auf mehrere durch Absperrgitter getrennte Einlassspuren vor einer Konzerthalle, in denen Besucher in der Abendsonne zügig vorrücken",
+    imageAlt: "Gäste strömen entspannt durch mehrere geöffnete Einlassgassen auf ein Festivalgelände",
   },
   "eintrittskarten-erstellen": {
     id: "2026-11-06-eintrittskarten-erstellen",
@@ -309,7 +301,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Nahaufnahme einer Helferin an einem Schultisch, die einen Stapel unbedruckter Eintrittskarten mit einem Nummerierstempel durchzählt, daneben liegt ein Smartphone",
+      "Begeistertes Publikum mit erhobenen Händen und Konfetti vor der Bühne eines ausverkauften Clubkonzerts im bunten Licht",
   },
   "event-marketing": {
     id: "2026-11-06-event-marketing",
@@ -324,8 +316,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Zwei junge Veranstalterinnen filmen im leeren Konzertsaal beim Soundcheck ein kurzes Hochformat-Video mit dem Smartphone",
+    imageAlt: "Riesige jubelnde Festivalmenge vor der Hauptbühne in der Abenddämmerung, Konfetti in der Luft",
   },
   "event-sichtbar-google-ki": {
     id: "2026-11-06-event-sichtbar-google-ki",
@@ -341,7 +332,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Ein Veranstalter sitzt nach Feierabend in einem kleinen Vereinsbüro am Laptop und pflegt die Eventseite, neben ihm liegt ein Stapel Plakate",
+      "Riesige jubelnde Festivalmenge bei Tageslicht vor der Hauptbühne mit bunten Fahnen, alle Hände in der Luft",
   },
   "eventbrite-alternative": {
     id: "2026-11-06-eventbrite-alternative",
@@ -356,8 +347,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Ein Vereinsvorstand sortiert im Vereinsheim Unterlagen in Umzugskartons, während eine Helferin am Laptop eine Liste abhakt",
+    imageAlt: "Ausverkaufte Clubshow mit jubelnden Gästen und Konfetti im bunten Bühnenlicht",
   },
   "eventbudget-planen": {
     id: "2026-11-06-eventbudget-planen",
@@ -372,8 +362,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Kassenwartin eines Vereins rechnet abends am Küchentisch mit Belegen, Taschenrechner und Laptop das Budget für ein Fest durch",
+    imageAlt: "Helfer schmücken eine leere Veranstaltungshalle mit Lichterketten und Stühlen im Morgenlicht",
   },
   "eventim-light-pretix-ticket-io-alternativen": {
     id: "2026-11-06-eventim-light-pretix-ticket-io-alternativen",
@@ -388,8 +377,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Ein Theaterleiter und eine Kassiererin besprechen im Foyer einer kleinen Bühne einen Stapel Unterlagen, im Hintergrund leere Sitzreihen",
+    imageAlt: "Ausverkaufte Clubshow: Sänger auf der Bühne vor jubelndem Publikum mit erhobenen Händen",
   },
   "eventlocation-finden": {
     id: "2026-11-06-eventlocation-finden",
@@ -405,7 +393,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Eine Veranstalterin misst bei einer Besichtigung in einem leeren Saal mit Holzboden die Raumbreite mit einem Maßband, während der Hausmeister am Fenster wartet",
+      "Ausgelassene Partygesellschaft tanzt in einer Backstein-Loftlocation mit hohen Fenstern und Lichterketten",
   },
   "fake-tickets-erkennen": {
     id: "2026-11-06-fake-tickets-erkennen",
@@ -420,8 +408,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine junge Frau sitzt abends am Küchentisch und vergleicht auf ihrem Laptop und ihrem Smartphone ein Ticketangebot, daneben liegt ein Notizblock",
+    imageAlt: "Lachende Konzertbesucher zeigen am Eingang ihre Tickets und werden eingelassen",
   },
   "festival-organisieren": {
     id: "2026-11-06-festival-organisieren",
@@ -436,8 +423,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine Festivalleiterin und ein Bühnentechniker gehen am Vortag eines kleinen Open-Air-Festivals mit Funkgerät über die Wiese, im Hintergrund wird die Bühne aufgebaut",
+    imageAlt: "Festivalgelände in der Abenddämmerung von oben: Hauptbühne, Riesenrad, Zelte und Lichterketten",
   },
   "firmenevent-konferenz-tickets": {
     id: "2026-11-06-firmenevent-konferenz-tickets",
@@ -452,8 +438,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Zwei Helferinnen geben am Morgen einer Fachkonferenz im Foyer eines Tagungszentrums Namensschilder an ankommende Teilnehmende aus",
+    imageAlt: "Großes Konferenzpublikum applaudiert stehend in einem modernen Kongresssaal dem Vortrag auf der Bühne",
   },
   "freischaltcodes-presale": {
     id: "2026-11-06-freischaltcodes-presale",
@@ -469,7 +454,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Zwei Vereinsmitglieder sitzen abends im Vereinsheim an einem Tisch und schreiben Briefumschläge für den Mitglieder-Vorverkauf",
+      "Begeisterte Fans strömen beim Einlass durch einen leuchtenden Tunnel in den Club, der DJ spielt bereits, Laserlichter tanzen über der Menge",
   },
   "gaesteliste-vorlage": {
     id: "2026-11-06-gaesteliste-vorlage",
@@ -484,8 +469,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Türsteherin mit Klemmbrett und Smartphone gleicht am Seiteneingang eines Clubs bei Nacht den Namen eines Paares ab, im Hintergrund warmes Licht aus der offenen Tür",
+    imageAlt: "Türsteherin begrüßt lächelnde Gäste am Club-Eingang, aus der offenen Tür strömt warmes Licht",
   },
   "gema-veranstaltung": {
     id: "2026-11-06-gema-veranstaltung",
@@ -500,7 +484,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Ein Organisator mit Klemmbrett steht beim Soundcheck einer Band im Vereinsheim neben dem Mischpult",
+    imageAlt: "Blaskapelle auf einer Dorfbühne im Abendlicht, Publikum als Silhouetten im Vordergrund",
   },
   "helfer-minijob-ehrenamt": {
     id: "2026-11-06-helfer-minijob-ehrenamt",
@@ -515,8 +499,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine Helferkoordinatorin teilt am frühen Morgen vor einem Festzelt Schichten ein, Helfer in Westen hören zu",
+    imageAlt: "Jubelndes Helferteam stemmt auf einem Vereinsfest gemeinsam die Arme in die Höhe",
   },
   "jugendschutz-party": {
     id: "2026-11-06-jugendschutz-party",
@@ -532,7 +515,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Ein Einlasshelfer legt einer Jugendlichen am Eingang einer Schulparty ein farbiges Stoffbändchen um das Handgelenk, daneben liegen Bändchen in weiteren Farben bereit",
+      "Lachende Jugendliche tanzen auf einer Sommerparty im Freien unter Lichterketten, bunte Scheinwerfer tauchen den Garten in Farbe",
   },
   "karneval-2027": {
     id: "2026-11-06-karneval-2027",
@@ -547,8 +530,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Kostümierte Gäste an langen Tischen schunkeln bei einer Karnevalssitzung in einem festlich beleuchteten Saal, vorne prüft eine Helferin die Tischreihen",
+    imageAlt: "Bunt kostümierte Karnevalsgruppe zieht unter Konfettiregen durch eine jubelnde Straßenmenge",
   },
   "kleinunternehmerregelung-veranstalter": {
     id: "2026-11-06-kleinunternehmerregelung-veranstalter",
@@ -564,7 +546,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Ein junger Partyveranstalter sitzt abends in seiner WG-Küche mit Taschenrechner, Kontoauszügen und Laptop und rechnet seine Jahresumsätze zusammen",
+      "Junges DJ-Kollektiv feiert hinter dem DJ-Pult seiner eigenen Partyreihe, davor tanzende Menge im türkisen und warmen Licht",
   },
   "konzert-veranstalten": {
     id: "2026-11-06-konzert-veranstalten",
@@ -579,8 +561,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Ein Tontechniker am Mischpult und eine Veranstalterin mit Klemmbrett verfolgen am Nachmittag den Soundcheck einer Band in einem leeren Club",
+    imageAlt: "Rockband auf der Bühne vor tobender Menge mit erhobenen Händen im Scheinwerferlicht",
   },
   "kostenlose-events-anmeldung": {
     id: "2026-11-06-kostenlose-events-anmeldung",
@@ -596,7 +577,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Eine Helferin hakt am Eingang eines Vereinsheims an einem Klapptisch Gäste ab, die abends zu einem kostenlosen Vortrag ankommen",
+      "Großes Publikum auf Picknickdecken vor der Bühne eines kostenlosen Sommerkonzerts auf dem Dorfplatz bei Sonnenuntergang",
   },
   kuenstlersozialabgabe: {
     id: "2026-11-06-kuenstlersozialabgabe",
@@ -611,8 +592,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine Vereinskassiererin sortiert nach einem Konzert im Vereinsheim Honorarbelege, im Hintergrund packt eine Band ihre Instrumente ein",
+    imageAlt: "Band spielt auf kleiner Bühne vor tanzendem Publikum bei einem Sommerfest",
   },
   "lesung-comedy-kleinkunst": {
     id: "2026-11-06-lesung-comedy-kleinkunst",
@@ -627,8 +607,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine Autorin liest abends in einer Buchhandlung vor rund dreißig Zuhörern auf Klappstühlen zwischen hohen Bücherregalen",
+    imageAlt: "Comedian als Silhouette im Scheinwerferkegel auf kleiner Bühne, Publikum von hinten vor Backsteinwand",
   },
   "party-veranstalten": {
     id: "2026-11-06-party-veranstalten",
@@ -643,8 +622,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Zwei junge Veranstalter bauen am Nachmittag in einem leeren Partyraum eine Bar aus Getränkekisten auf und hängen warme Lichterketten auf",
+    imageAlt: "Volle Tanzfläche mit tanzenden Gästen und Konfetti vor dem DJ-Pult in einem Club",
   },
   "personalisierte-tickets": {
     id: "2026-11-06-personalisierte-tickets",
@@ -660,7 +638,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Zwei Mitglieder eines Abikomitees gleichen an einem Tisch in der Schulaula eine ausgedruckte Gästeliste mit einem Laptop ab",
+      "Jubelnde Fans mit erhobenen Armen und bunten Festivalbändchen vor der Bühne einer ausverkauften Show im bunten Bühnenlicht",
   },
   "schulveranstaltung-tickets": {
     id: "2026-11-06-schulveranstaltung-tickets",
@@ -675,8 +653,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Zwei Elternhelfer prüfen am Eingang einer Schulaula Tickets auf dem Smartphone, während Familien zur Aufführung des Schultheaters hereinkommen",
+    imageAlt: "Junge Schauspieler verbeugen sich unter Applaus auf der Bühne der geschmückten Schulaula",
   },
   "sicherheitskonzept-veranstaltung": {
     id: "2026-11-06-sicherheitskonzept-veranstaltung",
@@ -692,7 +669,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Eine Veranstaltungsleiterin bespricht vor Einlassbeginn mit Ordnern in Warnwesten und einer Sanitäterin den Ablauf in einer leeren Stadthalle",
+      "Entspannte Gästemenge beim Open-Air-Konzert in der Abendsonne, Ordner mit Lanyards lächeln mitten unter den Gästen",
   },
   "silvesterparty-2026": {
     id: "2026-11-06-silvesterparty-2026",
@@ -708,7 +685,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Zwei Helfer stellen am Silvesterabend in einem Festsaal Reihen leerer Sektgläser auf eine lange Theke, im Fenster dahinter leuchtet die Winternacht",
+      "Silvesterparty um Mitternacht: jubelnde Gäste stoßen mit Sektgläsern an, Luftschlangen fallen von der Decke",
   },
   "sponsoren-finden": {
     id: "2026-11-06-sponsoren-finden",
@@ -724,7 +701,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Eine Veranstalterin und der Inhaber einer kleinen Brauerei gehen im Sudhaus zwischen Kupferkesseln gemeinsam eine aufgeschlagene Mappe durch",
+      "Jubelnde Menge vor der Festivalbühne in der Abenddämmerung, geschmückte Bühne mit Fahnen und warmem Licht",
   },
   "sportveranstaltung-turnier": {
     id: "2026-11-06-sportveranstaltung-turnier",
@@ -739,8 +716,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Jugendmannschaften wärmen sich auf einem Sportplatz am Morgen eines Turniers auf, im Vordergrund prüft ein Betreuer eine Liste am Spielfeldrand",
+    imageAlt: "Jugendmannschaft bejubelt ein Tor im Finale, Zuschauer applaudieren am Spielfeldrand",
   },
   ticketarten: {
     id: "2026-11-06-ticketarten",
@@ -755,8 +731,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Familie mit zwei Kindern und eine Gruppe Jugendlicher stehen am späten Nachmittag in getrennten Reihen vor dem Eingang eines Open-Air-Festivals",
+    imageAlt: "Gästemenge strömt bei goldenem Abendlicht durch die geschmückten Eingangstore eines Sommerfestivals",
   },
   "ticketbetrug-verhindern": {
     id: "2026-11-06-ticketbetrug-verhindern",
@@ -771,8 +746,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine Einlasshelferin hält am Eingang eines Clubs ihr Smartphone zum Scannen bereit, während ein Gast sein Handy-Ticket zeigt und weitere Gäste in der Schlange warten",
+    imageAlt: "Lächelnde Gäste passieren zügig den Einlass mit Scannern vor einer Konzerthalle am Abend",
   },
   ticketgebuehren: {
     id: "2026-11-06-ticketgebuehren",
@@ -788,7 +762,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Ein Veranstalter rechnet am Abend in einem kleinen Club an der Bar mit Notizblock und Taschenrechner, neben ihm ein Stapel unbedruckter Eintrittskarten",
+      "Hände reichen an einer Abendkasse eine Blanko-Ticketkarte über den Tresen, daneben ein Kartenlesegerät, Lichterketten im Hintergrund",
   },
   "ticketing-anbieter-vergleich": {
     id: "2026-11-06-ticketing-anbieter-vergleich",
@@ -803,8 +777,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Zwei Veranstalterinnen vergleichen an einem Küchentisch ausgedruckte Gebührenübersichten, daneben ein Taschenrechner und ein Laptop",
+    imageAlt: "Tausende feiern nachts vor der Hauptbühne eines Festivals im bunten Licht",
   },
   "ticketing-glossar": {
     id: "2026-11-06-ticketing-glossar",
@@ -820,7 +793,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Ein Stapel leerer Einlassbänder, ein Smartphone mit unscharfem Bildschirm und eine Rolle Klebeband liegen auf dem Tresen einer Kassenhütte, bevor der Einlass öffnet",
+      "Stimmungsvoller Festivaleingang in der Abenddämmerung: Gäste zeigen Handytickets an den Scan-Spuren unter Lichterketten",
   },
   "ticketing-verein": {
     id: "2026-11-06-ticketing-verein",
@@ -835,8 +808,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Drei Vorstandsmitglieder eines Vereins planen am Abend im Vereinsheim an einem Holztisch den Vorverkauf, eine Frau zeigt auf einen Ausdruck",
+    imageAlt: "Blaskapelle auf der Bühne eines Dorffests, Familien tanzen davor auf dem Platz",
   },
   "ticketpreis-kalkulieren": {
     id: "2026-11-06-ticketpreis-kalkulieren",
@@ -852,7 +824,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Zwei Veranstalterinnen sitzen abends an einem Küchentisch mit Laptop, Notizbuch und Taschenrechner und planen die Kosten für ein Konzert",
+      "Ekstatische Menge mit erhobenen Armen in einer ausverkauften Konzerthalle, Band auf der Bühne im warmen Scheinwerferlicht",
   },
   "tickets-online-verkaufen": {
     id: "2026-11-06-tickets-online-verkaufen",
@@ -867,8 +839,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Veranstalterin bereitet am Abend im Foyer eines kleinen Konzertsaals mit Laptop und Smartphone den Ticketverkauf vor, im Hintergrund bauen Helfer auf",
+    imageAlt: "Konzertmenge von hinten mit erhobenen Händen und Handylichtern vor einer leuchtenden Bühne",
   },
   "tickets-weiterverkaufen": {
     id: "2026-11-06-tickets-weiterverkaufen",
@@ -884,7 +855,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Zwei junge Frauen sitzen in einem Café am Fenster, eine reicht der anderen ihr Smartphone mit einem Ticket, auf dem Tisch stehen zwei Tassen",
+      "Freundesgruppe feiert gemeinsam beim Stadionkonzert: lachende junge Leute mit erhobenen Armen im Scheinwerferlicht",
   },
   "ticketshop-erstellen": {
     id: "2026-11-06-ticketshop-erstellen",
@@ -899,8 +870,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Zwei Vereinsmitglieder sitzen am Küchentisch mit Laptop, Notizblock und Kaffeetassen und planen die Ticketarten für ihr Sommerfest",
+    imageAlt: "Jubelnde Open-Air-Menge mit erhobenen Händen im goldenen Abendlicht vor der Bühne",
   },
   "umsatzsteuer-eintrittskarten": {
     id: "2026-11-06-umsatzsteuer-eintrittskarten",
@@ -915,8 +885,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine Veranstalterin rechnet am Küchentisch mit Taschenrechner, Belegen und Laptop die Ticketeinnahmen ihres Konzerts nach",
+    imageAlt: "Historischer Theatersaal von der Galerie: goldene Logen, Kronleuchter und applaudierendes Publikum",
   },
   veranstalterhaftpflicht: {
     id: "2026-11-06-veranstalterhaftpflicht",
@@ -931,8 +900,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine Organisatorin prüft am Morgen nach einem Fest mit dem Hausmeister den Parkettboden einer gemieteten Gemeindehalle",
+    imageAlt: "Paare tanzen unbeschwert auf dem Dorfplatz beim Sommerfest zur Livemusik einer Blaskapelle",
   },
   "veranstaltung-absagen": {
     id: "2026-11-06-veranstaltung-absagen",
@@ -948,7 +916,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Zwei Organisatorinnen stehen bei Sturm unter einem Vordach am leeren Festgelände und besprechen am Telefon die Absage",
+      "Jubelnde Menge beim Open-Air-Konzert in der Abendsonne: Gäste mit erhobenen Händen vor der Bühne, Konfetti in der Luft",
   },
   "veranstaltung-anmelden-genehmigung": {
     id: "2026-11-06-veranstaltung-anmelden-genehmigung",
@@ -963,8 +931,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Zwei Vereinsmitglieder besprechen an einem Behördenschalter einen ausgedruckten Lageplan für ihr Dorffest",
+    imageAlt: "Belebtes Straßenfest mit Ständen, Musik und flanierenden Familien am Sommerabend",
   },
   "veranstaltung-planen-checkliste": {
     id: "2026-11-06-veranstaltung-planen-checkliste",
@@ -980,7 +947,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Drei Mitglieder eines Organisationsteams planen an einem Küchentisch eine Veranstaltung mit Klebezetteln, Wandkalender und Laptop",
+      "Tanzende Menge vor der Bühne eines Laternenfests am Abend, Liveband und warme Lichter in der historischen Altstadt",
   },
   "vereinsfest-organisieren": {
     id: "2026-11-06-vereinsfest-organisieren",
@@ -995,8 +962,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Ehrenamtliche bauen am Morgen eines Sommerfests auf einer Dorfwiese Bierzeltgarnituren und einen Pavillon auf",
+    imageAlt: "Blick über Biergartentische hinweg zu einer Blaskapelle am Ende der Reihe unter Lampions",
   },
   "vorverkauf-steigern": {
     id: "2026-11-06-vorverkauf-steigern",
@@ -1011,8 +977,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Drei junge Leute aus einem Veranstaltungsteam hängen nachmittags in einem Café Plakate auf und verteilen Flyer an der Theke",
+    imageAlt: "Künstler-Silhouette am Bühnenrand mit Konfettikanonen über einem Meer erhobener Hände",
   },
   "weihnachtsfeier-adventsveranstaltung": {
     id: "2026-11-06-weihnachtsfeier-adventsveranstaltung",
@@ -1027,8 +992,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Chormitglieder in dunklen Mänteln stellen vor einem Adventskonzert in einer kerzenbeleuchteten Kirche Notenständer auf, während eine Helferin Programmblätter auf die Bänke legt",
+    imageAlt: "Adventskonzert in einer Kirche: Chor singt vor Kerzenlicht, Publikum applaudiert",
   },
   "widerrufsrecht-tickets": {
     id: "2026-11-06-widerrufsrecht-tickets",
@@ -1044,7 +1008,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Eine Vereinsvorsitzende liest im Vereinsheim am Fenster die Bestellbedingungen ihres Ticketshops auf dem Tablet gegen",
+      "Freunde sitzen lachend auf der Wiese beim Open-Air-Konzert in der Abenddämmerung, Laternen und warmes Bühnenlicht um sie herum",
   },
   "zahlungsarten-ticketshop": {
     id: "2026-11-06-zahlungsarten-ticketshop",
@@ -1059,8 +1023,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Eine junge Frau kauft abends auf dem Sofa mit ihrem Smartphone Konzerttickets, neben ihr liegt eine Bankkarte auf der Decke",
+    imageAlt: "Jubelnde Menge mit erhobenen Armen bei einem ausverkauften Arenakonzert im goldenen Licht",
   },
 } as const satisfies Record<string, ContentEntry>
 

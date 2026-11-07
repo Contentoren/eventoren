@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "clubnacht-veranstalten"
 author: "Eventoren Redaktion"
 image: "ratgeber-clubnacht-veranstalten"
-imageAlt: "Eine Promoterin und ein Clubbetreiber gehen am frühen Abend im noch leeren Club an der Bar einen Ablaufplan durch, im Hintergrund baut ein DJ sein Equipment auf"
+imageAlt: "Volle Tanzfläche einer Clubnacht: tanzende Gäste mit erhobenen Händen vor dem DJ-Pult in türkisfarbenem und bernsteinfarbenem Licht"
 category: "eventformate"
 keywords:
   [
@@ -52,6 +52,8 @@ Klärt vor jedem Deal schriftlich, wer was übernimmt:
 | Künstlersozialabgabe   |                   | wer die Gage zahlt      |                               |
 
 Bei der GEMA gilt: Hat der Club einen Vertrag, der Fremdveranstaltungen einschließt, musst du nicht selbst anmelden. Lass dir das schriftlich bestätigen. Sonst meldest du die Nacht vorher an, für DJs nach Tarif M-V. Wie das geht, steht im Ratgeber [GEMA für Veranstaltungen](/ratgeber/gema-veranstaltung).
+
+![Ausverkaufte Clubnacht aus Sicht des DJ-Pults: jubelnde Menge mit erhobenen Armen im bunten Scheinwerferlicht](ratgeber-clubnacht-veranstalten-szene-1)
 
 ## Welche Deals mit dem Club gibt es?
 
@@ -156,6 +158,8 @@ Clubpublikum entscheidet spät. Trotzdem lohnt es sich, den Vorverkauf aktiv zu 
 | **Summe**  | **400**    |       | nie über Kapazität          |
 
 Plane so, dass Vorverkauf plus Gästeliste die Kosten weitgehend decken. Die Abendkasse ist der Bonus. Wie viel Aufschlag an der Tür sinnvoll ist und wie eine bargeldlose Abendkasse läuft, erklärt der Ratgeber [Abendkasse organisieren](/ratgeber/abendkasse-organisieren).
+
+![Zügiger Einlass bei der Clubnacht: Gäste zeigen ihre Handytickets am Scan und strömen in den hell erleuchteten Club](ratgeber-clubnacht-veranstalten-szene-2)
 
 ## Wie hältst du die Gästeliste im Griff?
 
