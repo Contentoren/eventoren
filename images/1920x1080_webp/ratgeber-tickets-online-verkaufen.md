@@ -1,1 +1,1 @@
-Konzertmenge von hinten mit erhobenen Händen und Handylichtern vor einer leuchtenden Bühne
+Blick über die Schulter: Frau kauft am hellen Heimbüroplatz Tickets am Laptop mit verschwommenem Bildschirm

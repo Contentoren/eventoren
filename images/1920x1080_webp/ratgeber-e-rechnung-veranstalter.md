@@ -1,1 +1,1 @@
-Veranstalter blickt bei Sonnenuntergang über die jubelnde Menge seines Festivals
+Aufsicht auf Schreibtisch mit Taschenrechner, Rechnungsvordrucken und Laptop im hellen Tageslicht

@@ -1,1 +1,1 @@
-Begeisterte Fans strömen beim Einlass durch einen leuchtenden Tunnel in den Club, der DJ spielt bereits, Laserlichter tanzen über der Menge
+Detailaufnahme: Hände halten ein Smartphone mit verschwommenem Bildschirm, Festivalbändchen am Handgelenk

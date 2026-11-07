@@ -1,1 +1,1 @@
-Jubelnde Menge mit erhobenen Armen bei einem ausverkauften Arenakonzert im goldenen Licht
+Makroaufnahme: Hand hält Karte über ein Kartenterminal, daneben ein Festivalbändchen im neutralen Licht

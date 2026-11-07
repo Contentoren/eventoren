@@ -1,1 +1,1 @@
-Lächelnde Gäste passieren zügig den Einlass mit Scannern vor einer Konzerthalle am Abend
+Ordner scannt am hellen Nachmittag am Einlass ein Handyticket, dahinter wartet die Schlange geordnet

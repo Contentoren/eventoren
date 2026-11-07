@@ -1,1 +1,1 @@
-Riesige jubelnde Festivalmenge vor der Hauptbühne in der Abenddämmerung, Konfetti in der Luft
+Drohnenbild am klaren Morgen: Festivalgelände im Aufbau mit Bühne, Zelten und Fahnen ohne Publikum

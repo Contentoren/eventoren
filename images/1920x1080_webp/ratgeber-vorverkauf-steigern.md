@@ -1,1 +1,1 @@
-Künstler-Silhouette am Bühnenrand mit Konfettikanonen über einem Meer erhobener Hände
+Fröhliche Warteschlange an einer Holzkasse auf dem Dorfplatz am sonnigen Samstagmorgen

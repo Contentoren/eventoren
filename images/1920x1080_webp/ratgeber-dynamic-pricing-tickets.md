@@ -1,1 +1,1 @@
-Euphorische Konzertmenge mit erhobenen Händen bei einer Nachtshow in der Arena, bunte Lichtstrahlen fächern über die jubelnden Fans
+Teleaufnahme der fernen Festivalbühne in kühlem Blau nach Sonnenuntergang, Menge als dunkle Textur

@@ -1,1 +1,1 @@
-Jubelnde Festivalmenge bei Sonnenuntergang aus erhöhter Perspektive, türkisfarbenes Bühnenlicht und warme Lichterketten über tanzenden Gästen
+Drohnenblick am hellen Mittag auf grünes Festivalgelände mit Bühne, Zelten und Riesenrad

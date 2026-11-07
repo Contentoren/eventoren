@@ -1,1 +1,1 @@
-Rockband auf der Bühne vor tobender Menge mit erhobenen Händen im Scheinwerferlicht
+Leere Konzertbühne beim Soundcheck am Nachmittag im harten Arbeitslicht, keine Zuschauer

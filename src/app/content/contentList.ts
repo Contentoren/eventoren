@@ -20,8 +20,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Fröhliche Gäste strömen am Abend in den warm beleuchteten Eingang eines kleinen Clubs, halten ihre Smartphones mit den Tickets bereit und lachen, während drinnen die Bühne leuchtet",
+    imageAlt: "Nahaufnahme: Gast zahlt am hellen Nachmittag kontaktlos an einer Holzkasse per Smartphone",
   },
   "abiball-finanzieren-sponsoren": {
     id: "2026-11-06-abiball-finanzieren-sponsoren",
@@ -130,7 +129,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Ausverkauftes Konzert: begeistertes Publikum mit erhobenen Händen vor farbig beleuchteter Bühne",
+    imageAlt: "Aufsicht auf einen aufgeräumten Schreibtisch mit Vertrag, Tickets und Lanyard im neutralen Tageslicht",
   },
   "barrierefreiheit-bfsg": {
     id: "2026-11-06-barrierefreiheit-bfsg",
@@ -176,8 +175,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Volle Tanzfläche einer Clubnacht: tanzende Gäste mit erhobenen Händen vor dem DJ-Pult in türkisfarbenem und bernsteinfarbenem Licht",
+    imageAlt: "Clubnacht aus Bodennähe im kühlen blauen Licht: DJ-Pult über tanzender Menge in blauen Strahlen",
   },
   "dsgvo-veranstalter": {
     id: "2026-11-06-dsgvo-veranstalter",
@@ -192,7 +190,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Blick über die Schulter eines Fotografen auf eine tanzende Festivalmenge in der Abenddämmerung",
+    imageAlt: "Nahaufnahme am Schreibtisch: Laptop mit verschwommenem Bildschirm, Klemmbrett und Festivalbändchen",
   },
   "dynamic-pricing-tickets": {
     id: "2026-11-06-dynamic-pricing-tickets",
@@ -207,8 +205,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Euphorische Konzertmenge mit erhobenen Händen bei einer Nachtshow in der Arena, bunte Lichtstrahlen fächern über die jubelnden Fans",
+    imageAlt: "Teleaufnahme der fernen Festivalbühne in kühlem Blau nach Sonnenuntergang, Menge als dunkle Textur",
   },
   "e-rechnung-veranstalter": {
     id: "2026-11-06-e-rechnung-veranstalter",
@@ -223,7 +220,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Veranstalter blickt bei Sonnenuntergang über die jubelnde Menge seines Festivals",
+    imageAlt: "Aufsicht auf Schreibtisch mit Taschenrechner, Rechnungsvordrucken und Laptop im hellen Tageslicht",
   },
   "e-ticket-hilfe": {
     id: "2026-11-06-e-ticket-hilfe",
@@ -238,8 +235,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Gut gelaunte Festivalgäste zeigen am Einlass bei Sonnenuntergang ihre Handytickets, Helfer scannen sie lächelnd",
+    imageAlt: "Detail am hellen Mittag: Ordnerhand scannt das leuchtende Handyticket eines Gastes am Einlass",
   },
   "early-bird-tickets": {
     id: "2026-11-06-early-bird-tickets",
@@ -300,8 +296,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Begeistertes Publikum mit erhobenen Händen und Konfetti vor der Bühne eines ausverkauften Clubkonzerts im bunten Licht",
+    imageAlt: "Makroaufnahme blanker Eintrittskarten und Stoffbändchen auf hellem Leinen im weichen Tageslicht",
   },
   "event-marketing": {
     id: "2026-11-06-event-marketing",
@@ -316,7 +311,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Riesige jubelnde Festivalmenge vor der Hauptbühne in der Abenddämmerung, Konfetti in der Luft",
+    imageAlt: "Drohnenbild am klaren Morgen: Festivalgelände im Aufbau mit Bühne, Zelten und Fahnen ohne Publikum",
   },
   "event-sichtbar-google-ki": {
     id: "2026-11-06-event-sichtbar-google-ki",
@@ -347,7 +342,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Ausverkaufte Clubshow mit jubelnden Gästen und Konfetti im bunten Bühnenlicht",
+    imageAlt: "Veranstalterin vergleicht in einem hellen Büro zwei Laptops mit verschwommenen Bildschirmen",
   },
   "eventbudget-planen": {
     id: "2026-11-06-eventbudget-planen",
@@ -377,7 +372,8 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Ausverkaufte Clubshow: Sänger auf der Bühne vor jubelndem Publikum mit erhobenen Händen",
+    imageAlt:
+      "Weite Tagesansicht des Eingangsportals einer Stadthalle mit kleiner Warteschlange unter blassblauem Himmel",
   },
   "eventlocation-finden": {
     id: "2026-11-06-eventlocation-finden",
@@ -454,7 +450,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Redaktion",
     imageAlt:
-      "Begeisterte Fans strömen beim Einlass durch einen leuchtenden Tunnel in den Club, der DJ spielt bereits, Laserlichter tanzen über der Menge",
+      "Detailaufnahme: Hände halten ein Smartphone mit verschwommenem Bildschirm, Festivalbändchen am Handgelenk",
   },
   "gaesteliste-vorlage": {
     id: "2026-11-06-gaesteliste-vorlage",
@@ -469,7 +465,8 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Türsteherin begrüßt lächelnde Gäste am Club-Eingang, aus der offenen Tür strömt warmes Licht",
+    imageAlt:
+      "Blick durch die offene Tür: Gastgeberin prüft Gästeliste auf Klemmbrett, Gäste warten auf sonnigen Stufen",
   },
   "gema-veranstaltung": {
     id: "2026-11-06-gema-veranstaltung",
@@ -484,7 +481,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Blaskapelle auf einer Dorfbühne im Abendlicht, Publikum als Silhouetten im Vordergrund",
+    imageAlt: "Blaskapelle spielt am Vormittag auf dem Dorfplatz, Familien tanzen davor unter blauem Himmel",
   },
   "helfer-minijob-ehrenamt": {
     id: "2026-11-06-helfer-minijob-ehrenamt",
@@ -545,8 +542,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Junges DJ-Kollektiv feiert hinter dem DJ-Pult seiner eigenen Partyreihe, davor tanzende Menge im türkisen und warmen Licht",
+    imageAlt: "Leerer kleiner Veranstaltungssaal im klaren Morgenlicht mit gestapelten Stühlen und kleiner Bühne",
   },
   "konzert-veranstalten": {
     id: "2026-11-06-konzert-veranstalten",
@@ -561,7 +557,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Rockband auf der Bühne vor tobender Menge mit erhobenen Händen im Scheinwerferlicht",
+    imageAlt: "Leere Konzertbühne beim Soundcheck am Nachmittag im harten Arbeitslicht, keine Zuschauer",
   },
   "kostenlose-events-anmeldung": {
     id: "2026-11-06-kostenlose-events-anmeldung",
@@ -592,7 +588,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Band spielt auf kleiner Bühne vor tanzendem Publikum bei einem Sommerfest",
+    imageAlt: "Folkduo spielt mittags auf dem Dorfplatz vor applaudierenden Zuhörern in hellem Sonnenlicht",
   },
   "lesung-comedy-kleinkunst": {
     id: "2026-11-06-lesung-comedy-kleinkunst",
@@ -637,8 +633,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Jubelnde Fans mit erhobenen Armen und bunten Festivalbändchen vor der Bühne einer ausverkauften Show im bunten Bühnenlicht",
+    imageAlt: "Makroaufnahme eines Stoffbändchens am Handgelenk im weichen Tageslicht, Garten unscharf dahinter",
   },
   "schulveranstaltung-tickets": {
     id: "2026-11-06-schulveranstaltung-tickets",
@@ -668,8 +663,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Entspannte Gästemenge beim Open-Air-Konzert in der Abendsonne, Ordner mit Lanyards lächeln mitten unter den Gästen",
+    imageAlt: "Drohnenaufnahme des Festivalgeländes am hellen Nachmittag mit Bühne, Rettungswegen und Sanitätszelt",
   },
   "silvesterparty-2026": {
     id: "2026-11-06-silvesterparty-2026",
@@ -731,7 +725,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Gästemenge strömt bei goldenem Abendlicht durch die geschmückten Eingangstore eines Sommerfestivals",
+    imageAlt: "Aufsicht auf Ticketheft, drei Stoffbändchen und Lanyard in einer Reihe auf dunklem Schiefer",
   },
   "ticketbetrug-verhindern": {
     id: "2026-11-06-ticketbetrug-verhindern",
@@ -746,7 +740,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Lächelnde Gäste passieren zügig den Einlass mit Scannern vor einer Konzerthalle am Abend",
+    imageAlt: "Ordner scannt am hellen Nachmittag am Einlass ein Handyticket, dahinter wartet die Schlange geordnet",
   },
   ticketgebuehren: {
     id: "2026-11-06-ticketgebuehren",
@@ -777,7 +771,8 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Tausende feiern nachts vor der Hauptbühne eines Festivals im bunten Licht",
+    imageAlt:
+      "Zwei Laptops mit verschwommenen Bildschirmen und Vergleichstabelle auf einem Bürotisch im neutralen Licht",
   },
   "ticketing-glossar": {
     id: "2026-11-06-ticketing-glossar",
@@ -823,8 +818,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Ekstatische Menge mit erhobenen Armen in einer ausverkauften Konzerthalle, Band auf der Bühne im warmen Scheinwerferlicht",
+    imageAlt: "Hand schreibt Zahlen in ein Notizbuch neben Taschenrechner und Kaffee im morgendlichen Fensterlicht",
   },
   "tickets-online-verkaufen": {
     id: "2026-11-06-tickets-online-verkaufen",
@@ -839,7 +833,8 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Konzertmenge von hinten mit erhobenen Händen und Handylichtern vor einer leuchtenden Bühne",
+    imageAlt:
+      "Blick über die Schulter: Frau kauft am hellen Heimbüroplatz Tickets am Laptop mit verschwommenem Bildschirm",
   },
   "tickets-weiterverkaufen": {
     id: "2026-11-06-tickets-weiterverkaufen",
@@ -870,7 +865,8 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Jubelnde Open-Air-Menge mit erhobenen Händen im goldenen Abendlicht vor der Bühne",
+    imageAlt:
+      "Schreibtisch von oben im hellen Mittagslicht: Laptop mit verschwommenem Bildschirm, Hände tippen am Rand",
   },
   "umsatzsteuer-eintrittskarten": {
     id: "2026-11-06-umsatzsteuer-eintrittskarten",
@@ -915,8 +911,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Jubelnde Menge beim Open-Air-Konzert in der Abendsonne: Gäste mit erhobenen Händen vor der Bühne, Konfetti in der Luft",
+    imageAlt: "Leere Open-Air-Bühne an einem grauen Morgen mit verwaisten Bänken und einem Techniker am Rand",
   },
   "veranstaltung-anmelden-genehmigung": {
     id: "2026-11-06-veranstaltung-anmelden-genehmigung",
@@ -931,7 +926,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Belebtes Straßenfest mit Ständen, Musik und flanierenden Familien am Sommerabend",
+    imageAlt: "Morgendlicher Aufbau auf dem Marktplatz vor dem Rathaus, zwei Organisatoren spannen Absperrband",
   },
   "veranstaltung-planen-checkliste": {
     id: "2026-11-06-veranstaltung-planen-checkliste",
@@ -977,7 +972,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Künstler-Silhouette am Bühnenrand mit Konfettikanonen über einem Meer erhobener Hände",
+    imageAlt: "Fröhliche Warteschlange an einer Holzkasse auf dem Dorfplatz am sonnigen Samstagmorgen",
   },
   "weihnachtsfeier-adventsveranstaltung": {
     id: "2026-11-06-weihnachtsfeier-adventsveranstaltung",
@@ -1007,8 +1002,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt:
-      "Freunde sitzen lachend auf der Wiese beim Open-Air-Konzert in der Abenddämmerung, Laternen und warmes Bühnenlicht um sie herum",
+    imageAlt: "Freunde sitzen an einem bedeckten Tag entspannt auf Picknickdecken vor kleiner Bühne auf grüner Wiese",
   },
   "zahlungsarten-ticketshop": {
     id: "2026-11-06-zahlungsarten-ticketshop",
@@ -1023,7 +1017,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Redaktion",
-    imageAlt: "Jubelnde Menge mit erhobenen Armen bei einem ausverkauften Arenakonzert im goldenen Licht",
+    imageAlt: "Makroaufnahme: Hand hält Karte über ein Kartenterminal, daneben ein Festivalbändchen im neutralen Licht",
   },
 } as const satisfies Record<string, ContentEntry>
 

@@ -1,1 +1,1 @@
-Gut gelaunte Festivalgäste zeigen am Einlass bei Sonnenuntergang ihre Handytickets, Helfer scannen sie lächelnd
+Detail am hellen Mittag: Ordnerhand scannt das leuchtende Handyticket eines Gastes am Einlass

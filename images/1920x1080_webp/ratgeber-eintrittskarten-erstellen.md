@@ -1,1 +1,1 @@
-Begeistertes Publikum mit erhobenen Händen und Konfetti vor der Bühne eines ausverkauften Clubkonzerts im bunten Licht
+Makroaufnahme blanker Eintrittskarten und Stoffbändchen auf hellem Leinen im weichen Tageslicht

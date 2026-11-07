@@ -1,1 +1,1 @@
-Jubelnde Open-Air-Menge mit erhobenen Händen im goldenen Abendlicht vor der Bühne
+Schreibtisch von oben im hellen Mittagslicht: Laptop mit verschwommenem Bildschirm, Hände tippen am Rand

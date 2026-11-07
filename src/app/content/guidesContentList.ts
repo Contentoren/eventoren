@@ -20,8 +20,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "Cheerful guests stream into the warmly lit entrance of a small club in the evening, smartphones with tickets ready, laughing as the stage glows inside",
+    imageAlt: "Close-up: guest paying contactless by phone at a wooden box-office counter in bright afternoon sun",
   },
   "charity-event-tickets": {
     id: "2026-11-06-charity-event-tickets",
@@ -51,8 +50,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "An ecstatic concert crowd with raised hands at a night-time arena show, colourful light beams sweeping over the cheering fans",
+    imageAlt: "Telephoto shot of the distant main stage in cool blue hour light, crowd dissolving into dark texture",
   },
   "e-invoicing-event-organisers": {
     id: "2026-11-06-e-invoicing-event-organisers",
@@ -67,7 +65,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt: "Event organiser looking over the cheering crowd of his festival at sunset",
+    imageAlt: "Top-down desk flat-lay with calculator, blank invoice sheets and laptop in bright daylight",
   },
   "early-bird-tickets": {
     id: "2026-11-06-early-bird-tickets",
@@ -128,8 +126,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "Cheering crowd at an open-air concert in the evening sun: guests with raised hands in front of the stage, confetti in the air",
+    imageAlt: "Empty open-air stage on a grey overcast morning with vacant benches and a lone technician",
   },
   "event-entry-queue-management": {
     id: "2026-11-06-event-entry-queue-management",
@@ -191,7 +188,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt: "Sold-out club show with cheering guests and confetti in colourful stage light",
+    imageAlt: "Young organiser comparing two laptops with blurred screens in a bright modern office",
   },
   "fake-tickets": {
     id: "2026-11-06-fake-tickets",
@@ -221,7 +218,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt: "View over a photographer's shoulder of a dancing festival crowd at dusk",
+    imageAlt: "Close desk detail: laptop with blurred screen, clipboard and fabric wristband in neutral office light",
   },
   "guest-list-management": {
     id: "2026-11-06-guest-list-management",
@@ -236,7 +233,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt: "Door host greeting smiling guests at a club entrance with warm light spilling from the open door",
+    imageAlt: "View through the open venue doorway: host checking a guest list on a clipboard in soft morning light",
   },
   "how-to-organise-a-festival": {
     id: "2026-11-06-how-to-organise-a-festival",
@@ -266,7 +263,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt: "An ecstatic crowd with raised arms in a sold-out concert hall, the band on stage in warm spotlight",
+    imageAlt: "Hand writing figures into a blank notebook beside a calculator and coffee in morning window light",
   },
   "how-to-run-a-club-night": {
     id: "2026-11-06-how-to-run-a-club-night",
@@ -281,8 +278,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "Packed dance floor on a club night: dancing guests with hands in the air in front of the DJ booth in teal and amber light",
+    imageAlt: "Club night from ground level in cool blue light: DJ booth towering over the dancing crowd",
   },
   "presale-codes": {
     id: "2026-11-06-presale-codes",
@@ -297,8 +293,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "Excited fans stream through a glowing tunnel into the club at doors, the DJ already playing as laser lights dance over the crowd",
+    imageAlt: "Hands-only detail: smartphone with blurred screen held up at the gate, fabric wristband on the wrist",
   },
   "qr-code-ticket-check-in": {
     id: "2026-11-06-qr-code-ticket-check-in",
@@ -328,7 +323,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt: "Concert crowd seen from behind with raised hands and phone lights facing a glowing stage",
+    imageAlt: "Over-the-shoulder view: woman buying tickets on a laptop with blurred screen at a bright home desk",
   },
   "ticket-payment-methods-europe": {
     id: "2026-11-06-ticket-payment-methods-europe",
@@ -343,7 +338,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt: "Cheering crowd with raised arms at a sold-out arena concert in golden light",
+    imageAlt: "Macro detail: hand holding a card over a payment terminal beside a wristband in neutral indoor light",
   },
   "ticket-resale-rules-europe": {
     id: "2026-11-06-ticket-resale-rules-europe",
@@ -374,7 +369,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt: "Thousands celebrating at night in front of a festival main stage in colourful light",
+    imageAlt: "Two laptops with blurred screens and a blank comparison sheet on an office table in neutral light",
   },
   "vat-on-event-tickets-europe": {
     id: "2026-11-06-vat-on-event-tickets-europe",

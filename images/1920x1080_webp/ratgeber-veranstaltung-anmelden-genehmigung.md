@@ -1,1 +1,1 @@
-Belebtes Straßenfest mit Ständen, Musik und flanierenden Familien am Sommerabend
+Morgendlicher Aufbau auf dem Marktplatz vor dem Rathaus, zwei Organisatoren spannen Absperrband

@@ -1,1 +1,1 @@
-Ausverkaufte Clubshow: Sänger auf der Bühne vor jubelndem Publikum mit erhobenen Händen
+Weite Tagesansicht des Eingangsportals einer Stadthalle mit kleiner Warteschlange unter blassblauem Himmel

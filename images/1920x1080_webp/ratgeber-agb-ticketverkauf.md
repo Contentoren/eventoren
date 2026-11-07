@@ -1,1 +1,1 @@
-Ausverkauftes Konzert: begeistertes Publikum mit erhobenen Händen vor farbig beleuchteter Bühne
+Aufsicht auf einen aufgeräumten Schreibtisch mit Vertrag, Tickets und Lanyard im neutralen Tageslicht

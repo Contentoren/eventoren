@@ -1,1 +1,1 @@
-Fröhliche Gäste strömen am Abend in den warm beleuchteten Eingang eines kleinen Clubs, halten ihre Smartphones mit den Tickets bereit und lachen, während drinnen die Bühne leuchtet
+Nahaufnahme: Gast zahlt am hellen Nachmittag kontaktlos an einer Holzkasse per Smartphone

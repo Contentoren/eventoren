@@ -1,1 +1,1 @@
-Band spielt auf kleiner Bühne vor tanzendem Publikum bei einem Sommerfest
+Folkduo spielt mittags auf dem Dorfplatz vor applaudierenden Zuhörern in hellem Sonnenlicht

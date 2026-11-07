@@ -1,1 +1,1 @@
-Blaskapelle auf einer Dorfbühne im Abendlicht, Publikum als Silhouetten im Vordergrund
+Blaskapelle spielt am Vormittag auf dem Dorfplatz, Familien tanzen davor unter blauem Himmel

@@ -1,1 +1,1 @@
-Junges DJ-Kollektiv feiert hinter dem DJ-Pult seiner eigenen Partyreihe, davor tanzende Menge im türkisen und warmen Licht
+Leerer kleiner Veranstaltungssaal im klaren Morgenlicht mit gestapelten Stühlen und kleiner Bühne
