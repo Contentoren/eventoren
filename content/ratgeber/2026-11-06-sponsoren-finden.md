@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "sponsoren-finden"
 author: "Eventoren Redaktion"
 image: "ratgeber-sponsoren-finden"
-imageAlt: "Eine Veranstalterin und der Inhaber einer kleinen Brauerei gehen im Sudhaus zwischen Kupferkesseln gemeinsam eine aufgeschlagene Mappe durch"
+imageAlt: "Jubelnde Menge vor der Festivalbühne in der Abenddämmerung, geschmückte Bühne mit Fahnen und warmem Licht"
 category: "planung-marketing"
 keywords:
   [
@@ -46,6 +46,8 @@ Der Unterschied zur **Spende**: Eine Spende ist freiwillig und ohne Gegenleistun
 | Mischformen             | Zahlung über den Paketpreis hinaus kann gesondert als Spende behandelt werden, wenn sie klar getrennt ist | –                                                                |
 
 Wie Spenden und Tickets bei Benefizveranstaltungen sauber getrennt werden, erklärt der Ratgeber [Benefizveranstaltung organisieren](/ratgeber/benefizveranstaltung). Für Abibälle gibt es einen eigenen Ratgeber [Abiball finanzieren](/ratgeber/abiball-finanzieren-sponsoren) mit Paketen in kleinerem Rahmen.
+
+![Familien und Freunde feiern am Nachmittag vor der Bühne eines Dorffestivals mit bunten Wimpelketten und Sonnenschein](ratgeber-sponsoren-finden-szene-1)
 
 ## Welche Unternehmen kommen als Sponsor in Frage?
 
@@ -250,6 +252,8 @@ Ein Sponsor, der nach dem Event nichts mehr hört, sponsert im nächsten Jahr se
 | Ausblick                 | Termin im nächsten Jahr, Angebot zur Verlängerung, Frist für die Zusage                                                                            |
 
 Achte bei Fotos auf den Datenschutz: Zeig vor allem Bilder von Banner, Bühne und Stand und nur dann erkennbare Gäste, wenn du ihre Einwilligung hast. Wie du Fotos rechtssicher nutzt, steht im Ratgeber [DSGVO für Veranstalter](/ratgeber/dsgvo-veranstalter).
+
+![Glückliche Festivalbesucher feiern das große Konfettifinale in der Nacht vor der strahlend beleuchteten Bühne](ratgeber-sponsoren-finden-szene-2)
 
 ## So setzt du das mit Eventoren um
 

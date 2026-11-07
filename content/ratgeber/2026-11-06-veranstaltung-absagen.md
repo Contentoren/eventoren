@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "veranstaltung-absagen"
 author: "Eventoren Redaktion"
 image: "ratgeber-veranstaltung-absagen"
-imageAlt: "Zwei Organisatorinnen stehen bei Sturm unter einem Vordach am leeren Festgelände und besprechen am Telefon die Absage"
+imageAlt: "Jubelnde Menge beim Open-Air-Konzert in der Abendsonne: Gäste mit erhobenen Händen vor der Bühne, Konfetti in der Luft"
 category: "recht-steuern"
 keywords:
   [
@@ -49,6 +49,8 @@ Dieser Artikel ersetzt keine Rechts- oder Steuerberatung.
 
 Die Verbraucherzentrale NRW gewichtet bei Line-up-Änderungen danach, wie wichtig der Act ist: Der Ausfall eines Solokünstlers berechtigt eher zur Erstattung als der eines Backgroundsängers. Bei mehrtägigen Festivals ist der Austausch einzelner Bands, die keine Headliner sind, eher hinzunehmen.
 
+![Voller Konzertsaal applaudiert beim Ersatztermin: Publikum erhebt sich jubelnd, Bühne im warmen Licht](ratgeber-veranstaltung-absagen-szene-1)
+
 ## Welche Rechte haben Ticketkäufer bei einer Absage?
 
 Mit dem Ticketkauf schließt der Käufer einen Vertrag mit dir als Veranstalter. Kannst du die Veranstaltung nicht durchführen, entfällt dein Anspruch auf den Ticketpreis (§ 326 Abs. 1 BGB). Was schon gezahlt wurde, kann der Käufer nach § 326 Abs. 4 i. V. m. §§ 346 bis 348 BGB **zurückfordern**. Daneben kann er zurücktreten (§ 326 Abs. 5 BGB).
@@ -64,6 +66,8 @@ Das gilt **unabhängig vom Verschulden**. Die Verbraucherzentrale NRW formuliert
 | Zinsen                          | nur bei Verzug mit der Rückzahlung                                                                                   |
 
 **Wer zahlt zurück?** Laut BGH (Urt. v. 13.07.2022 – VIII ZR 317/21) hat eine Vorverkaufsstelle, die als Kommissionärin verkauft, mit der Übergabe des Tickets ihre Pflicht erfüllt und haftet für die Absage grundsätzlich nicht. Verantwortlich bist **du als Veranstalter**. In der Praxis übertragen Veranstalter die Rückabwicklung oft an die Ticketplattform. Das solltest du vorab vertraglich klären.
+
+![Begeisterte Festivalmenge mit Konfetti bei Sonnenuntergang: tanzende Gäste mit erhobenen Armen vor der Hauptbühne](ratgeber-veranstaltung-absagen-szene-2)
 
 ### Gutschein statt Geld?
 

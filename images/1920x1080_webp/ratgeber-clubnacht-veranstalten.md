@@ -1,1 +1,1 @@
-Eine Promoterin und ein Clubbetreiber gehen am frühen Abend im noch leeren Club an der Bar einen Ablaufplan durch, im Hintergrund baut ein DJ sein Equipment auf
+Volle Tanzfläche einer Clubnacht: tanzende Gäste mit erhobenen Händen vor dem DJ-Pult in türkisfarbenem und bernsteinfarbenem Licht

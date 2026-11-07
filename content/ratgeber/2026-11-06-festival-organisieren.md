@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "festival-organisieren"
 author: "Eventoren Redaktion"
 image: "ratgeber-festival-organisieren"
-imageAlt: "Eine Festivalleiterin und ein Bühnentechniker gehen am Vortag eines kleinen Open-Air-Festivals mit Funkgerät über die Wiese, im Hintergrund wird die Bühne aufgebaut"
+imageAlt: "Festivalgelände in der Abenddämmerung von oben: Hauptbühne, Riesenrad, Zelte und Lichterketten"
 category: "eventformate"
 keywords:
   [
@@ -49,6 +49,8 @@ Bevor du Bands anfragst, lege fünf Eckdaten fest. Sie bestimmen fast jede spät
 | Träger   | Verein, Unternehmen, Privatperson     | Haftung, Steuern, Gemeinnützigkeit                  |
 
 Ein erstes Festival mit 300 bis 1.500 Gästen an einem bekannten Ort ist realistisch. Für alles darüber brauchst du Erfahrung aus kleineren Ausgaben und ein Team mit klaren Verantwortlichkeiten: Leitung, Booking, Produktion und Technik, Sicherheit, Gastronomie, Ticketing und Finanzen, Helferkoordination.
+
+![Festivalgelände bei Sonnenuntergang: Gäste schlendern zwischen Foodtrucks und zwei Bühnen über die Wiese, Lichterketten leuchten](ratgeber-festival-organisieren-szene-1)
 
 ## Welcher Zeitplan gilt für ein Festival 2027?
 
@@ -183,6 +185,8 @@ Bei einem mehrtägigen Festival scannst du jedes Ticket genau einmal, beim erste
 - **Internet am Einlass prüfen:** Auf freiem Feld ist das Mobilfunknetz bei 1.500 Menschen schnell überlastet. Plane eigenes WLAN oder einen Router mit Außenantenne.
 
 Wie viele Scanpunkte du für 1.500 Gäste brauchst, berechnest du mit der Formel im Ratgeber [Einlassmanagement](/ratgeber/einlassmanagement-warteschlangen).
+
+![Lächelnde Helfer legen am Festivaleingang ankommenden Gästen Stoffbändchen an, dahinter Sonne und volle Einlassspuren](ratgeber-festival-organisieren-szene-2)
 
 ## Was gehört in den Wetter- und Nachhaltigkeitsplan?
 

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "how-to-price-event-tickets"
 author: "Eventoren Editorial Team"
 image: "ratgeber-ticketpreis-kalkulieren"
-imageAlt: "Two organisers sit at a kitchen table late in the evening with a laptop, a notebook and a calculator, planning the costs of a concert"
+imageAlt: "An ecstatic crowd with raised arms in a sold-out concert hall, the band on stage in warm spotlight"
 category: "selling-tickets"
 keywords:
   [
@@ -52,6 +52,8 @@ Every pricing decision starts with an honest cost list split into two groups:
 | VAT                | variable           | part of the gross ticket price                         | rate depends on the event type and country                  |
 
 The two classic mistakes: forgetting that VAT sits inside the price your guest pays, and having no buffer. Add 10 % of your fixed costs as contingency. For a full cost template, see our [event budget template](/en/guides/event-budget-template).
+
+![A live band plays on a small club stage before an enthusiastic audience, warm stage light and raised hands in the foreground](ratgeber-ticketpreis-kalkulieren-szene-1)
 
 ## What is the break-even formula for event tickets?
 
@@ -134,6 +136,8 @@ How to read it:
 - **A higher price can mean fewer buyers.** Check the cell you actually expect, not the best one. If your realistic cell is still red, no pricing trick helps: cut fixed costs, negotiate a door deal or find a sponsor.
 
 Then sanity-check against the market: what do comparable shows at similar venues in your city charge? Start from your costs, then adjust to the market, never the other way round.
+
+![A packed concert hall at the encore under sparkling light, the audience clapping in rhythm](ratgeber-ticketpreis-kalkulieren-szene-2)
 
 ## Should you pass the booking fee on or absorb it?
 

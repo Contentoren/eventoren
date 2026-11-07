@@ -1,1 +1,1 @@
-Drei junge Leute aus einem Veranstaltungsteam hängen nachmittags in einem Café Plakate auf und verteilen Flyer an der Theke
+Künstler-Silhouette am Bühnenrand mit Konfettikanonen über einem Meer erhobener Hände

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "sportveranstaltung-turnier"
 author: "Eventoren Redaktion"
 image: "ratgeber-sportveranstaltung-turnier"
-imageAlt: "Jugendmannschaften wärmen sich auf einem Sportplatz am Morgen eines Turniers auf, im Vordergrund prüft ein Betreuer eine Liste am Spielfeldrand"
+imageAlt: "Jugendmannschaft bejubelt ein Tor im Finale, Zuschauer applaudieren am Spielfeldrand"
 category: "vereine-schulen"
 keywords:
   [
@@ -46,6 +46,8 @@ Bevor du Hallen buchst oder Einladungen verschickst, klärt das Orga-Team fünf 
 | Startgeld und Eintritt?            | nur Startgeld, nur Eintritt, beides, nichts                | Steuer, Ticketing, Einlass                                       |
 
 Ein **Sportturnier** ist eine Veranstaltung, in der mehrere Mannschaften oder Einzelsportler nach einem festen Modus gegeneinander antreten. Für Fußball definiert etwa der Württembergische Fußballverband ein Turnier als Veranstaltung mit mindestens fünf Mannschaften. Bis zu vier Teams spricht man dort von „Blitzturnier“, das keine eigene Genehmigung braucht.
+
+![Spannender Zweikampf beim Hobbyturnier vor mitfiebernden Zuschauern](ratgeber-sportveranstaltung-turnier-szene-1)
 
 ## Brauchst du eine Genehmigung für ein Fußballturnier?
 
@@ -179,6 +181,8 @@ Praxisorientierung für Vereinsturniere:
 - **Hitze im Sommer:** Wasser, Schatten und kürzere Spielzeiten einplanen.
 
 Lege fest, wer im Notfall den Rettungsdienst ruft, wer ihn an der Einfahrt abholt und wo der Defibrillator hängt. Was ein Sicherheitskonzept bei größeren Veranstaltungen enthält, erklärt der Ratgeber [Sicherheitskonzept für Veranstaltungen](/ratgeber/sicherheitskonzept-veranstaltung).
+
+![Siegerehrung beim Jugendturnier: Kinder mit Medaillen werden vom Publikum gefeiert](ratgeber-sportveranstaltung-turnier-szene-2)
 
 ## Wie läuft der Turniertag ab?
 

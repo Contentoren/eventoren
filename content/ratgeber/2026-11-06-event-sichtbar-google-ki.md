@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "event-sichtbar-google-ki"
 author: "Eventoren Redaktion"
 image: "ratgeber-event-sichtbar-google-ki"
-imageAlt: "Ein Veranstalter sitzt nach Feierabend in einem kleinen Vereinsbüro am Laptop und pflegt die Eventseite, neben ihm liegt ein Stapel Plakate"
+imageAlt: "Riesige jubelnde Festivalmenge bei Tageslicht vor der Hauptbühne mit bunten Fahnen, alle Hände in der Luft"
 category: "planung-marketing"
 keywords:
   [
@@ -58,6 +58,8 @@ Die Richtlinien schließen einige Fälle aus. Das ist für viele Veranstalter wi
 | Öffnungszeiten, Gutscheine, Reisepakete                                                      | nein                              | nicht als Event auszeichnen                                 |
 
 Ein Event mit einem Presale nur per Code und einem späteren öffentlichen Verkauf ist dagegen ein normales öffentliches Event. Wie du Presales aufsetzt, steht im Ratgeber [Presale- und Freischaltcodes](/ratgeber/freischaltcodes-presale). Für Theater und Konzerte an Schulen hilft der Ratgeber [Tickets für Schulveranstaltungen](/ratgeber/schulveranstaltung-tickets).
+
+![Abendliche Arenashow, tausende Besucher halten leuchtende Smartphones hoch und filmen den Auftritt unter funkelndem Bühnenlicht](ratgeber-event-sichtbar-google-ki-szene-1)
 
 ## Was sind strukturierte Daten für Events?
 
@@ -164,6 +166,8 @@ Strukturierte Daten ersetzen keinen guten Text. Google weist darauf hin, dass di
 - Programm oder Line-up mit Zeiten, sobald bekannt.
 - Barrierefreiheit, Garderobe, Parken, Hinweise zu Fotos.
 - Veranstalter mit Kontakt.
+
+![Begeisterte Konzertbesucher klatschen im ausverkauften Saal, auf der Bühne verbeugt sich die Band im Scheinwerferlicht](ratgeber-event-sichtbar-google-ki-szene-2)
 
 ## Wie hilft das Google Unternehmensprofil?
 

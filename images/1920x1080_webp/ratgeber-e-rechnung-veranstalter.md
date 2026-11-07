@@ -1,1 +1,1 @@
-Ein Veranstalter vergleicht im Produktionsbüro eines Festivalgeländes eine Papierrechnung mit den Daten auf seinem Laptop
+Veranstalter blickt bei Sonnenuntergang über die jubelnde Menge seines Festivals

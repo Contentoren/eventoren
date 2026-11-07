@@ -1,1 +1,1 @@
-Eine Veranstalterin und der Inhaber einer kleinen Brauerei gehen im Sudhaus zwischen Kupferkesseln gemeinsam eine aufgeschlagene Mappe durch
+Jubelnde Menge vor der Festivalbühne in der Abenddämmerung, geschmückte Bühne mit Fahnen und warmem Licht

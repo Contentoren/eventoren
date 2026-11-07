@@ -1,1 +1,1 @@
-Zwei Helferinnen geben am Morgen einer Fachkonferenz im Foyer eines Tagungszentrums Namensschilder an ankommende Teilnehmende aus
+Großes Konferenzpublikum applaudiert stehend in einem modernen Kongresssaal dem Vortrag auf der Bühne

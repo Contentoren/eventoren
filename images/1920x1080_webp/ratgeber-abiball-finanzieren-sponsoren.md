@@ -1,1 +1,1 @@
-Zwei Abiturienten stellen einem Bäckermeister im Verkaufsraum seiner Bäckerei eine Mappe mit Sponsoring-Paketen für ihren Abiball vor
+Abiballpaar tanzt unter goldenem Konfettiregen im festlich beleuchteten Ballsaal, umgeben von feiernden Gästen an gedeckten Tischen

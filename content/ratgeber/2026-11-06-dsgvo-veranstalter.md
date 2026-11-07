@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "dsgvo-veranstalter"
 author: "Eventoren Redaktion"
 image: "ratgeber-dsgvo-veranstalter"
-imageAlt: "Eine Helferin befestigt am Eingang eines Vereinsheims ein Hinweisblatt an einer Staffelei, während ein Fotograf mit Kamera im Hintergrund den Saal betritt"
+imageAlt: "Blick über die Schulter eines Fotografen auf eine tanzende Festivalmenge in der Abenddämmerung"
 category: "recht-steuern"
 keywords:
   [
@@ -48,6 +48,8 @@ Dazu kommen Grundpflichten:
 - **Informationspflicht** (Art. 13): Gäste erfahren beim Kauf, was mit ihren Daten passiert.
 - **Verzeichnis von Verarbeitungstätigkeiten** (Art. 30): Die Ausnahme für Organisationen unter 250 Beschäftigten greift nur, wenn du Daten bloß gelegentlich verarbeitest. Wer regelmäßig Tickets verkauft, sollte es führen. Die Tabelle im nächsten Abschnitt ist ein guter Anfang.
 - **Datenschutzbeauftragter:** meist erst ab 20 Personen nötig (siehe FAQ).
+
+![Lachende Gäste kommen am beleuchteten Festival-Eingang an und halten ihre Tickets bereit](ratgeber-dsgvo-veranstalter-szene-1)
 
 ## Welche Rechtsgrundlage gilt für welche Daten?
 
@@ -126,6 +128,8 @@ Der LfDI BW empfiehlt einen Aushang an den Eingängen mit den Basisinformationen
 > Verantwortlich: [Name, Anschrift]. Alle Informationen zum Datenschutz: [kurze URL].
 
 Häng den Hinweis vor dem Einlass auf, nicht erst im Saal, und wiederhole ihn in der Eventbeschreibung. Das Bändchen ist kein Muss, hilft dem Fotografen aber.
+
+![Fotografin mitten im feiernden Publikum fotografiert die jubelnde Menge mit Konfetti](ratgeber-dsgvo-veranstalter-szene-2)
 
 ## Newsletter: Double-Opt-in und die Bestandskunden-Ausnahme
 

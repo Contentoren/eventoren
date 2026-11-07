@@ -1,1 +1,1 @@
-Zwei junge Veranstalter bauen am Nachmittag in einem leeren Partyraum eine Bar aus Getränkekisten auf und hängen warme Lichterketten auf
+Volle Tanzfläche mit tanzenden Gästen und Konfetti vor dem DJ-Pult in einem Club

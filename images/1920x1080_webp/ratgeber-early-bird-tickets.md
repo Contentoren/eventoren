@@ -1,1 +1,1 @@
-Ein Veranstalter klebt am frühen Morgen in einer Altstadtgasse ein unbedrucktes Plakat an eine Litfaßsäule, im Hintergrund geht die Sonne auf
+Aufgeregte junge Festivalfans warten am frühen Morgen vor den geöffneten Toren in der Morgensonne

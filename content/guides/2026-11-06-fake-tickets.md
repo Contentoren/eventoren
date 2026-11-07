@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "fake-tickets"
 author: "Eventoren Editorial Team"
 image: "ratgeber-fake-tickets-erkennen"
-imageAlt: "A young woman sits at a kitchen table at night, comparing a ticket offer on her laptop and her smartphone, with a notepad beside her"
+imageAlt: "Smiling concertgoers showing their tickets at the entrance as they are let in"
 category: "for-ticket-buyers"
 keywords:
   [
@@ -46,6 +46,8 @@ You can rarely tell a fake ticket from the ticket itself. You spot it from the o
 | Ticket never delivered          | Seller takes the money and disappears            | No ticket exists                        |
 
 The UK's national fraud reporting service describes ticket fraud the same way: you buy tickets for a concert, festival, sports event or comedy show, but they never arrive or turn out to be fake, and you aren't refunded.
+
+![Friends cheering with raised arms in the crowd of a sold-out concert](ratgeber-fake-tickets-erkennen-szene-1)
 
 ## What are the warning signs of a ticket scam?
 
@@ -135,6 +137,8 @@ Your choice of source matters more than any check you can do.
 Citizens Advice in England points out that you're unlikely to get a refund if you bought from a reselling website, a private seller or a fan-to-fan site. If the event is cancelled, refunds go to the original buyer. Our guide on [event cancellation refunds in the EU](/en/guides/event-cancellation-refunds-eu) explains your rights when you bought from the official seller.
 
 To find the official shop, go to the organiser's, venue's or artist's website and follow the ticket link from there. Check the address bar before you enter card details.
+
+![Families passing happily through ticket checks at a big evening concert](ratgeber-fake-tickets-erkennen-szene-2)
 
 ## What should you do if you've bought fake tickets?
 

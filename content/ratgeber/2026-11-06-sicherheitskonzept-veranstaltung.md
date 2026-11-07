@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "sicherheitskonzept-veranstaltung"
 author: "Eventoren Redaktion"
 image: "ratgeber-sicherheitskonzept-veranstaltung"
-imageAlt: "Eine Veranstaltungsleiterin bespricht vor Einlassbeginn mit Ordnern in Warnwesten und einer Sanitäterin den Ablauf in einer leeren Stadthalle"
+imageAlt: "Entspannte Gästemenge beim Open-Air-Konzert in der Abendsonne, Ordner mit Lanyards lächeln mitten unter den Gästen"
 category: "einlass-event-tag"
 keywords:
   [
@@ -44,6 +44,8 @@ Es hat drei Aufgaben:
 3. **Nachweisen:** Im Schadensfall zeigt es, dass du deine Sorgfaltspflichten ernst genommen hast. Das gilt aber nur, wenn du die festgelegten Maßnahmen auch umsetzt.
 
 Ein Konzept, das nur in der Schublade liegt, ist im Ernstfall eher ein Problem als eine Hilfe: Es dokumentiert, was du hättest tun sollen.
+
+![Volle Festivalwiese bei Sonnenuntergang mit tanzenden Gästen, freie Rettungswege und gut sichtbarer Sanitätsstand am Rand](ratgeber-sicherheitskonzept-veranstaltung-szene-1)
 
 ## Wann ist ein Sicherheitskonzept Pflicht?
 
@@ -193,6 +195,8 @@ Eine Beispielrechnung zum Mitdenken: Der Saal hat laut Rettungswegeplan 400 Steh
 - **Ordnungsdienst:** zwei Personen am Einlass zum Scannen, eine für Taschenkontrolle und Bändchen, eine pro Notausgang (zwei Ausgänge), eine im Saal, eine Reserve, zusammen sieben Personen pro Schicht.
 - **Sanitätsdienst:** nach Rücksprache mit der Kommune eine kleine Besetzung einer Hilfsorganisation.
 - **Helferkosten**, falls bezahlt: 7 Personen × 6 Stunden × 13,90 € = 583,80 € brutto (Mindestlohn 2026, ohne Arbeitgeberabgaben).
+
+![Vereinsparty in der Stadthalle: tanzende Gäste im bunten Licht, Ordner am freien Notausgang im Hintergrund](ratgeber-sicherheitskonzept-veranstaltung-szene-2)
 
 ## Wie sieht ein Wetter- und Hitzeplan aus?
 

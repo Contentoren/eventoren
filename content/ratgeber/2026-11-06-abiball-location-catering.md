@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "abiball-location-catering"
 author: "Eventoren Redaktion"
 image: "ratgeber-abiball-location-catering"
-imageAlt: "Zwei Abiturientinnen und ein Vater probieren beim Probeessen in einem hellen Nebenraum kleine Teller, während der Koch des Caterers die Gerichte erklärt"
+imageAlt: "Abiball in einem festlich geschmückten Saal: Abiturienten in Abendgarderobe tanzen lachend unter Kronleuchtern, Konfetti fällt auf die Tanzfläche"
 category: "abiball"
 keywords:
   [
@@ -44,6 +44,8 @@ Rechnet zuerst die Gästezahl: Abiturienten plus Gäste pro Kopf plus Lehrkräft
 Für die Fläche nennt ein Zeltvermieter als Faustwert 1,2 bis 1,5 m² pro Gast an Rundtischen mit Bestuhlung, dazu 10 bis 20 m² für Buffet oder Theke und 0,5 m² pro tanzender Person. Für 365 Gäste ergibt das in einer **Beispielrechnung**: 365 × 1,35 m² = rund 490 m² für die Tische, plus 20 m² Buffet, plus 75 m² Tanzfläche für 150 Tanzende, zusammen knapp **590 m²**. Die tatsächliche Kapazität bestimmt der genehmigte Bestuhlungsplan der Location, nicht eure Rechnung.
 
 Für Räume mit mehr als 200 Besuchern gilt in den meisten Ländern die Versammlungsstättenverordnung, mit Vorgaben zu Rettungswegen und Bestuhlung. Etablierte Säle haben dafür genehmigte Pläne. Bei Zelten, Turnhallen und umgenutzten Räumen müsst ihr selbst nachfragen.
+
+![Festlich dekorierter Ballsaal beim Abiball: Gäste strömen auf die volle Tanzfläche, runde Tische mit Kerzen am Rand](ratgeber-abiball-location-catering-szene-1)
 
 ## Welche Location-Typen gibt es und was kosten sie?
 
@@ -124,6 +126,8 @@ Die Wahl hängt an Gästezahl, Budget und Ablauf. Bei Abibällen mit mehreren Hu
 Quellen der Spannen: Bernemann & Röhl (Buffet 15–35 €, kalt-warm 25–35 €, Getränkepauschale 12–18 €), abiball-deko.de (Buffet 25–50 €, Getränkepauschale 15–30 €), bvents (Menü 30–55 € inkl. Service, Flying Buffet 30–50 €, eine Servicekraft pro 15–20 Gäste), egora (Abiball-3-Gang-Menüs ab 38 € bzw. 42,90 €).
 
 Ein konkretes Beispiel aus Baden-Württemberg zeigt, wie stark die Gästezahl wirkt: Ein Partyservice bietet für 2026 ein Abiball-Buffet aus Salaten, drei Hauptgerichten und Desserts für zusammen **22,30 € pro Person inklusive 7 % Umsatzsteuer** an, ab 300 Personen. Unter 300 Personen kommen 2 € pro Person dazu, Lieferung und Personal extra, bezahlt wird per Vorkasse eine Woche vorher.
+
+![Abiballgäste bedienen sich lachend am festlichen Buffet mit mehreren Stationen im Ballsaal](ratgeber-abiball-location-catering-szene-2)
 
 ### Tipps für das Buffet bei vielen Gästen
 

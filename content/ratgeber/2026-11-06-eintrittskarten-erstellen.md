@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "eintrittskarten-erstellen"
 author: "Eventoren Redaktion"
 image: "ratgeber-eintrittskarten-erstellen"
-imageAlt: "Nahaufnahme einer Helferin an einem Schultisch, die einen Stapel unbedruckter Eintrittskarten mit einem Nummerierstempel durchzählt, daneben liegt ein Smartphone"
+imageAlt: "Begeistertes Publikum mit erhobenen Händen und Konfetti vor der Bühne eines ausverkauften Clubkonzerts im bunten Licht"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -35,6 +35,8 @@ Eintrittskarten erstellst du 2026 am sichersten digital: Jedes Ticket bekommt ei
 Eine Eintrittskarte ist ein Beleg, der den Inhaber zum Besuch einer bestimmten Veranstaltung berechtigt. Rechtlich gilt sie in Deutschland in der Regel als kleines Inhaberpapier nach § 807 BGB: Der Veranstalter muss grundsätzlich jeden einlassen, der die Karte vorlegt, solange nichts anderes vereinbart ist, z. B. eine Personalisierung.
 
 Daraus folgt die wichtigste Regel für die Gestaltung: Du musst am Einlass erkennen können, ob **dieses konkrete Exemplar** echt ist und ob es **schon benutzt** wurde. Ein schönes Design allein leistet das nicht.
+
+![Freundlicher Einlasshelfer scannt am Eingang eines Konzerts das Handyticket einer Besucherin, dahinter wartet die Schlange im Abendlicht](ratgeber-eintrittskarten-erstellen-szene-1)
 
 ## Digital oder gedruckt: Welche Eintrittskarte passt zu deinem Event?
 
@@ -98,6 +100,8 @@ Damit sind die drei typischen Betrugsfälle abgedeckt: kopierte Tickets (zweiter
 ### Kann ich QR-Codes einfach selbst generieren?
 
 Technisch ja, mit jedem QR-Generator. Ohne eine zentrale Liste, die beim Scan geprüft und aktualisiert wird, bringt das aber wenig. Spätestens bei mehreren Einlasshelfern musst du in Echtzeit wissen, welcher Code schon benutzt wurde. Genau das leistet ein Ticketsystem.
+
+![Lachende Konzertgäste mit frisch angelegten Einlassbändchen tanzen im vollen Saal vor der bunt erleuchteten Bühne](ratgeber-eintrittskarten-erstellen-szene-2)
 
 ## Gedruckte Eintrittskarten nummerieren: die sichere Druckvariante
 

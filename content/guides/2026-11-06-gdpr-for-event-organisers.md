@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "gdpr-for-event-organisers"
 author: "Eventoren Editorial Team"
 image: "ratgeber-dsgvo-veranstalter"
-imageAlt: "A volunteer clips a notice to an easel at the entrance of a village club house while a photographer with a camera walks into the hall behind her"
+imageAlt: "View over a photographer's shoulder of a dancing festival crowd at dusk"
 category: "law-tax"
 keywords:
   [
@@ -45,6 +45,8 @@ The **controller** (Art. 4(7)) decides why and how data is processed. For your e
 - **Data minimisation** (Art. 5(1)(c)): only collect what you need for the ticket and the door. Date of birth, address or phone number need a specific reason.
 - **Transparency** (Art. 13): tell people at the time you collect their data.
 - **Records of processing** (Art. 30): the exemption for organisations under 250 staff does not apply where processing is "not occasional". If you sell tickets regularly, keep a record. The table below is a good start.
+
+![Laughing guests arriving at the illuminated festival entrance, holding up their tickets](ratgeber-dsgvo-veranstalter-szene-1)
 
 ## Which lawful basis applies to which data?
 
@@ -119,6 +121,8 @@ The following text is an example, not a reviewed legal template.
 > Prefer not to be photographed? Ask the door team for [a coloured wristband]. Object to a published picture via [email]. Details: [short URL]. Controller: [name, address].
 
 Put the notice up before the door and repeat it in the event description.
+
+![Photographer in the middle of the celebrating crowd capturing the cheering audience with confetti](ratgeber-dsgvo-veranstalter-szene-2)
 
 ## Marketing emails: consent and the soft opt-in
 

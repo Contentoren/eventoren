@@ -145,7 +145,7 @@ export function contentArticleHeadCreate(
       seoJsonLdGraphScriptCreate([
         articleNode,
         organization,
-        contentBreadcrumbJsonLdCreate(meta.collection, { title: entry.title, url }),
+        contentBreadcrumbJsonLdCreate(meta.collection, { title: entry.title, url, category: meta.category }),
         ...faqNodes,
       ]),
     ],

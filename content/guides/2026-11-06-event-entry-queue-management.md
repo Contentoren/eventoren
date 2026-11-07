@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "event-entry-queue-management"
 author: "Eventoren Editorial Team"
 image: "ratgeber-einlassmanagement-warteschlangen"
-imageAlt: "Elevated view of several entry lanes separated by crowd barriers outside a concert hall, with guests moving forward quickly in the evening sun"
+imageAlt: "Guests flowing relaxed through several open entry lanes onto a festival site"
 category: "on-the-day"
 keywords:
   [
@@ -38,6 +38,8 @@ Event entry management means working out in advance how many guests per minute y
 Ticket scanning is only one part of it. How the scan itself works, which hardware to use and how to brief helpers is covered in [QR code ticket check-in without an app](/en/guides/qr-code-ticket-check-in). This guide answers the question before that: **how many lanes do you need, and when will it get tight?**
 
 Long queues are more than an annoyance. A queue that spills onto a pavement or road becomes a safety issue, and venue licences and national assembly rules often set conditions for escape routes and stewarding. In Germany, for example, the model venue regulation applies to rooms for more than 200 visitors and requires a safety concept for venues with more than 5,000 places. Rules differ by country and region, so check your licence conditions.
+
+![Friends passing happily through the entrance to an evening concert in the city](ratgeber-einlassmanagement-warteschlangen-szene-1)
 
 ## How do you calculate entry throughput?
 
@@ -194,6 +196,8 @@ Practical rules:
 5. **Space behind the door:** if the bar or cloakroom sits right behind the entrance, the queue backs up inside.
 
 Weezevent recommends Z-shaped barriers for long queues and placing the search area before ticket control, with mixed-gender search teams. Your security provider and licence conditions decide the details.
+
+![Stewards guiding guests to the right entry lanes in front of a concert hall at night](ratgeber-einlassmanagement-warteschlangen-szene-2)
 
 ## How do you communicate with guests before and at entry?
 

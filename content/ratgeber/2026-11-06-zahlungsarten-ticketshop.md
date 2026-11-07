@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "zahlungsarten-ticketshop"
 author: "Eventoren Redaktion"
 image: "ratgeber-zahlungsarten-ticketshop"
-imageAlt: "Eine junge Frau kauft abends auf dem Sofa mit ihrem Smartphone Konzerttickets, neben ihr liegt eine Bankkarte auf der Decke"
+imageAlt: "Jubelnde Menge mit erhobenen Armen bei einem ausverkauften Arenakonzert im goldenen Licht"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -47,6 +47,8 @@ Die Ecommerce News Europe veröffentlicht Schätzwerte, welche Zahlungsarten Onl
 | Lastschrift       | 31 %                                                      |
 
 Diese Werte gelten für den Onlinehandel allgemein, nicht speziell für Tickets. Sie zeigen aber die Richtung: Deutsche Käufer wollen Auswahl, und viele vertrauen PayPal oder dem Kauf auf Rechnung mehr als der Eingabe von Kartendaten. Gleichzeitig sind Apple Pay und Google Pay auf dem Smartphone so schnell, dass sie gerade beim spontanen Ticketkauf punkten.
+
+![Freunde genießen lachend ein Sommerkonzert in der Abendsonne](ratgeber-zahlungsarten-ticketshop-szene-1)
 
 ### Was ist mit Österreich, Belgien und den Niederlanden?
 
@@ -156,6 +158,8 @@ Für Veranstalter ist Wero 2026 eine Zahlungsart zum Beobachten. Vorteile: Das G
 ### Echtzeitüberweisung und Empfängerprüfung
 
 Seit dem **9. Oktober 2025** müssen Banken im Euroraum Echtzeitüberweisungen senden können, und zwar nicht teurer als normale Überweisungen. Gleichzeitig prüfen sie bei jeder Überweisung, ob Name und IBAN des Empfängers zusammenpassen (Empfängerüberprüfung). Für dich heißt das: Wenn du Tickets gegen Vorkasse verkaufst, kommt das Geld in Sekunden an. Stimmt der Kontoinhaber nicht mit dem angegebenen Empfängernamen überein, sieht der Käufer eine Warnung, etwa wenn das Abikonto auf eine Privatperson läuft.
+
+![Junge Festivalgäste zahlen lächelnd bargeldlos an einem Getränkestand](ratgeber-zahlungsarten-ticketshop-szene-2)
 
 ## Darf ich für bestimmte Zahlungsarten Aufpreis verlangen?
 

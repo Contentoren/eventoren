@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "vereinsfest-organisieren"
 author: "Eventoren Redaktion"
 image: "ratgeber-vereinsfest-organisieren"
-imageAlt: "Ehrenamtliche bauen am Morgen eines Sommerfests auf einer Dorfwiese Bierzeltgarnituren und einen Pavillon auf"
+imageAlt: "Blick über Biergartentische hinweg zu einer Blaskapelle am Ende der Reihe unter Lampions"
 category: "vereine-schulen"
 keywords:
   [
@@ -48,6 +48,8 @@ Die Organisation besteht aus sieben Bausteinen:
 7. **Kommunikation:** Mitglieder, Nachbarn, Presse, Social Media
 
 Benenne für jeden Baustein eine verantwortliche Person. Die Projektleitung koordiniert, entscheidet aber nicht alles allein.
+
+![Ehrenamtliche schmücken morgens lachend das Festzelt mit bunten Girlanden](ratgeber-vereinsfest-organisieren-szene-1)
 
 ## Wann musst du mit der Planung anfangen? Der Zeitplan
 
@@ -209,6 +211,8 @@ Ein Sommerfest ohne Schlechtwetterplan ist ein Glücksspiel. Lege die Entscheidu
 **Wer entscheidet?** Benenne eine Person mit Entscheidungsrecht und einen festen Zeitpunkt, zum Beispiel am Vorabend um 18 Uhr und am Festtag um 9 Uhr. Behalte Unwetterwarnungen des Deutschen Wetterdienstes im Blick.
 
 Wird eine Veranstaltung mit verkauften Tickets abgesagt, bekommen die Käufer ihr Geld zurück. Wie du richtig vorgehst, steht im Ratgeber [Veranstaltung absagen](/ratgeber/veranstaltung-absagen). Gegen die Kosten eines Ausfalls hilft eine Veranstaltungsausfallversicherung. Die normale Haftpflicht zahlt dafür nicht.
+
+![Gut gelaunte Gäste genießen bei Sonnenschein den Frühschoppen mit Blasmusik](ratgeber-vereinsfest-organisieren-szene-2)
 
 ## 40 Programmideen für dein Vereinsfest
 

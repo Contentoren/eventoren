@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "eventlocation-finden"
 author: "Eventoren Redaktion"
 image: "ratgeber-eventlocation-finden"
-imageAlt: "Eine Veranstalterin misst bei einer Besichtigung in einem leeren Saal mit Holzboden die Raumbreite mit einem Maßband, während der Hausmeister am Fenster wartet"
+imageAlt: "Ausgelassene Partygesellschaft tanzt in einer Backstein-Loftlocation mit hohen Fenstern und Lichterketten"
 category: "planung-marketing"
 keywords:
   [
@@ -45,6 +45,8 @@ Die Suche läuft am besten über mehrere Kanäle gleichzeitig, weil jede Quelle 
 | Netzwerk: Caterer, DJs, Technikverleiher                 | Locations, mit denen Dienstleister schon gearbeitet haben | ehrliche Einschätzung von Abläufen und Tücken   | Empfehlung kann mit eigenem Auftrag verknüpft sein          |
 
 Schick allen Favoriten dieselbe kurze Anfrage: Datum mit Ausweichterminen, Uhrzeit von Aufbau bis Abbau, Format, erwartete Gästezahl, Bestuhlungsart, Bedarf an Catering und Technik, Budgetrahmen. Je vollständiger die Anfrage, desto vergleichbarer werden die Angebote.
+
+![Fröhliche Gäste tanzen im festlich beleuchteten Bürgersaal eines Dorffests, bunte Lichterketten an der Holzdecke](ratgeber-eventlocation-finden-szene-1)
 
 ## Welche Kriterien entscheiden über die richtige Location?
 
@@ -105,6 +107,8 @@ Besichtige zur gleichen Tageszeit, zu der dein Event stattfindet, und gehe die W
 - [ ] Ansprechpartner am Veranstaltungstag mit Handynummer
 
 Frag außerdem nach Referenzveranstaltungen in ähnlicher Größe. Wer schon dreimal eine Party mit 300 Gästen im Haus hatte, kennt die Engpässe an Bar, Garderobe und Toiletten.
+
+![Gäste genießen bei goldenem Abendlicht den Sektempfang im begrünten Innenhof einer historischen Location unter Lichterketten](ratgeber-eventlocation-finden-szene-2)
 
 ## Was muss im Mietvertrag der Location stehen?
 

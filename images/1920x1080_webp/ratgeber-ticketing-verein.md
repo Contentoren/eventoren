@@ -1,1 +1,1 @@
-Drei Vorstandsmitglieder eines Vereins planen am Abend im Vereinsheim an einem Holztisch den Vorverkauf, eine Frau zeigt auf einen Ausdruck
+Blaskapelle auf der Bühne eines Dorffests, Familien tanzen davor auf dem Platz

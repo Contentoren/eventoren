@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "e-invoicing-event-organisers"
 author: "Eventoren Editorial Team"
 image: "ratgeber-e-rechnung-veranstalter"
-imageAlt: "An organiser in a festival production office compares a paper invoice with the data on his laptop"
+imageAlt: "Event organiser looking over the cheering crowd of his festival at sunset"
 category: "law-tax"
 keywords:
   [
@@ -39,6 +39,8 @@ This guide is not legal or tax advice.
 **An e-invoice is an invoice issued, transmitted and received in a structured electronic format that allows automatic processing.** The EU standard for its content is **EN 16931**. Common formats include XRechnung and ZUGFeRD in Germany, Factur-X in France, invoices over the **Peppol** network in Belgium, and the formats of the state platforms in Italy (SdI) and Poland (KSeF).
 
 The key point many organisers miss: a normal PDF sent by email is **not** an e-invoice. It is a picture of an invoice that a human has to retype. In Germany, it has been classed as an "other invoice" since 2025.
+
+![Audience applauding at a conference in a modern event hall](ratgeber-e-rechnung-veranstalter-szene-1)
 
 | Term                               | Meaning                                                                     | Example                                                                                 |
 | ---------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
@@ -120,6 +122,8 @@ In Germany, a club is affected only where it acts as a business: events with adm
 ### Which format should you choose?
 
 For mixed customers, a **hybrid** format (ZUGFeRD in Germany, Factur-X in France) is often the easiest: it looks like a normal PDF to a person and carries XML for software. In Belgium, Peppol is the default route. In Poland and Italy, invoices go through the state platform, so your accounting software must connect to KSeF or SdI. In France, you need an approved platform (plateforme agréée).
+
+![International festival crowd dancing at dusk beneath strings of lights](ratgeber-e-rechnung-veranstalter-szene-2)
 
 ## How to receive and check e-invoices
 

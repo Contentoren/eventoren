@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "abendkasse-organisieren"
 author: "Eventoren Redaktion"
 image: "ratgeber-abendkasse-organisieren"
-imageAlt: "Gast hält am Eingang einer kleinen Konzertbühne sein Smartphone vor ein Plakat an der Wand, während eine Helferin daneben die Schlange im warmen Abendlicht betreut"
+imageAlt: "Fröhliche Gäste strömen am Abend in den warm beleuchteten Eingang eines kleinen Clubs, halten ihre Smartphones mit den Tickets bereit und lachen, während drinnen die Bühne leuchtet"
 category: "einlass-event-tag"
 keywords:
   [
@@ -45,6 +45,8 @@ Drei Grundmodelle gibt es:
 | Bargeldkasse (offene Ladenkasse) | Geldkassette, Wechselgeld, Kassenbericht am Ende                                             | Vereinsfest, Dorfparty, kleines Konzert  |
 | Elektronische Kasse              | Kassen-App oder Registrierkasse mit TSE, Bar und Karte                                       | Theater, Clubs, regelmäßige Veranstalter |
 | Bargeldlos                       | Kartenterminal, Kassen-App nur mit Kartenzahlung oder Self-Service per QR-Code am Gästehandy | Clubnacht, Festival, junge Zielgruppen   |
+
+![Lachendes Paar bekommt im gemütlichen Foyer eines kleinen Theaters Einlassbändchen überreicht, um sie herum weitere gut gelaunte Gäste im warmen Lampenlicht](ratgeber-abendkasse-organisieren-szene-1)
 
 ## Bargeld oder bargeldlos: Was passt zu deinem Event?
 
@@ -207,6 +209,8 @@ Bei Eventbrite ist der Vor-Ort-Verkauf in der Organizer-App laut Hilfeseite nur 
 - [ ] Bei Mietkasse: Abmeldung bei ELSTER innerhalb eines Monats
 
 Wie du die Abendkasse in den Einlass einplanst, zeigt der Ratgeber [Einlassmanagement](/ratgeber/einlassmanagement-warteschlangen).
+
+![Gäste mit bunten Einlassbändchen strömen lachend durch den Eingang in den Konzertsaal, aus dem bereits Musik und warmes Bühnenlicht dringen](ratgeber-abendkasse-organisieren-szene-2)
 
 ## So setzt du das mit Eventoren um
 

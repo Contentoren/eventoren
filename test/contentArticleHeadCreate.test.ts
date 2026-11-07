@@ -176,7 +176,7 @@ test("article without a translation emits no hreflang links", () => {
   expect(head.links).toEqual([{ rel: "canonical", href: "https://eventoren.de/ratgeber/fake-tickets-erkennen" }])
 })
 
-test("German JSON-LD graph has Article, publisher Organization and Startseite → Ratgeber → title breadcrumb", () => {
+test("German JSON-LD graph has Article, publisher Organization and Startseite → Ratgeber → category → title breadcrumb", () => {
   const head = contentArticleHeadCreate(
     { entry: entryCreate(), meta: metaCreate(), faq: [] },
     { today, translationFind: noTranslation },
@@ -194,10 +194,15 @@ test("German JSON-LD graph has Article, publisher Organization and Startseite �
   })
   expect(graph[1]).toMatchObject({ "@id": "https://eventoren.de/#organization", name: "Eventoren" })
   const crumbs = crumbNamesRead(graph[2])
-  expect(crumbs).toEqual(["Startseite", "Ratgeber", "Fake-Tickets erkennen: So kaufst du Tickets sicher"])
+  expect(crumbs).toEqual([
+    "Startseite",
+    "Ratgeber",
+    "Für Ticketkäufer",
+    "Fake-Tickets erkennen: So kaufst du Tickets sicher",
+  ])
 })
 
-test("English article uses en_GB, en-GB, the editorial team author and Eventoren → Guides breadcrumb", () => {
+test("English article uses en_GB, en-GB, the editorial team author and Eventoren → Guides → category breadcrumb", () => {
   const head = contentArticleHeadCreate(
     { entry: englishCounterpart.entry, meta: englishCounterpart.meta, faq: [] },
     { today, translationFind: noTranslation },
@@ -207,7 +212,7 @@ test("English article uses en_GB, en-GB, the editorial team author and Eventoren
   const graph = graphRead(head)
   expect(graph[0]).toMatchObject({ inLanguage: "en-GB", author: { name: "Eventoren Editorial Team" } })
   const crumbs = crumbNamesRead(graph[2])
-  expect(crumbs).toEqual(["Eventoren", "Guides", "Fake Tickets: How to Spot Them and Buy Safely"])
+  expect(crumbs).toEqual(["Eventoren", "Guides", "For ticket buyers", "Fake Tickets: How to Spot Them and Buy Safely"])
 })
 
 test("FAQPage is added only when the article has FAQ entries, with plain-text answers", () => {

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "konzert-veranstalten"
 author: "Eventoren Redaktion"
 image: "ratgeber-konzert-veranstalten"
-imageAlt: "Ein Tontechniker am Mischpult und eine Veranstalterin mit Klemmbrett verfolgen am Nachmittag den Soundcheck einer Band in einem leeren Club"
+imageAlt: "Rockband auf der Bühne vor tobender Menge mit erhobenen Händen im Scheinwerferlicht"
 category: "eventformate"
 keywords:
   [
@@ -60,6 +60,8 @@ Bei Door und Versus Deals muss im Vertrag stehen, **was vor der Teilung abgezoge
 - [ ] Merchandise: wer verkauft, ob die Location eine Provision verlangt
 - [ ] Absage durch Band oder Veranstalter, höhere Gewalt
 - [ ] Werbefreigaben, Fotos, Mitschnitte
+
+![Gitarrist springt auf der Bühne vor begeistertem Publikum in die Luft](ratgeber-konzert-veranstalten-szene-1)
 
 ## Was regeln Rider, Technik und Location?
 
@@ -214,6 +216,8 @@ Der wichtigste Kanal ist die Band selbst. Gib ihr fertige Grafiken, einen kurzen
 | 23:00              | Abrechnung mit Band und Club, Merch-Abrechnung          | Veranstalter             |
 
 Drei Dinge machen den Unterschied: ein Ansprechpartner für die Band den ganzen Tag, Scanner-Links vor Einlass auf allen Helfer-Handys getestet, und eine fertige Abrechnungsvorlage für Versus-Deals. Wie du den Einlass ohne Stau planst, zeigt der Ratgeber [Einlasskontrolle mit QR-Code](/ratgeber/einlasskontrolle-qr-code).
+
+![Besucher strömen beim Einlass in einen Club, im Hintergrund leuchtet die Bühne](ratgeber-konzert-veranstalten-szene-2)
 
 ## So setzt du das mit Eventoren um
 

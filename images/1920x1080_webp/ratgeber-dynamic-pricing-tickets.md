@@ -1,1 +1,1 @@
-Eine junge Frau sitzt abends auf dem Sofa und schaut nachdenklich auf ihr Smartphone, während sie auf den Start eines Ticketverkaufs wartet
+Euphorische Konzertmenge mit erhobenen Händen bei einer Nachtshow in der Arena, bunte Lichtstrahlen fächern über die jubelnden Fans

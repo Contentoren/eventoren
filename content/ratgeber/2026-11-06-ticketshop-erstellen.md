@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketshop-erstellen"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketshop-erstellen"
-imageAlt: "Zwei Vereinsmitglieder sitzen am Küchentisch mit Laptop, Notizblock und Kaffeetassen und planen die Ticketarten für ihr Sommerfest"
+imageAlt: "Jubelnde Open-Air-Menge mit erhobenen Händen im goldenen Abendlicht vor der Bühne"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -42,6 +42,8 @@ Drei Varianten sind verbreitet:
 | Selbst gebauter Shop (Shop-System + Ticket-Plugin + Zahlungsanbieter)                           | hoch                 | Hosting, Plugins, Zahlungsgebühren, Wartung | Veranstalter mit Entwicklerkapazität |
 
 Für die meisten Veranstalter ist die erste oder zweite Variante richtig. Einen Überblick über alle Verkaufswege inklusive Abendkasse gibt der Leitfaden [Tickets online verkaufen](/ratgeber/tickets-online-verkaufen).
+
+![Ausverkauftes Konzert aus Sicht des Publikums: Hände oben, Bühne in farbigem Licht](ratgeber-ticketshop-erstellen-szene-1)
 
 ## Die 10 Schritte im Überblick
 
@@ -182,6 +184,8 @@ Ein Shop verkauft nicht von allein. Diese Kanäle bringen erfahrungsgemäß die 
 - Plakate und Flyer mit Kurzlink oder QR-Code zum Shop
 
 Beobachte die Verkäufe in den ersten 72 Stunden: Läuft Early Bird schnell aus, war der Preis womöglich zu niedrig. Stockt es, hilft eine knappe Frist mehr als ein Rabatt.
+
+![Begeisterte Gäste stürmen beim Einlass in die beleuchtete Konzerthalle](ratgeber-ticketshop-erstellen-szene-2)
 
 ### Schritt 10: Einlass vorbereiten und nach dem Event abrechnen
 

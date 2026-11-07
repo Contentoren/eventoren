@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "e-rechnung-veranstalter"
 author: "Eventoren Redaktion"
 image: "ratgeber-e-rechnung-veranstalter"
-imageAlt: "Ein Veranstalter vergleicht im Produktionsbüro eines Festivalgeländes eine Papierrechnung mit den Daten auf seinem Laptop"
+imageAlt: "Veranstalter blickt bei Sonnenuntergang über die jubelnde Menge seines Festivals"
 category: "recht-steuern"
 keywords:
   [
@@ -39,6 +39,8 @@ Dieser Artikel ersetzt keine Rechts- oder Steuerberatung.
 **Definition:** Eine E-Rechnung ist eine Rechnung, „die in einem strukturierten elektronischen Format ausgestellt, übermittelt und empfangen wird und eine elektronische Verarbeitung ermöglicht“ (§ 14 Abs. 1 Satz 3 UStG). Das Format muss der europäischen Norm EN 16931 entsprechen (§ 14 Abs. 1 Satz 6 UStG). Alle anderen Rechnungen, also Papier und unstrukturierte Dateien wie ein normales PDF, heißen seit 2025 **„sonstige Rechnung“**.
 
 Das ist der Punkt, an dem viele Veranstalter falsch liegen: Die PDF-Rechnung, die du per Mail an den Sponsor schickst, war bis Ende 2024 eine „elektronische Rechnung“. Seit 01.01.2025 ist sie es nicht mehr. Das BMF schreibt in seinen FAQ ausdrücklich, dass ein einfaches PDF-Dokument „kein strukturiertes Format“ hat.
+
+![Publikum applaudiert bei einer Konferenz in einem modernen Veranstaltungssaal](ratgeber-e-rechnung-veranstalter-szene-1)
 
 | Begriff              | Was gemeint ist                                          | Beispiel                                                        |
 | -------------------- | -------------------------------------------------------- | --------------------------------------------------------------- |
@@ -167,6 +169,8 @@ Ein Bußgeld für fehlende E-Rechnungen gibt es nach Auffassung der Finanzverwal
 | EU (ViDA)  | E-Rechnung für innergemeinschaftliche B2B-Umsätze ab 01.07.2030 |
 
 Verkaufst du Konferenztickets an Firmen in mehreren Ländern, lies unseren englischen Guide [E-invoicing for event organisers](/en/guides/e-invoicing-event-organisers).
+
+![Internationales Festivalpublikum tanzt in der Abenddämmerung unter Lichterketten](ratgeber-e-rechnung-veranstalter-szene-2)
 
 ## Checkliste: E-Rechnung für Vereine und Veranstalter
 

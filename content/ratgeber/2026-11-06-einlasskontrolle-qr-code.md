@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "einlasskontrolle-qr-code"
 author: "Eventoren Redaktion"
 image: "ratgeber-einlasskontrolle-qr-code"
-imageAlt: "Junge Helferin mit petrolfarbenem Schlüsselband scannt am Eingang eines Vereinsheims in der Abenddämmerung das Smartphone-Ticket eines Gastes"
+imageAlt: "Festival-Einlassspuren von oben in der blauen Stunde: leuchtende Armbänder und Absperrungen vor erleuchteten Toren"
 category: "einlass-event-tag"
 keywords:
   [
@@ -42,6 +42,8 @@ Gegenüber Papierkarten mit Abreißabschnitt oder Stempel hat das drei Vorteile:
 - **Weniger Diskussion:** Die Entscheidung trifft das System, nicht der Helfer nach Bauchgefühl.
 
 Mehr zur Gestaltung der Tickets selbst findest du im Ratgeber [Eintrittskarten erstellen](/ratgeber/eintrittskarten-erstellen).
+
+![Lächelnde Helfer scannen am Eingang eines Clubs die Smartphone-Tickets ankommender Gäste im warmen Licht](ratgeber-einlasskontrolle-qr-code-szene-1)
 
 ## Wie funktioniert die Prüfung eines QR-Tickets?
 
@@ -169,6 +171,8 @@ Die Kamera eines Smartphones braucht Kontrast. Die häufigsten Bremsen am Einlas
 - Papiertickets: Knicke im Code vermeiden, nicht laminieren (Spiegelung).
 
 Kommuniziere die wichtigsten Punkte schon in der Info-Mail vor dem Event: „Ticket vor der Schlange öffnen, Helligkeit hoch.“ Das spart pro Gast Sekunden und bei Hunderten Gästen viele Minuten.
+
+![Sonniger Open-Air-Einlass am Nachmittag, Gäste mit Sonnenbrillen halten ihre Handys zum Scannen bereit, Helfer grüßen freundlich unter einem Schirmdach](ratgeber-einlasskontrolle-qr-code-szene-2)
 
 ## Wie viel Personal brauchst du am Einlass?
 

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "vorverkauf-steigern"
 author: "Eventoren Redaktion"
 image: "ratgeber-vorverkauf-steigern"
-imageAlt: "Drei junge Leute aus einem Veranstaltungsteam hängen nachmittags in einem Café Plakate auf und verteilen Flyer an der Theke"
+imageAlt: "Künstler-Silhouette am Bühnenrand mit Konfettikanonen über einem Meer erhobener Hände"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -42,6 +42,8 @@ Last-Minute-Käufe sind kein Zeichen von Desinteresse. Meist fehlt einfach ein G
 - **Gruppendynamik:** Viele kaufen erst, wenn klar ist, dass ihre Clique auch kommt.
 
 Jeder der folgenden Hebel setzt an einer dieser Ursachen an.
+
+![Lange gut gelaunte Schlange vor dem Club in der Abenddämmerung, Gäste zeigen ihre Handytickets am Einlass](ratgeber-vorverkauf-steigern-szene-1)
 
 ## Die 25 Hebel im Überblick
 
@@ -139,6 +141,8 @@ Dieser Plan passt zu Konzerten, Bällen und größeren Partys. Für eine Clubnac
 | Eventtag    | Abendkasse, Stimmung posten, ggf. „Ausverkauft“                                         | 25            |
 
 Wichtig: Jede Zeile ist ein neuer Anlass zum Kaufen. Ein Vorverkauf mit nur einem Start-Post und einer Erinnerung kurz vorher verkauft fast zwangsläufig spät.
+
+![Jubelnde Menge vor der Festivalbühne bei der Ankündigung des Hauptacts am Abend, Hände und Fahnen in der Luft](ratgeber-vorverkauf-steigern-szene-2)
 
 ## Welche KPIs zeigen, ob dein Vorverkauf läuft?
 

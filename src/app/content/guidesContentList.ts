@@ -21,7 +21,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Editorial Team",
     imageAlt:
-      "A guest holds his smartphone up to a poster on the wall at the entrance of a small live-music venue while a helper beside him looks after the queue in warm evening light",
+      "Cheerful guests stream into the warmly lit entrance of a small club in the evening, smartphones with tickets ready, laughing as the stage glows inside",
   },
   "charity-event-tickets": {
     id: "2026-11-06-charity-event-tickets",
@@ -36,8 +36,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "After a charity concert in a parish hall, two volunteers count the takings at a long table while helpers dismantle the stage behind them",
+    imageAlt: "Enthusiastic audience applauding a band on stage at a charity concert in a warmly lit hall",
   },
   "dynamic-pricing-tickets-eu": {
     id: "2026-11-06-dynamic-pricing-tickets-eu",
@@ -53,7 +52,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Editorial Team",
     imageAlt:
-      "A young woman sits on a sofa in the evening, wrapped in a blanket, looking thoughtfully at her phone while she waits for a ticket sale to open",
+      "An ecstatic concert crowd with raised hands at a night-time arena show, colourful light beams sweeping over the cheering fans",
   },
   "e-invoicing-event-organisers": {
     id: "2026-11-06-e-invoicing-event-organisers",
@@ -68,7 +67,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt: "An organiser in a festival production office compares a paper invoice with the data on his laptop",
+    imageAlt: "Event organiser looking over the cheering crowd of his festival at sunset",
   },
   "early-bird-tickets": {
     id: "2026-11-06-early-bird-tickets",
@@ -83,8 +82,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "Just after sunrise, an organiser pastes a blank poster onto a round advertising column in a cobbled old-town lane",
+    imageAlt: "Excited young festival fans waiting in front of the open gates in the early morning sun",
   },
   "european-accessibility-act-ticketing": {
     id: "2026-11-06-european-accessibility-act-ticketing",
@@ -100,7 +98,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Editorial Team",
     imageAlt:
-      "A volunteer holds open the glass door of a step-free side entrance at a brick concert hall as a woman in a wheelchair rolls in with a friend",
+      "A wheelchair user dances amid a cheerful daytime festival crowd, surrounded by laughing, clapping concertgoers",
   },
   "event-budget-template": {
     id: "2026-11-06-event-budget-template",
@@ -115,8 +113,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "The treasurer of a local club works through the budget for a party at her kitchen table in the evening with receipts, a calculator and a laptop",
+    imageAlt: "Volunteers setting up an empty event hall with string lights and chairs in morning light",
   },
   "event-cancellation-refunds-eu": {
     id: "2026-11-06-event-cancellation-refunds-eu",
@@ -132,7 +129,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Editorial Team",
     imageAlt:
-      "Two organisers in rain jackets stand under the roof of a ticket hut at an empty festival ground in a storm, one on the phone discussing the cancellation",
+      "Cheering crowd at an open-air concert in the evening sun: guests with raised hands in front of the stage, confetti in the air",
   },
   "event-entry-queue-management": {
     id: "2026-11-06-event-entry-queue-management",
@@ -147,8 +144,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "Elevated view of several entry lanes separated by crowd barriers outside a concert hall, with guests moving forward quickly in the evening sun",
+    imageAlt: "Guests flowing relaxed through several open entry lanes onto a festival site",
   },
   "event-planning-checklist": {
     id: "2026-11-06-event-planning-checklist",
@@ -164,7 +160,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Editorial Team",
     imageAlt:
-      "Three members of an organising team plan an event around a kitchen table with sticky notes, a wall calendar and a laptop",
+      "A dancing crowd before the stage of an evening lantern festival, a live band and warm lights in the historic old town",
   },
   "event-seo-google-ai": {
     id: "2026-11-06-event-seo-google-ai",
@@ -180,7 +176,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Editorial Team",
     imageAlt:
-      "An organiser works on a laptop in a small club office after hours, updating an event page, with a stack of rolled posters on the desk beside him",
+      "A huge cheering daytime festival crowd in front of the main stage with colourful flags, every hand in the air",
   },
   "eventbrite-alternatives-europe": {
     id: "2026-11-06-eventbrite-alternatives-europe",
@@ -195,8 +191,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "A club chairman packs folders into moving boxes in a wood-panelled club house while a volunteer ticks off a list next to a laptop",
+    imageAlt: "Sold-out club show with cheering guests and confetti in colourful stage light",
   },
   "fake-tickets": {
     id: "2026-11-06-fake-tickets",
@@ -211,8 +206,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "A young woman sits at a kitchen table at night, comparing a ticket offer on her laptop and her smartphone, with a notepad beside her",
+    imageAlt: "Smiling concertgoers showing their tickets at the entrance as they are let in",
   },
   "gdpr-for-event-organisers": {
     id: "2026-11-06-gdpr-for-event-organisers",
@@ -227,8 +221,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "A volunteer clips a notice to an easel at the entrance of a village club house while a photographer with a camera walks into the hall behind her",
+    imageAlt: "View over a photographer's shoulder of a dancing festival crowd at dusk",
   },
   "guest-list-management": {
     id: "2026-11-06-guest-list-management",
@@ -243,8 +236,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "A door host with a clipboard and smartphone checks a couple's name at the side entrance of a city club at night, warm light spilling from the open door behind them",
+    imageAlt: "Door host greeting smiling guests at a club entrance with warm light spilling from the open door",
   },
   "how-to-organise-a-festival": {
     id: "2026-11-06-how-to-organise-a-festival",
@@ -259,8 +251,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "A festival director with a radio and a stage technician carrying cable walk across a meadow the day before a small open-air festival while the stage is being rigged behind them",
+    imageAlt: "Festival grounds at dusk from above: main stage, ferris wheel, tents and string lights",
   },
   "how-to-price-event-tickets": {
     id: "2026-11-06-how-to-price-event-tickets",
@@ -275,8 +266,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "Two organisers sit at a kitchen table late in the evening with a laptop, a notebook and a calculator, planning the costs of a concert",
+    imageAlt: "An ecstatic crowd with raised arms in a sold-out concert hall, the band on stage in warm spotlight",
   },
   "how-to-run-a-club-night": {
     id: "2026-11-06-how-to-run-a-club-night",
@@ -292,7 +282,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Editorial Team",
     imageAlt:
-      "A promoter and a club owner go through a running order at the bar of an empty club in the early evening while a DJ sets up in the booth behind them",
+      "Packed dance floor on a club night: dancing guests with hands in the air in front of the DJ booth in teal and amber light",
   },
   "presale-codes": {
     id: "2026-11-06-presale-codes",
@@ -308,7 +298,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Editorial Team",
     imageAlt:
-      "Two club members sit at a table in their clubhouse in the evening, addressing envelopes for the members' presale",
+      "Excited fans stream through a glowing tunnel into the club at doors, the DJ already playing as laser lights dance over the crowd",
   },
   "qr-code-ticket-check-in": {
     id: "2026-11-06-qr-code-ticket-check-in",
@@ -323,8 +313,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "A young volunteer with a teal lanyard scans a guest's smartphone ticket at the door of a small clubhouse at dusk",
+    imageAlt: "Festival entry lanes from above at blue hour: glowing wristbands and barriers before lit gates",
   },
   "sell-tickets-online": {
     id: "2026-11-06-sell-tickets-online",
@@ -339,8 +328,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "An organiser prepares the ticket presale with a laptop and smartphone in the foyer of a small concert hall in the evening while helpers set up in the background",
+    imageAlt: "Concert crowd seen from behind with raised hands and phone lights facing a glowing stage",
   },
   "ticket-payment-methods-europe": {
     id: "2026-11-06-ticket-payment-methods-europe",
@@ -355,8 +343,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "A young woman buys concert tickets on her smartphone on the sofa in the evening, with a bank card lying on the blanket beside her",
+    imageAlt: "Cheering crowd with raised arms at a sold-out arena concert in golden light",
   },
   "ticket-resale-rules-europe": {
     id: "2026-11-06-ticket-resale-rules-europe",
@@ -372,7 +359,7 @@ export const contentList = {
     updatedAt: null,
     author: "Eventoren Editorial Team",
     imageAlt:
-      "Two young women sit at a café table by the window, one passing her smartphone with a ticket across to the other, with two coffee cups between them",
+      "A group of friends celebrates together at a stadium concert: laughing young people with raised arms in the spotlights",
   },
   "ticketing-platforms-fees-compared": {
     id: "2026-11-06-ticketing-platforms-fees-compared",
@@ -387,8 +374,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "Two organisers compare printed fee overviews at a kitchen table in the evening, with a calculator and a laptop beside them",
+    imageAlt: "Thousands celebrating at night in front of a festival main stage in colourful light",
   },
   "vat-on-event-tickets-europe": {
     id: "2026-11-06-vat-on-event-tickets-europe",
@@ -403,8 +389,7 @@ export const contentList = {
     publishedAt: "2026-11-06",
     updatedAt: null,
     author: "Eventoren Editorial Team",
-    imageAlt:
-      "An organiser in a teal cardigan sits at her kitchen table in the evening, working through her concert's ticket income with a calculator, receipts and a laptop",
+    imageAlt: "Historic theatre auditorium from the gallery: golden boxes, chandelier and applauding audience",
   },
 } as const satisfies Record<string, ContentEntry>
 

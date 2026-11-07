@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "abiball-veranstalter-haftung"
 author: "Eventoren Redaktion"
 image: "ratgeber-abiball-veranstalter-haftung"
-imageAlt: "Eine Mutter und zwei volljährige Abiturienten sitzen abends am Küchentisch und gehen gemeinsam einen ausgedruckten Mietvertrag für den Abiball durch"
+imageAlt: "Junge Abiturienten des Abikomitees feiern lachend auf der vollen Tanzfläche ihres Abiballs unter warmem Licht und Lichterketten"
 category: "abiball"
 keywords:
   [
@@ -48,6 +48,8 @@ Eine GbR entsteht, sobald sich mehrere Personen verpflichten, einen gemeinsamen 
 Das Landgericht Detmold hat schon 2015 einen ganzen Abiturjahrgang als GbR eingestuft (Urt. v. 08.07.2015 – 10 S 27/15). Das Komitee hatte eine Band für 1.800 € gebucht und wieder abgesagt. Das Gericht sprach der Band nur 90 € zu, weil sie keinen höheren Schaden belegte, stellte aber klar: Der Jahrgang hatte als GbR einen wirksamen Vertrag geschlossen.
 
 Der Haken steht in [§ 721 BGB](https://www.gesetze-im-internet.de/bgb/__721.html): Die Gesellschafter haften für die Schulden der GbR **persönlich und als Gesamtschuldner**. Ein Gläubiger kann den vollen Betrag von einem einzelnen volljährigen Mitglied verlangen. Eine interne Abrede „wir haften nur bis 100 €“ gilt gegenüber Dritten nicht.
+
+![Drei strahlende Abiturienten des Abikomitees begrüßen abends die Gäste am festlich geschmückten Eingang ihres Abiballs](ratgeber-abiball-veranstalter-haftung-szene-1)
 
 ## Welche Rechtsform passt für den Abiball? Vergleich der Varianten
 
@@ -130,6 +132,8 @@ Was die GEMA konkret sagt (Stand: November 2026):
 Für Abschlussfeiern bietet die GEMA drei Pakete mit Live- und Tonträgermusik an, kalkuliert auf 10 € Kostenbeitrag pro Person ohne bzw. 30 € mit Essen und Getränken: **S bis 300 m² 374,29 €, M bis 500 m² 623,81 €, L bis 800 m² 998,10 €**. Kleinere Abschlussfeiern gibt es laut GEMA ab ca. 100 €. Bei höheren Ticketpreisen rechnet ihr im Preisrechner nach den Tarifen U-V oder M-V. Enthält das Ticket Essen oder Getränke, zieht die GEMA bis 64 € netto pauschal zwei Drittel ab. Die GEMA-Tarife für 2027 sind noch nicht veröffentlicht.
 
 Ganz wichtig: **Vorher anmelden.** Für nicht angemeldete Musik verlangt die GEMA nach ständiger Rechtsprechung regelmäßig einen Kontrollzuschlag von 100 %, also die doppelte Vergütung. Alles zu Tarifen und Rechenweg im Ratgeber [GEMA für Veranstaltungen](/ratgeber/gema-veranstaltung).
+
+![Volle Tanzfläche beim Abiball: Abiturienten und Eltern tanzen ausgelassen vor dem DJ-Pult im bunten Scheinwerferlicht](ratgeber-abiball-veranstalter-haftung-szene-2)
 
 ## Fällt beim Abiball Künstlersozialabgabe an?
 

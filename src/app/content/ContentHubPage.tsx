@@ -4,8 +4,10 @@ import { buttonVariant } from "#ui/interactive/button/buttonCva.ts"
 import { LinkButtonInternal } from "#ui/interactive/link/LinkButton.tsx"
 import { LinkTextExternal, LinkTextInternal } from "#ui/interactive/link/LinkText.tsx"
 import { EmptyState } from "#ui/static/empty/EmptyState.tsx"
+import { Img } from "#ui/static/img/Img.tsx"
 import { ContentBreadcrumbs } from "./ContentBreadcrumbs.tsx"
 import { ContentCardView } from "./ContentCardView.tsx"
+import { ContentFeaturedCardView } from "./ContentFeaturedCardView.tsx"
 import type { ContentListItem } from "./ContentListItem.ts"
 import type { ContentCollection } from "./contentCollectionSchema.ts"
 import { contentHubPageStateCreate } from "./contentHubPageStateCreate.ts"
@@ -20,19 +22,36 @@ export function ContentHubPage(props: {
     <main id="content" tabindex="-1" lang={state.lang()} class="flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
       <div class="mx-auto max-w-6xl">
         <ContentBreadcrumbs label={state.labels().breadcrumbAria} items={state.breadcrumbs()} />
-        <header class="mt-6 max-w-3xl">
-          <h1 class="text-3xl font-bold tracking-tight text-content text-balance sm:text-4xl">{state.h1()}</h1>
-          <p class="mt-4 text-lg leading-relaxed text-content-muted">{state.labels().intro}</p>
-          <p class="mt-3 text-sm">
-            <LinkTextInternal
-              to={state.otherHub().href as never}
-              hreflang={state.otherHub().lang}
-              lang={state.otherHub().lang}
-              class="break-normal font-medium text-brand-strong hover:text-brand-accent"
-            >
-              {state.otherHub().label}
-            </LinkTextInternal>
-          </p>
+        <header
+          class={state.heroImage() === undefined ? "mt-6 max-w-3xl" : "mt-6 grid items-center gap-8 lg:grid-cols-2"}
+        >
+          <div>
+            <h1 class="text-3xl font-bold tracking-tight text-content text-balance sm:text-4xl">{state.h1()}</h1>
+            <p class="mt-4 text-lg leading-relaxed text-content-muted">{state.labels().intro}</p>
+            <p class="mt-3 text-sm">
+              <LinkTextInternal
+                to={state.otherHub().href as never}
+                hreflang={state.otherHub().lang}
+                lang={state.otherHub().lang}
+                class="break-normal font-medium text-brand-strong hover:text-brand-accent"
+              >
+                {state.otherHub().label}
+              </LinkTextInternal>
+            </p>
+          </div>
+          <Show when={state.heroImage()}>
+            {(image) => (
+              <Img
+                src={image().src}
+                alt={image().alt}
+                width={image().width}
+                height={image().height}
+                eager
+                fetchPriority="high"
+                class="aspect-video w-full rounded-card object-cover"
+              />
+            )}
+          </Show>
         </header>
 
         <Show
@@ -70,9 +89,12 @@ export function ContentHubPage(props: {
                 <h2 id={`${section.id}-heading`} class="text-2xl font-bold tracking-tight text-content">
                   {section.label}
                 </h2>
-                <div class="mt-5 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  <For each={section.cards}>{(card) => <ContentCardView card={card} />}</For>
-                </div>
+                <Show when={section.cards[0]}>{(first) => <ContentFeaturedCardView card={first()} />}</Show>
+                <Show when={section.cards.length > 1}>
+                  <div class="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <For each={section.cards.slice(1)}>{(card) => <ContentCardView card={card} />}</For>
+                  </div>
+                </Show>
               </section>
             )}
           </For>

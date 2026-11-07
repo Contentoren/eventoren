@@ -1,6 +1,7 @@
 import { type Token, type Tokens, walkTokens } from "marked"
 import type { ContentIssue } from "./ContentIssue.ts"
 import type { ContentLinkTargets } from "./ContentLinkTargets.ts"
+import { contentCatalogImageRead } from "./contentImages.ts"
 import { contentCollectionConfig } from "./contentCollectionConfig.ts"
 import type { ContentCollection } from "./contentCollectionSchema.ts"
 import { contentFaqExtract } from "./contentFaqExtract.ts"
@@ -69,7 +70,10 @@ export function contentBodyCheck(
   let internalLinks = 0
   walkTokens(tokens, (token) => {
     if (token.type === "html") error(`body: raw HTML is not allowed: ${token.raw.trim().slice(0, 60)}`)
-    if (token.type === "image") error(`body: images are not allowed in the body: ${token.href}`)
+    if (token.type === "image") {
+      const imageIssue = contentBodyImageCheck(token as Tokens.Image)
+      if (imageIssue !== undefined) error(imageIssue)
+    }
     if (token.type === "table" || (token.type === "list" && token.items.some((item: Tokens.ListItem) => item.task)))
       hasTableOrChecklist = true
     if (token.type !== "link") return
@@ -83,6 +87,18 @@ export function contentBodyCheck(
     warning(`body: legal/tax article without "${config.legalDisclaimer}"`)
 
   return issues
+}
+
+const contentBodyImageKeyPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u
+
+/** Body images must reference a resolvable kebab-case catalog key with non-empty alt text. */
+function contentBodyImageCheck(token: Tokens.Image): string | undefined {
+  if (!contentBodyImageKeyPattern.test(token.href))
+    return `body: image href must be a kebab-case catalog image key, not a URL or path: ${token.href}`
+  if (contentCatalogImageRead(token.href) === undefined) return `body: unknown image key: ${token.href}`
+  const alt = contentTokenTextRead(token.tokens) || token.text
+  if (alt.trim() === "") return `body: image "${token.href}" needs non-empty alt text`
+  return undefined
 }
 
 type Section = { readonly title: string; readonly tokens: Token[] }

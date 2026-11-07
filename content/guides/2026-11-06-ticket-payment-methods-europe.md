@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticket-payment-methods-europe"
 author: "Eventoren Editorial Team"
 image: "ratgeber-zahlungsarten-ticketshop"
-imageAlt: "A young woman buys concert tickets on her smartphone on the sofa in the evening, with a bank card lying on the blanket beside her"
+imageAlt: "Cheering crowd with raised arms at a sold-out arena concert in golden light"
 category: "selling-tickets"
 keywords:
   [
@@ -54,6 +54,8 @@ The figures below are **estimates** from Ecommerce News Europe (page updated 10 
 | Austria, Ireland         | cards and wallets; EPS bank transfer in Austria                    | –                                                                | not in our source                                        |
 
 Two methods work across borders: **Klarna** (buy now, pay later, strong in Sweden, Belgium and Spain according to the same source) and **PayPal**, the leader in Germany.
+
+![Friends laughing and enjoying a summer concert in the evening sun](ratgeber-zahlungsarten-ticketshop-szene-1)
 
 ## What does each payment method cost the organiser?
 
@@ -129,6 +131,8 @@ Under Regulation (EU) 2024/886, euro-area banks must receive instant SEPA transf
 ### PSD3 and the Payment Services Regulation
 
 The EU's new payments package passed the Council's first reading on 29 October 2026 (27–0), and Parliament's second reading is pending. It will apply about 21 months after entry into force, roughly late 2028. Expect an IBAN–name check, more liability for spoofing fraud, e-money institutions merged into payment institutions, and more fee transparency.
+
+![Young festivalgoers paying cashless with a smile at a drinks stand](ratgeber-zahlungsarten-ticketshop-szene-2)
 
 ## Can you charge extra for certain payment methods?
 

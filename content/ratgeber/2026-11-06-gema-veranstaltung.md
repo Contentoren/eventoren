@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "gema-veranstaltung"
 author: "Eventoren Redaktion"
 image: "ratgeber-gema-veranstaltung"
-imageAlt: "Ein Organisator mit Klemmbrett steht beim Soundcheck einer Band im Vereinsheim neben dem Mischpult"
+imageAlt: "Blaskapelle auf einer Dorfbühne im Abendlicht, Publikum als Silhouetten im Vordergrund"
 category: "recht-steuern"
 keywords:
   [
@@ -50,6 +50,8 @@ Entscheidend ist, ob die Veranstaltung **öffentlich** ist. Nach § 15 Abs. 3 Ur
 | Konzert mit ausschließlich GEMA-freier Musik                | ja                                              | ja, mit Setlist als Nachweis |
 
 Zwei Missverständnisse halten sich hartnäckig. Erstens: „Ohne Eintritt ist es GEMA-frei.“ Falsch. Die GEMA schreibt selbst, dass öffentliche Veranstaltungen mit Musik auch ohne Eintrittsgeld anmelde- und vergütungspflichtig sind; nur die Sätze sind niedriger. Zweitens: „Wir spielen nur GEMA-freie Musik, also melden wir nichts.“ Auch falsch. Die GEMA geht davon aus, dass ihr Repertoire genutzt wird (GEMA-Vermutung). Du meldest an, reichst die vollständige Setlist ein, und dann storniert die GEMA die Rechnung.
+
+![Fröhliche Gäste tanzen auf einem Sommerfest im Freien zur Livemusik einer Band auf kleiner Bühne](ratgeber-gema-veranstaltung-szene-1)
 
 ## Welcher GEMA-Tarif gilt für welche Veranstaltung?
 
@@ -109,6 +111,8 @@ Die Stufenlogik „je weitere angefangene 0,85 €“ leiten wir aus der Tabelle
 Bei 200 Gästen à 10,08 € nimmst du netto 2.016 € Eintritt ein. Der Tarif U-V (Abschnitt VI) sieht vor: Übersteigt die Pauschale 11,89 % der Netto-Einnahmen, liegt ein grobes Missverhältnis vor. 11,89 % von 2.016 € sind **239,70 €**, also deutlich weniger als 422,64 €. Du kannst innerhalb von 6 Wochen nach der Rechnung schriftlich beantragen, nach 11,89 % abgerechnet zu werden. Dazu brauchst du eine geordnete Aufstellung aller Einnahmen inklusive Sponsoring mit Belegen. Nachlässe gibt es auf diese Vergütung nicht, und die Mindestvergütung des Tarifs darf nicht unterschritten werden. Wie der GVL-Zuschlag in diesem Fall berücksichtigt wird, klärst du am besten direkt mit dem GEMA-Kundencenter.
 
 Wichtig: Ticketexporte mit Verkaufszahlen pro Preisstufe sind hier dein bester Beleg.
+
+![DJ-Party mit rund 200 Gästen: volle Tanzfläche im Saal mit bunten Lichtkegeln und tanzender Menge](ratgeber-gema-veranstaltung-szene-2)
 
 ## Was kostet die GEMA für ein Konzert?
 

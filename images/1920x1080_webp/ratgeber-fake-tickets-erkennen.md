@@ -1,1 +1,1 @@
-Eine junge Frau sitzt abends am Küchentisch und vergleicht auf ihrem Laptop und ihrem Smartphone ein Ticketangebot, daneben liegt ein Notizblock
+Lachende Konzertbesucher zeigen am Eingang ihre Tickets und werden eingelassen

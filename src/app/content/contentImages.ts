@@ -12,7 +12,8 @@ export type ContentImageData = {
 
 type ContentImageEntry = Pick<ContentEntry, "imagePath"> & Partial<Pick<ContentEntry, "image" | "imageAlt" | "title">>
 
-function contentCatalogImageRead(imageKey: string | null | undefined): CatalogImage | undefined {
+/** Resolve a kebab-case image key (or basename) to its assets-catalog entry. */
+export function contentCatalogImageRead(imageKey: string | null | undefined): CatalogImage | undefined {
   if (imageKey === undefined || imageKey === null) return undefined
 
   const normalizedKey = imageKey.replace(/[\\/-]/gu, "_")

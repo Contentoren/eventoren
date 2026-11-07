@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "barrierefreiheit-bfsg"
 author: "Eventoren Redaktion"
 image: "ratgeber-barrierefreiheit-bfsg"
-imageAlt: "Ein Helfer am Einlass eines Konzertsaals hält einer Besucherin im Rollstuhl die Tür zu einem stufenlosen Seiteneingang auf"
+imageAlt: "Rollstuhlfahrerin tanzt mitten in einer fröhlichen Festivalmenge bei Tageslicht, um sie herum lachende und klatschende Konzertbesucher"
 category: "recht-steuern"
 keywords:
   [
@@ -50,6 +50,8 @@ Nicht gemeint ist die Kategorie „elektronische Tickets“ in § 1 Abs. 3 Nr. 2
 | Ausnahme               | Kleinstunternehmen, die Dienstleistungen erbringen (§ 3 Abs. 3 BFSG)                                             |
 | Aufsicht               | Marktüberwachungsstelle der Länder für die Barrierefreiheit von Produkten und Dienstleistungen (MLBF), Magdeburg |
 | Bußgeld                | bis 100.000 €, bei bestimmten Informationspflichten bis 10.000 € (§ 37 Abs. 2 BFSG)                              |
+
+![Gemischtes Konzertpublikum mit und ohne Behinderung genießt gemeinsam ein Indoor-Konzert im warmen Bühnenlicht](ratgeber-barrierefreiheit-bfsg-szene-1)
 
 ## Gilt das BFSG für meinen Ticketshop?
 
@@ -175,6 +177,8 @@ Viele Barrieren entstehen, weil Gäste nicht wissen, was sie erwartet. Schreib i
 - Ansprechperson für Fragen zur Barrierefreiheit, mit E-Mail
 
 Vorlagen für die Organisation am Eventtag findest du im Ratgeber [Einlassmanagement](/ratgeber/einlassmanagement-warteschlangen) und in der [Checkliste zur Veranstaltungsplanung](/ratgeber/veranstaltung-planen-checkliste).
+
+![Gebärdendolmetscherin am Bühnenrand eines Konzerts, davor ein begeistertes Publikum mit erhobenen Händen](ratgeber-barrierefreiheit-bfsg-szene-2)
 
 ## Checkliste: Barrierefreier Ticketshop und barrierefreies Event
 

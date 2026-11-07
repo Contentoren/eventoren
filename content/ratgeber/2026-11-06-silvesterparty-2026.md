@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "silvesterparty-2026"
 author: "Eventoren Redaktion"
 image: "ratgeber-silvesterparty-2026"
-imageAlt: "Zwei Helfer stellen am Silvesterabend in einem Festsaal Reihen leerer Sektgläser auf eine lange Theke, im Fenster dahinter leuchtet die Winternacht"
+imageAlt: "Silvesterparty um Mitternacht: jubelnde Gäste stoßen mit Sektgläsern an, Luftschlangen fallen von der Decke"
 category: "eventformate"
 keywords:
   [
@@ -44,6 +44,8 @@ Der Wochentag verändert Nachfrage, Personal und Abreise:
 | Abreise          | Neujahr ist Feiertag, ÖPNV fährt oft nach Sonderfahrplan                                                    | Heimweg-Infos vorab an alle Gäste                                                |
 
 Für Veranstalter heißt das: Silvester ist der eine Abend im Jahr, an dem fast alle ausgehen wollen, aber jeder schon Pläne hat. Wer im November nicht verkauft, verkauft im Dezember gegen Hauspartys und Stadtfeuerwerke.
+
+![Elegant gekleidete Gäste tanzen in einem goldfarben geschmückten Silvestersaal](ratgeber-silvesterparty-2026-szene-1)
 
 ## Last-Minute-Zeitplan: Was musst du bis wann erledigen?
 
@@ -155,6 +157,8 @@ Um 0 Uhr wollen alle gleichzeitig raus, um das Feuerwerk zu sehen, und danach gl
 - **Nüchterne Ansprechperson.** Eine volljährige, verantwortliche Person bleibt die ganze Nacht nüchtern und erreichbar.
 
 Security-Faustregeln, Ordnerzahlen und die Pflicht zum Sicherheitskonzept stehen im Ratgeber [Sicherheitskonzept für Veranstaltungen](/ratgeber/sicherheitskonzept-veranstaltung).
+
+![Partygäste auf einer Terrasse schauen jubelnd das Mitternachtsfeuerwerk an](ratgeber-silvesterparty-2026-szene-2)
 
 ### Heimweg
 

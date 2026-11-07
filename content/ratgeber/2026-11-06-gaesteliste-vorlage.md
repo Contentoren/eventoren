@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "gaesteliste-vorlage"
 author: "Eventoren Redaktion"
 image: "ratgeber-gaesteliste-vorlage"
-imageAlt: "Türsteherin mit Klemmbrett und Smartphone gleicht am Seiteneingang eines Clubs bei Nacht den Namen eines Paares ab, im Hintergrund warmes Licht aus der offenen Tür"
+imageAlt: "Türsteherin begrüßt lächelnde Gäste am Club-Eingang, aus der offenen Tür strömt warmes Licht"
 category: "einlass-event-tag"
 keywords:
   [
@@ -48,6 +48,8 @@ Typische Gruppen auf der Gästeliste:
 | Gewinner            | Verlosungen auf Social Media oder im Radio | genau nach Gewinnspiel                            |
 
 Bei einer Clubnacht ist die Gästeliste oft ein Marketing-Werkzeug, beim Vereinsfest eher Dank an Helfer und Sponsoren. Wie Gästeliste und Promoter im Club zusammenspielen, beschreibt der Ratgeber [Clubnacht veranstalten](/ratgeber/clubnacht-veranstalten).
+
+![Gäste stoßen bei Sonnenuntergang auf einer Dachterrassenparty mit Getränken an](ratgeber-gaesteliste-vorlage-szene-1)
 
 ## Gästeliste-Vorlage: Welche Spalten brauchst du?
 
@@ -162,6 +164,8 @@ Die Gästeliste braucht am Einlass **eine eigene Linie oder zumindest eine eigen
 | Liste nach Uhrzeit-Limit                          | Wie in der Einladung angekündigt: regulärer Preis oder Abendkasse.                          |
 
 **Wichtig:** Die Entscheidung über Ausnahmen trifft eine Person, die Einlassleitung. Wenn jeder Helfer eigene Ausnahmen macht, ist die Liste nach einer Stunde wertlos.
+
+![Gastgeberin begrüßt namentlich Gäste am Einlass einer Abendveranstaltung](ratgeber-gaesteliste-vorlage-szene-2)
 
 ## Was gilt beim Datenschutz für Gästelisten?
 

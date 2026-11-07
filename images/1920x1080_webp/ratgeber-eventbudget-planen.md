@@ -1,1 +1,1 @@
-Kassenwartin eines Vereins rechnet abends am Küchentisch mit Belegen, Taschenrechner und Laptop das Budget für ein Fest durch
+Helfer schmücken eine leere Veranstaltungshalle mit Lichterketten und Stühlen im Morgenlicht

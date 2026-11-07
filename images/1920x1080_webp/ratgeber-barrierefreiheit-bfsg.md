@@ -1,1 +1,1 @@
-Ein Helfer am Einlass eines Konzertsaals hält einer Besucherin im Rollstuhl die Tür zu einem stufenlosen Seiteneingang auf
+Rollstuhlfahrerin tanzt mitten in einer fröhlichen Festivalmenge bei Tageslicht, um sie herum lachende und klatschende Konzertbesucher

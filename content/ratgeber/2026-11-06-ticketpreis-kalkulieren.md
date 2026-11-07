@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketpreis-kalkulieren"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketpreis-kalkulieren"
-imageAlt: "Zwei Veranstalterinnen sitzen abends an einem Küchentisch mit Laptop, Notizbuch und Taschenrechner und planen die Kosten für ein Konzert"
+imageAlt: "Ekstatische Menge mit erhobenen Armen in einer ausverkauften Konzerthalle, Band auf der Bühne im warmen Scheinwerferlicht"
 category: "tickets-verkaufen"
 keywords:
   [
@@ -53,6 +53,8 @@ Jede Kalkulation beginnt mit einer ehrlichen Kostenliste. Entscheidend ist die T
 | Umsatzsteuer         | variabel                | 7 % (Konzert), 19 % (Party) im Bruttopreis                       | entfällt als Kleinunternehmer                                               |
 
 Zwei Fehler tauchen in fast jeder ersten Kalkulation auf: Die Umsatzsteuer wird vergessen, weil der Gast ja „20 €“ zahlt, und es gibt keinen Puffer für Unvorhergesehenes. Plane 10 % der Fixkosten als Reserve ein. Eine ausführliche Kostenvorlage findest du im Ratgeber [Eventbudget planen](/ratgeber/eventbudget-planen).
+
+![Liveband spielt auf kleiner Clubbühne vor begeistertem Publikum, warmes Bühnenlicht und erhobene Hände im Vordergrund](ratgeber-ticketpreis-kalkulieren-szene-1)
 
 ## Wie lautet die Break-even-Formel für Tickets?
 
@@ -140,6 +142,8 @@ So liest du die Tabelle:
 - **Ein Preis ist nur so gut wie die Absatzannahme.** Ein höherer Preis kann weniger Käufer bedeuten. Rechne deshalb immer die Kombination durch, die du für wahrscheinlich hältst, nicht nur die beste.
 
 Wenn selbst die realistische Zelle rot bleibt, hilft kein Preistrick. Dann musst du an die Fixkosten: kleinere Technik, Türdeal statt Festgage, Ehrenamtliche statt bezahlter Aushilfen oder ein Sponsor.
+
+![Voll besetzter Konzertsaal bei der Zugabe unter funkelndem Licht, das Publikum klatscht im Takt](ratgeber-ticketpreis-kalkulieren-szene-2)
 
 ## Gebühr weitergeben oder selbst tragen: Was ändert sich?
 

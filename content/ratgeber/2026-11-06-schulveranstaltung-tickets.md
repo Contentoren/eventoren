@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "schulveranstaltung-tickets"
 author: "Eventoren Redaktion"
 image: "ratgeber-schulveranstaltung-tickets"
-imageAlt: "Zwei Elternhelfer prüfen am Eingang einer Schulaula Tickets auf dem Smartphone, während Familien zur Aufführung des Schultheaters hereinkommen"
+imageAlt: "Junge Schauspieler verbeugen sich unter Applaus auf der Bühne der geschmückten Schulaula"
 category: "vereine-schulen"
 keywords:
   [
@@ -45,6 +45,8 @@ Nicht jede Schulveranstaltung braucht Eintrittskarten. Tickets lohnen sich, soba
 | Infoabend, Tag der offenen Tür     | frei                                                 | Raumgröße, Führungen                   | Gratis-Tickets mit Zeitfenstern                                                          |
 
 Ein Grundsatz gilt für alle: Die Kapazität kommt nicht aus dem Bauch, sondern vom Schulträger. Für Räume mit mehr als 200 Besuchern gelten die Versammlungsstättenverordnungen der Länder, und der Schulträger kennt die zulässige Personenzahl der Aula (oft im genehmigten Bestuhlungsplan). Diese Zahl ist die Obergrenze für alle Kontingente zusammen, Mitwirkende und Helfer eingerechnet.
+
+![Schulchor singt in der Aula vor aufmerksam lauschenden Eltern und Geschwistern](ratgeber-schulveranstaltung-tickets-szene-1)
 
 ## Wer verkauft die Tickets: Förderverein oder Schule?
 
@@ -195,6 +197,8 @@ Am Aufführungsabend brauchst du Eltern, nicht Lehrkräfte: Die Lehrkräfte steh
 Organisiere die Schichten über den Elternrat bzw. die Klassenpflegschaft, wie das Gremium in deinem Land auch heißt. Gib jedem Helfer vorher eine kurze schriftliche Einweisung: Wann scannen, was tun bei „bereits eingecheckt“, wer entscheidet bei Streitfällen.
 
 **Versicherung:** Ob Eltern als Helfer gesetzlich unfallversichert sind, hängt davon ab, wer veranstaltet. Wer ehrenamtlich für eine Körperschaft des öffentlichen Rechts tätig ist, kann nach § 2 Abs. 1 Nr. 10 SGB VII versichert sein. Bei Veranstaltungen des Fördervereins gilt das nicht automatisch. Frag bei der zuständigen Unfallkasse nach. Schülerinnen und Schüler sind während des Schulbesuchs gesetzlich unfallversichert (§ 2 Abs. 1 Nr. 8b SGB VII). Ob eine Abendveranstaltung dazu zählt, klärt die Schulleitung vorher. Bei Veranstaltungen des Fördervereins lohnt außerdem ein Blick in die Vereinshaftpflicht: Öffentliche Feste sind nicht in jeder Police mitversichert.
+
+![Elternhelfer begrüßen Familien am geschmückten Eingang der Schulaula](ratgeber-schulveranstaltung-tickets-szene-2)
 
 ## Checkliste: Ticketverkauf für die Schulveranstaltung
 

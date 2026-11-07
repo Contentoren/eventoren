@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "abiball-kosten"
 author: "Eventoren Redaktion"
 image: "ratgeber-abiball-kosten"
-imageAlt: "Zwei Schülerinnen und ein Vater des Abikomitees schmücken einen festlichen Saal mit runden Tischen, weißen Tischdecken und warmen Lichterketten"
+imageAlt: "Blick vom Balkon auf tanzende Abiball-Paare in Abendgarderobe mit Konfetti in der Luft"
 category: "abiball"
 keywords:
   [
@@ -43,6 +43,8 @@ Warum ist die Spanne so groß? Vier Stellschrauben bestimmen den Preis:
 4. **Gästezahl:** Je mehr Gäste, desto stärker verteilen sich die Fixkosten.
 
 Wichtig für Eltern: Der Ticketpreis ist nicht alles. Kleidung, Friseur und Anreise kommen dazu. Die Stiftung Warentest zitierte schon 2020 die Einschätzung, dass pro Familie schnell Kosten im vierstelligen Bereich entstehen können.
+
+![Festlich gedeckter Abiball-Saal mit rundem Buffet, Gäste in Abendgarderobe stoßen mit Sektgläsern an](ratgeber-abiball-kosten-szene-1)
 
 ## Welche Kostenpositionen hat ein Abiball?
 
@@ -124,6 +126,8 @@ Viele Jahrgänge geben Lehrkräften eine Freikarte und subventionieren die Abitu
 28.000 € Einnahmen minus 27.973,73 € Budget ergeben **26,27 € Überschuss**, und der Puffer ist schon voll finanziert. Bleibt der Puffer ungenutzt, habt ihr am Ende rund 2.570 € übrig für eine Spende, die Afterparty oder eine Rückzahlung an die Stufe.
 
 Warum 64 € für Gäste? In diesem Beispiel bleibt der höchste Preis damit innerhalb der 64-€-Grenze für den pauschalen Verzehrabzug der GEMA. Liegt euer Preis darüber, rechnet die GEMA anders. Prüft das im Preisrechner, bevor ihr Preise festlegt.
+
+![Abiturienten und ihre Familien strömen abends in festlicher Kleidung durch den beleuchteten Eingang in den Abiball-Saal](ratgeber-abiball-kosten-szene-2)
 
 ## Wie viele Tickets müsst ihr verkaufen (Break-even)?
 

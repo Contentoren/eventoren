@@ -1,1 +1,1 @@
-Ein Organisator mit Klemmbrett steht beim Soundcheck einer Band im Vereinsheim neben dem Mischpult
+Blaskapelle auf einer Dorfbühne im Abendlicht, Publikum als Silhouetten im Vordergrund

@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "dynamic-pricing-tickets-eu"
 author: "Eventoren Editorial Team"
 image: "ratgeber-dynamic-pricing-tickets"
-imageAlt: "A young woman sits on a sofa in the evening, wrapped in a blanket, looking thoughtfully at her phone while she waits for a ticket sale to open"
+imageAlt: "An ecstatic concert crowd with raised hands at a night-time arena show, colourful light beams sweeping over the cheering fans"
 category: "selling-tickets"
 keywords:
   [
@@ -51,6 +51,8 @@ It helps to separate the models that are often lumped together:
 | Personalised pricing | based on data about the individual buyer | differs per buyer                       | a different price depending on device or purchase history |
 
 Tiers and phases have been standard practice for decades and are unproblematic when clearly announced. True demand pricing, and personalised pricing even more so, is under close regulatory scrutiny.
+
+![A huge festival crowd in front of the main stage in golden evening light, golden confetti raining onto the cheering visitors](ratgeber-dynamic-pricing-tickets-szene-1)
 
 ## What happened in the Oasis ticket sale?
 
@@ -153,6 +155,8 @@ Switch on fixed, announced dates instead: "€12 until 31 January, €15 from 1 
 - [ ] Name tiers after what they include; a "premium" ticket needs a real extra
 - [ ] Publish the door price from day one
 - [ ] Never drop back to a lower price without announcing it first
+
+![Early-bird fans celebrate in the front rows before the stage of a summer festival in daylight](ratgeber-dynamic-pricing-tickets-szene-2)
 
 ## What do we recommend?
 

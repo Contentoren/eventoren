@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "ticketing-glossar"
 author: "Eventoren Redaktion"
 image: "ratgeber-ticketing-glossar"
-imageAlt: "Ein Stapel leerer Einlassbänder, ein Smartphone mit unscharfem Bildschirm und eine Rolle Klebeband liegen auf dem Tresen einer Kassenhütte, bevor der Einlass öffnet"
+imageAlt: "Stimmungsvoller Festivaleingang in der Abenddämmerung: Gäste zeigen Handytickets an den Scan-Spuren unter Lichterketten"
 category: "planung-marketing"
 keywords:
   [
@@ -44,6 +44,8 @@ Viele Missverständnisse zwischen Veranstalter, Location und Ticketanbieter ents
 | Personalisiertes Ticket | Inhaberkarte      | personalisiert = Name auf dem Ticket, Inhaberkarte = gilt für jeden, der sie vorzeigt                                                                          |
 | Check-in-Quote          | Sell-through      | Check-in-Quote = Anteil erschienener Gäste, Sell-through = Anteil verkaufter Tickets                                                                           |
 | Chargeback              | Rückerstattung    | Chargeback = vom Käufer über Bank oder Kartenanbieter erzwungen, Rückerstattung = vom Veranstalter ausgezahlt                                                  |
+
+![Abendkasse eines Stadtfests: lachende Gäste kaufen Tickets am hell erleuchteten Kassenhäuschen mit Lichterketten](ratgeber-ticketing-glossar-szene-1)
 
 ## A–B: Von Abendkasse bis Break-even
 
@@ -124,6 +126,8 @@ Viele Missverständnisse zwischen Veranstalter, Location und Ticketanbieter ents
 - **Sicherheitskonzept:** Ein Sicherheitskonzept beschreibt Gefahren, Zuständigkeiten, Ordnungsdienst und Abläufe für den Notfall. Pflicht ist es bei Versammlungsstätten mit mehr als 5.000 Besucherplätzen, darunter wenn die Art der Veranstaltung es erfordert. Siehe [Sicherheitskonzept](/ratgeber/sicherheitskonzept-veranstaltung).
 - **Sperrzeit:** Die Sperrzeit ist der Zeitraum, in dem Gaststätten und Veranstaltungen schließen müssen. Sie wird per Landesverordnung festgelegt und kann im Einzelfall verkürzt oder aufgehoben werden.
 - **Systemgebühr:** Eine Systemgebühr ist ein fester Betrag pro Ticket, mit dem ein Anbieter seine Ticketing-Technik abrechnet. Viele Anbieter fassen sie mit anderen Posten zusammen. Vergleiche deshalb immer die Gesamtkosten pro Ticket.
+
+![Einlasshelferin scannt am Abend mit dem Smartphone die Tickets ankommender Konzertgäste im Scheinwerferlicht](ratgeber-ticketing-glossar-szene-2)
 
 ## T–Z: Von Ticketart bis Zweitmarkt
 

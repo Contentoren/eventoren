@@ -1,0 +1,1 @@
+Internationales Festivalpublikum tanzt in der Abenddämmerung unter Lichterketten

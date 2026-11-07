@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "kleinunternehmerregelung-veranstalter"
 author: "Eventoren Redaktion"
 image: "ratgeber-kleinunternehmerregelung-veranstalter"
-imageAlt: "Ein junger Partyveranstalter sitzt abends in seiner WG-Küche mit Taschenrechner, Kontoauszügen und Laptop und rechnet seine Jahresumsätze zusammen"
+imageAlt: "Junges DJ-Kollektiv feiert hinter dem DJ-Pult seiner eigenen Partyreihe, davor tanzende Menge im türkisen und warmen Licht"
 category: "recht-steuern"
 keywords:
   [
@@ -48,6 +48,8 @@ Für dich als Veranstalter bedeutet das:
 
 Wichtig: Die Kleinunternehmerregelung betrifft nur die Umsatzsteuer. Einkommen-, Körperschaft- oder Gewerbesteuer auf deinen Gewinn sind davon unabhängig.
 
+![Tanzende Gäste einer kleinen Clubparty im bunten Licht, DJ im Hintergrund am Pult](ratgeber-kleinunternehmerregelung-veranstalter-szene-1)
+
 ## Welche Umsatzgrenzen gelten 2026 und 2027?
 
 | Prüfung für das Jahr                     | Umsatz Vorjahr  | Umsatz laufendes Jahr       | Rechtsgrundlage                    |
@@ -85,6 +87,8 @@ Lena bleibt mit 24.400 € unter 25.000 € und ist 2026 Kleinunternehmerin. Sie
 **Was die Regelbesteuerung ab 2028 kosten würde (Beispielrechnung):** Bei 40.000 € Bruttoeinnahmen aus Partys mit 19 % stecken darin 6.386,55 € Umsatzsteuer. Ihr bleiben 33.613,45 € netto, abzüglich Vorsteuer aus Rechnungen für Location und Technik. Plane die Preise für 2028 deshalb rechtzeitig neu. Wie du Ticketpreise sauber kalkulierst, steht im Ratgeber [Ticketpreis kalkulieren](/ratgeber/ticketpreis-kalkulieren).
 
 Welche Einnahmen zählen? Nach unserer Einschätzung zählt der Ticketpreis, den deine Gäste für die Eintrittsberechtigung zahlen, nicht nur die Auszahlung nach Abzug der Plattformgebühr. Die Gebühren der Ticketplattform sind deine Kosten. Verlangt eine Plattform im eigenen Namen eine Servicegebühr vom Käufer, ist das in der Regel ihr Umsatz, nicht deiner. Kläre Einzelheiten mit deiner Steuerberatung.
+
+![Ausgelassene Silvesterparty: Gästemenge mit Konfetti und Sektgläsern um Mitternacht im festlich erleuchteten Saal](ratgeber-kleinunternehmerregelung-veranstalter-szene-2)
 
 ## Bin ich mit einer einmaligen privaten Party überhaupt Unternehmer?
 

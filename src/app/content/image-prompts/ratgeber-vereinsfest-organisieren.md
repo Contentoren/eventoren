@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-vereinsfest-organisieren"
 articles: ["/ratgeber/vereinsfest-organisieren"]
-alt: "Ehrenamtliche bauen am Morgen eines Sommerfests auf einer Dorfwiese Bierzeltgarnituren und einen Pavillon auf"
+alt: "Blick über Biergartentische hinweg zu einer Blaskapelle am Ende der Reihe unter Lampions"
 ---
 
-Early summer morning on a village meadow before a club summer festival (Dorffest): a teenage boy and an older man in a teal club T-shirt carry a folding beer table between them, while a woman in her forties unfolds the legs of a bench nearby and a white pavilion is half raised behind them. Dew on the grass, a few stacked crates and a coiled cable lie at their feet, a string of unlit amber festoon bulbs hangs loosely from the pavilion. The volunteers occupy the right third of the frame in a medium-wide shot; the left side is calm negative space of softly blurred meadow, a distant tree line and a pale morning sky with gentle warm light.
+View down the length of long beer-garden tables toward a brass band playing on a small platform at the far end. Lanterns hang on lines above the tables, where guests sit seen from behind and from the side, mugs and plates before them. No face is close to the camera.

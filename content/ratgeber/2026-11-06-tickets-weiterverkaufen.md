@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "tickets-weiterverkaufen"
 author: "Eventoren Redaktion"
 image: "ratgeber-tickets-weiterverkaufen"
-imageAlt: "Zwei junge Frauen sitzen in einem Café am Fenster, eine reicht der anderen ihr Smartphone mit einem Ticket, auf dem Tisch stehen zwei Tassen"
+imageAlt: "Freundesgruppe feiert gemeinsam beim Stadionkonzert: lachende junge Leute mit erhobenen Armen im Scheinwerferlicht"
 category: "ticketkaeufer"
 keywords:
   [
@@ -47,6 +47,8 @@ Drei Dinge können das einschränken:
 3. **Die Regeln der Verkaufsplattform.** Kleinanzeigen etwa listet in seinen Grundsätzen „nicht übertragbare Tickets für Veranstaltungen“ als verbotene Angebote.
 
 **Definition:** Der Zweitmarkt (Secondary Market) umfasst alle Verkäufe eines Tickets nach dem Erstverkauf durch den Veranstalter oder seinen Ticketanbieter, egal ob privat, über eine Ticketbörse oder über eine offizielle Weiterverkaufsplattform.
+
+![Zwei Freunde umarmen sich lachend vor der Konzertbühne in der Menge, dahinter jubelnde Konzertgäste im bunten Licht](ratgeber-tickets-weiterverkaufen-szene-1)
 
 ## Welche AGB-Klauseln sind wirksam?
 
@@ -124,6 +126,8 @@ Manche Veranstalter und Ticketanbieter bieten eine eigene Weiterverkaufsfunktion
 ### Namensänderung und Verkauf an Bekannte
 
 Gibt es keine offizielle Plattform, ist der Verkauf an Menschen, die du kennst, der nächstbeste Weg. Bei personalisierten Tickets lässt du den Namen über den Veranstalter ändern. Bei Tickets ohne Namen schickst du das PDF nur an den Käufer und behältst keine Kopie, die du weitergeben könntest.
+
+![Drei Freunde treffen sich lachend am beleuchteten Veranstaltungseingang, einer hält die Tickets in der Hand](ratgeber-tickets-weiterverkaufen-szene-2)
 
 ### Kleinanzeigen und Social Media
 

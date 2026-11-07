@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "widerrufsrecht-tickets"
 author: "Eventoren Redaktion"
 image: "ratgeber-widerrufsrecht-tickets"
-imageAlt: "Eine Vereinsvorsitzende liest im Vereinsheim am Fenster die Bestellbedingungen ihres Ticketshops auf dem Tablet gegen"
+imageAlt: "Freunde sitzen lachend auf der Wiese beim Open-Air-Konzert in der Abenddämmerung, Laternen und warmes Bühnenlicht um sie herum"
 category: "recht-steuern"
 keywords:
   [
@@ -41,6 +41,8 @@ Bei Veranstaltungstickets macht das Gesetz eine Ausnahme. § 312g Abs. 2 Nr. 9 B
 Der Grund: Der Veranstalter hält für einen festen Termin einen Platz frei. Könnten Käufer bis kurz vorher grundlos zurücktreten, bliebe er auf leeren Plätzen sitzen, die er nicht mehr verkaufen kann. Die Regel stammt aus Art. 16 Buchst. l der EU-Verbraucherrechterichtlinie 2011/83/EU und gilt deshalb in der ganzen EU ähnlich.
 
 Wichtig ist der Einschub „soweit die Parteien nichts anderes vereinbart haben“ in § 312g Abs. 2 BGB. Du **darfst** also freiwillig ein Rückgaberecht einräumen. Du musst es nur nicht.
+
+![Entspannte Festivalmenge genießt bei Sonnenuntergang die Hauptbühne, Freunde lachen gemeinsam auf Picknickdecken](ratgeber-widerrufsrecht-tickets-szene-1)
 
 ## Für welche Tickets gilt die Ausnahme?
 
@@ -133,6 +135,8 @@ Kein Widerrufsrecht heißt nicht, dass du jede Anfrage ablehnen musst. Kulanz ka
 **Beispielrechnung (Kulanz mit Bearbeitungsgebühr):** Ein Käufer gibt 3 Tickets à 30 € gemäß deiner Kulanzregel 20 Tage vor dem Event zurück. Du erstattest 90 € abzüglich einer in den AGB genannten Bearbeitungsgebühr von 2 € pro Ticket, also 84 €. Prüfe vorher, ob und welche Gebühren deines Ticketanbieters bei einer Erstattung zurückkommen oder bei dir hängen bleiben. Die Kosten für Zahlungsabwicklung sind bei vielen Anbietern bereits angefallen.
 
 Formuliere Kulanz als **freiwillige Leistung**, nicht als Widerrufsrecht. Sonst könnten die gesetzlichen Widerrufsregeln samt 14-Tage-Frist und Widerrufsbutton greifen.
+
+![Glückliche Gäste tanzen unter Lichterketten bei einem Gartenkonzert am Sommerabend](ratgeber-widerrufsrecht-tickets-szene-2)
 
 ## Was ist der Unterschied zwischen Widerruf, Rücktritt und Absage?
 

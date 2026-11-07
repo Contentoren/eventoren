@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "event-seo-google-ai"
 author: "Eventoren Editorial Team"
 image: "ratgeber-event-sichtbar-google-ki"
-imageAlt: "An organiser works on a laptop in a small club office after hours, updating an event page, with a stack of rolled posters on the desk beside him"
+imageAlt: "A huge cheering daytime festival crowd in front of the main stage with colourful flags, every hand in the air"
 category: "planning-marketing"
 keywords:
   [
@@ -56,6 +56,8 @@ Google states that it "does not guarantee" that structured data will show up in 
 | Opening hours, coupons, travel packages                                               | no                                 | don't mark them up as events            |
 
 An event with a code-only presale followed by a public sale is a normal public event. How to set that up is in [presale codes](/en/guides/presale-codes).
+
+![An evening arena show, thousands of visitors hold up glowing smartphones and film the performance under sparkling stage light](ratgeber-event-sichtbar-google-ki-szene-1)
 
 ## What is event structured data?
 
@@ -160,6 +162,8 @@ Markup must match visible content, so write the page for people first:
 - Date, doors, start and end times, venue with address
 - Every ticket type with its total price and age limit
 - Programme or line-up, accessibility and organiser contact
+
+![An enthusiastic audience applauds in a sold-out hall as the band takes a bow on stage in the spotlight](ratgeber-event-sichtbar-google-ki-szene-2)
 
 ## How does Google Business Profile help?
 

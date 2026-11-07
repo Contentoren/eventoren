@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-ticketbetrug-verhindern"
 articles: ["/ratgeber/ticketbetrug-verhindern"]
-alt: "Eine Einlasshelferin hält am Eingang eines Clubs ihr Smartphone zum Scannen bereit, während ein Gast sein Handy-Ticket zeigt und weitere Gäste in der Schlange warten"
+alt: "Lächelnde Gäste passieren zügig den Einlass mit Scannern vor einer Konzerthalle am Abend"
 ---
 
-Evening at the brick entrance of a small city club: a door helper in her thirties wearing a deep teal lanyard holds up her smartphone to scan the glowing phone a young guest is presenting, both screens showing only soft blurred light. Behind the guest, a short queue of people in autumn jackets waits along a metal barrier under warm amber wall lamps. The helper, the guest and the barrier sit on the right third of the frame; the left side is calm negative space formed by the softly out-of-focus dark brick wall and amber light falloff along the street.
+A smooth, friendly entry at a concert hall in the evening: smiling guests flow through open gates where the entry team scans tickets quickly, the queue moving fast under warm entrance lights. Inside, the first arrivals already dance near the stage, and relaxed anticipation shows on every face. Fast, fair and secure admission that gets everyone inside with a smile.

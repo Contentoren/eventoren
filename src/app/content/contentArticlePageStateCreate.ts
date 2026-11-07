@@ -19,7 +19,11 @@ export function contentArticlePageStateCreate(props: { readonly data: () => Cont
     labels,
     entry: () => article().entry,
     html: () => article().html,
-    breadcrumbs: () => contentBreadcrumbsCreate(article().meta.collection, article().entry.title),
+    breadcrumbs: () =>
+      contentBreadcrumbsCreate(article().meta.collection, {
+        title: article().entry.title,
+        category: article().meta.category,
+      }),
     categoryLabel: () => card().categoryLabel,
     author: () => article().entry.author,
     dateLabel: () => {

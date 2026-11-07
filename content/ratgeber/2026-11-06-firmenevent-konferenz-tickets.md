@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "firmenevent-konferenz-tickets"
 author: "Eventoren Redaktion"
 image: "ratgeber-firmenevent-konferenz-tickets"
-imageAlt: "Zwei Helferinnen geben am Morgen einer Fachkonferenz im Foyer eines Tagungszentrums Namensschilder an ankommende Teilnehmende aus"
+imageAlt: "Großes Konferenzpublikum applaudiert stehend in einem modernen Kongresssaal dem Vortrag auf der Bühne"
 category: "eventformate"
 keywords:
   [
@@ -49,6 +49,8 @@ Beide brauchen eine Anmeldung, aber steuerlich und organisatorisch gelten andere
 | GEMA bei Musik              | Tarif nach Art der Musiknutzung                          | Firmenfeiern gelten als öffentlich, Berechnung aus Musikkosten pro Gast |
 
 Für kostenlose Events gilt: Eine Anmeldung mit Gratis-Tickets senkt No-Shows nur, wenn du nachfasst und die Kapazität bewusst überbuchst. Wie das geht, steht im Ratgeber [Kostenlose Events](/ratgeber/kostenlose-events-anmeldung).
+
+![Lachendes Konferenzpublikum in einem modernen Kongresssaal während eines Vortrags](ratgeber-firmenevent-konferenz-tickets-szene-1)
 
 ## Welche Umsatzsteuer gilt für Konferenztickets?
 
@@ -142,6 +144,8 @@ Eine Konferenz verkauft mit wenigen, gut erklärten Stufen. Jede Stufe hat einen
 Die Stückzahl im Early Bird bestimmt, wie früh die Konferenz Planungssicherheit bekommt. Hat deine Zielgruppe Weiterbildungsbudgets pro Kalenderjahr, lohnt sich ein Early Bird, der vor dem Jahreswechsel endet. Mehr zur Größe des Kontingents im Ratgeber [Early-Bird-Tickets](/ratgeber/early-bird-tickets).
 
 Workshops als eigene Ticketstufe haben zwei Vorteile: Der Raum kann nicht überbucht werden, und du siehst in der Teilnehmerliste sofort, wer welchen Workshop gebucht hat. Schreib in die Beschreibung, dass das Workshop-Ticket nur zusammen mit einem Konferenzticket gilt, und gleiche die Listen vor dem Event ab.
+
+![Teilnehmende stoßen beim Networking-Empfang einer Konferenz mit Getränken an](ratgeber-firmenevent-konferenz-tickets-szene-2)
 
 ## Welche Anmeldedaten darfst du erheben und wie lange?
 

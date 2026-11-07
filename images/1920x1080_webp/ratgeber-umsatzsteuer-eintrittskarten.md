@@ -1,1 +1,1 @@
-Eine Veranstalterin rechnet am Küchentisch mit Taschenrechner, Belegen und Laptop die Ticketeinnahmen ihres Konzerts nach
+Historischer Theatersaal von der Galerie: goldene Logen, Kronleuchter und applaudierendes Publikum

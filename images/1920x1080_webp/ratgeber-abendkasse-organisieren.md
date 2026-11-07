@@ -1,1 +1,1 @@
-Gast hält am Eingang einer kleinen Konzertbühne sein Smartphone vor ein Plakat an der Wand, während eine Helferin daneben die Schlange im warmen Abendlicht betreut
+Fröhliche Gäste strömen am Abend in den warm beleuchteten Eingang eines kleinen Clubs, halten ihre Smartphones mit den Tickets bereit und lachen, während drinnen die Bühne leuchtet

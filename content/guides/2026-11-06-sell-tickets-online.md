@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "sell-tickets-online"
 author: "Eventoren Editorial Team"
 image: "ratgeber-tickets-online-verkaufen"
-imageAlt: "An organiser prepares the ticket presale with a laptop and smartphone in the foyer of a small concert hall in the evening while helpers set up in the background"
+imageAlt: "Concert crowd seen from behind with raised hands and phone lights facing a glowing stage"
 category: "selling-tickets"
 keywords:
   [
@@ -37,6 +37,8 @@ To sell tickets online in Europe, you pick a ticketing platform, create your eve
 **Online ticketing** means that guests buy admission through a web shop, pay digitally and receive a unique e-ticket, usually a PDF or wallet pass with a QR code. The organiser sets prices and capacities, sees sales live and scans tickets at the entrance.
 
 A **ticketing platform** bundles five jobs: the shop page, payment processing, ticket delivery, attendee management and check-in. Some add marketing, seat maps, box-office tills or resale.
+
+![Group of friends entering the festival grounds laughing in the early evening](ratgeber-tickets-online-verkaufen-szene-1)
 
 Selling in advance gives you three things a door-only event cannot:
 
@@ -150,6 +152,8 @@ Decide who scans and what happens when a ticket isn't found. See [QR code ticket
 ### 9. Reconcile and get paid
 
 Export sales and match the payout to your sales report.
+
+![Sold-out party night with raised hands and confetti in the crowd](ratgeber-tickets-online-verkaufen-szene-2)
 
 ## Which EU rules apply to online ticket sales in 2026?
 

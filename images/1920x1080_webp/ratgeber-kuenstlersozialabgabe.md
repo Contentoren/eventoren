@@ -1,1 +1,1 @@
-Eine Vereinskassiererin sortiert nach einem Konzert im Vereinsheim Honorarbelege, im Hintergrund packt eine Band ihre Instrumente ein
+Band spielt auf kleiner Bühne vor tanzendem Publikum bei einem Sommerfest

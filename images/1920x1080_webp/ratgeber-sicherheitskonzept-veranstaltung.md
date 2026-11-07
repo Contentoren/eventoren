@@ -1,1 +1,1 @@
-Eine Veranstaltungsleiterin bespricht vor Einlassbeginn mit Ordnern in Warnwesten und einer Sanitäterin den Ablauf in einer leeren Stadthalle
+Entspannte Gästemenge beim Open-Air-Konzert in der Abendsonne, Ordner mit Lanyards lächeln mitten unter den Gästen

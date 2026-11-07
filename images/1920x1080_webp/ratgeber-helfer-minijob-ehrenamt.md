@@ -1,1 +1,1 @@
-Eine Helferkoordinatorin teilt am frühen Morgen vor einem Festzelt Schichten ein, Helfer in Westen hören zu
+Jubelndes Helferteam stemmt auf einem Vereinsfest gemeinsam die Arme in die Höhe

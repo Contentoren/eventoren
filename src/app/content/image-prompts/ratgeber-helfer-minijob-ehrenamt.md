@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-helfer-minijob-ehrenamt"
 articles: ["/ratgeber/helfer-minijob-ehrenamt"]
-alt: "Eine Helferkoordinatorin teilt am frühen Morgen vor einem Festzelt Schichten ein, Helfer in Westen hören zu"
+alt: "Jubelndes Helferteam stemmt auf einem Vereinsfest gemeinsam die Arme in die Höhe"
 ---
 
-Early summer morning on a village sports ground before a club festival opens, a white festival tent and a closed beer wagon in soft focus behind. On the right third, a helper coordinator in her thirties in a teal vest holds a clipboard with a blank shift sheet and speaks to a small semicircle of five volunteers of mixed ages, a teenager, a student and two older club members, some holding coffee cups. Low sun gives warm amber light on their faces and long shadows on the grass. The left side of the frame is calm negative space: a hazy, empty stretch of lawn and morning sky with gentle light falloff.
+Golden afternoon at a village club festival: a team of volunteers of mixed ages, teenagers, students and older club members in coloured vests, throws their arms in the air together in front of a white festival tent, laughing and cheering after a busy shift. Behind them families stroll between stalls, children run past with balloons, and string lights glow above the benches. Proud team spirit at the heart of a thriving summer fair.

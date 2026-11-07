@@ -1,1 +1,1 @@
-Ein Tontechniker am Mischpult und eine Veranstalterin mit Klemmbrett verfolgen am Nachmittag den Soundcheck einer Band in einem leeren Club
+Rockband auf der Bühne vor tobender Menge mit erhobenen Händen im Scheinwerferlicht

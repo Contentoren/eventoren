@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "lesung-comedy-kleinkunst"
 author: "Eventoren Redaktion"
 image: "ratgeber-lesung-comedy-kleinkunst"
-imageAlt: "Eine Autorin liest abends in einer Buchhandlung vor rund dreißig Zuhörern auf Klappstühlen zwischen hohen Bücherregalen"
+imageAlt: "Comedian als Silhouette im Scheinwerferkegel auf kleiner Bühne, Publikum von hinten vor Backsteinwand"
 category: "eventformate"
 keywords:
   [
@@ -47,6 +47,8 @@ Dieser Artikel ersetzt keine Rechts- oder Steuerberatung.
 | Weingut, Galerie, Bibliothek | 30–100             | besonderes Setting                          | Nutzungsregeln, Akustik                                           |
 
 Für Lesungen reichen ein Lesetisch, eine gute Leselampe und bei mehr als 50 Gästen ein Mikrofon mit kleiner Anlage. Comedy braucht mehr: eine erhöhte Bühne oder ein Podest, einen Spot, ein Funkmikrofon und einen Raum, in dem alle Zuschauer nah beieinandersitzen. Lachen steckt an, verteilte Gäste in einem halb leeren Saal nicht.
+
+![Autorin liest am Lesetisch einer Buchhandlung vor aufmerksamem Publikum auf Stuhlreihen zwischen Bücherregalen](ratgeber-lesung-comedy-kleinkunst-szene-1)
 
 ## Gage oder Eintrittsbeteiligung: Welcher Künstlerdeal passt?
 
@@ -139,6 +141,8 @@ Ein Kulturverein macht in seiner monatlichen Reihe einen Kabarettabend in einem 
 Variante B: Überschuss = Netto minus 436,80 € Kosten, davon 70 % an den Künstler, KSA 5 % auf dessen Anteil trägt der Verein. Die Rechnung zeigt den typischen Zielkonflikt: Mit der Festgage verdient der Verein bei vollem Haus mehr, trägt aber das Risiko. Mit der Beteiligung verdient der Künstler bei vollem Haus besser, bei schwachem Verkauf deutlich schlechter. Ein fairer Kompromiss ist eine niedrige Garantie (etwa 200 €) gegen 70 %. Den Break-even für eigene Zahlen rechnest du mit dem Ratgeber [Ticketpreis kalkulieren](/ratgeber/ticketpreis-kalkulieren).
 
 Wäre der Abend mit 19 % zu versteuern, sänke das Ergebnis mit Festgage bei vollem Haus von 391,29 € auf 250,30 €, im mittleren Szenario würde es leicht negativ.
+
+![Kabarettist auf ausverkaufter Kleinkunstbühne: voll besetzter Saal mit lachendem Publikum im warmen Spotlicht](ratgeber-lesung-comedy-kleinkunst-szene-2)
 
 ## Wie bestuhlst du ohne Saalplan?
 

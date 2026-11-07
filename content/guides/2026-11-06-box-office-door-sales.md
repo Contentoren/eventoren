@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "box-office-door-sales"
 author: "Eventoren Editorial Team"
 image: "ratgeber-abendkasse-organisieren"
-imageAlt: "A guest holds his smartphone up to a poster on the wall at the entrance of a small live-music venue while a helper beside him looks after the queue in warm evening light"
+imageAlt: "Cheerful guests stream into the warmly lit entrance of a small club in the evening, smartphones with tickets ready, laughing as the stage glows inside"
 category: "on-the-day"
 keywords:
   [
@@ -44,6 +44,8 @@ There are three basic models:
 | Cash box                         | Cash tin, float, paper record at the end                                      | Village fêtes, club fundraisers, small gigs |
 | Electronic till or card terminal | Till app or register, card reader, often also cash                            | Theatres, clubs, regular promoters          |
 | Self-service via QR code         | Guest scans a poster, buys online on their phone, receives a regular e-ticket | Club nights, festivals, younger audiences   |
+
+![A laughing couple receive wristbands in the cosy foyer of a small theatre, surrounded by other cheerful guests in warm lamplight](ratgeber-abendkasse-organisieren-szene-1)
 
 ## Cash or cashless: which suits your event?
 
@@ -168,6 +170,8 @@ For cash, add these safety rules:
 - [ ] Rented tills deregistered where required
 
 Where the box office sits in your overall door layout is covered in [event entry queue management](/en/guides/event-entry-queue-management).
+
+![Guests with colourful wristbands stream laughing through the entrance into the concert hall, music and warm stage light spilling out](ratgeber-abendkasse-organisieren-szene-2)
 
 ## How to do this with Eventoren
 

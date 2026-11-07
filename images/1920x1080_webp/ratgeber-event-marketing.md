@@ -1,1 +1,1 @@
-Zwei junge Veranstalterinnen filmen im leeren Konzertsaal beim Soundcheck ein kurzes Hochformat-Video mit dem Smartphone
+Riesige jubelnde Festivalmenge vor der Hauptbühne in der Abenddämmerung, Konfetti in der Luft

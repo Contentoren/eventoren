@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "einlassmanagement-warteschlangen"
 author: "Eventoren Redaktion"
 image: "ratgeber-einlassmanagement-warteschlangen"
-imageAlt: "Blick von oben auf mehrere durch Absperrgitter getrennte Einlassspuren vor einer Konzerthalle, in denen Besucher in der Abendsonne zügig vorrücken"
+imageAlt: "Gäste strömen entspannt durch mehrere geöffnete Einlassgassen auf ein Festivalgelände"
 category: "einlass-event-tag"
 keywords:
   [
@@ -38,6 +38,8 @@ Einlassmanagement heißt: Du planst vorher, wie viele Gäste pro Minute durch de
 Die Ticketkontrolle selbst ist nur ein Teil davon. Wie Scan, Hardware und Helfer-Briefing funktionieren, beschreibt der Ratgeber [Einlasskontrolle mit QR-Code](/ratgeber/einlasskontrolle-qr-code). Hier geht es um die Frage davor: **Wie viele Linien brauchst du, und wann wird es eng?**
 
 Lange Schlangen sind nicht nur ärgerlich. Staut es sich bis auf Gehweg oder Straße, entsteht ein Sicherheitsproblem, und in Versammlungsstätten mit mehr als 200 Besuchern gelten ohnehin die Vorgaben der jeweiligen Landes-Versammlungsstättenverordnung zu Rettungswegen und Ordnungsdienst (Stand: November 2026, Länderfassungen weichen ab). Mehr dazu im Ratgeber [Sicherheitskonzept für Veranstaltungen](/ratgeber/sicherheitskonzept-veranstaltung).
+
+![Freunde passieren gut gelaunt den Einlass zu einem Abendkonzert in der Stadt](ratgeber-einlassmanagement-warteschlangen-szene-1)
 
 ## Wie berechnest du die Einlassdauer?
 
@@ -149,6 +151,8 @@ Jeder Sonderfall an der Hauptlinie kostet Zeit für alle dahinter. Trenne deshal
 | Klärstelle            | Doppelscans, unbekannte Codes, Probleme              | Diskussionen raus aus der Linie                   |
 
 Bei kleinen Events kann eine Person mehrere Rollen übernehmen. Die **räumliche** Trennung von Abendkasse und Einlass solltest du trotzdem fast immer einplanen. Wie du die Abendkasse aufstellst, steht im Ratgeber [Abendkasse organisieren](/ratgeber/abendkasse-organisieren), die Gästeliste im Ratgeber [Gästeliste führen](/ratgeber/gaesteliste-vorlage).
+
+![Ordner lotsen Gäste abends zu den passenden Einlasslinien vor einer Konzerthalle](ratgeber-einlassmanagement-warteschlangen-szene-2)
 
 ### Wie planst du einen barrierefreien Einlass?
 

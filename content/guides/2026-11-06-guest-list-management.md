@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "guest-list-management"
 author: "Eventoren Editorial Team"
 image: "ratgeber-gaesteliste-vorlage"
-imageAlt: "A door host with a clipboard and smartphone checks a couple's name at the side entrance of a city club at night, warm light spilling from the open door behind them"
+imageAlt: "Door host greeting smiling guests at a club entrance with warm light spilling from the open door"
 category: "on-the-day"
 keywords:
   [
@@ -48,6 +48,8 @@ Typical groups:
 | Competition winners   | Social media or radio giveaways          | Exactly as advertised                                      |
 
 At a club night the list is a marketing tool; at a school concert or charity gala it's a thank-you to helpers and sponsors. How guest lists and promoters fit together in nightlife is covered in [how to run a club night](/en/guides/how-to-run-a-club-night).
+
+![Guests raising their glasses at a rooftop party at sunset](ratgeber-gaesteliste-vorlage-szene-1)
 
 ## Guest list template: which columns do you need?
 
@@ -139,6 +141,8 @@ How to deal with it:
 ## How does guest-list entry work at the door?
 
 The guest list needs **its own lane, or at least its own person**. Searching for a name takes longer than a scan and otherwise holds up the main lanes; the maths is in [event entry queue management](/en/guides/event-entry-queue-management).
+
+![Hostess welcoming guests by name at the entrance of an evening event](ratgeber-gaesteliste-vorlage-szene-2)
 
 **Door process:**
 

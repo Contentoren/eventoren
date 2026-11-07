@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "event-budget-template"
 author: "Eventoren Editorial Team"
 image: "ratgeber-eventbudget-planen"
-imageAlt: "The treasurer of a local club works through the budget for a party at her kitchen table in the evening with receipts, a calculator and a laptop"
+imageAlt: "Volunteers setting up an empty event hall with string lights and chairs in morning light"
 category: "planning-marketing"
 keywords:
   [
@@ -42,6 +42,8 @@ Two terms do most of the work:
 - **Variable costs** rise with each ticket or guest: ticketing fees, bar stock, wristbands, included drinks, and music licences calculated as a percentage of box office (common for concerts).
 
 To derive ticket prices from this, see [how to price event tickets](/en/guides/how-to-price-event-tickets). This guide goes one step further: from ticket price to a complete budget with several income sources, a contingency, payment dates and a review.
+
+![Packed dance floor at a club party at its peak: dancing guests in colourful light, confetti in the air](ratgeber-eventbudget-planen-szene-1)
 
 ## The event budget template: which cost lines do you need?
 
@@ -166,6 +168,8 @@ A budget can end in profit and still go negative on the way. Venue and band want
 | 4–8 weeks after | Music licence invoice                                   | −€600             | **+€3,121.20**  |
 
 The club therefore needs about **€3,750** of its own money on the event day, even in the plan scenario. With fewer guests, the low point after the event gets deeper, because the bills stay the same. How to ease it:
+
+![Busy bar on event night: bartenders serving drinks to laughing guests in warm light](ratgeber-eventbudget-planen-szene-2)
 
 - **Negotiate payment terms:** final payments for hall, tech and security 14 days after the event instead of on the night.
 - **Collect sponsors early:** payment on signing or at least four weeks before.

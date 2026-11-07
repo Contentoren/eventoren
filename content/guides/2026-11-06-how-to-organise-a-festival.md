@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "how-to-organise-a-festival"
 author: "Eventoren Editorial Team"
 image: "ratgeber-festival-organisieren"
-imageAlt: "A festival director with a radio and a stage technician carrying cable walk across a meadow the day before a small open-air festival while the stage is being rigged behind them"
+imageAlt: "Festival grounds at dusk from above: main stage, ferris wheel, tents and string lights"
 category: "event-types"
 keywords:
   [
@@ -41,6 +41,8 @@ This guide is not legal or tax advice.
 Before you contact a single act, fix five parameters, because they drive almost every cost line: **size** (permit route, safety plan, entry lanes), **duration** (camping, showers, day tickets), **site** (power, water, access, neighbours), **genre** (fees, volume, age limits, VAT rate) and **legal entity** (liability, tax, grants).
 
 A first festival of 300 to 1,500 visitors on a site you know is realistic for a small team with named leads for programme, production, safety, bar, ticketing and finance, and volunteers.
+
+![Festival site at sunset: visitors strolling across the meadow between food trucks and two stages, string lights glowing](ratgeber-festival-organisieren-szene-1)
 
 ## What is the timeline for a 2027 festival?
 
@@ -175,6 +177,8 @@ Scan each ticket once at first entry and fit a wristband, which proves entitleme
 - **Test connectivity:** mobile networks in open fields overload quickly. Plan dedicated Wi-Fi or a router with an external antenna at entry.
 
 Details for browser-based scanning are in [QR code ticket check-in without an app](/en/guides/qr-code-ticket-check-in).
+
+![Smiling crew fitting fabric wristbands on arriving guests at the festival gate, sun and busy entry lanes behind](ratgeber-festival-organisieren-szene-2)
 
 ## What belongs in the weather and sustainability plan?
 

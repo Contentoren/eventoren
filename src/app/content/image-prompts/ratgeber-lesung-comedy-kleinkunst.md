@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-lesung-comedy-kleinkunst"
 articles: ["/ratgeber/lesung-comedy-kleinkunst"]
-alt: "Eine Autorin liest abends in einer Buchhandlung vor rund dreißig Zuhörern auf Klappstühlen zwischen hohen Bücherregalen"
+alt: "Comedian als Silhouette im Scheinwerferkegel auf kleiner Bühne, Publikum von hinten vor Backsteinwand"
 ---
 
-Evening reading in a small independent bookshop: on the left third, a woman in her fifties sits at a small wooden table with a warm amber reading lamp and an open book with blank, out-of-focus pages, reading aloud with a slight smile. In front of her, seen partly from behind, about thirty listeners of mixed ages sit on folding chairs between tall shelves of books whose spines are soft and unreadable; one listener wears a teal scarf. The right side of the frame is calm negative space: deep, softly blurred rows of bookshelves fading into warm shadow.
+A small comedy stage against a brick wall: the performer stands as a warm silhouette inside a single beam of spotlight, microphone in hand. The backs of audience heads fill the dark foreground, all facing the stage. A tiny round table with a glass sits at the edge of the light.

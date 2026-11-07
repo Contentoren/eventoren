@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "abiball-finanzieren-sponsoren"
 author: "Eventoren Redaktion"
 image: "ratgeber-abiball-finanzieren-sponsoren"
-imageAlt: "Zwei Abiturienten stellen einem Bäckermeister im Verkaufsraum seiner Bäckerei eine Mappe mit Sponsoring-Paketen für ihren Abiball vor"
+imageAlt: "Abiballpaar tanzt unter goldenem Konfettiregen im festlich beleuchteten Ballsaal, umgeben von feiernden Gästen an gedeckten Tischen"
 category: "abiball"
 keywords:
   [
@@ -38,6 +38,8 @@ Marktangaben nennen für einen Abiball etwa **50 bis 100 € pro Gast**, regiona
 Daraus folgt die wichtigste Regel für die Finanzplanung: Rechnet zuerst die Kosten und den Ticketpreis, den eure Stufe tragen will. Erst dann wisst ihr, wie viel die Abikasse einbringen muss. Ein Ziel ohne Zahl motiviert niemanden.
 
 **Die Abikasse** ist das gemeinsame Konto eines Abiturjahrgangs, in das alle Einnahmen aus Aktionen, Sponsoring und Eigenbeiträgen fließen. Aus ihr werden Anzahlungen, Abizeitung, Abistreich und der Zuschuss zum Ball bezahlt. Auf wessen Namen das Konto läuft und wer haftet, klärt der Ratgeber [Wer ist Veranstalter beim Abiball?](/ratgeber/abiball-veranstalter-haftung).
+
+![Festlich gekleidete Abiturienten und Gäste feiern tanzend im Ballsaal unter funkelnden Lichtern](ratgeber-abiball-finanzieren-sponsoren-szene-1)
 
 ## Welche Geldquellen gibt es für den Abiball?
 
@@ -163,6 +165,8 @@ Dieser Artikel ersetzt keine Rechts- oder Steuerberatung.
 ## Wie plant ihr eine Abiparty als Geldquelle?
 
 Abipartys sind die ergiebigste Quelle für die Abikasse, aber auch die riskanteste. Ihr tretet als Veranstalter auf, mit allen Pflichten: Location, Jugendschutz, GEMA, Sicherheit und Versicherung. Der Ratgeber [Party veranstalten](/ratgeber/party-veranstalten) erklärt die Grundlagen von Location-Deal bis Abrechnung.
+
+![Abiparty in der geschmückten Schulturnhalle: Jugendliche tanzen unter Lichterketten](ratgeber-abiball-finanzieren-sponsoren-szene-2)
 
 ### Beispielrechnung: Abiparty mit 400 Gästen
 

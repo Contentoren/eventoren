@@ -1,5 +1,7 @@
 import { Renderer, type Tokens } from "marked"
+import { urlImage } from "../assets/urlImage.js"
 import type { ContentHeading } from "./ContentHeading.ts"
+import { contentCatalogImageRead } from "./contentImages.ts"
 import { contentHeadingSlug } from "./contentHeadingSlug.ts"
 import { contentLinkExternalIs } from "./contentLinkExternalIs.ts"
 import { contentTokenTextRead } from "./contentTokenTextRead.ts"
@@ -51,7 +53,22 @@ export function contentMarkedRendererCreate(
 
   renderer.checkbox = ({ checked }: Tokens.Checkbox) => `<input type="checkbox" disabled${checked ? " checked" : ""}> `
 
+  renderer.image = function image({ href, text, tokens }: Tokens.Image) {
+    const catalogImage = contentCatalogImageRead(href)
+    if (catalogImage === undefined) throw new Error(`body: unknown image key: ${href}`)
+    const alt = contentTokenTextRead(tokens) || text
+    const dimensions =
+      catalogImage.metadata.width !== undefined && catalogImage.metadata.height !== undefined
+        ? ` width="${catalogImage.metadata.width}" height="${catalogImage.metadata.height}"`
+        : ""
+    return `<img src="${imageAttributeEscape(urlImage(catalogImage))}" alt="${imageAttributeEscape(alt)}"${dimensions} loading="lazy" decoding="async">\n`
+  }
+
   return renderer
+}
+
+function imageAttributeEscape(value: string): string {
+  return value.replace(/&/gu, "&amp;").replace(/"/gu, "&quot;").replace(/</gu, "&lt;").replace(/>/gu, "&gt;")
 }
 
 function headingIdUnique(baseId: string, usedIds: Set<string>): string {

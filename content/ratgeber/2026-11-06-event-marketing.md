@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "event-marketing"
 author: "Eventoren Redaktion"
 image: "ratgeber-event-marketing"
-imageAlt: "Zwei junge Veranstalterinnen filmen im leeren Konzertsaal beim Soundcheck ein kurzes Hochformat-Video mit dem Smartphone"
+imageAlt: "Riesige jubelnde Festivalmenge vor der Hauptbühne in der Abenddämmerung, Konfetti in der Luft"
 category: "planung-marketing"
 keywords:
   [
@@ -40,6 +40,8 @@ Ein Event bewirbst du 2026 am wirksamsten mit einem festen Plan über acht bis z
 3. **Wie viele Tickets bis wann?** Ein Ziel mit Zwischenständen, etwa 40 % verkauft vier Wochen vorher. Ohne Ziel weißt du nicht, wann du nachsteuern musst.
 
 Danach baust du die **Eventseite**: Titel, Datum, Uhrzeit, Ort mit Adresse, Programm, Preise inklusive aller Gebühren, Einlass und Altersgrenze, Anfahrt, ein gutes Bild und ein klarer Kaufbutton. Diese Seite ist das Ziel jedes Links. Wie sie auch bei Google und in KI-Assistenten gefunden wird, steht im Ratgeber [Event bei Google und KI-Assistenten sichtbar machen](/ratgeber/event-sichtbar-google-ki).
+
+![Begeistertes Publikum mit erhobenen Händen bei einem Open-Air-Konzert am Sommerabend](ratgeber-event-marketing-szene-1)
 
 ## Welche Kanäle passen 2026 zu deinem Event?
 
@@ -167,6 +169,8 @@ Menschen kaufen eher, wenn jemand, den sie kennen, hingeht. Diese drei Modelle n
 | Botschafter aus der Community  | Freikarte ab einer Zahl verkaufter Tickets, Danke im Post | Vereine, Abiball, Kulturreihen              | realistische Ziele, keine Verkaufspflicht                                                       |
 
 Provisionen und Honorare sind für die Empfänger Einkommen. Zahlst du regelmäßig, kläre die steuerliche Seite mit deinem Steuerberater. Für Promoter gilt außerdem: Lege vorher fest, ob Gästelistenplätze zur Gegenleistung gehören und wie viele es pro Person sind.
+
+![Junge Festivalbesucher tanzen lachend in der Menge und filmen die leuchtende Bühne](ratgeber-event-marketing-szene-2)
 
 ## Was musst du rechtlich beachten?
 

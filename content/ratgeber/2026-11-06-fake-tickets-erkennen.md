@@ -6,7 +6,7 @@ publishedAt: "2026-11-06"
 slug: "fake-tickets-erkennen"
 author: "Eventoren Redaktion"
 image: "ratgeber-fake-tickets-erkennen"
-imageAlt: "Eine junge Frau sitzt abends am Küchentisch und vergleicht auf ihrem Laptop und ihrem Smartphone ein Ticketangebot, daneben liegt ein Notizblock"
+imageAlt: "Lachende Konzertbesucher zeigen am Eingang ihre Tickets und werden eingelassen"
 category: "ticketkaeufer"
 keywords:
   [
@@ -48,6 +48,8 @@ Für dich als Käufer ist die Unterscheidung wichtig, weil das Risiko jeweils wo
 | Nie geliefertes Ticket                   | Verkäufer kassiert und meldet sich nicht mehr                          | Kein Ticket vorhanden                    |
 
 Strafrechtlich ist das in der Regel Betrug nach [§ 263 StGB](https://www.gesetze-im-internet.de/stgb/__263.html). Der Versuch ist bereits strafbar.
+
+![Freunde jubeln mit erhobenen Armen in der Menge eines ausverkauften Konzerts](ratgeber-fake-tickets-erkennen-szene-1)
 
 ## Woran erkennst du Fake-Tickets und unseriöse Angebote?
 
@@ -149,6 +151,8 @@ So findest du den offiziellen Shop:
 - Prüfe die Adresse in der Browserzeile, bevor du Zahlungsdaten eingibst.
 
 Ob und wann ein privater Weiterverkauf überhaupt erlaubt ist, erklärt der Ratgeber [Tickets weiterverkaufen](/ratgeber/tickets-weiterverkaufen).
+
+![Familien passieren abends gut gelaunt die Einlasskontrolle eines großen Konzerts](ratgeber-fake-tickets-erkennen-szene-2)
 
 ## Was tun, wenn du auf Fake-Tickets hereingefallen bist?
 

@@ -29,9 +29,10 @@ test("visible breadcrumbs match the JSON-LD trail in the article language", () =
     { label: "Startseite", href: "/" },
     { label: "Ratgeber", href: null },
   ])
-  expect(contentBreadcrumbsCreate("guides", "Fake Tickets")).toEqual([
+  expect(contentBreadcrumbsCreate("guides", { title: "Fake Tickets", category: "for-ticket-buyers" })).toEqual([
     { label: "Eventoren", href: "/" },
     { label: "Guides", href: "/en/guides" },
+    { label: "For ticket buyers", href: "/en/guides#for-ticket-buyers" },
     { label: "Fake Tickets", href: null },
   ])
 })
