@@ -21,5 +21,6 @@ function demoNavigationHref(path: string): string {
   if (path === "/kontakt") return "/demo/contact"
   if (path === "/organizer") return "/demo/admin/organizer"
   if (path === "/admin") return "/demo/admin/events"
+  if (path === "/ratgeber") return "/demo/ratgeber"
   return "/demo/customer/events"
 }

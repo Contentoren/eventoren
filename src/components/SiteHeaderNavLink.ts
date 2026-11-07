@@ -1,5 +1,5 @@
 export type SiteHeaderNavLink = {
-  to: "/" | "/kontakt" | "/organizer" | "/admin"
+  to: "/" | "/ratgeber" | "/kontakt" | "/organizer" | "/admin"
   label: string
   exact: boolean
   icon: string
