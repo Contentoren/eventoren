@@ -568,7 +568,7 @@ const mockFaqsById: Record<string, readonly EventFaqItem[]> = {
       id: "einlass-ticket",
       question: "Wie wird das Ticket am Eingang kontrolliert?",
       answer:
-        "Das mobile Ticket kann direkt in der Eventoren-App oder im Browser auf dem Smartphone am Drehkreuz gescannt werden.",
+        "Der QR-Code des Tickets wird am Einlass gescannt – direkt vom Smartphone-Display oder vom ausgedruckten PDF-Ticket.",
     },
   ],
   "basketball-euroleague-bayern": [
