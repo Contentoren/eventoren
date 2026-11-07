@@ -2,6 +2,16 @@
   Cache-Control: public, max-age=0, must-revalidate
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
+/ratgeber
+  Cache-Control: public, max-age=0, must-revalidate
+/ratgeber/*
+  Cache-Control: public, max-age=0, must-revalidate
+/en/guides
+  Cache-Control: public, max-age=0, must-revalidate
+/en/guides/*
+  Cache-Control: public, max-age=0, must-revalidate
+/llms.txt
+  Cache-Control: public, max-age=0, must-revalidate
 /site.webmanifest
   Cache-Control: public, max-age=604800
 /assets/*
