@@ -1,1 +1,1 @@
-Eine Mutter und zwei volljährige Abiturienten sitzen abends am Küchentisch und gehen gemeinsam einen ausgedruckten Mietvertrag für den Abiball durch
+Junge Abiturienten des Abikomitees feiern lachend auf der vollen Tanzfläche ihres Abiballs unter warmem Licht und Lichterketten

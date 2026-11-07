@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-einlasskontrolle-qr-code"
 articles: ["/ratgeber/einlasskontrolle-qr-code", "/en/guides/qr-code-ticket-check-in"]
-alt: "Junge Helferin mit petrolfarbenem Schlüsselband scannt am Eingang eines Vereinsheims in der Abenddämmerung das Smartphone-Ticket eines Gastes"
+alt: "Festival-Einlassspuren von oben in der blauen Stunde: leuchtende Armbänder und Absperrungen vor erleuchteten Toren"
 ---
 
-Close medium shot at the open wooden door of a small club house (Vereinsheim) at dusk: a young volunteer with a teal lanyard holds her smartphone up to scan the phone a middle-aged guest is presenting, both screens glowing as soft abstract light. A small powerbank and a folded paper list lie on a narrow table beside her, and an amber porch lamp lights the doorway. The two people fill the left third of the frame; the right side shows the softly blurred gravel path and dusky blue evening sky as calm negative space.
+Festival entry lanes seen from slightly above at blue hour: fenced lanes with barriers guide the crowd, viewed from behind, toward brightly lit entry gates. Glowing wristbands show on guest wrists under the gate lights. Paths and fences lead the eye to the gates.

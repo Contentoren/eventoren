@@ -1,1 +1,1 @@
-Ein Veranstalter rechnet am Abend in einem kleinen Club an der Bar mit Notizblock und Taschenrechner, neben ihm ein Stapel unbedruckter Eintrittskarten
+Hände reichen an einer Abendkasse eine Blanko-Ticketkarte über den Tresen, daneben ein Kartenlesegerät, Lichterketten im Hintergrund

@@ -1,1 +1,1 @@
-Ein Einlasshelfer legt einer Jugendlichen am Eingang einer Schulparty ein farbiges Stoffbändchen um das Handgelenk, daneben liegen Bändchen in weiteren Farben bereit
+Lachende Jugendliche tanzen auf einer Sommerparty im Freien unter Lichterketten, bunte Scheinwerfer tauchen den Garten in Farbe

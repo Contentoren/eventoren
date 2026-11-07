@@ -1,1 +1,1 @@
-Türsteherin mit Klemmbrett und Smartphone gleicht am Seiteneingang eines Clubs bei Nacht den Namen eines Paares ab, im Hintergrund warmes Licht aus der offenen Tür
+Türsteherin begrüßt lächelnde Gäste am Club-Eingang, aus der offenen Tür strömt warmes Licht

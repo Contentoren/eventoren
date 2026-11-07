@@ -1,1 +1,1 @@
-Zwei Mitglieder eines Abikomitees gleichen an einem Tisch in der Schulaula eine ausgedruckte Gästeliste mit einem Laptop ab
+Jubelnde Fans mit erhobenen Armen und bunten Festivalbändchen vor der Bühne einer ausverkauften Show im bunten Bühnenlicht

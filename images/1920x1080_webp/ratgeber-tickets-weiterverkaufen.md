@@ -1,1 +1,1 @@
-Zwei junge Frauen sitzen in einem Café am Fenster, eine reicht der anderen ihr Smartphone mit einem Ticket, auf dem Tisch stehen zwei Tassen
+Freundesgruppe feiert gemeinsam beim Stadionkonzert: lachende junge Leute mit erhobenen Armen im Scheinwerferlicht

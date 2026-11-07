@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-kleinunternehmerregelung-veranstalter"
 articles: ["/ratgeber/kleinunternehmerregelung-veranstalter"]
-alt: "Ein junger Partyveranstalter sitzt abends in seiner WG-Küche mit Taschenrechner, Kontoauszügen und Laptop und rechnet seine Jahresumsätze zusammen"
+alt: "Junges DJ-Kollektiv feiert hinter dem DJ-Pult seiner eigenen Partyreihe, davor tanzende Menge im türkisen und warmen Licht"
 ---
 
-Late evening in a shared-flat kitchen (WG) in a German city. On the right third, a man in his mid-twenties wearing a dark hoodie with a teal party wristband still on his wrist leans over a cluttered table, adding up figures on a calculator next to blank, out-of-focus bank statements, a notebook and a laptop glowing with soft abstract light. A rolled-up DJ cable and an empty glass hint at last weekend's party. The left side of the frame is calm negative space: the blurred kitchen with a fridge, warm amber light from a small lamp falling off towards a dark window.
+The young promoter's dream realised: a DJ collective celebrates behind the decks of their own party night, one fist in the air, while the crowd dances in front of them in teal and warm light. A small club packed to the walls, hands up, the night they built themselves.

@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-personalisierte-tickets"
 articles: ["/ratgeber/personalisierte-tickets"]
-alt: "Zwei Mitglieder eines Abikomitees gleichen an einem Tisch in der Schulaula eine ausgedruckte Gästeliste mit einem Laptop ab"
+alt: "Jubelnde Fans mit erhobenen Armen und bunten Festivalbändchen vor der Bühne einer ausverkauften Show im bunten Bühnenlicht"
 ---
 
-Late afternoon in an empty school assembly hall a few days before a graduation ball: two eighteen-year-old students of the ball committee sit side by side at a folding table, one running a pen down a printed guest list with blank, out-of-focus lines, the other leaning towards an open laptop whose screen shows only soft blurred light. A deep teal cardigan, a stack of blank envelopes and a mug sit on the table, and warm amber light falls through tall windows. The pair and the table fill the left third of the frame; the right side is calm negative space of softly blurred hall depth with stacked chairs and window light falloff.
+Cheering fans raise their arms before the stage of a sold-out show, colourful fabric wristbands circling their wrists in the vibrant stage light. The crowd jumps in unison as the chorus hits, confetti swirling overhead. Smiling faces glow in the beams of light.

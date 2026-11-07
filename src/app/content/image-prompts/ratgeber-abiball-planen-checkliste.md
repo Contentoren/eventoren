@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-abiball-planen-checkliste"
 articles: ["/ratgeber/abiball-planen-checkliste"]
-alt: "Abikomitee sitzt nach Schulschluss an zusammengeschobenen Tischen im Klassenzimmer und plant mit Laptop, Kalender und Haftnotizen den Abiball"
+alt: "Abiturienten in festlicher Abendgarderobe tanzen lachend unter Kronleuchtern im festlich geschmückten Ballsaal, Konfetti rieselt von der Decke"
 ---
 
-Five 17- to 18-year-old students of the Abikomitee sit around pushed-together desks in an ordinary German classroom after school, late afternoon sun slanting through tall windows. One student in a teal hoodie writes in a paper wall calendar while two others lean over a laptop whose screen is only soft blurred light, and a fourth sticks blank coloured sticky notes onto a desk in a loose timeline; a half-eaten pack of biscuits and water bottles lie between them. The group fills the left third of the frame, seen at table height. The right side is calm negative space: the softly out-of-focus empty classroom with stacked chairs and a pale green chalkboard wiped clean, warm amber light falling across it.
+Graduates in elegant evening wear fill a grand ballroom, dancing and laughing beneath sparkling chandeliers. Confetti drifts down over twirling couples as the band plays on stage. Tables with candles and flowers line the edges of the shining dance floor.

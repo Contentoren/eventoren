@@ -1,1 +1,1 @@
-Familie mit zwei Kindern und eine Gruppe Jugendlicher stehen am späten Nachmittag in getrennten Reihen vor dem Eingang eines Open-Air-Festivals
+Gästemenge strömt bei goldenem Abendlicht durch die geschmückten Eingangstore eines Sommerfestivals

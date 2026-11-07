@@ -1,1 +1,1 @@
-Eine Vereinsvorsitzende liest im Vereinsheim am Fenster die Bestellbedingungen ihres Ticketshops auf dem Tablet gegen
+Freunde sitzen lachend auf der Wiese beim Open-Air-Konzert in der Abenddämmerung, Laternen und warmes Bühnenlicht um sie herum

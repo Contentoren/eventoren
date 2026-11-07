@@ -1,1 +1,1 @@
-Ein junger Partyveranstalter sitzt abends in seiner WG-Küche mit Taschenrechner, Kontoauszügen und Laptop und rechnet seine Jahresumsätze zusammen
+Junges DJ-Kollektiv feiert hinter dem DJ-Pult seiner eigenen Partyreihe, davor tanzende Menge im türkisen und warmen Licht

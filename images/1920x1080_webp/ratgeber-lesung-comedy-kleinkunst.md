@@ -1,1 +1,1 @@
-Eine Autorin liest abends in einer Buchhandlung vor rund dreißig Zuhörern auf Klappstühlen zwischen hohen Bücherregalen
+Comedian als Silhouette im Scheinwerferkegel auf kleiner Bühne, Publikum von hinten vor Backsteinwand

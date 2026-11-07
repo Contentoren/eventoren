@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-event-marketing"
 articles: ["/ratgeber/event-marketing"]
-alt: "Zwei junge Veranstalterinnen filmen im leeren Konzertsaal beim Soundcheck ein kurzes Hochformat-Video mit dem Smartphone"
+alt: "Riesige jubelnde Festivalmenge vor der Hauptbühne in der Abenddämmerung, Konfetti in der Luft"
 ---
 
-Late afternoon in a small, still empty concert hall during soundcheck: two young organisers in their twenties stand close together near the front of the stage, one holding a smartphone upright to film a short vertical clip, the other leaning in to watch the blurred, glowing screen. Behind them a band member tunes a guitar on the stage under warm amber stage lights, softly out of focus. One of the women wears a teal jacket. The two organisers occupy the right third of the frame; the left side is calm negative space of the dim, empty hall with soft light falling across the wooden floor.
+A huge festival crowd at dusk in front of the glowing main stage: thousands of cheering people with raised hands stretch across a wide green field while confetti fills the amber evening sky. The headliner performs under bright stage beams, friends sit on each other's shoulders, and the whole field moves as one. The unforgettable highlight moment every guest will talk about and share.

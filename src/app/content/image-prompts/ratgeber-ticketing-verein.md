@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-ticketing-verein"
 articles: ["/ratgeber/ticketing-verein"]
-alt: "Drei Vorstandsmitglieder eines Vereins planen am Abend im Vereinsheim an einem Holztisch den Vorverkauf, eine Frau zeigt auf einen Ausdruck"
+alt: "Blaskapelle auf der Bühne eines Dorffests, Familien tanzen davor auf dem Platz"
 ---
 
-An evening board meeting in a modest club house (Vereinsheim): three volunteer board members in their fifties and thirties sit at a worn wooden table with coffee mugs, a ring binder and a few blank printed sheets. A woman in a teal cardigan points at one of the sheets while a man beside her holds a smartphone with a softly glowing blank screen and a younger man takes notes. Faded team pennants and a trophy shelf blur in the background, warm amber pendant lamps hang above the table. The group fills the left third of the frame in a medium shot; the right side is calm negative space with the softly blurred wood-panelled wall and the glow of the lamps falling off into shadow.
+A sunny afternoon at a village club festival: a brass band in traditional jackets plays on a flower-decorated wooden stage while families dance and clap on the square in front. Children wave small flags, older couples sway arm in arm, and guests at long beer benches sing along with raised mugs. The whole village celebrating together under string lights and a blue sky.

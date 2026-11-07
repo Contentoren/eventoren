@@ -1,1 +1,1 @@
-Eine Helferin hakt am Eingang eines Vereinsheims an einem Klapptisch Gäste ab, die abends zu einem kostenlosen Vortrag ankommen
+Großes Publikum auf Picknickdecken vor der Bühne eines kostenlosen Sommerkonzerts auf dem Dorfplatz bei Sonnenuntergang

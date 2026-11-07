@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-ticketpreis-kalkulieren"
 articles: ["/ratgeber/ticketpreis-kalkulieren", "/en/guides/how-to-price-event-tickets"]
-alt: "Zwei Veranstalterinnen sitzen abends an einem Küchentisch mit Laptop, Notizbuch und Taschenrechner und planen die Kosten für ein Konzert"
+alt: "Ekstatische Menge mit erhobenen Armen in einer ausverkauften Konzerthalle, Band auf der Bühne im warmen Scheinwerferlicht"
 ---
 
-Late evening in a small European flat kitchen, two women in their thirties from a local culture association sit side by side at a wooden table, planning the budget for a concert. One taps figures into a calculator while the other points at a handwritten column in an open notebook; a laptop with a softly blurred screen, a mug of tea and a teal folder lie between them. A warm amber pendant lamp hangs low over the table. They sit on the left third of the frame; the right side is calm negative space of the dim kitchen wall and window with gentle light falloff.
+An ecstatic crowd with raised arms fills a sold-out concert hall, the band playing on stage in warm spotlight. The audience sings the chorus as one voice, hands swaying above their heads. Light beams cut through the joyful haze over the crowd.

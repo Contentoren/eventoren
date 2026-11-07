@@ -1,1 +1,1 @@
-Ein Vereinsvorstand sortiert im Vereinsheim Unterlagen in Umzugskartons, während eine Helferin am Laptop eine Liste abhakt
+Ausverkaufte Clubshow mit jubelnden Gästen und Konfetti im bunten Bühnenlicht

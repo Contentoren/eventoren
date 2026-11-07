@@ -1,1 +1,1 @@
-Zwei Elternhelfer prüfen am Eingang einer Schulaula Tickets auf dem Smartphone, während Familien zur Aufführung des Schultheaters hereinkommen
+Junge Schauspieler verbeugen sich unter Applaus auf der Bühne der geschmückten Schulaula

@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-abiball-kosten"
 articles: ["/ratgeber/abiball-kosten"]
-alt: "Zwei Schülerinnen und ein Vater des Abikomitees schmücken einen festlichen Saal mit runden Tischen, weißen Tischdecken und warmen Lichterketten"
+alt: "Blick vom Balkon auf tanzende Abiball-Paare in Abendgarderobe mit Konfetti in der Luft"
 ---
 
-On the afternoon before the ball, two teenage girls in casual clothes and a father in his forties decorate a festive hall: round tables with white tablecloths, chairs still pushed in, a teal table runner being laid out and simple glass vases waiting to be filled. One girl stands on a low step ladder hanging warm amber string lights while the father steadies it and the other girl folds napkins at the nearest table. The three people occupy the right third of the frame in a medium-wide shot. The left side is calm negative space: the deep, softly blurred hall with rows of empty set tables fading into warm evening light from high windows.
+A ballroom seen from a balcony: dozens of dancing couples in evening dress swirl across the polished floor in a wide pattern, confetti drifting through the air. Faces are small and indistinct from above. Round set tables with candles ring the dance floor.

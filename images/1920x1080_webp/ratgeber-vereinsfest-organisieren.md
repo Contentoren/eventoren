@@ -1,1 +1,1 @@
-Ehrenamtliche bauen am Morgen eines Sommerfests auf einer Dorfwiese Bierzeltgarnituren und einen Pavillon auf
+Blick über Biergartentische hinweg zu einer Blaskapelle am Ende der Reihe unter Lampions

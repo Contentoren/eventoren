@@ -1,1 +1,1 @@
-Zwei Helfer stellen am Silvesterabend in einem Festsaal Reihen leerer Sektgläser auf eine lange Theke, im Fenster dahinter leuchtet die Winternacht
+Silvesterparty um Mitternacht: jubelnde Gäste stoßen mit Sektgläsern an, Luftschlangen fallen von der Decke

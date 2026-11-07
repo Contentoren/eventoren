@@ -1,1 +1,1 @@
-Zwei Veranstalterinnen vergleichen an einem Küchentisch ausgedruckte Gebührenübersichten, daneben ein Taschenrechner und ein Laptop
+Tausende feiern nachts vor der Hauptbühne eines Festivals im bunten Licht

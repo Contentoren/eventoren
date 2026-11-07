@@ -1,1 +1,1 @@
-Abikomitee sitzt nach Schulschluss an zusammengeschobenen Tischen im Klassenzimmer und plant mit Laptop, Kalender und Haftnotizen den Abiball
+Abiturienten in festlicher Abendgarderobe tanzen lachend unter Kronleuchtern im festlich geschmückten Ballsaal, Konfetti rieselt von der Decke

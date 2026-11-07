@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-e-rechnung-veranstalter"
 articles: ["/ratgeber/e-rechnung-veranstalter", "/en/guides/e-invoicing-event-organisers"]
-alt: "Ein Veranstalter vergleicht im Produktionsbüro eines Festivalgeländes eine Papierrechnung mit den Daten auf seinem Laptop"
+alt: "Veranstalter blickt bei Sonnenuntergang über die jubelnde Menge seines Festivals"
 ---
 
-Late afternoon inside a small production office container on a festival site a few days before opening. On the right third, a man in his forties with a teal fleece jacket and a radio clipped to his belt sits at a narrow desk, holding a blank paper invoice in one hand and comparing it against an open laptop whose screen shows only soft blurred light; a ring binder, a stamp pad and a coffee thermos stand beside him. Through the container window behind him, out of focus, stage scaffolding and a forklift catch warm amber evening sun. The left side of the frame is calm negative space: the softly lit corrugated container wall with a coat hook and gentle light falloff.
+Golden hour at a festival main stage: the organiser stands at the side of the stage with arms open, looking out over thousands of cheering visitors with raised hands, while the crew beside him celebrates and confetti drifts through the warm evening light. The calm confidence of an event whose paperwork is done and whose crowd is happy.

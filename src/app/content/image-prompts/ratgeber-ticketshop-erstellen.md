@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-ticketshop-erstellen"
 articles: ["/ratgeber/ticketshop-erstellen"]
-alt: "Zwei Vereinsmitglieder sitzen am Küchentisch mit Laptop, Notizblock und Kaffeetassen und planen die Ticketarten für ihr Sommerfest"
+alt: "Jubelnde Open-Air-Menge mit erhobenen Händen im goldenen Abendlicht vor der Bühne"
 ---
 
-Two club volunteers, an older man with reading glasses and a younger woman, sit side by side at a wooden kitchen table on a bright weekday morning, planning the ticket tiers for their summer fete. She types on a laptop while he points at a handwritten notepad with a pencil; coffee mugs, a teal club scarf and a stack of blank paper lie between them. Eye-level shot with both people on the right third; the left side shows a softly blurred window with daylight and plants as calm negative space.
+Golden hour at an open-air concert: a jubilant crowd with raised hands faces the stage, where the band plays against a glowing amber sky. Friends dance on each other's shoulders, balloons drift above the audience, and warm light bathes laughing faces. The sold-out evening every organiser dreams of when opening their ticket shop.

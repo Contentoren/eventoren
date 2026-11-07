@@ -1,1 +1,1 @@
-Zwei Organisatorinnen eines Kulturvereins gehen an einem Küchentisch ausgedruckte Ticketbedingungen mit Textmarker und Laptop durch
+Ausverkauftes Konzert: begeistertes Publikum mit erhobenen Händen vor farbig beleuchteter Bühne

@@ -1,1 +1,1 @@
-Ehrenamtliche zählen nach einem Benefizkonzert in einem Gemeindesaal an einem langen Tisch die Einnahmen, im Hintergrund wird die Bühne abgebaut
+Begeistertes Publikum applaudiert in einem Konzertsaal einer Benefizband auf der Bühne

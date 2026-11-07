@@ -1,7 +1,7 @@
 ---
 imageKey: "ratgeber-eventbrite-alternative"
 articles: ["/ratgeber/eventbrite-alternative", "/en/guides/eventbrite-alternatives-europe"]
-alt: "Ein Vereinsvorstand sortiert im Vereinsheim Unterlagen in Umzugskartons, während eine Helferin am Laptop eine Liste abhakt"
+alt: "Ausverkaufte Clubshow mit jubelnden Gästen und Konfetti im bunten Bühnenlicht"
 ---
 
-In a modest club house (Vereinsheim) with wood panelling, a grey-haired club chairman places folders into an open cardboard moving box on a long table, while a younger volunteer in a teal cardigan ticks items off a blank paper list next to a laptop whose screen glows only as soft light. Late afternoon sun comes through the window, a string of warm amber lights glows along the wall. Both people are on the right third of the frame; the left side is calm negative space of the softly blurred, sunlit room depth.
+A sold-out club show at its peak: hundreds of guests cheer with raised hands as colourful spotlights sweep the room and confetti rains down, the singer leaning into the crowd from a low stage. Sweat, smiles and bass in the air, nobody thinking about ticketing platforms.

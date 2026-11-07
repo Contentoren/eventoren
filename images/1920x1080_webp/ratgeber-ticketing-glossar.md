@@ -1,1 +1,1 @@
-Ein Stapel leerer Einlassbänder, ein Smartphone mit unscharfem Bildschirm und eine Rolle Klebeband liegen auf dem Tresen einer Kassenhütte, bevor der Einlass öffnet
+Stimmungsvoller Festivaleingang in der Abenddämmerung: Gäste zeigen Handytickets an den Scan-Spuren unter Lichterketten

@@ -1,1 +1,1 @@
-Zwei Vereinsmitglieder besprechen an einem Behördenschalter einen ausgedruckten Lageplan für ihr Dorffest
+Belebtes Straßenfest mit Ständen, Musik und flanierenden Familien am Sommerabend

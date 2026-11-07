@@ -1,1 +1,1 @@
-Nahaufnahme einer Helferin an einem Schultisch, die einen Stapel unbedruckter Eintrittskarten mit einem Nummerierstempel durchzählt, daneben liegt ein Smartphone
+Begeistertes Publikum mit erhobenen Händen und Konfetti vor der Bühne eines ausverkauften Clubkonzerts im bunten Licht
