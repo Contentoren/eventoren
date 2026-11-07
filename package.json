@@ -52,6 +52,7 @@
     "content:compile": "bun run src/contentCompile.ts",
     "content:check": "bun run content:process:local && bun run src/contentCheck.ts",
     "content:lint": "bun run src/contentLint.ts",
+    "content:images": "bun scripts/contentImageGenerate.ts",
     "seo:check": "bun run src/seoOutputCheck.ts && bun run src/contentOutputCheck.ts",
     "www-redirect:create": "bunx wrangler pages project create eventoren-www-redirect --production-branch=main",
     "deploy:www-redirect": "bunx wrangler pages deploy . --cwd src/www-redirect --project-name eventoren-www-redirect --branch main --commit-dirty=true",
@@ -119,6 +120,7 @@
     "valibot": "^1.5.0"
   },
   "devDependencies": {
+    "@adaptive-ds/codex-imagen": "0.3.0",
     "@biomejs/biome": "^2.6.4",
     "@edge-runtime/vm": "^5.0.0",
     "@rstest/core": "^0.12.5",
