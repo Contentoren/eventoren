@@ -20,6 +20,25 @@ function attr(tag: string, name: string): string | undefined {
   return undefined
 }
 
+/** Expected `<html lang>` for a route: `en` under `/en`, German everywhere else. */
+export function seoRouteLanguage(route: string): "de" | "en" {
+  return route === "/en" || route.startsWith("/en/") ? "en" : "de"
+}
+
+/**
+ * Top-level JSON-LD nodes of one script: the root itself, or each `@graph` item of a `@context` + `@graph` root.
+ * Returns undefined when the context is missing or any node lacks a non-empty `@type`.
+ */
+export function seoJsonLdNodesRead(value: unknown): JsonObject[] | undefined {
+  if (!recordIs(value) || value["@context"] !== "https://schema.org") return undefined
+  const typed = (node: unknown): node is JsonObject =>
+    recordIs(node) && typeof node["@type"] === "string" && node["@type"].length > 0
+  if (value["@graph"] === undefined) return typed(value) ? [value] : undefined
+  const graph = value["@graph"]
+  if (!Array.isArray(graph) || graph.length === 0 || !graph.every(typed)) return undefined
+  return graph
+}
+
 function routeOf(file: string): string {
   if (file === "index.html") return "/"
   return `/${file.replace(/(?:\/index)?\.html$/u, "")}`
@@ -207,7 +226,8 @@ export async function seoOutputVerify(options?: {
     const { file, html, noindex } = page
     const fail = (message: string) => failures.push(`${file}: ${message}`)
     if (tags(html, "h1").length !== 1) fail(`expected exactly one h1, found ${tags(html, "h1").length}`)
-    if (attr(tags(html, "html")[0] ?? "", "lang") !== "de") fail("missing html lang=de")
+    const expectedLang = seoRouteLanguage(route)
+    if (attr(tags(html, "html")[0] ?? "", "lang") !== expectedLang) fail(`missing html lang=${expectedLang}`)
     const metas = tags(html, "meta")
     const links = tags(html, "link")
     if (!metas.some((tag) => attr(tag, "charset")?.toLowerCase() === "utf-8")) fail("missing utf-8 charset")
@@ -234,6 +254,25 @@ export async function seoOutputVerify(options?: {
           .some((rel) => rel === "icon" || rel === "apple-touch-icon")
       )
         resourceCheck(file, attr(tag, "href"), route, "icon")
+    for (const tag of links) {
+      if (!(attr(tag, "rel") ?? "").toLowerCase().split(/\s+/u).includes("alternate")) continue
+      const hreflang = attr(tag, "hreflang")
+      if (hreflang === undefined) continue
+      const href = attr(tag, "href") ?? ""
+      if (!/^(?:x-default|[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*)$/u.test(hreflang)) fail(`invalid hreflang ${hreflang}`)
+      let url: URL | undefined
+      try {
+        url = new URL(href)
+      } catch {
+        url = undefined
+      }
+      if (!url || url.origin !== origin || !href.startsWith(`${site}/`) || url.search || url.hash) {
+        fail(`hreflang ${hreflang} must be an absolute ${site}/ URL, found ${href}`)
+        continue
+      }
+      if (!target(url) && !seoSsrRouteMatches(ssrPatterns, url.pathname))
+        fail(`hreflang ${hreflang} points to unknown page ${href}`)
+    }
     if (noindex) {
       if (file === "404.html" && !meta("name", "robots").some((value) => /\bnoindex\b/iu.test(value ?? "")))
         fail("excluded page missing noindex")
@@ -266,15 +305,9 @@ export async function seoOutputVerify(options?: {
     for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/giu)) {
       if (attr(match[1] ?? "", "type") !== "application/ld+json") continue
       try {
-        const value: unknown = JSON.parse(match[2] ?? "")
-        if (
-          !recordIs(value) ||
-          value["@context"] !== "https://schema.org" ||
-          typeof value["@type"] !== "string" ||
-          !value["@type"]
-        )
-          fail("invalid JSON-LD context or type")
-        if (recordIs(value)) jsonLd.push(value)
+        const nodes = seoJsonLdNodesRead(JSON.parse(match[2] ?? ""))
+        if (nodes === undefined) fail("invalid JSON-LD context or type")
+        else jsonLd.push(...nodes)
       } catch {
         fail("invalid JSON-LD JSON")
       }

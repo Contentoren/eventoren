@@ -3,9 +3,8 @@ import { tanstackStart } from "@tanstack/solid-start/plugin/vite"
 import { solidAiSrcPlugin } from "ai-src/solid"
 import { defineConfig, type Plugin } from "vite"
 import solid from "vite-plugin-solid"
-import { seo } from "./src/lib/seo.js"
-import type { ContentEntry } from "./src/app/content/contentList.js"
-import { allContent, isPublishedAtBuild } from "./src/app/content/contentList.js"
+import { contentStaticPageList } from "./src/app/content/contentStaticPageList.ts"
+import { contentStaticPathIs } from "./src/app/content/contentStaticPathIs.ts"
 
 const devNoindexHeaderName = "X-Robots-Tag"
 const devNoindexHeaderValue = "noindex"
@@ -35,6 +34,20 @@ export default defineConfig({
         semicolons: false,
         routesDirectory: "routes",
       },
+      // Only the Ratgeber/Guides hubs and published articles are static. Everything else stays
+      // request-time SSR, so no route discovery, no link crawling and never a `/` (index.html).
+      // `autoSubfolderIndex: false` writes `ratgeber/<slug>.html`, which Pages serves at the
+      // canonical extensionless URL without a trailing-slash redirect.
+      pages: contentStaticPageList(),
+      prerender: {
+        enabled: true,
+        autoStaticPathsDiscovery: false,
+        crawlLinks: false,
+        autoSubfolderIndex: false,
+        failOnError: true,
+        filter: (page) => contentStaticPathIs(page.path),
+      },
+      sitemap: { enabled: false },
     }),
     solidAiSrcPlugin(),
     solid({ ssr: true }),

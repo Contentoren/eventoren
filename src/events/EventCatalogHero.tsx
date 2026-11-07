@@ -8,9 +8,11 @@ export function EventCatalogHero() {
 
   return (
     <section class="relative isolate overflow-hidden border-b border-border-subtle bg-slate-100 text-content">
-      {/* Warm up background images in browser cache */}
+      {/* Warm up background images in browser cache (catalog images are 1920x1080) */}
       <div class="hidden">
-        <For each={state.images}>{(image) => <Img src={image.src} alt="" ariaHidden class="hidden" />}</For>
+        <For each={state.images}>
+          {(image) => <Img src={image.src} alt="" ariaHidden width={1920} height={1080} class="hidden" />}
+        </For>
       </div>
 
       {/* Atmospheric ambient glows */}

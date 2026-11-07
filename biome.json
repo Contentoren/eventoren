@@ -17,6 +17,14 @@
       "!src/app/assets/service/videoList.ts"
     ]
   },
+  "overrides": [
+    {
+      "includes": ["src/legal/agb.md", "src/legal/datenschutz.md"],
+      "formatter": {
+        "enabled": false
+      }
+    }
+  ],
   "assist": {
     "actions": {
       "source": {

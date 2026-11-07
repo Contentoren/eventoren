@@ -82,6 +82,9 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       await ctx.db.patch("ticketOrders", order._id, {
         status,
         paymentStatus,
+        ...(status === "paid" || status === "failed" || status === "expired" || status === "released"
+          ? { expireErrorDeferralCount: undefined, expireAttentionSince: undefined }
+          : {}),
         ...(args.payment === "paid"
           ? {
               paidAt: cancelledOrder.paidAt ?? now,
@@ -223,6 +226,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       await ctx.db.patch("ticketOrders", order._id, {
         status: "failed",
         paymentStatus: "failed",
+        expireErrorDeferralCount: undefined,
+        expireAttentionSince: undefined,
         billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
         releasedAt: now,
         lastPaymentCheckAt: now,
@@ -278,6 +283,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       await ctx.db.patch("ticketOrders", order._id, {
         status: "paid_inventory_conflict",
         paymentStatus: "paid",
+        expireErrorDeferralCount: undefined,
+        expireAttentionSince: undefined,
         billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
         bookingNumber: order.bookingNumber ?? bookingNumber,
         bookingReference: order.bookingReference ?? bookingReference,
@@ -308,6 +315,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       await ctx.db.patch("ticketOrders", order._id, {
         status: "paid_inventory_conflict",
         paymentStatus: "paid",
+        expireErrorDeferralCount: undefined,
+        expireAttentionSince: undefined,
         billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
         bookingNumber: order.bookingNumber ?? bookingNumber,
         bookingReference: order.bookingReference ?? bookingReference,
@@ -336,6 +345,8 @@ export const ticketPaymentStatusApplyMutation = internalMutation({
       ...lifecycle,
       status: "paid",
       paymentStatus: "paid",
+      expireErrorDeferralCount: undefined,
+      expireAttentionSince: undefined,
       billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
       bookingNumber: order.bookingNumber ?? bookingNumber,
       bookingReference: order.bookingReference ?? bookingReference,

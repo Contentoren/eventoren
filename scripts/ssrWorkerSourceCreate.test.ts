@@ -318,3 +318,41 @@ test("ssrWorkerSourceCreate keeps body, status, cache and cookie headers unchang
   expect(sourceResponse?.headers.get("x-robots-tag")).toBeNull()
   expect(setCookieValues(sourceResponse as Response)).toEqual(["session=abc; Path=/; HttpOnly", "locale=de; Path=/"])
 })
+
+test("ssrWorkerSourceCreate serves prerendered Ratgeber and Guides pages from the static assets without SSR", async () => {
+  for (const pathname of ["/ratgeber", "/ratgeber/tickets-online-verkaufen", "/en/guides", "/en/guides/fake-tickets"]) {
+    workerServerState.requests = []
+    const { env, assetsRequests } = workerEnvCreate({ assetsStatus: 200, assetsBody: "static" })
+    const response = await workerModule.default.fetch(new Request(`https://eventoren.de${pathname}`), env)
+    expect(response.status, pathname).toBe(200)
+    expect(await response.text(), pathname).toBe("static")
+    expect(response.headers.get("x-robots-tag"), pathname).toBeNull()
+    expect(assetsRequests, pathname).toEqual([`https://eventoren.de${pathname}`])
+    expect(workerServerState.requests, pathname).toEqual([])
+  }
+})
+
+test("ssrWorkerSourceCreate falls back to SSR when a Ratgeber page has no static asset or the asset redirects", async () => {
+  for (const assetsStatus of [404, 308]) {
+    workerServerState.requests = []
+    const { env } = workerEnvCreate({ assetsStatus, assetsBody: "asset" })
+    const response = await workerModule.default.fetch(new Request("https://eventoren.de/ratgeber/neu"), env)
+    expect(response.status, String(assetsStatus)).toBe(200)
+    expect(await response.text(), String(assetsStatus)).toBe("ssr")
+    expect(workerServerState.requests, String(assetsStatus)).toEqual(["https://eventoren.de/ratgeber/neu"])
+  }
+})
+
+test("ssrWorkerSourceCreate marks static Ratgeber pages on noncanonical hosts as noindex", async () => {
+  const { env } = workerEnvCreate({ assetsStatus: 200, assetsBody: "static" })
+  const response = await workerModule.default.fetch(new Request("https://preview.eventoren.pages.dev/ratgeber"), env)
+  expect(response.status).toBe(200)
+  expect(response.headers.get("x-robots-tag")).toBe("noindex")
+})
+
+test("ssrWorkerSourceCreate does not try static assets first for paths that only share the Ratgeber prefix", async () => {
+  const { env, assetsRequests } = workerEnvCreate({ assetsStatus: 200, assetsBody: "static" })
+  const response = await workerModule.default.fetch(new Request("https://eventoren.de/ratgeber-alt"), env)
+  expect(await response.text()).toBe("ssr")
+  expect(assetsRequests).toEqual([])
+})

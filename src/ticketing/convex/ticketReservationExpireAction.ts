@@ -29,6 +29,7 @@ async function ticketReservationExpireActionHandler(
     await ctx.runMutation(internal.ticketing.ticketReservationDeferMutation, {
       orderId: args.orderId,
       reason: "A server-side Billing request is still in progress",
+      isError: false,
     })
     return { success: true as const, data: { action: "deferred" as const } }
   }
@@ -38,6 +39,7 @@ async function ticketReservationExpireActionHandler(
     await ctx.runMutation(internal.ticketing.ticketReservationDeferMutation, {
       orderId: args.orderId,
       reason: config.errorMessage,
+      isError: true,
     })
     return config
   }
@@ -46,19 +48,27 @@ async function ticketReservationExpireActionHandler(
     await ctx.runMutation(internal.ticketing.ticketReservationDeferMutation, {
       orderId: args.orderId,
       reason: expirationResult.errorMessage,
+      isError: true,
     })
     return expirationResult
   }
   if (expirationResult.data.kind === "not_found") {
-    return await ctx.runMutation(internal.ticketing.ticketReservationReleaseMutation, {
+    const released = await ctx.runMutation(internal.ticketing.ticketReservationReleaseMutation, {
       orderId: args.orderId,
       reason: "Billing has no persisted payment context",
     })
+    if (!released.success)
+      await ctx.runMutation(internal.ticketing.ticketReservationDeferMutation, {
+        orderId: args.orderId,
+        reason: released.errorMessage,
+        isError: true,
+      })
+    return released
   }
 
   const status = expirationResult.data.data
-  if (status.payment === "expired")
-    return await ctx.runMutation(internal.ticketing.ticketReservationExpireMutation, {
+  if (status.payment === "expired") {
+    const expired = await ctx.runMutation(internal.ticketing.ticketReservationExpireMutation, {
       orderId: args.orderId,
       paymentReference: status.paymentReference,
       billingOrderReference: status.orderReference,
@@ -69,6 +79,14 @@ async function ticketReservationExpireActionHandler(
       paymentConfirmedExpired: ticketPaymentCorrelationMatches(context.data, status),
       reason: "Billing confirmed that the checkout session expired",
     })
+    if (!expired.success)
+      await ctx.runMutation(internal.ticketing.ticketReservationDeferMutation, {
+        orderId: args.orderId,
+        reason: expired.errorMessage,
+        isError: true,
+      })
+    return expired
+  }
   // Apply the provider response before any local retry/expiry decision. A
   // completed processing debit may not have issued locally yet; deferring it
   // without applying this evidence would miss early issuance at the cutoff.
@@ -80,6 +98,7 @@ async function ticketReservationExpireActionHandler(
     await ctx.runMutation(internal.ticketing.ticketReservationDeferMutation, {
       orderId: args.orderId,
       reason: applied.errorMessage,
+      isError: true,
     })
     return applied
   }
@@ -87,6 +106,7 @@ async function ticketReservationExpireActionHandler(
     await ctx.runMutation(internal.ticketing.ticketReservationDeferMutation, {
       orderId: args.orderId,
       reason: "Billing still reports a payable pending checkout",
+      isError: false,
     })
     return { success: true as const, data: { action: "deferred" as const } }
   }

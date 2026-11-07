@@ -1,7 +1,7 @@
-import type { ContentEntry } from "./contentList.js"
 import type { CatalogImage } from "@adaptive-ds/assets-service"
 import { imageList } from "../assets/imageList.js"
 import { urlImage } from "../assets/urlImage.js"
+import type { ContentEntry } from "./contentList.js"
 
 export type ContentImageData = {
   readonly src: string
@@ -12,7 +12,8 @@ export type ContentImageData = {
 
 type ContentImageEntry = Pick<ContentEntry, "imagePath"> & Partial<Pick<ContentEntry, "image" | "imageAlt" | "title">>
 
-function contentCatalogImageRead(imageKey: string | null | undefined): CatalogImage | undefined {
+/** Resolve a kebab-case image key (or basename) to its assets-catalog entry. */
+export function contentCatalogImageRead(imageKey: string | null | undefined): CatalogImage | undefined {
   if (imageKey === undefined || imageKey === null) return undefined
 
   const normalizedKey = imageKey.replace(/[\\/-]/gu, "_")

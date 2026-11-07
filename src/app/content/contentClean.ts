@@ -1,14 +1,10 @@
 #!/usr/bin/env bun
 
-import { contentClean } from "@adaptive-ds/website-content-pipeline"
-import { contentOptions } from "./contentOptions.js"
-
-try {
-  const result = contentClean(contentOptions)
-  console.log(
-    `[contentClean] scanned=${result.scanned}, changed=${result.changed.length}, unchanged=${result.unchanged}`,
-  )
-} catch (error) {
-  console.error("[contentClean] Fatal error:", error)
-  process.exitCode = 1
-}
+// Guard: the pipeline's contentClean rewrites frontmatter to its own schema and strips the
+// extended keys this project relies on (category, keywords, translationKey, seoTitle).
+console.error(
+  "[contentClean] Disabled: content:clean would strip the extended frontmatter (category, keywords, " +
+    "translationKey, seoTitle) from content/ratgeber and content/guides. Edit the Markdown sources by hand " +
+    "and run `bun run content:check` or `bun run content:lint -- <files>` instead.",
+)
+process.exit(1)

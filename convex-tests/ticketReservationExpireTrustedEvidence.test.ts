@@ -168,6 +168,12 @@ async function stateRead(h: Harness) {
 test("a provider-confirmed expiry frees the own code and cancels the early tickets of an unpaid order", async () => {
   const h = await harnessCreate()
   const correlation = await earlyIssuedOrderCreate(h)
+  await h.t.run(async (ctx) =>
+    ctx.db.patch("ticketOrders", correlation.orderId, {
+      expireErrorDeferralCount: 15,
+      expireAttentionSince: now,
+    }),
+  )
   expect(
     await h.t.mutation(internal.ticketing.ticketReservationExpireMutation, {
       ...correlation,
@@ -180,6 +186,8 @@ test("a provider-confirmed expiry frees the own code and cancels the early ticke
   })
   const expired = await stateRead(h)
   expect(expired.orders[0]).toMatchObject({ status: "expired", paymentStatus: "expired" })
+  expect(expired.orders[0]?.expireErrorDeferralCount).toBeUndefined()
+  expect(expired.orders[0]?.expireAttentionSince).toBeUndefined()
   // The own code of the definitively unpaid order is free again.
   expect(expired.codes[0]).toMatchObject({ status: "available" })
   expect(expired.codes[0]?.orderId).toBeUndefined()
@@ -204,6 +212,51 @@ test("a provider-confirmed expiry frees the own code and cancels the early ticke
   const reservedAgain = await stateRead(h)
   expect(reservedAgain.codes[0]).toMatchObject({ status: "reserved" })
   expect(reservedAgain.codes[0]?.orderId).not.toBe(correlation.orderId)
+})
+
+test("error deferrals back off and alert once; a normal pending deferral resets the streak", async () => {
+  const h = await harnessCreate()
+  const correlation = await earlyIssuedOrderCreate(h)
+  const log = vi.spyOn(console, "error").mockImplementation(() => {})
+  let attentionSince: string | undefined
+  for (let count = 1; count <= 16; count++) {
+    const before = Date.now()
+    await h.t.mutation(internal.ticketing.ticketReservationDeferMutation, {
+      orderId: correlation.orderId,
+      reason: "Billing unavailable",
+      isError: true,
+    })
+    const order = (await stateRead(h)).orders[0]!
+    expect(order.expireErrorDeferralCount).toBe(count)
+    const delay = 15 * 60 * 1000 * (count < 8 ? 1 : Math.min(24, 2 ** Math.min(count - 7, 5)))
+    expect(order.reservationExpiresAt).toBeGreaterThanOrEqual(before + delay)
+    expect(order.reservationExpiresAt).toBeLessThanOrEqual(Date.now() + delay)
+    if (count < 15) expect(order.expireAttentionSince).toBeUndefined()
+    if (count === 15) {
+      expect(order.expireAttentionSince).toBeDefined()
+      attentionSince = order.expireAttentionSince
+    }
+    if (count === 16) expect(order.expireAttentionSince).toBe(attentionSince)
+  }
+  expect(log).toHaveBeenCalledTimes(1)
+  expect(log).toHaveBeenCalledWith(
+    "ticket_reservation_expiry_attention",
+    expect.objectContaining({
+      orderId: correlation.orderId,
+      paymentReference: "payment-a",
+      reason: "Billing unavailable",
+      count: 15,
+    }),
+  )
+  await h.t.mutation(internal.ticketing.ticketReservationDeferMutation, {
+    orderId: correlation.orderId,
+    reason: "Payment pending",
+    isError: false,
+  })
+  const order = (await stateRead(h)).orders[0]!
+  expect(order.expireErrorDeferralCount).toBeUndefined()
+  expect(order.expireAttentionSince).toBeUndefined()
+  expect(order.reservationExpiresAt).toBeLessThanOrEqual(Date.now() + 15 * 60 * 1000)
 })
 
 test("an early issuance without a provider-confirmed expiry keeps the code and the tickets", async () => {
@@ -384,6 +437,25 @@ test("the expiry action never claims the trusted evidence for a pending payment"
   ])
   expect(runMutation.mock.calls[0]![1]).not.toHaveProperty("paymentConfirmedExpired")
 })
+
+test.each(["expired", "not_found"] as const)(
+  "a failed local %s transition is counted as an error and schedules another expiry attempt",
+  async (outcome) => {
+    const { ctx, runMutation } = actionContextCreate()
+    vi.spyOn(billingEventorenClient, "ticketCheckoutExpire").mockResolvedValue(
+      createResult(outcome === "not_found" ? { kind: "not_found" } : { kind: "status", data: providerStatus }),
+    )
+    runMutation.mockResolvedValueOnce(createResultError("localTransition", "Inventory needs repair"))
+    expect(await ticketReservationExpireAction._handler(ctx, { orderId })).toMatchObject({ success: false })
+    expect(runMutation.mock.calls.map(([reference]) => getFunctionName(reference))).toEqual([
+      outcome === "not_found"
+        ? "ticketing:ticketReservationReleaseMutation"
+        : "ticketing:ticketReservationExpireMutation",
+      "ticketing:ticketReservationDeferMutation",
+    ])
+    expect(runMutation.mock.calls[1]![1]).toMatchObject({ orderId, reason: "Inventory needs repair", isError: true })
+  },
+)
 
 test("the expiry action never claims the trusted evidence when the provider fails", async () => {
   const { ctx, runMutation } = actionContextCreate()

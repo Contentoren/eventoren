@@ -39,3 +39,24 @@ test("escapes xml characters in the location", () => {
   expect(xml).toContain("<loc>https://eventoren.de/events/summer%20%26%20grill?a=1&amp;b=2</loc>")
   expect(xml).not.toContain("&b=2")
 })
+
+test("renders hreflang alternates as xhtml links and declares the xhtml namespace only when needed", () => {
+  const withAlternates = sitemapXmlCreate([
+    {
+      loc: "https://eventoren.de/ratgeber",
+      changefreq: "weekly",
+      priority: 0.7,
+      alternates: [
+        { hreflang: "de", href: "https://eventoren.de/ratgeber" },
+        { hreflang: "en", href: "https://eventoren.de/en/guides" },
+      ],
+    },
+  ])
+  expect(withAlternates).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"')
+  expect(withAlternates).toContain(
+    '    <xhtml:link rel="alternate" hreflang="en" href="https://eventoren.de/en/guides"/>\n',
+  )
+
+  const withoutAlternates = sitemapXmlCreate([{ loc: "https://eventoren.de/", changefreq: "weekly", priority: 1 }])
+  expect(withoutAlternates).not.toContain("xmlns:xhtml")
+})

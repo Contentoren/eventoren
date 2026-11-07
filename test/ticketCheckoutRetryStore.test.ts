@@ -2,6 +2,7 @@ import { afterEach, beforeEach, expect, test } from "bun:test"
 import type { TicketCheckoutCreateInput } from "../src/ticketing/TicketCheckoutCreateInput.ts"
 import { ticketCheckoutCancelUrlCreate } from "../src/ticketing/ticketCheckoutCancelUrlCreate.ts"
 import { ticketCheckoutRetryKey } from "../src/ticketing/ticketCheckoutRetryKey.ts"
+import { ticketCheckoutRetryMemoryStore } from "../src/ticketing/ticketCheckoutRetryMemoryStore.ts"
 import { ticketCheckoutRetryProbeUrlsRead } from "../src/ticketing/ticketCheckoutRetryProbeUrlsRead.ts"
 import { ticketCheckoutRetryStorageLoad } from "../src/ticketing/ticketCheckoutRetryStorageLoad.ts"
 import {
@@ -44,11 +45,13 @@ const previousLocalStorage = Object.getOwnPropertyDescriptor(globalThis, "localS
 let storage: MemoryStorage
 
 beforeEach(() => {
+  ticketCheckoutRetryMemoryStore.clear()
   storage = new MemoryStorage()
   Object.defineProperty(globalThis, "localStorage", { configurable: true, value: storage })
 })
 
 afterEach(() => {
+  ticketCheckoutRetryMemoryStore.clear()
   if (previousLocalStorage) Object.defineProperty(globalThis, "localStorage", previousLocalStorage)
   else Reflect.deleteProperty(globalThis, "localStorage")
 })
@@ -290,7 +293,7 @@ test("material key ignores ticket order and the hold credential while staying by
   expect(ticketCheckoutRetryMaterialKey(reordered)).not.toBe(ticketCheckoutRetryMaterialKey(input))
 })
 
-test("denied storage disables the retry without failing the purchase", () => {
+test("denied storage retains retry evidence only in the current document", () => {
   Object.defineProperty(globalThis, "localStorage", {
     configurable: true,
     value: {
@@ -307,6 +310,11 @@ test("denied storage disables the retry without failing the purchase", () => {
   })
   const input = codeInput()
   ticketCheckoutRetryStore({ checkoutInput: input, checkoutKey: input.checkoutKey })
+  const retry = ticketCheckoutRetryLoad(input)
+  expect(retry?.checkoutKey).toBe(input.checkoutKey)
+  expect(retry?.checkoutInput).toEqual(input)
+
+  ticketCheckoutRetryMemoryStore.clear()
   expect(ticketCheckoutRetryLoad(input)).toBeUndefined()
   expect(ticketCheckoutRetryStorageLoad().success).toBe(false)
 })

@@ -74,3 +74,17 @@ test.each(["/", "/events", "/administer", "/organizers"])("%s keeps the public l
     }
   })
 })
+
+test.each<[string, "de" | "en"]>([
+  ["/en/guides/fake-tickets", "en"],
+  ["/ratgeber/fake-tickets-erkennen", "de"],
+])("%s renders the document language %s from the pathname", (path, expected) => {
+  pathname = path
+  solid.createRoot((dispose) => {
+    try {
+      expect(rootDocumentStateCreate().language()).toBe(expected)
+    } finally {
+      dispose()
+    }
+  })
+})

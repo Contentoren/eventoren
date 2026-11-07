@@ -35,6 +35,8 @@ export const ticketReservationReleaseMutation = internalMutation({
     if (ticketCount.data !== 0) await ticketOrderTicketsCancel(ctx, order._id, now)
     await ctx.db.patch("ticketOrders", order._id, {
       status: "released",
+      expireErrorDeferralCount: undefined,
+      expireAttentionSince: undefined,
       paymentStatus: "failed",
       releasedAt: now,
       checkoutAttemptLeaseUntil: undefined,

@@ -587,6 +587,12 @@ test.each(["expiry", "failure", "release", "capacity conflict"] as const)(
   async (operation) => {
     const h = await checkoutCreate()
     await distractorsInsert(h)
+    await h.t.run(async (ctx) => {
+      await ctx.db.patch("ticketOrders", h.correlation.orderId, {
+        expireErrorDeferralCount: 15,
+        expireAttentionSince: now,
+      })
+    })
     if (operation === "capacity conflict")
       await h.t.run(async (ctx) => {
         const tier = await ctx.db
@@ -610,6 +616,8 @@ test.each(["expiry", "failure", "release", "capacity conflict"] as const)(
     }
     expect(await run()).toMatchObject({ success: true })
     const first = await stateRead(h)
+    expect(first.order?.expireErrorDeferralCount).toBeUndefined()
+    expect(first.order?.expireAttentionSince).toBeUndefined()
     expect(first.reservations).toHaveLength(ticketMaxPerOrder)
     expect(first.reservations.every((reservation) => reservation.status === "released")).toBe(true)
     expect(first.tiers.every((tier) => tier.reserved === 0)).toBe(true)

@@ -113,6 +113,8 @@ export const ticketReservationExpireMutation = internalMutation({
     if (!releaseResult.success) return releaseResult
     await ctx.db.patch("ticketOrders", order._id, {
       status: "expired",
+      expireErrorDeferralCount: undefined,
+      expireAttentionSince: undefined,
       paymentStatus: "expired",
       billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
       releasedAt: now,
@@ -169,6 +171,8 @@ async function ticketReservationExpiredIssuedApply(
   await ticketOrderTicketsCancel(ctx, order._id, now)
   await ctx.db.patch("ticketOrders", order._id, {
     status: "expired",
+    expireErrorDeferralCount: undefined,
+    expireAttentionSince: undefined,
     paymentStatus: "expired",
     billingOrderReference: order.billingOrderReference ?? args.billingOrderReference,
     releasedAt: now,
