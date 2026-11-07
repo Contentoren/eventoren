@@ -93,6 +93,21 @@ test("treats too few words as an error and below-target length as a warning", ()
   expect(issues.some((issue) => issue.level === "warning" && issue.message.includes("target ≥ 1800"))).toBe(true)
 })
 
+test("allows body images with a resolvable kebab key and non-empty alt text", () => {
+  const body = germanBody({ extra: "![Abendkasse im Abendlicht](ratgeber-abendkasse-organisieren)\n" })
+  expect(errors(contentBodyCheck(body, { collection: "ratgeber", category: "abiball", linkTargets }))).toEqual([])
+})
+
+test("rejects external URLs, empty alt text and unknown keys in body images", () => {
+  const check = (extra: string) =>
+    errors(contentBodyCheck(germanBody({ extra }), { collection: "ratgeber", category: "abiball", linkTargets })).join(
+      "\n",
+    )
+  expect(check("![Foto](https://example.com/foto.png)\n")).toContain("kebab-case catalog image key")
+  expect(check("![](ratgeber-abendkasse-organisieren)\n")).toContain("non-empty alt text")
+  expect(check("![Foto](no-such-image-key)\n")).toContain("unknown image key")
+})
+
 test("requires at least five ## sections, the takeaways box and three https sources", () => {
   const issues = contentBodyCheck("## Eins\n\nText.\n\n## Quellen\n\n- [A](https://a.example/)\n", {
     collection: "guides",

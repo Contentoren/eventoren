@@ -39,6 +39,20 @@ test("renders task-list items with a disabled checkbox and no id attributes", ()
   expect(html).not.toContain("id=")
 })
 
+test("renders body images as lazy, dimensioned catalog images", () => {
+  const { html } = contentMarkdownRender("![Abendkasse im warmen Licht](ratgeber-abendkasse-organisieren)")
+  expect(html).toContain('alt="Abendkasse im warmen Licht"')
+  expect(html).toContain('width="1920"')
+  expect(html).toContain('height="1080"')
+  expect(html).toContain('loading="lazy"')
+  expect(html).toContain('decoding="async"')
+  expect(html).toMatch(/ratgeber-abendkasse-organisieren_default_v\d+\.avif/u)
+})
+
+test("throws at compile time for unresolvable image keys", () => {
+  expect(() => contentMarkdownRender("![Alt](no-such-image-key)")).toThrow("unknown image key")
+})
+
 test("reports word count and reading minutes", () => {
   const rendered = contentMarkdownRender(Array.from({ length: 401 }, () => "Wort").join(" "))
   expect(rendered.wordCount).toBe(401)

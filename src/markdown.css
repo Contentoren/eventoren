@@ -327,6 +327,14 @@
   margin-top: 0.25rem;
 }
 
+.markdown-body.content-article img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 2rem 0;
+  border-radius: var(--radius-control);
+}
+
 .markdown-body.content-article hr {
   margin: 2.5rem 0;
   border: 0;
