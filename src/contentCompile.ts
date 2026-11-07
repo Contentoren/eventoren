@@ -42,9 +42,9 @@ const header =
 await outputWrite(
   "contentMetaList.ts",
   header +
-    "// Client-safe article metadata, keyed by collection and entry id.\n" +
-    'import type { ContentCollection } from "./contentCollectionSchema.ts"\n' +
-    'import type { ContentMeta } from "./ContentMeta.ts"\n\n' +
+    "// Client-safe article metadata, keyed by collection and entry id.\n\n" +
+    'import type { ContentMeta } from "./ContentMeta.ts"\n' +
+    'import type { ContentCollection } from "./contentCollectionSchema.ts"\n\n' +
     "export const contentMetaList: Readonly<Record<ContentCollection, Readonly<Record<string, ContentMeta>>>> = " +
     JSON.stringify(metaList, null, 2) +
     "\n",
