@@ -13,6 +13,8 @@ export const contentViewLabels = {
     translation: "Read in English",
     intro:
       "Hier findest du praxisnahe Ratgeber für Veranstalter in Deutschland, Österreich und der Schweiz: vom Online-Ticketverkauf über den Einlass per QR-Code bis zu GEMA, Steuern und Recht. Jeder Beitrag ist auf dem Stand 2026/27 und liefert konkrete Zahlen, Checklisten und Beispielrechnungen. Wähle eine Kategorie oder starte mit dem neuesten Artikel.",
+    hubHeroAlt:
+      "Jubelnde Festivalmenge bei Sonnenuntergang aus erhöhter Perspektive, türkisfarbenes Bühnenlicht und warme Lichterketten über tanzenden Gästen",
     hubCtaText: "Tickets für dein Event verkaufen? 3,9 % + 0,49 € pro Ticket, keine Grundgebühr.",
     hubCtaAction: "Veranstalter werden",
   },
@@ -29,6 +31,8 @@ export const contentViewLabels = {
     translation: "Auf Deutsch lesen",
     intro:
       "Practical guides for event organisers across Europe: selling tickets online, running QR check-in at the door, pricing your event and staying compliant with VAT, GDPR and EU rules. Every guide is updated for 2026/27 and comes with real figures, checklists and worked examples. Pick a category below or start with the latest guide.",
+    hubHeroAlt:
+      "Cheering festival crowd at sunset seen from above, teal stage light and warm string lights over dancing guests",
     hubCtaText: "Selling tickets for your event? 3.9% + €0.49 per ticket, no base fee.",
     hubCtaAction: "Become an organiser",
   },
