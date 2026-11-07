@@ -28,11 +28,13 @@ export function demoSiteFrameStateCreate(inputs: {
 function demoSiteNavHref(link: SiteHeaderNavLink) {
   if (link.to === "/organizer") return "/demo/admin/organizer"
   if (link.to === "/admin") return "/demo/admin/events"
+  if (link.to === "/ratgeber") return "/demo/ratgeber"
   return "/demo/customer/events"
 }
 
 function demoSiteFooterHref(href: string) {
   if (href === "/support") return href
+  if (href === "/en/guides") return href
   if (href === "/agb") return "/demo/agb"
   if (href === "/kontakt") return "/demo/contact"
   return `/demo${href}`
@@ -47,6 +49,7 @@ function demoSiteNavIsActive(link: SiteHeaderNavLink, _href: string, pathname: s
     )
   }
   if (link.to === "/admin") return pathname.startsWith("/demo/admin")
+  if (link.to === "/ratgeber") return pathname === "/demo/ratgeber" || pathname.startsWith("/demo/ratgeber/")
   return (
     pathname === "/demo/customer/events" ||
     pathname === "/demo/customer/events-empty" ||

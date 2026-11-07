@@ -1,10 +1,13 @@
 import { mkdir, writeFile } from "node:fs/promises"
 import { join } from "node:path"
-import { allContent } from "./app/content/contentList.js"
+import { contentCollectionList } from "./app/content/contentCollectionList.js"
+import { contentCollectionSchema } from "./app/content/contentCollectionSchema.js"
+import { contentTodayRead } from "./app/content/contentTodayRead.js"
 import { envBaseUrlSiteResult } from "./app/env/public/envBaseUrlSiteResult.js"
 import { envEnvModeResult } from "./app/env/public/envEnvModeResult.js"
 import { seoPages } from "./seo/seoPages.js"
 import { seoSiteUrl } from "./seo/seoSiteUrl.js"
+import { sitemapContentUrlListCreate } from "./sitemap/sitemapContentUrlListCreate.js"
 import { sitemapEventUrlListCreate } from "./sitemap/sitemapEventUrlListCreate.js"
 import { sitemapProductionCatalogEnabled } from "./sitemap/sitemapProductionCatalogEnabled.js"
 import type { SitemapUrlEntry } from "./sitemap/sitemapUrlEntry.js"
@@ -12,7 +15,8 @@ import { sitemapUrlListCreate } from "./sitemap/sitemapUrlListCreate.js"
 import { sitemapXmlCreate } from "./sitemap/sitemapXmlCreate.js"
 
 const distClient = join(process.cwd(), "dist", "client")
-const buildDate = new Date().toISOString().slice(0, 10)
+// Publication cutoff in Europe/Berlin, the same calendar day the prerender and the views use.
+const today = contentTodayRead()
 
 const envModeResult = envEnvModeResult()
 const envMode = envModeResult.success ? envModeResult.data : undefined
@@ -36,9 +40,12 @@ if (!productionCatalog) {
 
 const urls = sitemapUrlListCreate({
   siteUrl: seoSiteUrl,
-  buildDate,
   pages: seoPages,
-  articles: allContent,
+  content: sitemapContentUrlListCreate({
+    siteUrl: seoSiteUrl,
+    today,
+    items: contentCollectionSchema.options.flatMap((collection) => contentCollectionList(collection, today)),
+  }),
   events: eventEntries,
 })
 

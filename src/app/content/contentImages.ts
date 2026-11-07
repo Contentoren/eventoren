@@ -1,7 +1,7 @@
-import type { ContentEntry } from "./contentList.js"
 import type { CatalogImage } from "@adaptive-ds/assets-service"
 import { imageList } from "../assets/imageList.js"
 import { urlImage } from "../assets/urlImage.js"
+import type { ContentEntry } from "./contentList.js"
 
 export type ContentImageData = {
   readonly src: string

@@ -78,6 +78,19 @@ function responseNoindexApply(response, hostname) {
 }
 
 
+// Ratgeber/Guides hubs and articles are prerendered into dist/client as
+// ratgeber.html and ratgeber/<slug>.html. Pages asset serving answers the
+// extensionless canonical URL with that file, so these paths try the static
+// asset first (200, or 304 for a revalidation) and fall back to SSR otherwise,
+// e.g. for an article published after the build or a redirect for "/x.html".
+const staticContentPathBases = ["/ratgeber", "/en/guides"]
+
+
+function pathnameIsStaticContent(pathname) {
+  return staticContentPathBases.some((base) => pathname === base || pathname.startsWith(base + "/"))
+}
+
+
 export default {
   async fetch(request, env) {
     runtimeEnvironmentApply(env)
@@ -99,6 +112,11 @@ export default {
 
     if (requestUrl.pathname === "/.well-known/ai-catalog.json") {
       return responseNoindexApply(await env.ASSETS.fetch(request), requestUrl.hostname)
+    }
+
+    if (pathnameIsStaticContent(requestUrl.pathname) && (request.method === "GET" || request.method === "HEAD")) {
+      const assetResponse = await env.ASSETS.fetch(request)
+      if (assetResponse.status === 200 || assetResponse.status === 304) return responseNoindexApply(assetResponse, requestUrl.hostname)
     }
 
     const response = await server.fetch(request, { context: { convexUrl: convexUrlResolve(env) } })

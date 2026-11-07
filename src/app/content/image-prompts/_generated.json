@@ -1,0 +1,464 @@
+{
+  "ratgeber-abendkasse-organisieren": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "f4c3d04d11ea90756d43773d28b5053042db19d83e0af82a64a99b50e61d04ca",
+    "generatedAt": "2026-11-06T22:57:57.775Z"
+  },
+  "ratgeber-abiball-finanzieren-sponsoren": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "8251259c3ef451c6389f2e417b585cacacebfa47b5e21de84f89e3b1ebe8cd9f",
+    "generatedAt": "2026-11-06T22:58:03.219Z"
+  },
+  "ratgeber-abiball-kosten": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "a20697e0c5f09061fbf818478df6bbadfd961576a09ecfef6986b2878f2f9546",
+    "generatedAt": "2026-11-06T22:58:00.241Z"
+  },
+  "ratgeber-abiball-location-catering": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "2908d665de4ceed0954c6862579e767575d26e530759c970148b1cec5868fa0f",
+    "generatedAt": "2026-11-06T22:57:59.758Z"
+  },
+  "ratgeber-abiball-planen-checkliste": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "d41f860a78f8aa5401ddcb68e50ec6ab4cf8218c8bceacdd07d2804fa4551c26",
+    "generatedAt": "2026-11-06T22:57:59.343Z"
+  },
+  "ratgeber-abiball-tickets-online-verkaufen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "b08a5204c0784e05946e198478a27ebe3fd1bf54aab898f9555be15330ace544",
+    "generatedAt": "2026-11-06T23:23:11.164Z"
+  },
+  "ratgeber-abiball-veranstalter-haftung": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "de2b7257b6191b4e6d82a083a2efae6a11f515267e112adee94e2127f7794d8c",
+    "generatedAt": "2026-11-06T22:58:54.552Z"
+  },
+  "ratgeber-agb-ticketverkauf": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "da9b4fc37fa7defaffeb007b19fcec6048c3f3123350d8f59b4b8f0598c3d9c7",
+    "generatedAt": "2026-11-06T22:58:53.541Z"
+  },
+  "ratgeber-barrierefreiheit-bfsg": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "686a2e249317d3169727bd2a0ba6397ba965db9181f4f9f4d91017ab72814de9",
+    "generatedAt": "2026-11-06T22:58:51.737Z"
+  },
+  "ratgeber-benefizveranstaltung": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "6da2e8408650afcff6cc76e98d3c7c304e71fc3dee8323384c5aaffe57ee3100",
+    "generatedAt": "2026-11-06T22:58:56.127Z"
+  },
+  "ratgeber-clubnacht-veranstalten": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "c1cf1692b1fd2fc41e96d720548fb8035261a80a9ea6ab1671144a8149f8375d",
+    "generatedAt": "2026-11-06T23:23:11.156Z"
+  },
+  "ratgeber-dsgvo-veranstalter": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "7f62d5910e46008a0d9d4c09190dd48dfaf32e24dc9f514bfa134222a87267b3",
+    "generatedAt": "2026-11-06T22:59:44.320Z"
+  },
+  "ratgeber-dynamic-pricing-tickets": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "2766dc5b41f5bf48dc4a5a2f65b21a62c0719a6ccd428b26b13ac4c5668cb49e",
+    "generatedAt": "2026-11-06T22:59:41.672Z"
+  },
+  "ratgeber-e-rechnung-veranstalter": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "68582261277edcfed1c1c4850da107bd2889d748de1cbedda850954ca1a7f67b",
+    "generatedAt": "2026-11-06T22:59:45.656Z"
+  },
+  "ratgeber-e-ticket-hilfe": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "e5f0d14891171708d209adf2dd1d47cc831f72f59211ff3310834addde0c8ad3",
+    "generatedAt": "2026-11-06T23:00:29.916Z"
+  },
+  "ratgeber-early-bird-tickets": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "60755a51b5645b993077fe4770c202b3247ac1dabac50d7b3334220a484ebe13",
+    "generatedAt": "2026-11-06T23:00:21.980Z"
+  },
+  "ratgeber-einlasskontrolle-qr-code": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "42395bae1c45cfb09c099f76ea7151df7204cd4c0dab7c80a40b1beb6a0c8446",
+    "generatedAt": "2026-11-06T23:00:39.163Z"
+  },
+  "ratgeber-einlassmanagement-warteschlangen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "7605f2de0f969c8a10062add784ab037770e08a9ed93fca797b82d0d7981a471",
+    "generatedAt": "2026-11-06T23:01:19.394Z"
+  },
+  "ratgeber-eintrittskarten-erstellen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "02ca65cbdf962dc4596721011f0800754bea89600bcaa62be6629e1bb3974941",
+    "generatedAt": "2026-11-06T23:01:09.095Z"
+  },
+  "ratgeber-event-marketing": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "abf6cefa4d98958c4453d45d99c976d5b6fae90bc0d00c1b82dde61f484d1f01",
+    "generatedAt": "2026-11-06T23:01:30.907Z"
+  },
+  "ratgeber-event-sichtbar-google-ki": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "3703f3c0d60ef7723edb68a18c7ca23afafe779dc8bf616269c1242e4a346744",
+    "generatedAt": "2026-11-06T23:02:00.387Z"
+  },
+  "ratgeber-eventbrite-alternative": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "476cab9f1765d7119ed85957c2b4ae82fca9e871763544e2d7c46865cd96ad79",
+    "generatedAt": "2026-11-06T23:02:07.714Z"
+  },
+  "ratgeber-eventbudget-planen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "ed4b7b3adc9053b203696489e6d93b719742488900fa27ff34e8919fda30ef50",
+    "generatedAt": "2026-11-06T23:02:22.753Z"
+  },
+  "ratgeber-eventim-light-pretix-ticket-io-alternativen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "90d60b40580ad91b2a957551dc6b816e14994e3eae21ee2a2cc2fdd93582b4c8",
+    "generatedAt": "2026-11-06T23:02:52.643Z"
+  },
+  "ratgeber-eventlocation-finden": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "8ff196c58a5c8814d3eb5753212ec6f1a163e78a7bcfa95e0ca5cab5781d6af0",
+    "generatedAt": "2026-11-06T23:03:00.589Z"
+  },
+  "ratgeber-fake-tickets-erkennen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "214c7c8c288905300c431121c0b48b0a192e8d6ccb71863924c7d61a7e77d30a",
+    "generatedAt": "2026-11-06T23:03:15.625Z"
+  },
+  "ratgeber-festival-organisieren": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "2cbced65ce0d9fa771436c3d7ad6aa87a3de11d5c8e3473ae84af7e4e166bdf7",
+    "generatedAt": "2026-11-06T23:03:46.286Z"
+  },
+  "ratgeber-firmenevent-konferenz-tickets": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "a7cabc417409b6b0f0c007b8e401c07fa4b01f27fcf52833f0aa82fee4135f85",
+    "generatedAt": "2026-11-06T23:03:59.026Z"
+  },
+  "ratgeber-freischaltcodes-presale": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "0d2fe723d7bde00d8e4af9735512202a86409884930e5fd6efe0de63f0562738",
+    "generatedAt": "2026-11-06T23:04:05.707Z"
+  },
+  "ratgeber-gaesteliste-vorlage": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "d0b448e71113bfb093e36b8b823440ad0506e7365bdcd6aa6a2f502465aaaede",
+    "generatedAt": "2026-11-06T23:04:25.269Z"
+  },
+  "ratgeber-gema-veranstaltung": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "a4477420cf71b5045c924d67bc0d7d8b6a589ffb6d66e5afd0ed23e429cc5206",
+    "generatedAt": "2026-11-06T23:04:52.136Z"
+  },
+  "ratgeber-helfer-minijob-ehrenamt": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "603576a5dda81363a0a58ca17fd4604d3cc3f1fb908a447de60e779c20069c57",
+    "generatedAt": "2026-11-06T23:04:58.710Z"
+  },
+  "ratgeber-jugendschutz-party": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "55cd778d556999d528c55c5def533c168ad13c0dbc85a305d910c3b398d44f1d",
+    "generatedAt": "2026-11-06T23:05:07.383Z"
+  },
+  "ratgeber-karneval-2027": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "ab2ddf161f9c4f8c58b89ca1e4f5e352a7069333363982c83217a372db23e4c0",
+    "generatedAt": "2026-11-06T23:07:27.758Z"
+  },
+  "ratgeber-kleinunternehmerregelung-veranstalter": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "904b06ac0c031a42b704eef425223e43bf9c744589d3acf4f46dcb24c8b6f866",
+    "generatedAt": "2026-11-06T23:05:44.598Z"
+  },
+  "ratgeber-konzert-veranstalten": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "1755497aa043f921b11c33cba25f365de3fdfdcf7f50eac82fcaf86adf5a7a14",
+    "generatedAt": "2026-11-06T23:05:55.667Z"
+  },
+  "ratgeber-kostenlose-events-anmeldung": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "3f5f7a58024fbac50f2b6e9d53a22990c1a8d0170ee80b7be5f215a52e217bc9",
+    "generatedAt": "2026-11-06T23:06:01.255Z"
+  },
+  "ratgeber-kuenstlersozialabgabe": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "8dc7461382cf82a15bf0f7c96d7afdb2c55dc6700dad82a7b63c5b8fead85c5d",
+    "generatedAt": "2026-11-06T23:07:12.556Z"
+  },
+  "ratgeber-lesung-comedy-kleinkunst": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "f1001ed44e4b471cb8653932dd569c07f5537dd742cbdda612951be462064fec",
+    "generatedAt": "2026-11-06T23:06:41.061Z"
+  },
+  "ratgeber-party-veranstalten": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "86658ad7053d00d61ba60188d138bcd1c9b54dc6fbc1dae4f6f639a6869e2908",
+    "generatedAt": "2026-11-06T23:06:48.266Z"
+  },
+  "ratgeber-personalisierte-tickets": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "56bdc25c45e9ec8bbc348d546438e7ec2f6c2b08e3e5d8ba733b7ba403cd1a35",
+    "generatedAt": "2026-11-06T23:06:51.573Z"
+  },
+  "ratgeber-schulveranstaltung-tickets": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "4ae756dfaadf2d10140c99cbee33320b737a44dd1fc7f459089a2beb2023b5bc",
+    "generatedAt": "2026-11-06T23:07:33.464Z"
+  },
+  "ratgeber-sicherheitskonzept-veranstaltung": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "b030b14e235869114846f10cfeeb32b26c3fe59f33fb3f6cbfcde75e6c6bd79d",
+    "generatedAt": "2026-11-06T23:07:41.595Z"
+  },
+  "ratgeber-silvesterparty-2026": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "78f370fe8b2c17246bc8df3fab1e24ca0986c6e5e6a0796f6748eb3f5acd9e5a",
+    "generatedAt": "2026-11-06T23:07:45.539Z"
+  },
+  "ratgeber-sponsoren-finden": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "4cf835ddca14e285a00de1f4933c1ed706437031a20ac0ee2b984fb3122c5c8a",
+    "generatedAt": "2026-11-06T23:34:37.895Z"
+  },
+  "ratgeber-sportveranstaltung-turnier": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "8a8c32cdc573656f36db7c5ac5f48619631dd222c0d0496cb6bbfa9e6f0b9831",
+    "generatedAt": "2026-11-06T23:08:22.877Z"
+  },
+  "ratgeber-ticketarten": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "4e8b36281f2628987dc3ea1bb590fa670685aeea5f0f2fb6b4060ce112784b98",
+    "generatedAt": "2026-11-06T23:08:27.929Z"
+  },
+  "ratgeber-ticketbetrug-verhindern": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "fe26ac0e7c1a5121162f01d87f3306a8c8b0b6304c6bf095f4a7205d5bfe0a68",
+    "generatedAt": "2026-11-06T23:08:34.208Z"
+  },
+  "ratgeber-ticketgebuehren": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "a3ff5a41536c802839ddecb70943f4282dcfc65d3c14b1d6ccf8e6619133eff7",
+    "generatedAt": "2026-11-06T23:08:37.321Z"
+  },
+  "ratgeber-ticketing-anbieter-vergleich": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "5abe143935261fcfe40093405378e62bf676b3a797baa9618ab2c4aa027ab91f",
+    "generatedAt": "2026-11-06T23:09:11.526Z"
+  },
+  "ratgeber-ticketing-glossar": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "0650273808f5ce956bc4ab8f70ab97ac158ad6b8d743dba802ee5fef0a0bfd9c",
+    "generatedAt": "2026-11-06T23:09:08.659Z"
+  },
+  "ratgeber-ticketing-verein": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "60b501fad50308506d97be0a720be3c1b2bac754ddccc062ba8192d429971b54",
+    "generatedAt": "2026-11-06T23:09:25.627Z"
+  },
+  "ratgeber-ticketpreis-kalkulieren": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "cb93f1ebd2c6d6ae19b385b2a7c62c871b0e53e4d9093385ddc2cfad5553acb4",
+    "generatedAt": "2026-11-06T23:09:26.277Z"
+  },
+  "ratgeber-tickets-online-verkaufen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "9bb23d790db23be52d3710022ddce145fc6281563b66d9b068b4e1e0e8091cc2",
+    "generatedAt": "2026-11-06T23:18:59.111Z"
+  },
+  "ratgeber-tickets-weiterverkaufen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "ad3dbb9e116c5c33264912bff49aa0e8ce475587fb504d2a40fec8eef126eeae",
+    "generatedAt": "2026-11-06T23:10:02.218Z"
+  },
+  "ratgeber-ticketshop-erstellen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "2e8cb9fcbc68e8900e361affb96288309fc09879e63a03b6185179b48860947c",
+    "generatedAt": "2026-11-06T23:10:17.333Z"
+  },
+  "ratgeber-umsatzsteuer-eintrittskarten": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "e61c4b0aa042534651a0da3a35f5643c1f02377ff3c0c6e6c137164a9136e437",
+    "generatedAt": "2026-11-06T23:10:15.524Z"
+  },
+  "ratgeber-veranstalterhaftpflicht": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "a1caacad0b1c510f9ddfae08af3e79754d0628ed4c5a631ec855796c8332b552",
+    "generatedAt": "2026-11-06T23:10:51.268Z"
+  },
+  "ratgeber-veranstaltung-absagen": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "f07de12173b1949cc02fe327cd20a03b4eb433a12a2a8d44106e80b64ecd8dfc",
+    "generatedAt": "2026-11-06T23:11:09.777Z"
+  },
+  "ratgeber-veranstaltung-anmelden-genehmigung": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "c0afd2df382cc8e330ba1b6085d81451d0298457c0132684f531d100dc7eb040",
+    "generatedAt": "2026-11-06T23:11:07.669Z"
+  },
+  "ratgeber-veranstaltung-planen-checkliste": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "6f88fc4cecf2ade776a2cc2cf7c5ab2d767a995bc719facd9a234f63e4096b81",
+    "generatedAt": "2026-11-06T23:12:47.032Z"
+  },
+  "ratgeber-vereinsfest-organisieren": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "a0153e86d048319d61b4abb853b773d1fe757a4759ba5ab8fa3b214129168e47",
+    "generatedAt": "2026-11-06T23:12:00.680Z"
+  },
+  "ratgeber-vorverkauf-steigern": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "f77e1d784afc6081959160ad516b7d31cf3f3f283aa7b199c9f6cf593d0347c6",
+    "generatedAt": "2026-11-06T23:12:04.609Z"
+  },
+  "ratgeber-weihnachtsfeier-adventsveranstaltung": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "b2b1fdc6ef2aed96038366ff963f626a8d7dfb2fb57673d9e9429ce9b20e5f7b",
+    "generatedAt": "2026-11-06T23:12:51.776Z"
+  },
+  "ratgeber-widerrufsrecht-tickets": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "d3acb63c91ecf82644605b1177b39f35318b7a9637be705ca56a11c6cf65c125",
+    "generatedAt": "2026-11-06T23:12:54.194Z"
+  },
+  "ratgeber-zahlungsarten-ticketshop": {
+    "model": "gpt-image-2",
+    "size": "2048x1152",
+    "quality": "medium",
+    "promptSha256": "bcb874e02507495e0767dcb4d84373bbdd6f319808f47d36359d0daa12b15e8b",
+    "generatedAt": "2026-11-06T23:13:35.544Z"
+  }
+}

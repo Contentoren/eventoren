@@ -1,4 +1,3 @@
-import { isPublishedAtBuild, type ContentEntry } from "../app/content/contentList.ts"
 import type { SitemapUrlEntry } from "./sitemapUrlEntry.ts"
 
 export type SitemapStaticPage = {
@@ -9,18 +8,17 @@ export type SitemapStaticPage = {
 }
 
 /**
- * The indexable URL list of the site: static pages, published articles and
- * published events.
+ * The indexable URL list of the site: static pages, the Ratgeber/Guides hubs
+ * and published articles (see `sitemapContentUrlListCreate`) and published events.
  *
  * Static pages carry no `lastmod`, because the build date is not a content
- * modification date. Articles keep their real modification date, and events
+ * modification date. Content entries keep their real modification date, and events
  * carry none because the public catalog contract exposes no modification date.
  */
 export function sitemapUrlListCreate(input: {
   readonly siteUrl: string
-  readonly buildDate: string
   readonly pages: readonly SitemapStaticPage[]
-  readonly articles: readonly ContentEntry[]
+  readonly content: readonly SitemapUrlEntry[]
   readonly events: readonly SitemapUrlEntry[]
 }): readonly SitemapUrlEntry[] {
   const entries: SitemapUrlEntry[] = []
@@ -33,16 +31,7 @@ export function sitemapUrlListCreate(input: {
     })
   }
 
-  for (const article of input.articles) {
-    if (!isPublishedAtBuild(article, input.buildDate)) continue
-    entries.push({
-      loc: new URL(article.path, input.siteUrl).toString(),
-      lastmod: article.updatedAt ?? article.publishedAt,
-      changefreq: "monthly",
-      priority: 0.6,
-    })
-  }
-
+  entries.push(...input.content)
   entries.push(...input.events)
 
   const unique = new Map<string, SitemapUrlEntry>()

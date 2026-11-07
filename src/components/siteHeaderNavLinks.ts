@@ -1,3 +1,4 @@
+import { mdiBookOpenPageVariantOutline } from "@adaptive-ds/mdi/mdiBookOpenPageVariantOutline.js"
 import { mdiCogOutline } from "@adaptive-ds/mdi/mdiCogOutline.js"
 import { mdiCompassOutline } from "@adaptive-ds/mdi/mdiCompassOutline.js"
 import { mdiStorefrontOutline } from "@adaptive-ds/mdi/mdiStorefrontOutline.js"
@@ -15,6 +16,7 @@ export function siteHeaderNavLinks(
   const activeRole = sessionHydrated ? role : undefined
   return [
     { to: "/", label: "Events entdecken", exact: true, icon: mdiCompassOutline },
+    { to: "/ratgeber", label: "Ratgeber", exact: false, icon: mdiBookOpenPageVariantOutline },
     ...(activeRole && userRoleCanAccessOrganizer(activeRole)
       ? [{ to: "/organizer" as const, label: "Veranstalter", exact: false, icon: mdiStorefrontOutline }]
       : []),

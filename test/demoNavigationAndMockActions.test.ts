@@ -77,8 +77,10 @@ describe("demo site frame overrides", () => {
     const eventsHeaderLink = headerLinks.find((link) => link.to === "/")!
     const organizerHeaderLink = headerLinks.find((link) => link.to === "/organizer")!
     const adminHeaderLink = headerLinks.find((link) => link.to === "/admin")!
+    const ratgeberHeaderLink = headerLinks.find((link) => link.to === "/ratgeber")!
 
     expect(frame.header.navLinkHref(eventsHeaderLink)).toBe("/demo/customer/events")
+    expect(frame.header.navLinkHref(ratgeberHeaderLink)).toBe("/demo/ratgeber")
     expect(frame.header.navLinkHref(organizerHeaderLink)).toBe("/demo/admin/organizer")
     expect(frame.header.navLinkHref(adminHeaderLink)).toBe("/demo/admin/events")
 
@@ -86,6 +88,12 @@ describe("demo site frame overrides", () => {
     expect(frame.footerLinkHref("/datenschutz")).toBe("/demo/datenschutz")
     expect(frame.footerLinkHref("/agb")).toBe("/demo/agb")
     expect(frame.footerLinkHref("/kontakt")).toBe("/demo/contact")
+    expect(frame.footerLinkHref("/ratgeber")).toBe("/demo/ratgeber")
+  })
+
+  test("English guides footer link keeps the real /en/guides target because no demo equivalent exists", () => {
+    const frame = demoSiteFrameStateCreate({ sessionRole: "admin" })
+    expect(frame.footerLinkHref("/en/guides")).toBe("/en/guides")
   })
 
   test("header nav active state identifies subroutes for admin, events and organizer", () => {
@@ -107,6 +115,13 @@ describe("demo site frame overrides", () => {
     expect(isActive(eventsHeaderLink, "/demo/customer/events", "/demo/customer/events/kraftklub-arena-berlin")).toBe(
       true,
     )
+
+    // Ratgeber active on hub and articles, events not active there
+    const ratgeberHeaderLink = headerLinks.find((link) => link.to === "/ratgeber")!
+    expect(isActive(ratgeberHeaderLink, "/demo/ratgeber", "/demo/ratgeber")).toBe(true)
+    expect(isActive(ratgeberHeaderLink, "/demo/ratgeber", "/demo/ratgeber/events-sicher-planen")).toBe(true)
+    expect(isActive(ratgeberHeaderLink, "/demo/ratgeber", "/demo/customer/events")).toBe(false)
+    expect(isActive(eventsHeaderLink, "/demo/customer/events", "/demo/ratgeber")).toBe(false)
 
     // Organizer active on list and scanner
     expect(isActive(organizerHeaderLink, "/demo/admin/organizer", "/demo/admin/organizer")).toBe(true)

@@ -1,7 +1,8 @@
 import type { JSX } from "solid-js"
-import type { ContentEntry } from "../app/content/contentList.js"
-import { isPublishedAtBuild } from "../app/content/contentList.js"
 import { getAbsoluteContentImageUrl } from "../app/content/contentImages.js"
+import type { ContentEntry } from "../app/content/contentList.js"
+import { contentPublishedIs } from "../app/content/contentPublishedIs.ts"
+
 type Meta = JSX.MetaHTMLAttributes<HTMLMetaElement>
 
 const siteUrl = "https://eventoren.de"
@@ -40,9 +41,12 @@ function websiteJsonLd() {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    // Same @id as seoHeadCreate and the content heads' `isPartOf`, so all pages resolve to one WebSite node.
+    "@id": `${siteUrl}/#website`,
     name: siteName,
     url: siteUrl,
     description: siteDescription,
+    inLanguage: "de-DE",
   }
 }
 
@@ -60,7 +64,7 @@ function softwareSourceCodeJsonLd() {
 
 function createArticleSeoHead(entry: ContentEntry) {
   const canonical = siteUrl + entry.path
-  const robots = isPublishedAtBuild(entry) ? "index, follow" : "noindex, nofollow"
+  const robots = contentPublishedIs(entry) ? "index, follow" : "noindex, nofollow"
   const imageUrl = getAbsoluteContentImageUrl(entry, siteUrl)
   const articleOgImage = imageUrl ?? ogImage
   return {

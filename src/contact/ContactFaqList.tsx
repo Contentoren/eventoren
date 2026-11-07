@@ -24,12 +24,13 @@ export function ContactFaqList(props: {
       id: "faq-3",
       question: "Wie funktioniert die Einlasskontrolle am Veranstaltungstag?",
       answer:
-        "Du und dein Einlassteam erhalten Zugang zu unserer kostenlosen Einlass-Scanner-App (für iOS & Android). Tickets mit QR-Codes werden in Echtzeit synchronisiert und können auch bei instabiler Internetverbindung offline gescannt werden.",
+        "Du teilst deinem Einlassteam einen Scanner-Link. Helfer öffnen ihn im Browser ihres Smartphones und scannen die QR-Codes der Tickets mit der Kamera – eine App-Installation ist nicht nötig. Ticketcodes lassen sich auch manuell eingeben, abgelehnte Scans zeigen den Grund an. Für das Scannen ist eine Internetverbindung erforderlich.",
     },
     {
       id: "faq-4",
       question: "Wo finden Besucher ihre gekauften Tickets?",
-      answer: "Gekaufte Tickets werden per E-Mail versendet und stehen mit QR-Code in deinem Eventoren-Konto bereit.",
+      answer:
+        "Gekaufte Tickets kommen per E-Mail als PDF mit QR-Code. Für den Kauf ist kein Konto nötig; mit einem Eventoren-Konto findest du Tickets, Bestellungen und Rechnungen zusätzlich in deinem Kundenkonto.",
     },
     {
       id: "faq-5",

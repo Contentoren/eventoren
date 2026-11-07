@@ -13,6 +13,6 @@ test("root document theme regressions pass in an isolated Bun subprocess", async
   const output = `${stdout}\n${stderr}`
 
   expect(exitCode, output).toBe(0)
-  expect(output).toContain("8 pass")
+  expect(output).toContain("10 pass")
   expect(output).toContain("0 fail")
 })
