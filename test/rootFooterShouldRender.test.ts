@@ -11,6 +11,10 @@ const siteFrameRouteIds = [
   "/events/$eventId",
   "/impressum",
   "/veranstalter-vertraege",
+  "/ratgeber/",
+  "/ratgeber/$slug",
+  "/en/guides/",
+  "/en/guides/$slug",
   "/admin",
   "/sign-in",
   "/support",
@@ -124,7 +128,6 @@ test("root footer remains for root-only routes", () => {
   expect(rootFooterShouldRender([{ routeId: "/privacy", status: "success" }])).toBe(true)
   expect(rootFooterShouldRender([{ routeId: "/terms", status: "success" }])).toBe(true)
   expect(rootFooterShouldRender([{ routeId: "/bestellungen", status: "success" }])).toBe(true)
-  expect(rootFooterShouldRender([{ routeId: "/ratgeber/", status: "success" }])).toBe(true)
   expect(rootFooterShouldRender([{ routeId: "/demo/", status: "success" }])).toBe(true)
 })
 
